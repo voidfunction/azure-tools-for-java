@@ -1,0 +1,5 @@
+Following content from Azure SDK 2.8.0 should be under this directory:
+
+x64/
+x86/
+Microsoft.WindowsAzure.ServiceRuntime.dll

@@ -1,0 +1,7 @@
+C:\gitbuild\wap4ej\Utils\encutil\encrypt\bin\Release\encutil.exe
+C:\gitbuild\wap4ej\Utils\encutil\encrypt\bin\Release\encutil.pdb
+C:\gitbuild\wap4ej\Utils\encutil\encrypt\bin\Release\encutil.exe.CodeAnalysisLog.xml
+C:\gitbuild\wap4ej\Utils\encutil\encrypt\bin\Release\encutil.exe.lastcodeanalysissucceeded
+C:\gitbuild\wap4ej\Utils\encutil\encrypt\obj\x86\Release\encutil.exe
+C:\gitbuild\wap4ej\Utils\encutil\encrypt\obj\x86\Release\encutil.pdb
+C:\gitbuild\wap4ej\Utils\encutil\encrypt\obj\x86\Release\encrypt.csprojResolveAssemblyReference.cache

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.ui.commands">
+	  <command
+	  		description="Publish as Azure Web App..."
+	        id="com.microsoft.ui.webapp"
+	        name="Publish as Azure Web App...">
+	  </command>
+	</extension>
+	
+	<extension point="org.eclipse.ui.menus">
+  		<menuContribution locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+	  		<menu label="Azure" icon="icons/small/windowsAzure.png" id="com.microsoftopentechnologies.ui.common.webprojmenu">
+		   		<command icon="icons/small/website.png"
+		           commandId="com.microsoft.ui.webapp">
+			     </command>
+			     <visibleWhen checkEnabled="false">
+			    <with 
+				variable="selection">
+				<count value="1"/> 
+				<iterate 
+					operator="or">
+					<adapt type="org.eclipse.core.resources.IProject">
+        				<test property="com.microsoft.ui.webapp.property.isWebProj"/>
+            		</adapt>
+				</iterate> 
+		    	</with>
+			    </visibleWhen>
+	  	</menu>
+    </menuContribution>
+  </extension>
+  <extension point="org.eclipse.ui.handlers">
+	  <handler
+	        class="com.microsoft.webapp.config.WebAppCommandHandler"
+	        commandId="com.microsoft.ui.webapp">
+	  </handler>
+  </extension>
+	  
+	   <!-- Property testers -->
+    <extension point="org.eclipse.core.expressions.propertyTesters">
+  	<propertyTester
+      id="com.microsoft.ui.webapp.property.testWebProj"
+      type="org.eclipse.core.resources.IProject"
+      namespace="com.microsoft.ui.webapp.property"
+      properties="isWebProj"
+      class="com.microsoft.webapp.util.WAPropertyTester">
+    </propertyTester>
+  </extension>
+</plugin>

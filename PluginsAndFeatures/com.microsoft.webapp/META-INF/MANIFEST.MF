@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Azure Web Apps Plugin for Java
+Bundle-SymbolicName: com.microsoft.webapp;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.microsoft.webapp.activator.Activator
+Bundle-ClassPath: .
+Require-Bundle: org.eclipse.ui;bundle-version="3.6.0",
+ org.eclipse.core.runtime,
+ org.eclipse.jdt.ui;bundle-version="3.6.0",
+ org.eclipse.jdt.core;bundle-version="3.6.0",
+ org.eclipse.core.resources;bundle-version="3.6.0",
+ org.eclipse.core.expressions;bundle-version="3.4.200",
+  org.eclipse.ui.console;bundle-version="3.5.0",
+ com.microsoftopentechnologies.windowsazure.tools.sdk;bundle-version="0.9.2",
+ com.microsoftopentechnologies.wacommon;bundle-version="2.8.2"
+Bundle-Vendor: Microsoft Corp.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
