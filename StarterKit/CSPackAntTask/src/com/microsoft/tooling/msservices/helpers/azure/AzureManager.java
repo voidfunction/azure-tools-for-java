@@ -330,6 +330,9 @@ public interface AzureManager {
     WebSite createWebSite(@NotNull String subscriptionId, @NotNull WebHostingPlanCache webHostingPlan, @NotNull String webSiteName)
     		throws AzureCmdException;
 
+    @NotNull
+    Void deleteWebSite(@NotNull String subscriptionId, @NotNull String webSpaceName, @NotNull String webSiteName) throws AzureCmdException;
+
     WebSite getWebSite(@NotNull String subscriptionId, @NotNull final String webSpaceName, @NotNull String webSiteName)
             throws AzureCmdException;
 

@@ -1067,6 +1067,21 @@ public class AzureSDKHelper {
     }
 
     @NotNull
+    public static SDKRequestCallback<Void, WebSiteManagementClient> deleteWebSite(@NotNull final String webSpaceName,
+    		@NotNull final String webSiteName) {
+    	return new SDKRequestCallback<Void, WebSiteManagementClient>() {
+    		@NotNull
+    		@Override
+    		public Void execute(@NotNull WebSiteManagementClient client)
+    				throws Throwable {
+    			WebSiteDeleteParameters delParam = new WebSiteDeleteParameters(true, true, true);
+    			getWebSiteOperations(client).delete(webSpaceName, webSiteName, null, delParam);
+    			return null;
+    		}
+    	};
+    }
+
+    @NotNull
     public static SDKRequestCallback<WebSite, WebSiteManagementClient> getWebSite(@NotNull final String webSpaceName,
                                                                                      @NotNull final String webSiteName) {
         return new SDKRequestCallback<WebSite, WebSiteManagementClient>() {

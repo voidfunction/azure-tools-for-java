@@ -1498,6 +1498,12 @@ public class AzureManagerImpl implements AzureManager {
     	return requestWebSiteSDK(subscriptionId, AzureSDKHelper.createWebSite(webHostingPlan, webSiteName));
     }
 
+    @NotNull
+    @Override
+	public Void deleteWebSite(@NotNull String subscriptionId, @NotNull String webSpaceName, @NotNull String webSiteName) throws AzureCmdException {
+    	return requestWebSiteSDK(subscriptionId, AzureSDKHelper.deleteWebSite(webSpaceName, webSiteName));
+    }
+
     @Override
     public WebSite getWebSite(@NotNull String subscriptionId, @NotNull final String webSpaceName, @NotNull String webSiteName)
             throws AzureCmdException {

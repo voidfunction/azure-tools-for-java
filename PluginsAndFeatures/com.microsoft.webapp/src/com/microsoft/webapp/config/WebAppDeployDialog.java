@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -82,6 +83,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 	Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
 	WebSite selectedWebSite;
 	Button okButton;
+	Button delBtn;
 	Button deployToRoot;
 	String webAppCreated = "";
 	AzureCmdException exp = new AzureCmdException("");
@@ -173,8 +175,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 					selectedWebSite = null;
 					okButton.setEnabled(false);
 				}
+				delBtn.setEnabled(true);
 			}
 		});
+
 		createButtons(container);
 	}
 
@@ -206,6 +210,45 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 				int result = dialog.open();
 				if (result == Window.OK) {
 					createWebApp(dialog);
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+		});
+
+		delBtn = new Button(containerButtons, SWT.PUSH);
+		delBtn.setText(Messages.delBtn);
+		gridData = new GridData();
+		gridData.widthHint = 70;
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+		delBtn.setLayoutData(gridData);
+		delBtn.setEnabled(false);
+		delBtn.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				if (selectedWebSite != null) {
+					try {
+						String name = selectedWebSite.getName();
+						boolean choice = MessageDialog.openConfirm(getShell(), Messages.delTtl, String.format(Messages.delMsg, name));
+						if (choice) {
+							int index = list.getSelectionIndex();
+							AzureManagerImpl.getManager().deleteWebSite(selectedWebSite.getSubscriptionId(),
+									selectedWebSite.getWebSpaceName(), name);
+							// update cached data as well
+							webSiteList.remove(index);
+							listToDisplay.remove(index);
+							list.setItems(listToDisplay.toArray(new String[listToDisplay.size()]));
+							webSiteConfigMap.remove(selectedWebSite);
+							// always disable button as after delete no entry is selected
+							delBtn.setEnabled(false);
+							selectedWebSite = null;
+						}
+					} catch (AzureCmdException e) {
+						PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, Messages.delErr, e);
+					}
 				}
 			}
 
@@ -410,6 +453,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 										list.select(i);
 										selectedWebSite = webSiteList.get(i);
 										okButton.setEnabled(true);
+										delBtn.setEnabled(true);
 										break;
 									}
 								}
