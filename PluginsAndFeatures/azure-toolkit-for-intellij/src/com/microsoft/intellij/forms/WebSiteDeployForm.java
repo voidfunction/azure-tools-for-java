@@ -29,8 +29,10 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.WizardCacheManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.IDEHelper.ArtifactDescriptor;
@@ -68,12 +70,14 @@ public class WebSiteDeployForm extends DialogWrapper {
     private JButton buttonEditSubscriptions;
     private JButton buttonAddApp;
     private JCheckBox chkBoxDeployRoot;
+    private JButton buttonDel;
     private Project project;
     private WebSite selectedWebSite;
     private CancellableTaskHandle fillListTaskHandle;
     private String nameToSelect = "";
     List<Subscription> subscriptionList = new ArrayList<Subscription>();
     List<WebSite> webSiteList = new ArrayList<WebSite>();
+    Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
 
     public WebSiteDeployForm(@org.jetbrains.annotations.Nullable Project project) {
         super(project, true, IdeModalityType.PROJECT);
@@ -83,6 +87,12 @@ public class WebSiteDeployForm extends DialogWrapper {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 createWebApp();
+            }
+        });
+        buttonDel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                deleteWebApp();
             }
         });
         buttonEditSubscriptions.addActionListener(new ActionListener() {
@@ -99,6 +109,31 @@ public class WebSiteDeployForm extends DialogWrapper {
         fillList();
     }
 
+    void deleteWebApp() {
+        if (selectedWebSite != null) {
+            String name = selectedWebSite.getName();
+            int choice = Messages.showOkCancelDialog(String.format(message("delMsg"), name), message("delTtl"), Messages.getQuestionIcon());
+            if (choice == Messages.OK) {
+                try {
+                    AzureManagerImpl.getManager().deleteWebSite(selectedWebSite.getSubscriptionId(),
+                            selectedWebSite.getWebSpaceName(), name);
+                    webSiteList.remove(webSiteJList.getSelectedIndex());
+                    webSiteConfigMap.remove(selectedWebSite);
+                    selectedWebSite = null;
+                    if (webSiteConfigMap.isEmpty()) {
+                        setMessages("There are no Azure web apps in the imported subscriptions.");
+                    } else {
+                        setWebApps(webSiteConfigMap);
+                    }
+                } catch (AzureCmdException e) {
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), message("delWebErr"), e);
+                }
+            }
+        } else {
+            PluginUtil.displayErrorDialog(message("errTtl"), "Select a web app container to delete.");
+        }
+    }
+
     @Override
     protected boolean postponeValidation() {
         return true;
@@ -107,7 +142,7 @@ public class WebSiteDeployForm extends DialogWrapper {
     @org.jetbrains.annotations.Nullable
     @Override
     protected ValidationInfo doValidate() {
-        return (selectedWebSite != null) ? null : new ValidationInfo("Select a valid web app container as the target for the deployment.", webSiteJList);
+        return (selectedWebSite != null && isDeployable(webSiteConfigMap, webSiteList, webSiteJList.getSelectedIndex())) ? null : new ValidationInfo("Select a valid web app container as the target for the deployment.", webSiteJList);
     }
 
     @org.jetbrains.annotations.Nullable
@@ -167,7 +202,6 @@ public class WebSiteDeployForm extends DialogWrapper {
                 final Object lock = new Object();
 
                 CancellationHandle cancellationHandle;
-                Map<WebSite, WebSiteConfiguration> webSiteConfigMap;
 
                 @Override
                 public synchronized void run(final CancellationHandle cancellationHandle) throws Throwable {
@@ -400,7 +434,7 @@ public class WebSiteDeployForm extends DialogWrapper {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) {
                 int index = webSiteJList.getSelectedIndex();
-                if (isDeployable(webSiteConfigMap, webSiteList, index)) {
+                if (index >= 0 && webSiteList.size() > index) {
                     selectedWebSite = webSiteList.get(index);
                 } else {
                     selectedWebSite = null;

@@ -107,7 +107,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 	protected Control createButtonBar(Composite parent) {
 		Control ctrl = super.createButtonBar(parent);
 		okButton = getButton(IDialogConstants.OK_ID);
-		okButton.setEnabled(true);
+		okButton.setEnabled(false);
 		fillList("");
 		return ctrl;
 	}
@@ -168,22 +168,19 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				int index = list.getSelectionIndex();
-				if (isDeployable(index)) {
+				if (index >= 0 && webSiteList.size() > index) {
 					selectedWebSite = webSiteList.get(index);
-					okButton.setEnabled(true);
-				} else {
-					selectedWebSite = null;
-					okButton.setEnabled(false);
+					delBtn.setEnabled(true);
+					if (webSiteConfigMap.get(webSiteList.get(index)).getJavaContainer().isEmpty()) {
+						okButton.setEnabled(false);
+					} else {
+						okButton.setEnabled(true);
+					}
 				}
-				delBtn.setEnabled(true);
 			}
 		});
 
 		createButtons(container);
-	}
-
-	private boolean isDeployable(int index) {
-		return index >= 0 && webSiteList.size() > index && !webSiteConfigMap.get(webSiteList.get(index)).getJavaContainer().isEmpty();
 	}
 
 	private void createButtons(Composite container) {
@@ -242,6 +239,9 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							listToDisplay.remove(index);
 							list.setItems(listToDisplay.toArray(new String[listToDisplay.size()]));
 							webSiteConfigMap.remove(selectedWebSite);
+							if (webSiteConfigMap.isEmpty()) {
+								setErrorMessage(Messages.noWebAppErrMsg);
+							}
 							// always disable button as after delete no entry is selected
 							delBtn.setEnabled(false);
 							selectedWebSite = null;
@@ -249,6 +249,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 					} catch (AzureCmdException e) {
 						PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, Messages.delErr, e);
 					}
+				} else {
+					PluginUtil.displayErrorDialog(getShell(), Messages.errTtl, "Select a web app container to delete.");
 				}
 			}
 
