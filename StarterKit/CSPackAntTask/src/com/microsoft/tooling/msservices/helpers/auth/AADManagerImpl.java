@@ -21,6 +21,18 @@
  */
 package com.microsoft.tooling.msservices.helpers.auth;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -40,18 +52,10 @@ import com.microsoftopentechnologies.auth.AuthenticationResult;
 import com.microsoftopentechnologies.auth.PromptValue;
 import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 public class AADManagerImpl implements AADManager {
     private static AADManager instance;
     private static Gson gson;
-
+    Logger logger = Logger.getLogger(AADManagerImpl.class.getName());
     /**
      * This structure stores AthenticationResults associated to each particular UserInfo (tenant+user) and Resource
      * The outer map provides a way to access all AutenticationResults for each particular UserInfo, and the inner map
@@ -395,8 +399,24 @@ public class AADManagerImpl implements AADManager {
         }
     }
 
+    private void addHandler() {
+    	FileHandler fh;
+    	try {
+    		fh = new FileHandler("D:/AzureToolkit.log");
+    		logger.addHandler(fh);
+    		SimpleFormatter formatter = new SimpleFormatter();
+    		fh.setFormatter(formatter);
+    	} catch (SecurityException e) {
+    		logger.log(Level.SEVERE, e.getMessage(), e);
+    		e.printStackTrace();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    		logger.log(Level.SEVERE, e.getMessage(), e);
+    	}  
+    }
+
     private void authenticateWithInteractiveToken(@NotNull UserInfo userInfo,
-                                                  @NotNull String resource,
+    		@NotNull String resource,
                                                   @NotNull String title)
             throws AzureCmdException {
         // acquire token via interactive token
@@ -408,11 +428,13 @@ public class AADManagerImpl implements AADManager {
         // since this might be the first time logging in with this UserInfo we create an
         // ad hoc lock.
         // We acquire the current authentication and refresh token before acquiring the lock
-        // (any of them might be null.) After the lock has been acquired, we validate if any
-        // of this values have changed, including null to not null transitions.
-        AuthenticationResult authenticationResult = isAuthenticated(userInfo, resource) ?
-                getAuthenticationResult(userInfo, resource) :
-                null;
+    	// (any of them might be null.) After the lock has been acquired, we validate if any
+    	// of this values have changed, including null to not null transitions.
+    	addHandler();
+    	logger.info("In method----------------");
+    	AuthenticationResult authenticationResult = isAuthenticated(userInfo, resource) ?
+    			getAuthenticationResult(userInfo, resource) :
+    				null;
         AuthenticationResult refreshAuthResult = hasRefreshAuthResult(userInfo) ?
                 getRefreshAuthResult(userInfo) :
                 null;
@@ -442,8 +464,16 @@ public class AADManagerImpl implements AADManager {
                                 PromptValue.login);
 
                         if (!userInfo.equals(interactiveUserInfo)) {
-                            //User could change the selected credentials, but we shouldn't allow this
-                            throw new AzureCmdException("Invalid User Information retrieved");
+                        	// User could change the selected credentials, but we shouldn't allow this
+                        	// comment for now. Just see what different information is retrieved
+                        	// throw new AzureCmdException("Invalid User Information retrieved");
+                        	logger.info("Old UserInfo-------------------");
+                        	logger.info("Tenant ID:" + userInfo.getTenantId());
+                        	logger.info("Unique Name:" + userInfo.getUniqueName());
+
+                        	logger.info("New UserInfo-------------------");
+                        	logger.info("Tenant ID:" + interactiveUserInfo.getTenantId());
+                        	logger.info("Unique Name:" + interactiveUserInfo.getUniqueName());
                         }
                     }
                 } catch (Throwable t) {
@@ -457,8 +487,16 @@ public class AADManagerImpl implements AADManager {
                                 PromptValue.refreshSession);
 
                         if (!userInfo.equals(interactiveUserInfo)) {
-                            //User could change the selected credentials, but we shouldn't allow this
-                            throw new AzureCmdException("Invalid User Information retrieved");
+                        	// User could change the selected credentials, but we shouldn't allow this
+                        	// comment for now. Just see what different information is retrieved
+                        	// throw new AzureCmdException("Invalid User Information retrieved");
+                        	logger.info("Old UserInfo-------------------");
+                        	logger.info("Tenant ID:" + userInfo.getTenantId());
+                        	logger.info("Unique Name:" + userInfo.getUniqueName());
+
+                        	logger.info("New UserInfo-------------------");
+                        	logger.info("Tenant ID:" + interactiveUserInfo.getTenantId());
+                        	logger.info("Unique Name:" + interactiveUserInfo.getUniqueName());
                         }
                     } catch (Throwable e) {
                         if (e instanceof AzureCmdException) {
