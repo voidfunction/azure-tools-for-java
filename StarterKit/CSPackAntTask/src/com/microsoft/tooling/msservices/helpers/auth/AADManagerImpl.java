@@ -21,6 +21,7 @@
  */
 package com.microsoft.tooling.msservices.helpers.auth;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -402,7 +403,8 @@ public class AADManagerImpl implements AADManager {
     private void addHandler() {
     	FileHandler fh;
     	try {
-    		fh = new FileHandler("D:/AzureToolkit.log");
+    		String path = String.format("%s%s%s", System.getProperty("java.io.tmpdir"), File.separator, "AzureToolkit.log");
+    		fh = new FileHandler(path);
     		logger.addHandler(fh);
     		SimpleFormatter formatter = new SimpleFormatter();
     		fh.setFormatter(formatter);
