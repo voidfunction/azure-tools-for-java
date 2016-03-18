@@ -29,25 +29,25 @@ import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class AppInsightsCustomEvent {
+	static String pluginInstLoc = String.format("%s%s%s",
+			PluginUtil.pluginFolder, File.separator, Messages.commonPluginID);
+	static String dataFile = String.format("%s%s%s", pluginInstLoc,
+			File.separator, Messages.dataFileName);
+	static String key = "824aaa4c-052b-4c43-bdcb-48f915d71b3f";
 
 	public static void create(String eventName, String version) {
-		String pluginInstLoc = String.format("%s%s%s",
-				PluginUtil.pluginFolder, File.separator, Messages.commonPluginID);
-		String dataFile = String.format("%s%s%s", pluginInstLoc,
-				File.separator, Messages.dataFileName);
-
 		if (new File(pluginInstLoc).exists() && new File(dataFile).exists()) {
 			String prefValue = DataOperations.getProperty(dataFile, Messages.prefVal);
 			if (prefValue != null && !prefValue.isEmpty() && prefValue.equalsIgnoreCase("true")) {
 				TelemetryClient telemetry = new TelemetryClient();
-				telemetry.getContext().setInstrumentationKey("824aaa4c-052b-4c43-bdcb-48f915d71b3f");
+				telemetry.getContext().setInstrumentationKey(key);
 
 				Map<String, String> properties = new HashMap<String, String>();
 
 				if (version != null && !version.isEmpty()) {
 					properties.put("Library Version", version);
 				}
-				
+
 				String pluginVersion = DataOperations.getProperty(dataFile, Messages.version);
 				if (pluginVersion != null && !pluginVersion.isEmpty()) {
 					properties.put("Plugin Version", pluginVersion);
@@ -63,5 +63,36 @@ public class AppInsightsCustomEvent {
 				telemetry.flush();
 			}
 		}
+	}
+
+	public static void createFTPEvent(String eventName, String uri, String appName, String subId) {
+		TelemetryClient telemetry = new TelemetryClient();
+		telemetry.getContext().setInstrumentationKey(key);
+
+		Map<String, String> properties = new HashMap<String, String>();
+		Map<String, Double> metrics = new HashMap<String, Double>();
+
+		if (uri != null && !uri.isEmpty()) {
+			properties.put("WebApp URI", uri);
+		}
+		if (appName != null && !appName.isEmpty()) {
+			properties.put("Java app name", appName);
+		}
+		if (subId != null && !subId.isEmpty()) {
+			properties.put("Subscription ID", subId);
+		}
+		if (new File(pluginInstLoc).exists() && new File(dataFile).exists()) {
+			String pluginVersion = DataOperations.getProperty(dataFile, Messages.version);
+			if (pluginVersion != null && !pluginVersion.isEmpty()) {
+				properties.put("Plugin Version", pluginVersion);
+			}
+
+			String instID = DataOperations.getProperty(dataFile, Messages.instID);
+			if (instID != null && !instID.isEmpty()) {
+				metrics.put("Installation ID", Double.parseDouble(instID));
+			}
+		}
+		telemetry.trackEvent(eventName, properties, metrics);
+		telemetry.flush();
 	}
 }

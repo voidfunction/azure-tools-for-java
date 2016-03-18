@@ -73,6 +73,7 @@ import com.microsoft.windowsazure.core.OperationStatus;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
 import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
+import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.microsoftopentechnologies.wacommon.utils.WAExportWarEar;
 
@@ -613,8 +614,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 						WebSitePublishSettings.PublishProfile profile = webSitePublishSettings.getPublishProfileList().get(0);
 						notifyProgress(selectedName, null, 20, OperationStatus.InProgress, "");
 						String url = "";
+						String destAppUrl = "";
 						if (profile != null) {
-							url = profile.getDestinationAppUrl();
+							destAppUrl = profile.getDestinationAppUrl();
+							url = destAppUrl;
 							if (!isDeployToRoot) {
 								url = url + "/" + project.getName();
 							}
@@ -629,8 +632,9 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							// exception will occur if user do not install azure explorer plugin
 							Activator.getDefault().log(ex.getMessage(), ex);
 						}
-						
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(Messages.activityView);
+						// send telemetry event
+						AppInsightsCustomEvent.createFTPEvent("WebAppFTP", destAppUrl, project.getName(), selectedSubId);
 					} catch (Exception e) {
 						Activator.getDefault().log(e.getMessage(), e);
 						notifyProgress(selectedName, null, 100, OperationStatus.Failed, e.getMessage());
