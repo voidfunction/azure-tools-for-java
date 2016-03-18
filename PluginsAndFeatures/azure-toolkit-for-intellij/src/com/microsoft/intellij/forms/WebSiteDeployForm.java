@@ -32,6 +32,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
+import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.WizardCacheManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -172,12 +173,15 @@ public class WebSiteDeployForm extends DialogWrapper {
             WebSitePublishSettings webSitePublishSettings = manager.
                     getWebSitePublishSettings(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
             WebSitePublishSettings.PublishProfile profile = webSitePublishSettings.getPublishProfileList().get(0);
+            String destAppUrl = "";
             if (profile != null) {
-                url = profile.getDestinationAppUrl();
+                destAppUrl = profile.getDestinationAppUrl();
+                url = destAppUrl;
                 if (!chkBoxDeployRoot.isSelected()) {
                     url = url + "/" + artifactDescriptor.getName();
                 }
             }
+            AppInsightsCustomEvent.createFTPEvent("WebAppFTP", destAppUrl, artifactDescriptor.getName(), selectedWebSite.getSubscriptionId());
         }
         return url;
     }
