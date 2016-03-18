@@ -468,7 +468,6 @@ public class AADManagerImpl implements AADManager {
                         if (!userInfo.equals(interactiveUserInfo)) {
                         	// User could change the selected credentials, but we shouldn't allow this
                         	// comment for now. Just see what different information is retrieved
-                        	// throw new AzureCmdException("Invalid User Information retrieved");
                         	logger.info("Old UserInfo-------------------");
                         	logger.info("Tenant ID:" + userInfo.getTenantId());
                         	logger.info("Unique Name:" + userInfo.getUniqueName());
@@ -476,6 +475,7 @@ public class AADManagerImpl implements AADManager {
                         	logger.info("New UserInfo-------------------");
                         	logger.info("Tenant ID:" + interactiveUserInfo.getTenantId());
                         	logger.info("Unique Name:" + interactiveUserInfo.getUniqueName());
+                        	throw new AzureCmdException("Invalid User Information retrieved");
                         }
                     }
                 } catch (Throwable t) {
@@ -491,7 +491,6 @@ public class AADManagerImpl implements AADManager {
                         if (!userInfo.equals(interactiveUserInfo)) {
                         	// User could change the selected credentials, but we shouldn't allow this
                         	// comment for now. Just see what different information is retrieved
-                        	// throw new AzureCmdException("Invalid User Information retrieved");
                         	logger.info("Old UserInfo-------------------");
                         	logger.info("Tenant ID:" + userInfo.getTenantId());
                         	logger.info("Unique Name:" + userInfo.getUniqueName());
@@ -499,6 +498,7 @@ public class AADManagerImpl implements AADManager {
                         	logger.info("New UserInfo-------------------");
                         	logger.info("Tenant ID:" + interactiveUserInfo.getTenantId());
                         	logger.info("Unique Name:" + interactiveUserInfo.getUniqueName());
+                        	throw new AzureCmdException("Invalid User Information retrieved");
                         }
                     } catch (Throwable e) {
                         if (e instanceof AzureCmdException) {
