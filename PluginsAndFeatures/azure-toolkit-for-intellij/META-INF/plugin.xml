@@ -112,7 +112,7 @@
             description="Configure Application Insights..." icon="/icons/applicationInsights.png"/>
     <action id="Actions.AzureWebDeploy" class="com.microsoft.intellij.actions.AzureWebDeployAction"
             text="Publish as Azure Web App..." description="Azure website deployment for Java"
-            icon="/icons/website.png">
+            icon="/icons/publishWebsite.png">
     </action>
 
     <group id="AzurePopupGroup" text="Azure" description="Azure" icon="/icons/azure.png" popup="true"

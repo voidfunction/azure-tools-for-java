@@ -18,7 +18,7 @@
 	<extension point="org.eclipse.ui.menus">
   		<menuContribution locationURI="popup:org.eclipse.ui.popup.any?after=additions">
 	  		<menu label="Azure" icon="icons/small/windowsAzure.png" id="com.microsoftopentechnologies.ui.common.webprojmenu">
-		   		<command commandId="com.microsoft.ui.webapp" icon="icons/small/website.png"/>
+		   		<command commandId="com.microsoft.ui.webapp" icon="icons/small/publishWebsite.png"/>
 			     <visibleWhen checkEnabled="false">
 			    <with 
 				variable="selection">
@@ -67,7 +67,7 @@
 
    <!-- Pulldown menu -->
   <extension point="org.eclipse.ui.commandImages">
-      <image commandId="com.microsoft.ui.webapp" icon="icons/small/website.png"></image>
+      <image commandId="com.microsoft.ui.webapp" icon="icons/small/publishWebsite.png"></image>
   </extension>
   <extension point="org.eclipse.ui.menus">
   <menuContribution locationURI="menu:com.microsoft.ui.dropdown.toolbar.command">
