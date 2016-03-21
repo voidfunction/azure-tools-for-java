@@ -500,14 +500,6 @@
 			</command>
 			
 			<command
-                   commandId="com.gigaspaces.azure.commands.deploy"
-                   icon="icons/publish.png"
-                   label="Publish as Azure Cloud Service"
-                   tooltip="Publish as Azure Cloud Service"
-                   style="push">
-			</command>
-			
-			<command
                    commandId="com.gigaspaces.azure.commands.undeploy"
                    icon="icons/unpublish.png"
                    label="Unpublish"
@@ -860,9 +852,11 @@
    <!-- Commands for fly menu on Azure Project -->
    <extension point="org.eclipse.ui.commands">
 	  <command
+	        categoryId="com.microsoft.ui.dropdown.category"
 	  		description="Deploy Application to Azure Cloud"
 	        id="com.gigaspaces.azure.commands.deploy"
 	        name="Deploy to Azure Cloud">
+	        <commandParameter id="com.microsoft.ui.dropdown.msg" name="DropDown Options" optional="true"></commandParameter>
 	  </command>
       <command
          description="Undeploy Application to Azure Cloud"
@@ -1037,6 +1031,18 @@
 	  	</menu>
     </menuContribution>
   </extension>
+  
+  <!-- Pulldown menu -->
+   <extension point="org.eclipse.ui.commandImages">
+      <image commandId="com.gigaspaces.azure.commands.deploy" icon="icons/publish.png"></image>
+   </extension>
+  <extension point="org.eclipse.ui.menus">
+  <menuContribution locationURI="menu:com.microsoft.ui.dropdown.toolbar.command">
+         <command commandId="com.gigaspaces.azure.commands.deploy" label="Publish as Azure Cloud Service..." style="push">
+            <parameter name="com.microsoft.ui.dropdown.msg" value="Cloud Service"></parameter>
+         </command>
+   </menuContribution>
+   </extension>
 	
 	<!-- Property testers -->
 	<extension point="org.eclipse.core.expressions.propertyTesters">

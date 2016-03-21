@@ -33,4 +33,31 @@
           name="Azure Activity Log">
     </view>
  </extension>
+
+  <!-- Toolbar Dropdown Menu -->
+   <extension point="org.eclipse.ui.commands">
+      <category id="com.microsoft.ui.dropdown.category" name="Publish DropDown"></category>
+      <command categoryId="com.microsoft.ui.dropdown.category" id="com.microsoft.ui.dropdown.command" name="Publish">
+         <commandParameter id="com.microsoft.ui.dropdown.msg" name="DropDown Options" optional="true"></commandParameter>
+      </command>
+   </extension>
+   
+   <!-- Icons for dropdown -->
+   <extension point="org.eclipse.ui.commandImages">
+      <image commandId="com.microsoft.ui.dropdown.command" icon="icons/azure.png"></image>
+   </extension>
+   
+   <!-- Handlers for dropdown -->
+   <extension point="org.eclipse.ui.handlers">
+      <handler commandId="com.microsoft.ui.dropdown.command" class="com.persistent.util.DropDownHandler"></handler>
+   </extension>
+   
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar id="com.persistent.ui.toolbar">
+            <command commandId="com.microsoft.ui.dropdown.command" id="com.microsoft.ui.dropdown.toolbar.command"
+            style="pulldown" tooltip="Publish"/>
+         </toolbar>
+      </menuContribution>
+   </extension>
 </plugin>
