@@ -46,7 +46,7 @@ public class UserInfo {
     public boolean equals(Object otherObj) {
         if (otherObj != null && otherObj instanceof UserInfo) {
             UserInfo other = (UserInfo) otherObj;
-            return tenantId.equals(other.tenantId) && uniqueName.equals(other.uniqueName);
+            return tenantId.equals(other.tenantId) && uniqueName.toLowerCase().equals(other.uniqueName.toLowerCase());
         }
 
         return false;
@@ -54,6 +54,6 @@ public class UserInfo {
 
     @Override
     public int hashCode() {
-        return tenantId.hashCode() * 13 + uniqueName.hashCode();
+        return tenantId.hashCode() * 13 + uniqueName.toLowerCase().hashCode();
     }
 }

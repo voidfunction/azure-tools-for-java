@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension point="org.eclipse.ui.startup">
+     <startup class="com.microsoft.webapp.util.WebAppStartup"/>
+   </extension>
+   
    <extension point="org.eclipse.ui.commands">
 	  <command
+	  		categoryId="com.microsoft.ui.dropdown.category"
 	  		description="Publish as Azure Web App..."
 	        id="com.microsoft.ui.webapp"
 	        name="Publish as Azure Web App...">
+	        <commandParameter id="com.microsoft.ui.dropdown.msg" name="DropDown Options" optional="true"></commandParameter>
 	  </command>
 	</extension>
 	
 	<extension point="org.eclipse.ui.menus">
   		<menuContribution locationURI="popup:org.eclipse.ui.popup.any?after=additions">
 	  		<menu label="Azure" icon="icons/small/windowsAzure.png" id="com.microsoftopentechnologies.ui.common.webprojmenu">
-		   		<command icon="icons/small/website.png"
-		           commandId="com.microsoft.ui.webapp">
-			     </command>
+		   		<command commandId="com.microsoft.ui.webapp" icon="icons/small/publishWebsite.png"/>
 			     <visibleWhen checkEnabled="false">
 			    <with 
 				variable="selection">
@@ -30,13 +34,26 @@
 	  	</menu>
     </menuContribution>
   </extension>
+  
   <extension point="org.eclipse.ui.handlers">
 	  <handler
 	        class="com.microsoft.webapp.config.WebAppCommandHandler"
 	        commandId="com.microsoft.ui.webapp">
+	        <enabledWhen>
+			<with
+				variable="selection">
+				<count value="1"/>
+				<iterate
+					operator="or">
+            		<adapt type="org.eclipse.core.resources.IProject">
+        				<test property="com.microsoft.ui.webapp.property.isWebProj"/>
+            		</adapt>
+				</iterate>
+		    </with>
+		</enabledWhen>
 	  </handler>
   </extension>
-	  
+
 	   <!-- Property testers -->
     <extension point="org.eclipse.core.expressions.propertyTesters">
   	<propertyTester
@@ -47,4 +64,16 @@
       class="com.microsoft.webapp.util.WAPropertyTester">
     </propertyTester>
   </extension>
+
+   <!-- Pulldown menu -->
+  <extension point="org.eclipse.ui.commandImages">
+      <image commandId="com.microsoft.ui.webapp" icon="icons/small/publishWebsite.png"></image>
+  </extension>
+  <extension point="org.eclipse.ui.menus">
+  <menuContribution locationURI="menu:com.microsoft.ui.dropdown.toolbar.command">
+         <command commandId="com.microsoft.ui.webapp" label="Publish as Azure Web App..." style="push">
+            <parameter name="com.microsoft.ui.dropdown.msg" value="Web App"></parameter>
+         </command>
+   </menuContribution>
+   </extension>
 </plugin>

@@ -75,6 +75,7 @@ import com.microsoft.windowsazure.core.OperationStatus;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
 import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
+import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.microsoftopentechnologies.wacommon.utils.WAExportWarEar;
 
@@ -109,7 +110,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 	protected Control createButtonBar(Composite parent) {
 		Control ctrl = super.createButtonBar(parent);
 		okButton = getButton(IDialogConstants.OK_ID);
-		okButton.setEnabled(true);
+		okButton.setEnabled(false);
 		fillList("");
 		return ctrl;
 	}
@@ -170,22 +171,19 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				int index = list.getSelectionIndex();
-				if (isDeployable(index)) {
+				if (index >= 0 && webSiteList.size() > index) {
 					selectedWebSite = webSiteList.get(index);
-					okButton.setEnabled(true);
-				} else {
-					selectedWebSite = null;
-					okButton.setEnabled(false);
+					delBtn.setEnabled(true);
+					if (webSiteConfigMap.get(webSiteList.get(index)).getJavaContainer().isEmpty()) {
+						okButton.setEnabled(false);
+					} else {
+						okButton.setEnabled(true);
+					}
 				}
-				delBtn.setEnabled(true);
 			}
 		});
 
 		createButtons(container);
-	}
-
-	private boolean isDeployable(int index) {
-		return index >= 0 && webSiteList.size() > index && !webSiteConfigMap.get(webSiteList.get(index)).getJavaContainer().isEmpty();
 	}
 
 	private void createButtons(Composite container) {
@@ -244,6 +242,9 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							listToDisplay.remove(index);
 							list.setItems(listToDisplay.toArray(new String[listToDisplay.size()]));
 							webSiteConfigMap.remove(selectedWebSite);
+							if (webSiteConfigMap.isEmpty()) {
+								setErrorMessage(Messages.noWebAppErrMsg);
+							}
 							// always disable button as after delete no entry is selected
 							delBtn.setEnabled(false);
 							selectedWebSite = null;
@@ -251,6 +252,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 					} catch (AzureCmdException e) {
 						PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, Messages.delErr, e);
 					}
+				} else {
+					PluginUtil.displayErrorDialog(getShell(), Messages.errTtl, "Select a web app container to delete.");
 				}
 			}
 
@@ -613,8 +616,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 						WebSitePublishSettings.PublishProfile profile = webSitePublishSettings.getPublishProfileList().get(0);
 						notifyProgress(selectedName, null, 20, OperationStatus.InProgress, "");
 						String url = "";
+						String destAppUrl = "";
 						if (profile != null) {
-							url = profile.getDestinationAppUrl();
+							destAppUrl = profile.getDestinationAppUrl();
+							url = destAppUrl;
 							if (!isDeployToRoot) {
 								url = url + "/" + project.getName();
 							}
@@ -644,8 +649,9 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							// exception will occur if user do not install azure explorer plugin
 							Activator.getDefault().log(ex.getMessage(), ex);
 						}
-						
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(Messages.activityView);
+						// send telemetry event
+						AppInsightsCustomEvent.createFTPEvent("WebAppFTP", destAppUrl, project.getName(), selectedSubId);
 					} catch (Exception e) {
 						Activator.getDefault().log(e.getMessage(), e);
 						notifyProgress(selectedName, null, 100, OperationStatus.Failed, e.getMessage());
