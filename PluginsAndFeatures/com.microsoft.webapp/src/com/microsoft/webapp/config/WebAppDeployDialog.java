@@ -630,7 +630,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							public void run() {
 								try {
 									
-									Activator.getDefault().log("To warm the site up - implicitly trying to connect it: " + sitePath);
+									Activator.getDefault().log("To warm the site up - implicitly trying to connect it");
 									sendGet(sitePath);
 								}
 								catch (Exception ex) {
@@ -669,16 +669,11 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 		private void sendGet(String sitePath) throws Exception {
 			URL url = new URL(sitePath);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-			// optional default is GET
 			con.setRequestMethod("GET");
-
-			//add request header
 			con.setRequestProperty("User-Agent", "AzureToolkit for Eclipse");
-
 			int responseCode = con.getResponseCode();
-			System.out.println("\nSending 'GET' request to URL : " + sitePath);
-			System.out.println("Response Code : " + responseCode);
+			Activator.getDefault().log("\nSending 'GET' request to URL : " + sitePath + "...");
+			Activator.getDefault().log("Response Code : " + responseCode);
 		}
 	}
 }
