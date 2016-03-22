@@ -20,6 +20,8 @@
 package com.microsoft.webapp.config;
 
 import java.io.File;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -622,6 +624,21 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 								url = url + "/" + project.getName();
 							}
 						}
+						
+						final String sitePath = url;
+						new Thread("Warm up the target site") {
+							public void run() {
+								try {
+									
+									Activator.getDefault().log("To warm the site up - implicitly trying to connect it");
+									sendGet(sitePath);
+								}
+								catch (Exception ex) {
+									Activator.getDefault().log(ex.getMessage(), ex);
+								}
+							}
+						}.start();
+						
 						Thread.sleep(2000);
 						notifyProgress(selectedName, url, 50, OperationStatus.Succeeded, "Running");
 
@@ -646,6 +663,17 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 			monitor.done();
 			super.done(Status.OK_STATUS);
 			return Status.OK_STATUS;
+		}
+		
+		// HTTP GET request
+		private void sendGet(String sitePath) throws Exception {
+			URL url = new URL(sitePath);
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			con.setRequestMethod("GET");
+			con.setRequestProperty("User-Agent", "AzureToolkit for Eclipse");
+			int responseCode = con.getResponseCode();
+			Activator.getDefault().log("\nSending 'GET' request to URL : " + sitePath + "...");
+			Activator.getDefault().log("Response Code : " + responseCode);
 		}
 	}
 }
