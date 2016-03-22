@@ -21,6 +21,8 @@ package com.microsoft.webapp.config;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +46,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
@@ -70,8 +73,11 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	Button newGroupBtn;
 	Button newPlanBtn;
 	Button okButton;
+	Label servicePlanDetailsLocationLbl;
+	Label servicePlanDetailsPricingTierLbl;
+	Label servicePlanDetailsInstanceSizeLbl;
+	HashMap<String, WebHostingPlanCache> hostingPlanMap = new HashMap<String, WebHostingPlanCache>();
 	Map<String, String> subMap = new HashMap<String, String>();
-	List<WebHostingPlanCache> webHostingPlans = new ArrayList<WebHostingPlanCache>();
 	List<String> plansAcrossSub = new ArrayList<String>();
 	List<String> webSiteNames = new ArrayList<String>();
 	// values to be used in WebAppDeployDialog
@@ -109,7 +115,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 			populateResourceGroups(subId, "");
 			String resName = groupCombo.getText();
 			if (resName != null && !resName.isEmpty()) {
-				populateServicePlans(subId, resName, "");
+				populateServicePlans(subId, resName, null);
 			}
 		}
 		enableOkBtn();
@@ -197,7 +203,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 					populateResourceGroups(subId, "");
 					String resName = groupCombo.getText();
 					if (resName != null && !resName.isEmpty()) {
-						populateServicePlans(subId, resName, "");
+						populateServicePlans(subId, resName, null);
 					}
 				}
 				enableOkBtn();
@@ -227,7 +233,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 				String resName = groupCombo.getText();
 				String subName = subscriptionCombo.getText();
 				if (subName != null && !subName.isEmpty() && resName != null && !resName.isEmpty()) {
-					populateServicePlans(findKeyAsPerValue(subName), resName, "");
+					populateServicePlans(findKeyAsPerValue(subName), resName, null);
 				}
 				enableOkBtn();
 			}
@@ -253,7 +259,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 					if (group != null) {
 						String subId = findKeyAsPerValue(subscriptionCombo.getText());
 						populateResourceGroups(subId, group.getName());
-						populateServicePlans(subId, group.getName(), "");
+						populateServicePlans(subId, group.getName(), null);
 					}
 				}
 				enableOkBtn();
@@ -264,7 +270,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 			}
 		});
 	}
-
+	
 	private void createAppPlanCmpnt(Composite container) {
 		Label lblName = new Label(container, SWT.LEFT);
 		GridData gridData = gridDataForLbl();
@@ -274,6 +280,18 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		servicePlanCombo = new Combo(container, SWT.READ_ONLY);
 		gridData = gridDataForText(180);
 		servicePlanCombo.setLayoutData(gridData);
+		servicePlanCombo.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				String resName = servicePlanCombo.getText();
+				WebHostingPlanCache plan = hostingPlanMap.get(resName);
+				pupulateServicePlanDetails(plan);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+		});
 
 		newPlanBtn = new Button(container, SWT.PUSH);
 		newPlanBtn.setText(Messages.newBtn);
@@ -301,6 +319,40 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 			}
 		});
+		
+		// placeholder
+		new Label(container, SWT.LEFT);
+		
+		Composite appPlanDetailsCmpt = new Composite(container, SWT.NONE);
+		
+		GridLayout gl = new GridLayout();
+		gl.numColumns = 2;
+		appPlanDetailsCmpt.setLayout(gl);
+		
+		gridData = new GridData();
+		gridData.horizontalSpan = 2;
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+		appPlanDetailsCmpt.setLayoutData(gridData);
+		appPlanDetailsCmpt.setLayoutData(gridData);
+		
+		new Label(appPlanDetailsCmpt, SWT.NONE).setText(Messages.loc);
+		servicePlanDetailsLocationLbl = new Label(appPlanDetailsCmpt, SWT.LEFT);
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+		servicePlanDetailsLocationLbl.setLayoutData(gridData);
+		servicePlanDetailsLocationLbl.setText("-");
+
+		new Label(appPlanDetailsCmpt, SWT.NONE).setText(Messages.price);
+		servicePlanDetailsPricingTierLbl = new Label(appPlanDetailsCmpt, SWT.NONE);
+		servicePlanDetailsPricingTierLbl.setLayoutData(gridData);
+		servicePlanDetailsPricingTierLbl.setText("-");
+		
+		new Label(appPlanDetailsCmpt, SWT.NONE).setText(Messages.price);
+		servicePlanDetailsInstanceSizeLbl = new Label(appPlanDetailsCmpt, SWT.NONE);
+		servicePlanDetailsInstanceSizeLbl.setLayoutData(gridData);
+		servicePlanDetailsInstanceSizeLbl.setText("-");
 	}
 
 	private void createWebContainerCmpnt(Composite container) {
@@ -424,25 +476,42 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 
 	private void populateServicePlans(String subId, String group, String valToSet) {
 		try {
-			webHostingPlans = AzureManagerImpl.getManager().getWebHostingPlans(subId, group);
-			List<String> plans = new ArrayList<String>(); 
+			hostingPlanMap.clear();
+			servicePlanCombo.removeAll();
+			List<WebHostingPlanCache> webHostingPlans = AzureManagerImpl.getManager().getWebHostingPlans(subId, group);
 			if (webHostingPlans.size() > 0) {
+				Collections.sort(webHostingPlans, new Comparator<WebHostingPlanCache>() {
+                    @Override
+                    public int compare(WebHostingPlanCache o1, WebHostingPlanCache o2) {
+                        return o1.getName().compareTo(o2.getName());
+                    }
+                });
+				
 				for (WebHostingPlanCache plan : webHostingPlans) {
-					plans.add(plan.getName());
-				}
-				String[] planArray = plans.toArray(new String[plans.size()]);
-				servicePlanCombo.setItems(planArray);
-				if (valToSet.isEmpty()) {
-					servicePlanCombo.setText(planArray[0]);
+					servicePlanCombo.add(plan.getName());
+					hostingPlanMap.put(plan.getName(), plan);
+				}	
+				
+				if (valToSet == null || valToSet.isEmpty()) {
+					servicePlanCombo.setText(servicePlanCombo.getItem(0));
 				} else {
 					servicePlanCombo.setText(valToSet);
-				}
+				}	
+				
+				pupulateServicePlanDetails(hostingPlanMap.get(servicePlanCombo.getText()));				
 			} else {
-				servicePlanCombo.removeAll();
+				pupulateServicePlanDetails(null);
 			}
+			
 		} catch (AzureCmdException e) {
 			Activator.getDefault().log(Messages.errTtl, e);
 		}
+	}
+	
+	private void pupulateServicePlanDetails(WebHostingPlanCache plan){
+		servicePlanDetailsLocationLbl.setText(plan == null ? "-" : plan.getLocation());
+		servicePlanDetailsPricingTierLbl.setText(plan == null ? "-" : plan.getSku().name());
+		servicePlanDetailsInstanceSizeLbl.setText(plan == null ? "-" : plan.getWorkerSize().name());
 	}
 
 	private void enableOkBtn() {
@@ -482,7 +551,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	protected void okPressed() {
 		finalName = txtName.getText().trim();
 		finalSubId = findKeyAsPerValue(subscriptionCombo.getText());
-		finalPlan = webHostingPlans.get(servicePlanCombo.getSelectionIndex());
+		finalPlan = hostingPlanMap.get(servicePlanCombo.getText());
 		finalContainer = containerCombo.getText();
 		super.okPressed();
 	}
