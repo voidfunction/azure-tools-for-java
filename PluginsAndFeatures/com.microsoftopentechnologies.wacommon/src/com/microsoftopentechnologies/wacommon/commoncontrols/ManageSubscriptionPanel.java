@@ -158,7 +158,7 @@ public class ManageSubscriptionPanel extends Composite {
 				ImportSubscriptionDialog dlg = new ImportSubscriptionDialog(getShell());
 				dlg.open();
 				String fileName = ImportSubscriptionDialog.getPubSetFilePath();
-				if (new File(fileName).exists()) {
+				if (fileName != null && !fileName.isEmpty() && new File(fileName).exists()) {
 					try {
 						PluginUtil.showBusy(true, getShell());
 						List<Subscription> oldSubList = AzureManagerImpl.getManager().getFullSubscriptionList();

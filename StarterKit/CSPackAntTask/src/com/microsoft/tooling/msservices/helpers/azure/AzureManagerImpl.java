@@ -68,6 +68,7 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -1642,8 +1643,10 @@ public class AzureManagerImpl implements AzureManager {
 
     		InputStream input = new FileInputStream(artifactPath);
     		if (isDeployRoot) {
+    			removeFtpDirectory(ftp, "/site/wwwroot/webapps/ROOT", "");
     			ftp.storeFile(targetDir + "/ROOT.war", input);
     		} else {
+    			removeFtpDirectory(ftp, "/site/wwwroot/webapps/" + artifactName, "");
     			ftp.storeFile(targetDir + "/" + artifactName + ".war", input);
     		}
     		input.close();
@@ -1657,6 +1660,38 @@ public class AzureManagerImpl implements AzureManager {
     			} catch (IOException ignored) {
     			}
     		}
+    	}
+    }
+
+    public static void removeFtpDirectory(FTPClient ftpClient, String parentDir,
+    		String currentDir) throws IOException {
+    	String dirToList = parentDir;
+    	if (!currentDir.equals("")) {
+    		dirToList += "/" + currentDir;
+    	}
+    	FTPFile[] subFiles = ftpClient.listFiles(dirToList);
+    	if (subFiles != null && subFiles.length > 0) {
+    		for (FTPFile ftpFile : subFiles) {
+    			String currentFileName = ftpFile.getName();
+    			if (currentFileName.equals(".") || currentFileName.equals("..")) {
+    				// skip parent directory and the directory itself
+    				continue;
+    			}
+    			String filePath = parentDir + "/" + currentDir + "/" + currentFileName;
+    			if (currentDir.equals("")) {
+    				filePath = parentDir + "/" + currentFileName;
+    			}
+
+    			if (ftpFile.isDirectory()) {
+    				// remove the sub directory
+    				removeFtpDirectory(ftpClient, dirToList, currentFileName);
+    			} else {
+    				// delete the file
+    				ftpClient.deleteFile(filePath);
+    			}
+    		}
+    		// remove the empty directory
+    		ftpClient.removeDirectory(dirToList);
     	}
     }
 
