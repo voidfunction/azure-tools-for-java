@@ -46,7 +46,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
@@ -481,12 +480,12 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 			List<WebHostingPlanCache> webHostingPlans = AzureManagerImpl.getManager().getWebHostingPlans(subId, group);
 			if (webHostingPlans.size() > 0) {
 				Collections.sort(webHostingPlans, new Comparator<WebHostingPlanCache>() {
-                    @Override
-                    public int compare(WebHostingPlanCache o1, WebHostingPlanCache o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
-				
+					@Override
+					public int compare(WebHostingPlanCache o1, WebHostingPlanCache o2) {
+						return o1.getName().compareTo(o2.getName());
+					}
+				});
+
 				for (WebHostingPlanCache plan : webHostingPlans) {
 					servicePlanCombo.add(plan.getName());
 					hostingPlanMap.put(plan.getName(), plan);
@@ -502,7 +501,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 			} else {
 				pupulateServicePlanDetails(null);
 			}
-			
+
 		} catch (AzureCmdException e) {
 			Activator.getDefault().log(Messages.errTtl, e);
 		}
