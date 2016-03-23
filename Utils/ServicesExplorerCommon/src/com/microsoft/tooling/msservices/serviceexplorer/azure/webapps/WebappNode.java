@@ -21,83 +21,84 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.webapps;
 
+import java.util.List;
+
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
-
-import java.util.List;
 
 public class WebappNode extends Node {
-    private static final String ACTION_START = "Start";
-    private static final String ACTION_STOP = "Stop";
+	private static final String ACTION_START = "Start";
+	private static final String ACTION_STOP = "Stop";
+	private static final String WEB_RUN_ICON = "website.png";
+	private static final String WEB_STOP_ICON = "stopWebsite.png";
+	String runStatus = "Running";
+	private WebSite webSite;
 
-    private static final String WAIT_ICON_PATH = "website.png";
-    private WebSite webSite;
+	public WebappNode(WebappsModule parent, WebSite webSite, String icon) {
+		super(webSite.getName(), webSite.getName(), parent, icon, true);
+		this.webSite = webSite;
 
-    public WebappNode(WebappsModule parent, WebSite webSite) {
-        super(webSite.getName(), webSite.getName(), parent, WAIT_ICON_PATH, true);
+		loadActions();
+	}
 
-        this.webSite = webSite;
+	public WebSite getWebSite() {
+		return webSite;
+	}
 
-        loadActions();
-    }
+	@Override
+	public List<NodeAction> getNodeActions() {
+		boolean running = runStatus.equals(webSite.getStatus());
+		getNodeActionByName(ACTION_START).setEnabled(!running);
+		getNodeActionByName(ACTION_STOP).setEnabled(running);
 
-    public WebSite getWebSite() {
-        return webSite;
-    }
+		return super.getNodeActions();
+	}
 
-    @Override
-    public List<NodeAction> getNodeActions() {
-        boolean running = "Running".equals(webSite.getStatus());
-        getNodeActionByName(ACTION_START).setEnabled(!running);
-        getNodeActionByName(ACTION_STOP).setEnabled(running);
+	@Override
+	protected void loadActions() {
+		addAction("Stop", new NodeActionListener() {
+			@Override
+			public void actionPerformed(NodeActionEvent e) {
+				DefaultLoader.getIdeHelper().runInBackground(null, "Stopping Web App", false, true, "Stopping Web App...", new Runnable() {
+					@Override
+					public void run() {
+						try {
+							AzureManagerImpl.getManager().stopWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
+							webSite = AzureManagerImpl.getManager().getWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
+							setIconPath(WEB_STOP_ICON);
+						} catch (AzureCmdException e) {
+							DefaultLoader.getUIHelper().showException("An error occurred while attempting to stop the Web App", e,
+									"Azure Services Explorer - Error Stopping Web App", false, true);
+						}
+					}
+				});
+			}
+		});
+		addAction("Start", new NodeActionListener() {
+			@Override
+			public void actionPerformed(NodeActionEvent e) {
+				DefaultLoader.getIdeHelper().runInBackground(null, "Starting Web App", false, true, "Starting Web App...", new Runnable() {
+					@Override
+					public void run() {
+						try {
+							AzureManagerImpl.getManager().startWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
+							webSite = AzureManagerImpl.getManager().getWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
+							setIconPath(WEB_RUN_ICON);
+						} catch (AzureCmdException e) {
+							DefaultLoader.getUIHelper().showException("An error occurred while attempting to start the Web App", e,
+									"Azure Services Explorer - Error Starting Web App", false, true);
+						}
+					}
+				});
+			}
+		});
 
-        return super.getNodeActions();
-    }
-
-    @Override
-    protected void loadActions() {
-        addAction("Stop", new NodeActionListener() {
-            @Override
-            public void actionPerformed(NodeActionEvent e) {
-                DefaultLoader.getIdeHelper().runInBackground(null, "Stopping Web App", false, true, "Stopping Web App...", new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            AzureManagerImpl.getManager().stopWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
-                            webSite = AzureManagerImpl.getManager().getWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
-                        } catch (AzureCmdException e) {
-                            DefaultLoader.getUIHelper().showException("An error occurred while attempting to stop the Web App", e,
-                                    "Azure Services Explorer - Error Stopping Web App", false, true);
-                        }
-                    }
-                });
-            }
-        });
-        addAction("Start", new NodeActionListener() {
-            @Override
-            public void actionPerformed(NodeActionEvent e) {
-                DefaultLoader.getIdeHelper().runInBackground(null, "Stopping Web App", false, true, "Stopping Web App...", new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            AzureManagerImpl.getManager().startWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
-                        } catch (AzureCmdException e) {
-                            DefaultLoader.getUIHelper().showException("An error occurred while attempting to start the Web App", e,
-                                    "Azure Services Explorer - Error Starting Web App", false, true);
-                        }
-                    }
-                });
-            }
-        });
-
-        super.loadActions();
-    }
+		super.loadActions();
+	}
 }

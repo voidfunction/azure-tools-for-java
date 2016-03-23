@@ -33,32 +33,38 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNo
 import java.util.List;
 
 public class WebappsModule extends AzureRefreshableNode {
-    private static final String WEBAPPS_MODULE_ID = WebappsModule.class.getName();
-    private static final String ICON_PATH = "website.png";
-    private static final String BASE_MODULE_NAME = "Web Apps";
+	private static final String WEBAPPS_MODULE_ID = WebappsModule.class.getName();
+	private static final String WEB_RUN_ICON = "website.png";
+	private static final String WEB_STOP_ICON = "stopWebsite.png";
+	private static final String BASE_MODULE_NAME = "Web Apps";
+	String runStatus = "Running";
 
-    public WebappsModule(Node parent) {
-        super(WEBAPPS_MODULE_ID, BASE_MODULE_NAME, parent, ICON_PATH);
-    }
+	public WebappsModule(Node parent) {
+		super(WEBAPPS_MODULE_ID, BASE_MODULE_NAME, parent, WEB_RUN_ICON);
+	}
 
-    @Override
-    protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
-            throws AzureCmdException {
-        if (eventState.isEventTriggered()) {
-            return;
-        }
+	@Override
+	protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
+			throws AzureCmdException {
+		if (eventState.isEventTriggered()) {
+			return;
+		}
 
-        removeAllChildNodes();
+		removeAllChildNodes();
 
-        List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
+		List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
 
-        for (Subscription subscription : subscriptionList) {
-            for (final String webSpace : AzureManagerImpl.getManager().getResourceGroupNames(subscription.getId())) {
-                List<WebSite> webapps = AzureManagerImpl.getManager().getWebSites(subscription.getId(), webSpace);
-                for (WebSite webapp : webapps) {
-                    addChildNode(new WebappNode(this, webapp));
-                }
-            }
-        }
-    }
+		for (Subscription subscription : subscriptionList) {
+			for (final String webSpace : AzureManagerImpl.getManager().getResourceGroupNames(subscription.getId())) {
+				List<WebSite> webapps = AzureManagerImpl.getManager().getWebSites(subscription.getId(), webSpace);
+				for (WebSite webapp : webapps) {
+					if (webapp.getStatus().equalsIgnoreCase(runStatus)) {
+						addChildNode(new WebappNode(this, webapp, WEB_RUN_ICON));
+					} else {
+						addChildNode(new WebappNode(this, webapp, WEB_STOP_ICON));
+					}
+				}
+			}
+		}
+	}
 }
