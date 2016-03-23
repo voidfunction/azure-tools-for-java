@@ -5,7 +5,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="resources/AzureCommons.jar" sourcepath="/AzureCommons/src"/>
 	<classpathentry exported="true" kind="lib" path="resources/ProjectManagerLibrary.jar" sourcepath="/ProjectManagerLibrary/src"/>
-	<classpathentry exported="true" kind="lib" path="resources/services-explorer-common.jar" sourcepath="/Users/farlen/stuff/wap4ej.2.8.2/Utils/ServicesExplorerCommon/src"/>
+	<classpathentry exported="true" kind="lib" path="resources/services-explorer-common.jar" sourcepath="/ServicesExplorerCommon/src"/>
 	<classpathentry exported="true" kind="lib" path="resources/.cspack.jar" sourcepath="/CSPackAntTask/src"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

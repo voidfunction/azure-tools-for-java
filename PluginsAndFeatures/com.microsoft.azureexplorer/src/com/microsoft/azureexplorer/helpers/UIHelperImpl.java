@@ -19,18 +19,10 @@
  */
 package com.microsoft.azureexplorer.helpers;
 
-import com.microsoft.azureexplorer.Activator;
-import com.microsoft.azureexplorer.editors.BlobExplorerFileEditor;
-import com.microsoft.azureexplorer.editors.QueueFileEditor;
-import com.microsoft.azureexplorer.editors.StorageEditorInput;
-import com.microsoft.azureexplorer.editors.TableFileEditor;
-import com.microsoft.azureexplorer.forms.OpenSSLFinderForm;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.UIHelper;
-import com.microsoft.tooling.msservices.model.storage.*;
-import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
-import org.eclipse.core.resources.IProject;
+import java.io.File;
+import java.text.DecimalFormat;
+import java.util.Map;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -43,10 +35,22 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import java.io.File;
-import java.text.DecimalFormat;
-import java.util.Map;
 import com.google.common.collect.ImmutableMap;
+import com.microsoft.azureexplorer.Activator;
+import com.microsoft.azureexplorer.editors.BlobExplorerFileEditor;
+import com.microsoft.azureexplorer.editors.QueueFileEditor;
+import com.microsoft.azureexplorer.editors.StorageEditorInput;
+import com.microsoft.azureexplorer.editors.TableFileEditor;
+import com.microsoft.azureexplorer.forms.OpenSSLFinderForm;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.UIHelper;
+import com.microsoft.tooling.msservices.model.storage.BlobContainer;
+import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
+import com.microsoft.tooling.msservices.model.storage.Queue;
+import com.microsoft.tooling.msservices.model.storage.StorageServiceTreeItem;
+import com.microsoft.tooling.msservices.model.storage.Table;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class UIHelperImpl implements UIHelper {
     private Map<Class<? extends StorageServiceTreeItem>, String> type2Editor = ImmutableMap.of(BlobContainer.class, "com.microsoft.azureexplorer.editors.BlobExplorerFileEditor",
