@@ -338,7 +338,7 @@ public class CreateWebSiteForm extends DialogWrapper {
         webHostingPlan = plan;
         servicePlanDetailsLocationLbl.setText(plan == null ? "-" : plan.getLocation());
         servicePlanDetailsPricingTierLbl.setText(plan == null ? "-" : plan.getSku().name());
-		servicePlanDetailsInstanceSizeLbl.setText(plan == null ? "-" : plan.getWorkerSize().name());
+        servicePlanDetailsInstanceSizeLbl.setText(plan == null ? "-" : plan.getWorkerSize().name());
     }
 
     private void showCreateWebHostingPlanForm() {

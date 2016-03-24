@@ -22,6 +22,7 @@
 package com.microsoft.tasks;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
@@ -36,12 +37,17 @@ import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener
 import com.microsoftopentechnologies.azurecommons.deploy.model.DeployDescriptor;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class WebSiteDeployTask extends Task.Backgroundable {
     WebSite webSite;
     String url;
     Project project;
+    static final Logger LOG = Logger.getInstance("#com.microsoft.intellij.AzurePlugin");
+
     public WebSiteDeployTask(Project project, WebSite webSite, String url) {
         super(project, message("deployingToAzure"), true, Backgroundable.DEAF);
         this.webSite = webSite;
@@ -64,6 +70,19 @@ public class WebSiteDeployTask extends Task.Backgroundable {
         AzurePlugin.addDeploymentEventListener(deployListnr);
         AzurePlugin.depEveList.add(deployListnr);
         DeploymentManager.getInstance().deployToWebApps(webSite, url);
+
+        new Thread("Warm up the target site") {
+            public void run() {
+                try {
+
+                    LOG.info("To warm the site up - implicitly trying to connect it");
+                    sendGet(url);
+                }
+                catch (Exception ex) {
+                    LOG.info(ex.getMessage(), ex);
+                }
+            }
+        }.start();
     }
 
     private void openViews(final Project project) {
@@ -75,5 +94,16 @@ public class WebSiteDeployTask extends Task.Backgroundable {
 
             }
         });
+    }
+
+    // HTTP GET request
+    private void sendGet(String sitePath) throws Exception {
+        URL url = new URL(sitePath);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
+        con.setRequestProperty("User-Agent", "AzureToolkit for Intellij");
+        int responseCode = con.getResponseCode();
+        LOG.info("\nSending 'GET' request to URL : " + sitePath + " ...");
+        LOG.info("Response Code : " + responseCode);
     }
 }

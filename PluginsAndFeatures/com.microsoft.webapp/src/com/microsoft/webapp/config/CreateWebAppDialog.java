@@ -348,7 +348,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		servicePlanDetailsPricingTierLbl.setLayoutData(gridData);
 		servicePlanDetailsPricingTierLbl.setText("-");
 		
-		new Label(appPlanDetailsCmpt, SWT.NONE).setText(Messages.price);
+		new Label(appPlanDetailsCmpt, SWT.NONE).setText(Messages.worker);
 		servicePlanDetailsInstanceSizeLbl = new Label(appPlanDetailsCmpt, SWT.NONE);
 		servicePlanDetailsInstanceSizeLbl.setLayoutData(gridData);
 		servicePlanDetailsInstanceSizeLbl.setText("-");
