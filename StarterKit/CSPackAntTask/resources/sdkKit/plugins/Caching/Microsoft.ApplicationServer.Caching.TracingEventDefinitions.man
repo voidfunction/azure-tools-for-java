@@ -2,7 +2,7 @@
 <instrumentationManifest xmlns="http://schemas.microsoft.com/win/2004/08/events">
   <instrumentation xmlns:win="http://manifests.microsoft.com/win/2004/08/windows/events" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <events xmlns="http://schemas.microsoft.com/win/2004/08/events">
-      <provider guid="{A77DCF21-545F-4191-B3D0-C396CF2683F2}" message="$(string.providermessage)" messageFileName="C:\Program Files\Microsoft SDKs\Azure\.NET SDK\v2.8\bin\plugins\Caching\Microsoft.ApplicationServer.Caching.TracingEventDefinitions.dll" name="Microsoft-Windows Server AppFabric Caching TracingProvider" resourceFileName="C:\Program Files\Microsoft SDKs\Azure\.NET SDK\v2.8\bin\plugins\Caching\Microsoft.ApplicationServer.Caching.TracingEventDefinitions.dll" symbol="TracingProvider">
+      <provider guid="{A77DCF21-545F-4191-B3D0-C396CF2683F2}" message="$(string.providermessage)" messageFileName="C:\Program Files\Microsoft SDKs\Azure\.NET SDK\v2.9\bin\plugins\Caching\Microsoft.ApplicationServer.Caching.TracingEventDefinitions.dll" name="Microsoft-Windows Server AppFabric Caching TracingProvider" resourceFileName="C:\Program Files\Microsoft SDKs\Azure\.NET SDK\v2.9\bin\plugins\Caching\Microsoft.ApplicationServer.Caching.TracingEventDefinitions.dll" symbol="TracingProvider">
         <channels>
           <importChannel chid="Microsoft-Windows-Application Server-System Services/Debug" name="Microsoft-Windows-Application Server-System Services/Debug"/>
         </channels>
