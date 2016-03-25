@@ -632,7 +632,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							destAppUrl = profile.getDestinationAppUrl();
 							url = destAppUrl;
 							if (!isDeployToRoot) {
-								url = url + "/" + project.getName();
+								String artifactName = project.getName().replaceAll("[^a-zA-Z0-9_-]+","");
+								url = url + "/" + artifactName;
 							}
 						}
 						

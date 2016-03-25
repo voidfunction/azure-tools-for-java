@@ -1652,6 +1652,7 @@ public class AzureManagerImpl implements AzureManager {
     			removeFtpDirectory(ftp, "/site/wwwroot/webapps/ROOT", "");
     			ftp.storeFile(targetDir + "/ROOT.war", input);
     		} else {
+    			artifactName = artifactName.replaceAll("[^a-zA-Z0-9_-]+","");
     			removeFtpDirectory(ftp, "/site/wwwroot/webapps/" + artifactName, "");
     			ftp.storeFile(targetDir + "/" + artifactName + ".war", input);
     		}

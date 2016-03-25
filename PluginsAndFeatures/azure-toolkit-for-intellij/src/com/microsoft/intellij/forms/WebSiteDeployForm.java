@@ -178,7 +178,8 @@ public class WebSiteDeployForm extends DialogWrapper {
                 destAppUrl = profile.getDestinationAppUrl();
                 url = destAppUrl;
                 if (!chkBoxDeployRoot.isSelected()) {
-                    url = url + "/" + artifactDescriptor.getName();
+                    String artifactName = artifactDescriptor.getName().replaceAll("[^a-zA-Z0-9_-]+","");
+                    url = url + "/" + artifactName;
                 }
             }
             AppInsightsCustomEvent.createFTPEvent("WebAppFTP", destAppUrl, artifactDescriptor.getName(), selectedWebSite.getSubscriptionId());

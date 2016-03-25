@@ -350,8 +350,7 @@ public class CreateWebSiteForm extends DialogWrapper {
                 if (form.isOK()) {
                     fillWebHostingPlans(form.getWebHostingPlan());
                 } else {
-                    webHostingPlanComboBox.setSelectedItem(null);
-                    pupulateServicePlanDetails(null);
+                    fillWebHostingPlans("");
                 }
             }
         });
@@ -370,6 +369,13 @@ public class CreateWebSiteForm extends DialogWrapper {
                     }
                 });
             }
+        } else {
+            DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    fillResourceGroups("");
+                }
+            });
         }
     }
 
