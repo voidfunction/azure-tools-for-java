@@ -1378,7 +1378,7 @@ public class WindowsAzurePackage extends Task {
 		if (storageEmulatorDir.exists()) {
 			return storageEmulatorDir.toString();
 		} else {
-			throw new IOException("Azure SDK v2.8 or later is not installed.");
+			throw new IOException("Azure SDK v2.9 or later is not installed.");
 		}
 	}
 
@@ -1399,7 +1399,7 @@ public class WindowsAzurePackage extends Task {
 
 		// Check if the SDK folder exists
 		if (!sdkDir.exists()) {
-			throw new IOException("Azure SDK v2.8 or later is not installed.");
+			throw new IOException("Azure SDK v2.9 or later is not installed.");
 		}
 		
 		String[] versionedSDKDirs = sdkDir.list();
@@ -1421,7 +1421,7 @@ public class WindowsAzurePackage extends Task {
 		}
 
 		if (latestVersionSdkDir == null) {
-			throw new IOException("Azure SDK v2.8 or later is not installed.");
+			throw new IOException("Azure SDK v2.9 or later is not installed.");
 		}
 
 		return String.format("%s%sbin", latestVersionSdkDir, File.separatorChar);
