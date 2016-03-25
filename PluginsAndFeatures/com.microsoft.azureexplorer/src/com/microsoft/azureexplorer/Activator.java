@@ -19,19 +19,15 @@
  */
 package com.microsoft.azureexplorer;
 
-import com.google.gson.Gson;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.components.PluginComponent;
-import com.microsoft.tooling.msservices.components.PluginSettings;
-import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.azureexplorer.helpers.UIHelperImpl;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import java.io.*;
-import java.net.URL;
+import com.microsoft.azureexplorer.helpers.UIHelperImpl;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.serviceexplorer.Node;
 
 /**
  * The activator class controls the plug-in life cycle

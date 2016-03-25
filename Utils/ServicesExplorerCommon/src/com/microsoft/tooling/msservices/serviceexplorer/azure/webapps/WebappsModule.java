@@ -21,16 +21,25 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.webapps;
 
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
+import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WebappsModule extends AzureRefreshableNode {
 	private static final String WEBAPPS_MODULE_ID = WebappsModule.class.getName();
@@ -49,22 +58,45 @@ public class WebappsModule extends AzureRefreshableNode {
 		if (eventState.isEventTriggered()) {
 			return;
 		}
-
 		removeAllChildNodes();
-
 		List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
-
 		for (Subscription subscription : subscriptionList) {
-			for (final String webSpace : AzureManagerImpl.getManager().getResourceGroupNames(subscription.getId())) {
-				List<WebSite> webapps = AzureManagerImpl.getManager().getWebSites(subscription.getId(), webSpace);
-				for (WebSite webapp : webapps) {
-					if (webapp.getStatus().equalsIgnoreCase(runStatus)) {
-						addChildNode(new WebappNode(this, webapp, WEB_RUN_ICON));
+			Map<WebSite, WebSiteConfiguration> webSiteConfigMapTemp = new HashMap<WebSite, WebSiteConfiguration>();
+			if (AzureServiceModule.webSiteConfigMap == null) {
+				// map null means load data and don't use cached data
+				AzureManager manager = AzureManagerImpl.getManager();
+				for (final String webSpace : manager.getResourceGroupNames(subscription.getId())) {
+					List<WebSite> webapps = manager.getWebSites(subscription.getId(), webSpace);
+					for (WebSite webapp : webapps) {
+						WebSiteConfiguration webSiteConfiguration = manager.
+								getWebSiteConfiguration(webapp.getSubscriptionId(),
+										webapp.getWebSpaceName(), webapp.getName());
+						webSiteConfigMapTemp.put(webapp, webSiteConfiguration);
+					}
+				}
+				// save preferences
+				DefaultLoader.getUIHelper().saveWebAppPreferences(webSiteConfigMapTemp);
+			} else {
+				webSiteConfigMapTemp = AzureServiceModule.webSiteConfigMap;
+			}
+
+			if (webSiteConfigMapTemp != null && !webSiteConfigMapTemp.isEmpty()) {
+				List<WebSite> webSiteList = new ArrayList<WebSite>(webSiteConfigMapTemp.keySet());
+				Collections.sort(webSiteList, new Comparator<WebSite>() {
+					@Override
+					public int compare(WebSite ws1, WebSite ws2) {
+						return ws1.getName().compareTo(ws2.getName());
+					}
+				});
+				for (WebSite webSite : webSiteList) {
+					if (webSite.getStatus().equalsIgnoreCase(runStatus)) {
+						addChildNode(new WebappNode(this, webSite, WEB_RUN_ICON));
 					} else {
-						addChildNode(new WebappNode(this, webapp, WEB_STOP_ICON));
+						addChildNode(new WebappNode(this, webSite, WEB_STOP_ICON));
 					}
 				}
 			}
 		}
+		AzureServiceModule.webSiteConfigMap = null;
 	}
 }

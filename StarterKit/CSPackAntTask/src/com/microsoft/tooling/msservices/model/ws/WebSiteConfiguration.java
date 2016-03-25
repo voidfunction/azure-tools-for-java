@@ -18,13 +18,15 @@ package com.microsoft.tooling.msservices.model.ws;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.model.ServiceTreeItem;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-public class WebSiteConfiguration implements ServiceTreeItem {
-    public static class ConnectionInfo {
+public class WebSiteConfiguration implements ServiceTreeItem, Serializable {
+	private static final long serialVersionUID = -5687551495552719808L;
+	public static class ConnectionInfo {
         private String name;
         private String type;
         private String connectionString;

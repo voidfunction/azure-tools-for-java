@@ -15,10 +15,13 @@
  */
 package com.microsoft.tooling.msservices.model.ws;
 
+import java.io.Serializable;
+
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.model.ServiceTreeItem;
 
-public class WebSite implements ServiceTreeItem {
+public class WebSite implements ServiceTreeItem, Serializable {
+	private static final long serialVersionUID = -5687551495552719808L;
     private boolean loading;
     private String name;
     private String webSpaceName;

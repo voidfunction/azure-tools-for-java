@@ -25,6 +25,8 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.tooling.msservices.model.ws.WebSite;
+import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
@@ -34,6 +36,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappsModule;
 
 import java.util.List;
+import java.util.Map;
 
 public class AzureServiceModule extends RefreshableNode {
     private static final String AZURE_SERVICE_MODULE_ID = AzureServiceModule.class.getName();
@@ -49,6 +52,8 @@ public class AzureServiceModule extends RefreshableNode {
     private EventWaitHandle subscriptionsChanged;
     private boolean registeredSubscriptionsChanged;
     private final Object subscriptionsChangedSync = new Object();
+    // by default its null which means load data and don't use cached data
+    public static Map<WebSite, WebSiteConfiguration> webSiteConfigMap = null;
 
     public AzureServiceModule(Object project, boolean storageModuleOnly) {
         this(null, ICON_PATH, null);

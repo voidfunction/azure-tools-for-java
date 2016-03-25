@@ -40,6 +40,7 @@ public class ManageSubscriptionsAction  extends NodeActionListener {
     public void actionPerformed(NodeActionEvent e) {
         Dialog subscriptionsDialog = new ManageSubscriptionDialog(new Shell(), true, false);
         subscriptionsDialog.open();
+        AzureServiceModule.webSiteConfigMap = null;
         azureServiceModule.load();
     }
 }

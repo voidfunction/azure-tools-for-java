@@ -33,10 +33,6 @@ public class OpenWebappAction extends NodeActionListener {
             WebSitePublishSettings.PublishProfile profile = webapp.getWebSitePublishSettings().getPublishProfileList().get(0);
             if (profile != null) {
                 String url = profile.getDestinationAppUrl();
-//            if (!chkBoxDeployRoot.isSelected()) {
-//                url = url + "/" + artifactDescriptor.getName();
-//            }
-//        }
                 PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
             } else {
                 DefaultLoader.getUIHelper().showException("No publish profile found",

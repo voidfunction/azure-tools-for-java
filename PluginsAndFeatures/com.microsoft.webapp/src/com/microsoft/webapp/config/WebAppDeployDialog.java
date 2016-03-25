@@ -59,6 +59,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
+import com.gigaspaces.azure.util.PreferenceWebAppUtil;
 import com.gigaspaces.azure.views.WindowsAzureActivityLogView;
 import com.gigaspaces.azure.wizards.WizardCacheManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -242,6 +243,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							listToDisplay.remove(index);
 							list.setItems(listToDisplay.toArray(new String[listToDisplay.size()]));
 							webSiteConfigMap.remove(selectedWebSite);
+							PreferenceWebAppUtil.save(webSiteConfigMap);
 							if (webSiteConfigMap.isEmpty()) {
 								setErrorMessage(Messages.noWebAppErrMsg);
 							}
@@ -354,32 +356,38 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 			monitor.beginTask(Messages.loadWebApps, IProgressMonitor.UNKNOWN);
 			try {
 				Activator.getDefault().log(Messages.jobStart);
-				AzureManager manager = AzureManagerImpl.getManager();
 				webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
+				AzureManager manager = AzureManagerImpl.getManager();
 				subList = manager.getSubscriptionList();
 				if (subList.size() > 0) {
-					if (manager.authenticated()) {
-						// authenticated using AD. Proceed for Web Apps retrieval
-						for (Subscription sub : subList) {
-							List<String> resList = manager.getResourceGroupNames(sub.getId());
-							for (String res : resList) {
-								List<WebSite> webList = manager.getWebSites(sub.getId(), res);
-								for (WebSite webSite : webList) {
-									WebSiteConfiguration webSiteConfiguration = AzureManagerImpl.getManager().
-											getWebSiteConfiguration(webSite.getSubscriptionId(),
-													webSite.getWebSpaceName(), webSite.getName());
-									webSiteConfigMap.put(webSite, webSiteConfiguration);
+					if (PreferenceWebAppUtil.isLoaded()) {
+						webSiteConfigMap = PreferenceWebAppUtil.load();
+					} else {
+						if (manager.authenticated()) {
+							// authenticated using AD. Proceed for Web Apps retrieval
+							for (Subscription sub : subList) {
+								List<String> resList = manager.getResourceGroupNames(sub.getId());
+								for (String res : resList) {
+									List<WebSite> webList = manager.getWebSites(sub.getId(), res);
+									for (WebSite webSite : webList) {
+										WebSiteConfiguration webSiteConfiguration = manager.
+												getWebSiteConfiguration(webSite.getSubscriptionId(),
+														webSite.getWebSpaceName(), webSite.getName());
+										webSiteConfigMap.put(webSite, webSiteConfiguration);
+									}
 								}
 							}
+							PreferenceWebAppUtil.save(webSiteConfigMap);
+							PreferenceWebAppUtil.setLoaded(true);
+						} else {
+							// imported publish settings file. Clear subscription
+							manager.clearImportedPublishSettingsFiles();
+							WizardCacheManager.clearSubscriptions();
+							subList = manager.getSubscriptionList();
 						}
-					} else {
-						// imported publish settings file. Clear subscription
-						manager.clearImportedPublishSettingsFiles();
-						WizardCacheManager.clearSubscriptions();
-						subList = manager.getSubscriptionList();
 					}
 				}
-			} catch(AzureCmdException ex) {
+			} catch(Exception ex) {
 				Activator.getDefault().log(Messages.loadErrMsg, ex);
 				super.setName("");
 				monitor.done();
@@ -425,6 +433,9 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 				manager.updateWebSiteConfiguration(dialog.getFinalSubId(), webSite.getWebSpaceName(), webSite.getName(),
 						webSite.getLocation(), webSiteConfiguration);
 				webAppCreated = webSite.getName();
+				// update eclipse workspace preferences
+				webSiteConfigMap.put(webSite, webSiteConfiguration);
+				PreferenceWebAppUtil.save(webSiteConfigMap);
 			} catch(AzureCmdException ex) {
 				Activator.getDefault().log(Messages.createErrMsg, ex);
 				super.setName("");

@@ -55,6 +55,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
+import com.gigaspaces.azure.util.PreferenceWebAppUtil;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -66,6 +67,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
+import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
 
 public class ServiceExplorerView extends ViewPart implements PropertyChangeListener {
@@ -135,6 +137,13 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
             invisibleRoot.add(createTreeNode(azureServiceModule));
 
             // kick-off asynchronous load of child nodes on all the modules
+            if (PreferenceWebAppUtil.isLoaded()) {
+            	try {
+            		AzureServiceModule.webSiteConfigMap = PreferenceWebAppUtil.load();
+            	} catch (RestAPIException e) {
+            		AzureServiceModule.webSiteConfigMap = null;
+            	}
+            }
             azureServiceModule.load();
         }
     }
@@ -370,6 +379,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
     private void makeActions() {
         refreshAction = new Action("Refresh", Activator.getImageDescriptor("icons/refresh.png")) {
             public void run() {
+            	AzureServiceModule.webSiteConfigMap = null;
                 azureServiceModule.load();
             }
         };
@@ -379,6 +389,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
             public void run() {
                 ManageSubscriptionDialog subscriptionDialog = new ManageSubscriptionDialog(new Shell(), true, false);
                 subscriptionDialog.open();
+                AzureServiceModule.webSiteConfigMap = null;
                 azureServiceModule.load();
 
             }
