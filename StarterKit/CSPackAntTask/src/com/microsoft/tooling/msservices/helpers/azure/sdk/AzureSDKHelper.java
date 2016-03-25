@@ -136,6 +136,7 @@ import com.microsoft.windowsazure.management.configuration.PublishSettingsLoader
 import com.microsoft.windowsazure.management.models.AffinityGroupListResponse;
 import com.microsoft.windowsazure.management.models.LocationsListResponse;
 import com.microsoft.windowsazure.management.models.RoleSizeListResponse;
+import com.microsoft.windowsazure.management.models.SubscriptionGetResponse;
 import com.microsoft.windowsazure.management.network.NetworkManagementClient;
 import com.microsoft.windowsazure.management.network.NetworkManagementService;
 import com.microsoft.windowsazure.management.network.NetworkOperations;
@@ -1370,6 +1371,25 @@ public class AzureSDKHelper {
         // mode is active directory
         AuthTokenRequestFilter requestFilter = new AuthTokenRequestFilter(accessToken);
         return client.withRequestFilterFirst(requestFilter);
+    }
+
+    @NotNull
+    public static SubscriptionGetResponse getSubscription(@NotNull Configuration config) throws AzureCmdException {
+    	ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
+    	try {
+    		if (DefaultLoader.PLUGIN_ID.equals(DefaultLoader.getPluginComponent().getPluginId())) {
+    			// Change context classloader to class context loader
+    			Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
+    		}
+    		ManagementClient client = ManagementService.create(config);
+    		return client.getSubscriptionsOperations().get();
+    	} catch(Exception ex) {
+    		throw new AzureCmdException(ex.getMessage());
+    	}
+    	finally {
+    		// Call Azure API and reset back the context loader
+    		Thread.currentThread().setContextClassLoader(contextLoader);
+    	}
     }
 
     @NotNull

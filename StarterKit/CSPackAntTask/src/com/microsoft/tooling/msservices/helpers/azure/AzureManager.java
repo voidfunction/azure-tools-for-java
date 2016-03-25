@@ -30,6 +30,7 @@ import com.microsoft.tooling.msservices.helpers.IDEHelper.ProjectDescriptor;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.ms.CustomAPI;
 import com.microsoft.tooling.msservices.model.ms.CustomAPIPermissions;
@@ -53,11 +54,13 @@ import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandle;
+import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.DeploymentCreateParameters;
 import com.microsoft.windowsazure.management.compute.models.DeploymentGetResponse;
 import com.microsoft.windowsazure.management.compute.models.DeploymentSlot;
 import com.microsoft.windowsazure.management.compute.models.ServiceCertificateListResponse;
+import com.microsoft.windowsazure.management.models.SubscriptionGetResponse;
 
 public interface AzureManager {
     void authenticate() throws AzureCmdException;
@@ -241,6 +244,9 @@ public interface AzureManager {
     @NotNull
     List<Location> getLocations(@NotNull String subscriptionId)
             throws AzureCmdException;
+    
+    @NotNull
+    public SubscriptionGetResponse getSubscription(@NotNull Configuration config) throws AzureCmdException;
 
     @NotNull
     List<AffinityGroup> getAffinityGroups(@NotNull String subscriptionId) throws AzureCmdException;

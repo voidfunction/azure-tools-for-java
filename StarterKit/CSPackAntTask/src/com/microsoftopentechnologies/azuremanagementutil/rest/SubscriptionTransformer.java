@@ -40,7 +40,6 @@ public class SubscriptionTransformer {
         subscription.setCurrentCoreCount(response.getCurrentCoreCount());
         subscription.setCurrentHostedServices(response.getCurrentHostedServices());
         subscription.setCurrentStorageAccounts(response.getCurrentStorageAccounts());
-        printSubscription(subscription);
         return subscription;
     }
 
@@ -49,7 +48,6 @@ public class SubscriptionTransformer {
             JAXBContext jaxbContext = JAXBContext.newInstance(Subscription.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
             jaxbMarshaller.marshal(subscription, System.out);
         } catch (JAXBException e) {
             e.printStackTrace();

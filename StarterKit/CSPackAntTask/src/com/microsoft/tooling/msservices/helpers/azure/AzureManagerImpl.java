@@ -1324,6 +1324,12 @@ public class AzureManagerImpl implements AzureManager {
             throws AzureCmdException {
         return requestManagementSDK(subscriptionId, AzureSDKHelper.getLocations());
     }
+    
+    @NotNull
+    @Override
+    public SubscriptionGetResponse getSubscription(@NotNull Configuration config) throws AzureCmdException {
+    	return AzureSDKHelper.getSubscription(config);
+    }
 
     @NotNull
     @Override
@@ -1905,7 +1911,7 @@ public class AzureManagerImpl implements AzureManager {
                 subscription.setSelected(true);
 
                 Configuration config = AzureSDKHelper.getConfiguration(new File(publishSettingsFilePath), subscription.getId());
-                SubscriptionGetResponse response = WindowsAzureRestUtils.getSubscription(config);
+                SubscriptionGetResponse response = getSubscription(config);
                 com.microsoftopentechnologies.azuremanagementutil.model.Subscription sub = SubscriptionTransformer.transform(response);
                 subscription.setMaxStorageAccounts(sub.getMaxStorageAccounts());
                 subscription.setMaxHostedServices(sub.getMaxHostedServices());
