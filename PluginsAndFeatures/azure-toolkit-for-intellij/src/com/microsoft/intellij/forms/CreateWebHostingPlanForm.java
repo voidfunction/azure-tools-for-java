@@ -75,10 +75,18 @@ public class CreateWebHostingPlanForm extends DialogWrapper {
             }
         });
 
+        pricingComboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent itemEvent) {
+                if (itemEvent.getItem() instanceof String) {
+                    fillWorkerSize((String) pricingComboBox.getSelectedItem());
+                }
+            }
+        });
+
         init();
         fillGeoRegions();
         fillPricingComboBox();
-        fillWorkerSize();
     }
 
     @org.jetbrains.annotations.Nullable
@@ -182,13 +190,18 @@ public class CreateWebHostingPlanForm extends DialogWrapper {
 
         if (!skuOptions.isEmpty()) {
             pricingComboBox.setSelectedIndex(0);
+            fillWorkerSize((String) pricingComboBox.getSelectedItem());
         }
     }
 
-    private void fillWorkerSize() {
+    private void fillWorkerSize(String price) {
         List<String> sizeList = new ArrayList<String>();
-        for (WorkerSizeOptions size : WorkerSizeOptions.values()) {
-            sizeList.add(size.toString());
+        if (price.equalsIgnoreCase(SkuOptions.Free.name()) || price.equalsIgnoreCase(SkuOptions.Shared.name())) {
+            sizeList.add(WorkerSizeOptions.Small.name());
+        } else {
+            for (WorkerSizeOptions size : WorkerSizeOptions.values()) {
+                sizeList.add(size.toString());
+            }
         }
         DefaultComboBoxModel model = new DefaultComboBoxModel(sizeList.toArray());
         model.setSelectedItem(null);

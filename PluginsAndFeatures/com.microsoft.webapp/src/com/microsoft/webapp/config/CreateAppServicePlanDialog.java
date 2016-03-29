@@ -27,6 +27,8 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -84,7 +86,6 @@ public class CreateAppServicePlanDialog extends TitleAreaDialog {
 		okButton = getButton(IDialogConstants.OK_ID);
 		fillGeoRegions();
 		fillPricingComboBox();
-		fillWorkerSize();
 		enableOkBtn();
 		return ctrl;
 	}
@@ -169,6 +170,16 @@ public class CreateAppServicePlanDialog extends TitleAreaDialog {
 		pricingCombo = new Combo(container, SWT.READ_ONLY);
 		gridData = gridDataForText(180);
 		pricingCombo.setLayoutData(gridData);
+		pricingCombo.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetDefaultSelected(SelectionEvent event) {
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				fillWorkerSize(pricingCombo.getText());
+			}
+		});
 	}
 
 	private void createWorkerCmpnt(Composite container) {
@@ -231,15 +242,20 @@ public class CreateAppServicePlanDialog extends TitleAreaDialog {
 			String[] skuArray = skuOptions.toArray(new String[skuOptions.size()]);
 			pricingCombo.setItems(skuArray);
 			pricingCombo.setText(skuArray[0]);
+			fillWorkerSize(skuArray[0]);
 		} else {
 			pricingCombo.removeAll();
 		}
 	}
 
-	private void fillWorkerSize() {
+	private void fillWorkerSize(String price) {
 		List<String> sizeList = new ArrayList<String>();
-		for (WorkerSizeOptions size : WorkerSizeOptions.values()) {
-			sizeList.add(size.toString());
+		if (price.equalsIgnoreCase(SkuOptions.Free.name()) || price.equalsIgnoreCase(SkuOptions.Shared.name())) {
+			sizeList.add(WorkerSizeOptions.Small.name());
+		} else {
+			for (WorkerSizeOptions size : WorkerSizeOptions.values()) {
+				sizeList.add(size.toString());
+			}
 		}
 		if (sizeList.size() > 0) {
 			String[] sizeArray = sizeList.toArray(new String[sizeList.size()]);
