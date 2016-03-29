@@ -435,7 +435,7 @@ public class ManageSubscriptionPanel extends Composite {
 	}
 
 	private void clearSubscriptions(boolean isSigningOut) {
-		boolean choice = MessageDialog.openConfirm(new Shell(),
+		boolean choice = MessageDialog.openConfirm(getShell(),
 				(isSigningOut
 						? "Clear Subscriptions"
 								: "Sign out"),
