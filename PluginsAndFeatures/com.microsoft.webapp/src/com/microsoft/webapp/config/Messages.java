@@ -66,6 +66,7 @@ public final class Messages extends NLS {
 	public static String delMsg;
 	public static String delTtl;
 	public static String delErr;
+	public static String lnkPrice;
 	
 	static {
 		// initialize resource bundle

@@ -41,11 +41,13 @@ import com.microsoft.tooling.msservices.model.ws.WebAppsContainers;
 import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
+import org.jdesktop.swingx.JXHyperlink;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.net.URI;
 import java.util.*;
 import java.util.List;
 
@@ -65,6 +67,7 @@ public class CreateWebSiteForm extends DialogWrapper {
     private JLabel servicePlanDetailsLocationLbl;
     private JLabel servicePlanDetailsPricingTierLbl;
     private JLabel servicePlanDetailsInstanceSizeLbl;
+    private JXHyperlink linkPrice;
     private Project project;
     private Subscription subscription;
     private WebHostingPlanCache webHostingPlan;
@@ -128,7 +131,8 @@ public class CreateWebSiteForm extends DialogWrapper {
             containerList.add(type.getName());
         }
         webContainerComboBox.setModel(new DefaultComboBoxModel(containerList.toArray()));
-
+        linkPrice.setURI(URI.create(message("lnkWebAppPrice")));
+        linkPrice.setText("Pricing");
         init();
         webAppCreated = "";
         fillSubscriptions();

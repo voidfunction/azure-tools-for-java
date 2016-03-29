@@ -19,6 +19,7 @@
  */
 package com.microsoft.webapp.config;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,6 +38,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -50,6 +52,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -335,6 +338,23 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		appPlanDetailsCmpt.setLayoutData(gridData);
 		appPlanDetailsCmpt.setLayoutData(gridData);
 		
+		// pricing link
+		Link linkPrice = new Link(appPlanDetailsCmpt, SWT.LEFT);
+		linkPrice.setLayoutData(gridData);
+		linkPrice.setText(Messages.lnkPrice);
+		linkPrice.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				try {
+					PlatformUI.getWorkbench().getBrowserSupport().
+					getExternalBrowser().openURL(new URL(event.text));
+				}
+				catch (Exception ex) {
+					Activator.getDefault().log(ex.getMessage());
+				}
+			}
+		});
+
 		new Label(appPlanDetailsCmpt, SWT.NONE).setText(Messages.loc);
 		servicePlanDetailsLocationLbl = new Label(appPlanDetailsCmpt, SWT.LEFT);
 		gridData = new GridData();
