@@ -27,6 +27,8 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.intellij.wizards.WizardCacheManager;
+import com.microsoft.tooling.msservices.model.ws.WebSite;
+import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoftopentechnologies.azurecommons.deploy.tasks.LoadingAccoutListener;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
 import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
@@ -52,6 +54,7 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
     private State myState = new State();
 
     private boolean subscriptionLoaded;
+    private boolean webAppLoaded;
 
     public static AzureSettings getSafeInstance(Project project) {
         AzureSettings settings = ServiceManager.getService(project, AzureSettings.class);
@@ -114,6 +117,27 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
         } catch (Exception e) {
             log(message("err"), e);
         }
+    }
+
+    public Map<WebSite, WebSiteConfiguration> loadWebApps() {
+        Map<WebSite, WebSiteConfiguration> map = null;
+        try {
+            if (myState.webApps != null) {
+                byte[] data = Base64.decode(myState.webApps.getBytes());
+                ByteArrayInputStream buffer = new ByteArrayInputStream(data);
+                ObjectInput input = new ObjectInputStream(buffer);
+                try {
+                    map = (Map<WebSite, WebSiteConfiguration>) input.readObject();
+                } finally {
+                    input.close();
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            // ignore - this happens because class package changed and settings were not updated
+        } catch (Exception e) {
+            log(message("err"), e);
+        }
+        return map;
     }
 
     public void loadPublishDatas(LoadingAccoutListener listener) {
@@ -195,6 +219,21 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
         }
     }
 
+    public void saveWebApps(Map<WebSite, WebSiteConfiguration> map) {
+        try {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            ObjectOutput output = new ObjectOutputStream(buffer);
+            try {
+                output.writeObject(map);
+            } finally {
+                output.close();
+            }
+            myState.webApps = new String(Base64.encode(buffer.toByteArray()));
+        } catch (IOException e) {
+            log(message("err"), e);
+        }
+    }
+
     public void savePublishDatas() {
         try {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -241,6 +280,14 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
         this.subscriptionLoaded = subscriptionLoaded;
     }
 
+    public boolean iswebAppLoaded() {
+        return webAppLoaded;
+    }
+
+    public void setwebAppLoaded(boolean webAppLoaded) {
+        this.webAppLoaded = webAppLoaded;
+    }
+
     public String[] getProperties(String name) {
         return new String[0];
     }
@@ -253,6 +300,7 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
         public String storageAccount;
         public String appInsights;
         public String publishProfile;
+        public String webApps;
         public Map<String, String> properties = new HashMap<String, String>();
     }
 }

@@ -31,6 +31,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
@@ -120,6 +122,7 @@ public class WebSiteDeployForm extends DialogWrapper {
                             selectedWebSite.getWebSpaceName(), name);
                     webSiteList.remove(webSiteJList.getSelectedIndex());
                     webSiteConfigMap.remove(selectedWebSite);
+                    AzureSettings.getSafeInstance(AzurePlugin.project).saveWebApps(webSiteConfigMap);
                     selectedWebSite = null;
                     if (webSiteConfigMap.isEmpty()) {
                         setMessages("There are no Azure web apps in the imported subscriptions.");
@@ -283,37 +286,37 @@ public class WebSiteDeployForm extends DialogWrapper {
                 private void loadWebSiteConfigurations(final Subscription subscription,
                                                        final SettableFuture<Void> subscriptionFuture) {
                     try {
-                        List<ListenableFuture<Void>> webSpaceFutures = new ArrayList<ListenableFuture<Void>>();
-
-                        for (final String webSpace : manager.getResourceGroupNames(subscription.getId())) {
-                            if (cancellationHandle.isCancelled()) {
-                                subscriptionFuture.set(null);
-                                return;
+                        if (AzureSettings.getSafeInstance(AzurePlugin.project).iswebAppLoaded()) {
+                            webSiteConfigMap = AzureSettings.getSafeInstance(AzurePlugin.project).loadWebApps();
+                            subscriptionFuture.set(null);
+                        } else {
+                            List<ListenableFuture<Void>> webSpaceFutures = new ArrayList<ListenableFuture<Void>>();
+                            for (final String webSpace : manager.getResourceGroupNames(subscription.getId())) {
+                                if (cancellationHandle.isCancelled()) {
+                                    subscriptionFuture.set(null);
+                                    return;
+                                }
+                                final SettableFuture<Void> webSpaceFuture = SettableFuture.create();
+                                DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        loadWebSiteConfigurations(subscription, webSpace, webSpaceFuture);
+                                    }
+                                });
+                                webSpaceFutures.add(webSpaceFuture);
                             }
-
-                            final SettableFuture<Void> webSpaceFuture = SettableFuture.create();
-
-                            DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
+                            Futures.addCallback(Futures.allAsList(webSpaceFutures), new FutureCallback<List<Void>>() {
                                 @Override
-                                public void run() {
-                                    loadWebSiteConfigurations(subscription, webSpace, webSpaceFuture);
+                                public void onSuccess(List<Void> voids) {
+                                    subscriptionFuture.set(null);
+                                }
+
+                                @Override
+                                public void onFailure(Throwable throwable) {
+                                    subscriptionFuture.setException(throwable);
                                 }
                             });
-
-                            webSpaceFutures.add(webSpaceFuture);
                         }
-
-                        Futures.addCallback(Futures.allAsList(webSpaceFutures), new FutureCallback<List<Void>>() {
-                            @Override
-                            public void onSuccess(List<Void> voids) {
-                                subscriptionFuture.set(null);
-                            }
-
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                                subscriptionFuture.setException(throwable);
-                            }
-                        });
                     } catch (AzureCmdException ex) {
                         subscriptionFuture.setException(ex);
                     }
@@ -323,22 +326,18 @@ public class WebSiteDeployForm extends DialogWrapper {
                                                        final SettableFuture<Void> webSpaceFuture) {
                     try {
                         List<ListenableFuture<Void>> webSiteFutures = new ArrayList<ListenableFuture<Void>>();
-
                         for (final WebSite webSite : manager.getWebSites(subscription.getId(), webSpace)) {
                             if (cancellationHandle.isCancelled()) {
                                 webSpaceFuture.set(null);
                                 return;
                             }
-
                             final SettableFuture<Void> webSiteFuture = SettableFuture.create();
-
                             DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     loadWebSiteConfigurations(subscription, webSpace, webSite, webSiteFuture);
                                 }
                             });
-
                             webSiteFutures.add(webSiteFuture);
                         }
 
@@ -362,7 +361,6 @@ public class WebSiteDeployForm extends DialogWrapper {
                                                        final WebSite webSite,
                                                        final SettableFuture<Void> webSiteFuture) {
                     WebSiteConfiguration webSiteConfiguration;
-
                     try {
                         webSiteConfiguration = AzureManagerImpl.getManager().
                                 getWebSiteConfiguration(webSite.getSubscriptionId(),
@@ -371,11 +369,11 @@ public class WebSiteDeployForm extends DialogWrapper {
                         webSiteConfiguration = new WebSiteConfiguration(webSpace, webSite.getName(),
                                 subscription.getId());
                     }
-
                     synchronized (lock) {
                         webSiteConfigMap.put(webSite, webSiteConfiguration);
+                        AzureSettings.getSafeInstance(AzurePlugin.project).saveWebApps(webSiteConfigMap);
+                        AzureSettings.getSafeInstance(AzurePlugin.project).setwebAppLoaded(true);
                     }
-
                     webSiteFuture.set(null);
                 }
             });

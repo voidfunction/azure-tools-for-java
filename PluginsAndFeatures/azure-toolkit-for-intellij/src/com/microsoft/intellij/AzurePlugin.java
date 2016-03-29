@@ -95,7 +95,7 @@ public class AzurePlugin extends AbstractProjectComponent {
     String dataFile = WAHelper.getTemplateFile(message("dataFileName"));
 
     private final AzureSettings azureSettings;
-    Project project;
+    public static Project project;
 
     public AzurePlugin(Project project) {
         super(project);

@@ -25,6 +25,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
+import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.ui.NewResourceGroupDialog;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -42,8 +44,6 @@ import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.*;
@@ -186,6 +186,9 @@ public class CreateWebSiteForm extends DialogWrapper {
             }
             manager.updateWebSiteConfiguration(subscription.getId(), webSite.getWebSpaceName(), webSite.getName(), webSite.getLocation(), webSiteConfiguration);
             webAppCreated = webSite.getName();
+            Map<WebSite, WebSiteConfiguration> tempMap = AzureSettings.getSafeInstance(AzurePlugin.project).loadWebApps();
+            tempMap.put(webSite, webSiteConfiguration);
+            AzureSettings.getSafeInstance(AzurePlugin.project).saveWebApps(tempMap);
         } catch (AzureCmdException e) {
             String errorMessage = e.getMessage();
             if (errorMessage.contains(message("nameConflict"))) {
