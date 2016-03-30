@@ -62,7 +62,7 @@ public class WebappNode extends Node {
 
 	@Override
 	protected void loadActions() {
-		addAction("Stop", new NodeActionListener() {
+		addAction("Stop", WEB_STOP_ICON, new NodeActionListener() {
 			@Override
 			public void actionPerformed(NodeActionEvent e) {
 				DefaultLoader.getIdeHelper().runInBackground(null, "Stopping Web App", false, true, "Stopping Web App...", new Runnable() {

@@ -33,6 +33,7 @@ public class NodeAction {
     private boolean enabled = true;
     private List<NodeActionListener> listeners = new ArrayList<NodeActionListener>();
     private Node node; // the node with which this action is associated
+    private String iconPath;
 
     public NodeAction(Node node, String name) {
         this.node = node;
@@ -84,5 +85,13 @@ public class NodeAction {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public String getIconPath() {
+        return iconPath;
+    }
+
+    public void setIconPath(String iconPath) {
+        this.iconPath = iconPath;
     }
 }

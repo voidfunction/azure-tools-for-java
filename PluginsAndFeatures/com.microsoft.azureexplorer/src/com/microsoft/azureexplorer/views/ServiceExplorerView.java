@@ -31,6 +31,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -342,7 +343,8 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
                     Node node = ((TreeNode) selection.getFirstElement()).node;
                     if (node.hasNodeActions()) {
                         for (final NodeAction nodeAction : node.getNodeActions()) {
-                            Action action = new Action(nodeAction.getName()) {
+                        	ImageDescriptor imageDescriptor = nodeAction.getIconPath() != null ? Activator.getImageDescriptor("icons/" + nodeAction.getIconPath()) : null;
+                            Action action = new Action(nodeAction.getName(), imageDescriptor) {
                                 public void run() {
                                     nodeAction.fireNodeActionEvent();
                                 }

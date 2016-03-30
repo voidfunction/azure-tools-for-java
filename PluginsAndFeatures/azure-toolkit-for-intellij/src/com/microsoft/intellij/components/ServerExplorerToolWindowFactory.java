@@ -152,9 +152,11 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
 
         for (final NodeAction nodeAction : node.getNodeActions()) {
             JMenuItem menuItem = new JMenuItem(nodeAction.getName());
-            menuItem.setIconTextGap(16);
+//            menuItem.setIconTextGap(16);
             menuItem.setEnabled(nodeAction.isEnabled());
-
+            if (nodeAction.getIconPath() != null) {
+                menuItem.setIcon(loadIcon(nodeAction.getIconPath()));
+            }
             // delegate the menu item click to the node action's listeners
             menuItem.addActionListener(new ActionListener() {
                 @Override
@@ -316,11 +318,6 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
             // setup a tooltip
             setToolTipText(node.getName());
         }
-
-        private ImageIcon loadIcon(String iconPath) {
-            URL url = NodeTreeCellRenderer.class.getResource("/icons/" + iconPath);
-            return new ImageIcon(url);
-        }
     }
 
     private void addToolbarItems(ToolWindow toolWindow) {
@@ -356,5 +353,10 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                         }
                     });
         }
+    }
+
+    private ImageIcon loadIcon(String iconPath) {
+        URL url = NodeTreeCellRenderer.class.getResource("/icons/" + iconPath);
+        return new ImageIcon(url);
     }
 }

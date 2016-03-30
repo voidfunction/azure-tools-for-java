@@ -184,6 +184,12 @@ public class Node {
         return nodeAction;
     }
 
+    public NodeAction addAction(String name, String iconPath, NodeActionListener actionListener) {
+        NodeAction nodeAction = addAction(name, actionListener);
+        nodeAction.setIconPath(iconPath);
+        return nodeAction;
+    }
+
     protected void loadActions() {
         // add the click action handler
         addClickActionListener(new NodeActionListener() {
