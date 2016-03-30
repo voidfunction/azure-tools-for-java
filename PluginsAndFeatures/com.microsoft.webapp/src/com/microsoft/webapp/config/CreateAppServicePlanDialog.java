@@ -287,6 +287,8 @@ public class CreateAppServicePlanDialog extends TitleAreaDialog {
 			String msg = Messages.createPlanMsg;
 			if (ex.getMessage().contains("MissingSubscriptionRegistration: The subscription is not registered to use namespace")) {
 				msg = msg + " " + Messages.tierErrMsg;
+			} else if (ex.getMessage().contains("Conflict: The maximum number of")) {
+				msg = msg + " " + Messages.maxPlanMsg;
 			}
 			PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, msg, ex);
 		}

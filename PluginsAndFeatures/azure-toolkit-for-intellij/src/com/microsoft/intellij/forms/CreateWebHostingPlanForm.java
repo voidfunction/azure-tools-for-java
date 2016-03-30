@@ -138,6 +138,8 @@ public class CreateWebHostingPlanForm extends DialogWrapper {
             String msg = message("appPlanMsg");
             if (e.getMessage().contains("MissingSubscriptionRegistration: The subscription is not registered to use namespace")) {
                 msg = msg + " " + message("tierErrMsg");
+            } else if (e.getMessage().contains("Conflict: The maximum number of")) {
+                msg = msg + " " + message("maxPlanMsg");
             }
             PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
         } finally {
