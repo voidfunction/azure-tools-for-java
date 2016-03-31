@@ -33,15 +33,15 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
-import waeclipseplugin.Activator;
 
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
 import com.interopbridges.tools.windowsazure.WindowsAzurePackageType;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureRole;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.persistent.util.WAEclipseHelper;
+
+import waeclipseplugin.Activator;
 /**
  * This class runs selected Azure project.
  * in the Azure Emulator
@@ -122,7 +122,7 @@ public class WARunEmulator extends AbstractHandler {
 					job.schedule();
 				} else {
 					// show server message dialog
-					boolean choice = MessageDialog.openConfirm(new Shell(),
+					boolean choice = MessageDialog.openConfirm(PluginUtil.getParentShell(),
 							errorTitle,
 							String.format(Messages.noLocalServerMsg, roleWithoutLocalServer.getName()));
 					if (choice) {
@@ -133,7 +133,7 @@ public class WARunEmulator extends AbstractHandler {
 				}
 			} else {
 				// show JDK message dialog
-				boolean choice = MessageDialog.openConfirm(new Shell(),
+				boolean choice = MessageDialog.openConfirm(PluginUtil.getParentShell(),
 						errorTitle,
 						String.format(Messages.noLocalJDKMsg, roleWithoutLocalJdk.getName()));
 				if (choice) {

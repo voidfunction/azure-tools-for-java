@@ -86,7 +86,7 @@ public class UIHelperImpl implements UIHelper {
 
     @Override
     public boolean showConfirmation(@NotNull String message, @NotNull String title, @NotNull String[] options, String defaultOption) {
-        boolean choice = MessageDialog.openConfirm(new Shell(),
+        boolean choice = MessageDialog.openConfirm(PluginUtil.getParentShell(),
                 title,
                 message);
 
@@ -196,7 +196,7 @@ public class UIHelperImpl implements UIHelper {
 
     @Override
     public String promptForOpenSSLPath() {
-        OpenSSLFinderForm openSSLFinderForm = new OpenSSLFinderForm(new Shell());
+        OpenSSLFinderForm openSSLFinderForm = new OpenSSLFinderForm(PluginUtil.getParentShell());
         openSSLFinderForm.open();
 
         return DefaultLoader.getIdeHelper().getProperty("MSOpenSSLPath", "");

@@ -28,8 +28,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.ExternalStorageNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
-
-import org.eclipse.swt.widgets.Shell;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 @Name("Attach external storage account")
 public class AttachExternalStorageAccountAction extends NodeActionListener {
@@ -41,7 +40,7 @@ public class AttachExternalStorageAccountAction extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        final ExternalStorageAccountForm form = new ExternalStorageAccountForm(new Shell(), "Attach External Storage Account");
+        final ExternalStorageAccountForm form = new ExternalStorageAccountForm(PluginUtil.getParentShell(), "Attach External Storage Account");
 
         form.setOnFinish(new Runnable() {
             @Override

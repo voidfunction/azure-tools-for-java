@@ -24,7 +24,6 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.wizards.IWizardDescriptor;
 
@@ -53,11 +52,11 @@ public class WANewProject extends AbstractHandler {
 				wizDialog.open();
 			}
 		} catch (NullPointerException ex) {
-			PluginUtil.displayErrorDialogAndLog(new Shell(),
+			PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(),
 					Messages.errTtl,
 					Messages.wzrdCrtErMsg + Messages.instSDK, ex);
 		} catch (Exception ex) {
-			PluginUtil.displayErrorDialogAndLog(new Shell(),
+			PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(),
 					Messages.errTtl,
 					Messages.wzrdCrtErMsg, ex);
 		}

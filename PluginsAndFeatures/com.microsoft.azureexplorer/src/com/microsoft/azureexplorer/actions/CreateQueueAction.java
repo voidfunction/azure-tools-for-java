@@ -25,7 +25,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.ClientStorageNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.QueueModule;
-import org.eclipse.swt.widgets.Shell;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 @Name("Create new queue")
 public class CreateQueueAction  extends NodeActionListener {
@@ -37,7 +37,7 @@ public class CreateQueueAction  extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        CreateQueueForm form = new CreateQueueForm(new Shell(), queueModule.getStorageAccount());
+        CreateQueueForm form = new CreateQueueForm(PluginUtil.getParentShell(), queueModule.getStorageAccount());
 
         form.setOnCreate(new Runnable() {
             @Override

@@ -1,5 +1,7 @@
 package com.microsoft.azureexplorer.actions;
 
+import java.util.List;
+
 import com.microsoft.azureexplorer.forms.CreateStorageAccountForm;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
@@ -10,9 +12,7 @@ import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
-import org.eclipse.swt.widgets.Shell;
-
-import java.util.List;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 @Name("Create Storage Account")
 public class CreateStorageAccountAction extends NodeActionListener {
@@ -48,7 +48,7 @@ public class CreateStorageAccountAction extends NodeActionListener {
             DefaultLoader.getUIHelper().showException("An error occurred while creating the storage account.", e1, "Error creating storage account", false, true);
         }
 
-        CreateStorageAccountForm createStorageAccountForm = new CreateStorageAccountForm(new Shell(), null);
+        CreateStorageAccountForm createStorageAccountForm = new CreateStorageAccountForm(PluginUtil.getParentShell(), null);
 
         createStorageAccountForm.setOnCreate(new Runnable() {
             @Override

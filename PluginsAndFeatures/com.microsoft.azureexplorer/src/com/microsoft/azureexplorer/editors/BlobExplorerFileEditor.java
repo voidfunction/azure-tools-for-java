@@ -19,16 +19,18 @@
  */
 package com.microsoft.azureexplorer.editors;
 
-import com.microsoft.azureexplorer.Activator;
-import com.microsoft.azureexplorer.forms.UploadBlobFileForm;
-import com.microsoft.azureexplorer.helpers.UIHelperImpl;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.CallableSingleArg;
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
-import com.microsoft.tooling.msservices.model.storage.*;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.SocketTimeoutException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -37,27 +39,57 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
-import sun.misc.IOUtils;
 
-import java.io.*;
-import java.net.SocketTimeoutException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import com.microsoft.azureexplorer.Activator;
+import com.microsoft.azureexplorer.forms.UploadBlobFileForm;
+import com.microsoft.azureexplorer.helpers.UIHelperImpl;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.helpers.CallableSingleArg;
+import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.model.storage.BlobContainer;
+import com.microsoft.tooling.msservices.model.storage.BlobDirectory;
+import com.microsoft.tooling.msservices.model.storage.BlobFile;
+import com.microsoft.tooling.msservices.model.storage.BlobItem;
+import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
+import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+
+import sun.misc.IOUtils;
 
 public class BlobExplorerFileEditor extends EditorPart {
     private Text queryTextField;
@@ -599,7 +631,7 @@ public class BlobExplorerFileEditor extends EditorPart {
     }
 
     private void uploadFile() {
-        final UploadBlobFileForm form = new UploadBlobFileForm(new Shell());
+        final UploadBlobFileForm form = new UploadBlobFileForm(PluginUtil.getParentShell());
         form.setUploadSelected(new Runnable() {
             @Override
             public void run() {

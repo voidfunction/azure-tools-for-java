@@ -19,6 +19,39 @@
  */
 package com.microsoft.azureexplorer.editors;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.EditorPart;
+
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azureexplorer.forms.TableEntityForm;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -29,28 +62,7 @@ import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Table;
 import com.microsoft.tooling.msservices.model.storage.TableEntity;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.part.EditorPart;
-
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.List;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class TableFileEditor extends EditorPart {
     public static final String PARTITION_KEY = "Partition key";
@@ -169,7 +181,7 @@ public class TableFileEditor extends EditorPart {
 //        newEntityButton.addSelectionListener(new SelectionAdapter() {
 //            @Override
 //            public void widgetSelected(SelectionEvent e) {
-//                final TableEntityForm form = new TableEntityForm(new Shell(), "Add Entity");
+//                final TableEntityForm form = new TableEntityForm(PluginUtil.getParentShell(), "Add Entity");
 //                form.setTableName(table.getName());
 //                form.setStorageAccount(storageAccount);
 //                form.setTableEntity(null);
@@ -198,7 +210,7 @@ public class TableFileEditor extends EditorPart {
         if (selectedEntities != null && selectedEntities.length > 0) {
             final TableEntity selectedEntity = selectedEntities[0];
 
-            final TableEntityForm form = new TableEntityForm(new Shell(), "Edit Entity");
+            final TableEntityForm form = new TableEntityForm(PluginUtil.getParentShell(), "Edit Entity");
             form.setTableName(table.getName());
             form.setStorageAccount(storageAccount);
             form.setTableEntity(selectedEntity);

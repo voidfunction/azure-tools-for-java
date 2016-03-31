@@ -6,7 +6,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.BlobModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.ClientStorageNode;
-import org.eclipse.swt.widgets.Shell;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 @Name("Create blob container")
 public class CreateBlobContainer extends NodeActionListener {
@@ -18,7 +18,7 @@ public class CreateBlobContainer extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        CreateBlobContainerForm form = new CreateBlobContainerForm(new Shell(), blobModule.getStorageAccount());
+        CreateBlobContainerForm form = new CreateBlobContainerForm(PluginUtil.getParentShell(), blobModule.getStorageAccount());
 
         form.setOnCreate(new Runnable() {
             @Override

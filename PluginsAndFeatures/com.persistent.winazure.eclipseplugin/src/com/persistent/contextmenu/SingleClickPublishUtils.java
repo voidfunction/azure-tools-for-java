@@ -32,9 +32,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Shell;
-
-import waeclipseplugin.Activator;
 
 import com.gigaspaces.azure.wizards.DeployWizard;
 import com.gigaspaces.azure.wizards.DeployWizardDialog;
@@ -52,6 +49,8 @@ import com.persistent.builder.WADependencyBuilder;
 import com.persistent.ui.propertypage.WAProjectNature;
 import com.persistent.util.ParseXML;
 import com.persistent.util.WAEclipseHelper;
+
+import waeclipseplugin.Activator;
 
 public class SingleClickPublishUtils {
 	static File cmpntFile = new File(WAEclipseHelper.getTemplateFile(Messages.cmpntFileName));
@@ -83,7 +82,7 @@ public class SingleClickPublishUtils {
 				openPublishWizard(projList.get(0));
 			} else {
 				// If more than one azure deployment project contains WAR project as a project reference
-				MessageDialog.openInformation(new Shell(), Messages.title, Messages.twoProjMsg);
+				MessageDialog.openInformation(PluginUtil.getParentShell(), Messages.title, Messages.twoProjMsg);
 			}
 		} catch(Exception ex) {
 			Activator.getDefault().log(Messages.cntxtMenuErr, ex);
@@ -152,20 +151,20 @@ public class SingleClickPublishUtils {
 				String jdkLicense = WindowsAzureProjectManager.getLicenseUrl(jdkName, cmpntFile);
 				String serverLicense = WindowsAzureProjectManager.
 						getThirdPartyServerLicenseUrl(thirdPartyServer, cmpntFile);
-				NewAzureProjectPromptDlg dlg = new NewAzureProjectPromptDlg(new Shell(),
+				NewAzureProjectPromptDlg dlg = new NewAzureProjectPromptDlg(PluginUtil.getParentShell(),
 						jdkName, jdkLicense, thirdPartyServer, serverLicense);
 				int btnId = dlg.open();
 				if (btnId == Window.OK) {
 					deploymentProj = createAzureDeploymentProject(
 							dynamicWebProjName, jdkName, thirdPartyServer);
 					if (deploymentProj == null) {
-						MessageDialog.openError(new Shell(), Messages.title, Messages.projErr);
+						MessageDialog.openError(PluginUtil.getParentShell(), Messages.title, Messages.projErr);
 					} else {
 						AppInsightsCustomEvent.create(com.persistent.ui.projwizard.Messages.projCrtEvtName, "");
 					}
 				}
 			} else {
-				MessageDialog.openError(new Shell(), Messages.title, Messages.noJdkSrvMsg);
+				MessageDialog.openError(PluginUtil.getParentShell(), Messages.title, Messages.noJdkSrvMsg);
 			}
 		} catch(Exception ex) {
 			deploymentProj = null;
@@ -300,7 +299,7 @@ public class SingleClickPublishUtils {
 		DeployWizard wizard = new DeployWizard(projectToPublish);
 		if (wizard.getSelectedProject() != null) {
 			wizard.setNeedsProgressMonitor(true);
-			DeployWizardDialog dialog = new DeployWizardDialog(new Shell(), wizard,
+			DeployWizardDialog dialog = new DeployWizardDialog(PluginUtil.getParentShell(), wizard,
 					com.gigaspaces.azure.handler.Messages.publish);
 			dialog.create();
 			dialog.open();

@@ -38,17 +38,16 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-
-import waeclipseplugin.Activator;
 
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureRole;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.persistent.util.WAEclipseHelper;
+
+import waeclipseplugin.Activator;
 
 /**
  * This class creates Roles table and buttons.
@@ -337,7 +336,7 @@ public class WARoles {
                 		Messages.rolsRefTitle, Messages.rolsRefMsg);
             } catch (Exception ex) {
             	PluginUtil.displayErrorDialogAndLog(
-            			new Shell(),
+            			PluginUtil.getParentShell(),
             			Messages.rolsDlgErr,
             			Messages.rolsDlgErrMsg, ex);
             }
@@ -367,7 +366,7 @@ public class WARoles {
             listRoles = waProjManager.getRoles();
         } catch (WindowsAzureInvalidProjectOperationException e) {
         	PluginUtil.displayErrorDialogAndLog(
-        			new Shell(),
+        			PluginUtil.getParentShell(),
         			Messages.rolsErr,
         			Messages.adRolErrMsgBox1
         			+ Messages.adRolErrMsgBox2, e);
@@ -400,7 +399,7 @@ public class WARoles {
             		Messages.rolsRefTitle, Messages.rolsRefMsg);
         } catch (Exception ex) {
         	PluginUtil.displayErrorDialogAndLog(
-        			new Shell(),
+        			PluginUtil.getParentShell(),
         			Messages.rolsDlgErr,
         			Messages.rolsDlgErrMsg, ex);
         }
@@ -422,7 +421,7 @@ public class WARoles {
     		waProjManager.save();
     	} catch (WindowsAzureInvalidProjectOperationException e) {
     		PluginUtil.displayErrorDialogAndLog(
-    				new Shell(),
+    				PluginUtil.getParentShell(),
     				Messages.rolsErr,
     				Messages.adRolErrMsgBox1
     				+ Messages.adRolErrMsgBox2, e);

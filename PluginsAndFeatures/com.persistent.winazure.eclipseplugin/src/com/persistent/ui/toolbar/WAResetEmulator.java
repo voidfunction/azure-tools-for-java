@@ -25,11 +25,10 @@ import java.io.IOException;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.swt.widgets.Shell;
-
-import waeclipseplugin.Activator;
 
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+
+import waeclipseplugin.Activator;
 
 /**
  * This class resets the Azure Emulator.
@@ -52,7 +51,7 @@ public class WAResetEmulator extends AbstractHandler {
 		} catch (IOException e1) {
 			Activator.getDefault().log(Messages.ioErrMsg, e1);
 		} catch (Exception e) {
-			PluginUtil.displayErrorDialogAndLog(new Shell(),
+			PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(),
 					Messages.rstEmltrErrTtl, Messages.rstEmuErrMsg, e);
 		}
 		return null;

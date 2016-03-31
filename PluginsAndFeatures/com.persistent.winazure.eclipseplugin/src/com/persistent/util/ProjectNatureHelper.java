@@ -27,12 +27,11 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.swt.widgets.Shell;
-
-import waeclipseplugin.Activator;
 
 import com.interopbridges.tools.windowsazure.WindowsAzureRoleComponentImportMethod;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+
+import waeclipseplugin.Activator;
 /**
  * Class has various method which
  * helps to find project nature,
@@ -153,7 +152,7 @@ public class ProjectNatureHelper {
            }
        } catch (Exception e) {
            PluginUtil.displayErrorDialogAndLog(
-        		   new Shell(),
+        		   PluginUtil.getParentShell(),
         		   Messages.prjSelErr,
         		   Messages.prjSelMsg, e);
        }

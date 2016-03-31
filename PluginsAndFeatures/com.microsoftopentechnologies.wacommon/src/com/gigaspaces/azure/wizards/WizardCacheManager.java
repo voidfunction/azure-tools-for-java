@@ -372,7 +372,7 @@ public final class WizardCacheManager {
 				public void run() {
 					String errorTitle = "Error while retrieving project"; //$NON-NLS-1$
 					String errorMessage = "Error occurred while loading project. Try the operation after re-selecting the project."; //$NON-NLS-1$
-					MessageUtil.displayErrorDialog(new Shell(), errorTitle,
+					MessageUtil.displayErrorDialog(PluginUtil.getParentShell(), errorTitle,
 							errorMessage);					
 				}
 			});

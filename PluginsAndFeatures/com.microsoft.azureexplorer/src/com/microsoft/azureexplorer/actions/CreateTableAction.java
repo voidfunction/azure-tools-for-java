@@ -25,7 +25,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.ClientStorageNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.TableModule;
-import org.eclipse.swt.widgets.Shell;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 @Name("Create new table")
 public class CreateTableAction extends NodeActionListener {
@@ -37,7 +37,7 @@ public class CreateTableAction extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        CreateTableForm form = new CreateTableForm(new Shell(), tableModule.getStorageAccount());
+        CreateTableForm form = new CreateTableForm(PluginUtil.getParentShell(), tableModule.getStorageAccount());
 
         form.setOnCreate(new Runnable() {
             @Override

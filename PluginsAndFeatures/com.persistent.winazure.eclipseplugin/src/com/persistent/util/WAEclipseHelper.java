@@ -40,7 +40,6 @@ import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbench;
@@ -105,7 +104,7 @@ public class WAEclipseHelper {
 			IWorkspaceRoot root = workspace.getRoot();
 			root.refreshLocal(IResource.DEPTH_INFINITE, null);
 		} catch (CoreException e) {
-			PluginUtil.displayErrorDialogAndLog(new Shell(), errorTitle,
+			PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(), errorTitle,
 					errorMessage, e);
 		}
 	}
@@ -269,7 +268,7 @@ public class WAEclipseHelper {
 			// return whether user has pressed OK or Cancel button
 			retVal = dialog.getReturnCode();
 		} catch (Exception ex) {
-			PluginUtil.displayErrorDialogAndLog(new Shell(),
+			PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(),
 					Messages.rolsDlgErr, Messages.rolsDlgErrMsg, ex);
 		}
 		return retVal;
@@ -334,7 +333,7 @@ public class WAEclipseHelper {
 			// return whether user has pressed OK or Cancel button
 			retVal = dialog.getReturnCode();
 		} catch (Exception e) {
-			PluginUtil.displayErrorDialogAndLog(new Shell(),
+			PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(),
 					Messages.rolsDlgErr, Messages.projDlgErrMsg, e);
 		}
 		return retVal;
@@ -523,7 +522,7 @@ public class WAEclipseHelper {
 			 */
 			if (isPwdChanged) {
 				if (!txtPassword.getText().isEmpty() && !match.find()) {
-					PluginUtil.displayErrorDialog(new Shell(),
+					PluginUtil.displayErrorDialog(PluginUtil.getParentShell(),
 							Messages.remAccErPwdNtStrg,
 							Messages.remAccPwdNotStrg);
 					txtConfirmPassword.setText("");
@@ -546,7 +545,7 @@ public class WAEclipseHelper {
 				}
 			}
 		} catch (WindowsAzureInvalidProjectOperationException e1) {
-			PluginUtil.displayErrorDialogAndLog(new Shell(),
+			PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(),
 					Messages.remAccErrTitle, Messages.remAccErPwd, e1);
 		}
 	}

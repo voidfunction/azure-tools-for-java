@@ -305,7 +305,7 @@ public class PluginUtil {
 			// return whether user has pressed OK or Cancel button
 			retVal = dialog.getReturnCode();
 		} catch (Exception e) {
-			PluginUtil.displayErrorDialogAndLog(new Shell(),
+			PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(),
 					Messages.rolsDlgErr, Messages.projDlgErrMsg, e);
 		}
 		return retVal;
@@ -353,6 +353,14 @@ public class PluginUtil {
 				}
 			}
 		});
+	}
+
+	public static Shell getParentShell() {
+		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+		if (shell == null) {
+			shell = new Shell();
+		}
+		return shell;
 	}
 
 	public static void createSubscriptionTelemetryEvent(List<Subscription> oldSubList, String eventName) {

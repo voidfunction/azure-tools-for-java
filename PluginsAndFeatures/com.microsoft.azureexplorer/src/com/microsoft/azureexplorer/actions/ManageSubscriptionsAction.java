@@ -20,13 +20,13 @@
 package com.microsoft.azureexplorer.actions;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.swt.widgets.Shell;
 
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule;
 import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 @Name("Manage Subscriptions")
 public class ManageSubscriptionsAction  extends NodeActionListener {
@@ -38,7 +38,7 @@ public class ManageSubscriptionsAction  extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        Dialog subscriptionsDialog = new ManageSubscriptionDialog(new Shell(), true, false);
+        Dialog subscriptionsDialog = new ManageSubscriptionDialog(PluginUtil.getParentShell(), true, false);
         subscriptionsDialog.open();
         AzureServiceModule.webSiteConfigMap = null;
         azureServiceModule.load();

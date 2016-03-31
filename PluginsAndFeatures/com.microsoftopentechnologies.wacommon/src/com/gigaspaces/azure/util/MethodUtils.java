@@ -38,6 +38,7 @@ import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccount
 import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccountRegistry;
 import com.microsoftopentechnologies.wacommon.commoncontrols.Messages;
 import com.microsoftopentechnologies.wacommon.storageregistry.PreferenceUtilStrg;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 import javax.xml.bind.JAXBException;
 
@@ -138,7 +139,7 @@ public class MethodUtils {
 		try {
 			data = com.microsoftopentechnologies.azurecommons.deploy.util.UIUtils.parse(file);
 		} catch (JAXBException e) {
-			MessageUtil.displayErrorDialog(new Shell(),
+			MessageUtil.displayErrorDialog(PluginUtil.getParentShell(),
 					Messages.importDlgTitle,
 					String.format(Messages.importDlgMsg,
 							file.getName(),
@@ -157,7 +158,7 @@ public class MethodUtils {
 //            } else {
 //                errorMessage = Messages.importDlgMsg;
 //            }
-//			MessageUtil.displayErrorDialog(new Shell(),
+//			MessageUtil.displayErrorDialog(PluginUtil.getParentShell(),
 //					Messages.importDlgTitle,
 //					String.format(errorMessage,
 //							file.getName(),
@@ -165,7 +166,7 @@ public class MethodUtils {
 //			return null;
 //		}
 		if (WizardCacheManager.findPublishDataBySubscriptionId(data.getSubscriptionIds().get(0)) != null) {
-            MessageDialog.openInformation(new Shell(), Messages.loadingCred, Messages.credentialsExist);
+            MessageDialog.openInformation(PluginUtil.getParentShell(), Messages.loadingCred, Messages.credentialsExist);
 		}
 		data.setCurrentSubscription(data.getPublishProfile().
 				getSubscriptions().get(0));

@@ -19,13 +19,14 @@
  */
 package com.microsoft.azureexplorer.actions;
 
+import org.eclipse.jface.wizard.WizardDialog;
+
 import com.microsoft.azureexplorer.forms.createvm.CreateVMWizard;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.widgets.Shell;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 @Name("Create VM")
 public class CreateVMAction extends NodeActionListener {
@@ -36,7 +37,7 @@ public class CreateVMAction extends NodeActionListener {
     @Override
     public void actionPerformed(NodeActionEvent e) {
         CreateVMWizard createVMWizard = new CreateVMWizard((VMServiceModule) e.getAction().getNode());
-        WizardDialog dialog = new WizardDialog(new Shell(), createVMWizard);
+        WizardDialog dialog = new WizardDialog(PluginUtil.getParentShell(), createVMWizard);
         dialog.setTitle("Create new Virtual Machine");
         dialog.setMinimumPageSize(450, 450);
         dialog.create();

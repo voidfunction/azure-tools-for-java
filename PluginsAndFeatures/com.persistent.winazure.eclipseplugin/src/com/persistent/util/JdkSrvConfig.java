@@ -1599,18 +1599,18 @@ public class JdkSrvConfig {
 						getComboServer().setText(newServerType);
 					} else {
 						setPath = false;
-						MessageDialog.openInformation(new Shell(), Messages.srvTtl, Messages.srvNoDetectionMsg);
+						MessageDialog.openInformation(PluginUtil.getParentShell(), Messages.srvTtl, Messages.srvNoDetectionMsg);
 					}
 				} else {
 					if (newServerType != null && !newServerType.isEmpty()) {
 						if (!oldServerType.equalsIgnoreCase(newServerType)) {
-							MessageDialog.openInformation(new Shell(), Messages.srvTtl,
+							MessageDialog.openInformation(PluginUtil.getParentShell(), Messages.srvTtl,
 									String.format(Messages.srvWrngDetectionMsg, newServerType));
 							getComboServer().setText(newServerType);
 						}
 					} else {
 						setPath = false;
-						MessageDialog.openInformation(new Shell(), Messages.srvTtl, Messages.srvNoDetectionMsg);
+						MessageDialog.openInformation(PluginUtil.getParentShell(), Messages.srvTtl, Messages.srvNoDetectionMsg);
 					}
 				}
 				if (setPath) {

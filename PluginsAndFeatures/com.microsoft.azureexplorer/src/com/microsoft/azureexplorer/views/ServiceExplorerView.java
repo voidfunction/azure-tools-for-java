@@ -49,7 +49,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
@@ -70,6 +69,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class ServiceExplorerView extends ViewPart implements PropertyChangeListener {
 
@@ -389,7 +389,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
 
         manageSubscriptionAction = new Action("Manage Subscriptions", Activator.getImageDescriptor("icons/azure_explorer.png")) {
             public void run() {
-                ManageSubscriptionDialog subscriptionDialog = new ManageSubscriptionDialog(new Shell(), true, false);
+                ManageSubscriptionDialog subscriptionDialog = new ManageSubscriptionDialog(PluginUtil.getParentShell(), true, false);
                 subscriptionDialog.open();
                 AzureServiceModule.webSiteConfigMap = null;
                 azureServiceModule.load();

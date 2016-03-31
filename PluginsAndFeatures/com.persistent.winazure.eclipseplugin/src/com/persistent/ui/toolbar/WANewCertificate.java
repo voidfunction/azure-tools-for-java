@@ -22,8 +22,6 @@ package com.persistent.ui.toolbar;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 
 import com.microsoftopentechnologies.wacommon.commoncontrols.NewCertificateDialog;
 import com.microsoftopentechnologies.wacommon.commoncontrols.NewCertificateDialogData;
@@ -43,15 +41,11 @@ public class WANewCertificate extends AbstractHandler {
 			 * as its toolbar button, do not refer any project for JDK path
 			 * just pass empty string.
 			 */
-			Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-			if (shell == null) {
-				shell = new Shell();
-			}
-			NewCertificateDialog dialog = new NewCertificateDialog(shell, data, "");
+			NewCertificateDialog dialog = new NewCertificateDialog(PluginUtil.getParentShell(), data, "");
 			// Open the dialog
 			dialog.open();
 		} catch (Exception e) {
-			PluginUtil.displayErrorDialogAndLog(new Shell(), Messages.newCertErrTtl,
+			PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(), Messages.newCertErrTtl,
 												Messages.newCertMsg, e);
 			Activator.getDefault().log(Messages.newCertMsg, e);
 		}

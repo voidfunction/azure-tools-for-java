@@ -19,14 +19,8 @@
  */
 package com.microsoft.azureexplorer.forms.createvm;
 
-import com.microsoft.azureexplorer.Activator;
-import com.microsoft.azureexplorer.forms.SubscriptionPropertyPage;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
+import java.util.Vector;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -34,9 +28,19 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
-import java.util.Vector;
+import com.microsoft.azureexplorer.Activator;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 
 public class SubscriptionStep extends WizardPage {
@@ -78,7 +82,7 @@ public class SubscriptionStep extends WizardPage {
         buttonLogin.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                Dialog subscriptionsDialog = new ManageSubscriptionDialog(new Shell(), true, false);
+                Dialog subscriptionsDialog = new ManageSubscriptionDialog(PluginUtil.getParentShell(), true, false);
                 subscriptionsDialog.open();
                 loadSubscriptions();
             }

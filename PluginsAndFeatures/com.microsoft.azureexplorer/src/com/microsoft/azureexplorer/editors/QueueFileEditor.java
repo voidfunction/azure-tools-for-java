@@ -19,6 +19,37 @@
  */
 package com.microsoft.azureexplorer.editors;
 
+import java.text.SimpleDateFormat;
+import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.EditorPart;
+
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azureexplorer.forms.QueueMessageForm;
 import com.microsoft.azureexplorer.forms.ViewMessageForm;
@@ -30,27 +61,7 @@ import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import com.microsoft.tooling.msservices.model.storage.QueueMessage;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.part.EditorPart;
-
-import java.text.SimpleDateFormat;
-import java.util.List;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class QueueFileEditor extends EditorPart {
 
@@ -153,7 +164,7 @@ public class QueueFileEditor extends EditorPart {
         addMessageButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                QueueMessageForm queueMessageForm = new QueueMessageForm(new Shell(), storageAccount, queue);
+                QueueMessageForm queueMessageForm = new QueueMessageForm(PluginUtil.getParentShell(), storageAccount, queue);
                 queueMessageForm.setOnAddedMessage(new Runnable() {
                     @Override
                     public void run() {
@@ -315,7 +326,7 @@ public class QueueFileEditor extends EditorPart {
 
     private void viewMessageText() {
         QueueMessage message = (QueueMessage) ((IStructuredSelection) tableViewer.getSelection()).getFirstElement();
-        ViewMessageForm viewMessageForm = new ViewMessageForm(new Shell(), message.getContent());
+        ViewMessageForm viewMessageForm = new ViewMessageForm(PluginUtil.getParentShell(), message.getContent());
         viewMessageForm.open();
     }
 

@@ -19,6 +19,37 @@
  */
 package com.microsoft.azureexplorer.forms;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+
+import com.gigaspaces.azure.util.MethodUtils;
+import com.gigaspaces.azure.util.PreferenceUtil;
 import com.gigaspaces.azure.wizards.WizardCacheManager;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -30,28 +61,7 @@ import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishProfile;
 import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.wacommon.commoncontrols.ImportSubscriptionDialog;
-import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
-import com.gigaspaces.azure.util.PreferenceUtil;
-import com.gigaspaces.azure.util.MethodUtils;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
-import org.osgi.framework.Bundle;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import java.io.File;
-import java.io.IOException;
 
 public class SubscriptionPropertyPage extends Dialog {
 
@@ -401,7 +411,7 @@ public class SubscriptionPropertyPage extends Dialog {
     }
 
     private void clearSubscriptions(boolean isSigningOut) {
-        boolean choice = MessageDialog.openConfirm(new Shell(),
+        boolean choice = MessageDialog.openConfirm(PluginUtil.getParentShell(),
                 (isSigningOut
                         ? "Clear Subscriptions"
                         : "Sign out"),
