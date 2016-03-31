@@ -39,6 +39,17 @@ public class PreferenceUtil {
             Activator.getDefault().log("Error", e);
         }
     }
+    
+    public static String[] getPreferenceKeys() {
+    	String[] keys = null;
+    	try {
+    		Preferences prefs = PluginUtil.getPrefs(com.microsoftopentechnologies.wacommon.utils.Messages.prefFileName);
+    		keys = prefs.keys();
+    	} catch (BackingStoreException e) {
+    		Activator.getDefault().log("Error", e);
+    	}
+    	return keys;
+    }
 
     public static String loadPreference(String name) {
         return loadPreference(name, null);

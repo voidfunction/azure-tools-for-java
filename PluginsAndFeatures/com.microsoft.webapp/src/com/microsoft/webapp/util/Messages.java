@@ -30,6 +30,7 @@ public final class Messages extends NLS {
 	public static String natJs;
 	public static String propWebProj;
 	public static String propErr;
+	public static String resCLJobName;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

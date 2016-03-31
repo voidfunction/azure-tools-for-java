@@ -79,4 +79,5 @@ Export-Package: com.gigaspaces.azure.runnable,
  com.microsoftopentechnologies.wacommon.storageregistry,
  com.microsoftopentechnologies.wacommon.telemetry,
  com.microsoftopentechnologies.wacommon.utils,
- com.persistent.util
+ com.persistent.util,
+ com.microsoft.azureexplorer.helpers

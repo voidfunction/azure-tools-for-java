@@ -62,6 +62,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import com.gigaspaces.azure.util.PreferenceWebAppUtil;
 import com.gigaspaces.azure.views.WindowsAzureActivityLogView;
 import com.gigaspaces.azure.wizards.WizardCacheManager;
+import com.microsoft.azureexplorer.helpers.PreferenceUtil;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -112,7 +113,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 		Control ctrl = super.createButtonBar(parent);
 		okButton = getButton(IDialogConstants.OK_ID);
 		okButton.setEnabled(false);
-		fillList("");
+		fillList(PreferenceUtil.loadPreference(String.format(Messages.webappKey, PluginUtil.getSelectedProject().getName())));
 		return ctrl;
 	}
 
@@ -302,7 +303,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 				list.setItems(new String[]{""});
 				selectedWebSite = null;
 			} else {
-				fillList("");
+				fillList(PreferenceUtil.loadPreference(String.format(Messages.webappKey, PluginUtil.getSelectedProject().getName())));
 			}
 		} catch(AzureCmdException ex) {
 			PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, Messages.loadSubErrMsg, ex);
@@ -664,6 +665,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(Messages.activityView);
 						// send telemetry event
 						AppInsightsCustomEvent.createFTPEvent("WebAppFTP", destAppUrl, project.getName(), selectedSubId);
+						// associate WebApp container with Java project for Republish functionality
+						PreferenceUtil.savePreference(String.format(Messages.webappKey, project.getName()), selectedName);
 					} catch (Exception e) {
 						Activator.getDefault().log(e.getMessage(), e);
 						notifyProgress(selectedName, null, 100, OperationStatus.Failed, e.getMessage());
