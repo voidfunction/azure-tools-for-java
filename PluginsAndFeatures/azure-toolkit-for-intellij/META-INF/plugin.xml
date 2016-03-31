@@ -136,7 +136,7 @@
       <reference ref="Actions.ResetEmulatorAction"/>
       <reference ref="Actions.BuildPackageAction"/>
       <reference ref="Actions.PackageAction"/>
-      <group id="PublishGroup" text="Publish Group" description="Publish Group" popup="true" icon="/icons/azure.png">
+      <group id="PublishToAzureGroup" text="Publish Group" description="Publish Group" popup="true" icon="/icons/azure.png">
         <reference ref="Actions.AzureWebDeploy"/>
         <reference ref="Actions.DeployAction"/>
       </group>
