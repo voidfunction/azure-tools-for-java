@@ -148,13 +148,11 @@ public class BrowserLauncherEclipse implements BrowserLauncher {
         @Override
         public void onAuthCodeReceived(String authCode) {
             sendStatus("success", "data=" + authCode);
-            shell.close();
         }
 
         @Override
         public void onFailed(String msg) {
             sendStatus("failed", msg);
-            shell.close();
         }
 
         private void sendStatus(String status, String data) {
@@ -168,6 +166,17 @@ public class BrowserLauncherEclipse implements BrowserLauncher {
                 // if we get here then it probably means that the user closed the IDE or the
                 // web server in the IDE died somehow
                 showError(display.getActiveShell(), Messages.ideErr);
+            }
+            
+            if(shell != null && !shell.isDisposed()) {
+            	display.asyncExec(new Runnable() {
+                    public void run() {
+                    	if(shell != null && !shell.isDisposed()) {
+                    		shell.close();
+                    		shell.dispose();
+                    	}
+                    }
+            	});
             }
         }
     }
