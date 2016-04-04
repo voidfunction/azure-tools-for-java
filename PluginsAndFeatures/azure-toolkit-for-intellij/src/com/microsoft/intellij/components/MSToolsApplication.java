@@ -27,6 +27,7 @@ import com.intellij.openapi.project.Project;
 import com.microsoft.intellij.helpers.IDEHelperImpl;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.intellij.serviceexplorer.NodeActionsMap;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.AppSettingsNames;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginComponent;
@@ -39,6 +40,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class MSToolsApplication extends AbstractProjectComponent implements PluginComponent {
 
@@ -76,9 +79,7 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
         try {
             loadPluginSettings();
         } catch (IOException e) {
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to load settings for the " +
-                            "Azure Services Explorer plugin.", e,
-                    "Azure Services Explorer - Error Loading Settings", false, true);
+            PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting to load settings", e);
         }
 
         cleanTempData(DefaultLoader.getIdeHelper());

@@ -36,6 +36,7 @@ import com.intellij.openapi.util.Key;
 import com.microsoft.intellij.forms.QueueMessageForm;
 import com.microsoft.intellij.forms.ViewMessageForm;
 import com.microsoft.intellij.helpers.UIHelperImpl;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -55,6 +56,8 @@ import java.awt.event.*;
 import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
 import java.util.List;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class QueueFileEditor implements FileEditor {
     private Project project;
@@ -214,8 +217,8 @@ public class QueueFileEditor implements FileEditor {
                                     }
                                 });
                             } catch (AzureCmdException e) {
-                                DefaultLoader.getUIHelper().showException("An error occurred while attempting to clear queue messages.", e,
-                                        "Azure Services Explorer - Error Clearing Queue Messages.", false, true);
+                                String msg = "An error occurred while attempting to clear queue messages." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                                PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                             }
                         }
                     });
@@ -264,8 +267,8 @@ public class QueueFileEditor implements FileEditor {
                     });
 
                 } catch (AzureCmdException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to get queue messages.", e,
-                            "Azure Services Explorer - Getting Queue Messages", false, true);
+                    String msg = "An error occurred while attempting to get queue messages." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
             }
         });
@@ -316,8 +319,8 @@ public class QueueFileEditor implements FileEditor {
                             }
                         });
                     } catch (AzureCmdException e) {
-                        DefaultLoader.getUIHelper().showException("An error occurred while attempting to dequeue messages", e,
-                                "Azure Services Explorer - Error Dequeuing Messages", false, true);
+                        String msg = "An error occurred while attempting to dequeue messages." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                        PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                     }
                 }
             });

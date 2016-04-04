@@ -25,6 +25,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
 import com.microsoft.intellij.forms.TableForm;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -37,6 +38,8 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.mobileservice.MobileServiceNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.mobileservice.TableNode;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 @Name("Edit table")
 public class EditTableAction extends AzureNodeActionListener {
@@ -74,8 +77,8 @@ public class EditTableAction extends AzureNodeActionListener {
                 }
             }, ModalityState.any());
         } catch (AzureCmdException e1) {
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to edit table.", e1,
-                    "Azure Services Explorer - Error Editing Table", false, true);
+            String msg = "An error occurred while attempting to edit table." + "\n" + String.format(message("webappExpMsg"), e1.getMessage());
+            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e1);
         }
     }
 

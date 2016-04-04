@@ -126,7 +126,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 		GridData gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.grabExcessHorizontalSpace = true;
-		gridLayout.marginBottom = 10;
 		container.setLayout(gridLayout);
 		container.setLayoutData(gridData);
 
@@ -253,7 +252,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							selectedWebSite = null;
 						}
 					} catch (AzureCmdException e) {
-						PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, Messages.delErr, e);
+						String msg = Messages.delErr + "\n" + String.format(Messages.webappExpMsg, e.getMessage());
+						PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, msg, e);
 					}
 				} else {
 					PluginUtil.displayErrorDialog(getShell(), Messages.errTtl, "Select a web app container to delete.");
@@ -306,7 +306,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 				fillList(PreferenceUtil.loadPreference(String.format(Messages.webappKey, PluginUtil.getSelectedProject().getName())));
 			}
 		} catch(AzureCmdException ex) {
-			PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, Messages.loadSubErrMsg, ex);
+			String msg = Messages.loadSubErrMsg + "\n" + String.format(Messages.webappExpMsg, ex.getMessage());
+			PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, msg, ex);
 		}
 	}
 
@@ -637,13 +638,11 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 								url = url + "/" + artifactName;
 							}
 						}
-						
+
 						final String sitePath = url;
 						new Thread("Warm up the target site") {
 							public void run() {
 								try {
-									
-									Activator.getDefault().log("To warm the site up - implicitly trying to connect it");
 									sendGet(sitePath);
 								}
 								catch (Exception ex) {
@@ -651,7 +650,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 								}
 							}
 						}.start();
-						
+
 						Thread.sleep(2000);
 						notifyProgress(selectedName, url, 50, OperationStatus.Succeeded, "Running");
 
@@ -686,9 +685,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
 			con.setRequestMethod("GET");
 			con.setRequestProperty("User-Agent", "AzureToolkit for Eclipse");
-			int responseCode = con.getResponseCode();
-			Activator.getDefault().log("\nSending 'GET' request to URL : " + sitePath + "...");
-			Activator.getDefault().log("Response Code : " + responseCode);
+			con.getResponseCode();
 		}
 	}
 }

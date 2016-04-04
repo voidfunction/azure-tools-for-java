@@ -35,6 +35,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.microsoft.intellij.forms.TableEntityForm;
 import com.microsoft.intellij.forms.TablesQueryDesigner;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -54,6 +55,8 @@ import java.awt.event.*;
 import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class TableFileEditor implements FileEditor {
     public static final String PARTITION_KEY = "Partition key";
@@ -248,14 +251,12 @@ public class TableFileEditor implements FileEditor {
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
-
                 try {
                     tableEntities = StorageClientSDKManagerImpl.getManager().getTableEntities(storageAccount, table, queryText);
-
                     refreshGrid();
                 } catch (AzureCmdException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to query entities.", e,
-                            "Azure Services Explorer - Error Querying Entities", false, true);
+                    String msg = "An error occurred while attempting to query entities." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
             }
         });
@@ -333,14 +334,13 @@ public class TableFileEditor implements FileEditor {
                             @Override
                             public void run() {
                                 tableEntities.removeAll(Arrays.asList(selectedEntities));
-
                                 refreshGrid();
                             }
                         });
                     }
                 } catch (AzureCmdException ex) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete entities.", ex,
-                            "Azure Services Explorer - Error Deleting Entities", false, true);
+                    String msg = "An error occurred while attempting to delete entities." + "\n" + String.format(message("webappExpMsg"), ex.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, ex);
                 }
             }
         });

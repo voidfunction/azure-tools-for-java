@@ -25,6 +25,7 @@ import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.microsoft.intellij.forms.ManageSubscriptionPanel;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
@@ -39,6 +40,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
 import java.util.Vector;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
     CreateVMWizardModel model;
@@ -118,8 +121,8 @@ public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
 
             model.getCurrentNavigationState().NEXT.setEnabled(!subscriptions.isEmpty());
         } catch (AzureCmdException e) {
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to load the subscriptions list.", e,
-                    "Azure Services Explorer - Error Loading Subscriptions", false, true);
+            String msg = "An error occurred while attempting to load the subscriptions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
         }
     }
 }

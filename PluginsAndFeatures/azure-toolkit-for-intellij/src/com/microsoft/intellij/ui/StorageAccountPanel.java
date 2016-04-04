@@ -26,6 +26,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.util.MethodUtils;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -120,7 +121,7 @@ public class StorageAccountPanel implements AzureAbstractConfigurablePanel {
                         apiManager.importPublishSettingsFile(fileName);
                         MethodUtils.handleFile(fileName, myProject);
                     } catch (Exception ex) {
-                        DefaultLoader.getUIHelper().showException("Error importing publish settings", ex, "Error", true, true);
+                        PluginUtil.displayErrorDialogAndLog(message("errTtl"), "Error importing publish settings", ex);
                     }
                     ((StorageAccountTableModel) accountsTable.getModel()).setAccounts(getTableContent());
                     ((StorageAccountTableModel) accountsTable.getModel()).fireTableDataChanged();

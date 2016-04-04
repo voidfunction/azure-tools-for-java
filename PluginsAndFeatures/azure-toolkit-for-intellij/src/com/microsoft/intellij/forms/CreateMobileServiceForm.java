@@ -30,7 +30,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.JBColor;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.helpers.LinkListener;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -52,6 +54,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class CreateMobileServiceForm extends DialogWrapper {
 
@@ -134,11 +138,9 @@ public class CreateMobileServiceForm extends DialogWrapper {
                     }
 
                 } catch (Throwable e) {
-
                     mainPanel.setCursor(Cursor.getDefaultCursor());
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to retrieve the " +
-                                    "subscription list.", e,
-                            "Azure Services Explorer - Error Retrieving Subscriptions", false, true);
+                    AzurePlugin.log(e.getStackTrace().toString());
+                    PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to retrieve the subscription list.");
                 }
             }
         });
@@ -246,12 +248,8 @@ public class CreateMobileServiceForm extends DialogWrapper {
                     });
 
                 } catch (Throwable e) {
-
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to create the mobile service.",
-                            e,
-                            "Azure Services Explorer - Error Creating Mobile Service",
-                            false,
-                            true);
+                    AzurePlugin.log(e.getStackTrace().toString());
+                    PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to create the mobile service.");
                 }
             }
         });
@@ -323,9 +321,8 @@ public class CreateMobileServiceForm extends DialogWrapper {
                         }
                     }, ModalityState.any());
                 } catch (AzureCmdException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to retrieve " +
-                                    "the location list.", e,
-                            "Azure Services Explorer - Error Retrieving Locations", false, true);
+                    String msg = "An error occurred while attempting to retrieve the location list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
             }
         });

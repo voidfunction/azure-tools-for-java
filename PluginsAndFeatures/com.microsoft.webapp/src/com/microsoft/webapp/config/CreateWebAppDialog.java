@@ -131,7 +131,6 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		GridLayout gridLayout = new GridLayout();
 		GridData gridData = new GridData();
 		gridLayout.numColumns = 3;
-		gridLayout.marginBottom = 10;
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.grabExcessHorizontalSpace = true;
 		container.setLayout(gridLayout);
@@ -510,18 +509,16 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 					servicePlanCombo.add(plan.getName());
 					hostingPlanMap.put(plan.getName(), plan);
 				}	
-				
+
 				if (valToSet == null || valToSet.isEmpty()) {
 					servicePlanCombo.setText(servicePlanCombo.getItem(0));
 				} else {
 					servicePlanCombo.setText(valToSet);
 				}	
-				
 				pupulateServicePlanDetails(hostingPlanMap.get(servicePlanCombo.getText()));				
 			} else {
 				pupulateServicePlanDetails(null);
 			}
-
 		} catch (AzureCmdException e) {
 			Activator.getDefault().log(Messages.errTtl, e);
 		}

@@ -26,6 +26,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.ListCellRendererWrapper;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -38,6 +39,8 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.util.List;
 import java.util.Vector;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 
 public class CreateCloudServiceForm extends DialogWrapper {
@@ -133,8 +136,7 @@ public class CreateCloudServiceForm extends DialogWrapper {
                         }
                     });
                 } catch (AzureCmdException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to load the regions list",
-                            e, "Azure Services Explorer - Error Loading Regions", false, true);
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting to load the regions list", e);
                 }
             }
         });
@@ -166,9 +168,8 @@ public class CreateCloudServiceForm extends DialogWrapper {
                     AzureManagerImpl.getManager().createCloudService(cloudService);
                 } catch (Exception e) {
                     cloudService = null;
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to create " +
-                                    "the specified cloud service", e,
-                            "Azure Services Explorer - Error Creating Storage Account", false, true);
+                    String msg = "An error occurred while attempting to create the specified cloud service." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
 
                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {

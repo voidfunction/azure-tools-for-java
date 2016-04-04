@@ -24,8 +24,10 @@ package com.microsoft.intellij.forms;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.table.JBTable;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.helpers.ReadOnlyCellTableModel;
 import com.microsoft.intellij.helpers.UIHelperImpl;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.ms.LogEntry;
@@ -36,6 +38,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.util.Vector;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class ViewLogForm extends DialogWrapper {
     private JTable logTable;
@@ -83,10 +87,9 @@ public class ViewLogForm extends DialogWrapper {
             });
         } catch (Throwable ex) {
             getWindow().setCursor(Cursor.getDefaultCursor());
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to load logs.", ex,
-                    "Azure Services Explorer - Error Loading Logs", false, true);
+            AzurePlugin.log(ex.getStackTrace().toString());
+            PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to load logs.");
         }
-
         init();
     }
 
@@ -115,8 +118,8 @@ public class ViewLogForm extends DialogWrapper {
             getWindow().setCursor(Cursor.getDefaultCursor());
         } catch (Throwable ex) {
             getWindow().setCursor(Cursor.getDefaultCursor());
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to query logs.", ex,
-                    "Azure Services Explorer - Error Querying Logs", false, true);
+            AzurePlugin.log(ex.getStackTrace().toString());
+            PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to query logs.");
         }
     }
 

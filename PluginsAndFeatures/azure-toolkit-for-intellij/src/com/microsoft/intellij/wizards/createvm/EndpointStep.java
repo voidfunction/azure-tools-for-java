@@ -30,6 +30,7 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -55,6 +56,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Vector;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class EndpointStep extends WizardStep<CreateVMWizardModel> {
     private final VMServiceModule node;
@@ -284,12 +287,8 @@ public class EndpointStep extends WizardStep<CreateVMWizardModel> {
                         }
                     });
                 } catch (Exception e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to create the specified " +
-                                    "virtual machine.",
-                            e,
-                            "Azure Services Explorer - Error Creating Virtual Machine",
-                            false,
-                            true);
+                    String msg = "An error occurred while attempting to create the specified virtual machine." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
             }
         });

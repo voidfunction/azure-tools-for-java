@@ -24,6 +24,8 @@ package com.microsoft.intellij.forms;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.ms.CustomAPI;
@@ -37,6 +39,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class CustomAPIForm extends DialogWrapper {
     private JPanel mainPanel;
@@ -156,10 +160,9 @@ public class CustomAPIForm extends DialogWrapper {
                     });
 
                 } catch (Throwable e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to save the table.", e,
-                            "Azure Services Explorer - Error Saving Table", false, true);
+                    AzurePlugin.log(e.getStackTrace().toString());
+                    PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to save the table.");
                 }
-
             }
         });
 

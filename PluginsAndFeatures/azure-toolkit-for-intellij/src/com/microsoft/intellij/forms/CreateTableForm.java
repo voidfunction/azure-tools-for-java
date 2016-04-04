@@ -28,6 +28,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.intellij.helpers.LinkListener;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
@@ -39,6 +40,8 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class CreateTableForm extends DialogWrapper {
     private JPanel contentPane;
@@ -123,8 +126,8 @@ public class CreateTableForm extends DialogWrapper {
                         DefaultLoader.getIdeHelper().invokeLater(onCreate);
                     }
                 } catch (AzureCmdException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to create table", e,
-                            "Azure Services Explorer - Error Creating Table", false, true);
+                    String msg = "An error occurred while attempting to create table." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
             }
         });

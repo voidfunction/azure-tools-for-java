@@ -35,6 +35,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.microsoft.intellij.forms.UploadBlobFileForm;
 import com.microsoft.intellij.helpers.UIHelperImpl;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.CallableSingleArg;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -67,6 +68,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class BlobExplorerFileEditor implements FileEditor {
     private JPanel mainPanel;
@@ -358,8 +361,8 @@ public class BlobExplorerFileEditor implements FileEditor {
                         }
                     });
                 } catch (AzureCmdException ex) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to query blob list.", ex,
-                            "Azure Services Explorer - Error Querying Blobs", false, true);
+                    String msg = "An error occurred while attempting to query blob list." + "\n" + String.format(message("webappExpMsg"), ex.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, ex);
                 }
             }
         });
@@ -509,8 +512,8 @@ public class BlobExplorerFileEditor implements FileEditor {
                                 }
                             });
                         } catch (AzureCmdException ex) {
-                            DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete blob.", ex,
-                                    "Azure Services Explorer - Error Deleting Blob", false, true);
+                            String msg = "An error occurred while attempting to delete blob." + "\n" + String.format(message("webappExpMsg"), ex.getMessage());
+                            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, ex);
                         }
                     }
                 });
@@ -630,8 +633,7 @@ public class BlobExplorerFileEditor implements FileEditor {
                             bufferedOutputStream.close();
                         }
                     } catch (IOException e) {
-                        DefaultLoader.getUIHelper().showException("An error occurred while attempting to download Blob.", e,
-                                "Azure Services Explorer - Error Downloading Blob", false, true);
+                        PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting to download Blob.", e);
                     }
                 }
             });
@@ -739,8 +741,8 @@ public class BlobExplorerFileEditor implements FileEditor {
                                 }
                             }
                         } catch (AzureCmdException e) {
-                            DefaultLoader.getUIHelper().showException("An error occurred while attempting to show new blob", e,
-                                    "Azure Services Explorer - Error Showing New Blob", false, true);
+                            String msg = "An error occurred while attempting to show new blob." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                         }
 
                         ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -767,8 +769,7 @@ public class BlobExplorerFileEditor implements FileEditor {
                         progressIndicator.setText2((connectionFault instanceof SocketTimeoutException) ? "Connection timed out" : message);
                     }
                 } catch (IOException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to upload Blob.", e,
-                            "Azure Services Explorer - Error Uploading Blob", false, true);
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting to upload Blob.", e);
                 }
             }
         });

@@ -232,8 +232,8 @@ public class CreateWebSiteForm extends DialogWrapper {
                 subscriptionComboBox.setSelectedIndex(0);
             }
         } catch (AzureCmdException e) {
-            DefaultLoader.getUIHelper().showException("An error occurred while trying to load the subscriptions list",
-                    e, "Azure Services Explorer - Error Loading Subscriptions", false, true);
+            String msg = "An error occurred while trying to load the subscriptions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
         }
     }
 
@@ -284,8 +284,8 @@ public class CreateWebSiteForm extends DialogWrapper {
                 }
             }
         } catch (AzureCmdException e) {
-            DefaultLoader.getUIHelper().showException("An error occurred while trying to load the resource groups",
-                    e, "Azure Services Explorer - Error Loading resource groups", false, true);
+            String msg = "An error occurred while loading the resource groups." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
         }
     }
 
@@ -336,8 +336,8 @@ public class CreateWebSiteForm extends DialogWrapper {
                 webHostingPlanComboBox.addItemListener(webHostingPlanComboBoxItemListner);
             }
         } catch (AzureCmdException e) {
-            DefaultLoader.getUIHelper().showException("An error occurred while trying to load the app service plans",
-                    e, "Azure Services Explorer - Error Loading App Service Plans", false, true);
+            String msg = "An error occurred while loading the app service plans." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
         }
     }
 

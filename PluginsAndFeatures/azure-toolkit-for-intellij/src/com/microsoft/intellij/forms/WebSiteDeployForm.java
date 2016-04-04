@@ -130,7 +130,8 @@ public class WebSiteDeployForm extends DialogWrapper {
                         setWebApps(webSiteConfigMap);
                     }
                 } catch (AzureCmdException e) {
-                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), message("delWebErr"), e);
+                    String msg = message("delWebErr") + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
             }
         } else {
@@ -279,8 +280,7 @@ public class WebSiteDeployForm extends DialogWrapper {
 
                 @Override
                 public void onError(@NotNull Throwable throwable) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while trying to load the web apps info",
-                            throwable, "Azure Services Explorer - Error Loading Web Apps Info", false, true);
+                    AzurePlugin.log(throwable.getStackTrace().toString());
                 }
 
                 private void loadWebSiteConfigurations(final Subscription subscription,
@@ -379,8 +379,7 @@ public class WebSiteDeployForm extends DialogWrapper {
             });
         } catch (AzureCmdException e) {
             selectedWebSite = null;
-            DefaultLoader.getUIHelper().showException("An error occurred while trying to load the web apps info",
-                    e, "Azure Services Explorer - Error Loading Web Apps Info", false, true);
+            AzurePlugin.log("Error Loading Web Apps Info", e);
         }
     }
 

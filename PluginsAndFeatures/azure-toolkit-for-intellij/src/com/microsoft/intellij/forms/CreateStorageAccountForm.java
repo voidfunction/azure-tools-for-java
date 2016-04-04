@@ -29,6 +29,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.ListCellRendererWrapper;
 import com.microsoft.intellij.helpers.LinkListener;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -45,6 +46,8 @@ import javax.swing.event.DocumentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Vector;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class CreateStorageAccountForm extends DialogWrapper {
     private JPanel contentPane;
@@ -202,9 +205,8 @@ public class CreateStorageAccountForm extends DialogWrapper {
                     });
                 } catch (AzureCmdException e) {
                     storageAccount = null;
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to create the specified " +
-                                    "storage account.", e,
-                            "Azure Services Explorer - Error Creating Storage Account", false, true);
+                    String msg = "An error occurred while attempting to create the specified storage account." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
             }
         });
@@ -234,8 +236,8 @@ public class CreateStorageAccountForm extends DialogWrapper {
                     loadRegions();
                 }
             } catch (AzureCmdException e) {
-                DefaultLoader.getUIHelper().showException("An error occurred while attempting to get subscriptions.", e,
-                        "Azure Services Explorer - Error Getting Subscriptions", false, true);
+                String msg = "An error occurred while attempting to get subscriptions." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
             }
         } else {
             this.subscription = subscription;
@@ -295,8 +297,8 @@ public class CreateStorageAccountForm extends DialogWrapper {
                         }
                     });
                 } catch (AzureCmdException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to load the regions list",
-                            e, "Azure Services Explorer - Error Loading Regions", false, true);
+                    String msg = "An error occurred while attempting to load the regions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
             }
         });

@@ -30,6 +30,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -44,6 +45,8 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.mobileservice.Tabl
 
 import javax.swing.*;
 import java.io.File;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 @Name("Update script")
 public class UpdateScriptAction extends NodeActionListener {
@@ -69,8 +72,8 @@ public class UpdateScriptAction extends NodeActionListener {
                             mobileService.getName(),
                             mobileService.getSubcriptionId());
                 } catch (AzureCmdException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to upload script.", e,
-                            "Azure Services Explorer - Error Uploading Script", false, true);
+                    String msg = "An error occurred while attempting to upload script." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
             }
         });
@@ -117,8 +120,8 @@ public class UpdateScriptAction extends NodeActionListener {
                             }
                         });
                     } catch (AzureCmdException e) {
-                        DefaultLoader.getUIHelper().showException("An error occurred while attempting to upload script.", e,
-                                "Azure Services Explorer - Error Uploading Script", false, true);
+                        String msg = "An error occurred while attempting to upload script." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                        PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                     }
                 }
             });

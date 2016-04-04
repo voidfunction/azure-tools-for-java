@@ -23,6 +23,7 @@ package com.microsoft.intellij.serviceexplorer.azure.mobileservice;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.microsoft.intellij.forms.CreateMobileServiceForm;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -34,6 +35,8 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.mobileservice.MobileServiceModule;
 
 import java.util.List;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 @Name("Create service")
 public class CreateServiceAction extends NodeActionListener {
@@ -64,8 +67,8 @@ public class CreateServiceAction extends NodeActionListener {
                 return;
             }
         } catch (AzureCmdException e1) {
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to create the mobile service.", e1,
-                    "Azure Services Explorer - Error Creating Mobile Service", false, true);
+            String msg = "An error occurred while attempting to create the mobile service." + "\n" + String.format(message("webappExpMsg"), e1.getMessage());
+            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e1);
         }
 
         CreateMobileServiceForm form = new CreateMobileServiceForm(null);

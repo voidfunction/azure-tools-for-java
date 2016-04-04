@@ -28,6 +28,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
@@ -45,6 +46,7 @@ import javax.swing.text.DocumentFilter;
 import java.util.GregorianCalendar;
 import java.util.regex.Pattern;
 
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 import static java.util.regex.Pattern.compile;
 
 public class QueueMessageForm extends DialogWrapper {
@@ -138,8 +140,8 @@ public class QueueMessageForm extends DialogWrapper {
                         ApplicationManager.getApplication().invokeLater(onAddedMessage);
                     }
                 } catch (AzureCmdException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to add queue message", e,
-                            "Azure Services Explorer - Error Adding Queue Message", false, true);
+                    String msg = "An error occurred while attempting to add queue message." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
             }
         });

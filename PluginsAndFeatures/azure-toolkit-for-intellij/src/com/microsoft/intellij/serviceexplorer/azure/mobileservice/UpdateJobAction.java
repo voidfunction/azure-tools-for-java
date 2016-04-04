@@ -30,6 +30,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -43,6 +44,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.File;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 @Name("Update job")
 public class UpdateJobAction extends NodeActionListener {
@@ -85,8 +88,8 @@ public class UpdateJobAction extends NodeActionListener {
                                 mobileService.getSubcriptionId(), mobileService.getName(),
                                 scheduledJobNode.getJob().getName(), scheduledJobNode.getJob().getLocalFilePath(mobileService.getName()));
                     } catch (AzureCmdException e) {
-                        DefaultLoader.getUIHelper().showException("An error occurred while attempting to upload script.", e,
-                                "Azure Services Explorer - Error Uploading Script", false, true);
+                        String msg = "An error occurred while attempting to upload script." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                        PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                     }
                 }
             });

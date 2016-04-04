@@ -30,6 +30,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -43,6 +44,8 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.mobileservice.Mobi
 
 import javax.swing.*;
 import java.io.File;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 @Name("Update Custom API")
 public class UpdateCustomAPIAction extends NodeActionListener {
@@ -60,8 +63,8 @@ public class UpdateCustomAPIAction extends NodeActionListener {
             MobileService mobileService = mobileServiceNode.getMobileService();
             saveCustomAPI((Project) customAPINode.getProject(), mobileService.getName(), mobileService.getSubcriptionId());
         } catch (AzureCmdException e1) {
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to upload script.", e1,
-                    "Azure Services Explorer - Error Uploading Script", false, true);
+            String msg = "An error occurred while attempting to upload script." + "\n" + String.format(message("webappExpMsg"), e1.getMessage());
+            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e1);
         }
     }
 
@@ -90,8 +93,8 @@ public class UpdateCustomAPIAction extends NodeActionListener {
                         AzureManagerImpl.getManager().uploadAPIScript(subscriptionId, serviceName, customAPINode.getCustomAPI().getName(),
                                 customAPINode.getCustomAPI().getLocalFilePath(serviceName));
                     } catch (AzureCmdException e) {
-                        DefaultLoader.getUIHelper().showException("An error occurred while attempting to upload script.", e,
-                                "Azure Services Explorer - Error Uploading Script", false, true);
+                        String msg = "An error occurred while attempting to upload script." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                        PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                     }
                 }
             });

@@ -23,6 +23,7 @@ package com.microsoft.intellij.serviceexplorer.azure.storage;
 
 import com.intellij.openapi.project.Project;
 import com.microsoft.intellij.forms.CreateStorageAccountForm;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -34,6 +35,8 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 
 import java.util.List;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 @Name("Create Storage Account")
 public class CreateStorageAccountAction extends NodeActionListener {
@@ -67,8 +70,8 @@ public class CreateStorageAccountAction extends NodeActionListener {
                 return;
             }
         } catch (AzureCmdException e1) {
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to create the storage account.", e1,
-                    "Azure Services Explorer - Error Creating Storage Account", false, true);
+            String msg = "An error occurred while attempting to create the storage account." + "\n" + String.format(message("webappExpMsg"), e1.getMessage());
+            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e1);
         }
 
         CreateStorageAccountForm createStorageAccountForm = new CreateStorageAccountForm((Project) storageModule.getProject());

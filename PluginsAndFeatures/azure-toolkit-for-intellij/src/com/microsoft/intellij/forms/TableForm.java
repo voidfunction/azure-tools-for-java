@@ -26,6 +26,8 @@ import com.google.common.collect.Iterables;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.ms.PermissionItem;
@@ -38,6 +40,8 @@ import javax.swing.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 
 public class TableForm extends DialogWrapper {
@@ -131,7 +135,6 @@ public class TableForm extends DialogWrapper {
             @Override
             public void run() {
                 try {
-
                     if (editingTable == null) {
                         AzureManagerImpl.getManager().createTable(subscriptionId, serviceName, tableName, tablePermissions);
                     } else {
@@ -144,13 +147,11 @@ public class TableForm extends DialogWrapper {
                             if (afterSave != null) {
                                 afterSave.run();
                             }
-
-
                         }
                     });
                 } catch (Throwable e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to save the table.", e,
-                            "Azure Services Explorer - Error Saving Table", false, true);
+                    AzurePlugin.log(e.getStackTrace().toString());
+                    PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to save the table.");
                 }
             }
         });

@@ -287,9 +287,8 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
 //                    myDialog.getWindow().setCursor(Cursor.getDefaultCursor());
                 } catch (AzureCmdException e) {
 //                    myDialog.getWindow().setCursor(Cursor.getDefaultCursor());
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to get the " +
-                                    "subscription list.", e,
-                            "Azure Services Explorer - Error Getting Subscriptions", false, true);
+                    String msg = "An error occurred while attempting to get the subscription list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
             }
         });
@@ -320,9 +319,8 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                 myDialog.close(DialogWrapper.CANCEL_EXIT_CODE, false);
             }
         } catch (AzureCmdException e) {
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to set the selected " +
-                            "subscriptions.", e,
-                    "Azure Services Explorer - Error Setting Selected Subscriptions", false, true);
+            String msg = "An error occurred while attempting to set the selected subscriptions." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
         }
     }
 

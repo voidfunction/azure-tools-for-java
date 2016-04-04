@@ -33,6 +33,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.intellij.util.Consumer;
+import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -53,6 +55,8 @@ import java.awt.event.ItemListener;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class MachineSettingsStep extends WizardStep<CreateVMWizardModel> {
     private JPanel rootPanel;
@@ -112,9 +116,7 @@ public class MachineSettingsStep extends WizardStep<CreateVMWizardModel> {
                         try {
                             Desktop.getDesktop().browse(hyperlinkEvent.getURL().toURI());
                         } catch (Exception e) {
-                            DefaultLoader.getUIHelper().showException("An error occurred while attempting to open the " +
-                                            "specified Link.", e,
-                                    "Azure Services Explorer - Error Opening Link", false, true);
+                            AzurePlugin.log(e.getStackTrace().toString());
                         }
                     }
                 }
@@ -244,9 +246,8 @@ public class MachineSettingsStep extends WizardStep<CreateVMWizardModel> {
                             }
                         }, ModalityState.any());
                     } catch (AzureCmdException e) {
-                        DefaultLoader.getUIHelper().showException("An error occurred while attempting to load the VM " +
-                                        "sizes list.", e,
-                                "Azure Services Explorer - Error Loading VM Sizes", false, true);
+                        String msg = "An error occurred while attempting to load the VM sizes list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                        PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                     }
                 }
             });

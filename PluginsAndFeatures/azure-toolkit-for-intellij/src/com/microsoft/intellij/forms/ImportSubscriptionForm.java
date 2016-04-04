@@ -28,8 +28,10 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Consumer;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.helpers.LinkListener;
 import com.microsoft.intellij.util.MethodUtils;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.WizardCacheManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
@@ -42,6 +44,8 @@ import javax.swing.event.DocumentListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class ImportSubscriptionForm extends DialogWrapper {
     private JPanel mainPanel;
@@ -134,7 +138,6 @@ public class ImportSubscriptionForm extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-
         try {
             // Note: these 2 operations always go together, as apiManager imports .publishsettings for Azure Explorer
             // and handleFile() caches it for Azure Toolkit plugin
@@ -146,8 +149,6 @@ public class ImportSubscriptionForm extends DialogWrapper {
             apiManager.clearAuthentication();
             apiManager.importPublishSettingsFile(txtFile.getText());
 
-
-
             MethodUtils.handleFile(txtFile.getText(), myProject);
 
             if (onSubscriptionLoaded != null)
@@ -155,10 +156,9 @@ public class ImportSubscriptionForm extends DialogWrapper {
 
             close(DialogWrapper.OK_EXIT_CODE, true);
         } catch (Throwable e) {
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to import the subscription.", e,
-                    "Azure Services Explorer - Error Importing Subscription", false, true);
+            AzurePlugin.log(e.getStackTrace().toString());
+            PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to import the subscription.");
         }
-
     }
 
     @Nullable

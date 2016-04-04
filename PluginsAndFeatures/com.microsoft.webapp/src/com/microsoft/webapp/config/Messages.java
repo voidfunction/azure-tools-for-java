@@ -69,6 +69,7 @@ public final class Messages extends NLS {
 	public static String lnkPrice;
 	public static String maxPlanMsg;
 	public static String webappKey;
+	public static String webappExpMsg;
 	
 	static {
 		// initialize resource bundle

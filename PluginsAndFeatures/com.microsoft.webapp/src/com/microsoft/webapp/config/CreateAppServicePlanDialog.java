@@ -121,7 +121,6 @@ public class CreateAppServicePlanDialog extends TitleAreaDialog {
 		GridLayout gridLayout = new GridLayout();
 		GridData gridData = new GridData();
 		gridLayout.numColumns = 2;
-		gridLayout.marginBottom = 10;
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.grabExcessHorizontalSpace = true;
 		container.setLayout(gridLayout);
@@ -290,6 +289,7 @@ public class CreateAppServicePlanDialog extends TitleAreaDialog {
 			} else if (ex.getMessage().contains("Conflict: The maximum number of")) {
 				msg = msg + " " + Messages.maxPlanMsg;
 			}
+			msg = msg + "\n" + String.format(Messages.webappExpMsg, ex.getMessage());
 			PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, msg, ex);
 		}
 		if (isValid) {

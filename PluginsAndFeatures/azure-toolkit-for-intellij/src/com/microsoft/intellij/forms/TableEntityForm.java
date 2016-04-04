@@ -33,6 +33,7 @@ import com.intellij.util.ui.table.ComboBoxTableCellEditor;
 import com.microsoft.intellij.helpers.DatePickerCellEditor;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.intellij.helpers.storage.TableFileEditor;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
@@ -53,6 +54,8 @@ import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 
 public class TableEntityForm extends DialogWrapper {
@@ -244,8 +247,8 @@ public class TableEntityForm extends DialogWrapper {
 
                     onFinish.run();
                 } catch (AzureCmdException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to create entity.", e,
-                            "Azure Services Explorer - Error Creating Entity", false, true);
+                    String msg = "An error occurred while attempting to create entity." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                 }
             }
         });

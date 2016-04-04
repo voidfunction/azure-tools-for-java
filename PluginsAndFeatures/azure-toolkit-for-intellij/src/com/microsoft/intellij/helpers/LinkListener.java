@@ -22,6 +22,7 @@
 
 package com.microsoft.intellij.helpers;
 
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import java.awt.*;
@@ -45,8 +46,7 @@ public class LinkListener implements MouseListener {
         try {
             Desktop.getDesktop().browse(new URI(mLink));
         } catch (Exception e) {
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to browse link.", e,
-                    "Azure Services Explorer - Error Browsing Link", false, true);
+            AzurePlugin.log(e.getStackTrace().toString());
         }
     }
 

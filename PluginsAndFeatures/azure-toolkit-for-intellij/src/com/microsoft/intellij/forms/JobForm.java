@@ -24,6 +24,8 @@ package com.microsoft.intellij.forms;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.ms.Job;
@@ -37,6 +39,7 @@ import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 import static java.lang.Integer.parseInt;
 
 public class JobForm extends DialogWrapper {
@@ -111,12 +114,9 @@ public class JobForm extends DialogWrapper {
 
                     return true;
                 }
-
                 return false;
             }
         });
-
-
         init();
     }
 
@@ -143,7 +143,6 @@ public class JobForm extends DialogWrapper {
 
             intervalUnitComboBox.setSelectedIndex(index);
         }
-
     }
 
     public void setSubscriptionId(String subscriptionId) {
@@ -178,7 +177,6 @@ public class JobForm extends DialogWrapper {
     @Nullable
     @Override
     protected ValidationInfo doValidate() {
-
         String jobName = jobNameTextField.getText().trim();
 
         if (!jobName.matches("^[A-Za-z][A-Za-z0-9_]+")) {
@@ -192,7 +190,6 @@ public class JobForm extends DialogWrapper {
         }
 
         return null;
-
     }
 
     @Override
@@ -207,23 +204,18 @@ public class JobForm extends DialogWrapper {
             public void run() {
                 try {
                     String now = ISO8601DATEFORMAT.format(new Date());
-
                     if (id == null) {
                         List<String> existingJobNames = new ArrayList<String>();
 
                         for (Job job : AzureManagerImpl.getManager().listJobs(subscriptionId, serviceName)) {
                             existingJobNames.add(job.getName().toLowerCase());
                         }
-
-
                         if (existingJobNames.contains(jobName.toLowerCase())) {
                             JOptionPane.showMessageDialog(mainPanel, "Invalid job name. A job with that name already exists in this service.",
                                     "Service Explorer", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
                     }
-
-
                     if (id == null)
                         AzureManagerImpl.getManager().createJob(subscriptionId, serviceName, jobName, interval, unit, now);
                     else {
@@ -238,16 +230,12 @@ public class JobForm extends DialogWrapper {
                             }
                         }
                     });
-
-
                 } catch (Throwable ex) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while trying to save job", ex,
-                            "Azure Services Explorer - Error Saving Job", false, true);
+                    AzurePlugin.log(ex.getStackTrace().toString());
+                    PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while trying to save job.");
                 }
             }
         });
-
-
         close(DialogWrapper.OK_EXIT_CODE, true);
     }
 

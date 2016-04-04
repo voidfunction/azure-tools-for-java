@@ -27,6 +27,8 @@ import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.azure.management.websites.models.SkuOptions;
 import com.microsoft.azure.management.websites.models.WebHostingPlan;
 import com.microsoft.azure.management.websites.models.WorkerSizeOptions;
+import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -141,6 +143,7 @@ public class CreateWebHostingPlanForm extends DialogWrapper {
             } else if (e.getMessage().contains("Conflict: The maximum number of")) {
                 msg = msg + " " + message("maxPlanMsg");
             }
+            msg = msg + "\n" + String.format(message("webappExpMsg"), e.getMessage());
             PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
         } finally {
             mainPanel.getRootPane().getParent().setCursor(Cursor.getDefaultCursor());
@@ -176,8 +179,7 @@ public class CreateWebHostingPlanForm extends DialogWrapper {
                 geoRegionComboBox.setSelectedIndex(0);
             }
         } catch (AzureCmdException e) {
-            DefaultLoader.getUIHelper().showException("An error occurred while trying to load the geo region list",
-                    e, "Azure Services Explorer - Error Loading Geo Regions", false, true);
+            AzurePlugin.log("Error Loading Geo Regions", e);
         }
     }
 

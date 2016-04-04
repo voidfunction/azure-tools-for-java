@@ -46,8 +46,10 @@ import com.intellij.packaging.artifacts.Artifact;
 import com.intellij.packaging.impl.artifacts.ArtifactUtil;
 import com.intellij.packaging.impl.compiler.ArtifactCompileScope;
 import com.intellij.packaging.impl.compiler.ArtifactsWorkspaceSettings;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.helpers.tasks.CancellableTaskHandleImpl;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -70,6 +72,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class IDEHelperImpl implements IDEHelper {
     private final Project project;
@@ -115,9 +119,8 @@ public class IDEHelperImpl implements IDEHelper {
                         });
                     }
                 } catch (Throwable e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to write temporal " +
-                                    "editable file.", e,
-                            "Azure Services Explorer - Error Writing Temp File", false, true);
+                    AzurePlugin.log(e.getStackTrace().toString());
+                    PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to write temporal editable file.");
                 } finally {
                     node.setLoading(false);
                 }
@@ -385,9 +388,8 @@ public class IDEHelperImpl implements IDEHelper {
                 });
             }
         } catch (Throwable e) {
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to write temporal editable " +
-                            "file.", e,
-                    "Azure Services Explorer - Error Writing Temp File", false, true);
+            AzurePlugin.log(e.getStackTrace().toString());
+            PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to write temporal editable file.");
         }
     }
 
@@ -432,9 +434,8 @@ public class IDEHelperImpl implements IDEHelper {
                                             VirtualFile msVF = libs.createChildData(module.getProject(), fileName);
                                             msVF.setBinaryContent(getArray(mobileserviceInputStream));
                                         } catch (Throwable ex) {
-                                            DefaultLoader.getUIHelper().showException("An error occurred while attempting " +
-                                                            "to configure Azure Mobile Services.", ex,
-                                                    "Azure Services Explorer - Error Configuring Mobile Services", false, true);
+                                            AzurePlugin.log(ex.getStackTrace().toString());
+                                            PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to configure Azure Mobile Services.");
                                         }
                                     }
                                 });

@@ -25,6 +25,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.util.MethodUtils;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.WizardCacheManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -137,7 +138,8 @@ public class SubscriptionsPanel implements AzureAbstractPanel {
                         apiManager.importPublishSettingsFile(fileName);
                         MethodUtils.handleFile(fileName, myProject);
                     } catch (AzureCmdException ex) {
-                        DefaultLoader.getUIHelper().showException("Error importing publish settings", ex, "Error", true, true);
+                        String msg = "Error importing publish settings" + "\n" + String.format(message("webappExpMsg"), ex.getMessage());
+                        PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, ex);
                     }
                     ((SubscriptionsTableModel) subscriptionsTable.getModel()).setSubscriptions(getTableContent());
                     ((SubscriptionsTableModel) subscriptionsTable.getModel()).fireTableDataChanged();

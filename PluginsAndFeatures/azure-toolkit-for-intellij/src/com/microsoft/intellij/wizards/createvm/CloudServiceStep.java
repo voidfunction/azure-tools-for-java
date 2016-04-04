@@ -30,8 +30,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.forms.CreateCloudServiceForm;
 import com.microsoft.intellij.forms.CreateStorageAccountForm;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -52,6 +54,8 @@ import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class CloudServiceStep extends WizardStep<CreateVMWizardModel> {
     private static final String PRODUCTION = "Production";
@@ -157,9 +161,7 @@ public class CloudServiceStep extends WizardStep<CreateVMWizardModel> {
                         try {
                             Desktop.getDesktop().browse(hyperlinkEvent.getURL().toURI());
                         } catch (Exception e) {
-                            DefaultLoader.getUIHelper().showException("An error occurred while attempting to open the " +
-                                            "specified Link.", e,
-                                    "Azure Services Explorer - Error Opening Link", false, true);
+                            AzurePlugin.log(e.getStackTrace().toString());
                         }
                     }
                 }
@@ -236,9 +238,8 @@ public class CloudServiceStep extends WizardStep<CreateVMWizardModel> {
                             csInitialized.signalAll();
                         } catch (AzureCmdException e) {
                             cloudServices = null;
-                            DefaultLoader.getUIHelper().showException("An error occurred while attempting to retrieve " +
-                                            "the cloud services list.",
-                                    e, "Azure Services Explorer - Error Retrieving Cloud Services", false, true);
+                            String msg = "An error occurred while attempting to retrieve the cloud services list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                         }
                     }
                 } finally {
@@ -291,9 +292,7 @@ public class CloudServiceStep extends WizardStep<CreateVMWizardModel> {
                         cloudServices.put(selectedCS.getName(), selectedCS);
                     }
                 } catch (InterruptedException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to load the cloud " +
-                                    "services list.", e,
-                            "Azure Services Explorer - Error Loading Cloud Services", false, true);
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting to load the cloud services list.", e);
                 } finally {
                     csLock.unlock();
                 }
@@ -415,9 +414,8 @@ public class CloudServiceStep extends WizardStep<CreateVMWizardModel> {
                             vnInitialized.signalAll();
                         } catch (AzureCmdException e) {
                             virtualNetworks = null;
-                            DefaultLoader.getUIHelper().showException("An error occurred while attempting to retrieve " +
-                                            "the virtual networks list.", e,
-                                    "Azure Services Explorer - Error Retrieving Virtual Networks", false, true);
+                            String msg = "An error occurred while attempting to retrieve the virtual networks list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                         }
                     }
                 } finally {
@@ -459,9 +457,7 @@ public class CloudServiceStep extends WizardStep<CreateVMWizardModel> {
                         vnInitialized.await();
                     }
                 } catch (InterruptedException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting load the virtual " +
-                                    "networks list.", e,
-                            "Azure Services Explorer - Error Loading Virtual Networks", false, true);
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting load the virtual networks list.", e);
                 } finally {
                     vnLock.unlock();
                 }
@@ -622,9 +618,8 @@ public class CloudServiceStep extends WizardStep<CreateVMWizardModel> {
                             saInitialized.signalAll();
                         } catch (AzureCmdException e) {
                             storageAccounts = null;
-                            DefaultLoader.getUIHelper().showException("An error occurred while attempting to retrieve " +
-                                            "the storage accounts list.", e,
-                                    "Azure Services Explorer - Error Retrieving Storage Accounts", false, true);
+                            String msg = "An error occurred while attempting to retrieve the storage accounts list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
                         }
                     }
                 } finally {
@@ -676,9 +671,7 @@ public class CloudServiceStep extends WizardStep<CreateVMWizardModel> {
                         storageAccounts.put(selectedSA.getName(), selectedSA);
                     }
                 } catch (InterruptedException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to load the storage " +
-                                    "accounts list.", e,
-                            "Azure Services Explorer - Error Loading Storage Accounts", false, true);
+                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting to load the storage accounts list.", e);
                 } finally {
                     saLock.unlock();
                 }
