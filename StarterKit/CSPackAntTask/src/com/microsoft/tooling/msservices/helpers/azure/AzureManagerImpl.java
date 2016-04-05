@@ -156,7 +156,6 @@ import com.microsoft.windowsazure.management.models.SubscriptionGetResponse;
 import com.microsoft.windowsazure.management.network.NetworkManagementClient;
 import com.microsoft.windowsazure.management.storage.StorageManagementClient;
 import com.microsoftopentechnologies.azuremanagementutil.rest.SubscriptionTransformer;
-import com.microsoftopentechnologies.azuremanagementutil.rest.WindowsAzureRestUtils;
 
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
@@ -1584,7 +1583,8 @@ public class AzureManagerImpl implements AzureManager {
     					}
     				});
     			} catch (AzureCmdException ex) {
-    				DefaultLoader.getUIHelper().showException("An error occurred while attempting to deploy web app.",
+    				String msg = "An error occurred while attempting to deploy web app." + "\n" + "(Message from Azure:" + ex.getMessage() + ")";
+    				DefaultLoader.getUIHelper().showException(msg,
     						ex, "MS Services - Error Deploying Web App", false, true);
     			}
     		}

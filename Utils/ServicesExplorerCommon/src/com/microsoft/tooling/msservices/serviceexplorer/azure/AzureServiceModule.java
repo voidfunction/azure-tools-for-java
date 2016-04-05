@@ -81,8 +81,9 @@ public class AzureServiceModule extends RefreshableNode {
                         : subscriptionList.get(0).getName());
             }
         } catch (AzureCmdException e) {
-            DefaultLoader.getUIHelper().showException("An error occurred while attempting to get the subscription list.", e,
-                    "MS Services - Error Getting Subscriptions", false, true);
+        	String msg = "An error occurred while getting the subscription list." + "\n" + "(Message from Azure:" + e.getMessage() + ")";
+        	DefaultLoader.getUIHelper().showException(msg, e,
+        			"MS Services - Error Getting Subscriptions", false, true);
         }
         return BASE_MODULE_NAME;
     }

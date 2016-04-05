@@ -28,6 +28,9 @@ import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
+import com.microsoftopentechnologies.wacommon.utils.Messages;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -158,22 +161,16 @@ public class CreateVMWizard extends Wizard {
                             userName,
                             password,
                             certData);
-
                     virtualMachine = AzureManagerImpl.getManager().refreshVirtualMachineInformation(virtualMachine);
-
                     final VirtualMachine vm = virtualMachine;
-
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                         @Override
                         public void run() {
                             try {
                                 node.addChildNode(new VMNode(node, vm));
                             } catch (AzureCmdException e) {
-                                DefaultLoader.getUIHelper().showException("An error occurred while trying to refresh the list of virtual machines",
-                                        e,
-                                        "Error Refreshing VM List",
-                                        false,
-                                        true);
+                            	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+                            			"An error occurred while refreshing the list of virtual machines.", e);
                             }
                         }
                     });

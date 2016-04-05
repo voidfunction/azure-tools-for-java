@@ -36,7 +36,6 @@ public class CreateStorageAccountAction extends NodeActionListener {
 
         try {
             List<Subscription> subscriptions = apiManager.getSubscriptionList();
-
             if (subscriptions.isEmpty()) {
                 DefaultLoader.getUIHelper().showException("No active Azure subscription was found. Please enable one more Azure " +
                                 "subscriptions by right-clicking on the \"Azure\" " +
@@ -45,7 +44,8 @@ public class CreateStorageAccountAction extends NodeActionListener {
                 return;
             }
         } catch (AzureCmdException e1) {
-            DefaultLoader.getUIHelper().showException("An error occurred while creating the storage account.", e1, "Error creating storage account", false, true);
+        	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), "Error creating storage account",
+        			"An error occurred while creating the storage account.", e1);
         }
 
         CreateStorageAccountForm createStorageAccountForm = new CreateStorageAccountForm(PluginUtil.getParentShell(), null);

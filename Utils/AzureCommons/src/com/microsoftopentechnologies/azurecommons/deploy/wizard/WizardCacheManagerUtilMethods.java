@@ -20,10 +20,8 @@
 
 package com.microsoftopentechnologies.azurecommons.deploy.wizard;
 
-import java.net.URI;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,15 +29,14 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
-import com.microsoft.windowsazure.core.OperationStatusResponse;
-import com.microsoft.windowsazure.management.compute.models.HostedServiceGetDetailedResponse;
-import com.microsoft.windowsazure.management.compute.models.ServiceCertificateListResponse.Certificate;
 import com.microsoft.tooling.msservices.model.vm.Location;
+import com.microsoft.windowsazure.core.OperationStatusResponse;
+import com.microsoft.windowsazure.management.compute.models.ServiceCertificateListResponse.Certificate;
 import com.microsoftopentechnologies.azurecommons.deploy.util.MethodUtils;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
-import com.microsoftopentechnologies.azuremanagementutil.exception.InvalidThumbprintException;
 import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.PreferenceSetUtil;
+import com.microsoftopentechnologies.azuremanagementutil.exception.InvalidThumbprintException;
 import com.microsoftopentechnologies.azuremanagementutil.model.KeyName;
 import com.microsoftopentechnologies.azuremanagementutil.model.Subscription;
 import com.microsoftopentechnologies.azuremanagementutil.rest.WindowsAzureStorageServices;
@@ -187,7 +184,6 @@ public final class WizardCacheManagerUtilMethods {
 		List<Certificate> certsInService = null;
 		AzureManagerImpl.getManager().getCertificates(currentPublishData.getCurrentSubscription().getId(),
 				getCurentHostedService(currentPublishData, currentHostedService).getName());
-
 		return certsInService;
 	}
 

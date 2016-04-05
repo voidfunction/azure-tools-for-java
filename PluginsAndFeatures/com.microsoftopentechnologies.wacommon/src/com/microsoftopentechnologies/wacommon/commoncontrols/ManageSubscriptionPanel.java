@@ -47,7 +47,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
@@ -155,9 +154,8 @@ public class ManageSubscriptionPanel extends Composite {
 								}
 								PluginUtil.createSubscriptionTelemetryEvent(oldSubList, "Azure Explorer login");
 							} catch (AzureCmdException e1) {
-								Activator.getDefault().log(e1.getMessage(), e1);
-								DefaultLoader.getUIHelper().showException("An error occurred while attempting to sign in to your account.",
-										e1, "Error", true, true);
+								PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.error,
+										"An error occurred while attempting to sign in to your account.", e1);
 							}
 						}
 					});
@@ -248,8 +246,8 @@ public class ManageSubscriptionPanel extends Composite {
 
 
 		} catch (AzureCmdException e) {
-			Activator.getDefault().log(e.getMessage(), e);
-			DefaultLoader.getUIHelper().showException("Error setting selected subscriptions", e, "Error", false, true);
+			PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.error,
+        			"An error occurred while setting selected subscriptions", e);
 		}
 	}
 
@@ -281,8 +279,8 @@ public class ManageSubscriptionPanel extends Composite {
 						removeButton.setEnabled(false);
 					}
 				} catch (AzureCmdException e) {
-					Activator.getDefault().log(e.getMessage(), e);
-					DefaultLoader.getUIHelper().showException("Error getting subscription list", e, "Error", false, true);
+					PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.error,
+		        			"An error occurred while getting subscription list.", e);
 				} finally {
 					tableViewer.refresh();
 					PluginUtil.showBusy(false, getShell());

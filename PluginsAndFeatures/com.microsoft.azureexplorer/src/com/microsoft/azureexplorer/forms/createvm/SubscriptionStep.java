@@ -34,12 +34,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.microsoft.azureexplorer.Activator;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
+import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 
@@ -150,8 +150,8 @@ public class SubscriptionStep extends WizardPage {
             }
             setPageComplete(!subscriptions.isEmpty());
         } catch (AzureCmdException e) {
-            DefaultLoader.getUIHelper().showException("An error occurred while trying to load the subscriptions list",
-                    e, "Error Loading Subscriptions", false, true);
+        	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+        			"An error occurred while loading the subscriptions list.", e);
         }
     }
 }

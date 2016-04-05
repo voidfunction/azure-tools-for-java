@@ -28,8 +28,11 @@ import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.AffinityGroup;
 import com.microsoft.tooling.msservices.model.vm.Location;
-
+import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+
+import sun.misc.resources.Messages_sv;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -260,7 +263,8 @@ public class CreateStorageAccountForm extends Dialog {
             }
         } catch (AzureCmdException e) {
             storageAccount = null;
-            DefaultLoader.getUIHelper().showException("An error occurred while trying to create the specified storage account.", e, "Error Creating Storage Account", false, true);
+            PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+        			"An error occurred while creating the storage account.", e);
         }
         PluginUtil.showBusy(false, getShell());
 
@@ -297,7 +301,8 @@ public class CreateStorageAccountForm extends Dialog {
                     loadRegions();
                 }
             } catch (AzureCmdException e) {
-                DefaultLoader.getUIHelper().showException("Error getting subscriptions", e, "Error getting subscriptions", false, true);
+            	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+            			"An error occurred while loading subscriptions.", e);
             }
         } else {
             subscriptionComboBox.setEnabled(false);
@@ -349,8 +354,8 @@ public class CreateStorageAccountForm extends Dialog {
                         }
                     });
                 } catch (AzureCmdException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while trying to load the regions list",
-                            e, "Error Loading Regions", false, true);
+                	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+                			"An error occurred while loading the regions list.", e);
                 }
             }
         });

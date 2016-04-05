@@ -61,6 +61,7 @@ import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishProfile;
 import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.wacommon.commoncontrols.ImportSubscriptionDialog;
+import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class SubscriptionPropertyPage extends Dialog {
@@ -139,17 +140,15 @@ public class SubscriptionPropertyPage extends Dialog {
                             WizardCacheManager.cachePublishData(null, pd, null);
                             PreferenceUtil.save();
                         } catch (RestAPIException e1) {
-                            e1.printStackTrace();
+                           Activator.getDefault().log(Messages.err, e1);
                         } catch (IOException e1) {
-                            e1.printStackTrace();
+                        	Activator.getDefault().log(Messages.err, e1);
                         }
-                        
-
                         PluginUtil.showBusy(false);
                     }
                 } catch (AzureCmdException e1) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while attempting to sign in to your account.",
-                    		e1, "Error", true, true);
+                	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+                			"An error occurred while attempting to sign in to your account.", e1);
                 }
             }
 
@@ -223,15 +222,9 @@ public class SubscriptionPropertyPage extends Dialog {
                 selectedList.add(((Subscription) s).getId());
             }
             AzureManagerImpl.getManager().setSelectedSubscriptions(selectedList);
-
-            //Saving the project is necessary to save the changes on the PropertiesComponent
-//            if (project != null) {
-//                project.save();
-//            }
-
-
         } catch (AzureCmdException e) {
-            DefaultLoader.getUIHelper().showException("Error setting selected subscriptions", e, "Error", false, true);
+        	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+        			"An error occurred while selecting subscription.", e);
         }
         return super.close();
     }
@@ -262,7 +255,8 @@ public class SubscriptionPropertyPage extends Dialog {
                         removeButton.setEnabled(false);
                     }
                 } catch (AzureCmdException e) {
-                    DefaultLoader.getUIHelper().showException("Error getting subscription list", e, "Error", false, true);
+                	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), "Error creating storage account",
+                			"An error occurred while loading the subscription list.", e);
                 } finally {
                     tableViewer.refresh();
                     PluginUtil.showBusy(false, getShell());
@@ -425,11 +419,7 @@ public class SubscriptionPropertyPage extends Dialog {
             WizardCacheManager.clearSubscriptions();
             subscriptionList.clear();
             tableViewer.refresh();
-            // todo ?
-//            DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.SELECTED_SUBSCRIPTIONS);
-
             removeButton.setEnabled(false);
-
             refreshSignInCaption();
         }
     }

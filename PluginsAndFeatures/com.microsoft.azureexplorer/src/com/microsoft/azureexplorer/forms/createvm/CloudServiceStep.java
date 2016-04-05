@@ -50,6 +50,7 @@ import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
 import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
+import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class CloudServiceStep extends WizardPage {
@@ -259,7 +260,6 @@ public class CloudServiceStep extends WizardPage {
                         try {
                             List<CloudService> services = AzureManagerImpl.getManager().getCloudServices(wizard.getSubscription().getId().toString());
                             cloudServices = new TreeMap<String, CloudService>();
-
                             for (CloudService cloudService : services) {
                                 if (cloudService.getProductionDeployment().getComputeRoles().size() == 0) {
                                     cloudServices.put(cloudService.getName(), cloudService);
@@ -268,8 +268,8 @@ public class CloudServiceStep extends WizardPage {
                             csInitialized.signalAll();
                         } catch (AzureCmdException e) {
                             cloudServices = null;
-                            DefaultLoader.getUIHelper().showException("An error occurred while trying to retrieve the cloud services list",
-                                    e, "Error Retrieving Cloud Services", false, true);
+                            PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+                        			"An error occurred while retrieving the cloud services list.", e);
                         }
                     }
                 } finally {
@@ -475,7 +475,6 @@ public class CloudServiceStep extends WizardPage {
                         try {
                             List<VirtualNetwork> networks = AzureManagerImpl.getManager().getVirtualNetworks(wizard.getSubscription().getId().toString());
                             virtualNetworks = new TreeMap<String, VirtualNetwork>();
-
                             for (VirtualNetwork virtualNetwork : networks) {
                                 virtualNetworks.put(virtualNetwork.getName(), virtualNetwork);
                             }
@@ -483,8 +482,8 @@ public class CloudServiceStep extends WizardPage {
                             vnInitialized.signalAll();
                         } catch (AzureCmdException e) {
                             virtualNetworks = null;
-                            DefaultLoader.getUIHelper().showException("An error occurred while trying to retrieve the virtual networks list",
-                                    e, "Error Retrieving Virtual Networks", false, true);
+                            PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+                            		"An error occurred while retrieving the virtual networks list.", e);
                         }
                     }
                 } finally {
@@ -681,8 +680,8 @@ public class CloudServiceStep extends WizardPage {
                             saInitialized.signalAll();
                         } catch (AzureCmdException e) {
                             storageAccounts = null;
-                            DefaultLoader.getUIHelper().showException("An error occurred while trying to retrieve the storage accounts list",
-                                    e, "Error Retrieving Storage Accounts", false, true);
+                            PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+                            		"An error occurred while retrieving the storage accounts list.", e);
                         }
                     }
                 } finally {

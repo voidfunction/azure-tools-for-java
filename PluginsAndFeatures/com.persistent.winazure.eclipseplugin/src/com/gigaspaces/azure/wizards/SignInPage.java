@@ -1191,8 +1191,8 @@ public class SignInPage extends WindowsAzurePage {
 				publishData = MethodUtils.handleFile(ImportSubscriptionDialog.getPubSetFilePath(), null);
 				PluginUtil.createSubscriptionTelemetryEvent(oldSubList, "Azure Explorer login");
 			} catch (Exception e) {
-				DefaultLoader.getUIHelper().showException("Error: " + e.getMessage(), e, "Error", false, true);
-				com.microsoftopentechnologies.wacommon.Activator.getDefault().log("Error: " + e.getMessage(), e);
+				PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.error,
+	        			"An error occurred while loading subscriptions.", e);
 			} finally {
 				PluginUtil.showBusy(false, getShell());
 			}

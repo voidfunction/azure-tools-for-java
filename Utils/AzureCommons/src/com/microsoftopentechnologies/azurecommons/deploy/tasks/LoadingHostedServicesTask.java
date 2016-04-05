@@ -78,7 +78,6 @@ public class LoadingHostedServicesTask extends LoadingTask<Map<String, List<Clou
 				return new ConcurrentHashMap<String, List<CloudService>>();
 			}
 		}
-
 		return hostedServicesMap;
 
 	}
@@ -92,7 +91,6 @@ public class LoadingHostedServicesTask extends LoadingTask<Map<String, List<Clou
 	}
 
 	class LoadHostedServicesPerSubscription implements Runnable {
-
 		private String subcriptionId;
 
 		public void setSubscriptionId(String id) {
@@ -101,7 +99,6 @@ public class LoadingHostedServicesTask extends LoadingTask<Map<String, List<Clou
 
 		@Override
 		public void run() {
-
 			List<CloudService> cloudServicesForSubscription;
 			try {
 				cloudServicesForSubscription = AzureManagerImpl.getManager().getCloudServices(subcriptionId);
@@ -121,6 +118,4 @@ public class LoadingHostedServicesTask extends LoadingTask<Map<String, List<Clou
 			}
 		}	
 	}
-
-
 }

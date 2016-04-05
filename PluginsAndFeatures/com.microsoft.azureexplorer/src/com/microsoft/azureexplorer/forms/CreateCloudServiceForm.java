@@ -7,6 +7,7 @@ import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.vm.AffinityGroup;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
 import com.microsoft.tooling.msservices.model.vm.Location;
+import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -168,8 +169,8 @@ public class CreateCloudServiceForm extends Dialog {
                         }
                     });
                 } catch (AzureCmdException e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while trying to load the regions list",
-                            e, "Error Loading Regions", false, true);
+                	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+                			"An error occurred while loading the regions list", e);
                 }
             }
         });
@@ -194,12 +195,12 @@ public class CreateCloudServiceForm extends Dialog {
             String affinityGroup = (regionOrAffinity != null && regionOrAffinity instanceof AffinityGroup) ?
                     ((AffinityGroup) regionOrAffinity).getName() :
                     "";
-
             cloudService = new CloudService(name, location, affinityGroup, subscription.getId());
             AzureManagerImpl.getManager().createCloudService(cloudService);
-        } catch (Exception e) {
-            cloudService = null;
-            DefaultLoader.getUIHelper().showException("An error occurred while trying to create the specified cloud service", e, "Error Creating Storage Account", false, true);
+        } catch (AzureCmdException e) {
+        	cloudService = null;
+        	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+        			"An error occurred while creating the specified cloud service.", e);
         }
 
         onCreate.run();

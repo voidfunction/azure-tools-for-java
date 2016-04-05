@@ -122,6 +122,12 @@ public class PluginUtil {
 		Activator.getDefault().log(message, e);
 		displayErrorDialog(shell, title, message);
 	}
+	
+	public static void displayErrorDialogWithAzureMsg(Shell shell, String title, String message, Exception e) {
+		Activator.getDefault().log(message, e);
+		message = message + "\n" + String.format(Messages.azExpMsg, e.getMessage());
+		displayErrorDialog(shell, title, message);
+	}
 
 	/**
 	 * Gets preferences object according to node name.

@@ -24,6 +24,9 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineSize;
+import com.microsoftopentechnologies.wacommon.utils.Messages;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -230,7 +233,6 @@ public class MachineSettingsStep extends WizardPage {
                         Collections.sort(virtualMachineSizes, new Comparator<VirtualMachineSize>() {
                             @Override
                             public int compare(VirtualMachineSize t0, VirtualMachineSize t1) {
-
                                 if (t0.getName().contains("Basic") && t1.getName().contains("Basic")) {
                                     return t0.getName().compareTo(t1.getName());
                                 } else if (t0.getName().contains("Basic")) {
@@ -260,8 +262,8 @@ public class MachineSettingsStep extends WizardPage {
                             }
                         });
                     } catch (AzureCmdException e) {
-                        DefaultLoader.getUIHelper().showException("An error occurred while trying to load the VM sizes list",
-                                e, "Error Loading VM Sizes", false, true);
+                    	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+                    			"An error occurred while loading the VM sizes list.", e);
                     }
                 }
             });

@@ -32,8 +32,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import waeclipseplugin.Activator;
-
 import com.gigaspaces.azure.rest.PluginConstants;
 import com.gigaspaces.azure.util.CommandLineException;
 import com.gigaspaces.azure.views.WindowsAzureActivityLogView;
@@ -45,7 +43,6 @@ import com.interopbridges.tools.windowsazure.WindowsAzureRole;
 import com.interopbridges.tools.windowsazure.WindowsAzureRoleComponent;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
-import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.core.OperationStatus;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.DeploymentGetResponse;
@@ -58,16 +55,18 @@ import com.microsoftopentechnologies.azurecommons.deploy.model.CertificateUpload
 import com.microsoftopentechnologies.azurecommons.deploy.model.DeployDescriptor;
 import com.microsoftopentechnologies.azurecommons.exception.DeploymentException;
 import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
+import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccount;
+import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccountRegistry;
 import com.microsoftopentechnologies.azuremanagementutil.model.InstanceStatus;
 import com.microsoftopentechnologies.azuremanagementutil.model.Notifier;
 import com.microsoftopentechnologies.azuremanagementutil.rest.WindowsAzureRestUtils;
 import com.microsoftopentechnologies.azuremanagementutil.rest.WindowsAzureStorageServices;
-import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccount;
-import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccountRegistry;
 import com.microsoftopentechnologies.wacommon.storageregistry.PreferenceUtilStrg;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.microsoftopentechnologies.wacommon.utils.WACommonException;
+
+import waeclipseplugin.Activator;
 
 public final class DeploymentManager {
 
