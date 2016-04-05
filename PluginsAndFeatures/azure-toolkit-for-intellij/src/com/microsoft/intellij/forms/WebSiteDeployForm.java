@@ -27,6 +27,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
@@ -74,6 +75,7 @@ public class WebSiteDeployForm extends DialogWrapper {
     private JButton buttonAddApp;
     private JCheckBox chkBoxDeployRoot;
     private JButton buttonDel;
+    private Module module;
     private Project project;
     private WebSite selectedWebSite;
     private CancellableTaskHandle fillListTaskHandle;
@@ -82,9 +84,10 @@ public class WebSiteDeployForm extends DialogWrapper {
     List<WebSite> webSiteList = new ArrayList<WebSite>();
     Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
 
-    public WebSiteDeployForm(@org.jetbrains.annotations.Nullable Project project) {
-        super(project, true, IdeModalityType.PROJECT);
-        this.project = project;
+    public WebSiteDeployForm(Module module) {
+        super(module.getProject(), true, IdeModalityType.PROJECT);
+        this.module = module;
+        this.project = module.getProject();
         setTitle(message("webAppTtl"));
         buttonAddApp.addActionListener(new ActionListener() {
             @Override
@@ -109,6 +112,10 @@ public class WebSiteDeployForm extends DialogWrapper {
             }
         });
         init();
+        String nameToSelectCached = DefaultLoader.getIdeHelper().getProperty(String.format("%s.webapps", module.getName()));
+        if (nameToSelectCached != null) {
+            nameToSelect = nameToSelectCached;
+        }
         fillList();
     }
 
@@ -188,6 +195,7 @@ public class WebSiteDeployForm extends DialogWrapper {
             }
             AppInsightsCustomEvent.createFTPEvent("WebAppFTP", destAppUrl, artifactDescriptor.getName(), selectedWebSite.getSubscriptionId());
         }
+        DefaultLoader.getIdeHelper().setProperty(String.format("%s.webapps", module.getName()), selectedWebSite.getName());
         return url;
     }
 
