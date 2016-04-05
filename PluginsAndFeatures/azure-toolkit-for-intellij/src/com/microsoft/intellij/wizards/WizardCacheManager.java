@@ -422,6 +422,7 @@ public final class WizardCacheManager {
                     profileSubscription.setSubscriptionID(subscription.getId());
                     profileSubscription.setSubscriptionName(subscription.getName());
                     profileSubscription.setMaxStorageAccounts(subscription.getMaxStorageAccounts());
+                    profileSubscription.setMaxHostedServices(subscription.getMaxHostedServices());
                     profileSubscription.setServiceManagementUrl(subscription.getServiceManagementUrl());
                     publishData.getPublishProfile().getSubscriptions().add(profileSubscription);
                 }
