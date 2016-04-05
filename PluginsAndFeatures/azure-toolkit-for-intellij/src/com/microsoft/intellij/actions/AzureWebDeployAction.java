@@ -26,20 +26,18 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleTypeId;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.microsoft.intellij.forms.WebSiteDeployForm;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tasks.WebSiteDeployTask;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class AzureWebDeployAction extends AnAction {
     public void actionPerformed(AnActionEvent e) {
-        WebSiteDeployForm form = new WebSiteDeployForm(e.getProject());
+        Module module = LangDataKeys.MODULE.getData(e.getDataContext());
+        WebSiteDeployForm form = new WebSiteDeployForm(module);
         form.show();
         if (form.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
             try {

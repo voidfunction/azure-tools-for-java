@@ -268,6 +268,10 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
         myState.properties.remove(name);
     }
 
+    public Set<String> getPropertyKeys() {
+        return myState.properties.keySet();
+    }
+
     public boolean isPropertySet(String name) {
         return myState.properties.containsKey(name);
     }
