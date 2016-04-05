@@ -903,14 +903,10 @@ public class WindowsAzurePackage extends Task {
 			this.verifyDownloads = false;
 		}
 		if (Utils.isNotNullOrEmpty(publishSettingsPath)) {
-			ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 			try {
-				Thread.currentThread().setContextClassLoader(WindowsAzurePackage.class.getClassLoader());
 				AzureManagerImpl.getManager().importPublishSettingsFile(publishSettingsPath);
 			} catch (AzureCmdException e) {
 				throw new BuildException(e);
-			} finally {
-				Thread.currentThread().setContextClassLoader(currentClassLoader);
 			}
 		} else {
 			String accessToken = getProject().getProperty("accesstoken");

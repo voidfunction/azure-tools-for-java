@@ -1377,10 +1377,7 @@ public class AzureSDKHelper {
     public static SubscriptionGetResponse getSubscription(@NotNull Configuration config) throws AzureCmdException {
     	ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
     	try {
-    		if (DefaultLoader.PLUGIN_ID.equals(DefaultLoader.getPluginComponent().getPluginId())) {
-    			// Change context classloader to class context loader
-    			Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
-    		}
+    		Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
     		ManagementClient client = ManagementService.create(config);
     		return client.getSubscriptionsOperations().get();
     	} catch(Exception ex) {
@@ -2773,14 +2770,11 @@ public class AzureSDKHelper {
         // Get current context class loader
         ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
         try {
-            if (DefaultLoader.getPluginComponent() != null && DefaultLoader.PLUGIN_ID.equals(DefaultLoader.getPluginComponent().getPluginId())) {
-                // Change context classloader to class context loader
-                Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
-            }
-            Configuration configuration = PublishSettingsLoader.createManagementConfiguration(file.getPath(), subscriptionId);
-            return configuration;
+        	Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
+        	Configuration configuration = PublishSettingsLoader.createManagementConfiguration(file.getPath(), subscriptionId);
+        	return configuration;
         } finally {
-            // Call Azure API and reset back the context loader
+        	// Call Azure API and reset back the context loader
             Thread.currentThread().setContextClassLoader(contextLoader);
         }
     }

@@ -1870,18 +1870,13 @@ public class AzureManagerImpl implements AzureManager {
             throws AzureCmdException {
         try {
             StringBuilder sb = new StringBuilder();
-
             BufferedReader br = new BufferedReader(new FileReader(publishSettingsFilePath));
             String line = br.readLine();
-
             while (line != null) {
                 sb.append(line);
                 line = br.readLine();
             }
-//            String subscriptionFile = OpenSSLHelper.processCertificate(sb.toString());
-
             String publishSettingsFile = sb.toString();
-
             String managementCertificate = null;
             String serviceManagementUrl = null;
             boolean isPublishSettings2 = true;
@@ -1894,9 +1889,7 @@ public class AzureManagerImpl implements AzureManager {
             }
             NodeList subscriptionNodes = (NodeList) XmlHelper.getXMLValue(publishSettingsFile, "//Subscription",
                     XPathConstants.NODESET);
-
             List<Subscription> subscriptions = new ArrayList<Subscription>();
-
             for (int i = 0; i < subscriptionNodes.getLength(); i++) {
                 Node subscriptionNode = subscriptionNodes.item(i);
                 Subscription subscription = new Subscription();
@@ -1910,16 +1903,13 @@ public class AzureManagerImpl implements AzureManager {
                     subscription.setServiceManagementUrl(serviceManagementUrl);
                 }
                 subscription.setSelected(true);
-
                 Configuration config = AzureSDKHelper.getConfiguration(new File(publishSettingsFilePath), subscription.getId());
                 SubscriptionGetResponse response = getSubscription(config);
                 com.microsoftopentechnologies.azuremanagementutil.model.Subscription sub = SubscriptionTransformer.transform(response);
                 subscription.setMaxStorageAccounts(sub.getMaxStorageAccounts());
                 subscription.setMaxHostedServices(sub.getMaxHostedServices());
-
                 subscriptions.add(subscription);
             }
-
             return subscriptions;
         } catch (Exception ex) {
             if (ex instanceof AzureCmdException) {
