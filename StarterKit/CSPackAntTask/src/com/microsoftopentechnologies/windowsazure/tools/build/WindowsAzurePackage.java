@@ -643,91 +643,94 @@ public class WindowsAzurePackage extends Task {
 	 * Executes the task
 	 */
 	public void execute() throws BuildException {
-		// Initialize and verify attributes
-		this.initialize();
-
+		// workaround for azure libraries class loading issues.
+		ClassLoader thread = Thread.currentThread().getContextClassLoader();
 		try {
-			
-		// To support auto storage in Ant task
-		try {
-			configureAutoCloudUrl();
-		} catch (Exception e) {
-			reportBuildError(e);
-		}
-
-		// Ensure that all approot directories are correctly setup
-		try {
-			this.verifyAppRoots();
-		} catch (IOException e) {
-			reportBuildError(e);
-		}
-
-		// Validate Azure Project Configuration
-		checkProjectConfiguration();
-		this.log("Verified attributes.");
-
-		// Start verifying downloads if needed, on a separate thread
-		startDownloadManagement();
-		
-		// Include storage library into all roles
-		includeStorageClientLibrary();
-		
-		// Import all components into roles
-		importComponents();
-
-		// Generate deployment startup scripts for all components
-		try {
-			this.createStartupScripts();
-		} catch (IOException e) {
-			reportBuildError(e);
-		}
-
-		// Run cspack.exe
-		this.log("Starting package generation...");
-        try {
-            if (getSdkDir() != null) {
-                // Get cspack.exe cmd-line
-                List<String> csPackCmdLine = this.createCSPackCommandLine();
-                this.runCommandLine(csPackCmdLine);
-            } else {
-                Configuration configuration = initConfiguration(this);
-//				new PackageCreator(configuration).createPackage();
-                new BinaryPackageCreator(configuration).createPackage();
+			Thread.currentThread().setContextClassLoader(WindowsAzurePackage.class.getClassLoader());
+			// Initialize and verify attributes
+			this.initialize();
+			// To support auto storage in Ant task
+			try {
+				configureAutoCloudUrl();
+			} catch (Exception e) {
+				reportBuildError(e);
 			}
-        } catch (Exception e) {
-            reportBuildError(e);
-        }
 
-        this.log("Completed package generation.");
+			// Ensure that all approot directories are correctly setup
+			try {
+				this.verifyAppRoots();
+			} catch (IOException e) {
+				reportBuildError(e);
+			}
 
-		// Prepare any additional deploy files
-		try {
-			prepareDeployFiles();
-		} catch (IOException e) {
-			reportBuildError(e);
-		}
+			// Validate Azure Project Configuration
+			checkProjectConfiguration();
+			this.log("Verified attributes.");
 
-		// Wait for the download verifier thread
-		try {
-			finishDownloadManagement();
+			// Start verifying downloads if needed, on a separate thread
+			startDownloadManagement();
+
+			// Include storage library into all roles
+			includeStorageClientLibrary();
+
+			// Import all components into roles
+			importComponents();
+
+			// Generate deployment startup scripts for all components
+			try {
+				this.createStartupScripts();
+			} catch (IOException e) {
+				reportBuildError(e);
+			}
+
+			// Run cspack.exe
+			this.log("Starting package generation...");
+			try {
+				if (getSdkDir() != null) {
+					// Get cspack.exe cmd-line
+					List<String> csPackCmdLine = this.createCSPackCommandLine();
+					this.runCommandLine(csPackCmdLine);
+				} else {
+					Configuration configuration = initConfiguration(this);
+					//				new PackageCreator(configuration).createPackage();
+					new BinaryPackageCreator(configuration).createPackage();
+				}
+			} catch (Exception e) {
+				reportBuildError(e);
+			}
+
+			this.log("Completed package generation.");
+
+			// Prepare any additional deploy files
+			try {
+				prepareDeployFiles();
+			} catch (IOException e) {
+				reportBuildError(e);
+			}
+
+			// Wait for the download verifier thread
+			try {
+				finishDownloadManagement();
+			} catch(Exception e) {
+				reportBuildError(e);
+			}
+
+			/*
+			 * Restore components which are updated during build
+			 * to original state i.e. again updates cloudurl to "auto"
+			 * and removes cloudkey attribute.
+			 */
+			if (mdfdCmpntList.size() > 0) {
+				addAutoCloudUrl();
+			}
+			if (roleMdfdCache.size() > 0) {
+				addAutoSettingsForCache();
+			}
 		} catch(Exception e) {
 			reportBuildError(e);
+		} finally {
+			Thread.currentThread().setContextClassLoader(thread);
 		}
-
-		/*
-		 * Restore components which are updated during build
-		 * to original state i.e. again updates cloudurl to "auto"
-		 * and removes cloudkey attribute.
-		 */
-		if (mdfdCmpntList.size() > 0) {
-			addAutoCloudUrl();
-		}
-		if (roleMdfdCache.size() > 0) {
-			addAutoSettingsForCache();
-		}
-		} catch(Exception e) {
-			reportBuildError(e);
-		} 
 	}
 
 	private void addAutoCloudUrl() {
