@@ -1,2 +1,3 @@
-# HDInsight-tools-for-java-private
-This is a staging repo for integrating code into an already open sourced repo, https://github.com/microsoft/azure-tools-for-java
+# Azure-HDInsight-Intellij-Tools
+Azure HDInsight Intellij plugin 
+Please contact hdivstool at microsoft dot com if you have any questions.
