@@ -44,7 +44,7 @@
    
    <!-- Icons for dropdown -->
    <extension point="org.eclipse.ui.commandImages">
-      <image commandId="com.microsoft.ui.dropdown.command" icon="icons/azure.png"></image>
+      <image commandId="com.microsoft.ui.dropdown.command" icon="icons/publish.png"></image>
    </extension>
    
    <!-- Handlers for dropdown -->

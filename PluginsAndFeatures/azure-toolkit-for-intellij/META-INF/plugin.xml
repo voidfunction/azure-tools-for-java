@@ -132,14 +132,14 @@
     </group>
 
     <group id="AzureToolbarGroup" text="Azure" description="Azure">
+      <group id="PublishToAzureGroup" text="Publish Group" description="Publish Group" popup="true" icon="/icons/publish.png">
+        <reference ref="Actions.AzureWebDeploy"/>
+        <reference ref="Actions.DeployAction"/>
+      </group>
       <reference ref="Actions.RunInEmulatorAction"/>
       <reference ref="Actions.ResetEmulatorAction"/>
       <reference ref="Actions.BuildPackageAction"/>
       <reference ref="Actions.PackageAction"/>
-      <group id="PublishToAzureGroup" text="Publish Group" description="Publish Group" popup="true" icon="/icons/azure.png">
-        <reference ref="Actions.AzureWebDeploy"/>
-        <reference ref="Actions.DeployAction"/>
-      </group>
       <reference ref="Actions.UnpublishAction"/>
     </group>
 

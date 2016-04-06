@@ -151,11 +151,11 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                         } catch (IOException e1) {
                             e1.printStackTrace();
                         }
-
-                        myDialog.getWindow().setCursor(Cursor.getDefaultCursor());
                     }
                 } catch (AzureCmdException e1) {
                     PluginUtil.displayErrorDialogAndLog(message("signInErr"), e1.getMessage(), e1);
+                } finally {
+                    myDialog.getWindow().setCursor(Cursor.getDefaultCursor());
                 }
             }
         });
