@@ -1533,6 +1533,13 @@ public class AzureManagerImpl implements AzureManager {
     	return requestWebSiteSDK(subscriptionId, AzureSDKHelper.createWebHostingPlan(webHostingPlan));
     }
 
+    @NotNull
+    @Override
+    public List<com.microsoft.azure.management.compute.models.VirtualMachine> getArmVirtualMachines(@NotNull String subscriptionId)
+            throws AzureCmdException {
+        return requestArmComputeSDK(subscriptionId, AzureSDKHelper.getArmVirtualMachines(subscriptionId));
+    }
+
     @Nullable
     @Override
     public ArtifactDescriptor getWebArchiveArtifact(@NotNull ProjectDescriptor projectDescriptor)
@@ -2544,6 +2551,27 @@ public class AzureManagerImpl implements AzureManager {
                     throws Throwable {
                 return AzureSDKHelper.getManagementClient(subscriptionId,
                         accessToken);
+            }
+        });
+    }
+
+    @NotNull
+    private <T> T requestArmComputeSDK(@NotNull final String subscriptionId,
+                                               @NotNull final SDKRequestCallback<T, com.microsoft.azure.management.compute.ComputeManagementClient> requestCallback)
+            throws AzureCmdException {
+        return requestAzureSDK(subscriptionId, requestCallback, new AzureSDKClientProvider<com.microsoft.azure.management.compute.ComputeManagementClient>() {
+            @NotNull
+            @Override
+            public com.microsoft.azure.management.compute.ComputeManagementClient getAADClient(@NotNull String subscriptionId, @NotNull String accessToken)
+                    throws Throwable {
+                return AzureSDKHelper.getArmComputeManagementClient(subscriptionId, accessToken);
+            }
+
+            @Override
+            public com.microsoft.azure.management.compute.ComputeManagementClient getSSLClient(Subscription subscription) throws Throwable {
+                throw new AzureCmdException("Certificate authentication not supported for ARM");
+//                return AzureSDKHelper.getResourceManagementClient(subscription.getId(),
+//                        subscription.getManagementCertificate(), subscription.getServiceManagementUrl());
             }
         });
     }

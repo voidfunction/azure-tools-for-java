@@ -19,30 +19,30 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.tooling.msservices.serviceexplorer.azure.vm;
+package com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm;
 
+import com.microsoft.azure.management.compute.models.VirtualMachine;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
+import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
 
 import java.util.List;
 
-public class VMServiceModule extends AzureRefreshableNode {
-    private static final String VM_SERVICE_MODULE_ID = VMServiceModule.class.getName();
+public class VMArmServiceModule extends AzureRefreshableNode {
+    private static final String VM_SERVICE_MODULE_ID = com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule.class.getName();
     private static final String ICON_PATH = "virtualmachines.png";
-    private static final String BASE_MODULE_NAME = "Virtual Machines (Classic)";
+    private static final String BASE_MODULE_NAME = "Virtual Machines";
 
-    public VMServiceModule(Node parent) {
+    public VMArmServiceModule(Node parent) {
         super(VM_SERVICE_MODULE_ID, BASE_MODULE_NAME, parent, ICON_PATH);
     }
 
     @Override
-    protected void refresh(@NotNull EventStateHandle eventState)
+    protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
             throws AzureCmdException {
         // remove all child nodes
         removeAllChildNodes();
@@ -51,7 +51,7 @@ public class VMServiceModule extends AzureRefreshableNode {
         List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
 
         for (Subscription subscription : subscriptionList) {
-            List<VirtualMachine> virtualMachines = AzureManagerImpl.getManager().getVirtualMachines(subscription.getId());
+            List<VirtualMachine> virtualMachines = AzureManagerImpl.getManager().getArmVirtualMachines(subscription.getId());
 
             if (eventState.isEventTriggered()) {
                 return;

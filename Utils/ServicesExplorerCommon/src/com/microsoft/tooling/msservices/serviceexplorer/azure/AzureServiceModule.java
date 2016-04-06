@@ -33,6 +33,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.mobileservice.MobileServiceModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappsModule;
 
 import java.util.List;
@@ -46,6 +47,7 @@ public class AzureServiceModule extends RefreshableNode {
     private Object project;
     private MobileServiceModule mobileServiceModule ;
     private VMServiceModule vmServiceModule;
+    private VMArmServiceModule vmArmServiceModule;
     private StorageModule storageServiceModule;
     private WebappsModule webappsModule;
     private boolean storageModuleOnly;
@@ -65,6 +67,7 @@ public class AzureServiceModule extends RefreshableNode {
             vmServiceModule = new VMServiceModule(this);
             mobileServiceModule = new MobileServiceModule(this);
         }
+        vmArmServiceModule = new VMArmServiceModule(this);
     }
 
     public AzureServiceModule(Node parent, String iconPath, Object data) {
@@ -126,6 +129,12 @@ public class AzureServiceModule extends RefreshableNode {
             }
 
             webappsModule.load();
+        }
+        if (!vmArmServiceModule.isLoading()) {
+            if (!isDirectChild(vmArmServiceModule)) {
+                addChildNode(vmArmServiceModule);
+            }
+            vmArmServiceModule.load();
         }
     }
 
