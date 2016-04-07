@@ -93,7 +93,7 @@ public class MethodUtils {
 		 */
 		if (data != null) {
 			Display.getDefault().syncExec(new
-					CacheAccountWithProgressWindow(file, data, new Shell(),
+					CacheAccountWithProgressWindow(file, data, PluginUtil.getParentShell(),
 							Messages.loadingCred));
 			PreferenceUtil.save();
 		}
@@ -120,7 +120,7 @@ public class MethodUtils {
 	 */
 	public static void loadSubInfoFirstTime(TableViewer tableViewer) {
 		if (!PreferenceUtil.isLoaded()) {
-			Display.getDefault().syncExec(new LoadAccountWithProgressWindow(null, new Shell()));
+			Display.getDefault().syncExec(new LoadAccountWithProgressWindow(null, PluginUtil.getParentShell()));
 			PreferenceUtilStrg.load();
 			prepareListFromPublishData();
 		}
