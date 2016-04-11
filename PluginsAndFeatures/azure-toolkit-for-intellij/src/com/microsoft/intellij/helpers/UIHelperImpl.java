@@ -301,7 +301,7 @@ public class UIHelperImpl implements UIHelper {
 
             if (ex instanceof AzureCmdException) {
                 String errorLog = ((AzureCmdException) ex).getErrorLog();
-                if (errorLog != null) {
+                if (errorLog != null && !errorLog.isEmpty()) {
                     details = errorLog;
                 }
             }

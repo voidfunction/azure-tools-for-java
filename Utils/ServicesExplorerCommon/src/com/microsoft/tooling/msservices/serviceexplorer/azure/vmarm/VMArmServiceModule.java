@@ -23,6 +23,7 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm;
 
 import com.microsoft.azure.management.compute.models.VirtualMachine;
 import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
@@ -51,14 +52,14 @@ public class VMArmServiceModule extends AzureRefreshableNode {
         List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
 
         for (Subscription subscription : subscriptionList) {
-            List<VirtualMachine> virtualMachines = AzureManagerImpl.getManager().getArmVirtualMachines(subscription.getId());
+            List<VirtualMachine> virtualMachines = AzureArmManagerImpl.getManager().getVirtualMachines(subscription.getId());
 
             if (eventState.isEventTriggered()) {
                 return;
             }
 
             for (VirtualMachine vm : virtualMachines) {
-                addChildNode(new VMNode(this, vm));
+                addChildNode(new VMNode(this, subscription.getId(), vm));
             }
         }
     }

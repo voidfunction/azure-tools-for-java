@@ -368,8 +368,4 @@ public interface AzureManager {
     List<String> getResourceGroupNames(@NotNull String subscriptionId) throws AzureCmdException;
     
     ResourceGroupExtended createResourceGroup(@NotNull String subscriptionId, @NotNull String name, @NotNull String location) throws AzureCmdException;
-
-    @NotNull
-    List<com.microsoft.azure.management.compute.models.VirtualMachine> getArmVirtualMachines(@NotNull String subscriptionId)
-            throws AzureCmdException;
 }

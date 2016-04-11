@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.management.compute.models.VirtualMachine;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.Endpoint;
@@ -42,6 +43,37 @@ import java.util.List;
 import java.util.Map;
 
 public class VMNode extends AzureRefreshableNode {
+    public class RestartVMAction extends AzureNodeActionPromptListener {
+        public RestartVMAction() {
+            super(VMNode.this,
+                    String.format("Are you sure you want to restart the virtual machine %s?", virtualMachine.getName()),
+                    "Restarting VM");
+        }
+
+        @Override
+        protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
+                throws AzureCmdException {
+            AzureArmManagerImpl.getManager().restartVirtualMachine(subscriptionId, virtualMachine);
+        }
+
+        @Override
+        protected void onSubscriptionsChanged(NodeActionEvent e) throws AzureCmdException {
+        }
+    }
+//    public class RestartVMAction extends VMNodeActionPromptListener {
+//        public RestartVMAction() {
+//            super(VMNode.this,
+//                    "Are you sure you want to restart the virtual machine %s?",
+//                    "Restarting VM");
+//        }
+//
+//        @Override
+//        protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
+//                throws AzureCmdException {
+//            AzureManagerImpl.getManager().restartVirtualMachineArm(virtualMachine);
+//        }
+//    }
+
     private static final String WAIT_ICON_PATH = "virtualmachinewait.png";
     private static final String STOP_ICON_PATH = "virtualmachinestop.png";
     private static final String RUN_ICON_PATH = "virtualmachinerun.png";
@@ -52,20 +84,21 @@ public class VMNode extends AzureRefreshableNode {
     public static final String ACTION_RESTART = "Restart";
     public static final int REMOTE_DESKTOP_PORT = 3389;
 
-    protected VirtualMachine virtualMachine;
+    private VirtualMachine virtualMachine;
+    private String subscriptionId;
 
-    public VMNode(Node parent, VirtualMachine virtualMachine)
+    public VMNode(Node parent, String subscriptionId, VirtualMachine virtualMachine)
             throws AzureCmdException {
         super(virtualMachine.getName(), virtualMachine.getName(), parent, WAIT_ICON_PATH, true);
         this.virtualMachine = virtualMachine;
-
+        this.subscriptionId = subscriptionId;
         loadActions();
 
         // update vm icon based on vm status
 //        refreshItemsInternal();
     }
 
-//    private String getVMIconPath() {
+    private String getVMIconPath() {
 //        switch (virtualMachine.getStatus()) {
 //            case Ready:
 //                return RUN_ICON_PATH;
@@ -73,9 +106,9 @@ public class VMNode extends AzureRefreshableNode {
 //            case StoppedDeallocated:
 //                return STOP_ICON_PATH;
 //            default:
-//                return WAIT_ICON_PATH;
+                return WAIT_ICON_PATH;
 //        }
-//    }
+    }
 
     @Override
     protected void refresh(@NotNull EventStateHandle eventState)
@@ -90,9 +123,9 @@ public class VMNode extends AzureRefreshableNode {
     }
 
     private void refreshItemsInternal() {
-//        // update vm name and status icon
-//        setName(virtualMachine.getName());
-//        setIconPath(getVMIconPath());
+        // update vm name and status icon
+        setName(virtualMachine.getName());
+        setIconPath(getVMIconPath());
 //
 //        // load up the endpoint nodes
 //        removeAllChildNodes();
@@ -112,7 +145,7 @@ public class VMNode extends AzureRefreshableNode {
 //        actionMap.put(ACTION_DOWNLOAD_RDP_FILE, DownloadRDPAction.class);
 //        actionMap.put(ACTION_SHUTDOWN, ShutdownVMAction.class);
 //        actionMap.put(ACTION_START, StartVMAction.class);
-//        actionMap.put(ACTION_RESTART, RestartVMAction.class);
+        actionMap.put(ACTION_RESTART, RestartVMAction.class);
 
         return ImmutableMap.copyOf(actionMap);
     }

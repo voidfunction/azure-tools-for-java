@@ -18,5 +18,6 @@
     <orderEntry type="library" name="azure-activedirectory-interactive-auth-library-for-java" level="project" />
     <orderEntry type="library" name="services-explorer-common" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="com.microsoft.azure:azure-storage:4.0.0" level="project" />
+    <orderEntry type="library" name="azure-arm-sdk" level="project" />
   </component>
 </module>

@@ -42,6 +42,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
 import com.microsoft.azure.management.websites.models.*;
+import com.microsoft.rest.credentials.TokenCredentials;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Strings;
@@ -1415,44 +1416,9 @@ public class AzureSDKHelper {
     }
 
     @NotNull
-    public static com.microsoft.azure.management.compute.ComputeManagementClient getArmComputeManagementClient(@NotNull String subscriptionId,
-                                                                       @NotNull String accessToken) throws IOException, URISyntaxException, AzureCmdException {
-        Configuration configuration = getConfigurationForArm(subscriptionId, accessToken);
-
-        if (configuration == null) {
-            throw new AzureCmdException("Unable to instantiate Configuration");
-        }
-        com.microsoft.azure.management.compute.ComputeManagementClient client = com.microsoft.azure.management.compute.ComputeManagementService.create(configuration);
-        if (client == null) {
-            throw new AzureCmdException("Unable to instantiate ARM Compute Management client");
-        }
-        client.withRequestFilterFirst(new AzureToolkitFilter());
-        // add a request filter for tacking on the A/D auth token if the current authentication
-        // mode is active directory
-        AuthTokenRequestFilter requestFilter = new AuthTokenRequestFilter(accessToken);
-        return client.withRequestFilterFirst(requestFilter);
-    }
-
-    @NotNull
     public static CloudStorageAccount getCloudStorageAccount(@NotNull ClientStorageAccount storageAccount)
             throws URISyntaxException, InvalidKeyException {
         return CloudStorageAccount.parse(storageAccount.getConnectionString());
-    }
-
-    @NotNull
-    public static SDKRequestCallback<List<com.microsoft.azure.management.compute.models.VirtualMachine>, com.microsoft.azure.management.compute.ComputeManagementClient> getArmVirtualMachines(@NotNull final String subscriptionId) {
-        return new SDKRequestCallback<List<com.microsoft.azure.management.compute.models.VirtualMachine>, com.microsoft.azure.management.compute.ComputeManagementClient>() {
-            @NotNull
-            @Override
-            public List<com.microsoft.azure.management.compute.models.VirtualMachine> execute(@NotNull com.microsoft.azure.management.compute.ComputeManagementClient client)
-                    throws Throwable {
-                List<com.microsoft.azure.management.compute.models.VirtualMachine> virtualMachines = client.getVirtualMachinesOperations().listAll(null).getVirtualMachines();
-                if (virtualMachines == null) {
-                    return new ArrayList<com.microsoft.azure.management.compute.models.VirtualMachine>();
-                }
-                return virtualMachines;
-            }
-        };
     }
 
     @NotNull

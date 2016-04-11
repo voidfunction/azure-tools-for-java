@@ -160,7 +160,7 @@ import com.microsoftopentechnologies.azuremanagementutil.rest.SubscriptionTransf
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
-public class AzureManagerImpl implements AzureManager {
+public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManager {
     private interface AzureSDKClientProvider<V extends Closeable> {
         @NotNull
         V getSSLClient(@NotNull Subscription subscription)
@@ -171,49 +171,11 @@ public class AzureManagerImpl implements AzureManager {
                 throws Throwable;
     }
 
-    private static class EventWaitHandleImpl implements EventWaitHandle {
-        Semaphore eventSignal = new Semaphore(0, true);
-
-        @Override
-        public void waitEvent(@NotNull Runnable callback)
-                throws AzureCmdException {
-            try {
-                eventSignal.acquire();
-                callback.run();
-            } catch (InterruptedException e) {
-                throw new AzureCmdException("Unable to aquire permit", e);
-            }
-        }
-
-        private synchronized void signalEvent() {
-            if (eventSignal.availablePermits() == 0) {
-                eventSignal.release();
-            }
-        }
-    }
-
     private static AzureManager instance;
-    private static Gson gson;
-
-    private AADManager aadManager;
-
-    private ReentrantReadWriteLock authDataLock = new ReentrantReadWriteLock(false);
-    private Map<String, Subscription> subscriptions;
-    private UserInfo userInfo;
-
-    private ReentrantReadWriteLock subscriptionMapLock = new ReentrantReadWriteLock(false);
-    private Map<String, ReentrantReadWriteLock> lockBySubscriptionId = new HashMap<String, ReentrantReadWriteLock>();
-    private Map<String, UserInfo> userInfoBySubscriptionId;
-    private Map<String, SSLSocketFactory> sslSocketFactoryBySubscriptionId;
 
     private String accessToken; // this field to be used from cspack ant task only
 
-    private ReentrantReadWriteLock userMapLock = new ReentrantReadWriteLock(false);
-    private Map<UserInfo, ReentrantReadWriteLock> lockByUser;
-    private Map<UserInfo, String> accessTokenByUser;
-
     private ReentrantReadWriteLock subscriptionsChangedLock = new ReentrantReadWriteLock(true);
-    private Set<EventWaitHandleImpl> subscriptionsChangedHandles;
 
     private AzureManagerImpl() {
         authDataLock.writeLock().lock();
@@ -1533,13 +1495,6 @@ public class AzureManagerImpl implements AzureManager {
     	return requestWebSiteSDK(subscriptionId, AzureSDKHelper.createWebHostingPlan(webHostingPlan));
     }
 
-    @NotNull
-    @Override
-    public List<com.microsoft.azure.management.compute.models.VirtualMachine> getArmVirtualMachines(@NotNull String subscriptionId)
-            throws AzureCmdException {
-        return requestArmComputeSDK(subscriptionId, AzureSDKHelper.getArmVirtualMachines(subscriptionId));
-    }
-
     @Nullable
     @Override
     public ArtifactDescriptor getWebArchiveArtifact(@NotNull ProjectDescriptor projectDescriptor)
@@ -1709,129 +1664,6 @@ public class AzureManagerImpl implements AzureManager {
     	}
     }
 
-    private void loadSubscriptions() {
-        String json = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.AZURE_SUBSCRIPTIONS);
-
-        if (!StringHelper.isNullOrWhiteSpace(json)) {
-            try {
-                Type subscriptionsType = new TypeToken<HashMap<String, Subscription>>() {
-                }.getType();
-                subscriptions = gson.fromJson(json, subscriptionsType);
-            } catch (JsonSyntaxException ignored) {
-                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_SUBSCRIPTIONS);
-            }
-        } else {
-            subscriptions = new HashMap<String, Subscription>();
-        }
-
-        for (String subscriptionId : subscriptions.keySet()) {
-            lockBySubscriptionId.put(subscriptionId, new ReentrantReadWriteLock(false));
-        }
-    }
-
-    private void loadUserInfo() {
-        String json = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.AZURE_USER_INFO);
-
-        if (!StringHelper.isNullOrWhiteSpace(json)) {
-            try {
-                userInfo = gson.fromJson(json, UserInfo.class);
-            } catch (JsonSyntaxException ignored) {
-                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_USER_INFO);
-                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS);
-            }
-        } else {
-            DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS);
-        }
-
-        json = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS);
-
-        if (!StringHelper.isNullOrWhiteSpace(json)) {
-            try {
-                Type userInfoBySubscriptionIdType = new TypeToken<HashMap<String, UserInfo>>() {
-                }.getType();
-                userInfoBySubscriptionId = gson.fromJson(json, userInfoBySubscriptionIdType);
-            } catch (JsonSyntaxException ignored) {
-                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS);
-            }
-        } else {
-            userInfoBySubscriptionId = new HashMap<String, UserInfo>();
-        }
-    }
-
-    private void loadSSLSocketFactory() {
-        sslSocketFactoryBySubscriptionId = new HashMap<String, SSLSocketFactory>();
-
-        for (Map.Entry<String, Subscription> subscriptionEntry : subscriptions.entrySet()) {
-            String subscriptionId = subscriptionEntry.getKey();
-            Subscription subscription = subscriptionEntry.getValue();
-            String managementCertificate = subscription.getManagementCertificate();
-
-            if (!StringHelper.isNullOrWhiteSpace(managementCertificate)) {
-                try {
-                    SSLSocketFactory sslSocketFactory = initSSLSocketFactory(managementCertificate);
-                    sslSocketFactoryBySubscriptionId.put(subscriptionId, sslSocketFactory);
-                } catch (Exception e) {
-                    subscription.setManagementCertificate(null);
-                }
-            }
-        }
-    }
-
-    private void removeInvalidUserInfo() {
-        List<String> invalidSubscriptionIds = new ArrayList<String>();
-
-        for (String subscriptionId : userInfoBySubscriptionId.keySet()) {
-            if (!subscriptions.containsKey(subscriptionId)) {
-                invalidSubscriptionIds.add(subscriptionId);
-            }
-        }
-
-        for (String invalidSubscriptionId : invalidSubscriptionIds) {
-            userInfoBySubscriptionId.remove(invalidSubscriptionId);
-        }
-    }
-
-    private void removeUnusedSubscriptions() {
-        List<String> invalidSubscriptionIds = new ArrayList<String>();
-
-        for (Map.Entry<String, Subscription> subscriptionEntry : subscriptions.entrySet()) {
-            String subscriptionId = subscriptionEntry.getKey();
-            Subscription subscription = subscriptionEntry.getValue();
-
-            if (!userInfoBySubscriptionId.containsKey(subscriptionId) &&
-                    !sslSocketFactoryBySubscriptionId.containsKey(subscriptionId)) {
-                invalidSubscriptionIds.add(subscriptionId);
-            } else if (!userInfoBySubscriptionId.containsKey(subscriptionId)) {
-                subscription.setTenantId(null);
-            } else if (!sslSocketFactoryBySubscriptionId.containsKey(subscriptionId)) {
-                subscription.setManagementCertificate(null);
-                subscription.setServiceManagementUrl(null);
-            }
-        }
-
-        for (String invalidSubscriptionId : invalidSubscriptionIds) {
-            lockBySubscriptionId.remove(invalidSubscriptionId);
-            subscriptions.remove(invalidSubscriptionId);
-        }
-    }
-
-    private void storeSubscriptions() {
-        Type subscriptionsType = new TypeToken<HashMap<String, Subscription>>() {
-        }.getType();
-        String json = gson.toJson(subscriptions, subscriptionsType);
-        DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.AZURE_SUBSCRIPTIONS, json);
-    }
-
-    private void storeUserInfo() {
-        String json = gson.toJson(userInfo, UserInfo.class);
-        DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.AZURE_USER_INFO, json);
-
-        Type userInfoBySubscriptionIdType = new TypeToken<HashMap<String, UserInfo>>() {
-        }.getType();
-        json = gson.toJson(userInfoBySubscriptionId, userInfoBySubscriptionIdType);
-        DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS, json);
-    }
-
     @NotNull
     private List<Subscription> parseSubscriptionsXML(@NotNull String subscriptionsXML)
             throws SAXException, ParserConfigurationException, XPathExpressionException, IOException {
@@ -1852,25 +1684,6 @@ public class AzureManagerImpl implements AzureManager {
         }
 
         return subscriptions;
-    }
-
-    private SSLSocketFactory initSSLSocketFactory(@NotNull String managementCertificate)
-            throws NoSuchAlgorithmException, IOException, KeyStoreException, CertificateException,
-            UnrecoverableKeyException, KeyManagementException {
-        byte[] decodeBuffer = new BASE64Decoder().decodeBuffer(managementCertificate);
-
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-
-        InputStream is = new ByteArrayInputStream(decodeBuffer);
-
-        KeyStore ks = KeyStore.getInstance("PKCS12");
-        ks.load(is, OpenSSLHelper.PASSWORD.toCharArray());
-        keyManagerFactory.init(ks, OpenSSLHelper.PASSWORD.toCharArray());
-
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(keyManagerFactory.getKeyManagers(), null, new SecureRandom());
-
-        return sslContext.getSocketFactory();
     }
 
     private List<Subscription> importSubscription(@NotNull String publishSettingsFilePath)
@@ -1993,17 +1806,6 @@ public class AzureManagerImpl implements AzureManager {
         }
     }
 
-    @Nullable
-    public UserInfo getUserInfo() {
-        authDataLock.readLock().lock();
-
-        try {
-            return userInfo;
-        } finally {
-            authDataLock.readLock().unlock();
-        }
-    }
-
     private void setUserInfo(@Nullable UserInfo userInfo) {
         authDataLock.writeLock().lock();
 
@@ -2061,29 +1863,6 @@ public class AzureManagerImpl implements AzureManager {
         }
     }
 
-    @NotNull
-    private UserInfo getUserInfo(@NotNull String subscriptionId)
-            throws AzureCmdException {
-        authDataLock.readLock().lock();
-
-        try {
-            ReentrantReadWriteLock subscriptionLock = getSubscriptionLock(subscriptionId, false);
-            subscriptionLock.readLock().lock();
-
-            try {
-                if (!userInfoBySubscriptionId.containsKey(subscriptionId)) {
-                    throw new AzureCmdException("No User Information for the specified Subscription Id");
-                }
-
-                return userInfoBySubscriptionId.get(subscriptionId);
-            } finally {
-                subscriptionLock.readLock().unlock();
-            }
-        } finally {
-            authDataLock.readLock().unlock();
-        }
-    }
-
     private void setUserInfo(@NotNull String subscriptionId, @NotNull UserInfo userInfo)
             throws AzureCmdException {
         authDataLock.readLock().lock();
@@ -2099,31 +1878,6 @@ public class AzureManagerImpl implements AzureManager {
             } finally {
                 subscriptionLock.writeLock().unlock();
             }
-        } finally {
-            authDataLock.readLock().unlock();
-        }
-    }
-
-    public String getAccessToken(String subscriptionId) {
-        authDataLock.readLock().lock();
-
-        try {
-            ReentrantReadWriteLock subscriptionLock = getSubscriptionLock(subscriptionId, false);
-            subscriptionLock.readLock().lock();
-
-            try {
-                if (!userInfoBySubscriptionId.containsKey(subscriptionId)) {
-                    return "";
-                }
-
-                UserInfo userInfo = userInfoBySubscriptionId.get(subscriptionId);
-                return getAccessToken(userInfo);
-            } finally {
-                subscriptionLock.readLock().unlock();
-            }
-        } catch (AzureCmdException ex) {
-            // return empty string
-            return "";
         } finally {
             authDataLock.readLock().unlock();
         }
@@ -2193,71 +1947,6 @@ public class AzureManagerImpl implements AzureManager {
         }
     }
 
-    private boolean hasAccessToken(@NotNull UserInfo userInfo) {
-        authDataLock.readLock().lock();
-
-        try {
-            Optional<ReentrantReadWriteLock> optionalRWLock = getUserLock(userInfo);
-
-            if (!optionalRWLock.isPresent()) {
-                return false;
-            }
-
-            ReadWriteLock userLock = optionalRWLock.get();
-            userLock.readLock().lock();
-
-            try {
-                return accessTokenByUser.containsKey(userInfo);
-            } finally {
-                userLock.readLock().unlock();
-            }
-        } finally {
-            authDataLock.readLock().unlock();
-        }
-    }
-
-    @NotNull
-    private String getAccessToken(@NotNull UserInfo userInfo)
-            throws AzureCmdException {
-        authDataLock.readLock().lock();
-
-        try {
-            ReentrantReadWriteLock userLock = getUserLock(userInfo, false);
-            userLock.readLock().lock();
-
-            try {
-                if (!accessTokenByUser.containsKey(userInfo)) {
-                    throw new AzureCmdException("No access token for the specified User Information", "");
-                }
-
-                return accessTokenByUser.get(userInfo);
-            } finally {
-                userLock.readLock().unlock();
-            }
-        } finally {
-            authDataLock.readLock().unlock();
-        }
-    }
-
-    private void setAccessToken(@NotNull UserInfo userInfo,
-                                @NotNull String accessToken)
-            throws AzureCmdException {
-        authDataLock.readLock().lock();
-
-        try {
-            ReentrantReadWriteLock userLock = getUserLock(userInfo, true);
-            userLock.writeLock().lock();
-
-            try {
-                accessTokenByUser.put(userInfo, accessToken);
-            } finally {
-                userLock.writeLock().unlock();
-            }
-        } finally {
-            authDataLock.readLock().unlock();
-        }
-    }
-
     private boolean hasAccessToken() {
         authDataLock.readLock().lock();
 
@@ -2265,27 +1954,6 @@ public class AzureManagerImpl implements AzureManager {
             return !(accessToken == null || accessToken.isEmpty());
         } finally {
             authDataLock.readLock().unlock();
-        }
-    }
-
-    @NotNull
-    private ReentrantReadWriteLock getSubscriptionLock(@NotNull String subscriptionId, boolean createOnMissing)
-            throws AzureCmdException {
-        Lock lock = createOnMissing ? subscriptionMapLock.writeLock() : subscriptionMapLock.readLock();
-        lock.lock();
-
-        try {
-            if (!lockBySubscriptionId.containsKey(subscriptionId)) {
-                if (createOnMissing) {
-                    lockBySubscriptionId.put(subscriptionId, new ReentrantReadWriteLock(false));
-                } else {
-                    throw new AzureCmdException("No authentication information for the specified Subscription Id");
-                }
-            }
-
-            return lockBySubscriptionId.get(subscriptionId);
-        } finally {
-            lock.unlock();
         }
     }
 
@@ -2301,42 +1969,6 @@ public class AzureManagerImpl implements AzureManager {
             }
         } finally {
             subscriptionMapLock.readLock().unlock();
-        }
-    }
-
-    @NotNull
-    private ReentrantReadWriteLock getUserLock(@NotNull UserInfo userInfo, boolean createOnMissing)
-            throws AzureCmdException {
-        Lock lock = createOnMissing ? userMapLock.writeLock() : userMapLock.readLock();
-        lock.lock();
-
-        try {
-            if (!lockByUser.containsKey(userInfo)) {
-                if (createOnMissing) {
-                    lockByUser.put(userInfo, new ReentrantReadWriteLock(false));
-                } else {
-                    throw new AzureCmdException("No access token for the specified User Information");
-                }
-            }
-
-            return lockByUser.get(userInfo);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @NotNull
-    private Optional<ReentrantReadWriteLock> getUserLock(@NotNull UserInfo userInfo) {
-        userMapLock.readLock().lock();
-
-        try {
-            if (lockByUser.containsKey(userInfo)) {
-                return Optional.of(lockByUser.get(userInfo));
-            } else {
-                return Optional.absent();
-            }
-        } finally {
-            userMapLock.readLock().unlock();
         }
     }
 
@@ -2541,27 +2173,6 @@ public class AzureManagerImpl implements AzureManager {
                     throws Throwable {
                 return AzureSDKHelper.getManagementClient(subscriptionId,
                         accessToken);
-            }
-        });
-    }
-
-    @NotNull
-    private <T> T requestArmComputeSDK(@NotNull final String subscriptionId,
-                                               @NotNull final SDKRequestCallback<T, com.microsoft.azure.management.compute.ComputeManagementClient> requestCallback)
-            throws AzureCmdException {
-        return requestAzureSDK(subscriptionId, requestCallback, new AzureSDKClientProvider<com.microsoft.azure.management.compute.ComputeManagementClient>() {
-            @NotNull
-            @Override
-            public com.microsoft.azure.management.compute.ComputeManagementClient getAADClient(@NotNull String subscriptionId, @NotNull String accessToken)
-                    throws Throwable {
-                return AzureSDKHelper.getArmComputeManagementClient(subscriptionId, accessToken);
-            }
-
-            @Override
-            public com.microsoft.azure.management.compute.ComputeManagementClient getSSLClient(Subscription subscription) throws Throwable {
-                throw new AzureCmdException("Certificate authentication not supported for ARM");
-//                return AzureSDKHelper.getResourceManagementClient(subscription.getId(),
-//                        subscription.getManagementCertificate(), subscription.getServiceManagementUrl());
             }
         });
     }
