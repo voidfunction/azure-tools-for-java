@@ -40,7 +40,6 @@ public class StorageAccount extends ClientStorageAccount {
     private String secondaryRegion = "";
     private String secondaryRegionStatus = "";
     private Calendar lastFailover = new GregorianCalendar();
-    private String subscriptionId;
 
     public StorageAccount(@NotNull String name,
                           @NotNull String subscriptionId) {
@@ -165,8 +164,4 @@ public class StorageAccount extends ClientStorageAccount {
         this.lastFailover = lastFailover;
     }
 
-    @NotNull
-    public String getSubscriptionId() {
-        return subscriptionId;
-    }
 }

@@ -9,7 +9,15 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="AzureCommons" level="project" />
+    <orderEntry type="module-library" scope="PROVIDED">
+          <library>
+            <CLASSES>
+              <root url="jar://$APPLICATION_PLUGINS_DIR$/Scala/lib/scala-plugin.jar!/" />
+            </CLASSES>
+            <JAVADOC />
+            <SOURCES />
+          </library>
+    </orderEntry><orderEntry type="library" name="AzureCommons" level="project" />
     <orderEntry type="library" name=".cspack" level="project" />
     <orderEntry type="library" name="azure-sdk" level="project" />
     <orderEntry type="library" name="ProjectManagerLibrary" level="project" />
@@ -19,5 +27,15 @@
     <orderEntry type="library" name="services-explorer-common" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="com.microsoft.azure:azure-storage:4.0.0" level="project" />
     <orderEntry type="library" name="azure-arm-sdk" level="project" />
-  </component>
+    <orderEntry type="module-library">
+        <library>
+          <CLASSES>
+            <root url="jar://$MODULE_DIR$/lib/java-json.jar!/" />
+          </CLASSES>
+          <JAVADOC />
+          <SOURCES>
+            <root url="jar://$MODULE_DIR$/lib/java-json.jar!/" />
+          </SOURCES>
+        </library>
+      </orderEntry></component>
 </module>

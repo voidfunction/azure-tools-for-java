@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$PROJECT_DIR$/AzureHDInsightIntelliJTools.iml" filepath="$PROJECT_DIR$/AzureHDInsightIntelliJTools.iml" />
-      <module fileurl="file://$PROJECT_DIR$/SDK/SDK.iml" filepath="$PROJECT_DIR$/SDK/SDK.iml" />
-    </modules>
-  </component>
-</project>

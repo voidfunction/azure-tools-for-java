@@ -22,7 +22,12 @@
 
 package com.microsoft.tooling.msservices.helpers;
 
+import java.util.regex.Pattern;
+import java.util.List;
+
 public class StringHelper {
+    private static final Pattern PATTERN = Pattern.compile("https://([^/.]\\.)+[^/.]+/?$");
+
     public static boolean isNullOrWhiteSpace(String str) {
         if (str == null) {
             return true;
@@ -36,5 +41,35 @@ public class StringHelper {
         }
 
         return true;
+    }
+
+    public static String concat(@NotNull String... args) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < args.length; ++i) {
+            stringBuilder.append(args[i]);
+        }
+
+        return stringBuilder.toString();
+    }
+
+    public static String join(@NotNull String delimiter, @NotNull List<String> args) {
+        StringBuffer stringBuffer=new StringBuffer();
+
+        for (int i=0; i < args.size(); ++i) {
+            stringBuffer.append(args.get(i));
+            if (i != args.size() - 1) {
+                stringBuffer.append(delimiter);
+            }
+        }
+
+        return stringBuffer.toString();
+    }
+
+    public static String getClusterNameFromEndPoint(@NotNull String endpoint) {
+        if (PATTERN.matcher(endpoint).find()) {
+            return endpoint.split("\\.")[0].substring(8);
+        }
+
+        return null;
     }
 }

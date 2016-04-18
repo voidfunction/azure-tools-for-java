@@ -23,31 +23,156 @@
 package com.microsoft.intellij.util;
 
 import com.intellij.ide.DataManager;
+import com.intellij.ide.plugins.IdeaPluginDescriptor;
+import com.intellij.ide.plugins.PluginManager;
 import com.intellij.ide.projectView.impl.ProjectRootsUtil;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureRole;
 import com.interopbridges.tools.windowsazure.WindowsAzureRoleComponentImportMethod;
+import com.microsoft.azure.hdinsight.common.CommonConst;
+import com.microsoft.azure.hdinsight.toolwindow.*;
 import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.wacommon.utils.WACommonException;
 
+import javax.swing.*;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class PluginUtil {
     private static final Logger LOG = Logger.getInstance("#com.microsoft.intellij.util.PluginUtil");
     public static final String BASE_PATH = "${basedir}" + File.separator + "..";
+
+    private static final Object LOCK = new Object();
+    //todo: check with multiple Idea projects open in separate windows
+    private static HashMap<ToolWindowKey, IToolWindowProcessor> toolWindowManagerCollection = new HashMap<>();
+
+    public static void registerToolWindowManager(ToolWindowKey toolWindowFactoryKey, IToolWindowProcessor IToolWindowProcessor) {
+        synchronized (PluginUtil.class) {
+            toolWindowManagerCollection.put(toolWindowFactoryKey, IToolWindowProcessor);
+        }
+    }
+
+    private static IToolWindowProcessor getToolWindowManager(ToolWindowKey toolWindowKey) {
+        return toolWindowManagerCollection.get(toolWindowKey);
+    }
+
+//    public static HDInsightRootModule getHDInsightModule(Project project) {
+//        IToolWindowProcessor IToolWindowProcessor = getToolWindowManager(
+//                new ToolWindowKey(project, ServerExplorerToolWindowFactory.TOOLWINDOW_FACTORY_ID));
+//
+//        if (IToolWindowProcessor != null) {
+//            return ((ServerExploreToolWindowProcessor) IToolWindowProcessor).getAzureServiceModule();
+//
+//        }
+//
+//        return null;
+//    }
+
+    @Nullable
+    public static JobStatusManager getJobStatusManager(@NotNull Project project) {
+        ToolWindowKey key = new ToolWindowKey(project, CommonConst.SPARK_SUBMISSION_WINDOW_ID);
+        if(toolWindowManagerCollection.containsKey(key)){
+            return ((SparkSubmissionToolWindowProcessor)getToolWindowManager(key)).getJobStatusManager();
+        } else {
+            return null;
+        }
+    }
+
+    public static SparkSubmissionToolWindowProcessor getSparkSubmissionToolWindowManager(Project project) {
+        final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(CommonConst.SPARK_SUBMISSION_WINDOW_ID);
+        ToolWindowKey key = new ToolWindowKey(project, CommonConst.SPARK_SUBMISSION_WINDOW_ID);
+
+        if(!toolWindowManagerCollection.containsKey(key)) {
+            SparkSubmissionToolWindowProcessor sparkSubmissionToolWindowProcessor = new SparkSubmissionToolWindowProcessor(toolWindow);
+            registerToolWindowManager(key, sparkSubmissionToolWindowProcessor);
+            sparkSubmissionToolWindowProcessor.initialize();
+        }
+
+        return (SparkSubmissionToolWindowProcessor)getToolWindowManager(key);
+    }
+
+    public static void showInfoOnSubmissionMessageWindow(@NotNull final Project project, @NotNull final String message, boolean isNeedClear) {
+        showInfoOnSubmissionMessageWindow(project, MessageInfoType.Info, message, isNeedClear);
+    }
+
+    public static void showInfoOnSubmissionMessageWindow(@NotNull final Project project, @NotNull final String message) {
+        showInfoOnSubmissionMessageWindow(project, MessageInfoType.Info, message, false);
+    }
+
+    public static void showErrorMessageOnSubmissionMessageWindow(@NotNull final Project project, @NotNull final String message) {
+        showInfoOnSubmissionMessageWindow(project, MessageInfoType.Error, message, false);
+    }
+
+    public static void showWarningMessageOnSubmissionMessageWindow(@NotNull final Project project, @NotNull final String message) {
+        showInfoOnSubmissionMessageWindow(project, MessageInfoType.Warning, message, false);
+    }
+
+    private static void showInfoOnSubmissionMessageWindow(@NotNull final Project project, @NotNull final MessageInfoType type, @NotNull final String message, @NotNull final boolean isNeedClear) {
+        final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(CommonConst.SPARK_SUBMISSION_WINDOW_ID);
+
+        if (!toolWindow.isVisible()) {
+            synchronized (LOCK) {
+                if (!toolWindow.isVisible()) {
+                    if (ApplicationManager.getApplication().isDispatchThread()) {
+                        toolWindow.show(null);
+                    } else {
+                        try {
+                            SwingUtilities.invokeAndWait(new Runnable() {
+                                @Override
+                                public void run() {
+                                    toolWindow.show(null);
+                                }
+                            });
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (InvocationTargetException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+
+        showSubmissionMessage(getSparkSubmissionToolWindowManager(project), message, type, isNeedClear);
+    }
+
+    private static void showSubmissionMessage(SparkSubmissionToolWindowProcessor processor, @NotNull String message, @NotNull MessageInfoType type, @NotNull final boolean isNeedClear) {
+        if (isNeedClear) {
+            processor.clearAll();
+        }
+
+        switch (type) {
+            case Error:
+                processor.setError(message);
+                break;
+            case Info:
+                processor.setInfo(message);
+                break;
+            case Warning:
+                processor.setWarning(message);
+                break;
+        }
+    }
 
     public static boolean isModuleRoot(VirtualFile moduleFolder, Module module) {
         return moduleFolder != null && ProjectRootsUtil.isModuleContentRoot(moduleFolder, module.getProject());
@@ -207,5 +332,14 @@ public class PluginUtil {
             }
         }
         return null;
+    }
+
+    public static String getPluginRootDirectory() {
+        IdeaPluginDescriptor pluginDescriptor = PluginManager.getPlugin(PluginId.findId(CommonConst.PLUGIN_ID));
+        return pluginDescriptor.getPath().getAbsolutePath();
+    }
+
+    public static Icon getIcon(String iconPath) {
+        return IconLoader.getIcon(iconPath);
     }
 }

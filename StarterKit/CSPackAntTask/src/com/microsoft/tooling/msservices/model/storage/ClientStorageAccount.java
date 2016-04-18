@@ -39,6 +39,7 @@ public class ClientStorageAccount implements ServiceTreeItem {
             TABLE_ENDPOINT_KEY + "=%s;" +
             ACCOUNT_NAME_KEY + "=%s;" +
             ACCOUNT_KEY_KEY + "=%s";
+    protected String subscriptionId;
 
     private String name;
     private String primaryKey = "";
@@ -139,5 +140,10 @@ public class ClientStorageAccount implements ServiceTreeItem {
     @Override
     public String toString() {
         return name + (loading ? " (loading...)" : "");
+    }
+
+    @NotNull
+    public String getSubscriptionId() {
+        return subscriptionId;
     }
 }

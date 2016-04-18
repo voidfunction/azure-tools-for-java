@@ -524,7 +524,7 @@ public class WebSiteDeployForm extends DialogWrapper {
     }
 
     private void editSubscriptions(boolean invokeSignIn) {
-        try {
+//        try {
             final ManageSubscriptionPanel manageSubscriptionPanel = new ManageSubscriptionPanel(project, false);
             final DefaultDialogWrapper subscriptionsDialog = new DefaultDialogWrapper(project, manageSubscriptionPanel) {
                 @Nullable
@@ -551,10 +551,10 @@ public class WebSiteDeployForm extends DialogWrapper {
             } else {
                 fillList();
             }
-        } catch (AzureCmdException e) {
-            setMessages("There has been an error while retrieving the configured Azure subscriptions.",
-                    "Please retry signing in/importing your Azure subscriptions.");
-        }
+//        } catch (AzureCmdException e) {
+//            setMessages("There has been an error while retrieving the configured Azure subscriptions.",
+//                    "Please retry signing in/importing your Azure subscriptions.");
+//        }
     }
 
     public WebSite getSelectedWebSite() {

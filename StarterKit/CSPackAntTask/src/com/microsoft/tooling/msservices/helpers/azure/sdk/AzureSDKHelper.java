@@ -848,7 +848,7 @@ public class AzureSDKHelper {
     }
 
     @NotNull
-    public static SDKRequestCallback<Void, StorageManagementClient> deleteStorageAccount(@NotNull final StorageAccount storageAccount) {
+    public static SDKRequestCallback<Void, StorageManagementClient> deleteStorageAccount(@NotNull final ClientStorageAccount storageAccount) {
         return new SDKRequestCallback<Void, StorageManagementClient>() {
             @NotNull
             @Override

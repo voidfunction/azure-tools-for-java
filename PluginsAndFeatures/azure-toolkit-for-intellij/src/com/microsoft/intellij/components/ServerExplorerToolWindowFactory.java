@@ -34,11 +34,15 @@ import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.openapi.wm.ex.ToolWindowEx;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
+import com.microsoft.azure.hdinsight.serverexplore.ui.AddNewClusterFrom;
+import com.microsoft.azure.hdinsight.toolwindow.ServerExploreToolWindowProcessor;
+import com.microsoft.azure.hdinsight.toolwindow.ToolWindowKey;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.forms.ManageSubscriptionPanel;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangeListener;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangedEvent;
@@ -72,6 +76,8 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
         // initialize azure service module
         azureServiceModule = new AzureServiceModule(project, false);
+        ServerExploreToolWindowProcessor serverExploreToolWindowProcessor = new ServerExploreToolWindowProcessor(null/*azureServiceModule*/);
+        PluginUtil.registerToolWindowManager(new ToolWindowKey(project, EXPLORER_WINDOW), serverExploreToolWindowProcessor);
 
         // initialize with all the service modules
         treeModel = new DefaultTreeModel(initRoot());
@@ -350,6 +356,13 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                             };
                             manageSubscriptionPanel.setDialog(subscriptionsDialog);
                             subscriptionsDialog.show();
+                        }
+                    },
+                    new AnAction("Add New Cluster", "Add New Cluster", AllIcons.Ide.Notifications) {
+                        @Override
+                        public void actionPerformed(AnActionEvent anActionEvent) {
+                            AddNewClusterFrom form = new AddNewClusterFrom((anActionEvent.getProject()));
+                            form.show();
                         }
                     });
         }

@@ -66,6 +66,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
+import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -370,8 +371,7 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
 
     @NotNull
     @Override
-    public List<Subscription> getSubscriptionList()
-            throws AzureCmdException {
+    public List<Subscription> getSubscriptionList() {
         authDataLock.readLock().lock();
 
         try {
@@ -1395,7 +1395,7 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
 
 
     @Override
-    public void deleteStorageAccount(@NotNull StorageAccount storageAccount)
+    public void deleteStorageAccount(@NotNull ClientStorageAccount storageAccount)
             throws AzureCmdException {
         requestStorageSDK(storageAccount.getSubscriptionId(), AzureSDKHelper.deleteStorageAccount(storageAccount));
     }

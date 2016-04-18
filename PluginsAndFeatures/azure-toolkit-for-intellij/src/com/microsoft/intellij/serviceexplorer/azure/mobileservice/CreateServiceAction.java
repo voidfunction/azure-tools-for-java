@@ -57,7 +57,7 @@ public class CreateServiceAction extends NodeActionListener {
             return;
         }
 
-        try {
+//        try {
             List<Subscription> subscriptions = apiManager.getSubscriptionList();
             if (subscriptions.isEmpty()) {
                 DefaultLoader.getUIHelper().showException("No active Azure subscription was found. Please enable one more Azure " +
@@ -66,10 +66,10 @@ public class CreateServiceAction extends NodeActionListener {
                         "Azure Services Explorer - No Active Azure Subscription", false, false);
                 return;
             }
-        } catch (AzureCmdException e1) {
-            String msg = "An error occurred while attempting to create the mobile service." + "\n" + String.format(message("webappExpMsg"), e1.getMessage());
-            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e1);
-        }
+//        } catch (AzureCmdException e1) {
+//            String msg = "An error occurred while attempting to create the mobile service." + "\n" + String.format(message("webappExpMsg"), e1.getMessage());
+//            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e1);
+//        }
 
         CreateMobileServiceForm form = new CreateMobileServiceForm(null);
         form.setServiceCreated(new Runnable() {
