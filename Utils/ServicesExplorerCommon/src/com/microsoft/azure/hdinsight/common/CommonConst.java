@@ -6,10 +6,10 @@ public class CommonConst {
     public static final String BlobFileIConPath = "/icons/BlobFile.png";
     public static final String HDInsightIConPath = "/icons/HdInsight.png";
     public static final String HDInsightGrayIconPath = "HdInsight_gray.png";
-    public static final String ClusterIConPath = "/icons/Cluster.png";
+    public static final String ClusterIConPath = "Cluster.png";
     public static final String StorageAccountIConPath = "/icons/StorageAccount.png";
-    public static final String StorageAccountFoldIConPath = "/icons/StorageAccountFolder.png";
-    public static final String BlobContainerIConPath = "/icons/Container.png";
+    public static final String StorageAccountFoldIConPath = "StorageAccountFolder.png";
+    public static final String BlobContainerIConPath = "Container.png";
     public static final String JavaProjectIconPath = "/icons/Spark-Java.png";
     public static final String ScalaProjectIconPath = "/icons/Spark-Scala.png";
     public static final String StopIconPath = "/icons/Stop.png";

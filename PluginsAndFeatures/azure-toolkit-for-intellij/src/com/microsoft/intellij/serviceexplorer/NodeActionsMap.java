@@ -62,6 +62,6 @@ public class NodeActionsMap {
         node2Actions.put(StorageModule.class, new ImmutableList.Builder().add(CreateStorageAccountAction.class, AttachExternalStorageAccountAction.class).build());
         node2Actions.put(ExternalStorageNode.class, new ImmutableList.Builder().add(ConfirmDialogAction.class, ModifyExternalStorageAccountAction.class).build());
         node2Actions.put(WebappNode.class, new ImmutableList.Builder().add(OpenWebappAction.class).build());
-        node2Actions.put(HDInsightRootModule.class, new ImmutableList.Builder().add(ManageSubscriptionsAction.class).add(AddNewClusterAction.class).build());
+        node2Actions.put(HDInsightRootModule.class, new ImmutableList.Builder().add(AddNewClusterAction.class).build());
     }
 }
