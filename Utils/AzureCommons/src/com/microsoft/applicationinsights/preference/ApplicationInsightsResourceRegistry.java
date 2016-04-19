@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.microsoft.applicationinsights.management.rest.model.Resource;
-import com.microsoft.applicationinsights.management.rest.model.Subscription;
+import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoftopentechnologies.azurecommons.storageregistry.StorageRegistryUtilMethods;
 
 
@@ -38,6 +38,10 @@ public class ApplicationInsightsResourceRegistry {
 
 	public static List<ApplicationInsightsResource> getAppInsightsResrcList() {
 		return appInsightsResrcList;
+	}
+
+	public static void setAppInsightsResrcList(List<ApplicationInsightsResource> appInsightsResrcList) {
+		ApplicationInsightsResourceRegistry.appInsightsResrcList = appInsightsResrcList;
 	}
 
 	/**
@@ -203,6 +207,18 @@ public class ApplicationInsightsResourceRegistry {
 					sub.getName(), sub.getId(),
 					resource.getLocation(), resource.getResourceGroup(), true);
 			list.add(resourceToAdd);
+		}
+		return list;
+	}
+
+	public static List<ApplicationInsightsResource> getAddedResources() {
+		// return manually added resources
+		List<ApplicationInsightsResource> list = new ArrayList<ApplicationInsightsResource>();
+		List<ApplicationInsightsResource> resourceList = getAppInsightsResrcList();
+		for (ApplicationInsightsResource resource : resourceList) {
+			if (resource.getSubscriptionId().equalsIgnoreCase("(Unknown)")) {
+				list.add(resource);
+			}
 		}
 		return list;
 	}

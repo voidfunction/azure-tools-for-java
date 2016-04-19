@@ -23,6 +23,7 @@ package com.microsoft.tooling.msservices.helpers.azure;
 
 import java.util.List;
 
+import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.azure.management.websites.models.WebHostingPlan;
 import com.microsoft.tooling.msservices.helpers.IDEHelper.ArtifactDescriptor;
@@ -30,7 +31,6 @@ import com.microsoft.tooling.msservices.helpers.IDEHelper.ProjectDescriptor;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.ms.CustomAPI;
 import com.microsoft.tooling.msservices.model.ms.CustomAPIPermissions;
@@ -368,4 +368,13 @@ public interface AzureManager {
     List<String> getResourceGroupNames(@NotNull String subscriptionId) throws AzureCmdException;
     
     ResourceGroupExtended createResourceGroup(@NotNull String subscriptionId, @NotNull String name, @NotNull String location) throws AzureCmdException;
+    
+    List<Resource> getApplicationInsightsResources(@NotNull String subscriptionId) throws AzureCmdException;
+    
+    List<String> getLocationsForApplicationInsights(@NotNull String subscriptionId) throws AzureCmdException;
+    
+    Resource createApplicationInsightsResource(@NotNull String subscriptionId,
+    		@NotNull String resourceGroupName,
+    		@NotNull String resourceName,
+    		@NotNull String location) throws AzureCmdException;
 }

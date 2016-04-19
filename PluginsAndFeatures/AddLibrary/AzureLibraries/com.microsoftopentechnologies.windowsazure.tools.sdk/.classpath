@@ -48,6 +48,6 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-mgmt-websites-0.9.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-mgmt-resources-0.9.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-net-3.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/applicationinsights-management-1.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/applicationinsights-management-1.0.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -19,7 +19,6 @@
  */
 package com.microsoft.applicationinsights.ui.config;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -41,8 +40,8 @@ import org.eclipse.core.runtime.Status;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.applicationinsights.ui.activator.Activator;
-import com.microsoft.applicationinsights.util.AILibraryHandler;
-import com.microsoft.applicationinsights.util.WAPropertyTester;
+import com.microsoft.wacommon.applicationinsights.AILibraryHandler;
+import com.microsoft.wacommon.applicationinsights.WebPropertyTester;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class AIResourceChangeListener implements IResourceChangeListener {
@@ -55,7 +54,7 @@ public class AIResourceChangeListener implements IResourceChangeListener {
 			public boolean visit(IResourceDelta delta) throws CoreException {
 				IProject project = delta.getResource().getProject();
 				// Check if project is of required nature
-				if (project != null && project.isOpen() && WAPropertyTester.isWebProj(project)) {
+				if (project != null && project.isOpen() && WebPropertyTester.isWebProj(project)) {
 					handleResourceChange(delta);
 				}
 				return true;
@@ -93,7 +92,7 @@ public class AIResourceChangeListener implements IResourceChangeListener {
 
 	public static void initializeAIRegistry(IProject iProject) {
 		try {
-			if (iProject.isOpen() && WAPropertyTester.isWebProj(iProject)) {
+			if (iProject.isOpen() && WebPropertyTester.isWebProj(iProject)) {
 				String aiXMLPath;
 				if (iProject.hasNature(Messages.natMaven)) {
 					aiXMLPath = Messages.aiXMLPathMaven;
@@ -128,41 +127,6 @@ public class AIResourceChangeListener implements IResourceChangeListener {
 
 	/**
 	 * Method scans all open Maven or Dynamic web projects form workspace
-	 * and prepare a list of instrumentation keys which are in use.
-	 * @return
-	 */
-	public static List<String> getInUseInstrumentationKeys() {
-		List<String> keyList = new ArrayList<String>();
-		try {
-			IWorkspace workspace = ResourcesPlugin.getWorkspace();
-			IWorkspaceRoot root = workspace.getRoot();
-			for (IProject iProject : root.getProjects()) {
-				if (iProject.isOpen() && WAPropertyTester.isWebProj(iProject)) {
-					String aiXMLPath;
-					if (iProject.hasNature(Messages.natMaven)) {
-						aiXMLPath = Messages.aiXMLPathMaven;
-					} else {
-						aiXMLPath = Messages.aiXMLPath;
-					}
-					AILibraryHandler handler = new AILibraryHandler();
-					IFile file = iProject.getFile(aiXMLPath);
-					if (file.exists()) {
-						handler.parseAIConfXmlPath(file.getLocation().toOSString());
-						String key = handler.getAIInstrumentationKey();
-						if (key != null && !key.isEmpty()) {
-							keyList.add(key);
-						}
-					}
-				}
-			}
-		} catch(Exception ex) {
-			Activator.getDefault().log(Messages.genKeyListErr, ex);
-		}
-		return keyList;
-	}
-
-	/**
-	 * Method scans all open Maven or Dynamic web projects form workspace
 	 * and returns name of project who is using specific key.
 	 * @return
 	 */
@@ -172,7 +136,7 @@ public class AIResourceChangeListener implements IResourceChangeListener {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
 			IWorkspaceRoot root = workspace.getRoot();
 			for (IProject iProject : root.getProjects()) {
-				if (iProject.isOpen() && WAPropertyTester.isWebProj(iProject)) {
+				if (iProject.isOpen() && WebPropertyTester.isWebProj(iProject)) {
 					String aiXMLPath;
 					String webXMLPath;
 					if (iProject.hasNature(Messages.natMaven)) {

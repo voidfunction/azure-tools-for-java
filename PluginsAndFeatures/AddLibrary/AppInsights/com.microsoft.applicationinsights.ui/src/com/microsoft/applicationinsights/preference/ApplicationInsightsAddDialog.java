@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.microsoft.applicationinsights.util.AILibraryUtil;
+import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 /**

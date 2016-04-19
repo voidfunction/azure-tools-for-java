@@ -19,7 +19,6 @@
  */
 package com.microsoft.applicationinsights.preference;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -46,14 +45,13 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.microsoft.applicationinsights.management.rest.ApplicationInsightsManagementClient;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
-import com.microsoft.applicationinsights.management.rest.model.ResourceGroup;
-import com.microsoft.applicationinsights.management.rest.model.Subscription;
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.util.AILibraryUtil;
 import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
-import com.microsoftopentechnologies.azuremanagementutil.rest.AzureApplicationInsightsServices;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoftopentechnologies.wacommon.commoncontrols.NewResourceGroupDialog;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 /**
@@ -67,15 +65,12 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 	Combo region;
 	Button okButton;
 	Button newBtn;
-	ApplicationInsightsManagementClient client;
-	AzureApplicationInsightsServices instance = AzureApplicationInsightsServices.getInstance();
 	Map<String, String> subMap = new HashMap<String, String>();
 	String currentSub;
 	static ApplicationInsightsResource resourceToAdd;
 
-	public ApplicationInsightsNewDialog(Shell parentShell, ApplicationInsightsManagementClient client) {
+	public ApplicationInsightsNewDialog(Shell parentShell) {
 		super(parentShell);
-		this.client = client;
 	}
 
 	@Override
@@ -123,26 +118,25 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 
 	private void populateValues() {
 		try {
-			if (client != null) {
-				List<Subscription> subList = instance.getSubscriptions(client);
-				// check at least single subscription is associated with the account
-				if (subList.size() > 0) {
-					for (Subscription sub : subList) {
-						subMap.put(sub.getId(), sub.getName());
-					}
-					Collection<String> values = subMap.values();
-					String[] subNameArray = values.toArray(new String[values.size()]);
-					Set<String> keySet = subMap.keySet();
-					String[] subKeyArray = keySet.toArray(new String[keySet.size()]);
-
-					subscription.setItems(subNameArray);
-					subscription.setText(subNameArray[0]);
-					currentSub = subNameArray[0];
-
-					populateResourceGroupValues(subKeyArray[0], "");
+			AzureManager manager = AzureManagerImpl.getManager();
+			List<Subscription> subList = manager.getSubscriptionList();
+			// check at least single subscription is associated with the account
+			if (subList.size() > 0) {
+				for (Subscription sub : subList) {
+					subMap.put(sub.getId(), sub.getName());
 				}
+				Collection<String> values = subMap.values();
+				String[] subNameArray = values.toArray(new String[values.size()]);
+				Set<String> keySet = subMap.keySet();
+				String[] subKeyArray = keySet.toArray(new String[keySet.size()]);
 
-				List<String> regionList = instance.getAvailableGeoLocations(client);
+				subscription.setItems(subNameArray);
+				subscription.setText(subNameArray[0]);
+				currentSub = subNameArray[0];
+
+				populateResourceGroupValues(subKeyArray[0], "");
+
+				List<String> regionList = manager.getLocationsForApplicationInsights(subKeyArray[0]);
 				String[] regionArray = regionList.toArray(new String[regionList.size()]);
 				region.setItems(regionArray);
 				region.setText(regionArray[0]);
@@ -155,12 +149,8 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 
 	private void populateResourceGroupValues(String subId, String valtoSet) {
 		try {
-			List<ResourceGroup> groupList = instance.getResourceGroups(client, subId);
-			if (groupList.size() > 0) {
-				List<String> groupStringList = new ArrayList<String>();
-				for (ResourceGroup group : groupList) {
-					groupStringList.add(group.getName());
-				}
+			List<String> groupStringList = AzureManagerImpl.getManager().getResourceGroupNames(subId);
+			if (groupStringList.size() > 0) {
 				String[] groupArray = groupStringList.toArray(new String[groupStringList.size()]);
 				resourceGrp.removeAll();
 				resourceGrp.setItems(groupArray);
@@ -356,7 +346,7 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 		try {
 			PluginUtil.showBusy(true, getShell());
 			String subId = findKeyAsPerValue(subscription.getText());
-			Resource resource = instance.createApplicationInsightsResource(client,
+			Resource resource = AzureManagerImpl.getManager().createApplicationInsightsResource(
 					subId, resourceGrp.getText(),
 					txtName.getText(), region.getText());
 			resourceToAdd = new ApplicationInsightsResource(
@@ -364,10 +354,6 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 					subscription.getText(), subId, resource.getLocation(),
 					resource.getResourceGroup(), true);
 			isValid = true;
-		} catch (java.net.SocketTimeoutException e) {
-			PluginUtil.showBusy(false, getShell());
-			PluginUtil.displayErrorDialogAndLog(getShell(), Messages.appTtl,
-					Messages.timeOutErr1, e);
 		} catch (Exception ex) {
 			PluginUtil.showBusy(false, getShell());
 			PluginUtil.displayErrorDialogAndLog(getShell(),

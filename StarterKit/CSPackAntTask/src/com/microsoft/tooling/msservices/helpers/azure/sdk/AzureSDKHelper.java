@@ -41,14 +41,15 @@ import javax.security.cert.X509Certificate;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
-import com.microsoft.azure.management.websites.models.*;
-import com.microsoft.rest.credentials.TokenCredentials;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.microsoft.applicationinsights.management.rest.ApplicationInsightsManagementClient;
+import com.microsoft.applicationinsights.management.rest.client.RestOperationException;
+import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.azure.management.resources.ResourceManagementClient;
 import com.microsoft.azure.management.resources.ResourceManagementService;
 import com.microsoft.azure.management.resources.models.ResourceGroup;
@@ -58,6 +59,22 @@ import com.microsoft.azure.management.websites.WebHostingPlanOperations;
 import com.microsoft.azure.management.websites.WebSiteManagementClient;
 import com.microsoft.azure.management.websites.WebSiteManagementService;
 import com.microsoft.azure.management.websites.WebSiteOperations;
+import com.microsoft.azure.management.websites.models.ConnectionStringInfo;
+import com.microsoft.azure.management.websites.models.WebHostingPlan;
+import com.microsoft.azure.management.websites.models.WebHostingPlanCreateOrUpdateParameters;
+import com.microsoft.azure.management.websites.models.WebHostingPlanListResponse;
+import com.microsoft.azure.management.websites.models.WebHostingPlanProperties;
+import com.microsoft.azure.management.websites.models.WebSiteBase;
+import com.microsoft.azure.management.websites.models.WebSiteBaseProperties;
+import com.microsoft.azure.management.websites.models.WebSiteCreateOrUpdateParameters;
+import com.microsoft.azure.management.websites.models.WebSiteDeleteParameters;
+import com.microsoft.azure.management.websites.models.WebSiteGetConfigurationResult;
+import com.microsoft.azure.management.websites.models.WebSiteGetParameters;
+import com.microsoft.azure.management.websites.models.WebSiteGetPublishProfileResponse;
+import com.microsoft.azure.management.websites.models.WebSiteListParameters;
+import com.microsoft.azure.management.websites.models.WebSiteListResponse;
+import com.microsoft.azure.management.websites.models.WebSiteUpdateConfigurationDetails;
+import com.microsoft.azure.management.websites.models.WebSiteUpdateConfigurationParameters;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
@@ -912,6 +929,47 @@ public class AzureSDKHelper {
     }
 
     @NotNull
+    public static SDKRequestCallback<List<Resource>, ApplicationInsightsManagementClient> getApplicationInsightsResources(
+    		@NotNull final String subscriptionId) {
+    	return new SDKRequestCallback<List<Resource>, ApplicationInsightsManagementClient>() {
+    		@NotNull
+    		@Override
+    		public List<Resource> execute(@NotNull ApplicationInsightsManagementClient client)
+    				throws Throwable {
+    			return client.getResources(subscriptionId);
+    		}
+    	};
+    }
+
+    @NotNull
+    public static SDKRequestCallback<List<String>, ApplicationInsightsManagementClient> getLocationsForApplicationInsights() {
+    	return new SDKRequestCallback<List<String>, ApplicationInsightsManagementClient>() {
+    		@NotNull
+    		@Override
+    		public List<String> execute(@NotNull ApplicationInsightsManagementClient client)
+    				throws Throwable {
+    			return client.getAvailableGeoLocations();
+    		}
+    	};
+    }
+
+    @NotNull
+    public static SDKRequestCallback<Resource, ApplicationInsightsManagementClient> createApplicationInsightsResource(
+    		@NotNull final String subscriptionId,
+    		@NotNull final String resourceGroupName,
+    		@NotNull final String resourceName,
+    		@NotNull final String location) {
+    	return new SDKRequestCallback<Resource, ApplicationInsightsManagementClient>() {
+    		@NotNull
+    		@Override
+    		public Resource execute(@NotNull ApplicationInsightsManagementClient client)
+    				throws Throwable {
+    			return client.createResource(subscriptionId, resourceGroupName, resourceName, location);
+    		}
+    	};
+    }
+
+    @NotNull
     public static SDKRequestCallback<List<WebHostingPlanCache>, WebSiteManagementClient> getWebHostingPlans(@NotNull final String resourceGroup) {
         return new SDKRequestCallback<List<WebHostingPlanCache>, WebSiteManagementClient>() {
             @NotNull
@@ -1372,6 +1430,14 @@ public class AzureSDKHelper {
         // mode is active directory
         AuthTokenRequestFilter requestFilter = new AuthTokenRequestFilter(accessToken);
         return client.withRequestFilterFirst(requestFilter);
+    }
+    
+    @NotNull
+    public static ApplicationInsightsManagementClient getApplicationManagementClient(@NotNull String tenantId, @NotNull String accessToken)
+    		throws RestOperationException, IOException {
+    	String userAgent = "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:19.0) Gecko/20100101 Firefox/19.0";
+    	ApplicationInsightsManagementClient client = new ApplicationInsightsManagementClient(tenantId, accessToken, userAgent);
+    	return client;
     }
 
     @NotNull

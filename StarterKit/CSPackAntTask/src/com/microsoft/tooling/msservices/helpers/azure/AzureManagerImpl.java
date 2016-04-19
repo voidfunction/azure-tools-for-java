@@ -23,7 +23,6 @@ package com.microsoft.tooling.msservices.helpers.azure;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,30 +36,16 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
@@ -81,23 +66,20 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.microsoft.applicationinsights.management.rest.ApplicationInsightsManagementClient;
+import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.azure.management.resources.ResourceManagementClient;
 import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.azure.management.websites.WebSiteManagementClient;
 import com.microsoft.azure.management.websites.models.WebHostingPlan;
-import com.microsoft.tooling.msservices.components.AppSettingsNames;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginSettings;
 import com.microsoft.tooling.msservices.helpers.IDEHelper.ArtifactDescriptor;
 import com.microsoft.tooling.msservices.helpers.IDEHelper.ProjectDescriptor;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
-import com.microsoft.tooling.msservices.helpers.OpenSSLHelper;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.XmlHelper;
-import com.microsoft.tooling.msservices.helpers.auth.AADManager;
 import com.microsoft.tooling.msservices.helpers.auth.AADManagerImpl;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
 import com.microsoft.tooling.msservices.helpers.azure.rest.AzureAADHelper;
@@ -157,7 +139,6 @@ import com.microsoft.windowsazure.management.network.NetworkManagementClient;
 import com.microsoft.windowsazure.management.storage.StorageManagementClient;
 import com.microsoftopentechnologies.azuremanagementutil.rest.SubscriptionTransformer;
 
-import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
 public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManager {
@@ -2176,6 +2157,28 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
             }
         });
     }
+    
+    @NotNull
+    private <T> T requestApplicationInsightsSDK(@NotNull final String subscriptionId,
+                                       @NotNull final SDKRequestCallback<T, ApplicationInsightsManagementClient> requestCallback)
+            throws AzureCmdException {
+        return requestAzureSDK(subscriptionId, requestCallback, new AzureSDKClientProvider<ApplicationInsightsManagementClient>() {
+            @NotNull
+            @Override
+            public ApplicationInsightsManagementClient getSSLClient(@NotNull Subscription subscription)
+                    throws Throwable {
+            	// Application insights does not support publish settings file as authentication
+                return null;
+            }
+
+            @NotNull
+            @Override
+            public ApplicationInsightsManagementClient getAADClient(@NotNull String subscriptionId, @NotNull String accessToken)
+            		throws Throwable {
+                return AzureSDKHelper.getApplicationManagementClient(getUserInfo(subscriptionId).getTenantId(), accessToken);
+            }
+        });
+    }
 
     @NotNull
     private <T, V extends Closeable> T requestAzureSDK(@NotNull final String subscriptionId,
@@ -2305,9 +2308,27 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
         }
     }
 
-
     @NotNull
     private static String getAbsolutePath(@NotNull String dir) {
         return "/" + dir.trim().replace('\\', '/').replaceAll("^/+", "").replaceAll("/+$", "");
+    }
+    
+    @Override
+    public List<Resource> getApplicationInsightsResources(@NotNull String subscriptionId) throws AzureCmdException {
+    	return requestApplicationInsightsSDK(subscriptionId, AzureSDKHelper.getApplicationInsightsResources(subscriptionId));
+    }
+    
+    @Override
+    public List<String> getLocationsForApplicationInsights(@NotNull String subscriptionId) throws AzureCmdException {
+    	return requestApplicationInsightsSDK(subscriptionId, AzureSDKHelper.getLocationsForApplicationInsights());
+    }
+    
+    @Override
+    public Resource createApplicationInsightsResource(@NotNull String subscriptionId,
+    		@NotNull String resourceGroupName,
+    		@NotNull String resourceName,
+    		@NotNull String location) throws AzureCmdException {
+    	return requestApplicationInsightsSDK(subscriptionId, AzureSDKHelper.createApplicationInsightsResource(subscriptionId,
+    			resourceGroupName, resourceName, location));
     }
 }
