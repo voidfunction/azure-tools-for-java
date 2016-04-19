@@ -24,8 +24,6 @@ package com.microsoft.azure.hdinsight.sdk.storage;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 
 public class HDStorageAccount extends ClientStorageAccount {
-    private final String DEFAULT_PROTOCOL = "https";
-
     private String fullStorageBlobName;
     private boolean isDefaultStorageAccount;
     private String defaultContainer;
