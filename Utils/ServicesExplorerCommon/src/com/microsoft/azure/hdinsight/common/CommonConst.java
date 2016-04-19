@@ -4,7 +4,8 @@ public class CommonConst {
     public static final String ProductIConPath = "/icons/Product.png";
     public static final String RefreshIConPath = "/icons/Refresh.png";
     public static final String BlobFileIConPath = "/icons/BlobFile.png";
-    public static final String HDInsightIConPath = "/icons/HdInsight.png";
+    public static final String HDExplorerIconPath = "HdExplorer.png";
+    public static final String HDInsightIConPath = "HdInsight.png";
     public static final String HDInsightGrayIconPath = "HdInsight_gray.png";
     public static final String ClusterIConPath = "Cluster.png";
     public static final String StorageAccountIConPath = "storageaccount.png";

@@ -10,15 +10,15 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 @Name("Add New Cluster")
 public class AddNewClusterAction extends NodeActionListener {
 
-    private HDInsightRootModule azureServiceModule;
+    private HDInsightRootModule hdInsightRootModule;
 
-    public AddNewClusterAction(HDInsightRootModule azureServiceModule) {
-        this.azureServiceModule = azureServiceModule;
+    public AddNewClusterAction(HDInsightRootModule hdInsightRootModule) {
+        this.hdInsightRootModule = hdInsightRootModule;
     }
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        AddNewClusterFrom form = new AddNewClusterFrom((Project) azureServiceModule.getProject());
+        AddNewClusterFrom form = new AddNewClusterFrom((Project) hdInsightRootModule.getProject(), hdInsightRootModule);
         form.show();
     }
 }

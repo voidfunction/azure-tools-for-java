@@ -76,18 +76,6 @@ public class PluginUtil {
         return toolWindowManagerCollection.get(toolWindowKey);
     }
 
-//    public static HDInsightRootModule getHDInsightModule(Project project) {
-//        IToolWindowProcessor IToolWindowProcessor = getToolWindowManager(
-//                new ToolWindowKey(project, ServerExplorerToolWindowFactory.TOOLWINDOW_FACTORY_ID));
-//
-//        if (IToolWindowProcessor != null) {
-//            return ((ServerExploreToolWindowProcessor) IToolWindowProcessor).getAzureServiceModule();
-//
-//        }
-//
-//        return null;
-//    }
-
     @Nullable
     public static JobStatusManager getJobStatusManager(@NotNull Project project) {
         ToolWindowKey key = new ToolWindowKey(project, CommonConst.SPARK_SUBMISSION_WINDOW_ID);

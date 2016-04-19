@@ -149,7 +149,6 @@ public class ClusterManagerEx {
         hdinsightAdditionalClusterDetails.add(hdInsightClusterDetail);
         cachedClusterDetails.add(hdInsightClusterDetail);
 
-//        PluginUtil.getServerExplorerRootModule(project).refreshWithoutAsync(); todo!
         saveAdditionalClusters();
     }
 
@@ -158,7 +157,6 @@ public class ClusterManagerEx {
         hdinsightAdditionalClusterDetails.remove(hdInsightClusterDetail);
         cachedClusterDetails.remove(hdInsightClusterDetail);
 
-//        PluginUtil.getServerExplorerRootModule(project).refreshWithoutAsync(); todo!
         saveAdditionalClusters();
     }
 

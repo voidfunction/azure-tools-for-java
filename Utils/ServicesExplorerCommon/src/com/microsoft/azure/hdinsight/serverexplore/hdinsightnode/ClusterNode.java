@@ -84,6 +84,7 @@ public class ClusterNode extends AzureRefreshableNode {
                     int exitCode = JOptionPane.showConfirmDialog(null, "Do you really want to delete the HDInsight cluster?", "Delete HDInsight Cluster", JOptionPane.OK_CANCEL_OPTION);
                     if(exitCode == JOptionPane.OK_OPTION) {
                         ClusterManagerEx.getInstance().removeHDInsightAdditionalCluster((HDInsightAdditionalClusterDetail)clusterDetail);
+                        ((HDInsightRootModule) getParent()).refreshWithoutAsync();
                     }
                 }
             });

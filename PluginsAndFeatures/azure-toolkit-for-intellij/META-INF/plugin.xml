@@ -60,13 +60,6 @@
 
       <projectTemplatesFactory implementation="com.microsoft.azure.hdinsight.projects.HDInsightProjectTemplatesFactory"/>
       <projectStructureDetector implementation="com.microsoft.azure.hdinsight.projects.HDInsightProjectStructureDetector"/>
-      <!--<fileEditorProvider implementation="com.microsoft.azure.hdinsight.serverexplore.ui.BlobExplorerFileEditorProvider"/>-->
-<!--      <toolWindow
-            anchor="left"
-            factoryClass="com.microsoft.azure.hdinsight.serverexplore.ServerExplorerToolWindowFactory"
-            id="HDInsight Explorer"
-            canCloseContents="false"
-            icon="/icons/HdExplorer.png"/>-->
       <toolWindow
             anchor="bottom"
             factoryClass="com.microsoft.azure.hdinsight.spark.ui.SparkSubmissionToolWindowFactory"
@@ -81,9 +74,6 @@
     <component>
       <implementation-class>com.microsoft.intellij.AzureActionsComponent</implementation-class>
     </component>
-<!--    <component>
-      <implementation-class>com.microsoft.azure.hdinsight.HDInsightToolsApplication</implementation-class>
-    </component>-->
     <component>
       <implementation-class>com.microsoft.azure.hdinsight.projects.HDInsightActionsComponent</implementation-class>
     </component>

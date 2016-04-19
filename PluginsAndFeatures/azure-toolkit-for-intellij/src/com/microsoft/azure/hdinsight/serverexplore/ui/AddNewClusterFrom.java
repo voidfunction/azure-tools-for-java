@@ -9,6 +9,7 @@ import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
 import com.microsoft.azure.hdinsight.sdk.cluster.HDInsightAdditionalClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
+import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import org.jetbrains.annotations.NotNull;
@@ -45,12 +46,15 @@ public class AddNewClusterFrom extends DialogWrapper {
     private JTextField storageNameField;
     private JTextField storageKeyTextField;
 
+    private HDInsightRootModule hdInsightModule;
+
     private static final String URL_PREFIX = "https://";
 
-    public AddNewClusterFrom(final Project project) {
+    public AddNewClusterFrom(final Project project, HDInsightRootModule hdInsightModule) {
         super(project, true);
         init();
         this.project = project;
+        this.hdInsightModule = hdInsightModule;
 
         this.setTitle("Add New HDInsight Cluster");
 
@@ -102,6 +106,7 @@ public class AddNewClusterFrom extends DialogWrapper {
                         if (storageAccount != null) {
                             HDInsightAdditionalClusterDetail hdInsightAdditionalClusterDetail = new HDInsightAdditionalClusterDetail(clusterName, userName, password, storageAccount);
                             ClusterManagerEx.getInstance().addHDInsightAdditionalCluster(hdInsightAdditionalClusterDetail);
+                            hdInsightModule.refreshWithoutAsync();
                         }
                         close(DialogWrapper.OK_EXIT_CODE, true);
                     } else {

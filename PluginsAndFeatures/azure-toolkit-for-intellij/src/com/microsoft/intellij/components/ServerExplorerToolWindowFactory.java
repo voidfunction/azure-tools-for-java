@@ -357,19 +357,24 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                             manageSubscriptionPanel.setDialog(subscriptionsDialog);
                             subscriptionsDialog.show();
                         }
-                    },
-                    new AnAction("Add New Cluster", "Add New Cluster", AllIcons.Ide.Notifications) {
-                        @Override
-                        public void actionPerformed(AnActionEvent anActionEvent) {
-                            AddNewClusterFrom form = new AddNewClusterFrom((anActionEvent.getProject()));
-                            form.show();
-                        }
                     });
+//                    new AnAction("Add New Cluster", "Add New Cluster", AllIcons.Ide.Notifications) {
+//                        @Override
+//                        public void actionPerformed(AnActionEvent anActionEvent) {
+//                            AddNewClusterFrom form = new AddNewClusterFrom(anActionEvent.getProject(), hd);
+//                            form.show();
+//                        }
+//                    });
         }
     }
 
     private ImageIcon loadIcon(String iconPath) {
-        URL url = NodeTreeCellRenderer.class.getResource("/icons/" + iconPath);
-        return new ImageIcon(url);
+        try {
+            URL url = NodeTreeCellRenderer.class.getResource("/icons/" + iconPath);
+            return new ImageIcon(url);
+        } catch (NullPointerException ex) {
+            System.out.println("iconpath = " + iconPath);
+            return null;
+        }
     }
 }
