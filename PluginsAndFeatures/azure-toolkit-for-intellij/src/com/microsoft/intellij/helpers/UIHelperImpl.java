@@ -35,6 +35,7 @@ import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.forms.ErrorMessageForm;
 import com.microsoft.intellij.forms.OpenSSLFinderForm;
 import com.microsoft.intellij.helpers.storage.*;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
@@ -325,7 +326,8 @@ public class UIHelperImpl implements UIHelper {
 
     @Override
     public void saveWebAppPreferences(Map<WebSite, WebSiteConfiguration> map) {
-        AzureSettings.getSafeInstance(AzurePlugin.project).saveWebApps(map);
-        AzureSettings.getSafeInstance(AzurePlugin.project).setwebAppLoaded(true);
+        Project activeProject = PluginUtil.getSelectedProject();
+        AzureSettings.getSafeInstance(activeProject).saveWebApps(map);
+        AzureSettings.getSafeInstance(activeProject).setwebAppLoaded(true);
     }
 }

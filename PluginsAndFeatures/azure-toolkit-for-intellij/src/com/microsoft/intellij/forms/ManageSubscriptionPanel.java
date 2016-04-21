@@ -29,7 +29,6 @@ import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.table.JBTable;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
-import com.microsoft.intellij.ui.AppInsightsMngmtPanel;
 import com.microsoft.intellij.ui.AzureAbstractPanel;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.WizardCacheManager;
@@ -141,8 +140,8 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                                 }
                             }
                         }
-                        AzureSettings.getSafeInstance(AzurePlugin.project).saveWebApps(webSiteConfigMap);
-                        AzureSettings.getSafeInstance(AzurePlugin.project).setwebAppLoaded(true);
+                        AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
+                        AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
                         AppInsightsMngmtPanel.updateApplicationInsightsResourceRegistry(subscriptions);
                         pd.setCurrentSubscription(publishProfile.getSubscriptions().get(0));
                         try {
@@ -178,8 +177,8 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                 isf.setOnSubscriptionLoaded(new Runnable() {
                     @Override
                     public void run() {
-                        AzureSettings.getSafeInstance(AzurePlugin.project).saveWebApps(new HashMap<WebSite, WebSiteConfiguration>());
-                        AzureSettings.getSafeInstance(AzurePlugin.project).setwebAppLoaded(false);
+                        AzureSettings.getSafeInstance(project).saveWebApps(new HashMap<WebSite, WebSiteConfiguration>());
+                        AzureSettings.getSafeInstance(project).setwebAppLoaded(false);
                         AppInsightsMngmtPanel.keeepManuallyAddedList();
                         loadList();
                     }
@@ -235,8 +234,8 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
             apiManager.clearImportedPublishSettingsFiles();
             WizardCacheManager.getPublishDatas().clear();
             AzureSettings.getSafeInstance(project).savePublishDatas();
-            AzureSettings.getSafeInstance(AzurePlugin.project).saveWebApps(new HashMap<WebSite, WebSiteConfiguration>());
-            AzureSettings.getSafeInstance(AzurePlugin.project).setwebAppLoaded(false);
+            AzureSettings.getSafeInstance(project).saveWebApps(new HashMap<WebSite, WebSiteConfiguration>());
+            AzureSettings.getSafeInstance(project).setwebAppLoaded(false);
             AppInsightsMngmtPanel.keeepManuallyAddedList();
             DefaultTableModel model = (DefaultTableModel) subscriptionTable.getModel();
             while (model.getRowCount() > 0) {
