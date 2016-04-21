@@ -89,6 +89,11 @@ public class AntIDEHelper implements IDEHelper {
     }
 
     @Override
+    public String getProperty(@NotNull String name, Object projectObject) {
+        return null;
+    }
+
+    @Override
     public String getProperty(@NotNull String name, @NotNull String defaultValue) {
         return null;
     }
@@ -98,12 +103,21 @@ public class AntIDEHelper implements IDEHelper {
     }
 
     @Override
+    public void setProperty(@NotNull String name, @NotNull String value, Object projectObject) {
+    }
+
+    @Override
     public void unsetProperty(@NotNull String name) {
     }
 
     @Override
     public boolean isPropertySet(@NotNull String name) {
         return false;
+    }
+
+    @Override
+    public void unsetProperty(@NotNull String name, Object projectObject) {
+
     }
 
     @Override

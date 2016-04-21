@@ -28,15 +28,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.openapi.wm.ex.ToolWindowEx;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
-import com.microsoft.azure.hdinsight.serverexplore.ui.AddNewClusterFrom;
-import com.microsoft.azure.hdinsight.toolwindow.ServerExploreToolWindowProcessor;
-import com.microsoft.azure.hdinsight.toolwindow.ToolWindowKey;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.forms.ManageSubscriptionPanel;
@@ -76,11 +72,9 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
         // initialize azure service module
         azureServiceModule = new AzureServiceModule(project, false);
-        ServerExploreToolWindowProcessor serverExploreToolWindowProcessor = new ServerExploreToolWindowProcessor(null/*azureServiceModule*/);
-        PluginUtil.registerToolWindowManager(new ToolWindowKey(project, EXPLORER_WINDOW), serverExploreToolWindowProcessor);
 
         // initialize with all the service modules
-        treeModel = new DefaultTreeModel(initRoot());
+        treeModel = new DefaultTreeModel(initRoot(project));
 
         // initialize tree
         tree = new Tree(treeModel);
@@ -108,15 +102,15 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         }
     }
 
-    private DefaultMutableTreeNode initRoot() {
+    private DefaultMutableTreeNode initRoot(Project project) {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
 
         // add the azure service root service module
         root.add(createTreeNode(azureServiceModule));
 
         // kick-off asynchronous load of child nodes on all the modules
-        if (AzureSettings.getSafeInstance(AzurePlugin.project).iswebAppLoaded()) {
-            AzureServiceModule.webSiteConfigMap = AzureSettings.getSafeInstance(AzurePlugin.project).loadWebApps();
+        if (AzureSettings.getSafeInstance(project).iswebAppLoaded()) {
+            AzureServiceModule.webSiteConfigMap = AzureSettings.getSafeInstance(project).loadWebApps();
         }
         azureServiceModule.load();
 
@@ -358,23 +352,11 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                             subscriptionsDialog.show();
                         }
                     });
-//                    new AnAction("Add New Cluster", "Add New Cluster", AllIcons.Ide.Notifications) {
-//                        @Override
-//                        public void actionPerformed(AnActionEvent anActionEvent) {
-//                            AddNewClusterFrom form = new AddNewClusterFrom(anActionEvent.getProject(), hd);
-//                            form.show();
-//                        }
-//                    });
         }
     }
 
     private ImageIcon loadIcon(String iconPath) {
-        try {
-            URL url = NodeTreeCellRenderer.class.getResource("/icons/" + iconPath);
-            return new ImageIcon(url);
-        } catch (NullPointerException ex) {
-            System.out.println("iconpath = " + iconPath);
-            return null;
-        }
+        URL url = NodeTreeCellRenderer.class.getResource("/icons/" + iconPath);
+        return new ImageIcon(url);
     }
 }

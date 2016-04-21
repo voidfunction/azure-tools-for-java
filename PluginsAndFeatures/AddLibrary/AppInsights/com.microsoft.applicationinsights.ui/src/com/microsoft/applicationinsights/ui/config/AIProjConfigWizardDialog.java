@@ -67,8 +67,13 @@ import org.osgi.framework.Bundle;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsPreferencePage;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.applicationinsights.ui.activator.Activator;
-import com.microsoft.applicationinsights.util.AILibraryHandler;
 import com.microsoft.applicationinsights.util.AILibraryUtil;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.wacommon.applicationinsights.AILibraryHandler;
+import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
+import com.microsoft.wacommon.applicationinsights.ApplicationInsightsResourceRegistryEclipse;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
@@ -162,6 +167,22 @@ public class AIProjConfigWizardDialog extends TitleAreaDialog {
 	}
 	
 	private void setData() {
+		try {
+			AzureManager manager = AzureManagerImpl.getManager();
+			List<Subscription> subList = manager.getSubscriptionList();
+			if (subList.size() > 0 && !ApplicationInsightsPreferences.isLoaded()) {
+				if (manager.authenticated()) {
+					// authenticated using AD. Proceed for updating application insights registry.
+					ApplicationInsightsResourceRegistryEclipse.updateApplicationInsightsResourceRegistry(subList);
+				} else {
+					// imported publish settings file. just show manually added list from preferences
+					// Neither clear subscription list nor show sign in dialog as user may just want to add key manually.
+					ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
+				}
+			}
+		} catch(Exception ex) {
+			Activator.getDefault().log(ex.getMessage(), ex);
+		}
 		comboInstrumentationKey.removeAll();
 		String[] array = ApplicationInsightsResourceRegistry.getResourcesNamesToDisplay();
 		if (array.length > 0) {

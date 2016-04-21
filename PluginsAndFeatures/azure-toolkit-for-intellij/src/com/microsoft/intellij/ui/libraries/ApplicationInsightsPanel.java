@@ -38,10 +38,14 @@ import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.ui.AppInsightsMngmtPanel;
 import com.microsoft.intellij.ui.AzureAbstractPanel;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.model.Subscription;
 import org.jdesktop.swingx.JXHyperlink;
 
 import javax.swing.*;
@@ -137,6 +141,7 @@ public class ApplicationInsightsPanel implements AzureAbstractPanel {
     }
 
     private void setData() {
+        AppInsightsMngmtPanel.refreshDataForDialog();
         comboInstrumentation.removeAllItems();
         String[] array = ApplicationInsightsResourceRegistry.getResourcesNamesToDisplay();
         if (array.length > 0) {

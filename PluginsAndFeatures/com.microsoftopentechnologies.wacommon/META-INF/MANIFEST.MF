@@ -80,4 +80,5 @@ Export-Package: com.gigaspaces.azure.runnable,
  com.microsoftopentechnologies.wacommon.telemetry,
  com.microsoftopentechnologies.wacommon.utils,
  com.persistent.util,
+ com.microsoft.wacommon.applicationinsights,
  com.microsoft.azureexplorer.helpers

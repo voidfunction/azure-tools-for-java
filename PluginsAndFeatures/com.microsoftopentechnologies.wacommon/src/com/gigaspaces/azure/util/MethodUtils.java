@@ -23,12 +23,11 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
-import com.persistent.util.MessageUtil;
+import javax.xml.bind.JAXBException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import com.gigaspaces.azure.runnable.CacheAccountWithProgressWindow;
 import com.gigaspaces.azure.runnable.LoadAccountWithProgressWindow;
@@ -39,8 +38,7 @@ import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccount
 import com.microsoftopentechnologies.wacommon.commoncontrols.Messages;
 import com.microsoftopentechnologies.wacommon.storageregistry.PreferenceUtilStrg;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
-
-import javax.xml.bind.JAXBException;
+import com.persistent.util.MessageUtil;
 
 /**
  * Class has common methods which

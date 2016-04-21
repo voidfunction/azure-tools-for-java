@@ -50,7 +50,6 @@ import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.helpers.tasks.CancellableTaskHandleImpl;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
@@ -76,12 +75,6 @@ import java.util.zip.ZipFile;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class IDEHelperImpl implements IDEHelper {
-    private final Project project;
-
-    public IDEHelperImpl(Project project) {
-        this.project = project;
-    }
-
     @Override
     public void openFile(@NotNull File file, @NotNull final Object n) {
         final Node node = (Node) n;
@@ -262,8 +255,12 @@ public class IDEHelperImpl implements IDEHelper {
     @Nullable
     @Override
     public String getProperty(@NotNull String name) {
-        return AzureSettings.getSafeInstance(project).getProperty(name);
+        return AzureSettings.getSafeInstance(PluginUtil.getSelectedProject()).getProperty(name);
 //        return PropertiesComponent.getInstance().getValue(name);
+    }
+
+    public String getProperty(@NotNull String name, Object projectObject) {
+        return AzureSettings.getSafeInstance((Project) projectObject).getProperty(name);
     }
 
     @NotNull
@@ -274,7 +271,7 @@ public class IDEHelperImpl implements IDEHelper {
 
     @Override
     public void setProperty(@NotNull String name, @NotNull String value) {
-        AzureSettings.getSafeInstance(project).setProperty(name, value);
+        AzureSettings.getSafeInstance(PluginUtil.getSelectedProject()).setProperty(name, value);
 //        PropertiesComponent.getInstance().setValue(name, value);
 //        ApplicationManager.getApplication().invokeLater(new Runnable() {
 //            @Override
@@ -285,8 +282,13 @@ public class IDEHelperImpl implements IDEHelper {
     }
 
     @Override
+    public void setProperty(@NotNull String name, @NotNull String value, Object projectObject) {
+        AzureSettings.getSafeInstance((Project) projectObject).setProperty(name, value);
+    }
+
+    @Override
     public void unsetProperty(@NotNull String name) {
-        AzureSettings.getSafeInstance(project).unsetProperty(name);
+        AzureSettings.getSafeInstance(PluginUtil.getSelectedProject()).unsetProperty(name);
 //        PropertiesComponent.getInstance().unsetValue(name);
 //        ApplicationManager.getApplication().invokeLater(new Runnable() {
 //            @Override
@@ -297,21 +299,26 @@ public class IDEHelperImpl implements IDEHelper {
     }
 
     @Override
+    public void unsetProperty(@NotNull String name, Object projectObject) {
+        AzureSettings.getSafeInstance((Project) projectObject).unsetProperty(name);
+    }
+
+    @Override
     public boolean isPropertySet(@NotNull String name) {
-        return AzureSettings.getSafeInstance(project).isPropertySet(name);
+        return AzureSettings.getSafeInstance(PluginUtil.getSelectedProject()).isPropertySet(name);
 //        return PropertiesComponent.getInstance().isValueSet(name);
     }
 
     @Nullable
     @Override
     public String[] getProperties(@NotNull String name) { // todo!!!
-        return AzureSettings.getSafeInstance(project).getProperties(name);
+        return AzureSettings.getSafeInstance(PluginUtil.getSelectedProject()).getProperties(name);
 //        return PropertiesComponent.getInstance().getValues(name);
     }
 
     @Override
     public void setProperties(@NotNull String name, @NotNull String[] value) {
-        AzureSettings.getSafeInstance(project).setProperties(name, value);
+        AzureSettings.getSafeInstance(PluginUtil.getSelectedProject()).setProperties(name, value);
 //        PropertiesComponent.getInstance().setValues(name, value);
 //        ApplicationManager.getApplication().saveSettings();
     }

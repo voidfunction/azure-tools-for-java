@@ -34,6 +34,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
+import com.microsoft.intellij.helpers.IDEHelperImpl;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
@@ -129,7 +130,7 @@ public class WebSiteDeployForm extends DialogWrapper {
                             selectedWebSite.getWebSpaceName(), name);
                     webSiteList.remove(webSiteJList.getSelectedIndex());
                     webSiteConfigMap.remove(selectedWebSite);
-                    AzureSettings.getSafeInstance(AzurePlugin.project).saveWebApps(webSiteConfigMap);
+                    AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
                     selectedWebSite = null;
                     if (webSiteConfigMap.isEmpty()) {
                         setMessages("There are no Azure web apps in the imported subscriptions.");
@@ -294,8 +295,8 @@ public class WebSiteDeployForm extends DialogWrapper {
                 private void loadWebSiteConfigurations(final Subscription subscription,
                                                        final SettableFuture<Void> subscriptionFuture) {
                     try {
-                        if (AzureSettings.getSafeInstance(AzurePlugin.project).iswebAppLoaded()) {
-                            webSiteConfigMap = AzureSettings.getSafeInstance(AzurePlugin.project).loadWebApps();
+                        if (AzureSettings.getSafeInstance(project).iswebAppLoaded()) {
+                            webSiteConfigMap = AzureSettings.getSafeInstance(project).loadWebApps();
                             subscriptionFuture.set(null);
                         } else {
                             List<ListenableFuture<Void>> webSpaceFutures = new ArrayList<ListenableFuture<Void>>();
@@ -379,8 +380,8 @@ public class WebSiteDeployForm extends DialogWrapper {
                     }
                     synchronized (lock) {
                         webSiteConfigMap.put(webSite, webSiteConfiguration);
-                        AzureSettings.getSafeInstance(AzurePlugin.project).saveWebApps(webSiteConfigMap);
-                        AzureSettings.getSafeInstance(AzurePlugin.project).setwebAppLoaded(true);
+                        AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
+                        AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
                     }
                     webSiteFuture.set(null);
                 }

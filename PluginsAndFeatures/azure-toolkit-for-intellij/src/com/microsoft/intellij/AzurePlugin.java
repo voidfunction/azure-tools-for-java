@@ -99,11 +99,9 @@ public class AzurePlugin extends AbstractProjectComponent {
     String dataFile = WAHelper.getTemplateFile(message("dataFileName"));
 
     private final AzureSettings azureSettings;
-    public static Project project;
 
     public AzurePlugin(Project project) {
         super(project);
-        this.project = project;
         this.azureSettings = AzureSettings.getSafeInstance(project);
         AzureToolkitFilter.setUserAgent(String.format(USER_AGENT, PLUGIN_VERSION));
     }
@@ -173,8 +171,8 @@ public class AzurePlugin extends AbstractProjectComponent {
 
     private void initializeAIRegistry() {
         try {
-            AzureSettings.getSafeInstance(project).loadAppInsights();
-            Module[] modules = ModuleManager.getInstance(project).getModules();
+            AzureSettings.getSafeInstance(myProject).loadAppInsights();
+            Module[] modules = ModuleManager.getInstance(myProject).getModules();
             for (Module module : modules) {
                 if (module != null && module.isLoaded() && ModuleTypeId.JAVA_MODULE.equals(module.getOptionValue(Module.ELEMENT_TYPE))) {
                     String aiXMLPath = String.format("%s%s%s", PluginUtil.getModulePath(module), File.separator, message("aiXMLPath"));
@@ -195,7 +193,7 @@ public class AzurePlugin extends AbstractProjectComponent {
                     }
                 }
             }
-            AzureSettings.getSafeInstance(project).saveAppInsights();
+            AzureSettings.getSafeInstance(myProject).saveAppInsights();
         } catch (Exception ex) {
             AzurePlugin.log(ex.getMessage(), ex);
         }
@@ -241,23 +239,23 @@ public class AzurePlugin extends AbstractProjectComponent {
     }
 
     private void loadWebappsSettings() {
-        StartupManager.getInstance(project).runWhenProjectIsInitialized(
+        StartupManager.getInstance(myProject).runWhenProjectIsInitialized(
                 new Runnable() {
                     @Override
                     public void run() {
-                        Module[] modules = ModuleManager.getInstance(project).getModules();
+                        Module[] modules = ModuleManager.getInstance(myProject).getModules();
                         Set<String> javaModules = new HashSet<String>();
                         for (Module module : modules) {
                             if (ModuleTypeId.JAVA_MODULE.equals(module.getOptionValue(Module.ELEMENT_TYPE))) {
                                 javaModules.add(module.getName());
                             }
                         }
-                        Set<String> keys = AzureSettings.getSafeInstance(project).getPropertyKeys();
+                        Set<String> keys = AzureSettings.getSafeInstance(myProject).getPropertyKeys();
                         for (String key : keys) {
                             if (key.endsWith(".webapps")) {
                                 String projName = key.substring(0, key.lastIndexOf("."));
                                 if (!javaModules.contains(projName)) {
-                                    AzureSettings.getSafeInstance(project).unsetProperty(key);
+                                    AzureSettings.getSafeInstance(myProject).unsetProperty(key);
                                 }
                             }
                         }
@@ -266,7 +264,7 @@ public class AzurePlugin extends AbstractProjectComponent {
     }
 
     private void telemetryAI() {
-        ModuleManager.getInstance(project).getModules();
+        ModuleManager.getInstance(myProject).getModules();
     }
 
     public String getComponentName() {

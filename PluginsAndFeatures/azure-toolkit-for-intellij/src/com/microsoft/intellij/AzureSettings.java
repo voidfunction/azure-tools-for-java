@@ -55,6 +55,7 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
 
     private boolean subscriptionLoaded;
     private boolean webAppLoaded;
+    private boolean appInsightsLoaded;
 
     public static AzureSettings getSafeInstance(Project project) {
         AzureSettings settings = ServiceManager.getService(project, AzureSettings.class);
@@ -290,6 +291,14 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
 
     public void setwebAppLoaded(boolean webAppLoaded) {
         this.webAppLoaded = webAppLoaded;
+    }
+
+    public boolean isAppInsightsLoaded() {
+        return appInsightsLoaded;
+    }
+
+    public void setAppInsightsLoaded(boolean appInsightsLoaded) {
+        this.appInsightsLoaded = appInsightsLoaded;
     }
 
     public String[] getProperties(String name) {

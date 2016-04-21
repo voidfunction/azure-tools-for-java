@@ -45,7 +45,6 @@ import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class MSToolsApplication extends AbstractProjectComponent implements PluginComponent {
 
-    private static MSToolsApplication current = null;
     private PluginSettings settings;
 
     // TODO: This needs to be the plugin ID from plugin.xml somehow.
@@ -53,10 +52,6 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
 
     protected MSToolsApplication(Project project) {
         super(project);
-    }
-
-    public static MSToolsApplication getCurrent() {
-        return current;
     }
 
     @Override
@@ -67,12 +62,9 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
 
     @Override
     public void initComponent() {
-        // save the object instance
-        current = this;
-
         DefaultLoader.setPluginComponent(this);
         DefaultLoader.setUiHelper(new UIHelperImpl());
-        DefaultLoader.setIdeHelper(new IDEHelperImpl(myProject));
+        DefaultLoader.setIdeHelper(new IDEHelperImpl());
         Node.setNode2Actions(NodeActionsMap.node2Actions);
 
         // load up the plugin settings
@@ -82,7 +74,7 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
             PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting to load settings", e);
         }
 
-        cleanTempData(DefaultLoader.getIdeHelper());
+        cleanTempData();
 
     }
 
@@ -121,7 +113,7 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
         }
     }
 
-    private void cleanTempData(IDEHelper ideHelper) {
+    private void cleanTempData() {
         // check the plugin version stored in the properties; if it
         // doesn't match with the current plugin version then we clear
         // all stored options
@@ -130,7 +122,7 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
         // current subscriptions and iterate over that list to clear the auth tokens for those
         // subscriptions.
 
-        String currentPluginVersion = ideHelper.getProperty(AppSettingsNames.CURRENT_PLUGIN_VERSION);
+        String currentPluginVersion = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.CURRENT_PLUGIN_VERSION, myProject);
 
         if (StringHelper.isNullOrWhiteSpace(currentPluginVersion) ||
                 !getSettings().getPluginVersion().equals(currentPluginVersion)) {
@@ -144,12 +136,12 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
             };
 
             for (String setting : settings) {
-                ideHelper.unsetProperty(setting);
+                DefaultLoader.getIdeHelper().unsetProperty(setting, myProject);
             }
         }
 
         // save the current plugin version
-        ideHelper.setProperty(AppSettingsNames.CURRENT_PLUGIN_VERSION, getSettings().getPluginVersion());
+        DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.CURRENT_PLUGIN_VERSION, getSettings().getPluginVersion(), myProject);
     }
 
 }

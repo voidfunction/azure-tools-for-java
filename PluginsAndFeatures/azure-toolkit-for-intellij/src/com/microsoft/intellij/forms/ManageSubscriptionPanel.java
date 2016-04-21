@@ -27,8 +27,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.table.JBTable;
-import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
+import com.microsoft.intellij.ui.AppInsightsMngmtPanel;
 import com.microsoft.intellij.ui.AzureAbstractPanel;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.WizardCacheManager;
@@ -140,8 +140,9 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                                 }
                             }
                         }
-                        AzureSettings.getSafeInstance(AzurePlugin.project).saveWebApps(webSiteConfigMap);
-                        AzureSettings.getSafeInstance(AzurePlugin.project).setwebAppLoaded(true);
+                        AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
+                        AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
+                        AppInsightsMngmtPanel.updateApplicationInsightsResourceRegistry(subscriptions);
                         pd.setCurrentSubscription(publishProfile.getSubscriptions().get(0));
                         try {
                             WizardCacheManager.cachePublishData(null, pd, null);
@@ -152,7 +153,7 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                             e1.printStackTrace();
                         }
                     }
-                } catch (AzureCmdException e1) {
+                } catch (Exception e1) {
                     PluginUtil.displayErrorDialogAndLog(message("signInErr"), e1.getMessage(), e1);
                 } finally {
                     myDialog.getWindow().setCursor(Cursor.getDefaultCursor());
@@ -176,6 +177,9 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                 isf.setOnSubscriptionLoaded(new Runnable() {
                     @Override
                     public void run() {
+                        AzureSettings.getSafeInstance(project).saveWebApps(new HashMap<WebSite, WebSiteConfiguration>());
+                        AzureSettings.getSafeInstance(project).setwebAppLoaded(false);
+                        AppInsightsMngmtPanel.keeepManuallyAddedList();
                         loadList();
                     }
                 });
@@ -230,8 +234,9 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
             apiManager.clearImportedPublishSettingsFiles();
             WizardCacheManager.getPublishDatas().clear();
             AzureSettings.getSafeInstance(project).savePublishDatas();
-            AzureSettings.getSafeInstance(AzurePlugin.project).saveWebApps(new HashMap<WebSite, WebSiteConfiguration>());
-            AzureSettings.getSafeInstance(AzurePlugin.project).setwebAppLoaded(false);
+            AzureSettings.getSafeInstance(project).saveWebApps(new HashMap<WebSite, WebSiteConfiguration>());
+            AzureSettings.getSafeInstance(project).setwebAppLoaded(false);
+            AppInsightsMngmtPanel.keeepManuallyAddedList();
             DefaultTableModel model = (DefaultTableModel) subscriptionTable.getModel();
             while (model.getRowCount() > 0) {
                 model.removeRow(0);

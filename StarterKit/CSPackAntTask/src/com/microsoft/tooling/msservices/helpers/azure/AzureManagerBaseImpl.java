@@ -130,7 +130,7 @@ abstract class AzureManagerBaseImpl {
     }
 
     @NotNull
-    protected UserInfo getUserInfo(@NotNull String subscriptionId)
+    public UserInfo getUserInfo(@NotNull String subscriptionId)
             throws AzureCmdException {
         authDataLock.readLock().lock();
 

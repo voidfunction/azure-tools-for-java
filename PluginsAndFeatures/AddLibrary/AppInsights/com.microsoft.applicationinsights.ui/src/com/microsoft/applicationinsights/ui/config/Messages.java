@@ -28,11 +28,6 @@ public final class Messages extends NLS {
 	public static String aiTxt;
 	public static String aiMsg;
 	public static String lblInstrumentationKey;
-	public static String natJavaEMF;
-	public static String natMdCore;
-	public static String natFctCore;
-	public static String natJava;
-	public static String natJs;
 	public static String propWebProj;
 	public static String propErr;
 	public static String aiErrTitle;

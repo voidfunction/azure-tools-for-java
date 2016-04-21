@@ -61,6 +61,7 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
+import com.microsoft.wacommon.applicationinsights.ApplicationInsightsResourceRegistryEclipse;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishProfile;
 import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
@@ -141,6 +142,7 @@ public class ManageSubscriptionPanel extends Composite {
 										}
 									}
 								}
+								ApplicationInsightsResourceRegistryEclipse.updateApplicationInsightsResourceRegistry(subscriptions);
 								PreferenceWebAppUtil.save(webSiteConfigMap);
 								PreferenceWebAppUtil.setLoaded(true);
 								pd.setCurrentSubscription(publishProfile.getSubscriptions().get(0));
@@ -153,7 +155,7 @@ public class ManageSubscriptionPanel extends Composite {
 									Activator.getDefault().log(e1.getMessage(), e1);
 								}
 								PluginUtil.createSubscriptionTelemetryEvent(oldSubList, "Azure Explorer login");
-							} catch (AzureCmdException e1) {
+							} catch (Exception e1) {
 								PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.error,
 										"An error occurred while attempting to sign in to your account.", e1);
 							}
@@ -188,6 +190,9 @@ public class ManageSubscriptionPanel extends Composite {
 						MethodUtils.handleFile(ImportSubscriptionDialog.getPubSetFilePath(), tableViewer);
 						PluginUtil.createSubscriptionTelemetryEvent(oldSubList, "Azure Explorer import publish settings");
 						loadList();
+						PreferenceWebAppUtil.save(new HashMap<WebSite, WebSiteConfiguration>());
+						PreferenceWebAppUtil.setLoaded(false);
+						ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
 					} catch (Exception e) {
 						DefaultLoader.getUIHelper().showException("Error: " + e.getMessage(), e, "Error", false, true);
 						Activator.getDefault().log("Error: " + e.getMessage(), e);
@@ -272,7 +277,7 @@ public class ManageSubscriptionPanel extends Composite {
 					subscriptionList = AzureManagerImpl.getManager().getFullSubscriptionList();
 					if (subscriptionList != null && subscriptionList.size() > 0) {
 						tableViewer.setInput(getTableContent());
-						if (myDialog.needBtnPubSetFile) {
+						if (myDialog != null && myDialog.needBtnPubSetFile) {
 							removeButton.setEnabled(true);
 						}
 					} else {
@@ -404,7 +409,7 @@ public class ManageSubscriptionPanel extends Composite {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				if (myDialog.needBtnPubSetFile) {
+				if (myDialog != null && myDialog.needBtnPubSetFile) {
 					removeButton.setEnabled(true);
 				}
 			}
@@ -452,6 +457,7 @@ public class ManageSubscriptionPanel extends Composite {
 			refreshSignInCaption();
 			PreferenceWebAppUtil.save(new HashMap<WebSite, WebSiteConfiguration>());
 			PreferenceWebAppUtil.setLoaded(false);
+			ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
 		}
 	}
 

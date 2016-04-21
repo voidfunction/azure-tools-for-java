@@ -22,7 +22,6 @@ package com.microsoft.applicationinsights.preference;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -42,25 +41,20 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.microsoft.applicationinsights.management.authentication.Settings;
-import com.microsoft.applicationinsights.management.rest.ApplicationInsightsManagementClient;
+import com.gigaspaces.azure.wizards.WizardCacheManager;
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.ui.config.AIResourceChangeListener;
-import com.microsoftopentechnologies.auth.AuthenticationContext;
-import com.microsoftopentechnologies.auth.AuthenticationResult;
-import com.microsoftopentechnologies.auth.PromptValue;
-import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
-import com.microsoftopentechnologies.azuremanagementutil.rest.AzureApplicationInsightsServices;
-import com.microsoftopentechnologies.wacommon.adauth.BrowserLauncherEclipse;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
+import com.microsoft.wacommon.applicationinsights.ApplicationInsightsResourceRegistryEclipse;
+import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 /**
@@ -76,7 +70,6 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 	private Button btnDetails;
 	private Button btnRemove;
 	public static int selIndex = -1;
-	AzureApplicationInsightsServices instance = AzureApplicationInsightsServices.getInstance();
 
 	@Override
 	public void init(IWorkbench arg0) {
@@ -317,60 +310,22 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 	 */
 	protected void importButtonListener() {
 		try {
-			final AuthenticationContext context = new AuthenticationContext(Settings.getAdAuthority());
-			final BrowserLauncher launcher = new BrowserLauncherEclipse(getShell());
-			// configure context with custom eclipse specific browser launcher
-			context.setBrowserLauncher(launcher);
-			ListenableFuture<AuthenticationResult> future = context.acquireTokenInteractiveAsync(Settings.getTenant(),
-					Settings.getResource(), Settings.getClientId(), Settings.getRedirectURI(), PromptValue.login);
-			Futures.addCallback(future, new FutureCallback<AuthenticationResult>() {
-
-				@Override
-				public void onFailure(Throwable throwable) {
-					context.dispose();
-					Activator.getDefault().log(Messages.callBackErr);
-					Activator.getDefault().log(throwable.getMessage());
-					Activator.getDefault().log(ExceptionUtils.getStackTrace(throwable));
-					Display.getDefault().syncExec(new Runnable() {
-						public void run() {
-							MessageDialog.openError(getShell(), Messages.appTtl, Messages.signInErr);
-						}});
+			AzureManager manager = AzureManagerImpl.getManager();
+			List<Subscription> subList = manager.getSubscriptionList();
+			if (subList.size() > 0) {
+				if (manager.authenticated()) {
+					createSubscriptionDialog(false);
+				} else {
+					// imported publish settings file.
+					manager.clearImportedPublishSettingsFiles();
+					WizardCacheManager.clearSubscriptions();
+					createSubscriptionDialog(true);
 				}
-
-				@Override
-				public void onSuccess(final AuthenticationResult result) {
-					Display.getDefault().syncExec(new Runnable() {
-						public void run() {
-							try {
-								if (result != null) {
-									PluginUtil.showBusy(true, getShell());
-									ApplicationInsightsManagementClient client =
-											instance.getApplicationInsightsManagementClient(result, launcher);
-									ApplicationInsightsResourceRegistryEclipse.
-									updateApplicationInsightsResourceRegistry(client);
-								} else {
-									Activator.getDefault().log(Messages.signInErr + Messages.noAuthErr);
-								}
-							} catch (java.net.SocketTimeoutException e) {
-								PluginUtil.showBusy(false, getShell());
-								Activator.getDefault().log(Messages.importErrMsg, e);
-								MessageDialog.openError(getShell(), Messages.appTtl, Messages.timeOutErr);
-							} catch (Exception e) {
-								PluginUtil.showBusy(false, getShell());
-								Activator.getDefault().log(Messages.importErrMsg, e);
-							}
-							context.dispose();
-							PluginUtil.showBusy(false, getShell());
-							tableViewer.refresh();
-						}});
-				}
-			});
-		} catch (Exception e) {
-			Activator.getDefault().log(Messages.signInErr + "(Method)", e);
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					MessageDialog.openError(getShell(), Messages.appTtl, Messages.signInErr);
-				}});
+			} else {
+				createSubscriptionDialog(true);
+			}
+		} catch(Exception ex) {
+			Activator.getDefault().log(Messages.importErrMsg, ex);
 		}
 	}
 
@@ -379,62 +334,26 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 	 */
 	protected void newButtonListener() {
 		try {
-			final AuthenticationContext context = new AuthenticationContext(Settings.getAdAuthority());
-			final BrowserLauncher launcher = new BrowserLauncherEclipse(getShell());
-			context.setBrowserLauncher(launcher);
-			ListenableFuture<AuthenticationResult> future = context.acquireTokenInteractiveAsync(Settings.getTenant(),
-					Settings.getResource(), Settings.getClientId(), Settings.getRedirectURI(), PromptValue.login);
-			Futures.addCallback(future, new FutureCallback<AuthenticationResult>() {
-
-				@Override
-				public void onFailure(Throwable throwable) {
-					context.dispose();
-					Activator.getDefault().log(Messages.callBackErr);
-					Activator.getDefault().log(throwable.getMessage());
-					Activator.getDefault().log(ExceptionUtils.getStackTrace(throwable));
-					Display.getDefault().syncExec(new Runnable() {
-						public void run() {
-							MessageDialog.openError(getShell(), Messages.appTtl, Messages.signInErr);
-						}});
+			AzureManager manager = AzureManagerImpl.getManager();
+			List<Subscription> subList = manager.getSubscriptionList();
+			if (subList.size() > 0) {
+				if (!manager.authenticated()) {
+					// imported publish settings file.
+					manager.clearImportedPublishSettingsFiles();
+					WizardCacheManager.clearSubscriptions();
+					createSubscriptionDialog(true);
 				}
-
-				@Override
-				public void onSuccess(final AuthenticationResult result) {
-					Display.getDefault().syncExec(new Runnable() {
-						public void run() {
-							try {
-								if (result != null) {
-									PluginUtil.showBusy(true, getShell());
-									ApplicationInsightsManagementClient client =
-											instance.getApplicationInsightsManagementClient(result, launcher);
-									createNewDilaog(client);
-								} else {
-									Activator.getDefault().log(Messages.signInErr + Messages.noAuthErr);
-								}
-							} catch (java.net.SocketTimeoutException e) {
-								PluginUtil.showBusy(false, getShell());
-								Activator.getDefault().log(Messages.importErrMsg, e);
-								MessageDialog.openError(getShell(), Messages.appTtl, Messages.timeOutErr);
-							} catch (Exception e) {
-								PluginUtil.showBusy(false, getShell());
-								Activator.getDefault().log(Messages.importErrMsg, e);
-							}
-							context.dispose();
-							PluginUtil.showBusy(false, getShell());
-						}});
-				}
-			});
-		} catch (Exception e) {
-			Activator.getDefault().log(Messages.signInErr + "(Method)", e);
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					MessageDialog.openError(getShell(), Messages.appTtl, Messages.signInErr);
-				}});
+			} else {
+				createSubscriptionDialog(true);
+			}
+			createNewDilaog();
+		} catch(Exception ex) {
+			Activator.getDefault().log(Messages.importErrMsg, ex);
 		}
 	}
 
-	public void createNewDilaog(ApplicationInsightsManagementClient client) {
-		ApplicationInsightsNewDialog dialog = new ApplicationInsightsNewDialog(getShell(), client);
+	public void createNewDilaog() {
+		ApplicationInsightsNewDialog dialog = new ApplicationInsightsNewDialog(getShell());
 		int result = dialog.open();
 		if (result == Window.OK) {
 			ApplicationInsightsResource resource = ApplicationInsightsNewDialog.getResource();
@@ -529,5 +448,57 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 
 	public static int getSelIndex() {
 		return selIndex;
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		// reload information if its new eclipse session.
+		loadInfoFirstTime();
+		selIndex = -1;
+		tableViewer.refresh();
+		super.setVisible(visible);
+	}
+
+	private void loadInfoFirstTime() {
+		try {
+			AzureManager manager = AzureManagerImpl.getManager();
+			List<Subscription> subList = manager.getSubscriptionList();
+			if (subList.size() > 0) {
+				if (!ApplicationInsightsPreferences.isLoaded()) {
+					if (manager.authenticated()) {
+						// authenticated using AD. Proceed for updating application insights registry.
+						ApplicationInsightsResourceRegistryEclipse.updateApplicationInsightsResourceRegistry(subList);
+					} else {
+						// imported publish settings file. just show manually added list from preferences
+						// Neither clear subscription list nor show sign in dialog as user may just want to add key manually.
+						ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
+					}
+				} else {
+					// show list from preferences - getTableContent() does it. So nothing to handle here
+				}
+			} else {
+				// just show manually added list from preferences
+				ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
+			}
+		} catch(Exception ex) {
+			Activator.getDefault().log(Messages.importErrMsg, ex);
+		}
+	}
+
+	private void createSubscriptionDialog(boolean invokeSignIn) {
+		try {
+			ManageSubscriptionDialog dialog = new ManageSubscriptionDialog(getShell(), false, invokeSignIn);
+			dialog.create();
+			dialog.open();
+			List<Subscription> subList = AzureManagerImpl.getManager().getSubscriptionList();
+			if (subList.size() == 0) {
+				ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
+			} else {
+				ApplicationInsightsResourceRegistryEclipse.updateApplicationInsightsResourceRegistry(subList);
+			}
+			tableViewer.refresh();
+		} catch(Exception ex) {
+			PluginUtil.displayErrorDialogWithAzureMsg(getShell(), Messages.appTtl, Messages.importErrMsg, ex);
+		}
 	}
 }
