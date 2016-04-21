@@ -23,14 +23,15 @@ package com.microsoft.intellij.ui;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TitlePanel;
-import com.microsoft.applicationinsights.management.rest.ApplicationInsightsManagementClient;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.management.rest.model.ResourceGroup;
-import com.microsoft.applicationinsights.management.rest.model.Subscription;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.model.Subscription;
 
 import javax.swing.*;
 
@@ -49,14 +50,12 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
     private JComboBox comboGrp;
     private JComboBox comboReg;
     private JButton btnNew;
-    ApplicationInsightsManagementClient client;
     Map<String, String> subMap = new HashMap<String, String>();
     String currentSub;
     static ApplicationInsightsResource resourceToAdd;
 
-    public ApplicationInsightsNewDialog(ApplicationInsightsManagementClient client) {
+    public ApplicationInsightsNewDialog() {
         super(true);
-        this.client = client;
         setTitle(message("aiErrTtl"));
         init();
     }
@@ -109,32 +108,31 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
 
     private void populateValues() {
         try {
-            if (client != null) {
-                List<Subscription> subList = client.getSubscriptions();
-                // check at least single subscription is associated with the account
-                if (subList.size() > 0) {
-                    for (Subscription sub : subList) {
-                        subMap.put(sub.getId(), sub.getName());
-                    }
-                    Collection<String> values = subMap.values();
-                    String[] subNameArray = values.toArray(new String[values.size()]);
-                    Set<String> keySet = subMap.keySet();
-                    String[] subKeyArray = keySet.toArray(new String[keySet.size()]);
-
-                    comboSub.setModel(new DefaultComboBoxModel(subNameArray));
-                    comboSub.setSelectedItem(subNameArray[0]);
-                    currentSub = subNameArray[0];
-
-                    populateResourceGroupValues(subKeyArray[0], "");
-                    btnNew.setEnabled(true);
-                } else {
-                    btnNew.setEnabled(false);
+            AzureManager manager = AzureManagerImpl.getManager();
+            List<Subscription> subList = manager.getSubscriptionList();
+            // check at least single subscription is associated with the account
+            if (subList.size() > 0) {
+                for (Subscription sub : subList) {
+                    subMap.put(sub.getId(), sub.getName());
                 }
+                Collection<String> values = subMap.values();
+                String[] subNameArray = values.toArray(new String[values.size()]);
+                Set<String> keySet = subMap.keySet();
+                String[] subKeyArray = keySet.toArray(new String[keySet.size()]);
 
-                List<String> regionList = client.getAvailableGeoLocations();
+                comboSub.setModel(new DefaultComboBoxModel(subNameArray));
+                comboSub.setSelectedItem(subNameArray[0]);
+                currentSub = subNameArray[0];
+
+                populateResourceGroupValues(subKeyArray[0], "");
+                btnNew.setEnabled(true);
+
+                List<String> regionList = manager.getLocationsForApplicationInsights(subKeyArray[0]);
                 String[] regionArray = regionList.toArray(new String[regionList.size()]);
                 comboReg.setModel(new DefaultComboBoxModel(regionArray));
                 comboReg.setSelectedItem(regionArray[0]);
+            } else {
+                btnNew.setEnabled(false);
             }
         } catch (Exception ex) {
             AzurePlugin.log(message("getValuesErrMsg"), ex);
@@ -143,12 +141,8 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
 
     private void populateResourceGroupValues(String subId, String valtoSet) {
         try {
-            List<ResourceGroup> groupList = client.getResourceGroups(subId);
-            if (groupList.size() > 0) {
-                List<String> groupStringList = new ArrayList<String>();
-                for (ResourceGroup group : groupList) {
-                    groupStringList.add(group.getName());
-                }
+            List<String> groupStringList = AzureManagerImpl.getManager().getResourceGroupNames(subId);
+            if (groupStringList.size() > 0) {
                 String[] groupArray = groupStringList.toArray(new String[groupStringList.size()]);
                 comboGrp.removeAllItems();
                 comboGrp.setModel(new DefaultComboBoxModel(groupArray));
@@ -200,14 +194,12 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
         } else {
             try {
                 String subId = findKeyAsPerValue((String) comboSub.getSelectedItem());
-                Resource resource = client.createResource(subId, (String) comboGrp.getSelectedItem(),
+                Resource resource = AzureManagerImpl.getManager().createApplicationInsightsResource(subId, (String) comboGrp.getSelectedItem(),
                         txtName.getText(), (String) comboReg.getSelectedItem());
                 resourceToAdd = new ApplicationInsightsResource(resource.getName(), resource.getInstrumentationKey(),
                         (String) comboSub.getSelectedItem(), subId, resource.getLocation(),
                         resource.getResourceGroup(), true);
                 isValid = true;
-            } catch (java.net.SocketTimeoutException e) {
-                PluginUtil.displayErrorDialogAndLog(message("aiErrTtl"), message("timeOutErr"), e);
             } catch (Exception ex) {
                 PluginUtil.displayErrorDialogAndLog(message("aiErrTtl"), message("resCreateErrMsg"), ex);
             }
