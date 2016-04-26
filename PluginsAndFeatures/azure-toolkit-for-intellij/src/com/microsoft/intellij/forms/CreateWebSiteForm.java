@@ -100,12 +100,14 @@ public class CreateWebSiteForm extends DialogWrapper {
         groupComboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
-                if (createResGrpLabel.equals(itemEvent.getItem())) {
-                    resourceGroup = null;
-                    showcreateResourceGroupForm();
-                } else if (itemEvent.getItem() instanceof String) {
-                    resourceGroup = (String) itemEvent.getItem();
-                    fillWebHostingPlans("");
+                if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
+                    if (createResGrpLabel.equals(itemEvent.getItem())) {
+                        resourceGroup = null;
+                        showcreateResourceGroupForm();
+                    } else if (itemEvent.getItem() instanceof String) {
+                        resourceGroup = (String) itemEvent.getItem();
+                        fillWebHostingPlans("");
+                    }
                 }
             }
         });
@@ -256,7 +258,7 @@ public class CreateWebSiteForm extends DialogWrapper {
                     }
                     IDEHelper.ProjectDescriptor projectDescriptor = new IDEHelper.ProjectDescriptor(project.getName(),
                             project.getBasePath() == null ? "" : project.getBasePath());
-                    fillPlansAcrossSub = DefaultLoader.getIdeHelper().runInBackground(projectDescriptor, "", null, new CancellableTask() {
+                    fillPlansAcrossSub = DefaultLoader.getIdeHelper().runInBackground(projectDescriptor, "Loading service plans...", null, new CancellableTask() {
                         @Override
                         public void onCancel() {
                         }
