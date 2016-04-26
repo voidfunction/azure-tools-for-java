@@ -18,6 +18,7 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,10 +96,8 @@ public class ClusterManagerEx {
 
         isListClusterSuccess = false;
         if (!AzureManagerImpl.getManager().authenticated()) {
-            if (!isAuthSuccess()) {
-                cachedClusterDetails.addAll(hdinsightAdditionalClusterDetails);
-                return cachedClusterDetails;
-            }
+            cachedClusterDetails.addAll(hdinsightAdditionalClusterDetails);
+            return cachedClusterDetails;
         }
 
         List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
@@ -107,29 +106,23 @@ public class ClusterManagerEx {
             cachedClusterDetails = ClusterManager.getInstance().getHDInsightCausersWithSpecificType(subscriptionList, ClusterType.spark, OSTYPE);
             // TODO: so far we have not a good way to judge whether it is token expired as we have changed the way to list hdinsight clusters
             if (cachedClusterDetails.size() == 0) {
-                if (isAuthSuccess()) {
-                    subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
-                    try {
-                        cachedClusterDetails.addAll(ClusterManager.getInstance().getHDInsightCausersWithSpecificType(subscriptionList, ClusterType.spark, OSTYPE));
-                        isListClusterSuccess = true;
-                    } catch (Exception exception) {
-                        DefaultLoader.getUIHelper().showError("Failed to list HDInsight cluster", "List HDInsight Cluster Error");
-                    }
-                }
+                //DefaultLoader.getUIHelper().showError("Falied to get HDInsight Cluster, Please make sure there's no login problem first","List HDInsight Cluster Error");
+                isListClusterSuccess = false;
             } else {
                 isListClusterSuccess = true;
             }
         } catch (AggregatedException aggregateException) {
             if (dealWithAggregatedException(aggregateException)) {
-                if (isAuthSuccess()) {
-                    subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
-                    try {
-                        cachedClusterDetails.addAll(ClusterManager.getInstance().getHDInsightCausersWithSpecificType(subscriptionList, ClusterType.spark, OSTYPE));
-                        isListClusterSuccess = true;
-                    } catch (Exception exception) {
-                        DefaultLoader.getUIHelper().showError("Failed to list HDInsight cluster", "List HDInsight Cluster Error");
-                    }
-                }
+                DefaultLoader.getUIHelper().showError("Falied to get HDInsight Cluster, Please make sure there's no login problem first","List HDInsight Cluster Error");
+//                if (isAuthSuccess()) {
+//                    subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
+//                    try {
+//                        cachedClusterDetails.addAll(ClusterManager.getInstance().getHDInsightCausersWithSpecificType(subscriptionList, ClusterType.spark, OSTYPE));
+//                        isListClusterSuccess = true;
+//                    } catch (Exception exception) {
+//                        DefaultLoader.getUIHelper().showError("Failed to list HDInsight cluster", "List HDInsight Cluster Error");
+//                    }
+//                }
             }
         }
 
@@ -229,6 +222,7 @@ public class ClusterManagerEx {
     }
 
     private boolean isAuthSuccess() {
+
         boolean isSuccess = false;
         try {
             AzureManager apiManager = AzureManagerImpl.getManager();
