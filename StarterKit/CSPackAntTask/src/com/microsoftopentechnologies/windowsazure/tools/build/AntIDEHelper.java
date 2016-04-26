@@ -24,6 +24,7 @@ import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
 import org.apache.commons.lang3.tuple.Pair;
@@ -126,6 +127,11 @@ public class AntIDEHelper implements IDEHelper {
     }
 
     @Override
+    public String[] getProperties(@NotNull String name, Object projectObject) {
+        return new String[0];
+    }
+
+    @Override
     public void setProperties(@NotNull String name, @NotNull String[] value) {
     }
 
@@ -142,5 +148,11 @@ public class AntIDEHelper implements IDEHelper {
     @Override
     public BrowserLauncher getBrowserLauncher() {
         return null;
+    }
+
+    @NotNull
+    @Override
+    public Object getCurrentProject() {
+        return AzureManagerImpl.DEFAULT_PROJECT;
     }
 }

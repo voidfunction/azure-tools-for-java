@@ -23,6 +23,7 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure.vm;
 
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
@@ -46,12 +47,12 @@ public class VMServiceModule extends AzureRefreshableNode {
             throws AzureCmdException {
         // remove all child nodes
         removeAllChildNodes();
-
+        AzureManager azureManager = AzureManagerImpl.getManager(getProject());
         // load all VMs
-        List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
+        List<Subscription> subscriptionList = azureManager.getSubscriptionList();
 
         for (Subscription subscription : subscriptionList) {
-            List<VirtualMachine> virtualMachines = AzureManagerImpl.getManager().getVirtualMachines(subscription.getId());
+            List<VirtualMachine> virtualMachines = azureManager.getVirtualMachines(subscription.getId());
 
             if (eventState.isEventTriggered()) {
                 return;

@@ -45,7 +45,7 @@ public class ModifyExternalStorageAccountAction extends NodeActionListener {
         final ExternalStorageAccountForm form = new ExternalStorageAccountForm((Project) storageNode.getProject());
         form.setTitle("Modify External Storage Account");
 
-        for (ClientStorageAccount account : ExternalStorageHelper.getList()) {
+        for (ClientStorageAccount account : ExternalStorageHelper.getList(storageNode.getProject())) {
             if (account.getName().equals(storageNode.getClientStorageAccount().getName())) {
                 form.setStorageAccount(account);
             }

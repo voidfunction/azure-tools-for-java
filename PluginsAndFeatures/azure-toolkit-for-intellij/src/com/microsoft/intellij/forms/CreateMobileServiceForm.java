@@ -74,7 +74,7 @@ public class CreateMobileServiceForm extends DialogWrapper {
     private Runnable serviceCreated;
 
 
-    public CreateMobileServiceForm(Project project) {
+    public CreateMobileServiceForm(final Project project) {
         super(project, true);
 
         this.project = project;
@@ -129,7 +129,7 @@ public class CreateMobileServiceForm extends DialogWrapper {
             @Override
             public void run() {
                 try {
-                    java.util.List<Subscription> subsList = AzureManagerImpl.getManager().getSubscriptionList();
+                    java.util.List<Subscription> subsList = AzureManagerImpl.getManager(project).getSubscriptionList();
                     DefaultComboBoxModel subscriptionDefaultComboBoxModel = new DefaultComboBoxModel(subsList.toArray(new Subscription[subsList.size()]));
                     subscriptionComboBox.setModel(subscriptionDefaultComboBoxModel);
 
@@ -238,7 +238,7 @@ public class CreateMobileServiceForm extends DialogWrapper {
 
                     progressIndicator.setText2("Creating service");
                     progressIndicator.setFraction(0.1);
-                    AzureManagerImpl.getManager().createMobileService(id, region, admin, pass, name, server, db);
+                    AzureManagerImpl.getManager(project).createMobileService(id, region, admin, pass, name, server, db);
 
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                         @Override
@@ -248,8 +248,7 @@ public class CreateMobileServiceForm extends DialogWrapper {
                     });
 
                 } catch (Throwable e) {
-                    AzurePlugin.log(e.getStackTrace().toString());
-                    PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to create the mobile service.");
+                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), "An error occurred while attempting to create the mobile service.", e);
                 }
             }
         });
@@ -312,7 +311,7 @@ public class CreateMobileServiceForm extends DialogWrapper {
             @Override
             public void run() {
                 try {
-                    final List<Location> locations = AzureManagerImpl.getManager().getLocations(subscription.getId());
+                    final List<Location> locations = AzureManagerImpl.getManager(project).getLocations(subscription.getId());
 
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
                         @Override
@@ -334,7 +333,7 @@ public class CreateMobileServiceForm extends DialogWrapper {
             public void run() {
                 try {
                     final List<SqlDb> databaseList = new ArrayList<SqlDb>();
-                    List<SqlServer> sqlServerList = AzureManagerImpl.getManager().getSqlServers(subscription.getId());
+                    List<SqlServer> sqlServerList = AzureManagerImpl.getManager(project).getSqlServers(subscription.getId());
 
                     ArrayList<Future<List<SqlDb>>> futures = new ArrayList<Future<List<SqlDb>>>();
 
@@ -342,7 +341,7 @@ public class CreateMobileServiceForm extends DialogWrapper {
                         futures.add(ApplicationManager.getApplication().executeOnPooledThread(new Callable<List<SqlDb>>() {
                             @Override
                             public List<SqlDb> call() throws Exception {
-                                return AzureManagerImpl.getManager().getSqlDb(subscription.getId(), server);
+                                return AzureManagerImpl.getManager(project).getSqlDb(subscription.getId(), server);
                             }
                         }));
                     }

@@ -77,7 +77,7 @@ public class AzureServiceModule extends RefreshableNode {
     @Override
     public String getName() {
         try {
-            List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
+            List<Subscription> subscriptionList = AzureManagerImpl.getManager(getProject()).getSubscriptionList();
             if (subscriptionList.size() > 0) {
                 return String.format("%s (%s)", BASE_MODULE_NAME, subscriptionList.size() > 1
                         ? String.format("%s subscriptions", subscriptionList.size())
@@ -115,6 +115,13 @@ public class AzureServiceModule extends RefreshableNode {
             }
         }
 
+        if (!vmArmServiceModule.isLoading()) {
+            if (!isDirectChild(vmArmServiceModule)) {
+                addChildNode(vmArmServiceModule);
+            }
+            vmArmServiceModule.load();
+        }
+
         if (!storageServiceModule.isLoading()) {
             if (!isDirectChild(storageServiceModule)) {
                 addChildNode(storageServiceModule);
@@ -130,12 +137,6 @@ public class AzureServiceModule extends RefreshableNode {
 
             webappsModule.load();
         }
-        if (!vmArmServiceModule.isLoading()) {
-            if (!isDirectChild(vmArmServiceModule)) {
-                addChildNode(vmArmServiceModule);
-            }
-            vmArmServiceModule.load();
-        }
     }
 
     @Override
@@ -147,7 +148,7 @@ public class AzureServiceModule extends RefreshableNode {
             throws AzureCmdException {
         synchronized (subscriptionsChangedSync) {
             if (subscriptionsChanged == null) {
-                subscriptionsChanged = AzureManagerImpl.getManager().registerSubscriptionsChanged();
+                subscriptionsChanged = AzureManagerImpl.getManager(getProject()).registerSubscriptionsChanged();
             }
 
             registeredSubscriptionsChanged = true;
@@ -187,7 +188,7 @@ public class AzureServiceModule extends RefreshableNode {
             registeredSubscriptionsChanged = false;
 
             if (subscriptionsChanged != null) {
-                AzureManagerImpl.getManager().unregisterSubscriptionsChanged(subscriptionsChanged);
+                AzureManagerImpl.getManager(getProject()).unregisterSubscriptionsChanged(subscriptionsChanged);
                 subscriptionsChanged = null;
             }
         }

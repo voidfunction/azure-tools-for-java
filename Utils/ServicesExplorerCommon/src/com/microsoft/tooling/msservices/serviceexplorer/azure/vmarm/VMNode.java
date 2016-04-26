@@ -50,7 +50,7 @@ public class VMNode extends AzureRefreshableNode {
         @Override
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
                 throws AzureCmdException {
-            AzureArmManagerImpl.getManager().restartVirtualMachine(subscriptionId, virtualMachine);
+            AzureArmManagerImpl.getManager(getProject()).restartVirtualMachine(subscriptionId, virtualMachine);
         }
 
         @Override

@@ -59,12 +59,12 @@ public class WebappsModule extends AzureRefreshableNode {
 			return;
 		}
 		removeAllChildNodes();
-		List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
+		AzureManager manager = AzureManagerImpl.getManager(getProject());
+		List<Subscription> subscriptionList = manager.getSubscriptionList();
 		for (Subscription subscription : subscriptionList) {
 			Map<WebSite, WebSiteConfiguration> webSiteConfigMapTemp = new HashMap<WebSite, WebSiteConfiguration>();
 			if (AzureServiceModule.webSiteConfigMap == null) {
 				// map null means load data and don't use cached data
-				AzureManager manager = AzureManagerImpl.getManager();
 				for (final String webSpace : manager.getResourceGroupNames(subscription.getId())) {
 					List<WebSite> webapps = manager.getWebSites(subscription.getId(), webSpace);
 					for (WebSite webapp : webapps) {
@@ -75,7 +75,7 @@ public class WebappsModule extends AzureRefreshableNode {
 					}
 				}
 				// save preferences
-				DefaultLoader.getUIHelper().saveWebAppPreferences(webSiteConfigMapTemp);
+				DefaultLoader.getUIHelper().saveWebAppPreferences(getProject(), webSiteConfigMapTemp);
 			} else {
 				webSiteConfigMapTemp = AzureServiceModule.webSiteConfigMap;
 			}

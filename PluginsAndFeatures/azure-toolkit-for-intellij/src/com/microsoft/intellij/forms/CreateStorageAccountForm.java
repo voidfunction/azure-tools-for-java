@@ -130,8 +130,8 @@ public class CreateStorageAccountForm extends DialogWrapper {
             }
         });
 
-        if (AzureManagerImpl.getManager().authenticated()) {
-            String upn = AzureManagerImpl.getManager().getUserInfo().getUniqueName();
+        if (AzureManagerImpl.getManager(project).authenticated()) {
+            String upn = AzureManagerImpl.getManager(project).getUserInfo().getUniqueName();
             userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
         } else {
             userInfoLabel.setText("");
@@ -192,8 +192,8 @@ public class CreateStorageAccountForm extends DialogWrapper {
                     storageAccount.setLocation(region);
                     storageAccount.setAffinityGroup(affinityGroup);
 
-                    AzureManagerImpl.getManager().createStorageAccount(storageAccount);
-                    AzureManagerImpl.getManager().refreshStorageAccountInformation(storageAccount);
+                    AzureManagerImpl.getManager(project).createStorageAccount(storageAccount);
+                    AzureManagerImpl.getManager(project).refreshStorageAccountInformation(storageAccount);
 
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                         @Override
@@ -206,7 +206,7 @@ public class CreateStorageAccountForm extends DialogWrapper {
                 } catch (AzureCmdException e) {
                     storageAccount = null;
                     String msg = "An error occurred while attempting to create the specified storage account." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
+                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
                 }
             }
         });
@@ -221,7 +221,7 @@ public class CreateStorageAccountForm extends DialogWrapper {
             try {
                 subscriptionComboBox.setEnabled(true);
 
-                java.util.List<Subscription> fullSubscriptionList = AzureManagerImpl.getManager().getFullSubscriptionList();
+                java.util.List<Subscription> fullSubscriptionList = AzureManagerImpl.getManager(project).getFullSubscriptionList();
                 subscriptionComboBox.setModel(new DefaultComboBoxModel(new Vector<Subscription>(fullSubscriptionList)));
                 subscriptionComboBox.addItemListener(new ItemListener() {
                     @Override
@@ -266,8 +266,8 @@ public class CreateStorageAccountForm extends DialogWrapper {
                 progressIndicator.setIndeterminate(true);
 
                 try {
-                    java.util.List<AffinityGroup> affinityGroups = AzureManagerImpl.getManager().getAffinityGroups(subscription.getId().toString());
-                    java.util.List<Location> locations = AzureManagerImpl.getManager().getLocations(subscription.getId().toString());
+                    java.util.List<AffinityGroup> affinityGroups = AzureManagerImpl.getManager(project).getAffinityGroups(subscription.getId().toString());
+                    java.util.List<Location> locations = AzureManagerImpl.getManager(project).getLocations(subscription.getId().toString());
 
                     final Vector<Object> vector = new Vector<Object>();
                     vector.add("Regions");

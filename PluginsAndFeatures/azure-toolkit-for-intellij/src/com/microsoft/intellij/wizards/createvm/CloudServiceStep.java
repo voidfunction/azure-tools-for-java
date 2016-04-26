@@ -225,7 +225,7 @@ public class CloudServiceStep extends WizardStep<CreateVMWizardModel> {
                 try {
                     if (cloudServices == null) {
                         try {
-                            List<CloudService> services = AzureManagerImpl.getManager()
+                            List<CloudService> services = AzureManagerImpl.getManager(project)
                                     .getCloudServices(model.getSubscription().getId());
                             cloudServices = new TreeMap<String, CloudService>();
 
@@ -403,7 +403,7 @@ public class CloudServiceStep extends WizardStep<CreateVMWizardModel> {
                 try {
                     if (virtualNetworks == null) {
                         try {
-                            List<VirtualNetwork> networks = AzureManagerImpl.getManager()
+                            List<VirtualNetwork> networks = AzureManagerImpl.getManager(project)
                                     .getVirtualNetworks(model.getSubscription().getId());
                             virtualNetworks = new TreeMap<String, VirtualNetwork>();
 
@@ -607,7 +607,7 @@ public class CloudServiceStep extends WizardStep<CreateVMWizardModel> {
                 try {
                     if (storageAccounts == null) {
                         try {
-                            List<StorageAccount> accounts = AzureManagerImpl.getManager()
+                            List<StorageAccount> accounts = AzureManagerImpl.getManager(project)
                                     .getStorageAccounts(model.getSubscription().getId(), true);
                             storageAccounts = new TreeMap<String, StorageAccount>();
 

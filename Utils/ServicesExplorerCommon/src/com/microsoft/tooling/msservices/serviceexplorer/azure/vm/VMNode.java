@@ -206,7 +206,7 @@ public class VMNode extends AzureRefreshableNode {
     @Override
     protected void refresh(@NotNull EventStateHandle eventState)
             throws AzureCmdException {
-        virtualMachine = AzureManagerImpl.getManager().refreshVirtualMachineInformation(virtualMachine);
+        virtualMachine = AzureManagerImpl.getManager(getProject()).refreshVirtualMachineInformation(virtualMachine);
 
         if (eventState.isEventTriggered()) {
             return;
