@@ -47,13 +47,13 @@ public abstract class AzureRefreshableNode extends RefreshableNode {
             @Override
             public EventHelper.EventWaitHandle registerEvent()
                     throws AzureCmdException {
-                return AzureManagerImpl.getManager().registerSubscriptionsChanged();
+                return AzureManagerImpl.getManager(getProject()).registerSubscriptionsChanged();
             }
 
             @Override
             public void unregisterEvent(@NotNull EventWaitHandle waitHandle)
                     throws AzureCmdException {
-                AzureManagerImpl.getManager().unregisterSubscriptionsChanged(waitHandle);
+                AzureManagerImpl.getManager(getProject()).unregisterSubscriptionsChanged(waitHandle);
             }
 
             @Override

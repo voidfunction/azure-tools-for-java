@@ -275,7 +275,7 @@ public class CreateWebSiteForm extends DialogWrapper {
                         public synchronized void run(final CancellationHandle cancellationHandle) throws Throwable {
                             plansAcrossSub = new ArrayList<String>();
                             for (String groupName : groupList) {
-                                List<WebHostingPlanCache> plans = AzureManagerImpl.getManager().getWebHostingPlans(subscription.getId(), groupName);
+                                List<WebHostingPlanCache> plans = AzureManagerImpl.getManager(project).getWebHostingPlans(subscription.getId(), groupName);
                                 for (WebHostingPlanCache plan : plans) {
                                     plansAcrossSub.add(plan.getName());
                                 }

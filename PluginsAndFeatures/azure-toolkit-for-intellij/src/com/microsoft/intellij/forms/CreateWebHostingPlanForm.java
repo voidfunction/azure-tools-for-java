@@ -122,7 +122,7 @@ public class CreateWebHostingPlanForm extends DialogWrapper {
     @Override
     protected void doOKAction() {
         boolean isOK = true;
-        AzureManager manager = AzureManagerImpl.getManager();
+        AzureManager manager = AzureManagerImpl.getManager(project);
         mainPanel.getRootPane().getParent().setCursor(new Cursor(Cursor.WAIT_CURSOR));
         try {
             if (subscriptionId == null || subscriptionId.isEmpty()) {

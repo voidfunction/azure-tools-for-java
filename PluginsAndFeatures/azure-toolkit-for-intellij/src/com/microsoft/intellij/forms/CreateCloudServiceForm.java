@@ -109,8 +109,8 @@ public class CreateCloudServiceForm extends DialogWrapper {
             @Override
             public void run() {
                 try {
-                    final List<AffinityGroup> affinityGroups = AzureManagerImpl.getManager().getAffinityGroups(subscription.getId());
-                    final List<Location> locations = AzureManagerImpl.getManager().getLocations(subscription.getId());
+                    final List<AffinityGroup> affinityGroups = AzureManagerImpl.getManager(project).getAffinityGroups(subscription.getId());
+                    final List<Location> locations = AzureManagerImpl.getManager(project).getLocations(subscription.getId());
 
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                         @Override
@@ -165,7 +165,7 @@ public class CreateCloudServiceForm extends DialogWrapper {
                             "";
 
                     cloudService = new CloudService(name, location, affinityGroup, subscription.getId());
-                    AzureManagerImpl.getManager().createCloudService(cloudService);
+                    AzureManagerImpl.getManager(project).createCloudService(cloudService);
                 } catch (Exception e) {
                     cloudService = null;
                     String msg = "An error occurred while attempting to create the specified cloud service." + "\n" + String.format(message("webappExpMsg"), e.getMessage());

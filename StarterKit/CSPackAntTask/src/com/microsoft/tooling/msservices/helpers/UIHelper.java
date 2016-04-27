@@ -58,5 +58,5 @@ public interface UIHelper {
                                                             @NotNull ClientStorageAccount storageAccount,
                                                             @NotNull T item);
 
-    void saveWebAppPreferences(Map<WebSite, WebSiteConfiguration> map);
+    void saveWebAppPreferences(@NotNull Object projectObject, Map<WebSite, WebSiteConfiguration> map);
 }

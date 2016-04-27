@@ -27,8 +27,10 @@ import com.intellij.ide.projectView.impl.ProjectRootsUtil;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.externalSystem.service.execution.ExternalSystemRunConfiguration;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
@@ -39,6 +41,7 @@ import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureRole;
 import com.interopbridges.tools.windowsazure.WindowsAzureRoleComponentImportMethod;
 import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.wacommon.utils.WACommonException;
 
 import java.io.File;
@@ -84,7 +87,7 @@ public class PluginUtil {
         displayErrorDialog(title, message);
     }
 
-    public static void displayErrorDialogInAWTAndLog(final String title, final String message, Exception e) {
+    public static void displayErrorDialogInAWTAndLog(final String title, final String message, Throwable e) {
         LOG.error(message, e);
         ApplicationManager.getApplication().invokeLater(new Runnable() {
             @Override

@@ -38,17 +38,19 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class AzureArmManagerImpl extends AzureManagerBaseImpl {
-    private static AzureArmManagerImpl instance;
+    private static Map<Object, AzureArmManagerImpl> instances = new HashMap<>();
 
-    public AzureArmManagerImpl() {
+    public AzureArmManagerImpl(Object projectObject) {
+        super(projectObject);
         authDataLock.writeLock().lock();
 
         try {
-            aadManager = AADManagerImpl.getManager();
+            aadManager = new AADManagerImpl(projectObject);
 
             loadSubscriptions();
             loadUserInfo();
@@ -69,11 +71,12 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
     }
 
     @NotNull
-    public static synchronized AzureArmManagerImpl getManager() {
-        if (instance == null) {
-            instance = new AzureArmManagerImpl();
+    public static synchronized AzureArmManagerImpl getManager(Object currentProject) {
+        if (instances.get(currentProject) == null) {
+            AzureArmManagerImpl instance = new AzureArmManagerImpl(currentProject);
+            instances.put(currentProject, instance);
         }
-        return instance;
+        return instances.get(currentProject);
     }
 
     private interface AzureSDKArmClientProvider<V> {

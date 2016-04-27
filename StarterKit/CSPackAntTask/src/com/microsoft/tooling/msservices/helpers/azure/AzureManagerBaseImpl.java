@@ -23,6 +23,7 @@ package com.microsoft.tooling.msservices.helpers.azure;
 
 import com.google.common.base.Optional;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.microsoft.tooling.msservices.components.AppSettingsNames;
@@ -53,6 +54,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 abstract class AzureManagerBaseImpl {
+    public static final String DEFAULT_PROJECT = "DEFAULT_PROJECT";
+
     static class EventWaitHandleImpl implements EventHelper.EventWaitHandle {
         Semaphore eventSignal = new Semaphore(0, true);
 
@@ -74,7 +77,7 @@ abstract class AzureManagerBaseImpl {
         }
     }
 
-    static Gson gson;
+    static Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();;
 
     Map<String, Subscription> subscriptions;
     Map<String, ReentrantReadWriteLock> lockBySubscriptionId = new HashMap<String, ReentrantReadWriteLock>();
@@ -89,21 +92,27 @@ abstract class AzureManagerBaseImpl {
     UserInfo userInfo;
     Set<EventWaitHandleImpl> subscriptionsChangedHandles;
 
+    Object projectObject;
+
+    protected AzureManagerBaseImpl(Object projectObject) {
+        this.projectObject = projectObject;
+    }
+
     protected void loadUserInfo() {
-        String json = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.AZURE_USER_INFO);
+        String json = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.AZURE_USER_INFO, projectObject);
 
         if (!StringHelper.isNullOrWhiteSpace(json)) {
             try {
                 userInfo = gson.fromJson(json, UserInfo.class);
             } catch (JsonSyntaxException ignored) {
-                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_USER_INFO);
-                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS);
+                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_USER_INFO, projectObject);
+                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS, projectObject);
             }
         } else {
-            DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS);
+            DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS, projectObject);
         }
 
-        json = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS);
+        json = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS, projectObject);
 
         if (!StringHelper.isNullOrWhiteSpace(json)) {
             try {
@@ -111,7 +120,7 @@ abstract class AzureManagerBaseImpl {
                 }.getType();
                 userInfoBySubscriptionId = gson.fromJson(json, userInfoBySubscriptionIdType);
             } catch (JsonSyntaxException ignored) {
-                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS);
+                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS, projectObject);
             }
         } else {
             userInfoBySubscriptionId = new HashMap<String, UserInfo>();
@@ -300,7 +309,7 @@ abstract class AzureManagerBaseImpl {
     }
 
     protected void loadSubscriptions() {
-        String json = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.AZURE_SUBSCRIPTIONS);
+        String json = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.AZURE_SUBSCRIPTIONS, projectObject);
 
         if (!StringHelper.isNullOrWhiteSpace(json)) {
             try {
@@ -308,7 +317,7 @@ abstract class AzureManagerBaseImpl {
                 }.getType();
                 subscriptions = gson.fromJson(json, subscriptionsType);
             } catch (JsonSyntaxException ignored) {
-                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_SUBSCRIPTIONS);
+                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AZURE_SUBSCRIPTIONS, projectObject);
             }
         } else {
             subscriptions = new HashMap<String, Subscription>();
@@ -380,17 +389,17 @@ abstract class AzureManagerBaseImpl {
         Type subscriptionsType = new TypeToken<HashMap<String, Subscription>>() {
         }.getType();
         String json = gson.toJson(subscriptions, subscriptionsType);
-        DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.AZURE_SUBSCRIPTIONS, json);
+        DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.AZURE_SUBSCRIPTIONS, json, projectObject);
     }
 
     protected void storeUserInfo() {
         String json = gson.toJson(userInfo, UserInfo.class);
-        DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.AZURE_USER_INFO, json);
+        DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.AZURE_USER_INFO, json, projectObject);
 
         Type userInfoBySubscriptionIdType = new TypeToken<HashMap<String, UserInfo>>() {
         }.getType();
         json = gson.toJson(userInfoBySubscriptionId, userInfoBySubscriptionIdType);
-        DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS, json);
+        DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.AZURE_USER_SUBSCRIPTIONS, json, projectObject);
     }
 
     protected SSLSocketFactory initSSLSocketFactory(@NotNull String managementCertificate)

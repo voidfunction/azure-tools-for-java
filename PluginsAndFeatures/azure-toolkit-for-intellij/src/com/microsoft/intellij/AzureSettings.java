@@ -50,6 +50,7 @@ import static com.microsoft.intellij.ui.messages.AzureBundle.message;
         }
 )
 public class AzureSettings implements PersistentStateComponent<AzureSettings.State> {
+    private static final String PREFERENCE_DELIMITER = ";";
 
     private State myState = new State();
 
@@ -302,11 +303,31 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
     }
 
     public String[] getProperties(String name) {
-        return new String[0];
+        String properties = getProperty(name);
+        return properties == null ? new String[0] : convertFromProperties(properties);
     }
 
-    public void setProperties(String name, String[] value) {
+    public void setProperties(String name, String[] values) {
+        setProperty(name, convertToProperties(values));
+    }
 
+    private static String convertToProperties(String[] elements) {
+        StringBuilder buffer = new StringBuilder();
+        for (String element : elements) {
+            buffer.append(element);
+            buffer.append(PREFERENCE_DELIMITER);
+        }
+        return buffer.toString();
+    }
+
+    private static String[] convertFromProperties(String propertiesValue) {
+        StringTokenizer tokenizer = new StringTokenizer(propertiesValue, PREFERENCE_DELIMITER);
+        int tokenCount = tokenizer.countTokens();
+        String[] elements = new String[tokenCount];
+        for (int i = 0; i < tokenCount; i++) {
+            elements[i] = tokenizer.nextToken();
+        }
+        return elements;
     }
 
     public static class State {

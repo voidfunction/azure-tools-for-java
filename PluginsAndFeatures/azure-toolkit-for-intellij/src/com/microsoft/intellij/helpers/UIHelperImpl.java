@@ -325,9 +325,8 @@ public class UIHelperImpl implements UIHelper {
     }
 
     @Override
-    public void saveWebAppPreferences(Map<WebSite, WebSiteConfiguration> map) {
-        Project activeProject = PluginUtil.getSelectedProject();
-        AzureSettings.getSafeInstance(activeProject).saveWebApps(map);
-        AzureSettings.getSafeInstance(activeProject).setwebAppLoaded(true);
+    public void saveWebAppPreferences(@NotNull Object projectObject, Map<WebSite, WebSiteConfiguration> map) {
+        AzureSettings.getSafeInstance((Project) projectObject).saveWebApps(map);
+        AzureSettings.getSafeInstance((Project) projectObject).setwebAppLoaded(true);
     }
 }

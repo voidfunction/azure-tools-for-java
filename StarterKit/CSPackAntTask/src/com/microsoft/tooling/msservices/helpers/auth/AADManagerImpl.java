@@ -48,6 +48,7 @@ import com.microsoft.tooling.msservices.components.PluginSettings;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoftopentechnologies.auth.AuthenticationContext;
 import com.microsoftopentechnologies.auth.AuthenticationResult;
 import com.microsoftopentechnologies.auth.PromptValue;
@@ -55,7 +56,7 @@ import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
 
 public class AADManagerImpl implements AADManager {
     private static AADManager instance;
-    private static Gson gson;
+    private static Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
     Logger logger = Logger.getLogger(AADManagerImpl.class.getName());
     /**
      * This structure stores AthenticationResults associated to each particular UserInfo (tenant+user) and Resource
@@ -74,8 +75,11 @@ public class AADManagerImpl implements AADManager {
     private Map<UserInfo, ReentrantReadWriteLock> authResultLockByUser;
     private Map<UserInfo, ReentrantReadWriteLock> tempLockByUser;
 
-    private AADManagerImpl() {
-        String json = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.AAD_AUTHENTICATION_RESULTS);
+    private Object projectObject;
+
+    public AADManagerImpl(Object projectObject) {
+        this.projectObject = projectObject;
+        String json = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.AAD_AUTHENTICATION_RESULTS, projectObject);
 
         if (!StringHelper.isNullOrWhiteSpace(json)) {
             try {
@@ -83,7 +87,7 @@ public class AADManagerImpl implements AADManager {
                 }.getType();
                 authResultByUserResource = gson.fromJson(json, authResultsType);
             } catch (JsonSyntaxException ignored) {
-                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AAD_AUTHENTICATION_RESULTS);
+                DefaultLoader.getIdeHelper().unsetProperty(AppSettingsNames.AAD_AUTHENTICATION_RESULTS, projectObject);
                 authResultByUserResource = new HashMap<UserInfo, Map<String, AuthenticationResult>>();
             }
         } else {
@@ -121,7 +125,7 @@ public class AADManagerImpl implements AADManager {
     public static synchronized AADManager getManager() {
         if (instance == null) {
             gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-            instance = new AADManagerImpl();
+            instance = new AADManagerImpl(AzureManagerImpl.DEFAULT_PROJECT);
         }
 
         return instance;
@@ -665,7 +669,7 @@ public class AADManagerImpl implements AADManager {
             Type authResultsType = new TypeToken<HashMap<UserInfo, Map<String, AuthenticationResult>>>() {
             }.getType();
             String json = gson.toJson(authResultByUserResource, authResultsType);
-            DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.AAD_AUTHENTICATION_RESULTS, json);
+            DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.AAD_AUTHENTICATION_RESULTS, json, projectObject);
         } finally {
             userLock.writeLock().unlock();
         }

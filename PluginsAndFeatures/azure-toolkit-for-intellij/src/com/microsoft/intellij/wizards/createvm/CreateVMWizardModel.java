@@ -88,7 +88,7 @@ public class CreateVMWizardModel extends WizardModel {
 
         Project project = (Project) node.getProject();
 
-        add(new SubscriptionStep(this));
+        add(new SubscriptionStep(this, project));
         add(new SelectImageStep(this, project));
         add(new MachineSettingsStep(this, project));
         add(new CloudServiceStep(this, project));
