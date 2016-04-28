@@ -45,7 +45,7 @@ public class AzureServiceModule extends RefreshableNode {
     private static final String BASE_MODULE_NAME = "Azure";
 
     private Object project;
-    private MobileServiceModule mobileServiceModule ;
+//    private MobileServiceModule mobileServiceModule ;
     private VMServiceModule vmServiceModule;
     private VMArmServiceModule vmArmServiceModule;
     private StorageModule storageServiceModule;
@@ -65,7 +65,7 @@ public class AzureServiceModule extends RefreshableNode {
         webappsModule = new WebappsModule(this);
         if (!storageModuleOnly) {
             vmServiceModule = new VMServiceModule(this);
-            mobileServiceModule = new MobileServiceModule(this);
+//            mobileServiceModule = new MobileServiceModule(this);
         }
         vmArmServiceModule = new VMArmServiceModule(this);
     }
@@ -98,13 +98,13 @@ public class AzureServiceModule extends RefreshableNode {
         // multiple times when the user clicks the "Refresh" context
         // menu item
         if (!storageModuleOnly) {
-            if (!mobileServiceModule.isLoading()) {
-                if (!isDirectChild(mobileServiceModule)) {
-                    addChildNode(mobileServiceModule);
-                }
-
-                mobileServiceModule.load();
-            }
+//            if (!mobileServiceModule.isLoading()) {
+//                if (!isDirectChild(mobileServiceModule)) {
+//                    addChildNode(mobileServiceModule);
+//                }
+//
+//                mobileServiceModule.load();
+//            }
 
             if (!vmServiceModule.isLoading()) {
                 if (!isDirectChild(vmServiceModule)) {
@@ -164,7 +164,7 @@ public class AzureServiceModule extends RefreshableNode {
                                     if (registeredSubscriptionsChanged) {
                                         removeAllChildNodes();
                                         if (!storageModuleOnly) {
-                                            mobileServiceModule = new MobileServiceModule(AzureServiceModule.this);
+//                                            mobileServiceModule = new MobileServiceModule(AzureServiceModule.this);
                                             vmServiceModule = new VMServiceModule(AzureServiceModule.this);
                                         }
                                         storageServiceModule = new StorageModule(AzureServiceModule.this);
