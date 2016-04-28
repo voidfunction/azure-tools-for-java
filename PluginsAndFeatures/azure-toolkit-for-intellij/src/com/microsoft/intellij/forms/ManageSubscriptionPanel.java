@@ -23,6 +23,10 @@ package com.microsoft.intellij.forms;
 
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
@@ -33,6 +37,7 @@ import com.microsoft.intellij.ui.AzureAbstractPanel;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.WizardCacheManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -114,45 +119,65 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
 
                         refreshSignInCaption();
                         loadList();
-                        DefaultLoader.getIdeHelper().runInBackground(project, "Loading subscriptions information", false, true, "Loading subscriptions information...", new Runnable() {
+
+                        ApplicationManager.getApplication().invokeLater(new Runnable() {
                             @Override
                             public void run() {
-                                try {
-                                    WizardCacheManager.getPublishDatas().clear();
-                                    List<Subscription> subscriptions = apiManager.getSubscriptionList();
-                                    PublishData pd = new PublishData();
-                                    PublishProfile publishProfile = new PublishProfile();
-                                    pd.setPublishProfile(publishProfile);
-                                    Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
-                                    for (Subscription subscription : subscriptions) {
-                                        com.microsoftopentechnologies.azuremanagementutil.model.Subscription profileSubscription =
-                                                new com.microsoftopentechnologies.azuremanagementutil.model.Subscription();
-                                        profileSubscription.setSubscriptionID(subscription.getId());
-                                        profileSubscription.setSubscriptionName(subscription.getName());
-                                        publishProfile.getSubscriptions().add(profileSubscription);
-                                        List<String> resList = apiManager.getResourceGroupNames(subscription.getId());
-                                        for (String res : resList) {
-                                            List<WebSite> webList = apiManager.getWebSites(subscription.getId(), res);
-                                            for (WebSite webSite : webList) {
-                                                WebSiteConfiguration webSiteConfiguration = apiManager.
-                                                        getWebSiteConfiguration(webSite.getSubscriptionId(),
-                                                                webSite.getWebSpaceName(), webSite.getName());
-                                                webSiteConfigMap.put(webSite, webSiteConfiguration);
+                                ProgressManager.getInstance().run(new Task.Modal((Project) project,
+                                        "Loading subscriptions information", true) {
+                                    @Override
+                                    public void run(@NotNull ProgressIndicator indicator) {
+                                        indicator.setIndeterminate(true);
+                                        try {
+                                            WizardCacheManager.getPublishDatas().clear();
+                                            final List<Subscription> subscriptions = apiManager.getSubscriptionList();
+                                            PublishData pd = new PublishData();
+                                            PublishProfile publishProfile = new PublishProfile();
+                                            pd.setPublishProfile(publishProfile);
+                                            for (Subscription subscription : subscriptions) {
+                                                com.microsoftopentechnologies.azuremanagementutil.model.Subscription profileSubscription =
+                                                        new com.microsoftopentechnologies.azuremanagementutil.model.Subscription();
+                                                profileSubscription.setSubscriptionID(subscription.getId());
+                                                profileSubscription.setSubscriptionName(subscription.getName());
+                                                publishProfile.getSubscriptions().add(profileSubscription);
                                             }
+                                            // load websites information in background
+                                            DefaultLoader.getIdeHelper().runInBackground(project, "Caching webapps information", false, true, "Caching webapps information...", new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    try {
+                                                        Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
+                                                        for (Subscription subscription : subscriptions) {
+                                                            List<String> resList = apiManager.getResourceGroupNames(subscription.getId());
+                                                            for (String res : resList) {
+                                                                List<WebSite> webList = apiManager.getWebSites(subscription.getId(), res);
+                                                                for (WebSite webSite : webList) {
+                                                                    WebSiteConfiguration webSiteConfiguration = apiManager.
+                                                                            getWebSiteConfiguration(webSite.getSubscriptionId(),
+                                                                                    webSite.getWebSpaceName(), webSite.getName());
+                                                                    webSiteConfigMap.put(webSite, webSiteConfiguration);
+                                                                }
+                                                            }
+                                                            AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
+                                                            AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
+                                                            AppInsightsMngmtPanel.updateApplicationInsightsResourceRegistry(subscriptions, project);
+                                                        }
+                                                    }catch (Exception ex) {
+                                                        PluginUtil.displayErrorDialogInAWTAndLog("Error caching webapps", "Error caching webapps", ex);
+                                                    }
+                                                }
+                                            });
+                                            pd.setCurrentSubscription(publishProfile.getSubscriptions().get(0));
+
+                                            WizardCacheManager.cachePublishData(null, pd, null, project);
+                                            AzureSettings.getSafeInstance(project).savePublishDatas();
+                                        } catch (Exception ex) {
+                                            PluginUtil.displayErrorDialogInAWTAndLog("Error", "Error when caching subscriptions", ex);
                                         }
                                     }
-                                    AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
-                                    AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
-                                    AppInsightsMngmtPanel.updateApplicationInsightsResourceRegistry(subscriptions, project);
-                                    pd.setCurrentSubscription(publishProfile.getSubscriptions().get(0));
-
-                                    WizardCacheManager.cachePublishData(null, pd, null);
-                                    AzureSettings.getSafeInstance(project).savePublishDatas();
-                                } catch (Exception ex) {
-                                    PluginUtil.displayErrorDialogInAWTAndLog("Error", "Error when caching subscriptions", ex);
-                                }
+                                });
                             }
-                        });
+                        }, ModalityState.any());
                     }
                 } catch (Exception e1) {
                     PluginUtil.displayErrorDialogAndLog(message("signInErr"), e1.getMessage(), e1);

@@ -40,8 +40,9 @@ import com.microsoftopentechnologies.azuremanagementutil.model.Subscription;
 
 public class LoadingStorageAccountTask extends LoadingTask<Map<String, List<StorageAccount>>> {
 
-	public LoadingStorageAccountTask(PublishData data) {
+	public LoadingStorageAccountTask(PublishData data, Object projectObject) {
 		super(data);
+		this.projectObject = projectObject;
 	}
 
 	private static final int OPERATION_TIMEOUT = 120;
@@ -50,6 +51,8 @@ public class LoadingStorageAccountTask extends LoadingTask<Map<String, List<Stor
 	private final Map<String, List<StorageAccount>> storageServicesMap = new ConcurrentHashMap<String, List<StorageAccount>>();
 	private List<Future<?>> futures = new ArrayList<Future<?>>();
 	private ScheduledExecutorService threadPool;
+
+	private Object projectObject;
 
 	@Override
 	public Map<String, List<StorageAccount>> call() throws Exception {
@@ -104,7 +107,7 @@ public class LoadingStorageAccountTask extends LoadingTask<Map<String, List<Stor
 		public void run() {
 			List<StorageAccount> storageAccountsForSubscription;
 			try {
-				storageAccountsForSubscription = AzureManagerImpl.getManager().getStorageAccounts(subscriptionId, true);
+				storageAccountsForSubscription = AzureManagerImpl.getManager(projectObject).getStorageAccounts(subscriptionId, true);
 				List<StorageService> storageServicesForSubscription = new ArrayList<StorageService>();
 				for (StorageAccount storageAccount : storageAccountsForSubscription) {
 					StorageService storageService = new StorageService(storageAccount);

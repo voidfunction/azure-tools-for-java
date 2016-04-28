@@ -142,7 +142,7 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
         return map;
     }
 
-    public void loadPublishDatas(LoadingAccoutListener listener) {
+    public void loadPublishDatas(LoadingAccoutListener listener, Project project) {
         try {
             if (myState.publishProfile != null) {
                 byte[] data = Base64.decode(myState.publishProfile.getBytes());
@@ -153,7 +153,7 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
                     listener.setNumberOfAccounts(publishDatas.length);
                     for (PublishData pd : publishDatas) {
                         try {
-                            WizardCacheManager.cachePublishData(null, pd, listener);
+                            WizardCacheManager.cachePublishData(null, pd, listener, project);
                         } catch (RestAPIException e) {
                             log(message("error"), e);
                         }
