@@ -253,7 +253,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
                     progressIndicator.setIndeterminate(true);
 
                     try {
-                        for (VirtualMachineImage virtualMachineImage : AzureManagerImpl.getManager().getVirtualMachineImages(model.getSubscription().getId())) {
+                        for (VirtualMachineImage virtualMachineImage : AzureManagerImpl.getManager(project).getVirtualMachineImages(model.getSubscription().getId())) {
                             if (virtualMachineImage.isShowInGui()) {
                                 Enum type = null;
 

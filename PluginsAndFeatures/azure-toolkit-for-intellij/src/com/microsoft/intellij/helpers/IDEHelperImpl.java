@@ -311,9 +311,14 @@ public class IDEHelperImpl implements IDEHelper {
 
     @Nullable
     @Override
-    public String[] getProperties(@NotNull String name) { // todo!!!
+    public String[] getProperties(@NotNull String name) {
         return AzureSettings.getSafeInstance(PluginUtil.getSelectedProject()).getProperties(name);
-//        return PropertiesComponent.getInstance().getValues(name);
+    }
+
+    @Nullable
+    @Override
+    public String[] getProperties(@NotNull String name, Object projectObject) {
+        return AzureSettings.getSafeInstance((Project) projectObject).getProperties(name);
     }
 
     @Override
@@ -380,6 +385,11 @@ public class IDEHelperImpl implements IDEHelper {
     @Override
     public BrowserLauncher getBrowserLauncher() {
         return null;
+    }
+
+    @Override
+    public Object getCurrentProject() {
+        return PluginUtil.getSelectedProject();
     }
 
     private static void openFile(@NotNull final Object projectObject, @Nullable final VirtualFile finalEditfile) {

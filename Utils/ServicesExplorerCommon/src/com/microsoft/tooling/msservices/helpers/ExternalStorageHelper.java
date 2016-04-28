@@ -33,10 +33,10 @@ import java.util.List;
 public class ExternalStorageHelper {
     private static final String EXTERNAL_STORAGE_LIST = "EXTERNAL_STORAGE_LIST";
 
-    public static List<ClientStorageAccount> getList() {
+    public static List<ClientStorageAccount> getList(Object projectObject) {
         List<ClientStorageAccount> list = new ArrayList<ClientStorageAccount>();
 
-        String[] storageArray = DefaultLoader.getIdeHelper().getProperties(EXTERNAL_STORAGE_LIST);
+        String[] storageArray = DefaultLoader.getIdeHelper().getProperties(EXTERNAL_STORAGE_LIST, projectObject);
         if (storageArray != null) {
 
             for (String json : storageArray) {

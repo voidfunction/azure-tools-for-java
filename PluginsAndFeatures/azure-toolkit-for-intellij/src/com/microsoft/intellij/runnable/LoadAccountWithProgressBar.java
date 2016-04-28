@@ -38,7 +38,7 @@ public class LoadAccountWithProgressBar extends AccountActionRunnable {
     @Override
     public void doTask() {
         try {
-            AzureSettings.getSafeInstance(myProject).loadPublishDatas(this);
+            AzureSettings.getSafeInstance(myProject).loadPublishDatas(this, myProject);
         } catch (Exception e) {
             log(message("error"), e);
         }

@@ -21,10 +21,13 @@
  */
 package com.microsoft.intellij.wizards;
 
+import com.intellij.openapi.project.Project;
 import com.interopbridges.tools.windowsazure.WindowsAzurePackageType;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.rest.WindowsAzureRestUtils;
 import com.microsoft.intellij.ui.components.WindowsAzurePage;
+import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
@@ -342,7 +345,7 @@ public final class WizardCacheManager {
         currentPublishData = currentSubscription2;
     }
 
-    public static void cachePublishData(File publishSettingsFile, PublishData publishData, LoadingAccoutListener listener) throws RestAPIException, IOException {
+    public static void cachePublishData(File publishSettingsFile, PublishData publishData, LoadingAccoutListener listener, Project project) throws RestAPIException, IOException {
         boolean canceled = false;
         List<Subscription> subscriptions = null;
         int OPERATIONS_TIMEOUT = 60 * 5;
@@ -415,7 +418,7 @@ public final class WizardCacheManager {
 //                loadSubscriptionsFuture = subscriptionThreadPool.submit(new LoadingTaskRunner(loadingSubscriptionTask));
 //                loadSubscriptionsFuture.get(OPERATIONS_TIMEOUT, TimeUnit.SECONDS);
                 subscriptions.clear();
-                List<com.microsoft.tooling.msservices.model.Subscription> loadedSubscriptions = AzureManagerImpl.getManager().getSubscriptionList();
+                List<com.microsoft.tooling.msservices.model.Subscription> loadedSubscriptions = AzureManagerImpl.getManager(project).getSubscriptionList();
                 for (com.microsoft.tooling.msservices.model.Subscription subscription : loadedSubscriptions) {
                     Subscription profileSubscription =
                             new com.microsoftopentechnologies.azuremanagementutil.model.Subscription();
@@ -451,7 +454,7 @@ public final class WizardCacheManager {
                 loadServicesFutures = new ArrayList<Future<?>>();
 
                 // Hosted services
-                LoadingHostedServicesTask loadingHostedServicesTask = new LoadingHostedServicesTask(publishData);
+                LoadingHostedServicesTask loadingHostedServicesTask = new LoadingHostedServicesTask(publishData, project);
                 if (listener != null) {
                     loadingHostedServicesTask.addLoadingAccountListener(listener);
                 }
@@ -459,7 +462,7 @@ public final class WizardCacheManager {
                 loadServicesFutures.add(submitHostedServices);
 
                 // locations
-                LoadingLocationsTask loadingLocationsTask = new LoadingLocationsTask(publishData);
+                LoadingLocationsTask loadingLocationsTask = new LoadingLocationsTask(publishData, project);
                 if (listener != null) {
                     loadingLocationsTask.addLoadingAccountListener(listener);
                 }
@@ -467,7 +470,7 @@ public final class WizardCacheManager {
                 loadServicesFutures.add(submitLocations);
 
                 // storage accounts
-                LoadingStorageAccountTask loadingStorageAccountTask = new LoadingStorageAccountTask(publishData);
+                LoadingStorageAccountTask loadingStorageAccountTask = new LoadingStorageAccountTask(publishData, project);
                 if (listener != null) {
                     loadingStorageAccountTask.addLoadingAccountListener(listener);
                 }
@@ -509,6 +512,7 @@ public final class WizardCacheManager {
                         future.cancel(true);
                     }
                 }
+                PluginUtil.displayErrorDialogInAWTAndLog("Error caching subscriptions", "Error caching subscriptions", e);
                 canceled = true;
             }
         }

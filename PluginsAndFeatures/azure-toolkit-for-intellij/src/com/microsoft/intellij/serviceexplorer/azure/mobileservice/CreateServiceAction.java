@@ -22,6 +22,7 @@
 package com.microsoft.intellij.serviceexplorer.azure.mobileservice;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.Project;
 import com.microsoft.intellij.forms.CreateMobileServiceForm;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -48,8 +49,9 @@ public class CreateServiceAction extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
+        Project project = (Project) mobileServiceModule.getProject();
         // check if we have a valid subscription handy
-        AzureManager apiManager = AzureManagerImpl.getManager();
+        AzureManager apiManager = AzureManagerImpl.getManager(project);
         if (!apiManager.authenticated() && !apiManager.usingCertificate()) {
             DefaultLoader.getUIHelper().showException("Please configure an Azure subscription by right-clicking on the \"Azure\" " +
                             "node and selecting \"Manage subscriptions\".", null,
@@ -71,7 +73,7 @@ public class CreateServiceAction extends NodeActionListener {
 //            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e1);
 //        }
 
-        CreateMobileServiceForm form = new CreateMobileServiceForm(null);
+        CreateMobileServiceForm form = new CreateMobileServiceForm(project);
         form.setServiceCreated(new Runnable() {
             @Override
             public void run() {

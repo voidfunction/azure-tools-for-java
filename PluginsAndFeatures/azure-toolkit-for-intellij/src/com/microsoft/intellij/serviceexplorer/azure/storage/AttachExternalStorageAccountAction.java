@@ -53,7 +53,7 @@ public class AttachExternalStorageAccountAction extends NodeActionListener {
                 ClientStorageAccount storageAccount = form.getStorageAccount();
                 ClientStorageAccount fullStorageAccount = form.getFullStorageAccount();
 
-                for (ClientStorageAccount clientStorageAccount : ExternalStorageHelper.getList()) {
+                for (ClientStorageAccount clientStorageAccount : ExternalStorageHelper.getList(storageModule.getProject())) {
                     String name = storageAccount.getName();
                     if (clientStorageAccount.getName().equals(name)) {
                         JOptionPane.showMessageDialog(form.getContentPane(),

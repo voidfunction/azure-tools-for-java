@@ -130,6 +130,9 @@ public interface IDEHelper {
     @Nullable
     String[] getProperties(@NotNull String name);
 
+    @Nullable
+    String[] getProperties(@NotNull String name, Object projectObject);
+
     void setProperties(@NotNull String name, @NotNull String[] value);
 
     @NotNull
@@ -141,4 +144,7 @@ public interface IDEHelper {
                                            @NotNull ArtifactDescriptor artifactDescriptor);
 
     BrowserLauncher getBrowserLauncher();
+
+    @NotNull
+    Object getCurrentProject();
 }

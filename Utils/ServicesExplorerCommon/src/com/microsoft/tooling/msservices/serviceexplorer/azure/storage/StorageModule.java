@@ -24,6 +24,7 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 import com.microsoft.tooling.msservices.helpers.ExternalStorageHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
@@ -50,11 +51,12 @@ public class StorageModule extends AzureRefreshableNode {
             throws AzureCmdException {
         removeAllChildNodes();
 
+        AzureManager azureManager = AzureManagerImpl.getManager(getProject());
         // load all Storage Accounts
-        List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
+        List<Subscription> subscriptionList = azureManager.getSubscriptionList();
 
         for (Subscription subscription : subscriptionList) {
-            List<StorageAccount> storageAccounts = AzureManagerImpl.getManager().getStorageAccounts(subscription.getId(), true);
+            List<StorageAccount> storageAccounts = azureManager.getStorageAccounts(subscription.getId(), true);
 
             if (eventState.isEventTriggered()) {
                 return;
@@ -74,7 +76,7 @@ public class StorageModule extends AzureRefreshableNode {
         }
 
         // load External Accounts
-        for (ClientStorageAccount clientStorageAccount : ExternalStorageHelper.getList()) {
+        for (ClientStorageAccount clientStorageAccount : ExternalStorageHelper.getList(getProject())) {
             ClientStorageAccount storageAccount = StorageClientSDKManagerImpl.getManager().getStorageAccount(clientStorageAccount.getConnectionString());
 
             if (eventState.isEventTriggered()) {

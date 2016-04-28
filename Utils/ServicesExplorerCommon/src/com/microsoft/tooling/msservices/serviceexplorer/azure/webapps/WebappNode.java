@@ -88,7 +88,7 @@ public class WebappNode extends Node {
 					public void run() {
 						try {
 							AzureManagerImpl.getManager().startWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
-							webSite = AzureManagerImpl.getManager().getWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
+							webSite = AzureManagerImpl.getManager(getProject()).getWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
 							setIconPath(WEB_RUN_ICON);
 						} catch (AzureCmdException e) {
 							DefaultLoader.getUIHelper().showException("An error occurred while attempting to start the Web App", e,

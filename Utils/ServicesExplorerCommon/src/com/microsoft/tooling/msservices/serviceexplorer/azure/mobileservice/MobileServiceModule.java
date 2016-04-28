@@ -23,6 +23,7 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure.mobileservice;
 
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.ms.MobileService;
@@ -46,12 +47,12 @@ public class MobileServiceModule extends AzureRefreshableNode {
             throws AzureCmdException {
         // remove all child mobile service nodes
         removeAllChildNodes();
-
+        AzureManager azureManager = AzureManagerImpl.getManager(getProject());
         // load all mobile services
-        List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
+        List<Subscription> subscriptionList = azureManager.getSubscriptionList();
 
         for (Subscription subscription : subscriptionList) {
-            List<MobileService> mobileServices = AzureManagerImpl.getManager().getMobileServiceList(subscription.getId());
+            List<MobileService> mobileServices = azureManager.getMobileServiceList(subscription.getId());
 
             if (eventState.isEventTriggered()) {
                 return;

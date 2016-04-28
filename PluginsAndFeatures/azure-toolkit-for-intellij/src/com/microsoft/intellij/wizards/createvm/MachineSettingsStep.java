@@ -214,7 +214,7 @@ public class MachineSettingsStep extends WizardStep<CreateVMWizardModel> {
                     progressIndicator.setIndeterminate(true);
 
                     try {
-                        final List<VirtualMachineSize> virtualMachineSizes = AzureManagerImpl.getManager().getVirtualMachineSizes(model.getSubscription().getId().toString());
+                        final List<VirtualMachineSize> virtualMachineSizes = AzureManagerImpl.getManager(project).getVirtualMachineSizes(model.getSubscription().getId().toString());
 
                         Collections.sort(virtualMachineSizes, new Comparator<VirtualMachineSize>() {
                             @Override

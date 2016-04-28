@@ -29,6 +29,7 @@ import com.intellij.ide.projectView.impl.ProjectRootsUtil;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
@@ -197,7 +198,7 @@ public class PluginUtil {
         displayErrorDialog(title, message);
     }
 
-    public static void displayErrorDialogInAWTAndLog(final String title, final String message, Exception e) {
+    public static void displayErrorDialogInAWTAndLog(final String title, final String message, Throwable e) {
         LOG.error(message, e);
         ApplicationManager.getApplication().invokeLater(new Runnable() {
             @Override

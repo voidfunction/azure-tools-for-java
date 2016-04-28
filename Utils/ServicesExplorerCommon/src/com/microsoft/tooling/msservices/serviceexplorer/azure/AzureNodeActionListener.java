@@ -60,13 +60,13 @@ public abstract class AzureNodeActionListener extends NodeActionListenerAsync {
             @Override
             public EventWaitHandle registerEvent()
                     throws AzureCmdException {
-                return AzureManagerImpl.getManager().registerSubscriptionsChanged();
+                return AzureManagerImpl.getManager(azureNode.getProject()).registerSubscriptionsChanged();
             }
 
             @Override
             public void unregisterEvent(@NotNull EventWaitHandle waitHandle)
                     throws AzureCmdException {
-                AzureManagerImpl.getManager().unregisterSubscriptionsChanged(waitHandle);
+                AzureManagerImpl.getManager(azureNode.getProject()).unregisterSubscriptionsChanged(waitHandle);
             }
 
             @Override

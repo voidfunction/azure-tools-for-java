@@ -39,8 +39,9 @@ import com.microsoftopentechnologies.azuremanagementutil.model.Subscription;
 
 public class LoadingLocationsTask extends LoadingTask<Map<String, List<Location>>> {
 
-	public LoadingLocationsTask(PublishData data) {
+	public LoadingLocationsTask(PublishData data, Object projectObject) {
 		super(data);
+		this.projectObject = projectObject;
 	}
 
 	private static final int OPERATION_TIMEOUT = 120;
@@ -49,6 +50,8 @@ public class LoadingLocationsTask extends LoadingTask<Map<String, List<Location>
 	private final Map<String, List<Location>> locationsServicesMap = new ConcurrentHashMap<String, List<Location>>();
 	private List<Future<?>> futures = new ArrayList<Future<?>>();
 	private ScheduledExecutorService threadPool;
+
+	private Object projectObject;
 
 	@Override
 	public Map<String, List<Location>> call() throws Exception {
@@ -112,7 +115,7 @@ public class LoadingLocationsTask extends LoadingTask<Map<String, List<Location>
         @Override
 		public void run() {
 			try {
-                List<Location> storageLocationsForSubscription = AzureManagerImpl.getManager().getLocations(subscriptionId);
+                List<Location> storageLocationsForSubscription = AzureManagerImpl.getManager(projectObject).getLocations(subscriptionId);
 				locationsServicesMap.put(subscriptionId, storageLocationsForSubscription);
 			} catch (Exception e) {
 				e.printStackTrace();

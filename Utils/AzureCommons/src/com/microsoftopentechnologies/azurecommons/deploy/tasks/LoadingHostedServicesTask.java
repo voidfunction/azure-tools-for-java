@@ -37,8 +37,9 @@ import com.microsoftopentechnologies.azuremanagementutil.model.Subscription;
 
 public class LoadingHostedServicesTask extends LoadingTask<Map<String, List<CloudService>>> {
 
-	public LoadingHostedServicesTask(PublishData data) {
+	public LoadingHostedServicesTask(PublishData data, Object projectObject) {
 		super(data);
+		this.projectObject = projectObject;
 	}
 
 	private static final int OPERATION_TIMEOUT = 120;
@@ -47,6 +48,7 @@ public class LoadingHostedServicesTask extends LoadingTask<Map<String, List<Clou
 	private List<Future<?>> futures = new ArrayList<Future<?>>();
 	private ScheduledExecutorService threadPool;
 
+	private Object projectObject;
 
 	@Override
 	public Map<String, List<CloudService>> call() throws Exception {
@@ -101,7 +103,7 @@ public class LoadingHostedServicesTask extends LoadingTask<Map<String, List<Clou
 		public void run() {
 			List<CloudService> cloudServicesForSubscription;
 			try {
-				cloudServicesForSubscription = AzureManagerImpl.getManager().getCloudServices(subcriptionId);
+				cloudServicesForSubscription = AzureManagerImpl.getManager(projectObject).getCloudServices(subcriptionId);
 //				hostedServicesForSubscription = service.listHostedServices(data.getConfiguration(subcriptionId));
 				hostedServicesMap.put(subcriptionId, cloudServicesForSubscription);
 			} catch (Exception e) {

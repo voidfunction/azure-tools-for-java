@@ -46,7 +46,7 @@ public class AzureServiceModule extends RefreshableNode {
     private static final String BASE_MODULE_NAME = "Azure";
 
     private Object project;
-    private MobileServiceModule mobileServiceModule ;
+//    private MobileServiceModule mobileServiceModule ;
     private VMServiceModule vmServiceModule;
     private VMArmServiceModule vmArmServiceModule;
     private StorageModule storageServiceModule;
@@ -68,7 +68,7 @@ public class AzureServiceModule extends RefreshableNode {
         hdInsightModule = new HDInsightRootModule(this);
         if (!storageModuleOnly) {
             vmServiceModule = new VMServiceModule(this);
-            mobileServiceModule = new MobileServiceModule(this);
+//            mobileServiceModule = new MobileServiceModule(this);
         }
         vmArmServiceModule = new VMArmServiceModule(this);
     }
@@ -80,7 +80,7 @@ public class AzureServiceModule extends RefreshableNode {
     @Override
     public String getName() {
 //        try {
-            List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
+            List<Subscription> subscriptionList = AzureManagerImpl.getManager(getProject()).getSubscriptionList();
             if (subscriptionList.size() > 0) {
                 return String.format("%s (%s)", BASE_MODULE_NAME, subscriptionList.size() > 1
                         ? String.format("%s subscriptions", subscriptionList.size())
@@ -101,13 +101,13 @@ public class AzureServiceModule extends RefreshableNode {
         // multiple times when the user clicks the "Refresh" context
         // menu item
         if (!storageModuleOnly) {
-            if (!mobileServiceModule.isLoading()) {
-                if (!isDirectChild(mobileServiceModule)) {
-                    addChildNode(mobileServiceModule);
-                }
-
-                mobileServiceModule.load();
-            }
+//            if (!mobileServiceModule.isLoading()) {
+//                if (!isDirectChild(mobileServiceModule)) {
+//                    addChildNode(mobileServiceModule);
+//                }
+//
+//                mobileServiceModule.load();
+//            }
 
             if (!vmServiceModule.isLoading()) {
                 if (!isDirectChild(vmServiceModule)) {
@@ -116,6 +116,13 @@ public class AzureServiceModule extends RefreshableNode {
 
                 vmServiceModule.load();
             }
+        }
+
+        if (!vmArmServiceModule.isLoading()) {
+            if (!isDirectChild(vmArmServiceModule)) {
+                addChildNode(vmArmServiceModule);
+            }
+            vmArmServiceModule.load();
         }
 
         if (!storageServiceModule.isLoading()) {
@@ -132,12 +139,6 @@ public class AzureServiceModule extends RefreshableNode {
             }
 
             webappsModule.load();
-        }
-        if (!vmArmServiceModule.isLoading()) {
-            if (!isDirectChild(vmArmServiceModule)) {
-                addChildNode(vmArmServiceModule);
-            }
-            vmArmServiceModule.load();
         }
         if (!hdInsightModule.isLoading()) {
             if (!isDirectChild(hdInsightModule)) {
@@ -156,7 +157,7 @@ public class AzureServiceModule extends RefreshableNode {
             throws AzureCmdException {
         synchronized (subscriptionsChangedSync) {
             if (subscriptionsChanged == null) {
-                subscriptionsChanged = AzureManagerImpl.getManager().registerSubscriptionsChanged();
+                subscriptionsChanged = AzureManagerImpl.getManager(getProject()).registerSubscriptionsChanged();
             }
 
             registeredSubscriptionsChanged = true;
@@ -172,7 +173,7 @@ public class AzureServiceModule extends RefreshableNode {
                                     if (registeredSubscriptionsChanged) {
                                         removeAllChildNodes();
                                         if (!storageModuleOnly) {
-                                            mobileServiceModule = new MobileServiceModule(AzureServiceModule.this);
+//                                            mobileServiceModule = new MobileServiceModule(AzureServiceModule.this);
                                             vmServiceModule = new VMServiceModule(AzureServiceModule.this);
                                         }
                                         storageServiceModule = new StorageModule(AzureServiceModule.this);
@@ -197,7 +198,7 @@ public class AzureServiceModule extends RefreshableNode {
             registeredSubscriptionsChanged = false;
 
             if (subscriptionsChanged != null) {
-                AzureManagerImpl.getManager().unregisterSubscriptionsChanged(subscriptionsChanged);
+                AzureManagerImpl.getManager(getProject()).unregisterSubscriptionsChanged(subscriptionsChanged);
                 subscriptionsChanged = null;
             }
         }

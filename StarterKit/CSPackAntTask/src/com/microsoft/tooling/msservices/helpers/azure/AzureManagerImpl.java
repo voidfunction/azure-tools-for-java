@@ -37,12 +37,7 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -51,6 +46,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
+import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -153,17 +149,18 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
                 throws Throwable;
     }
 
-    private static AzureManager instance;
+    private static Map<Object, AzureManagerImpl> instances = new HashMap<>();
 
     private String accessToken; // this field to be used from cspack ant task only
 
     private ReentrantReadWriteLock subscriptionsChangedLock = new ReentrantReadWriteLock(true);
 
-    private AzureManagerImpl() {
+    private AzureManagerImpl(Object projectObject) {
+        super(projectObject);
         authDataLock.writeLock().lock();
 
         try {
-            aadManager = AADManagerImpl.getManager();
+            aadManager = new AADManagerImpl(projectObject);
 
             loadSubscriptions();
             loadUserInfo();
@@ -184,6 +181,7 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
     }
 
     private AzureManagerImpl(String accessToken) {
+        super(DEFAULT_PROJECT);
         authDataLock.writeLock().lock();
 
         try {
@@ -212,18 +210,39 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
      * This method for now is supposed to be used from cspack ant task only
      */
     public static synchronized AzureManager initManager(String accessToken) {
-        instance = new AzureManagerImpl(accessToken);
+        AzureManagerImpl instance = new AzureManagerImpl(accessToken);
+        instances.put(DEFAULT_PROJECT, instance);
         return instance;
+    }
+
+    /**
+     * Because different IntelliJ windows share same static class information, need to associate
+     */
+    public static synchronized void initAzureManager(Object projectObject) {
+        if (instances.get(projectObject) == null) {
+            AzureManagerImpl instance = new AzureManagerImpl(projectObject);
+            instances.put(projectObject, instance);
+        }
     }
 
     @NotNull
     public static synchronized AzureManager getManager() {
-        if (instance == null) {
-            gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-            instance = new AzureManagerImpl();
-        }
+        return getManager(DefaultLoader.getIdeHelper().getCurrentProject());
+    }
 
-        return instance;
+    @NotNull
+    public static synchronized AzureManager getManager(Object currentProject) {
+        if (instances.get(currentProject) == null) {
+            AzureManagerImpl instance = new AzureManagerImpl(currentProject);
+            instances.put(currentProject, instance);
+        }
+        return instances.get(currentProject);
+//        if (instance == null) {
+//            gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+//            instance = new AzureManagerImpl();
+//        }
+//
+//        return instance;
     }
 
     @Override

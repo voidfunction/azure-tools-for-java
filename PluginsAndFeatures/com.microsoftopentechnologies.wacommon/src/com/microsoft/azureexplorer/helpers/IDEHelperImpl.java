@@ -125,20 +125,23 @@ public class IDEHelperImpl implements IDEHelper {
         job.schedule();
     }
 
-    public String getProperty(Object projectObject, String name) {
-        return null;
+    @Override
+    public String getProperty(String name, Object projectObject) {
+        return getProperty(name);
     }
 
     public String getProperty(Object projectObject, String name, String defaultValue) {
         return null;
     }
 
-    public void setProperty(Object projectObject, String name, String value) {
-
+    @Override
+    public void setProperty(String name, String value, Object projectObject) {
+        setProperty(name, value);
     }
 
-    public void unsetProperty(Object projectObject, String name) {
-
+    @Override
+    public void unsetProperty(String name, Object projectObject) {
+        unsetProperty(name);
     }
 
     public boolean isPropertySet(Object projectObject, String name) {
@@ -173,6 +176,11 @@ public class IDEHelperImpl implements IDEHelper {
     @Override
     public String[] getProperties(String name) {
         return PreferenceUtil.loadPreferences(name);
+    }
+
+    @Override
+    public String[] getProperties(String name, Object project) {
+        return getProperties(name);
     }
 
     @Override

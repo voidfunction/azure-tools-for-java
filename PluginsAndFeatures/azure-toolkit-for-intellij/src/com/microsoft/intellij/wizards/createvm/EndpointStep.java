@@ -251,7 +251,7 @@ public class EndpointStep extends WizardStep<CreateVMWizardModel> {
 
                     StorageAccount storageAccount = model.getStorageAccount();
 
-                    for (StorageAccount account : AzureManagerImpl.getManager().getStorageAccounts(
+                    for (StorageAccount account : AzureManagerImpl.getManager(project).getStorageAccounts(
                             model.getSubscription().getId(), true)) {
                         if (account.getName().equals(storageAccount.getName())) {
                             storageAccount = account;
@@ -259,7 +259,7 @@ public class EndpointStep extends WizardStep<CreateVMWizardModel> {
                         }
                     }
 
-                    AzureManagerImpl.getManager().createVirtualMachine(virtualMachine,
+                    AzureManagerImpl.getManager(project).createVirtualMachine(virtualMachine,
                             model.getVirtualMachineImage(),
                             storageAccount,
                             model.getVirtualNetwork() != null ? model.getVirtualNetwork().getName() : "",
@@ -267,7 +267,7 @@ public class EndpointStep extends WizardStep<CreateVMWizardModel> {
                             model.getPassword(),
                             certData);
 
-                    virtualMachine = AzureManagerImpl.getManager().refreshVirtualMachineInformation(virtualMachine);
+                    virtualMachine = AzureManagerImpl.getManager(project).refreshVirtualMachineInformation(virtualMachine);
 
                     final VirtualMachine vm = virtualMachine;
 

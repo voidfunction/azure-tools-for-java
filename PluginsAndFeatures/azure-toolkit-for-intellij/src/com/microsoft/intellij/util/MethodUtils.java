@@ -86,7 +86,7 @@ public class MethodUtils {
 		 * So don't load information again.
 		 */
         if (data != null) {
-            AccountActionRunnable settings = new CacheAccountWithProgressBar(file, data, message("loadingCred"));
+            AccountActionRunnable settings = new CacheAccountWithProgressBar(file, data, message("loadingCred"), project);
             ProgressManager.getInstance().runProcessWithProgressSynchronously(settings, "Loading Account Settings...", true, project);
             AzureSettings.getSafeInstance(project).savePublishDatas();
         }
