@@ -68,7 +68,7 @@ public class AuthenticationResult {
     /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
     /// </summary>
     @JsonProperty
-    public String idToken;
+    String idToken;
 
     /// <summary>
     /// Gets a value indicating whether the refresh token can be used for requesting access token for other resources.
@@ -77,24 +77,15 @@ public class AuthenticationResult {
     boolean isMultipleResourceRefreshToken;
     
     public String getAccessToken() {
-    	return accessToken;
+        return accessToken;
     }
 
     /// <summary>
     /// Serializes the object to a JSON String
     /// </summary>
     /// <returns>Deserialized authentication result</returns>
-    public static AuthenticationResult deserialize(String serializedObject) throws Exception {
-    	AuthenticationResult result = JsonHelper.deserialize(AuthenticationResult.class, serializedObject);
-//        AuthenticationResult result;
-//        var serializer = new DataContractJsonSerializer(typeof(AuthenticationResult));
-//        byte[] serializedObjectBytes = Encoding.UTF8.GetBytes(serializedObject);
-//        using (var stream = new MemoryStream(serializedObjectBytes))
-//        {
-//            result = (AuthenticationResult)serializer.ReadObject(stream);
-//        }
-
-        return result;
+    static AuthenticationResult deserialize(String serializedObject) throws Exception {
+        return JsonHelper.deserialize(AuthenticationResult.class, serializedObject);
     }
 
     /// <summary>

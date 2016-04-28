@@ -4,24 +4,17 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;//import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
 public class TokenCache {
-    final static Logger log = Logger.getLogger(TokenCache.class.getName());
+    private final static Logger log = Logger.getLogger(TokenCache.class.getName());
     private final int SchemaVersion = 1;
     private final static String Delimiter = ":::";
-    final Map<TokenCacheKey, AuthenticationResult> tokenCacheDictionary;
-    private final int ExpirationMarginInMinutes = 5;
+    private final Map<TokenCacheKey, AuthenticationResult> tokenCacheDictionary;
     private volatile boolean hasStateChanged = false;
     private final Object lock = new Object();
     private static TokenCache defaultShared = null;
@@ -143,7 +136,7 @@ public class TokenCache {
             log.info(String.format("Deserialized %d items to token cache.", count));
         }
     }
-
+/*
     /// <summary>
     /// Reads a copy of the list of all items in the cache. 
     /// </summary>
@@ -166,12 +159,19 @@ public class TokenCache {
     /// <param name="item">The item to delete from the cache</param>
     public void deleteItem(TokenCacheItem item) throws Exception
     {
-       synchronized(lock) {
+        synchronized(lock) {
             if (item == null) {
                 throw new IllegalArgumentException("item");
             }
             onBeforeAccess();
-            TokenCacheKey toRemoveKey = this.tokenCacheDictionary.keySet().stream().filter(k -> item.match(k)).findFirst().get();;
+            //TokenCacheKey toRemoveKey = this.tokenCacheDictionary.keySet().stream().filter(k -> item.match(k)).findFirst().get(); java8
+            TokenCacheKey toRemoveKey = null;
+            for( TokenCacheKey key : tokenCacheDictionary.keySet()) {
+                if(item.match(key)) {
+                    toRemoveKey = key;
+                    break;
+                }
+            }
             if (toRemoveKey != null) {
                 this.tokenCacheDictionary.remove(toRemoveKey);
                 log.info("One item removed successfully");
@@ -181,7 +181,7 @@ public class TokenCache {
             hasStateChanged = true;
         }
     }
-
+*/
     /// <summary>
     /// Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
     /// impact all the instances of <see cref="AuthenticationContext"/> which share that cache.
@@ -191,7 +191,7 @@ public class TokenCache {
           onBeforeAccess();
             log.info(String.format("Clearing Cache :- %d items to be removed", tokenCacheDictionary.size()));
             this.tokenCacheDictionary.clear();
-            log.info(String.format("Successfully Cleared Cache"));
+            log.info("Successfully Cleared Cache");
             hasStateChanged = true;
             onAfterAccess();
         }
@@ -219,16 +219,24 @@ public class TokenCache {
         this.onAfterAccessCallback = onAfterAccessCallback;
     }
 
-    AuthenticationResult loadFromCache(String authority, String resource, String clientId, TokenSubjectType subjectType, String uniqueId, String displayableId, CallState callState) throws Exception {
+    AuthenticationResult loadFromCache(String authority, String resource, String clientId, TokenSubjectType subjectType, String uniqueId, String displayableId) throws Exception {
        synchronized(lock) {
             log.info("Looking up cache for a token...");
             AuthenticationResult result = null;
             Map.Entry<TokenCacheKey, AuthenticationResult> kvp = loadSingleItemFromCache(authority,
-                resource, clientId, subjectType, uniqueId, displayableId, callState);
+                resource, clientId, subjectType, uniqueId, displayableId);
             if (kvp != null) {
                 TokenCacheKey cacheKey = kvp.getKey();
                 result = kvp.getValue();
-                boolean tokenNearExpiry = result.expiresOn < (OffsetDateTime.now(ZoneId.of("UTC")).plusMinutes(ExpirationMarginInMinutes)).toEpochSecond();
+
+                Calendar now = new GregorianCalendar();
+                now.setTimeInMillis(System.currentTimeMillis());
+                int expirationMarginInMinutes = 5;
+                now.add(Calendar.MINUTE, expirationMarginInMinutes);
+                Calendar expiresOn = new GregorianCalendar();
+                expiresOn.setTimeInMillis(TimeUnit.SECONDS.toMillis(result.expiresOn));
+                boolean tokenNearExpiry = expiresOn.before(now);
+
                 if (tokenNearExpiry) {
                     result.accessToken = null;
                     log.info("An expired or near expiry token was found in the cache");
@@ -236,11 +244,11 @@ public class TokenCache {
                     log.info(String.format(
                             "Multi resource refresh token for resource '%s' will be used to acquire token for '%s'",
                             cacheKey.resource, resource));
-                    AuthenticationResult newResult = new AuthenticationResult(null, null, result.refreshToken, OffsetDateTime.MIN.toEpochSecond());
+                    AuthenticationResult newResult = new AuthenticationResult(null, null, result.refreshToken, 0);
                     newResult.updateTenantAndUserInfo(result.tenantId, result.idToken, result.userInfo);
                     result = newResult;
                 } else {
-                   long nowSec = OffsetDateTime.now(ZoneId.of("UTC")).toEpochSecond();
+                   long nowSec = System.currentTimeMillis()/1000;
                     log.info(
                         String.format("%d minutes left until token in cache expires", TimeUnit.SECONDS.toMinutes(result.expiresOn - nowSec)));
                 }
@@ -260,7 +268,7 @@ public class TokenCache {
         }
     }
 
-    void storeToCache(AuthenticationResult result, String authority, String resource, String clientId, TokenSubjectType subjectType, CallState callState) {
+    void storeToCache(AuthenticationResult result, String authority, String resource, String clientId, TokenSubjectType subjectType) {
         synchronized(lock) {
             log.info("Storing token in the cache...");
             TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType, result.userInfo);
@@ -284,28 +292,45 @@ public class TokenCache {
     private void updateCachedMrrtRefreshTokens(AuthenticationResult result, String authority, String clientId, TokenSubjectType subjectType) {
        synchronized(lock) {
             if (result.userInfo != null && result.isMultipleResourceRefreshToken) {
-                List<Map.Entry<TokenCacheKey, AuthenticationResult>> mrrtItems = 
-                    queryCache(authority, clientId, subjectType, result.userInfo.uniqueId, result.userInfo.displayableId)
-                       .stream().filter(p -> p.getValue().isMultipleResourceRefreshToken).collect(Collectors.toList());
+//                List<Map.Entry<TokenCacheKey, AuthenticationResult>> mrrtItems =
+//                    queryCache(authority, clientId, subjectType, result.userInfo.uniqueId, result.userInfo.displayableId)
+//                       .stream().filter(p -> p.getValue().isMultipleResourceRefreshToken).collect(Collectors.toList());
+
+                List<Map.Entry<TokenCacheKey, AuthenticationResult>> items =  queryCache(authority, clientId,
+                        subjectType, result.userInfo.uniqueId, result.userInfo.displayableId);
+
+                List<Map.Entry<TokenCacheKey, AuthenticationResult>> mrrtItems = new LinkedList<>();
+                for (Map.Entry<TokenCacheKey, AuthenticationResult> item : items) {
+                    if (item.getValue().isMultipleResourceRefreshToken) {
+                        mrrtItems.add(item);
+                    }
+                }
 
                 for (Map.Entry<TokenCacheKey, AuthenticationResult> mrrtItem : mrrtItems) {
-                   AuthenticationResult update = mrrtItem.getValue();
-                   update.refreshToken = result.refreshToken;
-                   tokenCacheDictionary.put(mrrtItem.getKey(), update);
+                    AuthenticationResult update = mrrtItem.getValue();
+                    update.refreshToken = result.refreshToken;
+                    tokenCacheDictionary.put(mrrtItem.getKey(), update);
                 }
             }
         }
     }
 
     private Map.Entry<TokenCacheKey, AuthenticationResult> loadSingleItemFromCache(String authority, String resource, String clientId, 
-          TokenSubjectType subjectType, String uniqueId, String displayableId, CallState callState) throws AuthException {
-       synchronized(lock) {
+          TokenSubjectType subjectType, String uniqueId, String displayableId) throws AuthException {
+        synchronized(lock) {
             // First identify all potential tokens.
             List<Map.Entry<TokenCacheKey, AuthenticationResult>> items = queryCache(authority, clientId,
                 subjectType, uniqueId, displayableId);
 
-            List<Map.Entry<TokenCacheKey, AuthenticationResult>> resourceSpecificItems =
-                items.stream().filter(p -> p.getKey().resource.equals(resource)).collect(Collectors.toList());
+            List<Map.Entry<TokenCacheKey, AuthenticationResult>> resourceSpecificItems = new LinkedList<>();
+            for (Map.Entry<TokenCacheKey, AuthenticationResult> item : items) {
+                if (item.getKey().resource.equals(resource)) {
+                    resourceSpecificItems.add(item);
+                }
+            }
+
+//            List<Map.Entry<TokenCacheKey, AuthenticationResult>> resourceSpecificItems =
+//                items.stream().filter(p -> p.getKey().resource.equals(resource)).collect(Collectors.toList());
 
             int resourceValuesCount = resourceSpecificItems.size();
             Map.Entry<TokenCacheKey, AuthenticationResult> returnValue = null;
@@ -314,8 +339,13 @@ public class TokenCache {
                 returnValue = resourceSpecificItems.get(0);
             } else if (resourceValuesCount == 0) {
                 // There are no resource specific tokens.  Choose any of the MRRT tokens if there are any.
-                List<Map.Entry<TokenCacheKey, AuthenticationResult>> mrrtItems =
-                    items.stream().filter(p -> p.getValue().isMultipleResourceRefreshToken).collect(Collectors.toList());
+//                items.stream().filter(p -> p.getValue().isMultipleResourceRefreshToken).collect(Collectors.toList());
+                List<Map.Entry<TokenCacheKey, AuthenticationResult>> mrrtItems = new LinkedList<>();
+                for (Map.Entry<TokenCacheKey, AuthenticationResult> item : items) {
+                    if (item.getValue().isMultipleResourceRefreshToken) {
+                        mrrtItems.add(item);
+                    }
+                }
 
                 if (!mrrtItems.isEmpty()) {
                     returnValue = mrrtItems.get(0);
@@ -336,7 +366,7 @@ public class TokenCache {
     private List<Map.Entry<TokenCacheKey, AuthenticationResult>> queryCache(String authority, String clientId,
         TokenSubjectType subjectType, String uniqueId, String displayableId) {
        synchronized(lock) {
-          List<Map.Entry<TokenCacheKey, AuthenticationResult>> res = new LinkedList<Map.Entry<TokenCacheKey, AuthenticationResult>>();
+          List<Map.Entry<TokenCacheKey, AuthenticationResult>> res = new LinkedList<>();
           for(Map.Entry<TokenCacheKey, AuthenticationResult> p : tokenCacheDictionary.entrySet()) {
              if(p.getKey().authority.equals(authority)
                         && (StringUtils.isNullOrWhiteSpace(clientId) || p.getKey().clientId.equals(clientId))

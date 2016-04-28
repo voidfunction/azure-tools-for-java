@@ -1,6 +1,7 @@
 package com.microsoft.auth.example;
 
 import com.microsoft.auth.*;
+import com.microsoft.auth.subsriptions.Subscription;
 import com.microsoft.auth.subsriptions.SubscriptionsClient;
 import com.microsoft.azure.management.resources.ResourceManagementClient;
 import com.microsoft.azure.management.resources.ResourceManagementService;
@@ -27,9 +28,10 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            TokenFileStorage tokenFileStorage = new TokenFileStorage();
 
-            TokenCache cache = new TokenCache();
+            final TokenFileStorage tokenFileStorage = new TokenFileStorage();
+
+            final TokenCache cache = new TokenCache();
 
             cache.setOnBeforeAccessCallback(new Runnable() {
                 @Override
@@ -52,13 +54,30 @@ public class Main {
                             cache.setHasStateChanged(false);
                         }
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        System.out.println(ex.getMessage());
                     }
                 }
             });
 
-            URI baseUri = new URI("https://management.azure.com/");
-            getDataFromAzure(cache, baseUri);
+            final URI baseUri = new URI("https://management.azure.com/");
+
+            Runnable worker = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        getDataFromAzure(cache, baseUri);
+                    } catch (Exception ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                }
+            };
+
+            for (int i = 0; i < 2; ++i) {
+
+//                new Thread(worker).start();
+//                new Thread(worker).start();
+                worker.run();
+            }
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -73,15 +92,13 @@ public class Main {
         System.out.println("token: " + result.getAccessToken());
 
         System.out.println("=== Subscriptions:");
-        SubscriptionsClient
-                .getByToken(result.getAccessToken())
-                .stream()
-                .forEach(s -> {
+        List<Subscription> subscriptions = SubscriptionsClient.getByToken(result.getAccessToken());
+        for (Subscription s : subscriptions) {
                     String sid = s.getSubscriptionId().toString();
                     System.out.println(String.format("======> %s: %s ======================", s.getSubscriptionName(), sid ));
                     listSitesForSubscription(baseUri, sid, result.getAccessToken());
                     System.out.println();
-                });
+        }
     }
 
     private static void listSitesForSubscription(URI baseUri, String sid, String token) {

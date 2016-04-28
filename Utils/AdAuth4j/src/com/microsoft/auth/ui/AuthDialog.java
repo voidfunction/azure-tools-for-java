@@ -60,8 +60,8 @@ public class AuthDialog extends Application {
     public void start(Stage stage) throws Exception {
         Platform.setImplicitExit(false);
         Map<String, String> map = getParameters().getNamed();
-        int communicationPort = Integer.parseInt(map.get("communicationPort"));
-        int hostReadyPort = Integer.parseInt(map.get("hostReadyPort"));
+        final int communicationPort = Integer.parseInt(map.get("communicationPort"));
+        final int hostReadyPort = Integer.parseInt(map.get("hostReadyPort"));
         Callable<Void> worker = new Callable<Void>() {
             int count = 1;
             @Override
@@ -99,12 +99,12 @@ public class AuthDialog extends Application {
             }
         };
         
-        ExecutorService executor = Executors.newWorkStealingPool();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(worker);
         log.info("==> JavaFx host is up and running!");
     }
     
-    public void buildWindow(Stage stage, Params params, Socket socket) {
+    public void buildWindow(final Stage stage, final Params params, final Socket socket) {
 
         log.info("redirectUri: " + params.redirectUri);
         log.info("requestUri: " + params.requestUri);
@@ -153,7 +153,7 @@ public class AuthDialog extends Application {
         }
     }
 
-    public static void buildStage(Stage stage, String address) {
+    public static void buildStage(final Stage stage, String address) {
         log.info("Inside dialog");
         stage.setTitle(address);
         javafx.scene.layout.StackPane root = new javafx.scene.layout.StackPane();

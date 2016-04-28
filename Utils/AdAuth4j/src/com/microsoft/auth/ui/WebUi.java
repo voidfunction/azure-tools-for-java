@@ -34,7 +34,7 @@ public class WebUi implements IWebUi {
     }
 
     @Override
-    public  Future<String> authenticateAsync(URI requestUri, URI redirectUri) {
+    public  Future<String> authenticateAsync(final URI requestUri, final URI redirectUri) {
         Callable<String> worker = new Callable<String>() {
             @Override
             public String call() throws Exception {
@@ -42,7 +42,7 @@ public class WebUi implements IWebUi {
                     if (!javafxAppStarted) {
                         // requesting available ports
                         ServerSocket hostReadySocket = new ServerSocket(0);
-                        int hostReadyPort =  hostReadySocket.getLocalPort();
+                        final int hostReadyPort =  hostReadySocket.getLocalPort();
                         ServerSocket communicationSocket = new ServerSocket(0);
                         communicationPort = communicationSocket.getLocalPort();
                         communicationSocket.close();
@@ -99,7 +99,7 @@ public class WebUi implements IWebUi {
             }
         };
         
-        ExecutorService executor = Executors.newWorkStealingPool();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         return executor.submit(worker);
     }
 }

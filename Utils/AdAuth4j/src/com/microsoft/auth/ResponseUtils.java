@@ -1,16 +1,15 @@
 package com.microsoft.auth;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
 public class ResponseUtils {
-    final static Logger log = Logger.getLogger(ResponseUtils.class.getName());
+    private final static Logger log = Logger.getLogger(ResponseUtils.class.getName());
     
     public static AuthorizationResult parseAuthorizeResponse(String webAuthenticationResult, CallState callState) throws Exception {
         AuthorizationResult result = null;
@@ -49,11 +48,11 @@ public class ResponseUtils {
         return result;
     }
     
-    public static AuthenticationResult parseTokenResponse(TokenResponse tokenResponse, CallState callState) throws Exception  {
+    public static AuthenticationResult parseTokenResponse(TokenResponse tokenResponse) throws Exception  {
          AuthenticationResult result;
 
          if (tokenResponse.accessToken != null) {
-             long expiresOn = OffsetDateTime.now(ZoneId.of("UTC")).plusSeconds(tokenResponse.expiresIn).toEpochSecond();
+             long expiresOn = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) +  tokenResponse.expiresIn;
              result = new AuthenticationResult(tokenResponse.tokenType, tokenResponse.accessToken, tokenResponse.refreshToken, expiresOn);
              result.resource = tokenResponse.resource;
              IdToken idToken = parseIdToken(tokenResponse.idToken);
@@ -80,7 +79,7 @@ public class ResponseUtils {
                         : idToken.identityProvider;
                  long passwordExpiresOffest = 0;
                  if (idToken.passwordExpiration > 0) {
-                     passwordExpiresOffest = OffsetDateTime.now(ZoneId.of("UTC")).toEpochSecond() + idToken.passwordExpiration;
+                     passwordExpiresOffest = System.currentTimeMillis() + idToken.passwordExpiration;
                  }
                  URI changePasswordUri = null;
                  if (!StringUtils.isNullOrEmpty(idToken.passwordChangeUrl)) {
@@ -108,8 +107,8 @@ public class ResponseUtils {
 
              // If Id token format is invalid, we silently ignore the id token
              if (idTokenSegments.length == 2) {
-                 byte[] decoded = Base64.getDecoder().decode(idTokenSegments[1].getBytes(StandardCharsets.UTF_8));
-                 System.out.println("decoded: " + decoded);
+                 byte[] decoded = Base64.decodeBase64(idTokenSegments[1]);
+                 log.info("decoded: " + new String(decoded));
                  idTokenBody = JsonHelper.deserialize(IdToken.class, new String(decoded));
              }
          }

@@ -5,16 +5,16 @@ import java.net.URI;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 public final class UserInfo {
-	UserInfo(){}
-	
-	UserInfo(String uniqueId, String displayableId, String givenName, String familyName, String identityProvider, long passwordExpiresOffest, URI passwordChangeUrl){            
-		this.uniqueId = uniqueId;
-		this.displayableId = displayableId;
-		this.givenName = givenName;
-		this.familyName = familyName;
-		this.identityProvider = identityProvider;
-		this.passwordChangeUrl = passwordChangeUrl;
-		this.passwordExpiresOn = passwordExpiresOffest;
+    UserInfo(){}
+    
+    UserInfo(String uniqueId, String displayableId, String givenName, String familyName, String identityProvider, long passwordExpiresOffest, URI passwordChangeUrl){            
+        this.uniqueId = uniqueId;
+        this.displayableId = displayableId;
+        this.givenName = givenName;
+        this.familyName = familyName;
+        this.identityProvider = identityProvider;
+        this.passwordChangeUrl = passwordChangeUrl;
+        this.passwordExpiresOn = passwordExpiresOffest;
     }
 
     UserInfo(UserInfo other) {

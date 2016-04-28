@@ -8,7 +8,6 @@ import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
 
 import org.apache.log4j.Logger;
 
@@ -45,7 +44,7 @@ public class FileTokenCache extends TokenCache {
                 break;
             } catch(OverlappingFileLockException ex) {
                 log.warn(String.format("The file has been locked by another process - waiting %s sec to release [%d attempt(s) left].", sleepSec, tryCount));
-                Thread.sleep(Duration.ofSeconds(sleepSec).toMillis());
+                Thread.sleep(sleepSec*1000);
                 tryCount--;
             }
         }

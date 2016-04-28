@@ -20,9 +20,9 @@ import org.apache.log4j.Logger;
 public class HttpHelper {
     final static Logger log = Logger.getLogger(HttpHelper.class.getName());
     
-    public static <T> Future<T> sendPostRequestAndDeserializeJsonResponseAsync(String uri, Map<String, String> requestParameters, CallState callState, Class<T> cls)
+    public static <T> Future<T> sendPostRequestAndDeserializeJsonResponseAsync(final String uri, final Map<String, String> requestParameters, final CallState callState, final Class<T> cls)
     {
-        ExecutorService executor = Executors.newWorkStealingPool();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         return executor.submit(new Callable<T>() {
 
             @Override
