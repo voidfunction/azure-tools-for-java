@@ -130,7 +130,7 @@
             icon="/icons/publishWebsite.png">
     </action>
 
-    <action id="Actions.SubmitSparkAction"
+    <action id="Actions.SubmitSparkApplicationAction"
             class="com.microsoft.azure.hdinsight.spark.actions.SubmitAction" text="Submit Spark Application to HDInsight"
             description="Submit Spark Application to HDInsight" icon="/icons/Spark.png"/>
 
@@ -166,8 +166,9 @@
            popup="false">
         <separator/>
         <reference ref="Actions.AzureWebDeploy"/>
-        <add-to-group group-id="PublishGroup" anchor="last"/>
+        <add-to-group group-id="PublishToAzureGroup" anchor="last"/>
     </group>
+
   </actions>
 
     <helpset file="azure-toolkit-for-intellij-help.jar" path="/helpset.hs"/>

@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/azure-toolkit-for-intellij.iml" filepath="$PROJECT_DIR$/azure-toolkit-for-intellij.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hdinsight-node/hdinsight-node.iml" filepath="$PROJECT_DIR$/hdinsight-node/hdinsight-node.iml" />
     </modules>
   </component>
 </project>
