@@ -63,14 +63,14 @@ public class ClusterManagerEx {
         return isLIstAdditionalClusterSuccess;
     }
 
-    public List<IClusterDetail> getClusterDetailsWithoutAsync() {
+    public List<IClusterDetail> getClusterDetailsWithoutAsync(Object projectObject) {
         return getClusterDetailsWithoutAsync(false);
     }
 
-    public List<IClusterDetail> getClusterDetailsWithoutAsync(boolean isIgnoreErrorCluster) {
+    public List<IClusterDetail> getClusterDetailsWithoutAsync(boolean isIgnoreErrorCluster, Object projectObject) {
         cachedClusterDetails = ClusterMetaDataService.getInstance().getCachedClusterDetails();
         if(cachedClusterDetails.size() == 0) {
-            cachedClusterDetails = getClusterDetails();
+            cachedClusterDetails = getClusterDetails(projectObject);
         }
 
         if (isIgnoreErrorCluster == true) {
@@ -87,20 +87,20 @@ public class ClusterManagerEx {
         }
     }
 
-    public synchronized List<IClusterDetail> getClusterDetails() {
+    public synchronized List<IClusterDetail> getClusterDetails(Object projectObject) {
         cachedClusterDetails.clear();
 
         if(!isLIstAdditionalClusterSuccess) {
-            hdinsightAdditionalClusterDetails = getAdditionalClusters();
+            hdinsightAdditionalClusterDetails = getAdditionalClusters(projectObject);
         }
 
         isListClusterSuccess = false;
-        if (!AzureManagerImpl.getManager().authenticated()) {
+        if (!AzureManagerImpl.getManager(projectObject).authenticated()) {
             cachedClusterDetails.addAll(hdinsightAdditionalClusterDetails);
             return cachedClusterDetails;
         }
 
-        List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
+        List<Subscription> subscriptionList = AzureManagerImpl.getManager(projectObject).getSubscriptionList();
 
         try {
             cachedClusterDetails = ClusterManager.getInstance().getHDInsightCausersWithSpecificType(subscriptionList, ClusterType.spark, OSTYPE);
@@ -183,9 +183,9 @@ public class ClusterManagerEx {
         DefaultLoader.getIdeHelper().setProperty(CommonConst.HDINSIGHT_ADDITIONAL_CLUSTERS, json);
     }
 
-    private List<IClusterDetail> getAdditionalClusters() {
+    private List<IClusterDetail> getAdditionalClusters(Object projectObject) {
         Gson gson = new Gson();
-        String json = DefaultLoader.getIdeHelper().getProperty(CommonConst.HDINSIGHT_ADDITIONAL_CLUSTERS);
+        String json = DefaultLoader.getIdeHelper().getProperty(CommonConst.HDINSIGHT_ADDITIONAL_CLUSTERS, projectObject);
         List<IClusterDetail> hdiLocalClusters = new ArrayList<>();
 
         isLIstAdditionalClusterSuccess = false;

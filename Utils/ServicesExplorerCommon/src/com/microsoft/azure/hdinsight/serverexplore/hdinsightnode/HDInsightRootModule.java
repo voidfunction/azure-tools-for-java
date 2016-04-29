@@ -30,7 +30,7 @@ public class HDInsightRootModule extends AzureRefreshableNode {
         synchronized (this) { //todo???
             removeAllChildNodes();
             TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerHDInsightNodeExpand, null, null);
-            clusterDetailList = ClusterManagerEx.getInstance().getClusterDetails();
+            clusterDetailList = ClusterManagerEx.getInstance().getClusterDetails(getProject());
 
             if (clusterDetailList != null) {
                 for (IClusterDetail clusterDetail : clusterDetailList) {
@@ -43,7 +43,7 @@ public class HDInsightRootModule extends AzureRefreshableNode {
     public void refreshWithoutAsync() {
         synchronized (this) {
             removeAllChildNodes();
-            clusterDetailList = ClusterManagerEx.getInstance().getClusterDetailsWithoutAsync();
+            clusterDetailList = ClusterManagerEx.getInstance().getClusterDetailsWithoutAsync(getProject());
 
             if (clusterDetailList != null) {
                 for (IClusterDetail clusterDetail : clusterDetailList) {
