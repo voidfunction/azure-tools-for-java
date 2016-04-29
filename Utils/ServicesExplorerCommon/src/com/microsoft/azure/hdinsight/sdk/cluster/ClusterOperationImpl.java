@@ -22,6 +22,12 @@ public class ClusterOperationImpl implements IClusterOperation {
 
     private final String VERSION = "2015-03-01-preview";
 
+    private Object project;
+
+    public ClusterOperationImpl(Object project) {
+        this.project = project;
+    }
+
     /**
      * list hdinsight cluster
      *
@@ -30,7 +36,7 @@ public class ClusterOperationImpl implements IClusterOperation {
      * @throws IOException
      */
     public List<ClusterRawInfo> listCluster(Subscription subscription) throws IOException, HDIException, AzureCmdException {
-        String accessToken = AzureManagerImpl.getManager().getAccessToken(subscription.getId());
+        String accessToken = AzureManagerImpl.getManager(project).getAccessToken(subscription.getId());
         String response = AzureAADHelper.executeRequest(
                 CommonConstant.hdinsightClusterUri,
                 String.format("api/Clusters/GetAll?subscriptionIds=%s;&_=%d", subscription.getId(), new Date().getTime()),
@@ -73,7 +79,7 @@ public class ClusterOperationImpl implements IClusterOperation {
      * @throws IOException
      */
     public ClusterConfiguration getClusterConfiguration(Subscription subscription, String clusterId) throws IOException, HDIException, AzureCmdException {
-        String accessToken = AzureManagerImpl.getManager().getAccessToken(subscription.getId());
+        String accessToken = AzureManagerImpl.getManager(project).getAccessToken(subscription.getId());
         String response = AzureAADHelper.executeRequest(
                 CommonConstant.managementUri,
                 String.format("%s/configurations?api-version=%s", clusterId.replaceAll("/+$", ""), VERSION),

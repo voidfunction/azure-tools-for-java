@@ -32,7 +32,7 @@ public class StorageAccountFolderNode extends AzureRefreshableNode {
         removeAllChildNodes();
         if (clusterDetail != null) {
             try {
-                clusterDetail.getConfigurationInfo();
+                clusterDetail.getConfigurationInfo(getProject());
                 addChildNode(new StorageAccountNode(this, clusterDetail.getStorageAccount(), true));
                 List<HDStorageAccount> additionalStorageAccount = clusterDetail.getAdditionalStorageAccounts();
                 if (additionalStorageAccount != null) {

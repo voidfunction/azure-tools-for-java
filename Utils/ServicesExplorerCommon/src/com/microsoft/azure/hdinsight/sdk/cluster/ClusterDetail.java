@@ -139,8 +139,8 @@ public class ClusterDetail implements IClusterDetail {
         }
     }
 
-    public void getConfigurationInfo() throws IOException, HDIException, AzureCmdException {
-        IClusterOperation clusterOperation = new ClusterOperationImpl();
+    public void getConfigurationInfo(Object project) throws IOException, HDIException, AzureCmdException {
+        IClusterOperation clusterOperation = new ClusterOperationImpl(project);
         ClusterConfiguration clusterConfiguration =
                 clusterOperation.getClusterConfiguration(subscription, clusterRawInfo.getId());
         if(clusterConfiguration != null && clusterConfiguration.getConfigurations() != null){

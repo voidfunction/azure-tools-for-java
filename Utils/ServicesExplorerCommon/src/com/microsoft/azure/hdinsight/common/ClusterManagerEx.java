@@ -63,8 +63,8 @@ public class ClusterManagerEx {
         return isLIstAdditionalClusterSuccess;
     }
 
-    public List<IClusterDetail> getClusterDetailsWithoutAsync(Object projectObject) {
-        return getClusterDetailsWithoutAsync(false);
+    public List<IClusterDetail> getClusterDetailsWithoutAsync(Object project) {
+        return getClusterDetailsWithoutAsync(false, project);
     }
 
     public List<IClusterDetail> getClusterDetailsWithoutAsync(boolean isIgnoreErrorCluster, Object projectObject) {
@@ -87,23 +87,23 @@ public class ClusterManagerEx {
         }
     }
 
-    public synchronized List<IClusterDetail> getClusterDetails(Object projectObject) {
+    public synchronized List<IClusterDetail> getClusterDetails(Object project) {
         cachedClusterDetails.clear();
 
         if(!isLIstAdditionalClusterSuccess) {
-            hdinsightAdditionalClusterDetails = getAdditionalClusters(projectObject);
+            hdinsightAdditionalClusterDetails = getAdditionalClusters(project);
         }
 
         isListClusterSuccess = false;
-        if (!AzureManagerImpl.getManager(projectObject).authenticated()) {
+        if (!AzureManagerImpl.getManager(project).authenticated()) {
             cachedClusterDetails.addAll(hdinsightAdditionalClusterDetails);
             return cachedClusterDetails;
         }
 
-        List<Subscription> subscriptionList = AzureManagerImpl.getManager(projectObject).getSubscriptionList();
+        List<Subscription> subscriptionList = AzureManagerImpl.getManager(project).getSubscriptionList();
 
         try {
-            cachedClusterDetails = ClusterManager.getInstance().getHDInsightCausersWithSpecificType(subscriptionList, ClusterType.spark, OSTYPE);
+            cachedClusterDetails = ClusterManager.getInstance().getHDInsightCausersWithSpecificType(subscriptionList, ClusterType.spark, OSTYPE, project);
             // TODO: so far we have not a good way to judge whether it is token expired as we have changed the way to list hdinsight clusters
             if (cachedClusterDetails.size() == 0) {
                 //DefaultLoader.getUIHelper().showError("Falied to get HDInsight Cluster, Please make sure there's no login problem first","List HDInsight Cluster Error");

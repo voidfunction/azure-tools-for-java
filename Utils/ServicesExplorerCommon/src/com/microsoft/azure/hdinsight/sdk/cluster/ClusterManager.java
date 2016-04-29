@@ -45,9 +45,9 @@ public class ClusterManager {
      * @throws AggregatedException
      */
     public synchronized List<IClusterDetail> getHDInsightClusers(
-            List<Subscription> subscriptions) throws AggregatedException {
+            List<Subscription> subscriptions, Object projectObject) throws AggregatedException {
 
-        return getClusterDetails(subscriptions);
+        return getClusterDetails(subscriptions, projectObject);
     }
 
     /**
@@ -61,9 +61,10 @@ public class ClusterManager {
     public synchronized List<IClusterDetail> getHDInsightCausersWithSpecificType(
             List<Subscription> subscriptions,
             ClusterType type,
-            String osType) throws AggregatedException {
+            String osType,
+            Object projectObject) throws AggregatedException {
 
-        List<IClusterDetail> clusterDetailList = getClusterDetails(subscriptions);
+        List<IClusterDetail> clusterDetailList = getClusterDetails(subscriptions, projectObject);
         List<IClusterDetail> filterClusterDetailList = new ArrayList<>();
         for (IClusterDetail clusterDetail : clusterDetailList) {
             if (clusterDetail.getOSType() != null && osType != null) {
@@ -80,7 +81,7 @@ public class ClusterManager {
         return filterClusterDetailList;
     }
 
-    private List<IClusterDetail> getClusterDetails(List<Subscription> subscriptions) throws AggregatedException {
+    private List<IClusterDetail> getClusterDetails(List<Subscription> subscriptions, final Object project) throws AggregatedException {
         ExecutorService taskExecutor = Executors.newFixedThreadPool(MAX_CONCURRENT);
         final List<IClusterDetail> cachedClusterList = new ArrayList<>();
         final List<Exception> aggregateExceptions = new ArrayList<>();
@@ -89,7 +90,7 @@ public class ClusterManager {
             taskExecutor.execute(new CommonRunnable<Subscription, Exception>(subscription) {
                 @Override
                 public void runSpecificParameter(Subscription parameter) throws IOException, HDIException, AzureCmdException {
-                    IClusterOperation clusterOperation = new ClusterOperationImpl();
+                    IClusterOperation clusterOperation = new ClusterOperationImpl(project);
                     List<ClusterRawInfo> clusterRawInfoList = clusterOperation.listCluster(parameter);
                     if (clusterRawInfoList != null) {
                         for (ClusterRawInfo item : clusterRawInfoList) {

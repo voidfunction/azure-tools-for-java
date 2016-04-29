@@ -105,7 +105,7 @@ public class HDInsightAdditionalClusterDetail implements IClusterDetail {
     }
 
     @Override
-    public void getConfigurationInfo() throws IOException, HDIException {
+    public void getConfigurationInfo(Object project) throws IOException, HDIException {
 
     }
 }
