@@ -56,7 +56,7 @@ public class AddNewClusterFrom extends DialogWrapper {
         this.project = project;
         this.hdInsightModule = hdInsightModule;
 
-        this.setTitle("Add New HDInsight Cluster");
+        this.setTitle("Link A New HDInsight Cluster");
 
         errorMessageField.setBackground(this.addNewClusterPanel.getBackground());
         errorMessageField.setBorder(BorderFactory.createEmptyBorder());

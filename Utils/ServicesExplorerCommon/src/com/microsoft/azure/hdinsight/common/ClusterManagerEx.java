@@ -180,12 +180,12 @@ public class ClusterManagerEx {
     private void saveAdditionalClusters() {
         Gson gson = new Gson();
         String json = gson.toJson(hdinsightAdditionalClusterDetails);
-        DefaultLoader.getIdeHelper().setProperty(CommonConst.HDINSIGHT_ADDITIONAL_CLUSTERS, json);
+        DefaultLoader.getIdeHelper().setApplicationProperty(CommonConst.HDINSIGHT_ADDITIONAL_CLUSTERS, json);
     }
 
     private List<IClusterDetail> getAdditionalClusters(Object projectObject) {
         Gson gson = new Gson();
-        String json = DefaultLoader.getIdeHelper().getProperty(CommonConst.HDINSIGHT_ADDITIONAL_CLUSTERS, projectObject);
+        String json = DefaultLoader.getIdeHelper().getApplicationProperty(CommonConst.HDINSIGHT_ADDITIONAL_CLUSTERS);
         List<IClusterDetail> hdiLocalClusters = new ArrayList<>();
 
         isLIstAdditionalClusterSuccess = false;
@@ -197,7 +197,7 @@ public class ClusterManagerEx {
 
                 isLIstAdditionalClusterSuccess = false;
                 // clear local cache if we cannot get information from local json
-                DefaultLoader.getIdeHelper().unsetProperty(CommonConst.HDINSIGHT_ADDITIONAL_CLUSTERS);
+                DefaultLoader.getIdeHelper().unsetApplicationProperty(CommonConst.HDINSIGHT_ADDITIONAL_CLUSTERS);
                 DefaultLoader.getUIHelper().showException("Failed to list additional HDInsight cluster", e, "List Additional HDInsight Cluster", false, true);
                 return new ArrayList<>();
             }

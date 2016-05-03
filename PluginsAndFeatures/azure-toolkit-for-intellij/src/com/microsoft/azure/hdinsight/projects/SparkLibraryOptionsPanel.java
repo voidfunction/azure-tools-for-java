@@ -68,9 +68,9 @@ public class SparkLibraryOptionsPanel extends JPanel {
         }
         this.mySettings.setLibraryProvider(null);
 
-        if(project == null && libraryEditorMap.containsValue(editorBase)) {
-            saveSetting(editorBase);
-        }
+//        if(project == null && libraryEditorMap.containsValue(editorBase)) {
+//            saveSetting(editorBase);
+//        }
 
         return this.mySettings;
     }
@@ -199,9 +199,9 @@ public class SparkLibraryOptionsPanel extends JPanel {
             }
         }
 
-        if(!cachedLibraryPath.isEmpty()) {
-            DefaultLoader.getIdeHelper().setProperties(CommonConst.CACHED_SPARK_SDK_PATHS, cachedLibraryPath.toArray(new String[0]));
-        }
+//        if(!cachedLibraryPath.isEmpty()) {
+//            DefaultLoader.getIdeHelper().setProperties(CommonConst.CACHED_SPARK_SDK_PATHS, cachedLibraryPath.toArray(new String[0]));
+//        }
     }
 
     private NewLibraryEditor getNewLibraryEditor(@NotNull String path) {

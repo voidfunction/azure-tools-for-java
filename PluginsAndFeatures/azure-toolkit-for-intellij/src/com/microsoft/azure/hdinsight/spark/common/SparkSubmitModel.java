@@ -148,6 +148,7 @@ public class SparkSubmitModel {
                         postEventProperty.put("IsSubmitSucceed", "false");
                         postEventProperty.put("SubmitFailedReason", "CompileFailed");
                         TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
+                        PluginUtil.getJobStatusManager(project).setJobRunningState(false);
                         return;
                     } else {
                         CompilerManager.getInstance(project).make(new CompileStatusNotification() {
@@ -222,13 +223,13 @@ public class SparkSubmitModel {
     private IClusterDetail getClusterConfiguration(@NotNull final IClusterDetail selectedClusterDetail, @NotNull final boolean isFirstSubmit) {
         try {
             if (!selectedClusterDetail.isConfigInfoAvailable()) {
-                selectedClusterDetail.getConfigurationInfo();
+                selectedClusterDetail.getConfigurationInfo(project);
             }
         } catch (AuthenticationException authenticationException) {
             if (isFirstSubmit) {
                 PluginUtil.showErrorMessageOnSubmissionMessageWindow(project, "Error: Cluster Credentials Expired, Please sign in again...");
                 //get new credentials by call getClusterDetails
-                cachedClusterDetails = ClusterManagerEx.getInstance().getClusterDetails();
+                cachedClusterDetails = ClusterManagerEx.getInstance().getClusterDetails(project);
 
                 for (IClusterDetail iClusterDetail : cachedClusterDetails) {
                     if (iClusterDetail.getName().equalsIgnoreCase(selectedClusterDetail.getName())) {

@@ -174,7 +174,7 @@ public class SparkSubmissionExDialog extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 Cursor cursor = contentPane.getCursor();
                 contentPane.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-                ClusterManagerEx.getInstance().getClusterDetails();
+                ClusterManagerEx.getInstance().getClusterDetails(project);
                 contentPane.setCursor(cursor);
             }
         });

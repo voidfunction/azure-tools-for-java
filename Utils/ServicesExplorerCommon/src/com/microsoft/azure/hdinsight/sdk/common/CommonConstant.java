@@ -12,4 +12,5 @@ public class CommonConstant {
     public static final String managementUri = "https://management.azure.com/";
     public static final String hdinsightClusterUri = "https://main.hdinsight.ext.azure.com/";
     public static final String default_cluster_endpoint = "https://%s.azurehdinsight.net";
+    public static final String blob_url_suffix = ".blob.core.windows.net";
 }

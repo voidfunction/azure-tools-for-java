@@ -47,7 +47,8 @@
                   order="before javaDirectory"/>
     <projectService serviceInterface="com.microsoft.intellij.AzureSettings"
                     serviceImplementation="com.microsoft.intellij.AzureSettings"/>
-
+    <applicationService serviceInterface="com.microsoft.intellij.ApplicationSettings"
+                        serviceImplementation="com.microsoft.intellij.ApplicationSettings"/>
       <fileEditorProvider implementation="com.microsoft.intellij.helpers.storage.BlobExplorerFileEditorProvider"/>
       <fileEditorProvider implementation="com.microsoft.intellij.helpers.storage.QueueExplorerFileEditorProvider"/>
       <fileEditorProvider implementation="com.microsoft.intellij.helpers.storage.TableExplorerFileEditorProvider"/>

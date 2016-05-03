@@ -84,6 +84,32 @@ public class AntIDEHelper implements IDEHelper {
         return null;
     }
 
+    public void setApplicationProperty(@NotNull String name, @NotNull String value) {
+    }
+
+    public void unsetApplicationProperty(@NotNull String name) {
+    }
+
+    @Nullable
+    public String getApplicationProperty(@NotNull String name) {
+        return null;
+    }
+
+    public void setApplicationProperties(@NotNull String name, @NotNull String[] value) {
+    }
+
+    public void unsetApplicatonProperties(@NotNull String name) {
+    }
+
+    @Nullable
+    public String[] getApplicationProperties(@NotNull String name) {
+        return new String[0];
+    }
+
+    public boolean isApplicationPropertySet(@NotNull String name) {
+        return false;
+    }
+
     @Override
     public String getProperty(@NotNull String name) {
         return null;

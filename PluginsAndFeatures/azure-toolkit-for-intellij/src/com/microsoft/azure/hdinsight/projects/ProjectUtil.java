@@ -18,7 +18,7 @@ public class ProjectUtil {
         GridBagLayout layout = new GridBagLayout();
 
         JLabel[] labels = new JLabel[]{
-                new JLabel("You can either download Spark library from "),
+                new JLabel("You can either download Spark library from"),
                 new JLabel("<HTML><FONT color=\"#000099\"><U>here</U></FONT>,</HTML>"),
                 new JLabel("or add Apache Spark packages from Maven repository in the project manually.")
         };

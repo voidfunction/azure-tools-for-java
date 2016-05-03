@@ -35,7 +35,21 @@ public class HDInsightProjectTemplate implements ProjectTemplate {
 
     @Nullable
     @Override
-    public String getDescription() { return "HDInsight Tools"; }
+    public String getDescription() {
+        switch (templateItem.getType()) {
+            case Java:
+            case Scala:
+                return "HDInsight Spark blank module.";
+            case JavaLocalSample:
+                return "HDInsight Spark samples written in Scala; This code sample should be executed locally.";
+            case ScalaLocalSample:
+                return "HDInsight Spark samples written in Java; This code sample should be executed locally.";
+            case ScalaClusterSample:
+                return "HDInsight Spark samples written in Java; This code sample should be submitted to HDInsight cluster.";
+            default:
+                return "HDInsight Tools";
+        }
+    }
 
     @Override
     public Icon getIcon() {

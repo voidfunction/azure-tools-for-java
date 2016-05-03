@@ -7,7 +7,7 @@ import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 
-@Name("Add New Cluster")
+@Name("Link A Cluster")
 public class AddNewClusterAction extends NodeActionListener {
 
     private HDInsightRootModule hdInsightRootModule;

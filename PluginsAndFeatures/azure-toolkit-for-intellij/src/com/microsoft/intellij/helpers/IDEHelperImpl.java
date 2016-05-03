@@ -46,10 +46,12 @@ import com.intellij.packaging.artifacts.Artifact;
 import com.intellij.packaging.impl.artifacts.ArtifactUtil;
 import com.intellij.packaging.impl.compiler.ArtifactCompileScope;
 import com.intellij.packaging.impl.compiler.ArtifactsWorkspaceSettings;
+import com.microsoft.intellij.ApplicationSettings;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.helpers.tasks.CancellableTaskHandleImpl;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
@@ -75,6 +77,42 @@ import java.util.zip.ZipFile;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class IDEHelperImpl implements IDEHelper {
+
+    @Override
+    public void setApplicationProperty(@NotNull String name, @NotNull String value) {
+        ApplicationSettings.getInstance().setProperty(name, value);
+    }
+
+    @Override
+    public void unsetApplicationProperty(@NotNull String name) {
+        ApplicationSettings.getInstance().unsetProperty(name);
+    }
+
+    @Override
+    public String getApplicationProperty(@NotNull String name) {
+        return ApplicationSettings.getInstance().getProperty(name);
+    }
+
+    @Override
+    public void setApplicationProperties(@NotNull String name, @NotNull String[] value) {
+        ApplicationSettings.getInstance().setProperties(name, value);
+    }
+
+    @Override
+    public void unsetApplicatonProperties(@NotNull String name) {
+        ApplicationSettings.getInstance().unsetProperty(name);
+    }
+
+    @Override
+    public String[] getApplicationProperties(@NotNull String name) {
+        return ApplicationSettings.getInstance().getProperties(name);
+    }
+
+    @Override
+    public boolean isApplicationPropertySet(@NotNull String name) {
+        return ApplicationSettings.getInstance().isPropertySet(name);
+    }
+
     @Override
     public void openFile(@NotNull File file, @NotNull final Object n) {
         final Node node = (Node) n;

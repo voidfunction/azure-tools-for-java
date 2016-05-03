@@ -1,5 +1,6 @@
 package com.microsoft.azure.hdinsight.serverexplore;
 
+import com.microsoft.azure.hdinsight.sdk.common.CommonConstant;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
 import com.microsoft.azure.hdinsight.common.StreamUtil;
@@ -51,7 +52,7 @@ public class AddHDInsightAdditionalClusterImpl {
             throw new HDIException("Failed to get default container for storage account");
         }
 
-        HDStorageAccount account = new HDStorageAccount(storageName, storageKey, true, defaultContainer);
+        HDStorageAccount account = new HDStorageAccount(storageName + CommonConstant.blob_url_suffix, storageKey, true, defaultContainer);
 
         //getting container to check the storage key is correct or not
         try {

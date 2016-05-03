@@ -67,7 +67,7 @@ public class SparkLibraryDescription extends CustomLibraryDescription {
             return null;
         }
 
-        return new NewLibraryConfiguration(LibraryTypeServiceImpl.suggestLibraryName(roots), SparkLibraryType.getInstance(), null) {
+        return new NewLibraryConfiguration(LibraryTypeServiceImpl.suggestLibraryName(roots), SparkLibraryType.getInstance(), new SparkLibraryProperties()) {
             @Override
             public void addRoots(@NotNull LibraryEditor libraryEditor) {
                 libraryEditor.addRoots(roots);
