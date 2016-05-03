@@ -65,7 +65,7 @@ public final class SimpleGraphService implements GraphService {
 		return future;
 	}
 
-	public Boolean isUserInRole(final String userID, final String role) {
+	private Boolean isUserInRole(final String userID, final String role) {
 		try {
 			final ApplicationSettings applicationSettings = applicationSettingsLoader.load();
 			final String bearerToken = getBearerToken(applicationSettings.getTenant(),
@@ -77,10 +77,10 @@ public final class SimpleGraphService implements GraphService {
 			return isUserInGroup(applicationSettings.getTenant(), userID, roleID, bearerToken);
 		} catch (GeneralException e) {
 			LOGGER.error("General Exception", e);
-			return null;
+			return Boolean.FALSE;
 		} catch (RuntimeException e) {
 			LOGGER.error(e.getMessage(), e);
-			return null;
+			return Boolean.FALSE;
 		}
 	}
 
@@ -110,7 +110,11 @@ public final class SimpleGraphService implements GraphService {
 			final JsonNode node = mapper.readValue(result.toString().getBytes(), JsonNode.class);
 			return node.get("value").asBoolean();
 		} catch (IOException e) {
-			throw new GeneralException("IO Exception", e);
+			LOGGER.error("IO Exception", e);
+			return Boolean.FALSE;
+		} catch (RuntimeException e) {
+			LOGGER.error(e.getMessage(), e);
+			return Boolean.FALSE;
 		}
 	}
 
@@ -137,7 +141,11 @@ public final class SimpleGraphService implements GraphService {
 			}
 			return null;
 		} catch (IOException e) {
-			throw new GeneralException("IO Exception", e);
+			LOGGER.error("IO Exception", e);
+			return null;
+		} catch (RuntimeException e) {
+			LOGGER.error(e.getMessage(), e);
+			return null;
 		}
 	}
 
@@ -167,7 +175,11 @@ public final class SimpleGraphService implements GraphService {
 			final JsonNode node = mapper.readValue(result.toString().getBytes(), JsonNode.class);
 			return node.get("access_token").asText();
 		} catch (IOException e) {
-			throw new GeneralException("IO Exception", e);
+			LOGGER.error("IO Exception", e);
+			return null;
+		} catch (RuntimeException e) {
+			LOGGER.error(e.getMessage(), e);
+			return null;
 		}
 	}
 
