@@ -27,6 +27,7 @@ import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
 import com.microsoft.tooling.msservices.model.storage.*;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoftopentechnologies.wacommon.adauth.BrowserLauncherEclipse;
 import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
 
@@ -154,7 +155,7 @@ public class IDEHelperImpl implements IDEHelper {
     }
 
     @Override
-    public String getProperty(String name, String defaultValue) {
+    public String getPropertyWithDefault(String name, String defaultValue) {
         return PreferenceUtil.loadPreference(name, defaultValue);
     }
 
@@ -214,5 +215,9 @@ public class IDEHelperImpl implements IDEHelper {
 
     public BrowserLauncher getBrowserLauncher() {
         return new BrowserLauncherEclipse(null);
+    }
+
+    public Object getCurrentProject() {
+        return AzureManagerImpl.DEFAULT_PROJECT;
     }
 }

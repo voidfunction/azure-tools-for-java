@@ -51,7 +51,7 @@ public class AttachExternalStorageAccountAction extends NodeActionListener {
                                 ClientStorageAccount storageAccount = form.getStorageAccount();
                                 ClientStorageAccount fullStorageAccount = form.getFullStorageAccount();
 
-                                for (ClientStorageAccount clientStorageAccount : ExternalStorageHelper.getList()) {
+                                for (ClientStorageAccount clientStorageAccount : ExternalStorageHelper.getList(null)) {
                                     String name = storageAccount.getName();
                                     if (clientStorageAccount.getName().equals(name)) {
                                         DefaultLoader.getUIHelper().showError(

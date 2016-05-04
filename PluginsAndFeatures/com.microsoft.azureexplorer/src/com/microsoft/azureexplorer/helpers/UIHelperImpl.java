@@ -215,7 +215,7 @@ public class UIHelperImpl implements UIHelper {
     }
 
 	@Override
-	public void saveWebAppPreferences(Map<WebSite, WebSiteConfiguration> map) {
+	public void saveWebAppPreferences(Object project, Map<WebSite, WebSiteConfiguration> map) {
 		PreferenceWebAppUtil.save(map);
 		PreferenceWebAppUtil.setLoaded(true);
 	}

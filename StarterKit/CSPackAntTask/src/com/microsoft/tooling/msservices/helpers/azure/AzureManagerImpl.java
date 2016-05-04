@@ -231,6 +231,9 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
 
     @NotNull
     public static synchronized AzureManager getManager(Object currentProject) {
+        if (currentProject == null) {
+            currentProject = DEFAULT_PROJECT;
+        }
         if (instances.get(currentProject) == null) {
             AzureManagerImpl instance = new AzureManagerImpl(currentProject);
             instances.put(currentProject, instance);
