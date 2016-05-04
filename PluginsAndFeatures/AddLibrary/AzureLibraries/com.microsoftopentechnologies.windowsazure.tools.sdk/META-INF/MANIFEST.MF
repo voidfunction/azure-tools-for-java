@@ -432,5 +432,5 @@ Export-Package: .,
  org.apache.commons.net.time,
  org.apache.commons.net.util,
  org.apache.commons.net.whois
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BundleShape: dir

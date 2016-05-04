@@ -3,7 +3,7 @@
 <ApplicationInsights xmlns="http://schemas.microsoft.com/ApplicationInsights/2013/Settings" schemaVersion="2014-05-30">
   <!--
 	Please do not modify below instrumentation key.
-	Use of this instrumentation key by any application other than Azure Services Explorer is strictly prohibited.
+	Use of this instrumentation key by any application other than Azure Toolkit for IntelliJ is strictly prohibited.
   -->
   <InstrumentationKey>9ee9694d-128e-4c2b-903f-dbe694548bf0</InstrumentationKey>
   <ContextInitializers>

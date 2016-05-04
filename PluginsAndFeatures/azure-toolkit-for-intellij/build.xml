@@ -261,7 +261,7 @@
   
   
   
-  <property name="compiler.args.azure-toolkit-for-intellij" value="-encoding UTF-8 -source 1.6 ${compiler.args}"/>
+  <property name="compiler.args.azure-toolkit-for-intellij" value="-encoding UTF-8 -source 1.7 ${compiler.args}"/>
   
   <property name="azure-toolkit-for-intellij.output.dir" value="${module.azure-toolkit-for-intellij.basedir}/out/production/azure-toolkit-for-intellij"/>
   <property name="azure-toolkit-for-intellij.testoutput.dir" value="${module.azure-toolkit-for-intellij.basedir}/out/test/azure-toolkit-for-intellij"/>
