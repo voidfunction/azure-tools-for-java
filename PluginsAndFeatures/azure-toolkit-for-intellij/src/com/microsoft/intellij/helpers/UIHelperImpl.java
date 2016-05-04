@@ -247,7 +247,7 @@ public class UIHelperImpl implements UIHelper {
         openSSLFinderForm.setModal(true);
         openSSLFinderForm.show();
 
-        return DefaultLoader.getIdeHelper().getProperty("MSOpenSSLPath", "");
+        return DefaultLoader.getIdeHelper().getPropertyWithDefault("MSOpenSSLPath", "");
     }
 
     @Nullable

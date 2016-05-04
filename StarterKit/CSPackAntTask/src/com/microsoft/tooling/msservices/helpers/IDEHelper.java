@@ -115,7 +115,7 @@ public interface IDEHelper {
     String getProperty(@NotNull String name, Object projectObject);
 
     @NotNull
-    String getProperty(@NotNull String name, @NotNull String defaultValue);
+    String getPropertyWithDefault(@NotNull String name, @NotNull String defaultValue);
 
     void setProperty(@NotNull String name, @NotNull String value);
 

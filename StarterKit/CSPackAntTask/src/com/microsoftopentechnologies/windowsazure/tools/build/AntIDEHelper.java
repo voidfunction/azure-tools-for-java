@@ -95,7 +95,7 @@ public class AntIDEHelper implements IDEHelper {
     }
 
     @Override
-    public String getProperty(@NotNull String name, @NotNull String defaultValue) {
+    public String getPropertyWithDefault(@NotNull String name, @NotNull String defaultValue) {
         return null;
     }
 

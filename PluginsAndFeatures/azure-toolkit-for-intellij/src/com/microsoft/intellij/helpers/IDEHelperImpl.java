@@ -265,7 +265,7 @@ public class IDEHelperImpl implements IDEHelper {
 
     @NotNull
     @Override
-    public String getProperty(@NotNull String name, @NotNull String defaultValue) {
+    public String getPropertyWithDefault(@NotNull String name, @NotNull String defaultValue) {
         return PropertiesComponent.getInstance().getValue(name, defaultValue);
     }
 
