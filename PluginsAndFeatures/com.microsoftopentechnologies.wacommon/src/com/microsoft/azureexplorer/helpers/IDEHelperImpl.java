@@ -76,16 +76,6 @@ public class IDEHelperImpl implements IDEHelper {
     }
 
     @Override
-    public void replaceInFile(Object module, Pair<String, String>... replace) {
-
-    }
-
-    @Override
-    public void copyJarFiles2Module(Object moduleObject, File zipFile, String zipPath) throws IOException {
-
-    }
-
-    @Override
     public boolean isFileEditing(Object projectObject, File file) {
         return false;
     }

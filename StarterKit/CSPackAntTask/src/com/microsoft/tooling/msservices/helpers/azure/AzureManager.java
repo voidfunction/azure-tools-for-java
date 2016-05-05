@@ -32,15 +32,6 @@ import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
 import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.ms.CustomAPI;
-import com.microsoft.tooling.msservices.model.ms.CustomAPIPermissions;
-import com.microsoft.tooling.msservices.model.ms.Job;
-import com.microsoft.tooling.msservices.model.ms.LogEntry;
-import com.microsoft.tooling.msservices.model.ms.MobileService;
-import com.microsoft.tooling.msservices.model.ms.SqlDb;
-import com.microsoft.tooling.msservices.model.ms.SqlServer;
-import com.microsoft.tooling.msservices.model.ms.Table;
-import com.microsoft.tooling.msservices.model.ms.TablePermissions;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.AffinityGroup;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
@@ -101,107 +92,6 @@ public interface AzureManager {
             throws AzureCmdException;
 
     void unregisterSubscriptionsChanged(@NotNull EventWaitHandle handle)
-            throws AzureCmdException;
-
-    @NotNull
-    List<SqlDb> getSqlDb(@NotNull String subscriptionId, @NotNull SqlServer server)
-            throws AzureCmdException;
-
-    @NotNull
-    List<SqlServer> getSqlServers(@NotNull String subscriptionId)
-            throws AzureCmdException;
-
-    @NotNull
-    List<MobileService> getMobileServiceList(@NotNull String subscriptionId)
-            throws AzureCmdException;
-
-    void createMobileService(@NotNull String subscriptionId,
-                             @NotNull String region,
-                             @NotNull String username,
-                             @NotNull String password,
-                             @NotNull String mobileServiceName,
-                             @Nullable String server,
-                             @Nullable String database)
-            throws AzureCmdException;
-
-    void deleteMobileService(@NotNull String subscriptionId, @NotNull String mobileServiceName);
-
-    @NotNull
-    List<Table> getTableList(@NotNull String subscriptionId, @NotNull String mobileServiceName)
-            throws AzureCmdException;
-
-    void createTable(@NotNull String subscriptionId, @NotNull String mobileServiceName,
-                     @NotNull String tableName, @NotNull TablePermissions permissions)
-            throws AzureCmdException;
-
-    void updateTable(@NotNull String subscriptionId, @NotNull String mobileServiceName,
-                     @NotNull String tableName, @NotNull TablePermissions permissions)
-            throws AzureCmdException;
-
-    @NotNull
-    Table showTableDetails(@NotNull String subscriptionId, @NotNull String mobileServiceName,
-                           @NotNull String tableName)
-            throws AzureCmdException;
-
-    void downloadTableScript(@NotNull String subscriptionId, @NotNull String mobileServiceName,
-                             @NotNull String scriptName, @NotNull String downloadPath)
-            throws AzureCmdException;
-
-    void uploadTableScript(@NotNull String subscriptionId, @NotNull String mobileServiceName,
-                           @NotNull String scriptName, @NotNull String filePath)
-            throws AzureCmdException;
-
-    @NotNull
-    List<CustomAPI> getAPIList(@NotNull String subscriptionId, @NotNull String mobileServiceName)
-            throws AzureCmdException;
-
-    void downloadAPIScript(@NotNull String subscriptionId, @NotNull String mobileServiceName, @NotNull String scriptName,
-                           @NotNull String downloadPath)
-            throws AzureCmdException;
-
-    void uploadAPIScript(@NotNull String subscriptionId, @NotNull String mobileServiceName, @NotNull String scriptName,
-                         @NotNull String filePath)
-            throws AzureCmdException;
-
-    void createCustomAPI(@NotNull String subscriptionId, @NotNull String mobileServiceName, @NotNull String tableName,
-                         @NotNull CustomAPIPermissions permissions)
-            throws AzureCmdException;
-
-    void updateCustomAPI(@NotNull String subscriptionId, @NotNull String mobileServiceName, @NotNull String tableName,
-                         @NotNull CustomAPIPermissions permissions)
-            throws AzureCmdException;
-
-    void deleteTable(@NotNull String subscriptionId, @NotNull String mobileServiceName,
-                     @NotNull String tableName) throws AzureCmdException;
-
-    void deleteCustomApi(@NotNull String subscriptionId, @NotNull String mobileServiceName,
-                         @NotNull String apiName) throws AzureCmdException;
-
-    void deleteJob(@NotNull String subscriptionId, @NotNull String mobileServiceName,
-                   @NotNull String jobName) throws AzureCmdException;
-
-    @NotNull
-    List<Job> listJobs(@NotNull String subscriptionId, @NotNull String mobileServiceName)
-            throws AzureCmdException;
-
-    void createJob(@NotNull String subscriptionId, @NotNull String mobileServiceName, @NotNull String jobName,
-                   int interval, @NotNull String intervalUnit, @NotNull String startDate)
-            throws AzureCmdException;
-
-    void updateJob(@NotNull String subscriptionId, @NotNull String mobileServiceName, @NotNull String jobName,
-                   int interval, @NotNull String intervalUnit, @NotNull String startDate, boolean enabled)
-            throws AzureCmdException;
-
-    void downloadJobScript(@NotNull String subscriptionId, @NotNull String mobileServiceName, @NotNull String scriptName,
-                           @NotNull String downloadPath)
-            throws AzureCmdException;
-
-    void uploadJobScript(@NotNull String subscriptionId, @NotNull String mobileServiceName, @NotNull String scriptName,
-                         @NotNull String filePath)
-            throws AzureCmdException;
-
-    @NotNull
-    List<LogEntry> listLog(@NotNull String subscriptionId, @NotNull String mobileServiceName, @NotNull String runtime)
             throws AzureCmdException;
 
     @NotNull

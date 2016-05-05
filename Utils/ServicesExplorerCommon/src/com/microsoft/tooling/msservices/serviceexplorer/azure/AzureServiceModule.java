@@ -30,7 +30,6 @@ import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.mobileservice.MobileServiceModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
@@ -45,7 +44,6 @@ public class AzureServiceModule extends RefreshableNode {
     private static final String BASE_MODULE_NAME = "Azure";
 
     private Object project;
-//    private MobileServiceModule mobileServiceModule ;
     private VMServiceModule vmServiceModule;
     private VMArmServiceModule vmArmServiceModule;
     private StorageModule storageServiceModule;
@@ -65,7 +63,6 @@ public class AzureServiceModule extends RefreshableNode {
         webappsModule = new WebappsModule(this);
         if (!storageModuleOnly) {
             vmServiceModule = new VMServiceModule(this);
-//            mobileServiceModule = new MobileServiceModule(this);
         }
         vmArmServiceModule = new VMArmServiceModule(this);
     }
@@ -93,19 +90,11 @@ public class AzureServiceModule extends RefreshableNode {
 
     @Override
     protected void refreshItems() throws AzureCmdException {
-        // add the mobile service module; we check if the node has
+        // add the module; we check if the node has
         // already been added first because this method can be called
         // multiple times when the user clicks the "Refresh" context
         // menu item
         if (!storageModuleOnly) {
-//            if (!mobileServiceModule.isLoading()) {
-//                if (!isDirectChild(mobileServiceModule)) {
-//                    addChildNode(mobileServiceModule);
-//                }
-//
-//                mobileServiceModule.load();
-//            }
-
             if (!vmServiceModule.isLoading()) {
                 if (!isDirectChild(vmServiceModule)) {
                     addChildNode(vmServiceModule);
@@ -164,7 +153,6 @@ public class AzureServiceModule extends RefreshableNode {
                                     if (registeredSubscriptionsChanged) {
                                         removeAllChildNodes();
                                         if (!storageModuleOnly) {
-//                                            mobileServiceModule = new MobileServiceModule(AzureServiceModule.this);
                                             vmServiceModule = new VMServiceModule(AzureServiceModule.this);
                                         }
                                         storageServiceModule = new StorageModule(AzureServiceModule.this);

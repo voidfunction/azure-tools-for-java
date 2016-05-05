@@ -23,7 +23,7 @@
               </grid>
             </constraints>
             <properties>
-              <text value="OpenSSL was not found. An OpenSSL installation is required to use the Mobile Service Plugin."/>
+              <text value="OpenSSL was not found. An OpenSSL installation is required to use the Azure Toolkit Plugin."/>
             </properties>
           </component>
           <component id="c339e" class="javax.swing.JLabel">

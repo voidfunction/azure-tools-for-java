@@ -47,14 +47,6 @@ public class AntIDEHelper implements IDEHelper {
     }
 
     @Override
-    public void replaceInFile(@NotNull Object module, @NotNull Pair<String, String>... replace) {
-    }
-
-    @Override
-    public void copyJarFiles2Module(@NotNull Object moduleObject, @NotNull File zipFile, @NotNull String zipPath) throws IOException {
-    }
-
-    @Override
     public boolean isFileEditing(@NotNull Object projectObject, @NotNull File file) {
         return false;
     }

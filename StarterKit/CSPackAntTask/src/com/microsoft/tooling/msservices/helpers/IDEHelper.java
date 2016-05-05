@@ -83,11 +83,6 @@ public interface IDEHelper {
 
     void saveFile(@NotNull File file, @NotNull ByteArrayOutputStream buff, @NotNull Object node);
 
-    void replaceInFile(@NotNull Object module, @NotNull Pair<String, String>... replace);
-
-    void copyJarFiles2Module(@NotNull Object moduleObject, @NotNull File zipFile, @NotNull String zipPath)
-            throws IOException;
-
     boolean isFileEditing(@NotNull Object projectObject, @NotNull File file);
 
     void closeFile(@NotNull Object projectObject, @NotNull Object openedFile);

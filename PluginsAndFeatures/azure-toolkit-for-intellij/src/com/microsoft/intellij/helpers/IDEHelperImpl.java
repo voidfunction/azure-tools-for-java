@@ -53,7 +53,6 @@ import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
-import com.microsoft.tooling.msservices.helpers.ServiceCodeReferenceHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
@@ -119,50 +118,6 @@ public class IDEHelperImpl implements IDEHelper {
                 }
             }
         });
-    }
-
-    @Override
-    public void replaceInFile(@NotNull Object moduleObject, @NotNull Pair<String, String>... replace) {
-        Module module = (Module) moduleObject;
-
-        if (module.getModuleFile() != null && module.getModuleFile().getParent() != null) {
-            VirtualFile vf = module.getModuleFile().getParent().findFileByRelativePath(ServiceCodeReferenceHelper.STRINGS_XML);
-
-            if (vf != null) {
-                FileDocumentManager fdm = FileDocumentManager.getInstance();
-                com.intellij.openapi.editor.Document document = fdm.getDocument(vf);
-
-                if (document != null) {
-                    String content = document.getText();
-
-                    for (Pair<String, String> pair : replace) {
-                        content = content.replace(pair.getLeft(), pair.getRight());
-                    }
-
-                    document.setText(content);
-                    fdm.saveDocument(document);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void copyJarFiles2Module(@NotNull Object moduleObject, @NotNull File zipFile, @NotNull String zipPath)
-            throws IOException {
-        Module module = (Module) moduleObject;
-        final VirtualFile moduleFile = module.getModuleFile();
-
-        if (moduleFile != null) {
-            moduleFile.refresh(false, false);
-
-            final VirtualFile moduleDir = module.getModuleFile().getParent();
-
-            if (moduleDir != null) {
-                moduleDir.refresh(false, false);
-
-                copyJarFiles(module, moduleDir, zipFile, zipPath);
-            }
-        }
     }
 
     @Override
@@ -407,60 +362,6 @@ public class IDEHelperImpl implements IDEHelper {
         } catch (Throwable e) {
             AzurePlugin.log(e.getStackTrace().toString());
             PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to write temporal editable file.");
-        }
-    }
-
-    private static void copyJarFiles(@NotNull final Module module, @NotNull VirtualFile baseDir,
-                                     @NotNull File zipFile, @NotNull String zipPath)
-            throws IOException {
-        if (baseDir.isDirectory()) {
-            final ZipFile zip = new ZipFile(zipFile);
-            Enumeration<? extends ZipEntry> entries = zip.entries();
-
-            while (entries.hasMoreElements()) {
-                final ZipEntry zipEntry = entries.nextElement();
-
-                if (!zipEntry.isDirectory() && zipEntry.getName().startsWith(zipPath) &&
-                        zipEntry.getName().endsWith(".jar") &&
-                        !(zipEntry.getName().endsWith("-sources.jar") || zipEntry.getName().endsWith("-javadoc.jar"))) {
-                    VirtualFile libsVf = null;
-
-                    for (VirtualFile vf : baseDir.getChildren()) {
-                        if (vf.getName().equals("libs")) {
-                            libsVf = vf;
-                            break;
-                        }
-                    }
-
-                    if (libsVf == null) {
-                        libsVf = baseDir.createChildDirectory(module.getProject(), "libs");
-                    }
-
-                    final VirtualFile libs = libsVf;
-                    final String fileName = zipEntry.getName().split("/")[1];
-
-                    if (libs.findChild(fileName) == null) {
-                        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
-                            @Override
-                            public void run() {
-                                ApplicationManager.getApplication().runWriteAction(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            InputStream mobileserviceInputStream = zip.getInputStream(zipEntry);
-                                            VirtualFile msVF = libs.createChildData(module.getProject(), fileName);
-                                            msVF.setBinaryContent(getArray(mobileserviceInputStream));
-                                        } catch (Throwable ex) {
-                                            AzurePlugin.log(ex.getStackTrace().toString());
-                                            PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to configure Azure Mobile Services.");
-                                        }
-                                    }
-                                });
-                            }
-                        }, ModalityState.defaultModalityState());
-                    }
-                }
-            }
         }
     }
 
