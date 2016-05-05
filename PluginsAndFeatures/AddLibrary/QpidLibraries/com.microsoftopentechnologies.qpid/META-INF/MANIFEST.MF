@@ -27,5 +27,5 @@ Export-Package: javax.jms,
  org.apache.qpid.amqp_1_0.type.transaction.codec,
  org.apache.qpid.amqp_1_0.type.transport,
  org.apache.qpid.amqp_1_0.type.transport.codec
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BundleShape: dir

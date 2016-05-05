@@ -32,15 +32,12 @@ import com.intellij.openapi.compiler.CompileContext;
 import com.intellij.openapi.compiler.CompileScope;
 import com.intellij.openapi.compiler.CompileStatusNotification;
 import com.intellij.openapi.compiler.CompilerManager;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.packaging.artifacts.Artifact;
 import com.intellij.packaging.impl.artifacts.ArtifactUtil;
@@ -51,30 +48,21 @@ import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.helpers.tasks.CancellableTaskHandleImpl;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
-import com.microsoft.tooling.msservices.helpers.ServiceCodeReferenceHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
-import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
-import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class IDEHelperImpl implements IDEHelper {
 
@@ -111,108 +99,6 @@ public class IDEHelperImpl implements IDEHelper {
     @Override
     public boolean isApplicationPropertySet(@NotNull String name) {
         return ApplicationSettings.getInstance().isPropertySet(name);
-    }
-
-    @Override
-    public void openFile(@NotNull File file, @NotNull final Object n) {
-        final Node node = (Node) n;
-        final VirtualFile finalEditfile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file);
-        ApplicationManager.getApplication().runReadAction(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    openFile(node.getProject(), finalEditfile);
-                } finally {
-                    node.setLoading(false);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void saveFile(@NotNull final File file, @NotNull final ByteArrayOutputStream buff, @NotNull final Object n) {
-        final Node node = (Node) n;
-        ApplicationManager.getApplication().runWriteAction(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final VirtualFile editfile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file);
-
-                    if (editfile != null) {
-                        editfile.setWritable(true);
-                        editfile.setBinaryContent(buff.toByteArray());
-
-                        ApplicationManager.getApplication().invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                FileEditorManager.getInstance((Project) node.getProject()).openFile(editfile, true);
-                            }
-                        });
-                    }
-                } catch (Throwable e) {
-                    AzurePlugin.log(e.getStackTrace().toString());
-                    PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to write temporal editable file.");
-                } finally {
-                    node.setLoading(false);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void replaceInFile(@NotNull Object moduleObject, @NotNull Pair<String, String>... replace) {
-        Module module = (Module) moduleObject;
-
-        if (module.getModuleFile() != null && module.getModuleFile().getParent() != null) {
-            VirtualFile vf = module.getModuleFile().getParent().findFileByRelativePath(ServiceCodeReferenceHelper.STRINGS_XML);
-
-            if (vf != null) {
-                FileDocumentManager fdm = FileDocumentManager.getInstance();
-                com.intellij.openapi.editor.Document document = fdm.getDocument(vf);
-
-                if (document != null) {
-                    String content = document.getText();
-
-                    for (Pair<String, String> pair : replace) {
-                        content = content.replace(pair.getLeft(), pair.getRight());
-                    }
-
-                    document.setText(content);
-                    fdm.saveDocument(document);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void copyJarFiles2Module(@NotNull Object moduleObject, @NotNull File zipFile, @NotNull String zipPath)
-            throws IOException {
-        Module module = (Module) moduleObject;
-        final VirtualFile moduleFile = module.getModuleFile();
-
-        if (moduleFile != null) {
-            moduleFile.refresh(false, false);
-
-            final VirtualFile moduleDir = module.getModuleFile().getParent();
-
-            if (moduleDir != null) {
-                moduleDir.refresh(false, false);
-
-                copyJarFiles(module, moduleDir, zipFile, zipPath);
-            }
-        }
-    }
-
-    @Override
-    public boolean isFileEditing(@NotNull Object projectObject, @NotNull File file) {
-        VirtualFile scriptFile = LocalFileSystem.getInstance().findFileByIoFile(file);
-        boolean fileIsEditing = false;
-
-        if (scriptFile != null) {
-            fileIsEditing = FileEditorManager.getInstance((Project) projectObject).getEditors(scriptFile).length != 0;
-        }
-
-        return fileIsEditing;
     }
 
     @Override
@@ -303,7 +189,7 @@ public class IDEHelperImpl implements IDEHelper {
 
     @NotNull
     @Override
-    public String getProperty(@NotNull String name, @NotNull String defaultValue) {
+    public String getPropertyWithDefault(@NotNull String name, @NotNull String defaultValue) {
         return PropertiesComponent.getInstance().getValue(name, defaultValue);
     }
 
@@ -428,78 +314,6 @@ public class IDEHelperImpl implements IDEHelper {
     @Override
     public Object getCurrentProject() {
         return PluginUtil.getSelectedProject();
-    }
-
-    private static void openFile(@NotNull final Object projectObject, @Nullable final VirtualFile finalEditfile) {
-        try {
-            if (finalEditfile != null) {
-                finalEditfile.setWritable(true);
-
-                ApplicationManager.getApplication().invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        FileEditorManager.getInstance((Project) projectObject).openFile(finalEditfile, true);
-                    }
-                });
-            }
-        } catch (Throwable e) {
-            AzurePlugin.log(e.getStackTrace().toString());
-            PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to write temporal editable file.");
-        }
-    }
-
-    private static void copyJarFiles(@NotNull final Module module, @NotNull VirtualFile baseDir,
-                                     @NotNull File zipFile, @NotNull String zipPath)
-            throws IOException {
-        if (baseDir.isDirectory()) {
-            final ZipFile zip = new ZipFile(zipFile);
-            Enumeration<? extends ZipEntry> entries = zip.entries();
-
-            while (entries.hasMoreElements()) {
-                final ZipEntry zipEntry = entries.nextElement();
-
-                if (!zipEntry.isDirectory() && zipEntry.getName().startsWith(zipPath) &&
-                        zipEntry.getName().endsWith(".jar") &&
-                        !(zipEntry.getName().endsWith("-sources.jar") || zipEntry.getName().endsWith("-javadoc.jar"))) {
-                    VirtualFile libsVf = null;
-
-                    for (VirtualFile vf : baseDir.getChildren()) {
-                        if (vf.getName().equals("libs")) {
-                            libsVf = vf;
-                            break;
-                        }
-                    }
-
-                    if (libsVf == null) {
-                        libsVf = baseDir.createChildDirectory(module.getProject(), "libs");
-                    }
-
-                    final VirtualFile libs = libsVf;
-                    final String fileName = zipEntry.getName().split("/")[1];
-
-                    if (libs.findChild(fileName) == null) {
-                        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
-                            @Override
-                            public void run() {
-                                ApplicationManager.getApplication().runWriteAction(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            InputStream mobileserviceInputStream = zip.getInputStream(zipEntry);
-                                            VirtualFile msVF = libs.createChildData(module.getProject(), fileName);
-                                            msVF.setBinaryContent(getArray(mobileserviceInputStream));
-                                        } catch (Throwable ex) {
-                                            AzurePlugin.log(ex.getStackTrace().toString());
-                                            PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to configure Azure Mobile Services.");
-                                        }
-                                    }
-                                });
-                            }
-                        }, ModalityState.defaultModalityState());
-                    }
-                }
-            }
-        }
     }
 
     @NotNull

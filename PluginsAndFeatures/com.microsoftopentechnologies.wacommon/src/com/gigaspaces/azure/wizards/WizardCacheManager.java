@@ -570,7 +570,7 @@ public final class WizardCacheManager {
 				loadServicesFutures = new ArrayList<Future<?>>();
 
 				// Hosted services
-				LoadingHostedServicesTask loadingHostedServicesTask = new LoadingHostedServicesTask(publishData);
+				LoadingHostedServicesTask loadingHostedServicesTask = new LoadingHostedServicesTask(publishData, null);
 				if (listener != null) {
 					loadingHostedServicesTask.addLoadingAccountListener(listener);
 				}
@@ -578,7 +578,7 @@ public final class WizardCacheManager {
 				loadServicesFutures.add(submitHostedServices);
 
 				// locations
-				LoadingLocationsTask loadingLocationsTask = new LoadingLocationsTask(publishData);
+				LoadingLocationsTask loadingLocationsTask = new LoadingLocationsTask(publishData, null);
 				if (listener != null) {
 					loadingLocationsTask.addLoadingAccountListener(listener);
 				}
@@ -586,7 +586,7 @@ public final class WizardCacheManager {
 				loadServicesFutures.add(submitLocations);
 
 				// storage accounts
-				LoadingStorageAccountTask loadingStorageAccountTask = new LoadingStorageAccountTask(publishData);
+				LoadingStorageAccountTask loadingStorageAccountTask = new LoadingStorageAccountTask(publishData, null);
 				if (listener != null) {
 					loadingStorageAccountTask.addLoadingAccountListener(listener);
 				}

@@ -7,5 +7,5 @@ Bundle-ClassPath: sqljdbc42.jar
 Bundle-Vendor: Microsoft Corp.
 Export-Package: com.microsoft.sqlserver.jdbc,
  microsoft.sql
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BundleShape: dir

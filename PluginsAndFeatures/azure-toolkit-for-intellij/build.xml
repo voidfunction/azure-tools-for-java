@@ -261,7 +261,7 @@
   
   
   
-  <property name="compiler.args.azure-toolkit-for-intellij" value="-encoding UTF-8 -source 1.6 ${compiler.args}"/>
+  <property name="compiler.args.azure-toolkit-for-intellij" value="-encoding UTF-8 -source 1.7 ${compiler.args}"/>
   
   <property name="azure-toolkit-for-intellij.output.dir" value="${module.azure-toolkit-for-intellij.basedir}/out/production/azure-toolkit-for-intellij"/>
   <property name="azure-toolkit-for-intellij.testoutput.dir" value="${module.azure-toolkit-for-intellij.basedir}/out/test/azure-toolkit-for-intellij"/>
@@ -282,27 +282,7 @@
     <path refid="library.org.apache.commons:commons-lang3:3.4.classpath"/>
     <path refid="library.services-explorer-common.classpath"/>
   </path>
-  
-  <path id="azure-toolkit-for-intellij.runtime.production.module.classpath">
-    <pathelement location="${azure-toolkit-for-intellij.output.dir}"/>
-    <path refid="library.azurecommons.classpath"/>
-    <path refid="library..cspack.classpath"/>
-    <path refid="library.projectmanagerlibrary.classpath"/>
-  </path>
-  
-  <path id="azure-toolkit-for-intellij.module.classpath">
-    <pathelement location="${azure-toolkit-for-intellij.output.dir}"/>
-    <path refid="library.azurecommons.classpath"/>
-    <path refid="library..cspack.classpath"/>
-    <path refid="library.azure-sdk.classpath"/>
-    <path refid="library.azure-activedirectory-interactive-auth-library-for-java.classpath"/>
-    <path refid="library.com.microsoft.azure:azure-storage:4.0.0.classpath"/>
-    <path refid="library.projectmanagerlibrary.classpath"/>
-    <path refid="library.antintegration.classpath"/>
-    <path refid="library.org.apache.commons:commons-lang3:3.4.classpath"/>
-    <path refid="library.services-explorer-common.classpath"/>
-  </path>
-  
+
   <path id="azure-toolkit-for-intellij.runtime.module.classpath">
     <pathelement location="${azure-toolkit-for-intellij.testoutput.dir}"/>
     <pathelement location="${azure-toolkit-for-intellij.output.dir}"/>
@@ -428,6 +408,20 @@
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/azure-sdk/httpcore-4.3.3.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/httpcore-4.3.3.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/azure-sdk/arm/azure-mgmt-resources-0.9.2.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-mgmt-resources-0.9.2.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/azure-sdk/arm/azure-mgmt-websites-0.9.2.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-mgmt-websites-0.9.2.jar"/>
+
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/azure-client-authentication-1.0.0-SNAPSHOT.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-client-authentication-1.0.0-SNAPSHOT.jar"/>
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/azure-client-runtime-1.0.0-SNAPSHOT.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-client-runtime-1.0.0-SNAPSHOT.jar"/>
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/client-runtime-1.0.0-beta1.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/client-runtime-1.0.0-beta1.jar"/>
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/azure-mgmt-compute-1.0.0-SNAPSHOT.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-mgmt-compute-1.0.0-SNAPSHOT.jar"/>
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/jackson-datatype-joda-2.7.1.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/jackson-datatype-joda-2.7.1.jar"/>
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/jackson-databind-2.6.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/jackson-databind-2.6.0.jar"/>
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/jackson-annotations-2.6.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/jackson-annotations-2.6.0.jar"/>
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/joda-time-2.4.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/joda-time-2.4.jar"/>
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/okhttp-3.1.2.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/okhttp-3.1.2.jar"/>
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/okhttp-urlconnection-3.1.1.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/okhttp-urlconnection-3.1.1.jar"/>
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/okio-1.6.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/okio-1.6.0.jar"/>
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/retrofit-2.0.0-beta4.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/retrofit-2.0.0-beta4.jar"/>
+
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/ThirdPartyNotices.txt" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/ThirdPartyNotices.txt"/>
     <zip destfile="${azure-toolkit-for-intellij.plugin.path.jar}">
       <fileset dir="${module.azure-toolkit-for-intellij.basedir}/../temp"/>

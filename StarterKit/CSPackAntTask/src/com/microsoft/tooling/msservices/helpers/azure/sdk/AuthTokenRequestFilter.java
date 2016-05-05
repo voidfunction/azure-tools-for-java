@@ -21,11 +21,12 @@
  */
 package com.microsoft.tooling.msservices.helpers.azure.sdk;
 
-import com.microsoft.tooling.msservices.helpers.azure.rest.AzureRestAPIHelper;
 import com.microsoft.windowsazure.core.pipeline.filter.ServiceRequestContext;
 import com.microsoft.windowsazure.core.pipeline.filter.ServiceRequestFilter;
 
 public class AuthTokenRequestFilter implements ServiceRequestFilter {
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+
     private String accessToken;
 
     public AuthTokenRequestFilter(String accessToken) {
@@ -35,6 +36,6 @@ public class AuthTokenRequestFilter implements ServiceRequestFilter {
     @Override
     public void filter(ServiceRequestContext request) {
         // set access token
-        request.setHeader(AzureRestAPIHelper.AUTHORIZATION_HEADER, "Bearer " + accessToken);
+        request.setHeader(AUTHORIZATION_HEADER, "Bearer " + accessToken);
     }
 }

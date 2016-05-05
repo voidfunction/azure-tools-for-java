@@ -153,7 +153,7 @@ public class OpenSSLHelper {
     }
 
     private static String getOpenSSLPath() {
-        String opendSSLlPath = DefaultLoader.getIdeHelper().getProperty("MSOpenSSLPath", "");
+        String opendSSLlPath = DefaultLoader.getIdeHelper().getPropertyWithDefault("MSOpenSSLPath", "");
 
         if (!validOpenSSLPath(opendSSLlPath)) {
             opendSSLlPath = getOpenSSLPathFromEnvironment();

@@ -79,17 +79,6 @@ public interface IDEHelper {
         }
     }
 
-    void openFile(@NotNull File file, @NotNull Object node);
-
-    void saveFile(@NotNull File file, @NotNull ByteArrayOutputStream buff, @NotNull Object node);
-
-    void replaceInFile(@NotNull Object module, @NotNull Pair<String, String>... replace);
-
-    void copyJarFiles2Module(@NotNull Object moduleObject, @NotNull File zipFile, @NotNull String zipPath)
-            throws IOException;
-
-    boolean isFileEditing(@NotNull Object projectObject, @NotNull File file);
-
     void closeFile(@NotNull Object projectObject, @NotNull Object openedFile);
 
     void invokeLater(@NotNull Runnable runnable);
@@ -115,7 +104,7 @@ public interface IDEHelper {
     String getProperty(@NotNull String name, Object projectObject);
 
     @NotNull
-    String getProperty(@NotNull String name, @NotNull String defaultValue);
+    String getPropertyWithDefault(@NotNull String name, @NotNull String defaultValue);
 
     void setProperty(@NotNull String name, @NotNull String value);
 

@@ -39,27 +39,6 @@ import java.util.List;
  */
 public class AntIDEHelper implements IDEHelper {
     @Override
-    public void openFile(@NotNull File file, @NotNull Object node) {
-    }
-
-    @Override
-    public void saveFile(@NotNull File file, @NotNull ByteArrayOutputStream buff, @NotNull Object node) {
-    }
-
-    @Override
-    public void replaceInFile(@NotNull Object module, @NotNull Pair<String, String>... replace) {
-    }
-
-    @Override
-    public void copyJarFiles2Module(@NotNull Object moduleObject, @NotNull File zipFile, @NotNull String zipPath) throws IOException {
-    }
-
-    @Override
-    public boolean isFileEditing(@NotNull Object projectObject, @NotNull File file) {
-        return false;
-    }
-
-    @Override
     public void closeFile(@NotNull Object projectObject, @NotNull Object openedFile) {
     }
 
@@ -121,7 +100,7 @@ public class AntIDEHelper implements IDEHelper {
     }
 
     @Override
-    public String getProperty(@NotNull String name, @NotNull String defaultValue) {
+    public String getPropertyWithDefault(@NotNull String name, @NotNull String defaultValue) {
         return null;
     }
 
