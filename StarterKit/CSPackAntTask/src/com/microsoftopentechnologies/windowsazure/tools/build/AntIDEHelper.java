@@ -39,19 +39,6 @@ import java.util.List;
  */
 public class AntIDEHelper implements IDEHelper {
     @Override
-    public void openFile(@NotNull File file, @NotNull Object node) {
-    }
-
-    @Override
-    public void saveFile(@NotNull File file, @NotNull ByteArrayOutputStream buff, @NotNull Object node) {
-    }
-
-    @Override
-    public boolean isFileEditing(@NotNull Object projectObject, @NotNull File file) {
-        return false;
-    }
-
-    @Override
     public void closeFile(@NotNull Object projectObject, @NotNull Object openedFile) {
     }
 

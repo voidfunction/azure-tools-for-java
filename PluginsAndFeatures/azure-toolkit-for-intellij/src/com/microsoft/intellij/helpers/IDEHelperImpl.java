@@ -32,21 +32,17 @@ import com.intellij.openapi.compiler.CompileContext;
 import com.intellij.openapi.compiler.CompileScope;
 import com.intellij.openapi.compiler.CompileStatusNotification;
 import com.intellij.openapi.compiler.CompilerManager;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.packaging.artifacts.Artifact;
 import com.intellij.packaging.impl.artifacts.ArtifactUtil;
 import com.intellij.packaging.impl.compiler.ArtifactCompileScope;
 import com.intellij.packaging.impl.compiler.ArtifactsWorkspaceSettings;
-import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.helpers.tasks.CancellableTaskHandleImpl;
 import com.microsoft.intellij.util.PluginUtil;
@@ -56,82 +52,17 @@ import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
-import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
-import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class IDEHelperImpl implements IDEHelper {
-    @Override
-    public void openFile(@NotNull File file, @NotNull final Object n) {
-        final Node node = (Node) n;
-        final VirtualFile finalEditfile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file);
-        ApplicationManager.getApplication().runReadAction(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    openFile(node.getProject(), finalEditfile);
-                } finally {
-                    node.setLoading(false);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void saveFile(@NotNull final File file, @NotNull final ByteArrayOutputStream buff, @NotNull final Object n) {
-        final Node node = (Node) n;
-        ApplicationManager.getApplication().runWriteAction(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final VirtualFile editfile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file);
-
-                    if (editfile != null) {
-                        editfile.setWritable(true);
-                        editfile.setBinaryContent(buff.toByteArray());
-
-                        ApplicationManager.getApplication().invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                FileEditorManager.getInstance((Project) node.getProject()).openFile(editfile, true);
-                            }
-                        });
-                    }
-                } catch (Throwable e) {
-                    AzurePlugin.log(e.getStackTrace().toString());
-                    PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to write temporal editable file.");
-                } finally {
-                    node.setLoading(false);
-                }
-            }
-        });
-    }
-
-    @Override
-    public boolean isFileEditing(@NotNull Object projectObject, @NotNull File file) {
-        VirtualFile scriptFile = LocalFileSystem.getInstance().findFileByIoFile(file);
-        boolean fileIsEditing = false;
-
-        if (scriptFile != null) {
-            fileIsEditing = FileEditorManager.getInstance((Project) projectObject).getEditors(scriptFile).length != 0;
-        }
-
-        return fileIsEditing;
-    }
-
     @Override
     public void closeFile(@NotNull final Object projectObject, @NotNull final Object openedFile) {
         ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -345,24 +276,6 @@ public class IDEHelperImpl implements IDEHelper {
     @Override
     public Object getCurrentProject() {
         return PluginUtil.getSelectedProject();
-    }
-
-    private static void openFile(@NotNull final Object projectObject, @Nullable final VirtualFile finalEditfile) {
-        try {
-            if (finalEditfile != null) {
-                finalEditfile.setWritable(true);
-
-                ApplicationManager.getApplication().invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        FileEditorManager.getInstance((Project) projectObject).openFile(finalEditfile, true);
-                    }
-                });
-            }
-        } catch (Throwable e) {
-            AzurePlugin.log(e.getStackTrace().toString());
-            PluginUtil.displayErrorDialog(message("errTtl"), "An error occurred while attempting to write temporal editable file.");
-        }
     }
 
     @NotNull

@@ -79,12 +79,6 @@ public interface IDEHelper {
         }
     }
 
-    void openFile(@NotNull File file, @NotNull Object node);
-
-    void saveFile(@NotNull File file, @NotNull ByteArrayOutputStream buff, @NotNull Object node);
-
-    boolean isFileEditing(@NotNull Object projectObject, @NotNull File file);
-
     void closeFile(@NotNull Object projectObject, @NotNull Object openedFile);
 
     void invokeLater(@NotNull Runnable runnable);

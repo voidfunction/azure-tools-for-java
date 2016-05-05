@@ -22,21 +22,15 @@
 package com.microsoft.tooling.msservices.helpers.azure;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -78,16 +72,8 @@ import com.microsoft.tooling.msservices.helpers.XmlHelper;
 import com.microsoft.tooling.msservices.helpers.auth.AADManagerImpl;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
 import com.microsoft.tooling.msservices.helpers.azure.rest.AzureAADHelper;
-import com.microsoft.tooling.msservices.helpers.azure.rest.AzureCertificateHelper;
 import com.microsoft.tooling.msservices.helpers.azure.rest.RestServiceManager.ContentType;
 import com.microsoft.tooling.msservices.helpers.azure.rest.RestServiceManagerBaseImpl;
-import com.microsoft.tooling.msservices.helpers.azure.rest.model.CustomAPIData;
-import com.microsoft.tooling.msservices.helpers.azure.rest.model.JobData;
-import com.microsoft.tooling.msservices.helpers.azure.rest.model.LogData;
-import com.microsoft.tooling.msservices.helpers.azure.rest.model.TableColumnData;
-import com.microsoft.tooling.msservices.helpers.azure.rest.model.TableData;
-import com.microsoft.tooling.msservices.helpers.azure.rest.model.TablePermissionsData;
-import com.microsoft.tooling.msservices.helpers.azure.rest.model.TableScriptData;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.SDKRequestCallback;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
@@ -119,8 +105,6 @@ import com.microsoft.windowsazure.management.models.SubscriptionGetResponse;
 import com.microsoft.windowsazure.management.network.NetworkManagementClient;
 import com.microsoft.windowsazure.management.storage.StorageManagementClient;
 import com.microsoftopentechnologies.azuremanagementutil.rest.SubscriptionTransformer;
-
-import sun.misc.BASE64Encoder;
 
 public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManager {
     private interface AzureSDKClientProvider<V extends Closeable> {
