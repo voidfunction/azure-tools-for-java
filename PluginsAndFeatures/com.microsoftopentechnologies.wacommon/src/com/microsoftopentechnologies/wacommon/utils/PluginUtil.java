@@ -118,7 +118,7 @@ public class PluginUtil {
 		MessageDialog.openError(shell, title, message);
 	}
 
-	public static void displayErrorDialogAndLog(Shell shell, String title, String message, Exception e) {
+	public static void displayErrorDialogAndLog(Shell shell, String title, String message, Throwable e) {
 		Activator.getDefault().log(message, e);
 		displayErrorDialog(shell, title, message);
 	}
