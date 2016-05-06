@@ -179,7 +179,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
      * @param message
      * @param excp : exception.
      */
-    public void log(String message, Exception excp) {
+    public void log(String message, Throwable excp) {
     	getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, message, excp));
     }
 

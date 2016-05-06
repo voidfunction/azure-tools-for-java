@@ -69,9 +69,10 @@ public class UIHelperImpl implements UIHelper {
         Display.getDefault().asyncExec(new Runnable() {
             @Override
             public void run() {
-                PluginUtil.displayErrorDialog(null, title, message);
+                PluginUtil.displayErrorDialogAndLog(null, title, message, ex);
             }
         });
+        
     }
 
     @Override

@@ -46,11 +46,6 @@ import java.util.List;
 public class IDEHelperImpl implements IDEHelper {
 
     @Override
-    public void openFile(File file, Object node) {
-
-    }
-
-    @Override
     public void runInBackground(Object project, String name, boolean canBeCancelled, boolean isIndeterminate, final String indicatorText, final Runnable runnable) {
         Job job = new Job(name) {
 
@@ -68,16 +63,6 @@ public class IDEHelperImpl implements IDEHelper {
             }
         };
         job.schedule();
-    }
-
-    @Override
-    public void saveFile(File file, ByteArrayOutputStream byteArrayOutputStream, Object node) {
-
-    }
-
-    @Override
-    public boolean isFileEditing(Object projectObject, File file) {
-        return false;
     }
 
     @Override
