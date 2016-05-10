@@ -23,8 +23,8 @@
 package com.microsoft.intellij.serviceexplorer;
 
 import com.google.common.collect.ImmutableList;
+import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
 import com.microsoft.azure.hdinsight.serverexplore.action.AddNewClusterAction;
-import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
 import com.microsoft.intellij.serviceexplorer.azure.ManageSubscriptionsAction;
 import com.microsoft.intellij.serviceexplorer.azure.mobileservice.*;
 import com.microsoft.intellij.serviceexplorer.azure.mobileservice.CreateTableAction;
@@ -62,6 +62,6 @@ public class NodeActionsMap {
         node2Actions.put(StorageModule.class, new ImmutableList.Builder().add(CreateStorageAccountAction.class, AttachExternalStorageAccountAction.class).build());
         node2Actions.put(ExternalStorageNode.class, new ImmutableList.Builder().add(ConfirmDialogAction.class, ModifyExternalStorageAccountAction.class).build());
         node2Actions.put(WebappNode.class, new ImmutableList.Builder().add(OpenWebappAction.class).build());
-        node2Actions.put(HDInsightRootModule.class, new ImmutableList.Builder().add(AddNewClusterAction.class).build());
+        node2Actions.put(HDInsightRootModuleImpl.class, new ImmutableList.Builder().add(AddNewClusterAction.class).build());
     }
 }

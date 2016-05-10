@@ -23,6 +23,7 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure;
 
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
@@ -65,7 +66,7 @@ public class AzureServiceModule extends RefreshableNode {
         this.storageModuleOnly = storageModuleOnly;
         storageServiceModule = new StorageModule(this);
         webappsModule = new WebappsModule(this);
-        hdInsightModule = new HDInsightRootModule(this);
+        //hdInsightModule = new HDInsightRootModule(this);
         if (!storageModuleOnly) {
             vmServiceModule = new VMServiceModule(this);
 //            mobileServiceModule = new MobileServiceModule(this);
@@ -75,6 +76,10 @@ public class AzureServiceModule extends RefreshableNode {
 
     public AzureServiceModule(Node parent, String iconPath, Object data) {
         super(AZURE_SERVICE_MODULE_ID, BASE_MODULE_NAME, parent, iconPath);
+    }
+
+    public void setHdInsightModule(@NotNull HDInsightRootModule rootModule) {
+        this.hdInsightModule = rootModule;
     }
 
     @Override
@@ -140,7 +145,13 @@ public class AzureServiceModule extends RefreshableNode {
 
             webappsModule.load();
         }
-        if (!hdInsightModule.isLoading()) {
+        if (!vmArmServiceModule.isLoading()) {
+            if (!isDirectChild(vmArmServiceModule)) {
+                addChildNode(vmArmServiceModule);
+            }
+            vmArmServiceModule.load();
+        }
+        if (hdInsightModule != null && !hdInsightModule.isLoading()) {
             if (!isDirectChild(hdInsightModule)) {
                 addChildNode(hdInsightModule);
             }
@@ -177,7 +188,7 @@ public class AzureServiceModule extends RefreshableNode {
                                             vmServiceModule = new VMServiceModule(AzureServiceModule.this);
                                         }
                                         storageServiceModule = new StorageModule(AzureServiceModule.this);
-                                        hdInsightModule = new HDInsightRootModule(AzureServiceModule.this);
+                                        hdInsightModule = hdInsightModule.getNewNode(AzureServiceModule.this);
 
                                         load();
                                     }

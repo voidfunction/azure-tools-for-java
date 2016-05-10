@@ -36,6 +36,8 @@
 		<copy file="${basedir}\jar\.cspack.jar" tofile="${basedir}\..\..\Utils\ServicesExplorerCommon\lib\.cspack.jar" overwrite="true" />
 		<copy file="${basedir}\jar\.cspack.jar" tofile="${basedir}\..\..\PluginsAndFeatures\com.microsoftopentechnologies.wacommon\resources\.cspack.jar" overwrite="true" />
 		<copy file="${basedir}\jar\.cspack.jar" tofile="${basedir}\..\..\PluginsAndFeatures\azure-toolkit-for-intellij\lib\.cspack.jar" overwrite="true" />
+		<copy file="${basedir}\jar\.cspack.jar" tofile="${basedir}\..\..\Utils\ServicesExplorerCommon\lib\.cspack.jar" overwrite="true" />
+		<copy file="${basedir}\jar\.cspack.jar" tofile="${basedir}\..\..\Utils\HDInsightNodeCommon\lib\.cspack.jar" overwrite="true" />
 	</target>
 	
 	<target name="kit" description="Generates starter kit for eclipse" depends="clean, package">

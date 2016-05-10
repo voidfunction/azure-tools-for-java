@@ -77,7 +77,6 @@ import java.util.zip.ZipFile;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class IDEHelperImpl implements IDEHelper {
-
     @Override
     public void setApplicationProperty(@NotNull String name, @NotNull String value) {
         ApplicationSettings.getInstance().setProperty(name, value);

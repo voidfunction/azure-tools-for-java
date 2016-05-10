@@ -37,6 +37,7 @@ import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.ui.AzureWizardDialog;
 import com.microsoft.intellij.ui.AzureWizardModel;
 import com.microsoft.intellij.ui.messages.AzureBundle;
+import com.microsoft.intellij.util.PluginHelper;
 import com.microsoft.intellij.util.PluginUtil;
 
 import java.awt.*;
@@ -103,7 +104,7 @@ public class PackageAction extends AnAction {
             //	By deafult - disabling remote access
             //  when creating new project
             waProjMgr.setRemoteAccessAllRoles(false);
-            waProjMgr.setClassPathInPackage("azure.lib.dir", PluginUtil.getAzureLibLocation());
+            waProjMgr.setClassPathInPackage("azure.lib.dir", PluginHelper.getAzureLibLocation());
             WindowsAzureRole waRole = waProjMgr.getRoles().get(0);
             // remove http endpoint
             waRole.getEndpoint(AzureBundle.message("httpEp")).delete();
