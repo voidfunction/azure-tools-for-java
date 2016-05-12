@@ -88,7 +88,7 @@ public class SubscriptionsClient {
             Document doc = dBuilder.parse(resposeBodyStream);
             doc.getDocumentElement().normalize();
             NodeList list = doc.getElementsByTagName("Subscription");
-            System.out.println("list size: " + list.getLength());
+//            System.out.println("list size: " + list.getLength());
             for (int temp = 0; temp < list.getLength(); temp++) {
                 Node node = list.item(temp);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {

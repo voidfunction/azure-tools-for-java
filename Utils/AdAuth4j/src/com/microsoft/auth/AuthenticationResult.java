@@ -75,7 +75,19 @@ public class AuthenticationResult {
     /// </summary>
     @JsonProperty
     boolean isMultipleResourceRefreshToken;
-    
+
+    public String getResource() {
+        return resource;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public UserInfo getUserInfo() {
+        return userInfo;
+    }
+
     public String getAccessToken() {
         return accessToken;
     }

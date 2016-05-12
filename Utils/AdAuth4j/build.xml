@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="AzureService" default="package">
+
+    <property file="build.properties"/>
+
+    <path id="build.classpath">
+        <!-- Setting azure libraries in classpath -->
+         <fileset dir="${depependency}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="clean">
+        <delete dir="${out}\build"/>
+        <delete dir="${out}\jar"/>
+    </target>
+
+    <target name="package" description="Package JARs" depends="clean">
+        <mkdir dir="${out}\build" />
+        <mkdir dir="${out}\jar" />
+        <javac srcdir="${basedir}\src" destdir="${out}\build" source="1.8" target="1.8" classpathref="build.classpath" debug="true" debuglevel="vars,lines,source">
+            <exclude name="**/com/microsoft/auth/example/*.java" />
+        </javac>
+
+        <jar destfile="${out}\jar\adauth4j.jar" basedir="${out}\build">
+            <fileset dir="${basedir}\src">
+                <exclude name="**/com/microsoft/auth/example/*.java" />
+            </fileset>
+            <fileset dir="${basedir}\resources"/>
+            <fileset dir="${basedir}\deps"/>
+        </jar>
+        <copy file="${out}\jar\adauth4j.jar" tofile="${cspack.target.lib.dir}\adauth4j.jar" overwrite="true" />
+     </target>
+</project>

@@ -72,10 +72,10 @@ public class Main {
                 }
             };
 
-            for (int i = 0; i < 2; ++i) {
+            for (int i = 0; i < 12; ++i) {
 
-//                new Thread(worker).start();
-//                new Thread(worker).start();
+                new Thread(worker).start();
+                new Thread(worker).start();
                 worker.run();
             }
 
@@ -88,16 +88,16 @@ public class Main {
 
     private static void getDataFromAzure(TokenCache cache, URI baseUri) throws Exception{
         AuthContext ac = new AuthContext(authority, cache);
-        AuthenticationResult result = ac.acquireTokenAsync(resource, clientId, redirectUri, PromptBehavior.Auto).get();
-        System.out.println("token: " + result.getAccessToken());
+        AuthenticationResult result = ac.acquireTokenAsync(resource, clientId, redirectUri, PromptBehavior.Auto, null).get();
+//        System.out.println("token: " + result.getAccessToken());
 
-        System.out.println("=== Subscriptions:");
+//        System.out.println("=== Subscriptions:");
         List<Subscription> subscriptions = SubscriptionsClient.getByToken(result.getAccessToken());
         for (Subscription s : subscriptions) {
                     String sid = s.getSubscriptionId().toString();
-                    System.out.println(String.format("======> %s: %s ======================", s.getSubscriptionName(), sid ));
-                    listSitesForSubscription(baseUri, sid, result.getAccessToken());
-                    System.out.println();
+//                    System.out.println(String.format("======> %s: %s ======================", s.getSubscriptionName(), sid ));
+//                    listSitesForSubscription(baseUri, sid, result.getAccessToken());
+//                    System.out.println();
         }
     }
 

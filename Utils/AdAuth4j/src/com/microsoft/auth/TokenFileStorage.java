@@ -10,6 +10,7 @@ import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Created by shch on 4/24/2016.
@@ -19,6 +20,7 @@ public class TokenFileStorage {
     private static final String CacheDir = ".msauth4j";
     private static final String CacheFileName = "msauth4j.cache";
     private Path filePath;
+    private ReentrantReadWriteLock rwlock = new ReentrantReadWriteLock();
 
     public TokenFileStorage() throws Exception {
         String homeDir = System.getProperty("user.home");
@@ -34,7 +36,7 @@ public class TokenFileStorage {
             Files.createFile(filePath);
         }
     }
-
+/*
     private FileLock acquireLock(RandomAccessFile raf) throws Exception {
         // in case of multiprocess file access
         FileLock lock = null;
@@ -52,8 +54,17 @@ public class TokenFileStorage {
         }
         return lock;
     }
-
+*/
     public byte[] read() throws Exception {
+        try {
+            rwlock.readLock().lock();
+            return Files.readAllBytes(filePath);
+
+        } finally {
+            rwlock.readLock().unlock();
+        }
+
+/*
         try (RandomAccessFile in = new RandomAccessFile(filePath.toString(), "rw")) {
             // in case of multiprocess file access
             FileLock lock = acquireLock(in);
@@ -73,9 +84,19 @@ public class TokenFileStorage {
                 throw new IOException("Can't lock file token cache for reading");
             }
         }
+*/
     }
 
     public void write(byte[] data) throws Exception {
+
+        try {
+            rwlock.writeLock().lock();
+            Files.write(filePath, data);
+
+        } finally {
+            rwlock.writeLock().unlock();
+        }
+/*
         try (RandomAccessFile out = new RandomAccessFile(filePath.toString(), "rw")) {
             // in case of multiprocess file access
             FileLock lock = acquireLock(out);
@@ -92,5 +113,6 @@ public class TokenFileStorage {
                 throw new IOException("Can't lock file token cache for writing");
             }
         }
+*/
     }
 }

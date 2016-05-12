@@ -21,7 +21,6 @@
  */
 package com.microsoft.tooling.msservices.helpers.azure;
 
-import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -86,6 +85,7 @@ import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineSize;
 import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
+import com.microsoft.tooling.msservices.model.vm.*;
 import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
@@ -105,8 +105,28 @@ import com.microsoft.windowsazure.management.models.SubscriptionGetResponse;
 import com.microsoft.windowsazure.management.network.NetworkManagementClient;
 import com.microsoft.windowsazure.management.storage.StorageManagementClient;
 import com.microsoftopentechnologies.azuremanagementutil.rest.SubscriptionTransformer;
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPReply;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import javax.net.ssl.SSLSocketFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Logger;
 
 public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManager {
+    Logger logger = Logger.getLogger(AzureManagerImpl.class.getName());
+
     private interface AzureSDKClientProvider<V extends Closeable> {
         @NotNull
         V getSSLClient(@NotNull Subscription subscription)
@@ -143,6 +163,9 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
             accessTokenByUser = new HashMap<UserInfo, String>();
             lockByUser = new HashMap<UserInfo, ReentrantReadWriteLock>();
             subscriptionsChangedHandles = new HashSet<EventWaitHandleImpl>();
+        } catch (Exception e) {
+            // TODO.shch: handle the exception
+            logger.warning(e.getMessage());
         } finally {
             authDataLock.writeLock().unlock();
         }
@@ -216,12 +239,17 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
 //        return instance;
     }
 
+    // this method is called when "Sign in" dialog button is clicked
+
     @Override
     public void authenticate() throws AzureCmdException {
         final PluginSettings settings = DefaultLoader.getPluginComponent().getSettings();
         final String managementUri = settings.getAzureServiceManagementUri();
 
         final UserInfo userInfo = aadManager.authenticate(managementUri, "Sign in to your Azure account");
+        // FIXME.shch: need to extend interface?
+        com.microsoft.auth.AuthenticationResult res = ((AADManagerImpl)aadManager).auth(null);
+        UserInfo userInfo = new UserInfo(res.getTenantId(), res.getUserInfo().getUniqueId());
         setUserInfo(userInfo);
 
         List<Subscription> subscriptions = requestWithToken(userInfo, new RequestCallback<List<Subscription>>() {
@@ -259,7 +287,24 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
             aadManager.authenticate(subscriptionUser, managementUri, "Sign in to your Azure account");
 
             updateSubscription(subscription, subscriptionUser);
+        List<com.microsoft.auth.subsriptions.Subscription> subscriptions = null;
+        try {
+            subscriptions = com.microsoft.auth.subsriptions.SubscriptionsClient.getByToken(res.getAccessToken());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        for (com.microsoft.auth.subsriptions.Subscription s : subscriptions) {
+            String sid = s.getSubscriptionId().toString();
+
+            Subscription sub = new Subscription();
+            sub.setId(s.getSubscriptionId());
+            sub.setName(s.getSubscriptionName());
+            sub.setTenantId(s.getAADTenantId());
+            sub.setServiceManagementUrl(managementUri);
+            sub.setSelected(true);
+            updateSubscription(sub, userInfo);
+        }
+
     }
 
     @Override
@@ -274,6 +319,13 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
 
     @Override
     public void clearAuthentication() {
+        try {
+            ((AADManagerImpl)aadManager).clearTokenCache();
+        } catch (Exception e) {
+            // TODO.shch: handle the exception
+            logger.warning(e.getMessage());
+        }
+
         setUserInfo(null);
     }
 

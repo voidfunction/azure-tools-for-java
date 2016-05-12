@@ -25,8 +25,10 @@ public class AuthContext {
         this.tokenCache = tokenCache;
     }
     
-    public Future<AuthenticationResult> acquireTokenAsync(String resource, String clientId, String redirectUri, PromptBehavior promptBehavior) throws Exception {
-        AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(this.authenticator, this.tokenCache, resource, clientId, redirectUri, promptBehavior, UserIdentifier.anyUser, this.createWebAuthenticationDialog(promptBehavior));
+    public Future<AuthenticationResult> acquireTokenAsync(String resource, String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userIdentifier) throws Exception {
+        AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(this.authenticator, this.tokenCache,
+                resource, clientId, redirectUri, promptBehavior, (userIdentifier != null) ? userIdentifier : UserIdentifier.anyUser,
+                this.createWebAuthenticationDialog(promptBehavior));
         return handler.runAsync();
     }
     
