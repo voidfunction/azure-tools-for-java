@@ -3,7 +3,7 @@
   "pluginVersion": "0.1.1",
   "tenantName": "common",
   "redirectUri": "https://msopentech.com/",
-  "adAuthority": "login.windows.net",
+  "adAuthority": "https://login.windows.net",
   "azureServiceManagementUri": "https://management.core.windows.net/",
   "graphApiUri": "https://graph.windows.net/",
   "graphApiVersion": "1.5"

@@ -36,4 +36,5 @@ public class AppSettingsNames {
     public static final String AZURE_SUBSCRIPTIONS = "com.microsoft.intellij.AzureSubscriptions";
     public static final String AZURE_USER_INFO = "com.microsoft.intellij.AzureUserInfo";
     public static final String AZURE_USER_SUBSCRIPTIONS = "com.microsoft.intellij.AzureUserSubscriptions";
+    public static final String AAD_TOKEN_CACHE = "com.microsoft.auth.TokenCache";
 }

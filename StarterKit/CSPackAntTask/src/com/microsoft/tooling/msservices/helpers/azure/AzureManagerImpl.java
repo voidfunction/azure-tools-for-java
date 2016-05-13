@@ -21,40 +21,11 @@
  */
 package com.microsoft.tooling.msservices.helpers.azure;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.net.ssl.SSLSocketFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.commons.net.ftp.FTPReply;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
 import com.google.common.base.Optional;
 import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.microsoft.applicationinsights.management.rest.ApplicationInsightsManagementClient;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.azure.management.resources.ResourceManagementClient;
@@ -70,21 +41,11 @@ import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.XmlHelper;
 import com.microsoft.tooling.msservices.helpers.auth.AADManagerImpl;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
-import com.microsoft.tooling.msservices.helpers.azure.rest.AzureAADHelper;
-import com.microsoft.tooling.msservices.helpers.azure.rest.RestServiceManager.ContentType;
-import com.microsoft.tooling.msservices.helpers.azure.rest.RestServiceManagerBaseImpl;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.SDKRequestCallback;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
-import com.microsoft.tooling.msservices.model.vm.AffinityGroup;
-import com.microsoft.tooling.msservices.model.vm.CloudService;
-import com.microsoft.tooling.msservices.model.vm.Location;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachineSize;
-import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 import com.microsoft.tooling.msservices.model.vm.*;
 import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
@@ -112,6 +73,7 @@ import org.apache.commons.net.ftp.FTPReply;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
 import javax.net.ssl.SSLSocketFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
@@ -246,47 +208,11 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
         final PluginSettings settings = DefaultLoader.getPluginComponent().getSettings();
         final String managementUri = settings.getAzureServiceManagementUri();
 
-        final UserInfo userInfo = aadManager.authenticate(managementUri, "Sign in to your Azure account");
         // FIXME.shch: need to extend interface?
         com.microsoft.auth.AuthenticationResult res = ((AADManagerImpl)aadManager).auth(null);
         UserInfo userInfo = new UserInfo(res.getTenantId(), res.getUserInfo().getUniqueId());
         setUserInfo(userInfo);
 
-        List<Subscription> subscriptions = requestWithToken(userInfo, new RequestCallback<List<Subscription>>() {
-            @Override
-            public List<Subscription> execute()
-                    throws Throwable {
-                String accessToken = getAccessToken(userInfo);
-                String subscriptionsXML = AzureAADHelper.executeRequest(managementUri,
-                        "subscriptions",
-                        ContentType.Json,
-                        "GET",
-                        null,
-                        accessToken,
-                        new RestServiceManagerBaseImpl() {
-                            @NotNull
-                            @Override
-                            public String executePollRequest(@NotNull String managementUrl,
-                                                             @NotNull String path,
-                                                             @NotNull ContentType contentType,
-                                                             @NotNull String method,
-                                                             @Nullable String postData,
-                                                             @NotNull String pollPath,
-                                                             @NotNull HttpsURLConnectionProvider sslConnectionProvider)
-                                    throws AzureCmdException {
-                                throw new UnsupportedOperationException();
-                            }
-                        });
-
-                return parseSubscriptionsXML(subscriptionsXML);
-            }
-        });
-
-        for (Subscription subscription : subscriptions) {
-            UserInfo subscriptionUser = new UserInfo(subscription.getTenantId(), userInfo.getUniqueName());
-            aadManager.authenticate(subscriptionUser, managementUri, "Sign in to your Azure account");
-
-            updateSubscription(subscription, subscriptionUser);
         List<com.microsoft.auth.subsriptions.Subscription> subscriptions = null;
         try {
             subscriptions = com.microsoft.auth.subsriptions.SubscriptionsClient.getByToken(res.getAccessToken());
