@@ -3,52 +3,58 @@ package com.microsoft.auth;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 class IdToken {
-	@JsonProperty
-	String aud;
-	
-	@JsonProperty(IdTokenClaim.Issuer)
-	String issuer;
+    @JsonProperty
+    String aud;
+    
+    @JsonProperty(IdTokenClaim.Issuer)
+    String issuer;
 
-	@JsonProperty
-	String iat;
-	
-	@JsonProperty
-	String nbf;
+    @JsonProperty
+    String iat;
+    
+    @JsonProperty
+    String nbf;
 
-	@JsonProperty
-	String exp;
+    @JsonProperty
+    String exp;
 
-	@JsonProperty
-	String[] amr;
-	
-	@JsonProperty(IdTokenClaim.FamilyName)
-	String familyName;
+    @JsonProperty
+    String altsecid;
 
-	@JsonProperty(IdTokenClaim.GivenName)
-	String givenName;
+    @JsonProperty
+    String[] amr;
+    
+    @JsonProperty(IdTokenClaim.FamilyName)
+    String familyName;
 
-	@JsonProperty
-	String in_corp;
+    @JsonProperty(IdTokenClaim.GivenName)
+    String givenName;
 
-	@JsonProperty
-	String ipaddr;
+//    @JsonProperty
+//    String idp;
 
-	@JsonProperty
-	String name;
-	
-	@JsonProperty(IdTokenClaim.ObjectId)
+    @JsonProperty
+    String in_corp;
+
+    @JsonProperty
+    String ipaddr;
+
+    @JsonProperty
+    String name;
+    
+    @JsonProperty(IdTokenClaim.ObjectId)
     String objectId;
-	
-	@JsonProperty
-	String onprem_sid;
-	
-	@JsonProperty(IdTokenClaim.PasswordExpiration)
-	long passwordExpiration;
+    
+    @JsonProperty
+    String onprem_sid;
+    
+    @JsonProperty(IdTokenClaim.PasswordExpiration)
+    long passwordExpiration;
 
-	@JsonProperty(IdTokenClaim.PasswordChangeUrl)
-	String passwordChangeUrl;
+    @JsonProperty(IdTokenClaim.PasswordChangeUrl)
+    String passwordChangeUrl;
 
-	@JsonProperty(IdTokenClaim.Subject)
+    @JsonProperty(IdTokenClaim.Subject)
     String subject;
 
     @JsonProperty(IdTokenClaim.TenantId)

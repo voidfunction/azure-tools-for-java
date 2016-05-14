@@ -371,10 +371,11 @@ public class WebSiteDeployForm extends DialogWrapper {
                                                        final SettableFuture<Void> webSiteFuture) {
                     WebSiteConfiguration webSiteConfiguration;
                     try {
-                        webSiteConfiguration = AzureManagerImpl.getManager().
+                        webSiteConfiguration = AzureManagerImpl.getManager(project).
                                 getWebSiteConfiguration(webSite.getSubscriptionId(),
                                         webSite.getWebSpaceName(), webSite.getName());
                     } catch (Throwable ignore) {
+                        AzurePlugin.log("!!! Exception: " + ignore.getMessage());
                         webSiteConfiguration = new WebSiteConfiguration(webSpace, webSite.getName(),
                                 subscription.getId());
                     }

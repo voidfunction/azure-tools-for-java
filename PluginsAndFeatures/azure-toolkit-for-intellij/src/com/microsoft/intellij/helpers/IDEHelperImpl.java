@@ -52,7 +52,6 @@ import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
-import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -266,11 +265,6 @@ public class IDEHelperImpl implements IDEHelper {
         } catch (AzureCmdException e) {
             return Futures.immediateFailedFuture(e);
         }
-    }
-
-    @Override
-    public BrowserLauncher getBrowserLauncher() {
-        return null;
     }
 
     @Override

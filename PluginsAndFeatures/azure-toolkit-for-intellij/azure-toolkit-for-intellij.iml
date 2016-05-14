@@ -15,9 +15,9 @@
     <orderEntry type="library" name="ProjectManagerLibrary" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="antIntegration" level="project" />
     <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="project" />
-    <orderEntry type="library" name="azure-activedirectory-interactive-auth-library-for-java" level="project" />
     <orderEntry type="library" name="services-explorer-common" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="com.microsoft.azure:azure-storage:4.0.0" level="project" />
     <orderEntry type="library" name="azure-arm-sdk" level="project" />
+    <orderEntry type="library" name="adauth4j" level="project" />
   </component>
 </module>

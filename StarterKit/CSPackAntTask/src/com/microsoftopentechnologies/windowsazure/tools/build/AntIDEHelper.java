@@ -26,7 +26,6 @@ import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
-import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.ByteArrayOutputStream;
@@ -121,11 +120,6 @@ public class AntIDEHelper implements IDEHelper {
 
     @Override
     public ListenableFuture<String> buildArtifact(@NotNull ProjectDescriptor projectDescriptor, @NotNull ArtifactDescriptor artifactDescriptor) {
-        return null;
-    }
-
-    @Override
-    public BrowserLauncher getBrowserLauncher() {
         return null;
     }
 

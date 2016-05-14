@@ -108,7 +108,7 @@ public class ResponseUtils {
              // If Id token format is invalid, we silently ignore the id token
              if (idTokenSegments.length == 2) {
                  byte[] decoded = Base64.decodeBase64(idTokenSegments[1]);
-                 log.info("decoded: " + new String(decoded));
+                 log.info("==> decoded idToken: " + new String(decoded));
                  idTokenBody = JsonHelper.deserialize(IdToken.class, new String(decoded));
              }
          }

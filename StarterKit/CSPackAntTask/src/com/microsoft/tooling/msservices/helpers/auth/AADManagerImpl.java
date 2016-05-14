@@ -30,7 +30,6 @@ import com.microsoft.tooling.msservices.components.PluginSettings;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoftopentechnologies.auth.AuthenticationResult;
 
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -40,18 +39,6 @@ public class AADManagerImpl implements AADManager {
     private static AADManager instance;
     private static Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
     Logger logger = Logger.getLogger(AADManagerImpl.class.getName());
-    /**
-     * This structure stores AthenticationResults associated to each particular UserInfo (tenant+user) and Resource
-     * The outer map provides a way to access all AutenticationResults for each particular UserInfo, and the inner map
-     * gives access to the AuthenticationResult for a particular result
-     */
-    private Map<UserInfo, Map<String, AuthenticationResult>> authResultByUserResource;
-
-    /**
-     * This structure stores AthenticationResults associated to each particular UserInfo (tenant+user), in order to be
-     * used as refresh tokens for new or expired resources
-     */
-    private Map<UserInfo, AuthenticationResult> refreshAuthResultByUser;
 
     private ReentrantReadWriteLock authResultLock = new ReentrantReadWriteLock(false);
     private Map<UserInfo, ReentrantReadWriteLock> authResultLockByUser;
@@ -75,7 +62,6 @@ public class AADManagerImpl implements AADManager {
             final com.microsoft.auth.
                     TokenFileStorage tokenFileStorage = new com.microsoft.auth.TokenFileStorage();
             byte[] data = tokenFileStorage.read();
-            System.out.println("======> tokenCache loading from file ==========");
             tokenCache.deserialize(data);
 
             authContext = new com.microsoft.auth.AuthContext(String.format("%s/%s", authority, tenantName), tokenCache);
@@ -91,7 +77,6 @@ public class AADManagerImpl implements AADManager {
                         }
                     } catch (Exception e) {
                         logger.warning (e.getMessage());
-                        e.printStackTrace();
                     }
                 }
             });

@@ -17,8 +17,8 @@ public class Subscription {
     @XmlElement(name="SubscriptionStatus")
     private String subscriptionStatus;
 
-        @XmlElement(name="AADTenantID")
-        private String tenantId;
+    @XmlElement(name="AADTenantID")
+    private String tenantId;
 
 /*    
     @XmlElement(name="AccountAdminLiveEmailId")
