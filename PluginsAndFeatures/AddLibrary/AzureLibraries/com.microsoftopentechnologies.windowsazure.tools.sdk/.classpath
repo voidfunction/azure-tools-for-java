@@ -19,7 +19,6 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/annotation-detector-3.0.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/gson-1.7.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/guava-18.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-activedirectory-interactive-auth-library-for-java.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-lang3-3.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/jackson-core-2.6.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/httpclient-4.3.6.jar"/>
@@ -60,5 +59,6 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/arm/okhttp-urlconnection-3.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/arm/okio-1.6.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/arm/retrofit-2.0.0-beta4.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/adauth4j.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
