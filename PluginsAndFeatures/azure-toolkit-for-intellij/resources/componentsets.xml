@@ -122,7 +122,6 @@ of order will likely produce faulty logic.
         <component importmethod="copy" importsrc="${placeholder}" type="jdk.deploy" deploydir="%DEPLOYROOT%" deploymethod="copy" cloudaltsrc="http://azure.azulsystems.com/zulu/zulu1.8.0_05-8.1.0.6-win64.zip?eclipse" cloudmethod="unzip" cloudsrc="auto" cloudupload="auto" />
 	</componentset>
 	
-	
 	<componentset name="Azul Zulu, OpenJDK 1.7.0_u101" type="JDK" licenseurl="http://openjdk.java.net/legal/gplv2+ce.html">
 		<startupenv name="JAVA_HOME" value="%DEPLOYROOT%\${placeholder}" cloudvalue="%DEPLOYROOT%\zulu7.14.0.5-jdk7.0.101-win_x64" type="jdk.home"/>
 		<startupenv name="PATH" value="%JAVA_HOME%\bin;%PATH%" type="jdk.path"/>
@@ -199,6 +198,12 @@ of order will likely produce faulty logic.
 		<startupenv name="JAVA_HOME" value="%DEPLOYROOT%\${placeholder}" cloudvalue="%DEPLOYROOT%\zulu1.7.0_25-7.0.0.0-win64" type="jdk.home"/>
 		<startupenv name="PATH" value="%JAVA_HOME%\bin;%PATH%" type="jdk.path"/>
         <component importmethod="copy" importsrc="${placeholder}" type="jdk.deploy" deploydir="%DEPLOYROOT%" deploymethod="copy" cloudaltsrc="http://azure.azulsystems.com/zulu/zulu1.7.0_25-7.0.0.0-win64.zip?eclipse" cloudmethod="unzip" cloudsrc="auto" cloudupload="auto" />
+	</componentset>
+
+	<componentset name="Azul Zulu, OpenJDK 1.6.0_u79" type="JDK" licenseurl="http://openjdk.java.net/legal/gplv2+ce.html">
+		<startupenv name="JAVA_HOME" value="%DEPLOYROOT%\${placeholder}" cloudvalue="%DEPLOYROOT%\zulu6.12.0.2-jdk6.0.79-win_x64" type="jdk.home"/>
+		<startupenv name="PATH" value="%JAVA_HOME%\bin;%PATH%" type="jdk.path"/>
+        <component importmethod="copy" importsrc="${placeholder}" type="jdk.deploy" deploydir="%DEPLOYROOT%" deploymethod="copy" cloudaltsrc="http://azure.azulsystems.com/zulu/zulu6.12.0.2-jdk6.0.79-win_x64.zip?eclipse" cloudmethod="unzip" cloudsrc="auto" cloudupload="auto" />
 	</componentset>
 		
 	<componentset name="Azul Zulu, OpenJDK 1.6.0_u77" type="JDK" licenseurl="http://openjdk.java.net/legal/gplv2+ce.html">
