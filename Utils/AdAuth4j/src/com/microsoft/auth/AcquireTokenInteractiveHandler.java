@@ -3,15 +3,18 @@ package com.microsoft.auth;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.SynchronousQueue;
 
 public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     
-    private AuthorizationResult authorizationResult;
+    private static AuthorizationResult authorizationResult;
+    private static long authorizationResultTimestamp = -1;
     private URI redirectUri;
     private String redirectUriRequestParameter;
     private PromptBehavior promptBehavior;
     private final IWebUi webUi;
     private final UserIdentifier userId;
+    private final boolean isTenantLess;
 
     AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, String resource,
             String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, IWebUi webUi) throws Exception {
@@ -37,6 +40,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
                 && this.promptBehavior != PromptBehavior.Always 
                 && this.promptBehavior != PromptBehavior.RefreshSession);
         this.supportADFS = true;
+        this.isTenantLess = authenticator.isTenantless;
     }
 
     private void setRedirectUriRequestParameter() {
@@ -49,12 +53,22 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     }
     
     private void acquireAuthorization() throws Exception {
+        long allowedInterval = 25000; // authorization code ttl
+        if(authorizationResult != null
+            && !isTenantLess
+            && System.currentTimeMillis( )- authorizationResultTimestamp < allowedInterval) {
+            // use existing authorization code
+            return;
+        }
+
         URI authorizationUri = this.createAuthorizationUri(false);
         String resultUri = this.webUi.authenticateAsync(authorizationUri, this.redirectUri).get();
         if(resultUri == null) {
             throw new AuthException("Authorization failed");
         }
         authorizationResult = ResponseUtils.parseAuthorizeResponse(resultUri, this.callState);
+        authorizationResultTimestamp = System.currentTimeMillis();
+
         verifyAuthorizationResult();    
    }
     

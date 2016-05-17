@@ -15,12 +15,11 @@ import java.util.List;
  */
 public class TenantsClient {
     private static final String USER_AGENT_HEADER = "User-Agent";
-    private static final String X_MS_VERSION_HEADER = "x-ms-version";
     private static final String ACCEPT_HEADER = "Accept";
-    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+
     private static final String CONTENT_TYPE_JSON = "application/json";
     private static final String USER_AGENT = "auth4j";
-    private static final String AUTHORIZATION_HEADER = "Authorization";
 
     private static final String managementUrl = "https://management.azure.com/tenants?api-version=2015-11-01";
 
