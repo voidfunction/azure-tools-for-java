@@ -224,8 +224,8 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
 
             Subscription sub = new Subscription();
             sub.setId(s.getSubscriptionId());
-            sub.setName(s.getSubscriptionName());
-            sub.setTenantId(s.getAADTenantId());
+            sub.setName(s.getDisplayName());
+//           sub.setTenantId(s.getAADTenantId());
             sub.setServiceManagementUrl(managementUri);
             sub.setSelected(true);
             updateSubscription(sub, userInfo);
