@@ -8,7 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/Test" isTestSource="true" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="IntelliJ IDEA Community Edition IC-143.1184.17" jdkType="IDEA JDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library" scope="PROVIDED">
       <library>
@@ -26,7 +26,6 @@
     <orderEntry type="library" scope="PROVIDED" name="antIntegration" level="project" />
     <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="azure-activedirectory-interactive-auth-library-for-java" level="project" />
-    <orderEntry type="library" name="services-explorer-common" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="com.microsoft.azure:azure-storage:4.0.0" level="project" />
     <orderEntry type="library" name="azure-arm-sdk" level="project" />
     <orderEntry type="module-library">
@@ -40,6 +39,8 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="hdinsight-node" />
+    <orderEntry type="module" module-name="hdinsight" />
+    <orderEntry type="module" module-name="common" />
+    <orderEntry type="library" name="services-explorer-common" level="project" />
   </component>
 </module>

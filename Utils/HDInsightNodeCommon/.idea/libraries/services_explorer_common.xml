@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="services-explorer-common">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/services-explorer-common.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../ServicesExplorerCommon/src" />
+    </SOURCES>
+  </library>
+</component>

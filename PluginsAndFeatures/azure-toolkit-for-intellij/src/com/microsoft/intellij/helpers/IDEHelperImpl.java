@@ -65,7 +65,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class IDEHelperImpl implements IDEHelper {
-
     @Override
     public void setApplicationProperty(@NotNull String name, @NotNull String value) {
         ApplicationSettings.getInstance().setProperty(name, value);

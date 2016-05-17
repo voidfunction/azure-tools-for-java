@@ -6,8 +6,6 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
-
 public class SubmissionTableModelTest extends TestCase{
     private SubmissionTableModel tableModel;
     private String[] columns = new String[]{"col1", "col2", "col3"};

@@ -41,6 +41,7 @@ import com.intellij.ui.components.JBList;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
+import com.microsoft.intellij.util.PluginHelper;
 import com.microsoft.intellij.util.PluginUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -146,7 +147,7 @@ public class LibrariesConfigurationDialog extends DialogWrapper {
                 AddLibraryUtility.addLibraryRoot(file, newLibraryModel);
                 // if some files already contained in plugin dependencies, take them from there - true for azure sdk library
                 if (azureLibrary.getFiles().length > 0) {
-                    AddLibraryUtility.addLibraryFiles(new File(PluginUtil.getAzureLibLocation()), newLibraryModel, azureLibrary.getFiles());
+                    AddLibraryUtility.addLibraryFiles(new File(PluginHelper.getAzureLibLocation()), newLibraryModel, azureLibrary.getFiles());
                 }
                 newLibraryModel.commit();
                 modifiableModel.commit();
