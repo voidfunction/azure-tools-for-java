@@ -50,6 +50,12 @@ of order will likely produce faulty logic.
 		<component importmethod="copy" importsrc="${placeholder}" type="jdk.deploy" deploydir="%DEPLOYROOT%" deploymethod="copy"/>
 	</componentset>
 	
+	<componentset name="Azul Zulu, OpenJDK 1.8.0_u92" type="JDK" licenseurl="http://openjdk.java.net/legal/gplv2+ce.html">
+		<startupenv name="JAVA_HOME" value="%DEPLOYROOT%\${placeholder}" cloudvalue="%DEPLOYROOT%\zulu8.15.0.1-jdk8.0.92-win_x64" type="jdk.home"/>
+		<startupenv name="PATH" value="%JAVA_HOME%\bin;%PATH%" type="jdk.path"/>
+        <component importmethod="copy" importsrc="${placeholder}" type="jdk.deploy" deploydir="%DEPLOYROOT%" deploymethod="copy" cloudaltsrc="http://azure.azulsystems.com/zulu/zulu8.15.0.1-jdk8.0.92-win_x64.zip?eclipse" cloudmethod="unzip" cloudsrc="auto" cloudupload="auto" />
+	</componentset>
+
 	<componentset name="Azul Zulu, OpenJDK 1.8.0_u72" type="JDK" licenseurl="http://openjdk.java.net/legal/gplv2+ce.html">
 		<startupenv name="JAVA_HOME" value="%DEPLOYROOT%\${placeholder}" cloudvalue="%DEPLOYROOT%\zulu8.13.0.5-jdk8.0.72-win_x64" type="jdk.home"/>
 		<startupenv name="PATH" value="%JAVA_HOME%\bin;%PATH%" type="jdk.path"/>
@@ -98,7 +104,7 @@ of order will likely produce faulty logic.
         <component importmethod="copy" importsrc="${placeholder}" type="jdk.deploy" deploydir="%DEPLOYROOT%" deploymethod="copy" cloudaltsrc="http://azure.azulsystems.com/zulu/zulu1.8.0_25-8.4.0.1-win64.zip?eclipse" cloudmethod="unzip" cloudsrc="auto" cloudupload="auto" />
 	</componentset>
 	
-	<componentset name="Azul Zulu, OpenJDK 1.8.0_u20" type="JDK" licenseurl="http://openjdk.java.net/legal/gplv2+ce.html">
+	<componentset name="Azul Zulu, OpenJDK 1.8.0_u20" type="JDK" licenseurl="http://openjdk.java.net/legal/gplv2+ce.html" status="deprecated">
 		<startupenv name="JAVA_HOME" value="%DEPLOYROOT%\${placeholder}" cloudvalue="%DEPLOYROOT%\zulu1.8.0_20-8.3.0.1-win64" type="jdk.home"/>
 		<startupenv name="PATH" value="%JAVA_HOME%\bin;%PATH%" type="jdk.path"/>
         <component importmethod="copy" importsrc="${placeholder}" type="jdk.deploy" deploydir="%DEPLOYROOT%" deploymethod="copy" cloudaltsrc="http://azure.azulsystems.com/zulu/zulu1.8.0_20-8.3.0.1-win64.zip?eclipse" cloudmethod="unzip" cloudsrc="auto" cloudupload="auto" />
