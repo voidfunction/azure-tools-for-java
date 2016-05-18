@@ -79,7 +79,7 @@
     <include name="lib/forms_rt.jar"/>
     <include name="lib/freemarker.jar"/>
     <include name="lib/groovy-all-2.3.9.jar"/>
-    <include name="lib/gson-2.3.jar"/>
+    <include name="lib/gson-2.3.1.jar"/>
     <include name="lib/guava-17.0.jar"/>
     <include name="lib/hamcrest-core-1.3.jar"/>
     <include name="lib/hamcrest-library-1.3.jar"/>
@@ -157,8 +157,13 @@
     <include name="lib/xstream-1.4.3.jar"/>
   </fileset>
 
+  <fileset id="scala.libraries" dir="${scala.plugin.home}">
+    <include name="lib/scala-plugin.jar"/>
+  </fileset>
+
   <path id="jdk.classpath.idea">
     <resources refid="idea.libraries" />
+    <resources refid="scala.libraries"/>
   </path>
   
   <!-- Project Libraries -->
@@ -179,6 +184,14 @@
     <pathelement location="${basedir}/lib/services-explorer-common.jar"/>
   </path>
   
+  <path id="library.hdinsight-node-common.classpath">
+    <pathelement location="${basedir}/lib/hdinsight-node-common.jar"/>
+  </path>
+
+  <patternset id="execude.hdinsight.sample.pattern">
+    <exclude name="**/hdinsight/templates/**"/>
+  </patternset>
+
   <path id="library.azure-sdk.classpath">
     <pathelement location="${basedir}/lib/azure-sdk/azure-core-0.9.2.jar"/>
     <pathelement location="${basedir}/lib/azure-sdk/annotation-detector-3.0.4.jar"/>
@@ -236,7 +249,10 @@
   <path id="library.projectmanagerlibrary.classpath">
     <pathelement location="${basedir}/lib/ProjectManagerLibrary.jar"/>
   </path>
-  
+
+  <path id="library.java-json.classpath">
+    <pathelement location="${basedir}/lib/java-json.jar"/>
+  </path>
   
   <!-- Global Libraries -->
   <!-- Register Custom Compiler Taskdefs -->
@@ -278,9 +294,11 @@
     <path refid="library.azure-activedirectory-interactive-auth-library-for-java.classpath"/>
     <path refid="library.com.microsoft.azure:azure-storage:4.0.0.classpath"/>
     <path refid="library.projectmanagerlibrary.classpath"/>
+    <path refid="library.java-json.classpath"/>
     <path refid="library.antintegration.classpath"/>
     <path refid="library.org.apache.commons:commons-lang3:3.4.classpath"/>
     <path refid="library.services-explorer-common.classpath"/>
+	<path refid="library.hdinsight-node-common.classpath"/>
   </path>
 
   <path id="azure-toolkit-for-intellij.runtime.module.classpath">
@@ -292,14 +310,17 @@
     <path refid="library.azure-activedirectory-interactive-auth-library-for-java.classpath"/>
     <path refid="library.com.microsoft.azure:azure-storage:4.0.0.classpath"/>
     <path refid="library.projectmanagerlibrary.classpath"/>
+    <path refid="library.java-json.classpath"/>
     <path refid="library.antintegration.classpath"/>
     <path refid="library.org.apache.commons:commons-lang3:3.4.classpath"/>
     <path refid="library.services-explorer-common.classpath"/>
+	<path refid="library.hdinsight-node-common.classpath"/>
   </path>
   
   
   <patternset id="excluded.from.module.azure-toolkit-for-intellij">
     <patternset refid="ignored.files"/>
+    <patternset refid="execude.hdinsight.sample.pattern"/>
   </patternset>
   
   <patternset id="excluded.from.compilation.azure-toolkit-for-intellij">
@@ -308,7 +329,9 @@
   
   <path id="azure-toolkit-for-intellij.module.sourcepath">
     <dirset dir="${module.azure-toolkit-for-intellij.basedir}">
+      <include name="common/src"/>
       <include name="src"/>
+      <include name="hdinsight/src"/>
       <include name="resources"/>
     </dirset>
   </path>
@@ -333,6 +356,10 @@
       </fileset>
       <fileset dir="${module.azure-toolkit-for-intellij.basedir}/resources">
         <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+      <fileset dir="${module.azure-toolkit-for-intellij.basedir}//resources">
+        <include name="hdinsight/templates/**"/>
         <type type="file"/>
       </fileset>
     </copy>
@@ -368,6 +395,7 @@
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/AzureCommons.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/AzureCommons.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/azure-activedirectory-interactive-auth-library-for-java/azure-activedirectory-interactive-auth-library-for-java.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-activedirectory-interactive-auth-library-for-java.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/services-explorer-common.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/services-explorer-common.jar"/>
+	<copy file="${module.azure-toolkit-for-intellij.basedir}/lib/hdinsight-node-common.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/hdinsight-node-common.jar"/>
     <copy file="${path.variable.maven_repository}/com/microsoft/azure/azure-storage/4.0.0/azure-storage-4.0.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-storage-4.0.0.jar"/>
     <copy file="${path.variable.maven_repository}/com/fasterxml/jackson/core/jackson-core/2.6.0/jackson-core-2.6.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/jackson-core-2.6.0.jar"/>
     <copy file="${path.variable.maven_repository}/org/slf4j/slf4j-api/1.7.12/slf4j-api-1.7.12.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/slf4j-api-1.7.12.jar"/>
@@ -426,7 +454,7 @@
     <zip destfile="${azure-toolkit-for-intellij.plugin.path.jar}">
       <fileset dir="${module.azure-toolkit-for-intellij.basedir}/../temp"/>
     </zip>
-    <delete dir="${tmp.dir.azure-toolkit-for-intellij}"/>
+    <!--<delete dir="${tmp.dir.azure-toolkit-for-intellij}"/>-->
   </target>
   
   <target name="init" description="Build initialization">

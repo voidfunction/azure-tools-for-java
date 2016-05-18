@@ -79,6 +79,7 @@ import com.microsoft.tooling.msservices.helpers.azure.sdk.SDKRequestCallback;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
+import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.vm.AffinityGroup;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
 import com.microsoft.tooling.msservices.model.vm.Location;
