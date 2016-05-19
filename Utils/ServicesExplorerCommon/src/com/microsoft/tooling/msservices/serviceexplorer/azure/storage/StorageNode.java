@@ -25,8 +25,10 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
+import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
@@ -67,10 +69,11 @@ public class StorageNode extends ClientStorageNode {
     }
 
     private static final String WAIT_ICON_PATH = "storageaccount.png";
-    private final StorageAccount storageAccount;
+    private static final String DEFAULT_STORAGE_FLAG = "(default)";
+    private final ClientStorageAccount storageAccount;
 
-    public StorageNode(StorageModule parent, StorageAccount sm) {
-        super(sm.getName(), sm.getName(), parent, WAIT_ICON_PATH, sm, true);
+    public StorageNode(Node parent, ClientStorageAccount sm, boolean isDefaultStorageAccount) {
+        super(sm.getName(), isDefaultStorageAccount ? sm.getName() + DEFAULT_STORAGE_FLAG : sm.getName(), parent, WAIT_ICON_PATH, sm, true);
 
         this.storageAccount = sm;
 

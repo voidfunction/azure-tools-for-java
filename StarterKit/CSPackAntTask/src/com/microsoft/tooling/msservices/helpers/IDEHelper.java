@@ -133,4 +133,20 @@ public interface IDEHelper {
 
     @NotNull
     Object getCurrentProject();
+
+    void setApplicationProperty(@NotNull String name, @NotNull String value);
+
+    void unsetApplicationProperty(@NotNull String name);
+
+    @Nullable
+    String getApplicationProperty(@NotNull String name);
+
+    void setApplicationProperties(@NotNull String name, @NotNull String[] value);
+
+    void unsetApplicatonProperties(@NotNull String name);
+
+    @Nullable
+    String[] getApplicationProperties(@NotNull String name);
+
+    boolean isApplicationPropertySet(@NotNull String name);
 }

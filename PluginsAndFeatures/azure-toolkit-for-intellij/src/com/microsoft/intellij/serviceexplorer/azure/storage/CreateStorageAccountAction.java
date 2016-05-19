@@ -59,7 +59,7 @@ public class CreateStorageAccountAction extends NodeActionListener {
             return;
         }
 
-        try {
+//        try {
             List<Subscription> subscriptions = apiManager.getSubscriptionList();
 
             if (subscriptions.isEmpty()) {
@@ -69,10 +69,10 @@ public class CreateStorageAccountAction extends NodeActionListener {
                         "Azure Services Explorer - No Active Azure Subscription", false, false);
                 return;
             }
-        } catch (AzureCmdException e1) {
-            String msg = "An error occurred while attempting to create the storage account." + "\n" + String.format(message("webappExpMsg"), e1.getMessage());
-            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e1);
-        }
+//        } catch (AzureCmdException e1) {
+//            String msg = "An error occurred while attempting to create the storage account." + "\n" + String.format(message("webappExpMsg"), e1.getMessage());
+//            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e1);
+//        }
 
         CreateStorageAccountForm createStorageAccountForm = new CreateStorageAccountForm((Project) storageModule.getProject());
         createStorageAccountForm.fillFields(null);

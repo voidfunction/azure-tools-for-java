@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="hdinsight-node-common">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/hdinsight-node-common.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../../Utils/HDInsightNodeCommon/src" />
+    </SOURCES>
+  </library>
+</component>

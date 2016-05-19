@@ -21,11 +21,41 @@
  */
 package com.microsoft.tooling.msservices.helpers.azure;
 
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.net.ssl.SSLSocketFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPReply;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import com.google.common.base.Optional;
 import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.microsoft.applicationinsights.management.rest.ApplicationInsightsManagementClient;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.auth.tenants.Tenant;
@@ -43,12 +73,16 @@ import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.XmlHelper;
 import com.microsoft.tooling.msservices.helpers.auth.AADManagerImpl;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
+import com.microsoft.tooling.msservices.helpers.azure.rest.AzureAADHelper;
+import com.microsoft.tooling.msservices.helpers.azure.rest.RestServiceManager.ContentType;
+import com.microsoft.tooling.msservices.helpers.azure.rest.RestServiceManagerBaseImpl;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.SDKRequestCallback;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.*;
+import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
@@ -327,8 +361,7 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
 
     @NotNull
     @Override
-    public List<Subscription> getSubscriptionList()
-            throws AzureCmdException {
+    public List<Subscription> getSubscriptionList() {
         authDataLock.readLock().lock();
 
         try {
@@ -595,7 +628,7 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
 
 
     @Override
-    public void deleteStorageAccount(@NotNull StorageAccount storageAccount)
+    public void deleteStorageAccount(@NotNull ClientStorageAccount storageAccount)
             throws AzureCmdException {
         requestStorageSDK(storageAccount.getSubscriptionId(), AzureSDKHelper.deleteStorageAccount(storageAccount));
     }
@@ -1384,7 +1417,7 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
                             }
                         }
                     };
-//            String tenantId = getSubscription(subscriptionId).getTenantId();
+
             return aadManager.request(userInfo,
                     settings.getAzureServiceManagementUri(),
                     "Sign in to your Azure account",

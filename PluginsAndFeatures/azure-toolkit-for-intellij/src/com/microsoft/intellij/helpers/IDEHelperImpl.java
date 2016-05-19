@@ -43,6 +43,8 @@ import com.intellij.packaging.artifacts.Artifact;
 import com.intellij.packaging.impl.artifacts.ArtifactUtil;
 import com.intellij.packaging.impl.compiler.ArtifactCompileScope;
 import com.intellij.packaging.impl.compiler.ArtifactsWorkspaceSettings;
+import com.microsoft.intellij.ApplicationSettings;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.helpers.tasks.CancellableTaskHandleImpl;
 import com.microsoft.intellij.util.PluginUtil;
@@ -62,6 +64,41 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class IDEHelperImpl implements IDEHelper {
+    @Override
+    public void setApplicationProperty(@NotNull String name, @NotNull String value) {
+        ApplicationSettings.getInstance().setProperty(name, value);
+    }
+
+    @Override
+    public void unsetApplicationProperty(@NotNull String name) {
+        ApplicationSettings.getInstance().unsetProperty(name);
+    }
+
+    @Override
+    public String getApplicationProperty(@NotNull String name) {
+        return ApplicationSettings.getInstance().getProperty(name);
+    }
+
+    @Override
+    public void setApplicationProperties(@NotNull String name, @NotNull String[] value) {
+        ApplicationSettings.getInstance().setProperties(name, value);
+    }
+
+    @Override
+    public void unsetApplicatonProperties(@NotNull String name) {
+        ApplicationSettings.getInstance().unsetProperty(name);
+    }
+
+    @Override
+    public String[] getApplicationProperties(@NotNull String name) {
+        return ApplicationSettings.getInstance().getProperties(name);
+    }
+
+    @Override
+    public boolean isApplicationPropertySet(@NotNull String name) {
+        return ApplicationSettings.getInstance().isPropertySet(name);
+    }
+
     @Override
     public void closeFile(@NotNull final Object projectObject, @NotNull final Object openedFile) {
         ApplicationManager.getApplication().invokeLater(new Runnable() {

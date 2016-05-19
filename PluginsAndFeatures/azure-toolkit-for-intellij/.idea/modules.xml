@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/azure-toolkit-for-intellij.iml" filepath="$PROJECT_DIR$/azure-toolkit-for-intellij.iml" />
+      <module fileurl="file://$PROJECT_DIR$/common/common.iml" filepath="$PROJECT_DIR$/common/common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hdinsight/hdinsight.iml" filepath="$PROJECT_DIR$/hdinsight/hdinsight.iml" />
     </modules>
   </component>
 </project>

@@ -1,0 +1,83 @@
+package com.microsoft.azure.hdinsight.common;
+
+import com.intellij.util.ui.UIUtil;
+
+import java.awt.*;
+
+public class DarkThemeManager {
+    private DarkThemeManager(){}
+
+    private static DarkThemeManager instance = null;
+
+    private static final String Gold = "#FFA500";
+    private static final String LightOrange = "#FFC66D";
+
+    private static final String Red = "red";
+    private static final String Rose = "#FF5050";
+
+    private static final String Black = "black";
+    private static final String Gray = "#BBBBBB";
+
+    private static final String Blue = "blue";
+    private static final String LightBlue = "deepskyblue";
+
+    public static DarkThemeManager getInstance(){
+        if(instance == null){
+            synchronized (DarkThemeManager.class){
+                if(instance == null){
+                    instance = new DarkThemeManager();
+                }
+            }
+        }
+
+        return instance;
+    }
+
+    public String getWarningColor(){
+        if(UIUtil.isUnderDarcula()){
+            return LightOrange;
+        }
+
+        return Gold;
+    }
+
+    public Color getErrorMessageColor() {
+        if (UIUtil.isUnderDarcula()) {
+            return new Color(255, 80, 80);
+        }
+
+        return Color.red;
+    }
+
+    public Color getWarningMessageColor() {
+        if (UIUtil.isUnderDarcula()) {
+            return new Color(255, 198, 109);
+        }
+
+        return new Color(255, 165, 0);
+    }
+
+    public String getErrorColor(){
+        if(UIUtil.isUnderDarcula()){
+            return Rose;
+        }
+
+        return Red;
+    }
+
+    public String getInfoColor(){
+        if(UIUtil.isUnderDarcula()){
+            return Gray;
+        }
+
+        return Black;
+    }
+
+    public String getHyperLinkColor(){
+        if(UIUtil.isUnderDarcula()){
+            return LightBlue;
+        }
+
+        return Blue;
+    }
+}

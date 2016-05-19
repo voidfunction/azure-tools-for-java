@@ -42,6 +42,7 @@ import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.ui.AppInsightsMngmtPanel;
 import com.microsoft.intellij.ui.AzureAbstractPanel;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
+import com.microsoft.intellij.util.PluginHelper;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -305,7 +306,7 @@ public class ApplicationInsightsPanel implements AzureAbstractPanel {
             Library.ModifiableModel newLibraryModel = newLibrary.getModifiableModel();
             File file = new File(String.format("%s%s%s", AzurePlugin.pluginFolder, File.separator, AzureLibrary.AZURE_LIBRARIES.getLocation()));
             AddLibraryUtility.addLibraryRoot(file, newLibraryModel);
-            AddLibraryUtility.addLibraryFiles(new File(PluginUtil.getAzureLibLocation()), newLibraryModel,
+            AddLibraryUtility.addLibraryFiles(new File(PluginHelper.getAzureLibLocation()), newLibraryModel,
                     AzureLibrary.AZURE_LIBRARIES.getFiles());
             newLibraryModel.commit();
             modifiableModel.commit();

@@ -32,6 +32,7 @@ import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
 import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.AffinityGroup;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
@@ -81,8 +82,7 @@ public interface AzureManager {
             throws AzureCmdException;
 
     @NotNull
-    List<Subscription> getSubscriptionList()
-            throws AzureCmdException;
+    List<Subscription> getSubscriptionList();
 
     void setSelectedSubscriptions(@NotNull List<String> selectedList)
             throws AzureCmdException;
@@ -192,7 +192,7 @@ public interface AzureManager {
     List<ServiceCertificateListResponse.Certificate> getCertificates(@NotNull String subscriptionId, @NotNull String serviceName)
             throws AzureCmdException;
 
-    void deleteStorageAccount(@NotNull StorageAccount storageAccount)
+    void deleteStorageAccount(@NotNull ClientStorageAccount storageAccount)
             throws AzureCmdException;
 
     @NotNull

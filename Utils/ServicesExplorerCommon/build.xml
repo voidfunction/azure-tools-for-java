@@ -1,6 +1,6 @@
 <project name="ServicesExplorerCommon" default="dist" basedir=".">
     <description>
-    	Services Explorer Common project
+    	HDInsight Node Common project
     </description>
 	
 	  <!-- set global properties for this build -->
@@ -37,6 +37,7 @@
   	</jar>
   	<copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\..\PluginsAndFeatures\com.microsoftopentechnologies.wacommon\resources\${jar_name}" overwrite="true" />
 	<copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\..\PluginsAndFeatures\azure-toolkit-for-intellij\lib\${jar_name}" overwrite="true" />
+	<copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\HDInsightNodeCommon\lib\${jar_name}" overwrite="true" />
   </target>
 
   <target name="clean" description="clean up" >

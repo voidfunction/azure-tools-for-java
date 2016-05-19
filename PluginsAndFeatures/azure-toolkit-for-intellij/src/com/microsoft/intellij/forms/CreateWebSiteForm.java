@@ -224,7 +224,7 @@ public class CreateWebSiteForm extends DialogWrapper {
     }
 
     private void fillSubscriptions() {
-        try {
+//        try {
             List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
             DefaultComboBoxModel subscriptionComboModel = new DefaultComboBoxModel(subscriptionList.toArray());
             subscriptionComboModel.setSelectedItem(null);
@@ -232,10 +232,10 @@ public class CreateWebSiteForm extends DialogWrapper {
             if (!subscriptionList.isEmpty()) {
                 subscriptionComboBox.setSelectedIndex(0);
             }
-        } catch (AzureCmdException e) {
-            String msg = "An error occurred while trying to load the subscriptions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
-        }
+//        } catch (AzureCmdException e) {
+//            String msg = "An error occurred while trying to load the subscriptions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+//            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
+//        }
     }
 
     private void fillResourceGroups(String valToSet) {
