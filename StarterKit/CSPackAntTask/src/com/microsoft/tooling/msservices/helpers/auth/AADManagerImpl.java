@@ -23,6 +23,7 @@ package com.microsoft.tooling.msservices.helpers.auth;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.auth.AuthContext;
 import com.microsoft.auth.UserIdentifier;
 import com.microsoft.auth.UserIdentifierType;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -37,25 +38,23 @@ import java.util.logging.Logger;
 
 public class AADManagerImpl implements AADManager {
     private static AADManager instance;
-    private static Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+//    private static Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
     Logger logger = Logger.getLogger(AADManagerImpl.class.getName());
 
-    private ReentrantReadWriteLock authResultLock = new ReentrantReadWriteLock(false);
-    private Map<UserInfo, ReentrantReadWriteLock> authResultLockByUser;
-    private Map<UserInfo, ReentrantReadWriteLock> tempLockByUser;
+    private static final PluginSettings settings = DefaultLoader.getPluginComponent().getSettings();
+    private static final String RESOURCE = settings.getAzureServiceManagementUri();
+    private final String AUTHORITY = settings.getAdAuthority();
+    private final String CLIENT_ID = settings.getClientId();
+    private final String REDIRECT_URI = settings.getRedirectUri();
+    private final String COMMON_TENANT = settings.getTenantName();
 
-    private Object projectObject;
+//    private ReentrantReadWriteLock authResultLock = new ReentrantReadWriteLock(false);
+//    private Map<UserInfo, ReentrantReadWriteLock> authResultLockByUser;
+//    private Map<UserInfo, ReentrantReadWriteLock> tempLockByUser;
 
     final private com.microsoft.auth.TokenCache tokenCache;
-    private com.microsoft.auth.AuthContext authContext = null;
 
-    public AADManagerImpl(final Object projectObject) {
-        this.projectObject = projectObject;
-
-        final PluginSettings settings = DefaultLoader.getPluginComponent().getSettings();
-        final String tenantName = settings.getTenantName();
-        final String authority = settings.getAdAuthority();
-
+    public AADManagerImpl() {
         tokenCache = new com.microsoft.auth.TokenCache();
 
         try {
@@ -63,8 +62,6 @@ public class AADManagerImpl implements AADManager {
                     TokenFileStorage tokenFileStorage = new com.microsoft.auth.TokenFileStorage();
             byte[] data = tokenFileStorage.read();
             tokenCache.deserialize(data);
-
-            authContext = new com.microsoft.auth.AuthContext(String.format("%s/%s", authority, tenantName), tokenCache);
 
             tokenCache.setOnAfterAccessCallback(new Runnable() {
                 @Override
@@ -89,8 +86,8 @@ public class AADManagerImpl implements AADManager {
     @NotNull
     public static synchronized AADManager getManager() throws Exception {
         if (instance == null) {
-            gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-            instance = new AADManagerImpl(AzureManagerImpl.DEFAULT_PROJECT);
+//            gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+            instance = new AADManagerImpl();
         }
 
         return instance;
@@ -106,7 +103,7 @@ public class AADManagerImpl implements AADManager {
 
         com.microsoft.auth.
                 UserIdentifier userIdentifier = new UserIdentifier(userInfo.getUniqueName(), UserIdentifierType.UniqueId);
-        com.microsoft.auth.AuthenticationResult res = auth(userIdentifier);
+        com.microsoft.auth.AuthenticationResult res = auth(userIdentifier, userInfo.getTenantId());
         try {
             return requestCallback.execute(res.getAccessToken());
         } catch (Throwable throwable) {
@@ -114,16 +111,15 @@ public class AADManagerImpl implements AADManager {
             throw new AzureCmdException(throwable.getMessage(), throwable);
         }
     }
-    public com.microsoft.auth.AuthenticationResult auth(com.microsoft.auth.UserIdentifier userIdentifier) throws AzureCmdException {
 
-        final PluginSettings settings = DefaultLoader.getPluginComponent().getSettings();
-        final String resource = settings.getAzureServiceManagementUri();
-        String clientId = settings.getClientId();
-        String redirectUri = settings.getRedirectUri();
-
+    public com.microsoft.auth.AuthenticationResult auth(com.microsoft.auth.UserIdentifier userIdentifier, String tenantName) throws AzureCmdException {
+        if (tenantName == null) {
+            tenantName = COMMON_TENANT;
+        }
         try {
+            AuthContext authContext = new com.microsoft.auth.AuthContext(String.format("%s/%s", AUTHORITY, tenantName), tokenCache);
             com.microsoft.auth.
-                    AuthenticationResult result = authContext.acquireTokenAsync(resource, clientId, redirectUri,
+                    AuthenticationResult result = authContext.acquireTokenAsync(RESOURCE, CLIENT_ID, REDIRECT_URI,
                     com.microsoft.auth.PromptBehavior.Auto, userIdentifier).get();
             return result;
         } catch (Throwable throwable) {
