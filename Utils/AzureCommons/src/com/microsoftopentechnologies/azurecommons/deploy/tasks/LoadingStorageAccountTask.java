@@ -118,6 +118,8 @@ public class LoadingStorageAccountTask extends LoadingTask<Map<String, List<Stor
 				storageServicesMap.put(subscriptionId, storageAccountsForSubscription);
 			} catch (Exception e) {
 				e.printStackTrace();
+				// avoiding NPE across plugin
+				storageServicesMap.put(subscriptionId, new ArrayList<StorageAccount>());
 			} 
         }
 	}
