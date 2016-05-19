@@ -34,7 +34,10 @@ import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHa
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
 import com.microsoft.windowsazure.management.storage.models.StorageAccountTypes;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class StorageModule extends AzureRefreshableNode {
@@ -54,24 +57,29 @@ public class StorageModule extends AzureRefreshableNode {
         AzureManager azureManager = AzureManagerImpl.getManager(getProject());
         // load all Storage Accounts
         List<Subscription> subscriptionList = azureManager.getSubscriptionList();
-
+        List<Pair<String, String>> failedSubscriptions = new ArrayList<>();
         for (Subscription subscription : subscriptionList) {
-            List<StorageAccount> storageAccounts = azureManager.getStorageAccounts(subscription.getId(), true);
+            try {
+                List<StorageAccount> storageAccounts = azureManager.getStorageAccounts(subscription.getId(), true);
 
-            if (eventState.isEventTriggered()) {
-                return;
-            }
-
-            for (StorageAccount sm : storageAccounts) {
-                String type = sm.getType();
-
-                if (type.equals(StorageAccountTypes.STANDARD_GRS)
-                        || type.equals(StorageAccountTypes.STANDARD_LRS)
-                        || type.equals(StorageAccountTypes.STANDARD_RAGRS)
-                        || type.equals(StorageAccountTypes.STANDARD_ZRS)) {
-
-                    addChildNode(new StorageNode(this, sm));
+                if (eventState.isEventTriggered()) {
+                    return;
                 }
+
+                for (StorageAccount sm : storageAccounts) {
+                    String type = sm.getType();
+
+                    if (type.equals(StorageAccountTypes.STANDARD_GRS)
+                            || type.equals(StorageAccountTypes.STANDARD_LRS)
+                            || type.equals(StorageAccountTypes.STANDARD_RAGRS)
+                            || type.equals(StorageAccountTypes.STANDARD_ZRS)) {
+
+                        addChildNode(new StorageNode(this, sm));
+                    }
+                }
+            } catch (Exception ex) {
+                failedSubscriptions.add(new ImmutablePair<>(subscription.getName(), ex.getMessage()));
+                continue;
             }
         }
 
@@ -84,6 +92,13 @@ public class StorageModule extends AzureRefreshableNode {
             }
 
             addChildNode(new ExternalStorageNode(this, storageAccount));
+        }
+        if (!failedSubscriptions.isEmpty()) {
+            StringBuilder errorMessage = new StringBuilder("An error occurred when trying to load Storage Accounts for the subscriptions:\n\n");
+            for (Pair error : failedSubscriptions) {
+                errorMessage.append(error.getKey()).append(": ").append(error.getValue()).append("\n");
+            }
+            throw new AzureCmdException("An error occurred when trying to load Storage Accounts", errorMessage.toString());
         }
     }
 }

@@ -4,6 +4,8 @@
       <root url="jar://$PROJECT_DIR$/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/adauth4j.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../../Utils/AdAuth4j/src" />
+    </SOURCES>
   </library>
 </component>

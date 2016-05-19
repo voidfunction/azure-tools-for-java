@@ -50,7 +50,7 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
         authDataLock.writeLock().lock();
 
         try {
-            aadManager = new AADManagerImpl(projectObject);
+            aadManager = new AADManagerImpl();
 
             loadSubscriptions();
             loadUserInfo();

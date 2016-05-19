@@ -28,6 +28,8 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.applicationinsights.management.rest.ApplicationInsightsManagementClient;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
+import com.microsoft.auth.tenants.Tenant;
+import com.microsoft.auth.tenants.TenantsClient;
 import com.microsoft.azure.management.resources.ResourceManagementClient;
 import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.azure.management.websites.WebSiteManagementClient;
@@ -110,7 +112,7 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
         authDataLock.writeLock().lock();
 
         try {
-            aadManager = new AADManagerImpl(projectObject);
+            aadManager = new AADManagerImpl();
 
             loadSubscriptions();
             loadUserInfo();
@@ -209,28 +211,29 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
         final String managementUri = settings.getAzureServiceManagementUri();
 
         // FIXME.shch: need to extend interface?
-        com.microsoft.auth.AuthenticationResult res = ((AADManagerImpl)aadManager).auth(null);
-        UserInfo userInfo = new UserInfo(res.getTenantId(), res.getUserInfo().getUniqueId());
-        setUserInfo(userInfo);
+        com.microsoft.auth.AuthenticationResult res = ((AADManagerImpl)aadManager).auth(null, null);
 
-        List<com.microsoft.auth.subsriptions.Subscription> subscriptions = null;
         try {
-            subscriptions = com.microsoft.auth.subsriptions.SubscriptionsClient.getByToken(res.getAccessToken());
-        } catch (Exception e) {
-            e.printStackTrace();
+            List<Tenant> tenants = TenantsClient.getByToken(res.getAccessToken());
+            for (Tenant t : tenants) {
+                String tid = t.getTenantId();
+                res = ((AADManagerImpl)aadManager).auth(null, tid);
+                UserInfo userInfo = new UserInfo(tid, res.getUserInfo().getUniqueId());
+                List<com.microsoft.auth.subsriptions.Subscription> subscriptions = com.microsoft.auth.subsriptions.SubscriptionsClient.getByToken(res.getAccessToken());
+                for (com.microsoft.auth.subsriptions.Subscription s : subscriptions) {
+                    Subscription sub = new Subscription();
+                    sub.setId(s.getSubscriptionId());
+                    sub.setName(s.getDisplayName());
+                    sub.setTenantId(tid);
+                    sub.setServiceManagementUrl(managementUri);
+                    sub.setSelected(true);
+                    updateSubscription(sub, userInfo);
+                }
+                setUserInfo(userInfo);
+            }
+        } catch (Exception ex) {
+            throw new AzureCmdException("Error loading tenants", ex);
         }
-        for (com.microsoft.auth.subsriptions.Subscription s : subscriptions) {
-            String sid = s.getSubscriptionId().toString();
-
-            Subscription sub = new Subscription();
-            sub.setId(s.getSubscriptionId());
-            sub.setName(s.getDisplayName());
-//           sub.setTenantId(s.getAADTenantId());
-            sub.setServiceManagementUrl(managementUri);
-            sub.setSelected(true);
-            updateSubscription(sub, userInfo);
-        }
-
     }
 
     @Override
@@ -253,6 +256,10 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
         }
 
         setUserInfo(null);
+        userInfoBySubscriptionId.clear();
+        removeUnusedSubscriptions();
+
+        storeSubscriptions();
     }
 
     @Override
@@ -1004,32 +1011,13 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
 
         try {
             this.userInfo = userInfo;
-            userInfoBySubscriptionId.clear();
-            removeUnusedSubscriptions();
-
-            storeSubscriptions();
+//            userInfoBySubscriptionId.clear();
+//            removeUnusedSubscriptions();
+//
+//            storeSubscriptions();
             storeUserInfo();
         } finally {
             authDataLock.writeLock().unlock();
-        }
-    }
-
-    @NotNull
-    private Subscription getSubscription(@NotNull String subscriptionId)
-            throws AzureCmdException {
-        authDataLock.readLock().lock();
-
-        try {
-            ReentrantReadWriteLock subscriptionLock = getSubscriptionLock(subscriptionId, false);
-            subscriptionLock.readLock().lock();
-
-            try {
-                return subscriptions.get(subscriptionId);
-            } finally {
-                subscriptionLock.readLock().unlock();
-            }
-        } finally {
-            authDataLock.readLock().unlock();
         }
     }
 
@@ -1396,7 +1384,7 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
                             }
                         }
                     };
-
+//            String tenantId = getSubscription(subscriptionId).getTenantId();
             return aadManager.request(userInfo,
                     settings.getAzureServiceManagementUri(),
                     "Sign in to your Azure account",
@@ -1404,40 +1392,40 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
         }
     }
 
-    @NotNull
-    private <T> T requestWithToken(@NotNull final UserInfo userInfo, @NotNull final RequestCallback<T> requestCallback)
-            throws AzureCmdException {
-        PluginSettings settings = DefaultLoader.getPluginComponent().getSettings();
-
-        com.microsoft.tooling.msservices.helpers.auth.RequestCallback<T> aadRequestCB =
-                new com.microsoft.tooling.msservices.helpers.auth.RequestCallback<T>() {
-                    @NotNull
-                    @Override
-                    public T execute(@NotNull String accessToken) throws Throwable {
-                        if (!hasAccessToken(userInfo) ||
-                                !accessToken.equals(getAccessToken(userInfo))) {
-                            ReentrantReadWriteLock userLock = getUserLock(userInfo, true);
-                            userLock.writeLock().lock();
-
-                            try {
-                                if (!hasAccessToken(userInfo) ||
-                                        !accessToken.equals(getAccessToken(userInfo))) {
-                                    setAccessToken(userInfo, accessToken);
-                                }
-                            } finally {
-                                userLock.writeLock().unlock();
-                            }
-                        }
-
-                        return requestCallback.execute();
-                    }
-                };
-
-        return aadManager.request(userInfo,
-                settings.getAzureServiceManagementUri(),
-                "Sign in to your Azure account",
-                aadRequestCB);
-    }
+//    @NotNull
+//    private <T> T requestWithToken(@NotNull final UserInfo userInfo, @NotNull final RequestCallback<T> requestCallback)
+//            throws AzureCmdException {
+//        PluginSettings settings = DefaultLoader.getPluginComponent().getSettings();
+//
+//        com.microsoft.tooling.msservices.helpers.auth.RequestCallback<T> aadRequestCB =
+//                new com.microsoft.tooling.msservices.helpers.auth.RequestCallback<T>() {
+//                    @NotNull
+//                    @Override
+//                    public T execute(@NotNull String accessToken) throws Throwable {
+//                        if (!hasAccessToken(userInfo) ||
+//                                !accessToken.equals(getAccessToken(userInfo))) {
+//                            ReentrantReadWriteLock userLock = getUserLock(userInfo, true);
+//                            userLock.writeLock().lock();
+//
+//                            try {
+//                                if (!hasAccessToken(userInfo) ||
+//                                        !accessToken.equals(getAccessToken(userInfo))) {
+//                                    setAccessToken(userInfo, accessToken);
+//                                }
+//                            } finally {
+//                                userLock.writeLock().unlock();
+//                            }
+//                        }
+//
+//                        return requestCallback.execute();
+//                    }
+//                };
+//
+//        return aadManager.request(userInfo,
+//                settings.getAzureServiceManagementUri(),
+//                "Sign in to your Azure account",
+//                aadRequestCB);
+//    }
 
     @NotNull
     private static String readFile(@NotNull String filePath)

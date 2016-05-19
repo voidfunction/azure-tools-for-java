@@ -56,6 +56,25 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 abstract class AzureManagerBaseImpl {
     public static final String DEFAULT_PROJECT = "DEFAULT_PROJECT";
 
+    @NotNull
+    protected Subscription getSubscription(@NotNull String subscriptionId)
+            throws AzureCmdException {
+        authDataLock.readLock().lock();
+
+        try {
+            ReentrantReadWriteLock subscriptionLock = getSubscriptionLock(subscriptionId, false);
+            subscriptionLock.readLock().lock();
+
+            try {
+                return subscriptions.get(subscriptionId);
+            } finally {
+                subscriptionLock.readLock().unlock();
+            }
+        } finally {
+            authDataLock.readLock().unlock();
+        }
+    }
+
     static class EventWaitHandleImpl implements EventHelper.EventWaitHandle {
         Semaphore eventSignal = new Semaphore(0, true);
 
