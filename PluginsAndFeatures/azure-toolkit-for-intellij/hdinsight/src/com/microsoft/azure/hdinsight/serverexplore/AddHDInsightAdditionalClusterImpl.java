@@ -32,6 +32,7 @@ public class AddHDInsightAdditionalClusterImpl {
     private static final Pattern PATTERN_DEFAULT_STORAGE = Pattern.compile("\"fs\\.defaultFS\":\"wasb://([^@\"]*)@([^@\"]*)\"", Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
     private static final Pattern PATTER_STORAGE_KEY = Pattern.compile("\"fs\\.azure\\.account\\.key\\.[^\"]*\":\"[^\"]*=\"", Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
     private static final String STORAGE_ACCOUNT_NAME_PATTERN = "^wasb://(.*)@(.*)$";
+    private static final String BLOB_URL_SUFFIX = ".blob.core.windows.net";
 
     public static HDStorageAccount getStorageAccount(String clusterName, String storageName, String storageKey, String userName, String password) throws HDIException, AzureCmdException {
 
@@ -52,7 +53,7 @@ public class AddHDInsightAdditionalClusterImpl {
             throw new HDIException("Failed to get default container for storage account");
         }
 
-        HDStorageAccount account = new HDStorageAccount(storageName + CommonConstant.BLOB_URL_SUFFIX, storageKey, true, defaultContainer);
+        HDStorageAccount account = new HDStorageAccount(storageName + BLOB_URL_SUFFIX, storageKey, true, defaultContainer);
 
         //getting container to check the storage key is correct or not
         try {

@@ -15,17 +15,18 @@ import java.io.File;
 public class ProjectSampleUtil {
 
     //sample file path should be start with "/"
-    private static final String[] Java_Local_RunSample = new String[]{"/samples/java/JavaSparkPi.java"};
+
+    private static final String[] Java_Local_RunSample = new String[]{"/hdinsight/templates/java/JavaSparkPi.java"};
     private static final String[] Scala_Cluster_Run_Sample = new String[]{
-            "/samples/scala/scala_cluster_run/SparkCore_WasbIOTest.scala",
-            "/samples/scala/scala_cluster_run/SparkStreaming_HdfsWordCount.scala",
-            "/samples/scala/scala_cluster_run/SparkSQL_RDDRelation.scala"
+            "/hdinsight/templates/scala/scala_cluster_run/SparkCore_WasbIOTest.scala",
+            "/hdinsight/templates/scala/scala_cluster_run/SparkStreaming_HdfsWordCount.scala",
+            "/hdinsight/templates/scala/scala_cluster_run/SparkSQL_RDDRelation.scala"
     };
     private static final String[] Scala_Local_Run_Sample = new String[]{
-            "/samples/scala/scala_local_run/LogQuery.scala",
-            "/samples/scala/scala_local_run/SparkML_RankingMetricsExample.scala"
+            "/hdinsight/templates/scala/scala_local_run/LogQuery.scala",
+            "/hdinsight/templates/scala/scala_local_run/SparkML_RankingMetricsExample.scala"
     };
-    private static final String[] Scala_Local_Run_Sample_Data = new String[]{"/samples/scala/scala_local_run/data/sample_movielens_data.txt"};
+    private static final String[] Scala_Local_Run_Sample_Data = new String[]{"/hdinsight/templates/scala/scala_local_run/data/sample_movielens_data.txt"};
 
     private static final String MODULE_COMPONENT_NAME = "NewModuleRootManager";
 
