@@ -167,10 +167,6 @@
   </path>
   
   <!-- Project Libraries -->
-
-  <path id="library.azure-activedirectory-interactive-auth-library-for-java.classpath">
-    <pathelement location="${basedir}/lib/azure-activedirectory-interactive-auth-library-for-java/azure-activedirectory-interactive-auth-library-for-java.jar"/>
-  </path>
   
   <path id="library..cspack.classpath">
     <pathelement location="${basedir}/lib/.cspack.jar"/>
@@ -291,7 +287,6 @@
     <path refid="library.azurecommons.classpath"/>
     <path refid="library..cspack.classpath"/>
     <path refid="library.azure-sdk.classpath"/>
-    <path refid="library.azure-activedirectory-interactive-auth-library-for-java.classpath"/>
     <path refid="library.com.microsoft.azure:azure-storage:4.0.0.classpath"/>
     <path refid="library.projectmanagerlibrary.classpath"/>
     <path refid="library.java-json.classpath"/>
@@ -307,7 +302,6 @@
     <path refid="library.azurecommons.classpath"/>
     <path refid="library..cspack.classpath"/>
     <path refid="library.azure-sdk.classpath"/>
-    <path refid="library.azure-activedirectory-interactive-auth-library-for-java.classpath"/>
     <path refid="library.com.microsoft.azure:azure-storage:4.0.0.classpath"/>
     <path refid="library.projectmanagerlibrary.classpath"/>
     <path refid="library.java-json.classpath"/>
@@ -393,7 +387,6 @@
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/ProjectManagerLibrary.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/ProjectManagerLibrary.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/.cspack.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/.cspack.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/AzureCommons.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/AzureCommons.jar"/>
-    <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/azure-activedirectory-interactive-auth-library-for-java/azure-activedirectory-interactive-auth-library-for-java.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-activedirectory-interactive-auth-library-for-java.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/services-explorer-common.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/services-explorer-common.jar"/>
 	<copy file="${module.azure-toolkit-for-intellij.basedir}/lib/hdinsight-node-common.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/hdinsight-node-common.jar"/>
     <copy file="${path.variable.maven_repository}/com/microsoft/azure/azure-storage/4.0.0/azure-storage-4.0.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-storage-4.0.0.jar"/>
