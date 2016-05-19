@@ -18,7 +18,7 @@ import java.io.IOException;
 
 public class SparkBatchSubmission {
 
-    private static final String UserAgentName = "HDInsight Tools for IntelliJ 1.0";
+    private static final String UserAgentName = "Azure Toolkit for IntelliJ";
 
     // Singleton Instance
     private static SparkBatchSubmission instance = null;
