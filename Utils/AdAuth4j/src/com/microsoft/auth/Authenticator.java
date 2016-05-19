@@ -10,13 +10,13 @@ enum AuthorityType {
 }
 
 class Authenticator {
-    private final static String tenantlessTenantName = "Common";
+    private final static String tenantlessTenantName = "common";
     private final AuthenticatorTemplateList authenticatorTemplateList;
     private boolean updatedFromTemplate; 
     AuthorityType authorityType;
     boolean validateAuthority;
 
-    String authority;
+    private String authority;
     boolean isTenantless;
     String authorizationUri;
     String tokenUri;
@@ -24,10 +24,18 @@ class Authenticator {
     String selfSignedJwtAudience;
     UUID correlationId;
 
+    public String getAuthority() {
+        return this.authority;
+    }
+
+    public void setAuthority(String val) {
+        this.authority = val;
+    }
+
     public Authenticator(String authority, boolean validateAuthority) throws Exception {
     	this.authenticatorTemplateList = new AuthenticatorTemplateList();
-        this.authority = canonicalizeUri(authority);
-        this.authorityType = detectAuthorityType(this.authority);
+        setAuthority(canonicalizeUri(authority));
+        this.authorityType = detectAuthorityType(this.getAuthority());
 
         if (this.authorityType != AuthorityType.AAD && validateAuthority) {
             throw new IllegalArgumentException(AuthErrorMessage.UnsupportedAuthorityValidation);
@@ -38,7 +46,7 @@ class Authenticator {
 
     public void updateFromTemplate(CallState callState) throws Exception {
         if (!updatedFromTemplate) {
-            URI authorityUri = new URI(authority);
+            URI authorityUri = new URI(this.getAuthority());
             String host = authorityUri.getAuthority();
             String path = authorityUri.getPath().substring(1);
             String tenant = path.substring(0, path.indexOf("/"));
@@ -56,7 +64,7 @@ class Authenticator {
 
     public void updateTenantId(String tenantId) {
         if (this.isTenantless && tenantId != null && tenantId.isEmpty()) {
-            this.authority = replaceTenantlessTenant(this.authority, tenantId);
+            this.setAuthority(replaceTenantlessTenant(this.getAuthority(), tenantId));
             this.updatedFromTemplate = false;
         }
     }

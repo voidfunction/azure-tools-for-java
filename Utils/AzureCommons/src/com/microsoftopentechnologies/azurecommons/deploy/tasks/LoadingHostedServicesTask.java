@@ -108,6 +108,7 @@ public class LoadingHostedServicesTask extends LoadingTask<Map<String, List<Clou
 				hostedServicesMap.put(subcriptionId, cloudServicesForSubscription);
 			} catch (Exception e) {
 				e.printStackTrace();
+				hostedServicesMap.put(subcriptionId, new ArrayList<CloudService>());
             }
         }
 	}

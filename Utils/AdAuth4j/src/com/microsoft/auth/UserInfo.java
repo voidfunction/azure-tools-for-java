@@ -27,17 +27,51 @@ public final class UserInfo {
         this.passwordExpiresOn = other.passwordExpiresOn;
     }
 
+    public String getUniqueId() {
+        return uniqueId;
+    }
+
+    public String getDisplayableId() {
+        return displayableId;
+    }
+
+    public String getGivenName() {
+        return givenName;
+    }
+
+    public String getFamilyName() {
+        return familyName;
+    }
+
+    public long getPasswordExpiresOn() {
+        return passwordExpiresOn;
+    }
+
+    public URI getPasswordChangeUrl() {
+        return passwordChangeUrl;
+    }
+
+    public String getIdentityProvider() {
+        return identityProvider;
+    }
+
+    public boolean isForcePrompt() {
+        return forcePrompt;
+    }
+
     /// <summary>
-    /// Gets identifier of the user authenticated during token acquisition. 
+    /// Gets identifier of the user authenticated during token acquisition.
     /// </summary>
     @JsonProperty
     String uniqueId;
+
 
     /// <summary>
     /// Gets a displayable value in UserPrincipalName (UPN) format. The value can be null.
     /// </summary>
     @JsonProperty
     String displayableId;
+
 
     /// <summary>
     /// Gets given name of the user if provided by the service. If not, the value is null. 

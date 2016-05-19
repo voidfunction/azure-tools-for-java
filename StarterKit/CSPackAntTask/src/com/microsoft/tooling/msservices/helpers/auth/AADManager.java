@@ -21,31 +21,14 @@
  */
 package com.microsoft.tooling.msservices.helpers.auth;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
 
 public interface AADManager {
-    @NotNull
-    UserInfo authenticate(@NotNull String resource, @NotNull String title)
-            throws AzureCmdException;
-
-    void authenticate(@NotNull UserInfo userInfo,
-                      @NotNull String resource,
-                      @NotNull String title)
-            throws AzureCmdException;
-
     @NotNull
     <T> T request(@NotNull UserInfo userInfo,
                   @NotNull String resource,
                   @NotNull String title,
                   @NotNull RequestCallback<T> requestCallback)
             throws AzureCmdException;
-
-    @NotNull
-    <V> ListenableFuture<V> requestFuture(@NotNull UserInfo userInfo,
-                                          @NotNull String resource,
-                                          @NotNull String title,
-                                          @NotNull RequestCallback<ListenableFuture<V>> requestCallback);
 }

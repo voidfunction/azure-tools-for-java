@@ -26,7 +26,6 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
 import com.microsoft.tooling.msservices.model.storage.*;
-import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.ByteArrayOutputStream;
@@ -131,8 +130,6 @@ public interface IDEHelper {
     @NotNull
     ListenableFuture<String> buildArtifact(@NotNull ProjectDescriptor projectDescriptor,
                                            @NotNull ArtifactDescriptor artifactDescriptor);
-
-    BrowserLauncher getBrowserLauncher();
 
     @NotNull
     Object getCurrentProject();

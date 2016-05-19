@@ -19,29 +19,20 @@
  */
 package com.microsoft.azureexplorer.helpers;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.IDEHelper;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
-import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
-import com.microsoft.tooling.msservices.model.storage.*;
-import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoftopentechnologies.wacommon.adauth.BrowserLauncherEclipse;
-import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
+import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.microsoft.tooling.msservices.helpers.IDEHelper;
+import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
+import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
 
 public class IDEHelperImpl implements IDEHelper {
 
@@ -187,10 +178,6 @@ public class IDEHelperImpl implements IDEHelper {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-    public BrowserLauncher getBrowserLauncher() {
-        return new BrowserLauncherEclipse(null);
-    }
 
     public Object getCurrentProject() {
         return AzureManagerImpl.DEFAULT_PROJECT;

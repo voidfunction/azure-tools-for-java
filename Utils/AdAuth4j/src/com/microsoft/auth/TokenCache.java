@@ -178,7 +178,7 @@ public class TokenCache {
             } else {
                 log.info("Item not Present in the Cache");
             }
-            hasStateChanged = true;
+            this.setHasStateChanged(true);
         }
     }
 */
@@ -188,11 +188,11 @@ public class TokenCache {
     /// </summary>
     public void clear() throws Exception {
        synchronized(lock) {
-          onBeforeAccess();
+            onBeforeAccess();
             log.info(String.format("Clearing Cache :- %d items to be removed", tokenCacheDictionary.size()));
             this.tokenCacheDictionary.clear();
             log.info("Successfully Cleared Cache");
-            hasStateChanged = true;
+            this.setHasStateChanged(true);
             onAfterAccess();
         }
     }
@@ -255,7 +255,7 @@ public class TokenCache {
                 if (result.accessToken == null && result.refreshToken == null) {
                     this.tokenCacheDictionary.remove(cacheKey);
                     log.info( "An old item was removed from the cache");
-                    this.hasStateChanged = true;
+                    this.setHasStateChanged(true);
                     result = null;
                 }
                 if (result != null) {
@@ -285,7 +285,7 @@ public class TokenCache {
             log.info("An item was stored in the cache");
             updateCachedMrrtRefreshTokens(result, authority, clientId, subjectType);
 
-            hasStateChanged = true;
+            this.setHasStateChanged(true);
         }
     }
 
