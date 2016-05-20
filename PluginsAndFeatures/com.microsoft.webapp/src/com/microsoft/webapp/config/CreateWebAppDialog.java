@@ -100,7 +100,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText(Messages.crtWebAppTtl);
-		Image image = WebAppUtils.getImage();
+		Image image = WebAppUtils.getImage(Messages.dlgImgPath);
 		if (image != null) {
 			setTitleImage(image);
 		}

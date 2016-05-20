@@ -1495,4 +1495,14 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
     	return requestApplicationInsightsSDK(subscriptionId, AzureSDKHelper.createApplicationInsightsResource(subscriptionId,
     			resourceGroupName, resourceName, location));
     }
+    
+    @NotNull
+    @Override
+    public Void enableWebSockets(@NotNull String subscriptionId,
+    		@NotNull String webSpaceName,
+    		@NotNull String webSiteName,
+    		@NotNull String location,
+    		@NotNull boolean enableSocket) throws AzureCmdException {
+    	return requestWebSiteSDK(subscriptionId, AzureSDKHelper.enableWebSockets(webSpaceName, webSiteName, location, enableSocket));
+    }
 }
