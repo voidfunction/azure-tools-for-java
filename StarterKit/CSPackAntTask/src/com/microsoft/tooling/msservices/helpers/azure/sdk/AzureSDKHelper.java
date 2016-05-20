@@ -75,6 +75,7 @@ import com.microsoft.azure.management.websites.models.WebSiteListParameters;
 import com.microsoft.azure.management.websites.models.WebSiteListResponse;
 import com.microsoft.azure.management.websites.models.WebSiteUpdateConfigurationDetails;
 import com.microsoft.azure.management.websites.models.WebSiteUpdateConfigurationParameters;
+import com.microsoft.azure.management.websites.models.WebSiteState;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;

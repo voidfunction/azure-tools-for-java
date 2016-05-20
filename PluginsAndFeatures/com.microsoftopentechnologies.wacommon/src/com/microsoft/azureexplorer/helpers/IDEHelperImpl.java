@@ -182,4 +182,41 @@ public class IDEHelperImpl implements IDEHelper {
     public Object getCurrentProject() {
         return AzureManagerImpl.DEFAULT_PROJECT;
     }
+
+    @Override
+    public void setApplicationProperty(@NotNull String name, @NotNull String value) {
+    	setProperty(name, value);
+    }
+
+    @Override
+    public void unsetApplicationProperty(@NotNull String name) {
+    	unsetProperty(name);
+    }
+
+    @Override
+    @Nullable
+    public String getApplicationProperty(@NotNull String name) {
+    	return getProperty(name);
+    }
+
+    @Override
+    public void setApplicationProperties(@NotNull String name, @NotNull String[] value) {
+    	setProperties(name, value);
+    }
+
+    @Override
+    public void unsetApplicatonProperties(@NotNull String name) {
+    	unsetProperty(name);
+    }
+
+    @Override
+    @Nullable
+    public String[] getApplicationProperties(@NotNull String name) {
+    	return getProperties(name);
+    }
+
+    @Override
+    public boolean isApplicationPropertySet(@NotNull String name) {
+    	return isPropertySet(name);
+    }
 }
