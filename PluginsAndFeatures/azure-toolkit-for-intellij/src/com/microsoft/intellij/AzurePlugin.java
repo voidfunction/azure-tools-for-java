@@ -34,6 +34,7 @@ import com.intellij.openapi.startup.StartupManager;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.util.PlatformUtils;
 import com.intellij.util.containers.HashSet;
+import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
@@ -49,7 +50,6 @@ import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.FileUtil;
-import com.microsoftopentechnologies.azurecommons.xmlhandling.ParseXMLUtilMethods;
 import com.microsoftopentechnologies.windowsazure.tools.cspack.Utils;
 
 import javax.swing.event.EventListenerList;
@@ -152,10 +152,10 @@ public class AzurePlugin extends AbstractProjectComponent {
                     if (prefValue == null || prefValue.isEmpty()) {
                         setValues(dataFile);
                     } else if (instID == null || instID.isEmpty()) {
-                        Document doc = ParseXMLUtilMethods.parseFile(dataFile);
+                        Document doc = ParserXMLUtility.parseXMLFile(dataFile);
                         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
                         DataOperations.updatePropertyValue(doc, message("instID"), dateFormat.format(new Date()));
-                        ParseXMLUtilMethods.saveXMLDocument(dataFile, doc);
+                        ParserXMLUtility.saveXMLFile(dataFile, doc);
                     }
                 } else {
                     // proceed with setValues method. Case of new plugin installation
@@ -200,7 +200,7 @@ public class AzurePlugin extends AbstractProjectComponent {
     }
 
     private void setValues(final String dataFile) throws Exception {
-        final Document doc = ParseXMLUtilMethods.parseFile(dataFile);
+        final Document doc = ParserXMLUtility.parseXMLFile(dataFile);
         ApplicationManager.getApplication().invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -211,7 +211,7 @@ public class AzurePlugin extends AbstractProjectComponent {
                 DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
                 DataOperations.updatePropertyValue(doc, message("instID"), dateFormat.format(new Date()));
                 try {
-                    ParseXMLUtilMethods.saveXMLDocument(dataFile, doc);
+                    ParserXMLUtility.saveXMLFile(dataFile, doc);
                 } catch (Exception ex) {
                     LOG.error(message("error"), ex);
                 }
