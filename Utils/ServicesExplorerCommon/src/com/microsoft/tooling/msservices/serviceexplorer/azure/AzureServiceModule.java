@@ -134,12 +134,12 @@ public class AzureServiceModule extends RefreshableNode {
 
             webappsModule.load();
         }
-        if (!vmArmServiceModule.isLoading()) {
-            if (!isDirectChild(vmArmServiceModule)) {
-                addChildNode(vmArmServiceModule);
-            }
-            vmArmServiceModule.load();
-        }
+//        if (!vmArmServiceModule.isLoading()) {
+//            if (!isDirectChild(vmArmServiceModule)) {
+//                addChildNode(vmArmServiceModule);
+//            }
+//            vmArmServiceModule.load();
+//        }
         if (hdInsightModule != null && !hdInsightModule.isLoading()) {
             if (!isDirectChild(hdInsightModule)) {
                 addChildNode(hdInsightModule);

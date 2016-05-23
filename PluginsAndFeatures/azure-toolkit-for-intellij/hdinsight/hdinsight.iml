@@ -10,11 +10,10 @@
     <orderEntry type="library" name="AzureCommons" level="project" />
     <orderEntry type="library" name="azure-sdk" level="project" />
     <orderEntry type="library" name="azure-arm-sdk" level="project" />
-    <orderEntry type="library" name="azure-activedirectory-interactive-auth-library-for-java" level="project" />
     <orderEntry type="library" name=".cspack" level="project" />
     <orderEntry type="library" name="antIntegration" level="project" />
     <orderEntry type="library" name="ProjectManagerLibrary" level="project" />
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" scope="PROVIDED">
       <library>
         <CLASSES>
           <root url="jar://$APPLICATION_PLUGINS_DIR$/Scala/lib/scala-plugin.jar!/" />

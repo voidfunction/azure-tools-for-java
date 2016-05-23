@@ -12,7 +12,7 @@ public class DarkThemeManager {
     private static final String Gold = "#FFA500";
     private static final String LightOrange = "#FFC66D";
 
-    private static final String Red = "red";
+    private static final String ColorRed = "red";
     private static final String Rose = "#FF5050";
 
     private static final String Black = "black";
@@ -62,7 +62,7 @@ public class DarkThemeManager {
             return Rose;
         }
 
-        return Red;
+        return ColorRed;
     }
 
     public String getInfoColor(){

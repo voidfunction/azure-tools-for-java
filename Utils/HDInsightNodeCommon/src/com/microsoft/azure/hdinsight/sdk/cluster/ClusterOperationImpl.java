@@ -36,7 +36,7 @@ public class ClusterOperationImpl implements IClusterOperation {
      * @throws IOException
      */
     public List<ClusterRawInfo> listCluster(Subscription subscription) throws IOException, HDIException, AzureCmdException {
-        String accessToken = AzureManagerImpl.getManager().getAccessToken(subscription.getId());
+        String accessToken = AzureManagerImpl.getManager(project).getAccessToken(subscription.getId());
         String response = AzureAADHelper.executeRequest(
                 CommonConstant.HDINSIGHT_CLUSTER_URI,
                 String.format("api/Clusters/GetAll?subscriptionIds=%s;&_=%d", subscription.getId(), new Date().getTime()),
