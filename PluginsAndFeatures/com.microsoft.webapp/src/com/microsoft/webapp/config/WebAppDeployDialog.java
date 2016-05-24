@@ -291,21 +291,16 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 	}
 
 	private void createSubscriptionDialog(boolean invokeSignIn) {
-		try {
-			ManageSubscriptionDialog dialog = new ManageSubscriptionDialog(getShell(), false, invokeSignIn);
-			dialog.create();
-			dialog.open();
-			subList = AzureManagerImpl.getManager().getSubscriptionList();
-			if (subList.size() == 0) {
-				setErrorMessage(Messages.noSubErrMsg);
-				list.setItems(new String[]{""});
-				selectedWebSite = null;
-			} else {
-				fillList(PreferenceUtil.loadPreference(String.format(Messages.webappKey, PluginUtil.getSelectedProject().getName())));
-			}
-		} catch(AzureCmdException ex) {
-			String msg = Messages.loadSubErrMsg + "\n" + String.format(Messages.webappExpMsg, ex.getMessage());
-			PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, msg, ex);
+		ManageSubscriptionDialog dialog = new ManageSubscriptionDialog(getShell(), false, invokeSignIn);
+		dialog.create();
+		dialog.open();
+		subList = AzureManagerImpl.getManager().getSubscriptionList();
+		if (subList.size() == 0) {
+			setErrorMessage(Messages.noSubErrMsg);
+			list.setItems(new String[]{""});
+			selectedWebSite = null;
+		} else {
+			fillList(PreferenceUtil.loadPreference(String.format(Messages.webappKey, PluginUtil.getSelectedProject().getName())));
 		}
 	}
 

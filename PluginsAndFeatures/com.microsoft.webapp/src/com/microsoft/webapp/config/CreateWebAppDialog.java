@@ -405,24 +405,20 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	}
 
 	private void populateSubscriptions() {
-		try {
-			List<Subscription> subList = AzureManagerImpl.getManager().getSubscriptionList();
-			if (subList.size() > 0) {
-				for (Subscription sub : subList) {
-					subMap.put(sub.getId(), sub.getName());
-				}
-				Collection<String> values = subMap.values();
-				String[] subNameArray = values.toArray(new String[values.size()]);
-				subscriptionCombo.setItems(subNameArray);
-				subscriptionCombo.setText(subNameArray[0]);
-				newGroupBtn.setEnabled(true);
-			} else {
-				subscriptionCombo.removeAll();
-				newGroupBtn.setEnabled(false);
-				newPlanBtn.setEnabled(false);
+		List<Subscription> subList = AzureManagerImpl.getManager().getSubscriptionList();
+		if (subList.size() > 0) {
+			for (Subscription sub : subList) {
+				subMap.put(sub.getId(), sub.getName());
 			}
-		} catch (AzureCmdException e) {
-			Activator.getDefault().log(Messages.errTtl, e);
+			Collection<String> values = subMap.values();
+			String[] subNameArray = values.toArray(new String[values.size()]);
+			subscriptionCombo.setItems(subNameArray);
+			subscriptionCombo.setText(subNameArray[0]);
+			newGroupBtn.setEnabled(true);
+		} else {
+			subscriptionCombo.removeAll();
+			newGroupBtn.setEnabled(false);
+			newPlanBtn.setEnabled(false);
 		}
 	}
 
