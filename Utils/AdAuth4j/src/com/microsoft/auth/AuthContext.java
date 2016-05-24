@@ -14,6 +14,11 @@ public class AuthContext {
     
     Authenticator authenticator;
     TokenCache tokenCache;
+    private static IWebUi userDefinedWebUi = null;
+    
+    public static void setUserDefinedWebUi(IWebUi userDefinedWebUi) {
+    	AuthContext.userDefinedWebUi = userDefinedWebUi;
+    }
     
     public AuthContext(String authority, TokenCache tokenCache) throws Exception {
         this(authority, AuthorityValidationType.NotProvided, tokenCache);
@@ -25,15 +30,24 @@ public class AuthContext {
         this.tokenCache = tokenCache;
     }
     
-    public Future<AuthenticationResult> acquireTokenAsync(String resource, String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userIdentifier) throws Exception {
+    public AuthenticationResult acquireToken(String resource, String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userIdentifier) throws Exception {
         AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(this.authenticator, this.tokenCache,
                 resource, clientId, redirectUri, promptBehavior, (userIdentifier != null) ? userIdentifier : UserIdentifier.anyUser,
                 this.createWebAuthenticationDialog(promptBehavior));
-        return handler.runAsync();
+        return handler.run();
+    }
+    
+    public Future<AuthenticationResult> acquireTokenAsync(String resource, String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userIdentifier) throws Exception {
+    	AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(this.authenticator, this.tokenCache,
+    			resource, clientId, redirectUri, promptBehavior, (userIdentifier != null) ? userIdentifier : UserIdentifier.anyUser,
+    					this.createWebAuthenticationDialog(promptBehavior));
+    	return handler.runAsync();
     }
     
     private IWebUi createWebAuthenticationDialog(PromptBehavior promptBehavior) throws Exception {
-//        return new WebUi(promptBehavior);
+        if(userDefinedWebUi != null) {
+        	return userDefinedWebUi;
+        }
         WebUi webUi = WebUi.getInstance();
         if(promptBehavior != PromptBehavior.Always) {
             webUi.setUseCookie(true);
