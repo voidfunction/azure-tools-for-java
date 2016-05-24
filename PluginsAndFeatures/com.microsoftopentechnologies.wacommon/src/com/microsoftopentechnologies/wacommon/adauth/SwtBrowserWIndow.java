@@ -1,9 +1,6 @@
 package com.microsoftopentechnologies.wacommon.adauth;
 
 import java.awt.Dimension;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.URI;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -11,11 +8,6 @@ import java.util.concurrent.Future;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
-//import org.eclipse.ui.progress.UIJob;
-//import org.eclipse.core.runtime.IProgressMonitor;
-//import org.eclipse.core.runtime.IStatus;
-//import org.eclipse.core.runtime.Status;
-//import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
@@ -56,7 +48,6 @@ public class SwtBrowserWIndow implements com.microsoft.auth.IWebUi {
 		try {
 			
 			final Runnable gui = new Runnable() {
-//			class BrowserWindow implements Runnable {
 				@Override
 				public void run() {
 					
@@ -103,26 +94,12 @@ public class SwtBrowserWIndow implements com.microsoft.auth.IWebUi {
 			final Callable<String> worker = new Callable<String>() {
 	        	@Override
 	        	public String call() {
-	        		System.out.println("==> call -------------");
-//					try {
-//						ServerSocket listener = new ServerSocket(communicationPort);
-//						final Socket socket = listener.accept();
-//						listener.close();
-//						socket.close();
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-					
 	        		return getResult();
 	        			
 	        	}
 	        };
        
-//	        Display.getDefault().asyncExec(gui);
 	        display.syncExec(gui);
-//	        display.syncExec(new BrowserWindow());
-//	        new Thread(gui).start();
 	        return Executors.newSingleThreadExecutor().submit(worker);
 	        
 		} catch (Exception e) {
