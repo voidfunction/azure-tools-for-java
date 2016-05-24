@@ -20,6 +20,7 @@
 package com.microsoftopentechnologies.windowsazure.tools.build;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.microsoft.auth.IWebUi;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
@@ -154,4 +155,10 @@ public class AntIDEHelper implements IDEHelper {
     public Object getCurrentProject() {
         return AzureManagerImpl.DEFAULT_PROJECT;
     }
+
+	@Override
+	public IWebUi getWebUi() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

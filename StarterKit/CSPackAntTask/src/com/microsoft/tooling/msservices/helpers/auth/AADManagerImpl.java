@@ -56,6 +56,10 @@ public class AADManagerImpl implements AADManager {
 
     public AADManagerImpl() {
         tokenCache = new com.microsoft.auth.TokenCache();
+        
+        com.microsoft.auth.IWebUi webUi = DefaultLoader.getIdeHelper().getWebUi();
+        if(webUi != null)
+        	com.microsoft.auth.AuthContext.setUserDefinedWebUi(webUi);
 
         try {
             final com.microsoft.auth.
@@ -119,8 +123,8 @@ public class AADManagerImpl implements AADManager {
         try {
             AuthContext authContext = new com.microsoft.auth.AuthContext(String.format("%s/%s", AUTHORITY, tenantName), tokenCache);
             com.microsoft.auth.
-                    AuthenticationResult result = authContext.acquireTokenAsync(RESOURCE, CLIENT_ID, REDIRECT_URI,
-                    com.microsoft.auth.PromptBehavior.Auto, userIdentifier).get();
+                    AuthenticationResult result = authContext.acquireToken(RESOURCE, CLIENT_ID, REDIRECT_URI,
+                    com.microsoft.auth.PromptBehavior.Auto, userIdentifier);
             return result;
         } catch (Throwable throwable) {
             logger.warning(throwable.getMessage());

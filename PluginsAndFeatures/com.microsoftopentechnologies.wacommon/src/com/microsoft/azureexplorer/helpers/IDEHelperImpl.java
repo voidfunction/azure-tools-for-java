@@ -29,6 +29,8 @@ import org.eclipse.swt.widgets.Display;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
+import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
@@ -218,5 +220,10 @@ public class IDEHelperImpl implements IDEHelper {
     @Override
     public boolean isApplicationPropertySet(@NotNull String name) {
     	return isPropertySet(name);
+    }
+    
+    @Override
+    public  com.microsoft.auth.IWebUi getWebUi() {
+    	return new com.microsoftopentechnologies.wacommon.adauth.SwtBrowserWIndow();
     }
 }
