@@ -79,7 +79,7 @@ public class ClusterOperationImpl implements IClusterOperation {
      * @throws IOException
      */
     public ClusterConfiguration getClusterConfiguration(Subscription subscription, String clusterId) throws IOException, HDIException, AzureCmdException {
-        String accessToken = AzureManagerImpl.getManager().getAccessToken(subscription.getId());
+        String accessToken = AzureManagerImpl.getManager(project).getAccessToken(subscription.getId());
         String response = AzureAADHelper.executeRequest(
                 CommonConstant.MANAGEMENT_URI,
                 String.format("%s/configurations?api-version=%s", clusterId.replaceAll("/+$", ""), VERSION),
