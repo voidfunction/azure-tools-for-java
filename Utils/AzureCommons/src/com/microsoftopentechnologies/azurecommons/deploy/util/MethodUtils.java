@@ -23,16 +23,10 @@ package com.microsoftopentechnologies.azurecommons.deploy.util;
 import java.util.Collection;
 import java.util.List;
 
-
-
-
-
-import com.microsoftopentechnologies.azuremanagementutil.model.StorageService;
-import com.microsoftopentechnologies.azuremanagementutil.model.StorageServices;
-import com.microsoftopentechnologies.azuremanagementutil.model.Subscription;
 import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccount;
 import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccountRegistry;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.PreferenceSetUtil;
+import com.microsoftopentechnologies.azuremanagementutil.model.Subscription;
 
 public class MethodUtils {
 

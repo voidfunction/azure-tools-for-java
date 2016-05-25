@@ -1,5 +1,10 @@
 package com.microsoft.webapp.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +18,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -26,6 +32,7 @@ public class WebAppStartup implements IStartup {
 
 	@Override
 	public void earlyStartup() {
+		copyPluginComponents();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		// register resource change listener
 		WebAppResourceChangeListener listener = new WebAppResourceChangeListener();
@@ -47,13 +54,72 @@ public class WebAppStartup implements IStartup {
 		}
 		String[] keys = PreferenceUtil.getPreferenceKeys();
 		for (String key : keys) {
-			if (key.endsWith(".webapps")) {
+			if (key.endsWith(".webapps") && !key.equalsIgnoreCase(com.microsoftopentechnologies.wacommon.utils.Messages.prefFileName + ".webapps")) {
 				String projName = key.substring(0, key.lastIndexOf("."));
 				if (!webProjects.contains(projName)) {
 					PreferenceUtil.unsetPreference(key);
 				}
 			}
 		}
+	}
+
+	private void copyPluginComponents() {
+		try {
+			String pluginInstLoc = String.format("%s%s%s",
+					PluginUtil.pluginFolder,
+					File.separator, Messages.webAppPluginID);
+			if (!new File(pluginInstLoc).exists()) {
+				new File(pluginInstLoc).mkdir();
+			}
+			// JAR file
+			String debugJarFile = String.format("%s%s%s", pluginInstLoc,
+					File.separator, Messages.debugJarName);
+			if (new File(debugJarFile).exists()) {
+				new File(debugJarFile).delete();
+			}
+			copyResourceFile(Messages.debugJarEntry, debugJarFile);
+
+			// Bat file
+			String debugBatFile = String.format("%s%s%s", pluginInstLoc,
+					File.separator, Messages.debugBatName);
+			if (new File(debugBatFile).exists()) {
+				new File(debugBatFile).delete();
+			}
+			copyResourceFile(Messages.debugBatEntry, debugBatFile);
+
+			// web.config
+			String configFile = String.format("%s%s%s", pluginInstLoc,
+					File.separator, Messages.configName);
+			if (new File(configFile).exists()) {
+				new File(configFile).delete();
+			}
+			copyResourceFile(Messages.configEntry, configFile);
+		} catch (Exception e) {
+			Activator.getDefault().log(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * copy specified file to eclipse plugins folder
+	 * @param name : Name of file
+	 * @param entry : Location of file
+	 */
+	public static void copyResourceFile(String resourceFile , String destFile) {
+		URL url = Activator.getDefault().getBundle()
+				.getEntry(resourceFile);
+		URL fileURL;
+		try {
+			fileURL = FileLocator.toFileURL(url);
+			URL resolve = FileLocator.resolve(fileURL);
+			File file = new File(resolve.getFile());
+			FileInputStream fis = new FileInputStream(file);
+			File outputFile = new File(destFile);
+			FileOutputStream fos = new FileOutputStream(outputFile);
+			com.microsoftopentechnologies.azurecommons.wacommonutil.FileUtil.writeFile(fis , fos);
+		} catch (IOException e) {
+			Activator.getDefault().log(e.getMessage(), e);
+		}
+
 	}
 
 	private class WebAppResourceChangeListener implements IResourceChangeListener {

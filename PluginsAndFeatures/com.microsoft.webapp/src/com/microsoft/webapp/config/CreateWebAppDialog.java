@@ -100,7 +100,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText(Messages.crtWebAppTtl);
-		Image image = WebAppUtils.getImage();
+		Image image = WebAppUtils.getImage(Messages.dlgImgPath);
 		if (image != null) {
 			setTitleImage(image);
 		}
@@ -405,24 +405,20 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	}
 
 	private void populateSubscriptions() {
-		try {
-			List<Subscription> subList = AzureManagerImpl.getManager().getSubscriptionList();
-			if (subList.size() > 0) {
-				for (Subscription sub : subList) {
-					subMap.put(sub.getId(), sub.getName());
-				}
-				Collection<String> values = subMap.values();
-				String[] subNameArray = values.toArray(new String[values.size()]);
-				subscriptionCombo.setItems(subNameArray);
-				subscriptionCombo.setText(subNameArray[0]);
-				newGroupBtn.setEnabled(true);
-			} else {
-				subscriptionCombo.removeAll();
-				newGroupBtn.setEnabled(false);
-				newPlanBtn.setEnabled(false);
+		List<Subscription> subList = AzureManagerImpl.getManager().getSubscriptionList();
+		if (subList.size() > 0) {
+			for (Subscription sub : subList) {
+				subMap.put(sub.getId(), sub.getName());
 			}
-		} catch (AzureCmdException e) {
-			Activator.getDefault().log(Messages.errTtl, e);
+			Collection<String> values = subMap.values();
+			String[] subNameArray = values.toArray(new String[values.size()]);
+			subscriptionCombo.setItems(subNameArray);
+			subscriptionCombo.setText(subNameArray[0]);
+			newGroupBtn.setEnabled(true);
+		} else {
+			subscriptionCombo.removeAll();
+			newGroupBtn.setEnabled(false);
+			newPlanBtn.setEnabled(false);
 		}
 	}
 

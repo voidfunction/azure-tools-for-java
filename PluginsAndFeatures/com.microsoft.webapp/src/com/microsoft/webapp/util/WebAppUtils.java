@@ -20,19 +20,28 @@
 package com.microsoft.webapp.util;
 
 import java.io.FileInputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.ILaunchGroup;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.graphics.Image;
 
+import com.microsoft.tooling.msservices.model.ws.WebSite;
+import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoft.webapp.activator.Activator;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class WebAppUtils {
-	public static Image getImage() {
+	public static Image getImage(String entry) {
 		Image image = null;
 		try {
-			URL imgUrl = Activator.getDefault().getBundle()
-					.getEntry(com.microsoft.webapp.config.Messages.dlgImgPath);
+			URL imgUrl = Activator.getDefault().getBundle().getEntry(entry);
 			URL imgFileURL = FileLocator.toFileURL(imgUrl);
 			URL path = FileLocator.resolve(imgFileURL);
 			String imgpath = path.getFile();
@@ -41,5 +50,50 @@ public class WebAppUtils {
 			Activator.getDefault().log(e.getMessage(), e);
 		}
 		return image;
+	}
+
+	public static List<String> prepareListToDisplay(Map<WebSite, WebSiteConfiguration> webSiteConfigMap, List<WebSite> webSiteList) {
+		// prepare list to display
+		List<String> listToDisplay = new ArrayList<String>();
+		for (WebSite webSite : webSiteList) {
+			WebSiteConfiguration webSiteConfiguration = webSiteConfigMap.get(webSite);
+			StringBuilder builder = new StringBuilder(webSite.getName());
+			if (!webSiteConfiguration.getJavaVersion().isEmpty()) {
+				builder.append(" (JRE ");
+				builder.append(webSiteConfiguration.getJavaVersion());
+				if (!webSiteConfiguration.getJavaContainer().isEmpty()) {
+					builder.append("; ");
+					builder.append(webSiteConfiguration.getJavaContainer());
+					builder.append(" ");
+					builder.append(webSiteConfiguration.getJavaContainerVersion());
+				}
+				builder.append(")");
+			} else {
+				builder.append(" (.NET ");
+				builder.append(webSiteConfiguration.getNetFrameworkVersion());
+				if (!webSiteConfiguration.getPhpVersion().isEmpty()) {
+					builder.append("; PHP ");
+					builder.append(webSiteConfiguration.getPhpVersion());
+				}
+				builder.append(")");
+			}
+			listToDisplay.add(builder.toString());
+		}
+		return listToDisplay;
+	}
+
+	// HTTP GET request
+	public static void sendGet(String sitePath) throws Exception {
+		URL url = new URL(sitePath);
+		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+		con.setRequestProperty("User-Agent", "AzureToolkit for Eclipse");
+		con.getResponseCode();
+	}
+	
+	public static void openDebugLaunchDialog(Object toSelect) {
+		ILaunchGroup[] grp = DebugUITools.getLaunchGroups();
+		DebugUITools.openLaunchConfigurationDialogOnGroup(PluginUtil.getParentShell(),
+				new StructuredSelection(toSelect), grp[3].getIdentifier());
 	}
 }

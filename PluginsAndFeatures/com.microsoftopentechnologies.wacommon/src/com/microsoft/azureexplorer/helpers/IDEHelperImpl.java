@@ -29,6 +29,8 @@ import org.eclipse.swt.widgets.Display;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
+import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
@@ -181,5 +183,47 @@ public class IDEHelperImpl implements IDEHelper {
 
     public Object getCurrentProject() {
         return AzureManagerImpl.DEFAULT_PROJECT;
+    }
+
+    @Override
+    public void setApplicationProperty(@NotNull String name, @NotNull String value) {
+    	setProperty(name, value);
+    }
+
+    @Override
+    public void unsetApplicationProperty(@NotNull String name) {
+    	unsetProperty(name);
+    }
+
+    @Override
+    @Nullable
+    public String getApplicationProperty(@NotNull String name) {
+    	return getProperty(name);
+    }
+
+    @Override
+    public void setApplicationProperties(@NotNull String name, @NotNull String[] value) {
+    	setProperties(name, value);
+    }
+
+    @Override
+    public void unsetApplicatonProperties(@NotNull String name) {
+    	unsetProperty(name);
+    }
+
+    @Override
+    @Nullable
+    public String[] getApplicationProperties(@NotNull String name) {
+    	return getProperties(name);
+    }
+
+    @Override
+    public boolean isApplicationPropertySet(@NotNull String name) {
+    	return isPropertySet(name);
+    }
+    
+    @Override
+    public  com.microsoft.auth.IWebUi getWebUi() {
+    	return new com.microsoftopentechnologies.wacommon.adauth.SwtBrowserWIndow();
     }
 }

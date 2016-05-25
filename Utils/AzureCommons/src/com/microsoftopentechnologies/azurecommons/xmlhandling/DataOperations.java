@@ -24,9 +24,9 @@ import java.util.HashMap;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
-import com.microsoftopentechnologies.azurecommons.xmlhandling.ParseXMLUtilMethods;
-
 import org.w3c.dom.Document;
+
+import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 
 public class DataOperations {
 	public static final String PROPERTY = "/data/property[@name='%s']";
@@ -44,7 +44,7 @@ public class DataOperations {
 			HashMap<String, String> nodeAttribites = new HashMap<String, String>();
 			nodeAttribites.put("name", propertyName);
 			nodeAttribites.put("value", value);
-			ParseXMLUtilMethods.updateOrCreateElement(doc, nodeExpr, "/data", "property", true, nodeAttribites);
+			ParserXMLUtility.updateOrCreateElement(doc, nodeExpr, "/data", "property", true, nodeAttribites);
 		} catch (Exception ex) {
 			// ignore
 		}
@@ -59,7 +59,7 @@ public class DataOperations {
 	public static String getProperty(String dataFile, String propName) {
 		String propVal = null;
 		try {
-			Document doc = ParseXMLUtilMethods.parseFile(dataFile);
+			Document doc = ParserXMLUtility.parseXMLFile(dataFile);
 			if (doc != null) {
 				String nodeExpr = String.format(PROPERTY_VAL, propName);
 				XPath xPath = XPathFactory.newInstance().newXPath();

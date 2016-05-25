@@ -43,6 +43,7 @@ import com.intellij.packaging.artifacts.Artifact;
 import com.intellij.packaging.impl.artifacts.ArtifactUtil;
 import com.intellij.packaging.impl.compiler.ArtifactCompileScope;
 import com.intellij.packaging.impl.compiler.ArtifactsWorkspaceSettings;
+import com.microsoft.auth.IWebUi;
 import com.microsoft.intellij.ApplicationSettings;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
@@ -97,6 +98,11 @@ public class IDEHelperImpl implements IDEHelper {
     @Override
     public boolean isApplicationPropertySet(@NotNull String name) {
         return ApplicationSettings.getInstance().isPropertySet(name);
+    }
+
+    @Override
+    public IWebUi getWebUi() {
+        return null;
     }
 
     @Override

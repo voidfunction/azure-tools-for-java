@@ -24,12 +24,12 @@ package com.microsoft.intellij.ui;
 
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.util.WAHelper;
 import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
-import com.microsoftopentechnologies.azurecommons.xmlhandling.ParseXMLUtilMethods;
 
 import javax.swing.*;
 import java.io.File;
@@ -79,7 +79,7 @@ public class AzurePanel implements AzureAbstractConfigurablePanel {
     public boolean doOKAction() {
         try {
             if (new File(dataFile).exists()) {
-                Document doc = ParseXMLUtilMethods.parseFile(dataFile);
+                Document doc = ParserXMLUtility.parseXMLFile(dataFile);
                 String oldPrefVal = DataOperations.getProperty(dataFile, message("prefVal"));
                 DataOperations.updatePropertyValue(doc, message("prefVal"), String.valueOf(checkBox1.isSelected()));
                 String version = DataOperations.getProperty(dataFile, message("pluginVersion"));
@@ -91,7 +91,7 @@ public class AzurePanel implements AzureAbstractConfigurablePanel {
                     DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
                     DataOperations.updatePropertyValue(doc, message("instID"), dateFormat.format(new Date()));
                 }
-                ParseXMLUtilMethods.saveXMLDocument(dataFile, doc);
+                ParserXMLUtility.saveXMLFile(dataFile, doc);
                 // Its necessary to call application insights custom create event after saving data.xml
                 if (oldPrefVal != null && !oldPrefVal.isEmpty()
                         && oldPrefVal.equals("false") && checkBox1.isSelected()) {
@@ -112,12 +112,12 @@ public class AzurePanel implements AzureAbstractConfigurablePanel {
     }
 
     private void setValues(String dataFile) throws Exception {
-        Document doc = ParseXMLUtilMethods.parseFile(dataFile);
+        Document doc = ParserXMLUtility.parseXMLFile(dataFile);
         DataOperations.updatePropertyValue(doc, message("pluginVersion"), AzurePlugin.PLUGIN_VERSION);
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         DataOperations.updatePropertyValue(doc, message("instID"), dateFormat.format(new Date()));
         DataOperations.updatePropertyValue(doc, message("prefVal"), String.valueOf(checkBox1.isSelected()));
-        ParseXMLUtilMethods.saveXMLDocument(dataFile, doc);
+        ParserXMLUtility.saveXMLFile(dataFile, doc);
         if (checkBox1.isSelected()) {
             AppInsightsCustomEvent.create(message("telAgrEvtName"), "");
         }

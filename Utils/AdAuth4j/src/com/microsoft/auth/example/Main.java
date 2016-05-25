@@ -81,7 +81,7 @@ public class Main {
 
         System.out.println(String.format("\n======> tenantId: %s ======================\n", tenant));
         AuthContext ac = new AuthContext(String.format("%s/%s", authority, tenant), cache);
-        AuthenticationResult result = ac.acquireTokenAsync(resource, clientId, redirectUri, PromptBehavior.Auto, null).get();
+        AuthenticationResult result = ac.acquireToken(resource, clientId, redirectUri, PromptBehavior.Auto, null);
         System.out.println("token: " + result.getAccessToken());
         printSubsriptins(result.getAccessToken());
 
@@ -91,7 +91,7 @@ public class Main {
             System.out.println(String.format("\n======> tenantId: %s ======================\n", tid));
 
             AuthContext ac1 = new AuthContext(String.format("%s/%s", authority, tid), cache);
-            AuthenticationResult result1 = ac1.acquireTokenAsync(resource, clientId, redirectUri, PromptBehavior.Auto, null).get();
+            AuthenticationResult result1 = ac1.acquireToken(resource, clientId, redirectUri, PromptBehavior.Auto, null);
             System.out.println("token: " + result1.getAccessToken());
             printSubsriptins(result1.getAccessToken());
         }

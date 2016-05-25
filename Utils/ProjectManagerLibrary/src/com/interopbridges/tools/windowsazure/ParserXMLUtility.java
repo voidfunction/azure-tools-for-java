@@ -44,13 +44,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-final class ParserXMLUtility {
+public final class ParserXMLUtility {
 
 	private static final int BUFF_SIZE = 1024;
-
-	private ParserXMLUtility() {
-
-	}
 
 	/**
 	 * Parses XML file and returns XML document.
@@ -60,7 +56,7 @@ final class ParserXMLUtility {
 	 * @return XML document or <B>null</B> if error occurred
 	 * @throws WindowsAzureInvalidProjectOperationException
 	 */
-	protected static Document parseXMLFile(final String fileName)
+	public static Document parseXMLFile(final String fileName)
 			throws WindowsAzureInvalidProjectOperationException {
 		try {
 			DocumentBuilder docBuilder;
@@ -115,7 +111,7 @@ final class ParserXMLUtility {
 	 * @throws WindowsAzureInvalidProjectOperationException
 	 */
 
-	protected static boolean saveXMLFile(String fileName, Document doc)
+	public static boolean saveXMLFile(String fileName, Document doc)
 			throws IOException, WindowsAzureInvalidProjectOperationException {
 		File xmlFile = null;
 		FileOutputStream fos = null;
@@ -412,8 +408,6 @@ final class ParserXMLUtility {
 			try {
 				XPath xPath = XPathFactory.newInstance().newXPath();
 				Element element = (Element) xPath.evaluate(nodeExpression, doc, XPathConstants.NODE);
-	
-				// If element doesn't exist create one
 				if (element == null) {
 					return false;
 				} else {
@@ -423,7 +417,5 @@ final class ParserXMLUtility {
 				throw new WindowsAzureInvalidProjectOperationException(WindowsAzureConstants.EXCP_NODE_EXISTS_CHECK, e);
 			}
 		}
-		
 	}
-
 }

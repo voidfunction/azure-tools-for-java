@@ -78,6 +78,8 @@ public interface IDEHelper {
         }
     }
 
+    com.microsoft.auth.IWebUi getWebUi();
+    
     void closeFile(@NotNull Object projectObject, @NotNull Object openedFile);
 
     void invokeLater(@NotNull Runnable runnable);
@@ -149,4 +151,5 @@ public interface IDEHelper {
     String[] getApplicationProperties(@NotNull String name);
 
     boolean isApplicationPropertySet(@NotNull String name);
+    
 }

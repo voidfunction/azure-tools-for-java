@@ -126,32 +126,27 @@ public class SubscriptionStep extends WizardPage {
     }
 
     private void loadSubscriptions() {
-        try {
-            AzureManager manager = AzureManagerImpl.getManager();
+        AzureManager manager = AzureManagerImpl.getManager();
 
-            if (manager.authenticated()) {
-                String upn = manager.getUserInfo().getUniqueName();
-                userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
-            } else {
-                userInfoLabel.setText("");
-            }
-
-            java.util.List<Subscription> subscriptionList = manager.getSubscriptionList();
-
-            final Vector<Subscription> subscriptions = new Vector<Subscription>((subscriptionList == null) ? new Vector<Subscription>() : subscriptionList);
-            for (Subscription subscription : subscriptions) {
-                subscriptionComboBox.add(subscription.getName());
-                subscriptionComboBox.setData(subscription.getName(), subscription);
-            }
-
-            if (!subscriptions.isEmpty()) {
-                subscriptionComboBox.select(0);
-                wizard.setSubscription((Subscription) subscriptionComboBox.getData(subscriptionComboBox.getText()));
-            }
-            setPageComplete(!subscriptions.isEmpty());
-        } catch (AzureCmdException e) {
-        	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
-        			"An error occurred while loading the subscriptions list.", e);
+        if (manager.authenticated()) {
+            String upn = manager.getUserInfo().getUniqueName();
+            userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
+        } else {
+            userInfoLabel.setText("");
         }
+
+        java.util.List<Subscription> subscriptionList = manager.getSubscriptionList();
+
+        final Vector<Subscription> subscriptions = new Vector<Subscription>((subscriptionList == null) ? new Vector<Subscription>() : subscriptionList);
+        for (Subscription subscription : subscriptions) {
+            subscriptionComboBox.add(subscription.getName());
+            subscriptionComboBox.setData(subscription.getName(), subscription);
+        }
+
+        if (!subscriptions.isEmpty()) {
+            subscriptionComboBox.select(0);
+            wizard.setSubscription((Subscription) subscriptionComboBox.getData(subscriptionComboBox.getText()));
+        }
+        setPageComplete(!subscriptions.isEmpty());
     }
 }

@@ -29,8 +29,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IStartup;
 import org.w3c.dom.Document;
 
+import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
-import com.microsoftopentechnologies.azurecommons.xmlhandling.ParseXMLUtilMethods;
 import com.microsoftopentechnologies.wacommon.Activator;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.FileUtil;
@@ -97,10 +97,10 @@ public class WACPStartUp implements IStartup {
 							if (prefValue == null || prefValue.isEmpty()) {
 								setValues(dataFile);
 							} else if (instID == null || instID.isEmpty()) {
-								Document doc = ParseXMLUtilMethods.parseFile(dataFile);
+								Document doc = ParserXMLUtility.parseXMLFile(dataFile);
 								DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 								DataOperations.updatePropertyValue(doc, Messages.instID, dateFormat.format(new Date()));
-								ParseXMLUtilMethods.saveXMLDocument(dataFile, doc);
+								ParserXMLUtility.saveXMLFile(dataFile, doc);
 							}
 						} else {
 							// proceed with setValues method. Case of new plugin installation
@@ -128,7 +128,7 @@ public class WACPStartUp implements IStartup {
 	 * @throws Exception
 	 */
 	private void setValues(final String dataFile) throws Exception {
-		final Document doc = ParseXMLUtilMethods.parseFile(dataFile);
+		final Document doc = ParserXMLUtility.parseXMLFile(dataFile);
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
 				boolean accepted = false;
@@ -142,7 +142,7 @@ public class WACPStartUp implements IStartup {
 				Activator.getDefault().getBundle().getVersion().toString());
 		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 		DataOperations.updatePropertyValue(doc, Messages.instID, dateFormat.format(new Date()));
-		ParseXMLUtilMethods.saveXMLDocument(dataFile, doc);
+		ParserXMLUtility.saveXMLFile(dataFile, doc);
 		String prefVal = DataOperations.getProperty(dataFile, Messages.prefVal);
 		if (prefVal != null && !prefVal.isEmpty() && prefVal.equals("true")) {
 			AppInsightsCustomEvent.create(Messages.telAgrEvtName, "");

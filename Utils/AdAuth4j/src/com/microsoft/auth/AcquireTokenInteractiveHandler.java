@@ -53,7 +53,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     }
     
     private void acquireAuthorization() throws Exception {
-        long allowedInterval = 25000; // authorization code ttl
+        long allowedInterval = 300000; // authorization code ttl
         if(authorizationResult != null
             && !isTenantLess
             && System.currentTimeMillis( )- authorizationResultTimestamp < allowedInterval) {

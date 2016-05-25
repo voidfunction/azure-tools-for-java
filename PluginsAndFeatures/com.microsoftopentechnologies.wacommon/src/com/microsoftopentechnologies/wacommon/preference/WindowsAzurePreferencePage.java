@@ -40,8 +40,8 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.w3c.dom.Document;
 
+import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
-import com.microsoftopentechnologies.azurecommons.xmlhandling.ParseXMLUtilMethods;
 import com.microsoftopentechnologies.wacommon.Activator;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.FileUtil;
@@ -134,7 +134,7 @@ extends PreferencePage implements IWorkbenchPreferencePage {
 		try {
 			if (new File(pluginInstLoc).exists()) {
 				if (new File(dataFile).exists()) {
-					Document doc = ParseXMLUtilMethods.parseFile(dataFile);
+					Document doc = ParserXMLUtility.parseXMLFile(dataFile);
 					String oldPrefVal = DataOperations.getProperty(dataFile, Messages.prefVal);
 					DataOperations.updatePropertyValue(doc, Messages.prefVal,
 							String.valueOf(btnPreference.getSelection()));
@@ -148,7 +148,7 @@ extends PreferencePage implements IWorkbenchPreferencePage {
 						DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 						DataOperations.updatePropertyValue(doc, Messages.instID, dateFormat.format(new Date()));
 					}
-					ParseXMLUtilMethods.saveXMLDocument(dataFile, doc);
+					ParserXMLUtility.saveXMLFile(dataFile, doc);
 					// Its necessary to call application insights custom create event after saving data.xml
 					if (oldPrefVal != null && !oldPrefVal.isEmpty()
 							&& oldPrefVal.equals("false") && btnPreference.getSelection()) {
@@ -187,14 +187,14 @@ extends PreferencePage implements IWorkbenchPreferencePage {
 	 * @throws Exception
 	 */
 	private void setValues(String dataFile) throws Exception {
-		Document doc = ParseXMLUtilMethods.parseFile(dataFile);
+		Document doc = ParserXMLUtility.parseXMLFile(dataFile);
 		DataOperations.updatePropertyValue(doc, Messages.version,
 				Activator.getDefault().getBundle().getVersion().toString());
 		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 		DataOperations.updatePropertyValue(doc, Messages.instID, dateFormat.format(new Date()));
 		DataOperations.updatePropertyValue(doc, Messages.prefVal,
 				String.valueOf(btnPreference.getSelection()));
-		ParseXMLUtilMethods.saveXMLDocument(dataFile, doc);
+		ParserXMLUtility.saveXMLFile(dataFile, doc);
 		if (btnPreference.getSelection()) {
 			AppInsightsCustomEvent.create(Messages.telAgrEvtName, "");
 		}

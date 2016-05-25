@@ -20,16 +20,18 @@
 package com.microsoft.tooling.msservices.model.ws;
 
 public enum WebAppsContainers {
-    TOMCAT_8("8.0","Apache Tomcat 8 (Latest)"),
-    TOMCAT_7("7.0", "Apache Tomcat 7 (Latest)"),
-    JETTY_9("9.1", "Jetty 9 (Latest)");
+    TOMCAT_8("8.0","Apache Tomcat 8 (Latest)", "8.0.23"),
+    TOMCAT_7("7.0", "Apache Tomcat 7 (Latest)", "7.0.62"),
+    JETTY_9("9.1", "Jetty 9 (Latest)", "9.1.0.20131115");
 
     private String value;
     private String name;
+    private String currentVersion;
 
-    private WebAppsContainers(String value,String name){
+    private WebAppsContainers(String value, String name, String currentVersion){
         this.value = value;
         this.name  = name;
+        this.currentVersion = currentVersion;
     }
 
     public String getValue() {
@@ -39,4 +41,8 @@ public enum WebAppsContainers {
     public String getName() {
         return name;
     }
+
+	public String getCurrentVersion() {
+		return currentVersion;
+	}
 }
