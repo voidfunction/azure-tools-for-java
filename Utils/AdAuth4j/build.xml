@@ -8,6 +8,7 @@
          <fileset dir="${depependency}">
             <include name="*.jar"/>
         </fileset>
+        <file name="${jdk.home}/jre/lib/jfxrt.jar"/>
     </path>
 
     <target name="clean">
