@@ -237,6 +237,10 @@
   <path id="library.azurecommons.classpath">
     <pathelement location="${basedir}/lib/AzureCommons.jar"/>
   </path>
+
+  <path id="library.adauth4j.classpath">
+    <pathelement location="${basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/adauth4j.jar"/>
+  </path>
   
   <path id="library.org.apache.commons:commons-lang3:3.4.classpath">
     <pathelement location="${path.variable.maven_repository}/org/apache/commons/commons-lang3/3.4/commons-lang3-3.4.jar"/>
@@ -294,6 +298,7 @@
     <path refid="library.org.apache.commons:commons-lang3:3.4.classpath"/>
     <path refid="library.services-explorer-common.classpath"/>
 	<path refid="library.hdinsight-node-common.classpath"/>
+    <path refid="library.adauth4j.classpath"/>
   </path>
 
   <path id="azure-toolkit-for-intellij.runtime.module.classpath">
@@ -309,6 +314,7 @@
     <path refid="library.org.apache.commons:commons-lang3:3.4.classpath"/>
     <path refid="library.services-explorer-common.classpath"/>
 	<path refid="library.hdinsight-node-common.classpath"/>
+    <path refid="library.adauth4j.classpath"/>
   </path>
   
   
@@ -389,6 +395,7 @@
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/AzureCommons.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/AzureCommons.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/services-explorer-common.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/services-explorer-common.jar"/>
 	<copy file="${module.azure-toolkit-for-intellij.basedir}/lib/hdinsight-node-common.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/hdinsight-node-common.jar"/>
+    <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/adauth4j.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/adauth4j.jar"/>
     <copy file="${path.variable.maven_repository}/com/microsoft/azure/azure-storage/4.0.0/azure-storage-4.0.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-storage-4.0.0.jar"/>
     <copy file="${path.variable.maven_repository}/com/fasterxml/jackson/core/jackson-core/2.6.0/jackson-core-2.6.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/jackson-core-2.6.0.jar"/>
     <copy file="${path.variable.maven_repository}/org/slf4j/slf4j-api/1.7.12/slf4j-api-1.7.12.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/slf4j-api-1.7.12.jar"/>
