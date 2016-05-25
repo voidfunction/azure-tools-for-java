@@ -110,12 +110,12 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    if (AzureManagerImpl.getManager().authenticated()) {
+                    final AzureManager apiManager = AzureManagerImpl.getManager(project);
+                    if (apiManager.authenticated()) {
                         clearSubscriptions(false);
                     } else {
                         myDialog.getWindow().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-                        final AzureManager apiManager = AzureManagerImpl.getManager();
                         apiManager.clearImportedPublishSettingsFiles();
                         apiManager.authenticate();
 
