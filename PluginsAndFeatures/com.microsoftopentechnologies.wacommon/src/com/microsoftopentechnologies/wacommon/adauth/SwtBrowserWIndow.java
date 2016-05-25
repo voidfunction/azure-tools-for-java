@@ -1,19 +1,17 @@
 package com.microsoftopentechnologies.wacommon.adauth;
 
-import java.awt.Dimension;
 import java.net.URI;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Monitor;
-import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 public class SwtBrowserWIndow implements com.microsoft.auth.IWebUi {
 	
@@ -27,17 +25,14 @@ public class SwtBrowserWIndow implements com.microsoft.auth.IWebUi {
 		return res;
 	}
 	
-	final Display display;
-	
 	public SwtBrowserWIndow(){
-		System.out.println("==> SwtBrowserWIndow ---------------");
-		display = Display.getDefault();
+		//System.out.println("==> SwtBrowserWIndow ctor---------------");
 	}
 
 	@Override
 	public Future<String> authenticateAsync(URI requestUri, URI redirectUri) {
 		
-		System.out.println("==> run authenticateAsync ---------------");
+		//System.out.println("==> run authenticateAsync ---------------");
 		
 		final String redirectUriStr = redirectUri.toString();
 		final String requestUriStr = requestUri.toString();
@@ -52,38 +47,43 @@ public class SwtBrowserWIndow implements com.microsoft.auth.IWebUi {
 				public void run() {
 					
 					try {
-						System.out.println("==> run gui ---------------");
-				        //Display display = Display.getCurrent();
-				        final Shell shell = new Shell(display, SWT.APPLICATION_MODAL | SWT.CLOSE | SWT.TITLE | SWT.BORDER);
+						//System.out.println("==> run gui ---------------");
+				        Display display = Display.getDefault();
+				        final Shell activeShell = display.getActiveShell();
+				        final Shell shell = new Shell(activeShell, SWT.APPLICATION_MODAL | SWT.CLOSE | SWT.TITLE | SWT.BORDER);
 				        shell.setLayout(new FillLayout());
-				        Monitor monitor = display.getPrimaryMonitor();
-				        Rectangle bounds = monitor.getBounds();
-				        Dimension size = new Dimension((int) (bounds.width * 0.40), (int) (bounds.height * 0.70));
-				        shell.setSize(size.width, size.height);
-				        shell.setLocation((bounds.width - size.width) / 2, (bounds.height - size.height) / 2);
+				        final int HEIGHT = 700;
+				        final int WIDTH = 500;
+				        shell.setSize(WIDTH, HEIGHT);
 				        shell.setActive(); 
 				        
-				        Browser browser = new Browser(shell, SWT.NONE);
+				        Browser.clearSessions();
+				        final Browser browser = new Browser(shell, SWT.NONE);
+				        
 				        browser.addLocationListener(new LocationAdapter() {
 				            @Override
 				            public void changing(LocationEvent locationEvent) {
-				            	System.out.println("==> locationEvent.location: " + locationEvent.location);
+				            	//System.out.println("==> locationEvent.location: " + locationEvent.location);
 				                if(locationEvent.location.startsWith(redirectUriStr)) {
 				                	setResult(locationEvent.location);
-				                	shell.close();
+				                	Display.getDefault().asyncExec(new Runnable() {
+										@Override
+										public void run() {
+											//System.out.println("==> shell.close() ---------------");
+											browser.stop();
+						                	shell.close();
+										}
+				                	});
 				                }
 				            }
 				        });
 				        
 				        browser.setUrl(requestUriStr);
-				        Browser.clearSessions();
 				        shell.open();
-				        while (!shell.isDisposed()) {
+				        while (shell != null && !shell.isDisposed()) {
 				            if (!display.readAndDispatch())
 				            	display.sleep ();
 				        }
-				        shell.dispose ();
-		        
 				        
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -95,11 +95,11 @@ public class SwtBrowserWIndow implements com.microsoft.auth.IWebUi {
 	        	@Override
 	        	public String call() {
 	        		return getResult();
-	        			
 	        	}
 	        };
        
-	        display.syncExec(gui);
+	        Display.getDefault().syncExec(gui);
+	        // just to return future to comply interface
 	        return Executors.newSingleThreadExecutor().submit(worker);
 	        
 		} catch (Exception e) {
