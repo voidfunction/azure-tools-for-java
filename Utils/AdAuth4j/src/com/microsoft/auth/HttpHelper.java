@@ -22,6 +22,7 @@ public class HttpHelper {
     
     public static <T> Future<T> sendPostRequestAndDeserializeJsonResponseAsync(final String uri, final Map<String, String> requestParameters, final CallState callState, final Class<T> cls)
     {
+    	log.info("sendPostRequestAndDeserializeJsonResponseAsync...");
         ExecutorService executor = Executors.newSingleThreadExecutor();
         return executor.submit(new Callable<T>() {
 
@@ -65,9 +66,10 @@ public class HttpHelper {
                             errorReader.close();
                         }
                     }
-
-                    throw new Exception("AD Auth token endpoint returned HTTP status code " +
-                            Integer.toString(statusCode) + ". Error info: " + err.toString());
+                    String message = "AD Auth token endpoint returned HTTP status code " +
+                            Integer.toString(statusCode) + ". Error info: " + err.toString();
+                    log.error(message);
+                    throw new Exception(message);
                 }
                 
                 verifyCorrelationIdInReponseHeader(connection, callState);

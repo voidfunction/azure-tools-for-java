@@ -201,7 +201,8 @@ public abstract class AcquireTokenHandlerBase {
 
     private void validateAuthorityType() throws Exception {
         if (!this.supportADFS && this.authenticator.authorityType == AuthorityType.ADFS) {
-            throw new AuthException(AuthError.InvalidAuthorityType + ": " + this.authenticator.getAuthority());
+        	String message = AuthError.InvalidAuthorityType + ": " + this.authenticator.getAuthority();
+            throw new AuthException(message);
         }
     }
 }

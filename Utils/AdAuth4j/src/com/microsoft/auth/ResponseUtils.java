@@ -91,9 +91,13 @@ public class ResponseUtils {
              }
          }
          else if (tokenResponse.error != null) {
+        	 String message = tokenResponse.error + tokenResponse.errorDescription;
+         	 log.error(message);
              throw new AuthException(tokenResponse.error, tokenResponse.errorDescription);
          }
          else {
+        	 String message = AuthError.Unknown + AuthErrorMessage.Unknown;
+         	 log.error(message);
              throw new AuthException(AuthError.Unknown, AuthErrorMessage.Unknown);
          }
          return result;
