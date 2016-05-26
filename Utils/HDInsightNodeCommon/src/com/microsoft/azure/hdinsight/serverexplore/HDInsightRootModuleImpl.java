@@ -1,5 +1,8 @@
 package com.microsoft.azure.hdinsight.serverexplore;
 
+import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
+import com.microsoft.azure.hdinsight.common.CommonConst;
+import com.microsoft.azure.hdinsight.common.TelemetryCommon;
 import com.microsoft.azure.hdinsight.common.TelemetryManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.ClusterNode;
@@ -8,9 +11,6 @@ import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
-import com.microsoft.azure.hdinsight.common.CommonConst;
-import com.microsoft.azure.hdinsight.common.TelemetryCommon;
 
 import java.util.List;
 

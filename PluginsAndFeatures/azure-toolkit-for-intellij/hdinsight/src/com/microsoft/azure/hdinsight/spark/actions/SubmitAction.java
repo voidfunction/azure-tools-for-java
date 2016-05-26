@@ -34,7 +34,7 @@ public class SubmitAction extends AnAction {
                 public void run() {
                     HDInsightUtil.showInfoOnSubmissionMessageWindow(project, "List spark clusters ...", true);
 
-                    cachedClusterDetails = ClusterManagerEx.getInstance().getClusterDetailsWithoutAsync(true);
+                    cachedClusterDetails = ClusterManagerEx.getInstance().getClusterDetailsWithoutAsync(true, project);
                     if(!ClusterManagerEx.getInstance().isSelectedSubscriptionExist()) {
                         HDInsightUtil.showWarningMessageOnSubmissionMessageWindow(project, "No selected subscription(s), Please go to HDInsight Explorer to sign in....");
                     }

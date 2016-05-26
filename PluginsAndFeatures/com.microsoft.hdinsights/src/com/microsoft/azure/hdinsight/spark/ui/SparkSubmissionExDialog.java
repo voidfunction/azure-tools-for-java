@@ -1,0 +1,362 @@
+/**
+ * Copyright (c) Microsoft Corporation
+ * <p/>
+ * All rights reserved.
+ * <p/>
+ * MIT License
+ * <p/>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * <p/>
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ * <p/>
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package com.microsoft.azure.hdinsight.spark.ui;
+
+import com.microsoft.azure.hdinsight.Activator;
+import com.microsoft.azure.hdinsight.common.CommonConst;
+import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
+import com.microsoft.azure.hdinsight.spark.common.SparkSubmissionParameter;
+import com.microsoft.azure.hdinsight.spark.common.SparkSubmitModel;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.*;
+import com.microsoft.azure.hdinsight.common.CallBack;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.Nullable;
+import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class SparkSubmissionExDialog extends Dialog {
+
+    private final int margin = 10;
+    private final String DIALOG_TITLE = "Spark Submission";
+
+    private int row = 0;
+    private Combo clustersListComboBox;
+    private Combo selectedArtifactComboBox;
+    private Text selectedArtifactTextField;
+    private Button artifactBrowseButton;
+    private Text mainClassTextField;
+//    private JBTable jobConfigurationTable;
+    private Text commandLineTextField;
+    private Text referencedJarsTextField;
+    private Text referencedFilesTextField;
+    private Button intelliJArtifactRadioButton;
+    private Button localArtifactRadioButton;
+
+    private SparkSubmitModel submitModel;
+    private CallBack callBack;
+    private List<IClusterDetail> cachedClusterDetails;
+
+    public SparkSubmissionExDialog(Shell parentShell, @NotNull List<IClusterDetail> cachedClusterDetails, @Nullable CallBack callBack) {
+        super(parentShell);
+        this.callBack = callBack;
+        this.cachedClusterDetails = cachedClusterDetails;
+        submitModel = new SparkSubmitModel(cachedClusterDetails);
+
+//        initializeComponents();
+//        initializeModel();
+//        updateTableColumn();
+//        loadParameter();
+//        setSubmitButtonStatus();
+    }
+
+    @Override
+    protected void configureShell(Shell newShell) {
+        super.configureShell(newShell);
+        newShell.setText(DIALOG_TITLE);
+    }
+
+    @Override
+    protected Control createButtonBar(Composite parent) {
+        Control buttonBar = super.createButtonBar(parent);
+        getButton(Dialog.OK).setText("Submit");
+        return buttonBar;
+    }
+
+    @Override
+    protected Control createContents(Composite parent) {
+        Composite container = new Composite(parent, SWT.NONE);
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.numColumns = 2;
+        container.setLayout(gridLayout);
+        GridData gridData = new GridData();
+        gridData.widthHint = 550;
+        container.setLayoutData(gridData);
+
+        Label clusterListLabel = new Label(container, SWT.LEFT);
+        clusterListLabel.setText("Cluster Name:");
+        gridLayout = new GridLayout();
+        gridLayout.numColumns = 2;
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        Composite composite = new Composite(container, SWT.NONE);
+        composite.setLayout(gridLayout);
+        composite.setLayoutData(gridData);
+
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        clustersListComboBox = new Combo(composite, SWT.READ_ONLY);
+        clustersListComboBox.setLayoutData(gridData);
+        clustersListComboBox.setToolTipText("The HDInsight Spark cluster you want to submit your application to. Only Linux cluster is supported.");
+        for (IClusterDetail clusterDetail : cachedClusterDetails) {
+//            mapClusterNameToClusterDetail.put(clusterDetail.getName(), clusterDetail);
+            clustersListComboBox.add(clusterDetail.getName());
+            clustersListComboBox.setData(clusterDetail.getName(), clusterDetail);
+//            if (clusterComboBoxModel.getSize() == 0) {
+//                clusterComboBoxModel.setSelectedItem(clusterDetail.getName());
+//            }
+        }
+        if (cachedClusterDetails.size() > 0) {
+        	clustersListComboBox.select(0);
+        }
+        Button clusterListButton = new Button(composite, SWT.PUSH);
+        clusterListButton.setToolTipText("Refresh");
+        clusterListButton.setImage(Activator.getImageDescriptor(CommonConst.RefreshIConPath).createImage());
+
+        String tipInfo = "The Artifact you want to use.";
+        Label artifactSelectLabel = new Label(container, SWT.LEFT);
+        artifactSelectLabel.setText("Select an Artifact to submit");
+        artifactSelectLabel.setToolTipText(tipInfo);
+        gridData = new GridData();
+        gridData.horizontalSpan = 2;
+        artifactSelectLabel.setLayoutData(gridData);
+
+        intelliJArtifactRadioButton = new Button(container, SWT.RADIO);
+        intelliJArtifactRadioButton.setText("Artifact from Eclipse project:");
+        intelliJArtifactRadioButton.setSelection(true);
+        intelliJArtifactRadioButton.addSelectionListener(new SelectionListener() {
+    			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				selectedArtifactComboBox.setEnabled(true);
+				selectedArtifactTextField.setEnabled(false);
+//				mainClassTextField.setButtonEnabled(true);
+//
+//				setVisibleForFixedErrorMessageLabel(2, false);
+//
+//				if (selectedArtifactComboBox.getItemCount() == 0) {
+//					setVisibleForFixedErrorMessageLabel(2, true);
+//				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+		});
+        gridData = new GridData();
+        gridData.grabExcessHorizontalSpace = true;
+        gridData.horizontalAlignment = SWT.FILL;
+        selectedArtifactComboBox = new Combo(container, SWT.READ_ONLY);
+        selectedArtifactComboBox.setToolTipText(tipInfo);
+        selectedArtifactComboBox.setLayoutData(gridData);
+        String[] projects = getProjects();
+        selectedArtifactComboBox.setItems(projects);
+        if (projects.length > 0) {
+        	selectedArtifactComboBox.select(0);
+        }
+        
+        localArtifactRadioButton = new Button(container, SWT.RADIO);
+        localArtifactRadioButton.setText("Artifact from hard disk:");
+
+        localArtifactRadioButton.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				selectedArtifactComboBox.setEnabled(false);
+				selectedArtifactTextField.setEnabled(true);
+//				mainClassTextField.setButtonEnabled(false);
+//
+//				setVisibleForFixedErrorMessageLabel(1, false);
+//
+//				if (StringHelper.isNullOrWhiteSpace(selectedArtifactTextField.getText())) {
+//					setVisibleForFixedErrorMessageLabel(2, true);
+//				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+        });
+        
+        gridLayout = new GridLayout();
+        gridLayout.numColumns = 2;
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        composite = new Composite(container, SWT.NONE);
+        composite.setLayout(gridLayout);
+        composite.setLayoutData(gridData);
+
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        selectedArtifactTextField = new Text(composite, SWT.LEFT | SWT.BORDER);
+        selectedArtifactTextField.setLayoutData(gridData);
+        artifactBrowseButton = new Button(composite, SWT.PUSH);
+        artifactBrowseButton.setText("Browse");
+        artifactBrowseButton.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent arg0) {
+            	FileDialog dialog = new FileDialog(SparkSubmissionExDialog.this.getShell());
+                String[] extensions = {"*.war", "*.WAR", "*.jar", "*.JAR", "*.ear", "*.EAR"};
+                dialog.setFilterExtensions(extensions);
+                String file = dialog.open();
+                if (file != null) {
+                    selectedArtifactTextField.setText(file);
+                }
+            }
+		});
+        
+        Label sparkMainClassLabel = new Label(container, SWT.LEFT);
+        sparkMainClassLabel.setText("Main class name");
+        sparkMainClassLabel.setToolTipText("Application's java/spark main class");
+        
+        gridLayout = new GridLayout();
+        gridLayout.numColumns = 2;
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        composite = new Composite(container, SWT.NONE);
+        composite.setLayout(gridLayout);
+        composite.setLayoutData(gridData);
+
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        mainClassTextField = new Text(composite, SWT.LEFT | SWT.BORDER);
+        mainClassTextField.setLayoutData(gridData);
+        
+        Label label = new Label(container, SWT.LEFT);
+        label.setText("Command line arguments");
+        tipInfo = "Command line arguments used in your main class; multiple arguments should be split by space.";
+        label.setToolTipText(tipInfo);
+        commandLineTextField = new Text(container, SWT.LEFT | SWT.BORDER);
+        commandLineTextField.setToolTipText(tipInfo);
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        commandLineTextField.setLayoutData(gridData);
+        
+        tipInfo = "Files to be placed on the java classpath; The path needs to be a Azure Blob Storage Path (path started with wasb://); Multiple paths should be split by semicolon (;)";
+        Label referencedJarsLabel = new Label(container, SWT.LEFT);
+        referencedJarsLabel.setText("Referenced Jars");
+        referencedJarsLabel.setToolTipText(tipInfo);
+        referencedJarsTextField = new Text(container, SWT.BORDER | SWT.LEFT);
+        referencedJarsTextField.setToolTipText(tipInfo);
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        referencedJarsTextField.setLayoutData(gridData);
+        
+        tipInfo = "Files to be placed in executor working directory. The path needs to be a Azure Blob Storage Path (path started with wasb://); Multiple paths should be split by semicolon (;) ";
+        Label referencedFilesLabel = new Label(container, SWT.LEFT);
+        referencedFilesLabel.setText("Referenced Files");
+        referencedFilesLabel.setToolTipText(tipInfo);
+        referencedFilesTextField = new Text(container, SWT.BORDER | SWT.LEFT);
+        referencedFilesTextField.setToolTipText(tipInfo);
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        referencedFilesTextField.setLayoutData(gridData);
+        
+        return super.createContents(parent);
+    }
+
+    private SparkSubmissionParameter constructSubmissionParameter() {
+        IClusterDetail selectedClusterDetail = (IClusterDetail) clustersListComboBox.getData(clustersListComboBox.getText());
+
+        String selectedArtifactName = selectedArtifactComboBox.getText();
+        String className = mainClassTextField.getText().trim();
+        String commandLine = commandLineTextField.getText().trim();
+        String localArtifactPath = selectedArtifactTextField.getText();
+        String selectedClusterName = selectedClusterDetail.getName();
+
+        List<String> referencedFileList = new ArrayList<>();
+        for (String singleReferencedFile : referencedFilesTextField.getText().split(";")) {
+            singleReferencedFile = singleReferencedFile.trim();
+            if (!StringHelper.isNullOrWhiteSpace(singleReferencedFile)) {
+                referencedFileList.add(singleReferencedFile);
+            }
+        }
+
+        List<String> uploadedFilePathList = new ArrayList<>();
+        for (String singleReferencedJars : referencedJarsTextField.getText().split(";")) {
+            singleReferencedJars = singleReferencedJars.trim();
+            if (!StringHelper.isNullOrWhiteSpace(singleReferencedJars)) {
+                uploadedFilePathList.add(singleReferencedJars);
+            }
+        }
+
+        List<String> argsList = new ArrayList<>();
+        for (String singleArs : commandLine.split(" ")) {
+            if (!StringHelper.isNullOrWhiteSpace(singleArs)) {
+                argsList.add(singleArs.trim());
+            }
+        }
+
+//        Map<String, Object> jobConfigMap = submitModel.getJobConfigMap();
+
+        return new SparkSubmissionParameter(selectedClusterName, localArtifactRadioButton.getSelection(),
+                selectedArtifactName, localArtifactPath, null, className, referencedFileList, uploadedFilePathList, argsList, /*jobConfigMap*/ null);
+    }
+    
+    private String[] getProjects() {
+        IWorkspace workspace = ResourcesPlugin.getWorkspace();
+        IWorkspaceRoot root = workspace.getRoot();
+        String[] projects = null;
+        ArrayList<String> projList = new ArrayList<String>();
+        try {
+            for (IProject wRoot : root.getProjects()) {
+//                if (wRoot.isOpen()
+//                        && !wRoot.hasNature(Messages.waProjNature)) {
+                    projList.add(wRoot.getProject().getName());
+//                }
+            }
+            projects = new String[projList.size()];
+            projects = projList.toArray(projects);
+        } catch (Exception e) {
+        	DefaultLoader.getUIHelper().showError("A blob container with the specified name already exists.", "Azure Explorer");
+            
+            PluginUtil.displayErrorDialogAndLog(this.getShell(),
+            		"Project Selection Error",
+            		"Error occurred while selecting the project.", e);
+        }
+        return projects;
+    }
+    
+    @Override
+    protected void okPressed() {
+    	submitModel.action(constructSubmissionParameter());
+        super.okPressed();
+    }
+
+}

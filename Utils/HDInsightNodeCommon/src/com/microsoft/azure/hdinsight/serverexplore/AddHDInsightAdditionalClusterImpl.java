@@ -1,9 +1,8 @@
 package com.microsoft.azure.hdinsight.serverexplore;
 
-import com.microsoft.azure.hdinsight.sdk.common.CommonConstant;
+import com.microsoft.azure.hdinsight.common.StreamUtil;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
-import com.microsoft.azure.hdinsight.common.StreamUtil;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;

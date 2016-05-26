@@ -357,13 +357,6 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                             subscriptionsDialog.show();
                         }
                     });
-//                    new AnAction("Add New Cluster", "Add New Cluster", AllIcons.Ide.Notifications) {
-//                        @Override
-//                        public void actionPerformed(AnActionEvent anActionEvent) {
-//                            AddNewClusterFrom form = new AddNewClusterFrom(anActionEvent.getProject(), hd);
-//                            form.show();
-//                        }
-//                    });
         }
     }
 
