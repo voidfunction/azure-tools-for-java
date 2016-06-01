@@ -1,4 +1,4 @@
-package com.microsoft.azure.hdinsight.spark.common;
+package com.microsoft.azure.hdinsight.spark.common2;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -21,6 +21,9 @@ import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
+import com.microsoft.azure.hdinsight.spark.common.SparkBatchSubmission;
+import com.microsoft.azure.hdinsight.spark.common.SparkJobLog;
+import com.microsoft.azure.hdinsight.spark.common.SparkSubmitResponse;
 import com.microsoft.tooling.msservices.helpers.CallableSingleArg;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;

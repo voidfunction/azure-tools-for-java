@@ -64,6 +64,7 @@ Bundle-ClassPath: .,
  dependencies/arm/jackson-datatype-joda-2.7.1.jar,
  dependencies/arm/okio-1.6.0.jar,
  dependencies/arm/joda-time-2.4.jar,
+ dependencies/java-json.jar,
  dependencies/log4j-1.2.17.jar
 Export-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
@@ -451,6 +452,7 @@ Export-Package: com.fasterxml.jackson.core,
  org.codehaus.jettison.mapped,
  org.codehaus.jettison.util,
  org.joda.time,
- retrofit2
+ retrofit2,
+ org.json
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BundleShape: dir

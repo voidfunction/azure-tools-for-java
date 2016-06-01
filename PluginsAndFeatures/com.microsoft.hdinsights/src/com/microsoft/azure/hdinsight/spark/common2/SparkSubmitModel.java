@@ -19,15 +19,20 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.spark.common;
+package com.microsoft.azure.hdinsight.spark.common2;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.microsoft.azure.hdinsight.SparkSubmissionToolWindowView;
 import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
+import com.microsoft.azure.hdinsight.common2.HDInsightUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.AuthenticationException;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
+import com.microsoft.azure.hdinsight.spark.common.SparkBatchSubmission;
+import com.microsoft.azure.hdinsight.spark.common.SparkSubmissionParameter;
+import com.microsoft.azure.hdinsight.spark.common.SparkSubmitResponse;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
@@ -308,22 +313,23 @@ public class SparkSubmitModel {
         HttpResponse response = SparkBatchSubmission.getInstance().createBatchSparkJob(selectedClusterDetail.getConnectionUrl() + "/livy/batches", submissionParameter);
 
         if (response.getCode() == 201 || response.getCode() == 200) {
-//            PluginUtil.showInfoOnSubmissionMessageWindow(project, "Info : Submit to spark cluster successfully.");
+            HDInsightUtil.showInfoOnSubmissionMessageWindow("Info : Submit to spark cluster successfully.");
             postEventProperty.put("IsSubmitSucceed", "true");
 
             String jobLink = String.format("%s/sparkhistory", selectedClusterDetail.getConnectionUrl());
-//            PluginUtil.getSparkSubmissionToolWindowManager(project).setHyperLinkWithText("See spark job view from ", jobLink, jobLink);
+            HDInsightUtil.getSparkSubmissionToolWindowView().setHyperLinkWithText("See spark job view from ", jobLink, jobLink);
             SparkSubmitResponse sparkSubmitResponse = new Gson().fromJson(response.getMessage(), new TypeToken<SparkSubmitResponse>() {
             }.getType());
 
             // Set submitted spark application id and http request info for stopping running application
-//            PluginUtil.getSparkSubmissionToolWindowManager(project).setSparkApplicationStopInfo(selectedClusterDetail.getConnectionUrl(), sparkSubmitResponse.getId());
-//            PluginUtil.getSparkSubmissionToolWindowManager(project).setStopButtonState(true);
-//            PluginUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().resetJobStateManager();
-//            SparkSubmitHelper.getInstance().printRunningLogStreamingly(project, sparkSubmitResponse.getId(), selectedClusterDetail, postEventProperty);
+            SparkSubmissionToolWindowView view = HDInsightUtil.getSparkSubmissionToolWindowView();
+            view.setSparkApplicationStopInfo(selectedClusterDetail.getConnectionUrl(), sparkSubmitResponse.getId());
+            view.setStopButtonState(true);
+            view.getJobStatusManager().resetJobStateManager();
+            SparkSubmitHelper.getInstance().printRunningLogStreamingly(sparkSubmitResponse.getId(), selectedClusterDetail, postEventProperty);
         } else {
-//            PluginUtil.showErrorMessageOnSubmissionMessageWindow(project,
-//                    String.format("Error : Failed to submit to spark cluster. error code : %d, reason :  %s.", response.getCode(), response.getContent()));
+            HDInsightUtil.showErrorMessageOnSubmissionMessageWindow(
+                    String.format("Error : Failed to submit to spark cluster. error code : %d, reason :  %s.", response.getCode(), response.getContent()));
             postEventProperty.put("IsSubmitSucceed", "false");
             postEventProperty.put("SubmitFailedReason", response.getContent());
 //            TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
@@ -331,7 +337,7 @@ public class SparkSubmitModel {
     }
 
     private void showFailedSubmitErrorMessage(Exception exception) {
-//        PluginUtil.showErrorMessageOnSubmissionMessageWindow(project, "Error : Failed to submit application to spark cluster. Exception : " + exception.getMessage());
+        HDInsightUtil.showErrorMessageOnSubmissionMessageWindow("Error : Failed to submit application to spark cluster. Exception : " + exception.getMessage());
         postEventProperty.put("IsSubmitSucceed", "false");
         postEventProperty.put("SubmitFailedReason", exception.toString());
 //        TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
@@ -342,12 +348,12 @@ public class SparkSubmitModel {
         try {
             path = SparkSubmitHelper.getInstance().writeLogToLocalFile(/*project*/);
         } catch (IOException e) {
-//            PluginUtil.showErrorMessageOnSubmissionMessageWindow(project, e.getMessage());
+            HDInsightUtil.showErrorMessageOnSubmissionMessageWindow(e.getMessage());
         }
 
         if (!StringHelper.isNullOrWhiteSpace(path)) {
             String urlPath = StringHelper.concat("file:", path);
-//            PluginUtil.getSparkSubmissionToolWindowManager(project).setHyperLinkWithText("See detailed job log from local:", urlPath, path);
+            HDInsightUtil.getSparkSubmissionToolWindowView().setHyperLinkWithText("See detailed job log from local:", urlPath, path);
         }
     }
 //
@@ -358,7 +364,7 @@ public class SparkSubmitModel {
             }
         } catch (AuthenticationException authenticationException) {
             if (isFirstSubmit) {
-//                PluginUtil.showErrorMessageOnSubmissionMessageWindow(project, "Error: Cluster Credentials Expired, Please sign in again...");
+                HDInsightUtil.showErrorMessageOnSubmissionMessageWindow("Error: Cluster Credentials Expired, Please sign in again...");
                 //get new credentials by call getClusterDetails
                 cachedClusterDetails = ClusterManagerEx.getInstance().getClusterDetails(null);
 
@@ -390,7 +396,7 @@ public class SparkSubmitModel {
                 selectedClusterDetail = getClusterConfiguration(selectedClusterDetail, true);
 
                 if (selectedClusterDetail == null) {
-//                    PluginUtil.showErrorMessageOnSubmissionMessageWindow(project, "Selected Cluster can not found. Please login in first in HDInsight Explorer and try submit job again");
+                    HDInsightUtil.showErrorMessageOnSubmissionMessageWindow("Selected Cluster can not found. Please login in first in HDInsight Explorer and try submit job again");
                     return;
                 }
 

@@ -13,6 +13,7 @@ import org.eclipse.core.resources.IProject;
 import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
 import com.microsoft.azure.hdinsight.common.TelemetryCommon;
 import com.microsoft.azure.hdinsight.common.TelemetryManager;
+import com.microsoft.azure.hdinsight.common2.HDInsightUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
@@ -35,23 +36,23 @@ public class SubmitHandler extends AbstractHandler {
 //            DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
 //                @Override
 //                public void run() {
-//                    PluginUtil.showInfoOnSubmissionMessageWindow(project, "List spark clusters ...", true);
+                    HDInsightUtil.showInfoOnSubmissionMessageWindow("List spark clusters ...", true);
 //
                     cachedClusterDetails = ClusterManagerEx.getInstance().getClusterDetailsWithoutAsync(true, null);
-//                    if(!ClusterManagerEx.getInstance().isSelectedSubscriptionExist()) {
-//                        PluginUtil.showWarningMessageOnSubmissionMessageWindow(project, "No selected subscription(s), Please go to HDInsight Explorer to sign in....");
-//                    }
-//
-//                    if (ClusterManagerEx.getInstance().isListClusterSuccess()) {
-//                        PluginUtil.showInfoOnSubmissionMessageWindow(project, "List spark clusters successfully");
-//                    } else {
-//                        PluginUtil.showErrorMessageOnSubmissionMessageWindow(project, "Error : Failed to list spark clusters.");
-//                    }
-//                    if (ClusterManagerEx.getInstance().isLIstAdditionalClusterSuccess()) {
-//                        PluginUtil.showInfoOnSubmissionMessageWindow(project, "List additional spark clusters successfully");
-//                    } else {
-//                        PluginUtil.showErrorMessageOnSubmissionMessageWindow(project, "Error: Failed to list additional cluster");
-//                    }
+                    if(!ClusterManagerEx.getInstance().isSelectedSubscriptionExist()) {
+                        HDInsightUtil.showWarningMessageOnSubmissionMessageWindow("No selected subscription(s), Please go to HDInsight Explorer to sign in....");
+                    }
+
+                    if (ClusterManagerEx.getInstance().isListClusterSuccess()) {
+                        HDInsightUtil.showInfoOnSubmissionMessageWindow("List spark clusters successfully");
+                    } else {
+                        HDInsightUtil.showErrorMessageOnSubmissionMessageWindow("Error : Failed to list spark clusters.");
+                    }
+                    if (ClusterManagerEx.getInstance().isLIstAdditionalClusterSuccess()) {
+                        HDInsightUtil.showInfoOnSubmissionMessageWindow("List additional spark clusters successfully");
+                    } else {
+                        HDInsightUtil.showErrorMessageOnSubmissionMessageWindow("Error: Failed to list additional cluster");
+                    }
 //
                     SparkSubmissionExDialog dialog = new SparkSubmissionExDialog(PluginUtil.getParentShell(), cachedClusterDetails, new CallBack() {
                         @Override
