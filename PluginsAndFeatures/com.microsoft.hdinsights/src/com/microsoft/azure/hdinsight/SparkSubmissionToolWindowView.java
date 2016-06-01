@@ -3,22 +3,35 @@ package com.microsoft.azure.hdinsight;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 import com.microsoft.azure.hdinsight.common.CommonConst;
 import com.microsoft.azure.hdinsight.common.JobStatusManager;
 import com.microsoft.azure.hdinsight.common.MessageInfoType;
+import com.microsoft.azure.hdinsight.common.TelemetryCommon;
+import com.microsoft.azure.hdinsight.common.TelemetryManager;
+import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
+import com.microsoft.azure.hdinsight.spark.common.SparkBatchSubmission;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.helpers.StringHelper;
 
 public class SparkSubmissionToolWindowView extends ViewPart {
+    private static final String yarnRunningUIUrlFormat = "%s/yarnui/hn/proxy/%s/";
+    
     private Button stopButton;
     private Button openSparkUIButton;
     private Browser outputPanel;
@@ -46,11 +59,48 @@ public class SparkSubmissionToolWindowView extends ViewPart {
 		stopButton = new Button(composite, SWT.PUSH);
         stopButton.setToolTipText("Stop execution of current application");
         stopButton.setImage(Activator.getImageDescriptor(CommonConst.StopIconPath).createImage());
-
+        stopButton.addSelectionListener(new SelectionAdapter() {
+        	@Override
+        	public void widgetSelected(SelectionEvent evt) {
+        		DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!StringHelper.isNullOrWhiteSpace(connectionUrl)) {
+                            TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionStopButtionClickEvent, null, null);
+                            try {
+                                HttpResponse deleteResponse = SparkBatchSubmission.getInstance().killBatchJob(connectionUrl + "/livy/batches", batchId);
+                                if (deleteResponse.getCode() == 201 || deleteResponse.getCode() == 200) {
+                                    jobStatusManager.setJobKilled();
+                                    setInfo("========================Stop application successfully=======================");
+                                } else {
+                                    setError(String.format("Error : Failed to stop spark application. error code : %d, reason :  %s.", deleteResponse.getCode(), deleteResponse.getContent()));
+                                }
+                            } catch (IOException exception) {
+                                setError("Error : Failed to stop spark application. exception : " + exception.toString());
+                            }
+                        }
+                    }
+                });
+        	}
+		});
+        
 		openSparkUIButton = new Button(composite, SWT.PUSH);
 		openSparkUIButton.setToolTipText("Open the corresponding Spark UI page");
 		openSparkUIButton.setImage(Activator.getImageDescriptor(CommonConst.OpenSparkUIIconPath).createImage());
-
+		openSparkUIButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				try {
+					if (jobStatusManager.isApplicationGenerated()) {
+						String sparkApplicationUrl = String.format(yarnRunningUIUrlFormat, connectionUrl, jobStatusManager.getApplicationId());
+						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(sparkApplicationUrl));
+					}
+				} catch (Exception browseException) {
+					DefaultLoader.getUIHelper().showError("Failed to browse spark application yarn url", "Spark Submission");
+				}
+			}
+        });
+		
 		gridData = new GridData();
         gridData.horizontalAlignment = SWT.FILL;
         gridData.verticalAlignment = SWT.FILL;

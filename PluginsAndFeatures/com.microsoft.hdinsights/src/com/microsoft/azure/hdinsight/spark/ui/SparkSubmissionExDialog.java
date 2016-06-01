@@ -227,7 +227,7 @@ public class SparkSubmissionExDialog extends Dialog {
             @Override
             public void widgetSelected(SelectionEvent arg0) {
             	FileDialog dialog = new FileDialog(SparkSubmissionExDialog.this.getShell());
-                String[] extensions = {"*.war", "*.WAR", "*.jar", "*.JAR", "*.ear", "*.EAR"};
+                String[] extensions = {"*.jar", "*.JAR"};
                 dialog.setFilterExtensions(extensions);
                 String file = dialog.open();
                 if (file != null) {

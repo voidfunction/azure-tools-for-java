@@ -59,6 +59,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.internal.ui.jarpackager.JarFileExportOperation;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
 public class SparkSubmitModel {
@@ -317,16 +318,22 @@ public class SparkSubmitModel {
             postEventProperty.put("IsSubmitSucceed", "true");
 
             String jobLink = String.format("%s/sparkhistory", selectedClusterDetail.getConnectionUrl());
-            HDInsightUtil.getSparkSubmissionToolWindowView().setHyperLinkWithText("See spark job view from ", jobLink, jobLink);
-            SparkSubmitResponse sparkSubmitResponse = new Gson().fromJson(response.getMessage(), new TypeToken<SparkSubmitResponse>() {
+            
+            HDInsightUtil.setHyperLinkWithText("See spark job view from ", jobLink, jobLink);
+            final SparkSubmitResponse sparkSubmitResponse = new Gson().fromJson(response.getMessage(), new TypeToken<SparkSubmitResponse>() {
             }.getType());
 
             // Set submitted spark application id and http request info for stopping running application
-            SparkSubmissionToolWindowView view = HDInsightUtil.getSparkSubmissionToolWindowView();
-            view.setSparkApplicationStopInfo(selectedClusterDetail.getConnectionUrl(), sparkSubmitResponse.getId());
-            view.setStopButtonState(true);
-            view.getJobStatusManager().resetJobStateManager();
-            SparkSubmitHelper.getInstance().printRunningLogStreamingly(sparkSubmitResponse.getId(), selectedClusterDetail, postEventProperty);
+      		Display.getDefault().syncExec(new Runnable() {
+      			@Override
+      			public void run() {
+      				SparkSubmissionToolWindowView view = HDInsightUtil.getSparkSubmissionToolWindowView();
+      				view.setSparkApplicationStopInfo(selectedClusterDetail.getConnectionUrl(), sparkSubmitResponse.getId());
+      				view.setStopButtonState(true);
+      				view.getJobStatusManager().resetJobStateManager();
+      			}
+      		});
+      		SparkSubmitHelper.getInstance().printRunningLogStreamingly(sparkSubmitResponse.getId(), selectedClusterDetail, postEventProperty);
         } else {
             HDInsightUtil.showErrorMessageOnSubmissionMessageWindow(
                     String.format("Error : Failed to submit to spark cluster. error code : %d, reason :  %s.", response.getCode(), response.getContent()));
@@ -353,7 +360,7 @@ public class SparkSubmitModel {
 
         if (!StringHelper.isNullOrWhiteSpace(path)) {
             String urlPath = StringHelper.concat("file:", path);
-            HDInsightUtil.getSparkSubmissionToolWindowView().setHyperLinkWithText("See detailed job log from local:", urlPath, path);
+            HDInsightUtil.setHyperLinkWithText("See detailed job log from local:", urlPath, path);
         }
     }
 //
@@ -410,17 +417,16 @@ public class SparkSubmitModel {
 //                    PluginUtil.getSparkSubmissionToolWindowManager(project).setStopButtonState(false);
 //                    PluginUtil.getSparkSubmissionToolWindowManager(project).setBrowserButtonState(false);
 
-//                    if (PluginUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().isApplicationGenerated()) {
-//                        String applicationId = PluginUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().getApplicationId();
+                    if (HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().isApplicationGenerated()) {
+                        String applicationId = HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().getApplicationId();
 
                         // ApplicationYarnUrl example : https://sparklivylogtest.azurehdinsight.net/yarnui/hn/cluster/app/application_01_111
-//                        String applicationYarnUrl = String.format(SparkYarnLogUrlFormat, selectedClusterDetail.getConnectionUrl(), applicationId);
-//                        PluginUtil.getSparkSubmissionToolWindowManager(project).setHyperLinkWithText("See detailed job information from ", applicationYarnUrl, applicationYarnUrl);
+                        String applicationYarnUrl = String.format(SparkYarnLogUrlFormat, selectedClusterDetail.getConnectionUrl(), applicationId);
+                        HDInsightUtil.setHyperLinkWithText("See detailed job information from ", applicationYarnUrl, applicationYarnUrl);
 
                         writeJobLogToLocal();
-//                    }
-
-//                    PluginUtil.getJobStatusManager(project).setJobRunningState(false);
+                    }
+                    HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().setJobRunningState(false);
                 }
             }
         });

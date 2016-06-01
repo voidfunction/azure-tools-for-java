@@ -1,8 +1,10 @@
 package com.microsoft.azure.hdinsight.common2;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import com.microsoft.azure.hdinsight.Activator;
 import com.microsoft.azure.hdinsight.SparkSubmissionToolWindowView;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 
@@ -17,10 +19,18 @@ public class HDInsightUtil {
 							.getWorkbench().getActiveWorkbenchWindow()
 							.getActivePage().showView("com.microsoft.azure.hdinsight.sparksubmissiontoolwindowview");
 		} catch (PartInitException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Activator.getDefault().log(e.getMessage(), e);
 			return null;
 		}
+	}
+	
+	public static synchronized void setHyperLinkWithText(final String text, final String hyperlinkUrl, final String anchorText) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				getSparkSubmissionToolWindowView().setHyperLinkWithText(text, hyperlinkUrl, anchorText);
+			}
+		});
 	}
 	
     public static void showInfoOnSubmissionMessageWindow(/*@NotNull */final String message, boolean isNeedClear) {
@@ -67,9 +77,13 @@ public class HDInsightUtil {
 //                }
 //            }
 //        }
-
-        showSubmissionMessage(getSparkSubmissionToolWindowView(), message, type, isNeedClear);
-    }
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				showSubmissionMessage(getSparkSubmissionToolWindowView(), message, type, isNeedClear);
+			}
+		});
+	}
 
     private static void showSubmissionMessage(SparkSubmissionToolWindowView sparkSubmissionView, @NotNull String message, @NotNull MessageInfoType type, @NotNull final boolean isNeedClear) {
         if (isNeedClear) {

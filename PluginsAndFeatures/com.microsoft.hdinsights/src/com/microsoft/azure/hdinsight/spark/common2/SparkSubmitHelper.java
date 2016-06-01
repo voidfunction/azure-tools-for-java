@@ -17,6 +17,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.microsoft.azure.hdinsight.common.TelemetryCommon;
 import com.microsoft.azure.hdinsight.common.TelemetryManager;
+import com.microsoft.azure.hdinsight.common2.HDInsightUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
@@ -121,12 +122,12 @@ public class SparkSubmitHelper {
                             isFailedJob = true;
                         }
 
-//                        if (!PluginUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().isJobKilled()) {
-//                            printoutJobLog(project, id, from_index, clusterDetail);
-//                            PluginUtil.getSparkSubmissionToolWindowManager(project).setInfo("======================Finish printing out spark job log.=======================");
-//                        } else {
-//                            isKilledJob = true;
-//                        }
+                        if (!HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().isJobKilled()) {
+                            printoutJobLog(id, from_index, clusterDetail);
+                            HDInsightUtil.getSparkSubmissionToolWindowView().setInfo("======================Finish printing out spark job log.=======================");
+                        } else {
+                            isKilledJob = true;
+                        }
                         break;
                     }
                 }
@@ -144,10 +145,10 @@ public class SparkSubmitHelper {
 
             if (isFailedJob) {
                 postEventProperty.put("IsRunningSucceed", "false");
-//                PluginUtil.getSparkSubmissionToolWindowManager(project).setError("Error : Your submitted job run failed");
+                HDInsightUtil.getSparkSubmissionToolWindowView().setError("Error : Your submitted job run failed");
             } else {
                 postEventProperty.put("IsRunningSucceed", "true");
-//                PluginUtil.getSparkSubmissionToolWindowManager(project).setInfo("The Spark application completed successfully");
+                HDInsightUtil.getSparkSubmissionToolWindowView().setInfo("The Spark application completed successfully");
             }
 
             TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
@@ -179,8 +180,7 @@ public class SparkSubmitHelper {
                 String path = String.format("SparkSubmission/%s/%s", uniqueFolderId, file.getName());
                 String uploadedPath = String.format("wasb://%s@%s/%s", defaultContainerName, storageAccount.getFullStorageBlobName(), path);
 
-//                PluginUtil.showInfoOnSubmissionMessageWindow(project,
-//                        String.format("Info : Begin uploading file %s to Azure Blob Storage Account %s ...", localFile, uploadedPath));
+                HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Begin uploading file %s to Azure Blob Storage Account %s ...", localFile, uploadedPath));
 
                 StorageClientSDKManagerImpl.getManager().uploadBlobFileContent(
                         storageAccount,
@@ -191,7 +191,7 @@ public class SparkSubmitHelper {
                         1024 * 1024,
                         file.length());
 
-//                PluginUtil.showInfoOnSubmissionMessageWindow(project, String.format("Info : Submit file to azure blob '%s' successfully.", uploadedPath));
+                HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Submit file to azure blob '%s' successfully.", uploadedPath));
                 return uploadedPath;
             }
         }
@@ -202,21 +202,21 @@ public class SparkSubmitHelper {
         sparkJobLog = new Gson().fromJson(httpResponse.getMessage(), new TypeToken<SparkJobLog>() {
         }.getType());
 
-//        if (!PluginUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().isApplicationGenerated()) {
-//            String sparkLogs = Joiner.on("").join(sparkJobLog.getLog());
-//            String applicationId = getApplicationIdFromYarnLog(sparkLogs);
-//            if (applicationId != null) {
-//                PluginUtil.getSparkSubmissionToolWindowManager(project).setBrowserButtonState(true);
-//                PluginUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().setApplicationIdGenerated();
-//                PluginUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().setApplicationId(applicationId);
-//            }
-//        }
+        if (!HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().isApplicationGenerated()) {
+            String sparkLogs = Joiner.on("").join(sparkJobLog.getLog());
+            String applicationId = getApplicationIdFromYarnLog(sparkLogs);
+            if (applicationId != null) {
+                HDInsightUtil.getSparkSubmissionToolWindowView().setBrowserButtonState(true);
+                HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().setApplicationIdGenerated();
+                HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().setApplicationId(applicationId);
+            }
+        }
 
         int counter = 0;
         if (sparkJobLog.getLog().size() > 0) {
             for (String line : sparkJobLog.getLog()) {
                 if (counter >= from_index && !StringHelper.isNullOrWhiteSpace(line)) {
-//                    PluginUtil.getSparkSubmissionToolWindowManager(project).setInfo(line, true);
+                    HDInsightUtil.getSparkSubmissionToolWindowView().setInfo(line, true);
                 }
 
                 counter++;

@@ -47,7 +47,7 @@
     	</propertyTester>    
   	</extension>
   	
-  	<extension point="org.eclipse.ui.menus">
+  	<!--extension point="org.eclipse.ui.menus">
   		<menuContribution locationURI="popup:org.eclipse.ui.popup.any?after=additions">
    			<command commandId="com.microsoft.azure.hdinsight.submit">
    				<enabledWhen>
@@ -60,13 +60,13 @@
          				value="hdinsight.projectnature"/>
             		</adapt>
 				</iterate> 
-		    	</with>
+		    	</with-->
    					<!--test property="com.microsoft.azure.hdinsight.isHDInsightProj">
    					</test-->
-   				</enabledWhen>
+   				<!--/enabledWhen>
 			</command>			
     	</menuContribution>
-    </extension>
+    </extension-->
     
     <extension point="org.eclipse.ui.commands">
 	  <command
@@ -78,33 +78,26 @@
 	</extension>  
     
     <extension point="org.eclipse.ui.handlers">
-   		<handler class="com.microsoft.azure.hdinsight.spark.actions.SubmitHandler"
-            commandId="com.microsoft.azure.hdinsight.submit"
-            icon="icons/Spark.png"
-            label="Submit Spark Application to HDInsight"
-            name="Submit Spark Application to HDInsight">
+        <handler class="com.microsoft.azure.hdinsight.spark.actions.SubmitHandler"
+            commandId="com.microsoft.azure.hdinsight.submit">
       	</handler>
     </extension>
     
-    <!--extension point="org.eclipse.ui.menus">
+    <extension point="org.eclipse.ui.menus">
   		<menuContribution locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-	  		<menu label="Azure" icon="icons/small/windowsAzure.png" id="com.microsoftopentechnologies.ui.common.webprojmenu">
-		   		<command commandId="com.microsoft.ui.webapp" icon="icons/small/publishWebsite.png"/>
-			     <visibleWhen checkEnabled="false">
-			    <with 
-				variable="selection">
-				<count value="1"/> 
-				<iterate 
-					operator="or">
-					<adapt type="org.eclipse.core.resources.IProject">
-        				<test property="com.microsoft.ui.webapp.property.isWebProj"/>
-            		</adapt>
-				</iterate> 
+			<command commandId="com.microsoft.azure.hdinsight.submit" icon="icons/Spark.png" label="Submit Spark Application to HDInsight"/>
+			<visibleWhen>
+   				<with variable="selection"> 
+					<iterate operator="or"> 
+						<adapt type="org.eclipse.core.resources.IProject">
+        					<test property="org.eclipse.core.resources.projectNature" value="hdinsight.projectnature"/>
+            			</adapt>
+					</iterate> 
 		    	</with>
-			    </visibleWhen>
-	  	</menu>
-    </menuContribution>
-  </extension-->
+		    </visibleWhen>
+    	</menuContribution>
+  	</extension>
+  	
   	<extension point="org.eclipse.ui.views">
       <view
             category="com.gigaspaces.azure"
