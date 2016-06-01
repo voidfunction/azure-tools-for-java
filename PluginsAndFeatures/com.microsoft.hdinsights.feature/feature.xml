@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.microsoft.hdinsights.feature"
+      label="Azure HDInsights plugin for Java"
+      version="1.0.0.qualifier"
+      provider-name="Microsoft Corp.">
+
+   <description url="http://www.example.com/description">
+      HDInsights plugin for Azure
+   </description>
+
+   <copyright>
+      Copyright (c) Microsoft Corp.
+   </copyright>
+
+   <license url="">
+      [Enter License Description here.]
+   </license>
+
+</feature>
