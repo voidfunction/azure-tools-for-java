@@ -16,6 +16,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
@@ -221,20 +222,36 @@ public class SparkSubmissionToolWindowView extends ViewPart {
         cleanableMessageCounter = 0;
     }
 
-    private void setToolWindowText(String toolWindowText) {
-        changeSupport.firePropertyChange("toolWindowText", this.toolWindowText, toolWindowText);
-        this.toolWindowText = toolWindowText;
+	private void setToolWindowText(final String toolWindowText) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				changeSupport.firePropertyChange("toolWindowText", SparkSubmissionToolWindowView.this.toolWindowText, toolWindowText);			
+			}
+		});
+		SparkSubmissionToolWindowView.this.toolWindowText = toolWindowText;
     }
 
-    public synchronized void setStopButtonState(Boolean newState) {
-        Boolean oldState = stopButton.isEnabled();
-        changeSupport.firePropertyChange("isStopButtonEnable", oldState, newState);
-    }
+	public synchronized void setStopButtonState(final Boolean newState) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				Boolean oldState = stopButton.isEnabled();
+				changeSupport.firePropertyChange("isStopButtonEnable", oldState, newState);
+			}
+		});
+	}
 
-    public synchronized void setBrowserButtonState(Boolean newState) {
-        Boolean oldState = openSparkUIButton.isEnabled();
-        changeSupport.firePropertyChange("isBrowserButtonEnable", oldState, newState);
-    }
+	public synchronized void setBrowserButtonState(final Boolean newState) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				Boolean oldState = openSparkUIButton.isEnabled();
+				changeSupport.firePropertyChange("isBrowserButtonEnable", oldState, newState);
+			}
+		});
+	}
+	
     private String parserHtmlElementList(List<IHtmlElement> htmlElements) {
         StringBuilder builder = new StringBuilder();
         for (IHtmlElement e : htmlElements) {

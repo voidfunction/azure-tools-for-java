@@ -18,15 +18,52 @@
         	id="com.microsoft.azure.hdinsight.projwizard.category">
         </category>
         <wizard
-        	name="HDInsight Project"
+        	name="Spark on HDInsight (Scala)"
+            category="com.microsoft.azure.hdinsight.projwizard.category"
+            icon="icons/Spark-Scala.png"
+            project="true"
+            class="com.microsoft.azure.hdinsight.projects.HDInsightsProjectWizard"
+            id="com.microsoft.azure.hdinsight.scala.projwizard">
+        	<description>Spark on HDInsight (Scala)</description>
+         </wizard>
+        <wizard
+        	name="Spark on HDInsight (Java)"
             category="com.microsoft.azure.hdinsight.projwizard.category"
             icon="icons/Spark-Java.png"
             project="true"
             class="com.microsoft.azure.hdinsight.projects.HDInsightsProjectWizard"
-            id="com.microsoft.azure.hdinsight.projwizard">
+            id="com.microsoft.azure.hdinsight.java.projwizard">
         	<description>Spark on HDInsight (Java)</description>
          </wizard>
+         <wizard
+        	name="Spark on HDInsight Local Run Sample (Scala)"
+            category="com.microsoft.azure.hdinsight.projwizard.category"
+            icon="icons/Spark-Scala.png"
+            project="true"
+            class="com.microsoft.azure.hdinsight.projects.HDInsightsProjectWizard"
+            id="com.microsoft.azure.hdinsight.local-scala.projwizard">
+        	<description>Spark on HDInsight Local Run Sample (Scala)</description>
+         </wizard>
+         <wizard
+        	name="Spark on HDInsight Local Run Sample (Java)"
+            category="com.microsoft.azure.hdinsight.projwizard.category"
+            icon="icons/Spark-Java.png"
+            project="true"
+            class="com.microsoft.azure.hdinsight.projects.HDInsightsProjectWizard"
+            id="com.microsoft.azure.hdinsight.local-java.projwizard">
+        	<description>Spark on HDInsight Local Run Sample (Java)</description>
+         </wizard>
+         <wizard
+        	name="Spark on HDInsight Cluster Run Sample (Scala)"
+            category="com.microsoft.azure.hdinsight.projwizard.category"
+            icon="icons/Spark-Scala.png"
+            project="true"
+            class="com.microsoft.azure.hdinsight.projects.HDInsightsProjectWizard"
+            id="com.microsoft.azure.hdinsight.cluster-scala.projwizard">
+        	<description>Spark on HDInsight Cluster Run Sample (Scala)</description>
+         </wizard>
     </extension>
+    
     <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension

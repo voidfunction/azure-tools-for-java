@@ -12,16 +12,24 @@ import com.microsoft.azure.hdinsight.common.MessageInfoType;
 import static com.microsoft.azure.hdinsight.common.MessageInfoType.*;
 
 public class HDInsightUtil {
+	private static SparkSubmissionToolWindowView sparkSubmissionToolWindowView;
 	
 	public static SparkSubmissionToolWindowView getSparkSubmissionToolWindowView() {
-		try {
-			return (SparkSubmissionToolWindowView) PlatformUI
-							.getWorkbench().getActiveWorkbenchWindow()
-							.getActivePage().showView("com.microsoft.azure.hdinsight.sparksubmissiontoolwindowview");
-		} catch (PartInitException e) {
-			Activator.getDefault().log(e.getMessage(), e);
-			return null;
+		if (sparkSubmissionToolWindowView == null) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						sparkSubmissionToolWindowView = (SparkSubmissionToolWindowView) PlatformUI.getWorkbench()
+								.getActiveWorkbenchWindow().getActivePage()
+								.showView("com.microsoft.azure.hdinsight.sparksubmissiontoolwindowview");
+					} catch (PartInitException e) {
+						Activator.getDefault().log(e.getMessage(), e);
+					}
+				}
+			});
 		}
+		return sparkSubmissionToolWindowView;
 	}
 	
 	public static synchronized void setHyperLinkWithText(final String text, final String hyperlinkUrl, final String anchorText) {

@@ -25,6 +25,8 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.microsoft.azure.hdinsight.SparkSubmissionToolWindowView;
 import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
+import com.microsoft.azure.hdinsight.common.TelemetryCommon;
+import com.microsoft.azure.hdinsight.common.TelemetryManager;
 import com.microsoft.azure.hdinsight.common2.HDInsightUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.AuthenticationException;
@@ -222,8 +224,7 @@ public class SparkSubmitModel {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			try {
-			
+			try {			
 				JarPackageData jarPackageData = new JarPackageData();
 				jarPackageData.setElements(new Object[] { project });
 				jarPackageData.setExportClassFiles(false);
@@ -414,8 +415,8 @@ public class SparkSubmitModel {
                 	exception.printStackTrace();
                     showFailedSubmitErrorMessage(exception);
                 } finally {
-//                    PluginUtil.getSparkSubmissionToolWindowManager(project).setStopButtonState(false);
-//                    PluginUtil.getSparkSubmissionToolWindowManager(project).setBrowserButtonState(false);
+                    HDInsightUtil.getSparkSubmissionToolWindowView().setStopButtonState(false);
+                    HDInsightUtil.getSparkSubmissionToolWindowView().setBrowserButtonState(false);
 
                     if (HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().isApplicationGenerated()) {
                         String applicationId = HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().getApplicationId();

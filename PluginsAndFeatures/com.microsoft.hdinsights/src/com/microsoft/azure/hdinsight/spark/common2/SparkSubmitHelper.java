@@ -41,8 +41,9 @@ public class SparkSubmitHelper {
     private static final int MIN_INTERVAL_TIME = 1000;
     private static final int INC_TIME = 100;
 
-    private static final String applicationIdPattern = "Application report for ([^ ]*) \\(state: ACCEPTED\\)";
-
+    private static final String APPLICATION_ID_PATTERN = "Application report for ([^ ]*) \\(state: ACCEPTED\\)";
+    public static final String HELP_LINK = "http://go.microsoft.com/fwlink/?LinkID=722349&clcid=0x409";
+    
     private SparkJobLog sparkJobLog;
 
     public static SparkSubmitHelper getInstance() {
@@ -59,7 +60,7 @@ public class SparkSubmitHelper {
             return null;
         }
 
-        String applicationId = "123";//PluginUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().getApplicationId();
+        String applicationId = HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().getApplicationId();
         String pluginRootPath = PluginUtil.pluginFolder;//PluginUtil.getPluginRootDirectory();
         String folderPath = StringHelper.concat(pluginRootPath, File.separator, JobLogFolderName, File.separator, applicationId);
         String fullFileName = StringHelper.concat(folderPath, File.separator, "log.txt");
@@ -101,13 +102,13 @@ public class SparkSubmitHelper {
             int from_index = 0;
             int pre_index;
             int times = 0;
-//            PluginUtil.getSparkSubmissionToolWindowManager(project).setInfo("======================Begin printing out spark job log.=======================");
+            HDInsightUtil.getSparkSubmissionToolWindowView().setInfo("======================Begin printing out spark job log.=======================");
             while (true) {
                 pre_index = from_index;
-//                if (PluginUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().isJobKilled()) {
-//                    isKilledJob = true;
-//                    break;
-//                }
+                if (HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().isJobKilled()) {
+                    isKilledJob = true;
+                    break;
+                }
 
                 from_index = printoutJobLog(/*project, */id, from_index, clusterDetail);
                 HttpResponse statusHttpResponse = SparkBatchSubmission.getInstance().getBatchSparkJobStatus(clusterDetail.getConnectionUrl() + "/livy/batches", id);
@@ -154,12 +155,12 @@ public class SparkSubmitHelper {
             TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
 
         } catch (Exception e) {
-//            if (PluginUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().isJobKilled() == false) {
-//                PluginUtil.getSparkSubmissionToolWindowManager(project).setError("Error : Failed to getting running log. Exception : " + e.toString());
-//            } else {
+            if (HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().isJobKilled() == false) {
+                HDInsightUtil.getSparkSubmissionToolWindowView().setError("Error : Failed to getting running log. Exception : " + e.toString());
+            } else {
                 postEventProperty.put("IsKilled", "true");
                 TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
-//            }
+            }
         }
     }
 
@@ -243,7 +244,7 @@ public class SparkSubmitHelper {
     }
 
     private String getApplicationIdFromYarnLog(String yarnLog) {
-        Pattern r = Pattern.compile(applicationIdPattern);
+        Pattern r = Pattern.compile(APPLICATION_ID_PATTERN);
         Matcher m = r.matcher(yarnLog);
         if (m.find()) {
             return m.group(1);
@@ -254,7 +255,7 @@ public class SparkSubmitHelper {
 
     public static String uploadFileToAzureBlob(/*@NotNull Project project,*/ @NotNull IClusterDetail selectedClusterDetail, @NotNull String buildJarPath) throws Exception {
 
-//        PluginUtil.showInfoOnSubmissionMessageWindow(project, String.format("Info : Get target jar from %s.", buildJarPath));
+        HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Get target jar from %s.", buildJarPath));
         String uniqueFolderId = UUID.randomUUID().toString();
 
         return SparkSubmitHelper.getInstance().uploadFileToAzureBlob(/*project,*/ buildJarPath,
@@ -273,6 +274,4 @@ public class SparkSubmitHelper {
         return path.endsWith(".jar");
 
     }
-
-    public static final String HELP_LINK = "http://go.microsoft.com/fwlink/?LinkID=722349&clcid=0x409";
 }
