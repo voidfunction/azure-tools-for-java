@@ -1,136 +1,136 @@
-package com.microsoft.azure.hdinsight.projects;
-
-import org.eclipse.core.internal.resources.Project;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExecutableExtension;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
-import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
-import org.eclipse.jdt.ui.IPackagesViewPart;
-import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.INewWizard;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
-
-import com.microsoft.azure.hdinsight.Activator;
-
-public class HDInsightsProjectWizard extends NewElementWizard implements INewWizard, IExecutableExtension {
-	private SparkLibraryWizardPage sparkLibraryWizardPage;
-	private NewJavaProjectWizardPageTwo javaPageTwo;
-	
-	private String id;
-	private IConfigurationElement fConfigElement;
-	
-	public HDInsightsProjectWizard() {
-		
-	}
-
-	@Override
-	public void init(IWorkbench arg0, IStructuredSelection arg1) {
-		setWindowTitle("New HDInsights Project");
-	}
-
-    @Override
-    public void addPages() {
-    	sparkLibraryWizardPage = new SparkLibraryWizardPage("Library Settings");
-    	javaPageTwo = new NewJavaProjectWizardPageTwo(sparkLibraryWizardPage);
-    	
-        addPage(sparkLibraryWizardPage);
-        addPage(javaPageTwo);
-    }
-	
-	@Override
-	public boolean performFinish() {
-		boolean res= super.performFinish();
-		if (res) {
-			final IJavaElement newElement= getCreatedElement();
-
-			IWorkingSet[] workingSets= sparkLibraryWizardPage.getWorkingSets();
-			if (workingSets.length > 0) {
-				PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(newElement, workingSets);
-			}
-
-			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
-//			selectAndReveal(javaPageTwo.getJavaProject().getProject());
-
-//			Display.getDefault().asyncExec(new Runnable() {
-//				@Override
-//				public void run() {
-//					IWorkbenchPart activePart= getActivePart();
-//					if (activePart instanceof IPackagesViewPart) {
-//						PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
-//						view.tryToReveal(newElement);
-//					}
-//				}
-//			});
-
-			String projectName= sparkLibraryWizardPage.getProjectName();
-			try {
-			IProject project = getCreatedElement().getJavaProject().getProject(); //ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-			IProjectDescription description = project.getDescription();
-		    String[] natures = description.getNatureIds();
-		    String[] newNatures = new String[natures.length + 1];
-		    System.arraycopy(natures, 0, newNatures, 0, natures.length);
-		    newNatures[natures.length] = HDInsightProjectNature.NATURE_ID;
-		    description.setNatureIds(newNatures);
-		    project.setDescription(description, null);
-			} catch (Exception ex) {
-				Display.getDefault().syncExec(new Runnable() {
-	        		public void run() {
-	        			MessageDialog.openError(null,"Error", "Error creating project");
-	        		}
-	        	});
-	        	Activator.getDefault().log("Error cretaing project", ex);
-			}
-		}
-		return res;
-	}
-
-	private IWorkbenchPart getActivePart() {
-		IWorkbenchWindow activeWindow= getWorkbench().getActiveWorkbenchWindow();
-		if (activeWindow != null) {
-			IWorkbenchPage activePage= activeWindow.getActivePage();
-			if (activePage != null) {
-				return activePage.getActivePart();
-			}
-		}
-		return null;
-	}
-	
-	@Override
-	public void setInitializationData(IConfigurationElement parameter, String arg1, Object arg2) throws CoreException {
-		this.id = parameter.getAttribute("id");
-		fConfigElement = parameter;
-	}
-
-	@Override
-	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
-		javaPageTwo.performFinish(monitor);
-		
-	}
-	
-	@Override
-	public IJavaElement getCreatedElement() {
-		return javaPageTwo.getJavaProject();
-	}
-}
+//package com.microsoft.azure.hdinsight.projects;
+//
+//import org.eclipse.core.internal.resources.Project;
+//import org.eclipse.core.resources.IProject;
+//import org.eclipse.core.resources.IProjectDescription;
+//import org.eclipse.core.resources.ResourcesPlugin;
+//import org.eclipse.core.runtime.CoreException;
+//import org.eclipse.core.runtime.IConfigurationElement;
+//import org.eclipse.core.runtime.IExecutableExtension;
+//import org.eclipse.core.runtime.IProgressMonitor;
+//import org.eclipse.jdt.core.IJavaElement;
+//import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+//import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
+//import org.eclipse.jdt.ui.IPackagesViewPart;
+//import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
+//import org.eclipse.jface.dialogs.IDialogSettings;
+//import org.eclipse.jface.dialogs.MessageDialog;
+//import org.eclipse.jface.viewers.IStructuredSelection;
+//import org.eclipse.jface.wizard.IWizardContainer;
+//import org.eclipse.jface.wizard.IWizardPage;
+//import org.eclipse.jface.wizard.Wizard;
+//import org.eclipse.swt.graphics.Image;
+//import org.eclipse.swt.graphics.RGB;
+//import org.eclipse.swt.widgets.Composite;
+//import org.eclipse.swt.widgets.Display;
+//import org.eclipse.ui.INewWizard;
+//import org.eclipse.ui.IWorkbench;
+//import org.eclipse.ui.IWorkbenchPage;
+//import org.eclipse.ui.IWorkbenchPart;
+//import org.eclipse.ui.IWorkbenchWindow;
+//import org.eclipse.ui.IWorkingSet;
+//import org.eclipse.ui.PlatformUI;
+//import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
+//
+//import com.microsoft.azure.hdinsight.Activator;
+//
+//public class HDInsightsProjectWizard extends NewElementWizard implements INewWizard, IExecutableExtension {
+//	private SparkLibraryWizardPage sparkLibraryWizardPage;
+//	private NewJavaProjectWizardPageTwo javaPageTwo;
+//	
+//	private String id;
+//	private IConfigurationElement fConfigElement;
+//	
+//	public HDInsightsProjectWizard() {
+//		
+//	}
+//
+//	@Override
+//	public void init(IWorkbench arg0, IStructuredSelection arg1) {
+//		setWindowTitle("New HDInsights Project");
+//	}
+//
+//    @Override
+//    public void addPages() {
+//    	sparkLibraryWizardPage = new SparkLibraryWizardPage("Library Settings");
+//    	javaPageTwo = new NewJavaProjectWizardPageTwo(sparkLibraryWizardPage);
+//    	
+//        addPage(sparkLibraryWizardPage);
+//        addPage(javaPageTwo);
+//    }
+//	
+//	@Override
+//	public boolean performFinish() {
+//		boolean res= super.performFinish();
+//		if (res) {
+//			final IJavaElement newElement= getCreatedElement();
+//
+//			IWorkingSet[] workingSets= sparkLibraryWizardPage.getWorkingSets();
+//			if (workingSets.length > 0) {
+//				PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(newElement, workingSets);
+//			}
+//
+//			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
+////			selectAndReveal(javaPageTwo.getJavaProject().getProject());
+//
+////			Display.getDefault().asyncExec(new Runnable() {
+////				@Override
+////				public void run() {
+////					IWorkbenchPart activePart= getActivePart();
+////					if (activePart instanceof IPackagesViewPart) {
+////						PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
+////						view.tryToReveal(newElement);
+////					}
+////				}
+////			});
+//
+//			String projectName= sparkLibraryWizardPage.getProjectName();
+//			try {
+//			IProject project = getCreatedElement().getJavaProject().getProject(); //ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+//			IProjectDescription description = project.getDescription();
+//		    String[] natures = description.getNatureIds();
+//		    String[] newNatures = new String[natures.length + 1];
+//		    System.arraycopy(natures, 0, newNatures, 0, natures.length);
+//		    newNatures[natures.length] = HDInsightProjectNature.NATURE_ID;
+//		    description.setNatureIds(newNatures);
+//		    project.setDescription(description, null);
+//			} catch (Exception ex) {
+//				Display.getDefault().syncExec(new Runnable() {
+//	        		public void run() {
+//	        			MessageDialog.openError(null,"Error", "Error creating project");
+//	        		}
+//	        	});
+//	        	Activator.getDefault().log("Error cretaing project", ex);
+//			}
+//		}
+//		return res;
+//	}
+//
+//	private IWorkbenchPart getActivePart() {
+//		IWorkbenchWindow activeWindow= getWorkbench().getActiveWorkbenchWindow();
+//		if (activeWindow != null) {
+//			IWorkbenchPage activePage= activeWindow.getActivePage();
+//			if (activePage != null) {
+//				return activePage.getActivePart();
+//			}
+//		}
+//		return null;
+//	}
+//	
+//	@Override
+//	public void setInitializationData(IConfigurationElement parameter, String arg1, Object arg2) throws CoreException {
+//		this.id = parameter.getAttribute("id");
+//		fConfigElement = parameter;
+//	}
+//
+//	@Override
+//	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
+//		javaPageTwo.performFinish(monitor);
+//		
+//	}
+//	
+//	@Override
+//	public IJavaElement getCreatedElement() {
+//		return javaPageTwo.getJavaProject();
+//	}
+//}

@@ -1,5 +1,6 @@
 package com.microsoft.azure.hdinsight.projects;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -14,10 +15,7 @@ import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -32,52 +30,34 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
-import org.scalaide.core.SdtConstants;
-import org.scalaide.ui.ScalaImages;
-import org.scalaide.ui.internal.wizards.NewScalaProjectWizardPageOne;
-import org.scalaide.ui.internal.wizards.NewScalaProjectWizardPageTwo;
-import org.scalaide.ui.internal.wizards.ScalaProjectWizard;
-
 import com.microsoft.azure.hdinsight.Activator;
 
-public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements IExecutableExtension  {
+public class HDInsightsJavaProjectWizard extends JavaProjectWizard implements IExecutableExtension {
 	private String id;
-
-	public HDInsightsScalaProjectWizard() {
-		this(new HDInsightScalaPageOne());
-	}
+	private HDInsightJavaPageOne page11;
 	
-	public HDInsightsScalaProjectWizard(HDInsightScalaPageOne page1) {
-		super(page1, new NewScalaProjectWizardPageTwo(page1));
-		  setWindowTitle("New Scala Project");
-		  setDefaultPageImageDescriptor(ScalaImages.SCALA_PROJECT_WIZARD());
-
-		  page1.setTitle("Create a Scala project");
-		  page1.setDescription("Create a Scala project in the workspace or in an external location.");
-		  page1.setTitle("Scala Settings");
-		  page1.setDescription("Define the Scala build settings.");
-	}
+	public HDInsightsJavaProjectWizard() {
+			this(new HDInsightJavaPageOne());
+		}
 	
+	public HDInsightsJavaProjectWizard(HDInsightJavaPageOne page1) {
+		super(page1, new HDInsightJavaPageTwo(page1));
+	}
+
 	@Override
 	public void setInitializationData(IConfigurationElement parameter, String arg1, Object arg2) {
 		super.setInitializationData(parameter, arg1, arg2);
 		this.id = parameter.getAttribute("id");
 	}
 
-	static class HDInsightScalaPageOne extends NewScalaProjectWizardPageOne {
-//		@Override
-//		public IClasspathEntry[] getDefaultClasspathEntries() {
-//			IClasspathEntry[] entries = super.getDefaultClasspathEntries();
-//			IClasspathEntry scalaEntry = JavaCore.newContainerEntry(Path.fromPortableString(SdtConstants.ScalaLibContId()));
-//			IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];
-//			System.arraycopy(entries, 0, newEntries, 0, entries.length);
-//			newEntries[entries.length] = scalaEntry;
-//			return newEntries;
-//		}
-		
+	static class HDInsightJavaPageOne extends NewJavaProjectWizardPageOne {
+		protected HDInsightJavaPageOne() {
+			super();
+			setTitle("Libraries Settings");
+	        setDescription("Libraries Settings");
+	        setPageComplete(true);
+		}
+
 		@Override
 		public void createControl(Composite parent) {
 			final IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -121,8 +101,9 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 		}
 	}
 	
-	static class HDInsightScalaPageTwo extends NewJavaProjectWizardPageTwo {
-		public HDInsightScalaPageTwo(NewJavaProjectWizardPageOne mainPage) {
+	static class HDInsightJavaPageTwo extends NewJavaProjectWizardPageTwo {
+
+		public HDInsightJavaPageTwo(NewJavaProjectWizardPageOne mainPage) {
 			super(mainPage);
 		}
 		
@@ -143,7 +124,6 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 	        } finally {
 	            ((IProgressMonitor)monitor).done();
 	        }
-
 	    }
 
 		private IProject addHDInsightNature(IProgressMonitor monitor) throws CoreException {
@@ -154,11 +134,10 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 			if (!project.hasNature(JavaCore.NATURE_ID)) {
 				IProjectDescription description = project.getDescription();
 				String[] natures = description.getNatureIds();
-				String[] newNatures = new String[natures.length + 3];
+				String[] newNatures = new String[natures.length + 2];
 				System.arraycopy(natures, 0, newNatures, 0, natures.length);
 				newNatures[natures.length] = HDInsightProjectNature.NATURE_ID;
 				newNatures[natures.length + 1] = JavaCore.NATURE_ID;
-				newNatures[natures.length + 2] = SdtConstants.NatureId();
 				description.setNatureIds(newNatures);
 				project.setDescription(description, null);
 			} else {
@@ -166,6 +145,5 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 			}
 			return project;
 		}
-		
 	}
 }
