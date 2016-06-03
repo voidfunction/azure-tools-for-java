@@ -51,7 +51,7 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 	}
 	
 	public HDInsightsScalaProjectWizard(HDInsightScalaPageOne page1) {
-		super(page1, new NewScalaProjectWizardPageTwo(page1));
+		super(page1, new HDInsightScalaPageTwo(page1));
 		  setWindowTitle("New Scala Project");
 		  setDefaultPageImageDescriptor(ScalaImages.SCALA_PROJECT_WIZARD());
 
@@ -156,9 +156,9 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 				String[] natures = description.getNatureIds();
 				String[] newNatures = new String[natures.length + 3];
 				System.arraycopy(natures, 0, newNatures, 0, natures.length);
-				newNatures[natures.length] = HDInsightProjectNature.NATURE_ID;
+				newNatures[natures.length] = SdtConstants.NatureId();
 				newNatures[natures.length + 1] = JavaCore.NATURE_ID;
-				newNatures[natures.length + 2] = SdtConstants.NatureId();
+				newNatures[natures.length + 2] = HDInsightProjectNature.NATURE_ID;
 				description.setNatureIds(newNatures);
 				project.setDescription(description, null);
 			} else {
