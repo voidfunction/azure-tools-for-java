@@ -11,7 +11,8 @@ Require-Bundle: org.eclipse.ui,
  com.microsoftopentechnologies.wacommon;bundle-version="2.9.1",
  com.microsoftopentechnologies.windowsazure.tools.sdk,
  org.eclipse.swt,
- org.eclipse.ui.workbench
+ org.eclipse.ui.workbench,
+ org.scala-ide.sdt.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Import-Package: com.microsoft.azure.hdinsight.common2,

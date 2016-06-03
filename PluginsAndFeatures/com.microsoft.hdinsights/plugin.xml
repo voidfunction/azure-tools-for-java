@@ -22,7 +22,7 @@
             category="com.microsoft.azure.hdinsight.projwizard.category"
             icon="icons/Spark-Scala.png"
             project="true"
-            class="com.microsoft.azure.hdinsight.projects.HDInsightsProjectWizard"
+            class="com.microsoft.azure.hdinsight.projects.HDInsightsScalaProjectWizard"
             id="com.microsoft.azure.hdinsight.scala.projwizard">
         	<description>Spark on HDInsight (Scala)</description>
          </wizard>
