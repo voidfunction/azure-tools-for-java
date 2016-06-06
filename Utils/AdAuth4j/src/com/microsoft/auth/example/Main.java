@@ -7,7 +7,9 @@ import com.microsoft.auth.tenants.Tenant;
 import com.microsoft.auth.tenants.TenantsClient;
 import com.microsoft.azure.management.resources.ResourceManagementClient;
 import com.microsoft.azure.management.resources.ResourceManagementService;
+import com.microsoft.azure.management.resources.models.GenericResourceExtended;
 import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
+import com.microsoft.azure.management.resources.models.ResourceListParameters;
 import com.microsoft.azure.management.storage.StorageManagementClient;
 import com.microsoft.azure.management.storage.StorageManagementService;
 import com.microsoft.azure.management.storage.models.StorageAccount;
@@ -106,7 +108,8 @@ public class Main {
             String sid = s.getSubscriptionId().toString();
             System.out.println(String.format("\t======> %s: %s ======================", s.getDisplayName(), sid ));
             //listSitesForSubscription(sid, accessToken);
-            listStorageAccountsForSubscriptionClassic(sid, accessToken);
+            //listStorageAccountsForSubscriptionClassic(sid, accessToken);
+            listStorageAccountsForSubscriptionClassicRmc(sid, accessToken);
         }
     }
     
@@ -152,6 +155,33 @@ public class Main {
     	}
     	
     }
+    
+    private static void listStorageAccountsForSubscriptionClassicRmc(String sid, String token)  {
+    	System.out.println("listStorageAccountsForSubscriptionClassicRmc");
+    	try {
+    		final URI baseUri = new URI("https://management.azure.com/");
+    		Configuration config  = ManagementConfiguration.configure(
+    				null,
+    				Configuration.getInstance(),
+    				baseUri,
+    				sid,
+    				token);    		
+    		ResourceManagementClient managementClient = ResourceManagementService.create(config);
+    		ResourceListParameters resourceListParameters = new ResourceListParameters();
+//    		resourceListParameters.setResourceType("Microsoft.ClassicStorage/storageAccounts");
+    		
+    		ArrayList<GenericResourceExtended> list = managementClient.getResourcesOperations().list(resourceListParameters).getResources();
+    		for(GenericResourceExtended item : list) {
+    			System.out.println("\tGenericResourceExtended name : " + item.getName() + " [" + item.getType() + "]");
+    		}
+    		
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	
+    }
+    
+    
     
     private static void listSitesForSubscription(String sid, String token) {
 
