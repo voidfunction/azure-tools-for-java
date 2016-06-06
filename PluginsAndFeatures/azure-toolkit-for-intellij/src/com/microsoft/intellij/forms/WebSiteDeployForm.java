@@ -126,7 +126,7 @@ public class WebSiteDeployForm extends DialogWrapper {
             int choice = Messages.showOkCancelDialog(String.format(message("delMsg"), name), message("delTtl"), Messages.getQuestionIcon());
             if (choice == Messages.OK) {
                 try {
-                    AzureManagerImpl.getManager().deleteWebSite(selectedWebSite.getSubscriptionId(),
+                    AzureManagerImpl.getManager(project).deleteWebSite(selectedWebSite.getSubscriptionId(),
                             selectedWebSite.getWebSpaceName(), name);
                     webSiteList.remove(webSiteJList.getSelectedIndex());
                     webSiteConfigMap.remove(selectedWebSite);
@@ -216,7 +216,7 @@ public class WebSiteDeployForm extends DialogWrapper {
 
         try {
             fillListTaskHandle = DefaultLoader.getIdeHelper().runInBackground(projectDescriptor, "Retrieving web apps info...", null, new CancellableTask() {
-                final AzureManager manager = AzureManagerImpl.getManager();
+                final AzureManager manager = AzureManagerImpl.getManager(project);
                 final Object lock = new Object();
 
                 CancellationHandle cancellationHandle;
@@ -546,7 +546,7 @@ public class WebSiteDeployForm extends DialogWrapper {
             }
             subscriptionsDialog.show();
 
-            subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
+            subscriptionList = AzureManagerImpl.getManager(project).getSubscriptionList();
             if (subscriptionList.size() == 0) {
                 setMessages("Please sign in to import your Azure subscriptions. The credentials in a publish settings file are not sufficient for the web app functionality.");
                 selectedWebSite = null;
