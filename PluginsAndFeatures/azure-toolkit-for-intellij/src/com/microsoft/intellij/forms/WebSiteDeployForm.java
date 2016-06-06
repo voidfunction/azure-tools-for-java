@@ -178,7 +178,7 @@ public class WebSiteDeployForm extends DialogWrapper {
                 project.getBasePath() == null ? "" : project.getBasePath());
         WebSite webSite = this.selectedWebSite;
 
-        AzureManager manager = AzureManagerImpl.getManager();
+        AzureManager manager = AzureManagerImpl.getManager(project);
         ArtifactDescriptor artifactDescriptor = manager.getWebArchiveArtifact(projectDescriptor);
         if (artifactDescriptor != null && webSite != null) {
             manager.deployWebArchiveArtifact(projectDescriptor, artifactDescriptor, webSite, chkBoxDeployRoot.isSelected());
