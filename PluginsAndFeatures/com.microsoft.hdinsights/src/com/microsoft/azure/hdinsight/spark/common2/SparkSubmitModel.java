@@ -25,8 +25,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.microsoft.azure.hdinsight.SparkSubmissionToolWindowView;
 import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
-import com.microsoft.azure.hdinsight.common.TelemetryCommon;
-import com.microsoft.azure.hdinsight.common.TelemetryManager;
 import com.microsoft.azure.hdinsight.common2.HDInsightUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.AuthenticationException;
@@ -41,6 +39,7 @@ import com.microsoft.tooling.msservices.helpers.StringHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -223,11 +222,11 @@ public class SparkSubmitModel {
 		}
 
 		@Override
-		protected IStatus run(IProgressMonitor monitor) {
+		protected IStatus run(final IProgressMonitor monitor) {
 			try {			
-				JarPackageData jarPackageData = new JarPackageData();
+				final JarPackageData jarPackageData = new JarPackageData();
 				jarPackageData.setElements(new Object[] { project });
-				jarPackageData.setExportClassFiles(false);
+				jarPackageData.setExportClassFiles(true);
 				jarPackageData.setExportOutputFolders(true);
 				jarPackageData.setExportJavaFiles(false);
 				jarPackageData.setExportErrors(false);
@@ -242,9 +241,24 @@ public class SparkSubmitModel {
 				// project.getFile(cdkProjectJarLocation.lastSegment());
 				jarPackageData.setJarLocation(destPath);
 				monitor.worked(5);
-				monitor.setTaskName("Creating Connector Jar ...");
-				new JarFileExportOperation(jarPackageData, PlatformUI.createDisplay().getActiveShell())
-						.run(new SubProgressMonitor(monitor, 100, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+				monitor.setTaskName("Creating Jar file...");
+				Display.getDefault().syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+						try {
+							new JarFileExportOperation(jarPackageData, Display.getDefault().getActiveShell())
+							.run(new SubProgressMonitor(monitor, 100, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+						} catch (InvocationTargetException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+					}
+				});
 				// cdkProjectJarFile.createLink(cdkProjectJarLocation,
 				// IResource.HIDDEN | IResource.REPLACE, null);
 			} catch (Exception ex) {

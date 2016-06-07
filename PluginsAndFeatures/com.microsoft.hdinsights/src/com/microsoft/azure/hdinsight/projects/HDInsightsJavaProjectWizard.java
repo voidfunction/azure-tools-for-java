@@ -12,10 +12,13 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -51,11 +54,30 @@ public class HDInsightsJavaProjectWizard extends JavaProjectWizard implements IE
 	}
 
 	static class HDInsightJavaPageOne extends NewJavaProjectWizardPageOne {
+		private SparkLibraryOptionsPanel sparkLibraryOptionsPanel;
+		
 		protected HDInsightJavaPageOne() {
 			super();
-			setTitle("Libraries Settings");
-	        setDescription("Libraries Settings");
-	        setPageComplete(true);
+//			setTitle("Libraries Settings");
+//	        setDescription("Libraries Settings");
+//	        setPageComplete(true);
+		}
+		
+		@Override
+		public IClasspathEntry[] getDefaultClasspathEntries() {
+			final IClasspathEntry[] entries = super.getDefaultClasspathEntries();
+			final IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];			
+			Display.getDefault().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					IPath jarPath = new Path(sparkLibraryOptionsPanel.getSparkLibraryPath());
+					IClasspathEntry sparkEntry = JavaCore.newLibraryEntry(jarPath, null, null);
+					System.arraycopy(entries, 0, newEntries, 0, entries.length);
+					newEntries[entries.length] = sparkEntry;
+				}
+			});
+			return newEntries;
 		}
 
 		@Override
@@ -79,17 +101,7 @@ public class HDInsightsJavaProjectWizard extends JavaProjectWizard implements IE
 
 	        super.createControl(parent);
 	        Composite container = (Composite) getControl();
-	        Composite composite = new Composite(container, SWT.NONE);
-	        GridLayout gridLayout = new GridLayout();
-	        gridLayout.numColumns = 2;
-	        GridData gridData = new GridData();
-	        gridData.grabExcessHorizontalSpace = true;
-	        composite.setLayout(gridLayout);
-	        composite.setLayoutData(gridData);
-	        Label lblProjName = new Label(composite, SWT.LEFT | SWT.TOP);
-	        lblProjName.setText("Spark SDK:");
-
-	        Composite sparkLibraryOptionsPanel = new SparkLibraryOptionsPanel(composite, SWT.NONE);
+	        sparkLibraryOptionsPanel = new SparkLibraryOptionsPanel(container, SWT.NONE);
 //	        Text textProjName = new Text(container, SWT.SINGLE | SWT.BORDER);
 //	        GridData gridData = new GridData();
 //	        gridData.widthHint = 330;

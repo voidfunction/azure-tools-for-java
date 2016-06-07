@@ -31,7 +31,8 @@ Import-Package: com.microsoft.azure.hdinsight.common2,
  org.eclipse.jdt.ui.wizards,
  org.eclipse.jface,
  org.eclipse.swt,
- org.eclipse.ui.wizards.newresource
+ org.eclipse.ui.wizards.newresource,
+ org.eclipse.jdt.ui.jarpackager
 Export-Package: com.microsoft.azure.hdinsight,
  com.microsoft.azure.hdinsight.common2,
  com.microsoft.azure.hdinsight.projects,
