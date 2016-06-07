@@ -28,12 +28,11 @@ import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.module.Module;
 import com.interopbridges.tools.windowsazure.WindowsAzurePackageType;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
-import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.module.AzureModuleType;
 import com.microsoft.intellij.ui.messages.AzureBundle;
 import com.microsoft.intellij.util.AntHelper;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.wacommon.utils.WACommonException;
+import com.wacommon.utils.WACommonException;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.PreferenceSetUtil;
 
@@ -54,7 +53,7 @@ public class BuildPackageAction extends AnAction {
                 waProjManager.setPackageType(WindowsAzurePackageType.CLOUD);
             }
             try {
-                String pluginInstLoc = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, AzurePlugin.PLUGIN_ID);
+                String pluginInstLoc = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID);
                 String prefFile = String.format("%s%s%s", pluginInstLoc, File.separator, AzureBundle.message("prefFileName"));
                 String prefSetUrl = PreferenceSetUtil.getSelectedPortalURL(PreferenceSetUtil.getSelectedPreferenceSetName(prefFile), prefFile);
                 /*

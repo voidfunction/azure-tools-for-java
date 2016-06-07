@@ -72,7 +72,6 @@ import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class AzurePlugin extends AbstractProjectComponent {
     private static final Logger LOG = Logger.getInstance("#com.microsoft.intellij.AzurePlugin");
-    public static final String PLUGIN_ID = "azure-toolkit-for-intellij";
     public static final String COMPONENTSETS_VERSION = "2.9.1"; // todo: temporary fix!
     public static final String PLUGIN_VERSION = "1.4";
     private static final String PREFERENCESETS_VERSION = "2.9.1";
@@ -91,7 +90,7 @@ public class AzurePlugin extends AbstractProjectComponent {
 
     public static File cmpntFile = new File(WAHelper.getTemplateFile(message("cmpntFileName")));
     public static String prefFilePath = WAHelper.getTemplateFile(message("prefFileName"));
-    public static String pluginFolder = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, AzurePlugin.PLUGIN_ID);
+    public static String pluginFolder = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID);
 
     private static final EventListenerList DEPLOYMENT_EVENT_LISTENERS = new EventListenerList();
     public static List<DeploymentEventListener> depEveList = new ArrayList<DeploymentEventListener>();
@@ -277,7 +276,7 @@ public class AzurePlugin extends AbstractProjectComponent {
      */
     private void copyPluginComponents() {
         try {
-            String pluginInstLoc = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PLUGIN_ID);
+            String pluginInstLoc = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID);
 
             String cmpntFile = String.format("%s%s%s", pluginInstLoc,
                     File.separator, AzureBundle.message("cmpntFileName"));
@@ -304,7 +303,7 @@ public class AzurePlugin extends AbstractProjectComponent {
             copyResourceFile(message("encFileName"), enctFile);
             for (AzureLibrary azureLibrary : AzureLibrary.LIBRARIES) {
                 if (!new File(pluginInstLoc + File.separator + azureLibrary.getLocation()).exists()) {
-                    for (String entryName : Utils.getJarEntries(pluginInstLoc + File.separator + "lib" + File.separator + PLUGIN_ID + ".jar", azureLibrary.getLocation())) {
+                    for (String entryName : Utils.getJarEntries(pluginInstLoc + File.separator + "lib" + File.separator + PluginUtil.PLUGIN_ID + ".jar", azureLibrary.getLocation())) {
                         new File(pluginInstLoc + File.separator + entryName).getParentFile().mkdirs();
                         copyResourceFile(entryName, pluginInstLoc + File.separator + entryName);
                     }

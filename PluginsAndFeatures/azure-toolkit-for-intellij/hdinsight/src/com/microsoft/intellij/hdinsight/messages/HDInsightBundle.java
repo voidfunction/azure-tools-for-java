@@ -19,22 +19,27 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.wacommon.utils;
+package com.microsoft.intellij.hdinsight.messages;
 
-public class WACommonException extends Exception {
+import com.intellij.AbstractBundle;
+import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.PropertyKey;
 
-    private static final long serialVersionUID = 6280101034357272719L;
-
-    public WACommonException(String message) {
-        super(message);
+public class HDInsightBundle extends AbstractBundle {
+    protected HDInsightBundle(@NonNls @NotNull String pathToBundle) {
+        super(pathToBundle);
     }
 
-    public WACommonException() {
-        super();
+    public static String message(@NotNull @PropertyKey(resourceBundle = BUNDLE) String key, @NotNull Object... params) {
+        return ourInstance.getMessage(key, params);
     }
 
-    public WACommonException(String msg, Exception excep) {
-        super(msg, excep);
+    @NonNls
+    private static final String BUNDLE = "com.microsoft.intellij.hdinsight.messages.messages";
+    private static final HDInsightBundle ourInstance = new HDInsightBundle();
+
+    private HDInsightBundle() {
+        super(BUNDLE);
     }
 }
-

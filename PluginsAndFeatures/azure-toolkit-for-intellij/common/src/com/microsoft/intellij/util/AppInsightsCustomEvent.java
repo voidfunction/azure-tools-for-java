@@ -4,32 +4,43 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.intellij.openapi.application.PathManager;
 import com.microsoft.applicationinsights.TelemetryClient;
 
+import com.microsoft.intellij.ui.messages.AzureBundle;
+import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
-import static com.microsoft.intellij.ui.messages.AzureBundle.message;
+
 
 public class AppInsightsCustomEvent {
     static String key = "9ee9694d-128e-4c2b-903f-dbe694548bf0";
-    static String dataFile = WAHelper.getTemplateFile(message("dataFileName"));
+    static String dataFile = PluginHelper.getTemplateFile(AzureBundle.message("dataFileName"));
 
-    public static void create(String eventName, String version) {
+    /**
+     * @return resource filename in plugin's directory
+     */
+    private static String getTemplateFile(String fileName) {
+        return String.format("%s%s%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID, File.separator, fileName);
+    }
+
+    public static void create(String eventName, String version,@Nullable Map<String, String> myProperties) {
         if (new File(dataFile).exists()) {
-            String prefValue = DataOperations.getProperty(dataFile, message("prefVal"));
+            String prefValue = DataOperations.getProperty(dataFile, AzureBundle.message("prefVal"));
             if (prefValue != null && !prefValue.isEmpty() && prefValue.equalsIgnoreCase("true")) {
                 TelemetryClient telemetry = new TelemetryClient();
                 telemetry.getContext().setInstrumentationKey(key);
-                Map<String, String> properties = new HashMap<String, String>();
+                Map<String, String> properties = myProperties == null ? new HashMap<String, String>() : new HashMap<String, String>(myProperties);
                 if (version != null && !version.isEmpty()) {
                     properties.put("Library Version", version);
                 }
-                String pluginVersion = DataOperations.getProperty(dataFile, message("pluginVersion"));
+                String pluginVersion = DataOperations.getProperty(dataFile, AzureBundle.message("pluginVersion"));
                 if (pluginVersion != null && !pluginVersion.isEmpty()) {
                     properties.put("Plugin Version", pluginVersion);
                 }
 
                 Map<String, Double> metrics = new HashMap<String, Double>();
-                String instID = DataOperations.getProperty(dataFile, message("instID"));
+                String instID = DataOperations.getProperty(dataFile, AzureBundle.message("instID"));
                 if (instID != null && !instID.isEmpty()) {
                     metrics.put("Installation ID", Double.parseDouble(instID));
                 }
@@ -38,6 +49,10 @@ public class AppInsightsCustomEvent {
                 telemetry.flush();
             }
         }
+    }
+
+    public static void create(String eventName, String version) {
+        create(eventName, version, null);
     }
 
     public static void createFTPEvent(String eventName, String uri, String appName, String subId) {
@@ -57,12 +72,12 @@ public class AppInsightsCustomEvent {
             properties.put("Subscription ID", subId);
         }
         if (new File(dataFile).exists()) {
-            String pluginVersion = DataOperations.getProperty(dataFile, message("pluginVersion"));
+            String pluginVersion = DataOperations.getProperty(dataFile, AzureBundle.message("pluginVersion"));
             if (pluginVersion != null && !pluginVersion.isEmpty()) {
                 properties.put("Plugin Version", pluginVersion);
             }
 
-            String instID = DataOperations.getProperty(dataFile, message("instID"));
+            String instID = DataOperations.getProperty(dataFile, AzureBundle.message("instID"));
             if (instID != null && !instID.isEmpty()) {
                 metrics.put("Installation ID", Double.parseDouble(instID));
             }
