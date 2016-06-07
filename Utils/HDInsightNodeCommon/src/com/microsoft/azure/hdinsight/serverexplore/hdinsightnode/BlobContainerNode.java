@@ -23,8 +23,6 @@ package com.microsoft.azure.hdinsight.serverexplore.hdinsightnode;
 
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.hdinsight.common.CommonConst;
-import com.microsoft.azure.hdinsight.common.TelemetryCommon;
-import com.microsoft.azure.hdinsight.common.TelemetryManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
@@ -68,7 +66,7 @@ public class BlobContainerNode extends Node {
 
     @Override
     protected void onNodeClick(NodeActionEvent e) {
-        TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerContainerOpen, null, null);
+//        TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerContainerOpen, null, null);
         final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount, blobContainer);
         if (openedFile == null) {
             DefaultLoader.getUIHelper().openItem(getProject(), storageAccount, blobContainer, " [Container]", "BlobContainer", CommonConst.BlobContainerIConPath);

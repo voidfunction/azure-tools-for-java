@@ -23,8 +23,6 @@ package com.microsoft.azure.hdinsight.serverexplore;
 
 import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
 import com.microsoft.azure.hdinsight.common.CommonConst;
-import com.microsoft.azure.hdinsight.common.TelemetryCommon;
-import com.microsoft.azure.hdinsight.common.TelemetryManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.ClusterNode;
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
@@ -56,7 +54,7 @@ public class HDInsightRootModuleImpl extends HDInsightRootModule {
     protected void refresh(@NotNull EventHelper.EventStateHandle eventState) throws AzureCmdException {
         synchronized (this) { //todo???
             removeAllChildNodes();
-            TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerHDInsightNodeExpand, null, null);
+//            TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerHDInsightNodeExpand, null, null);
 
             clusterDetailList = ClusterManagerEx.getInstance().getClusterDetails(getProject());
 

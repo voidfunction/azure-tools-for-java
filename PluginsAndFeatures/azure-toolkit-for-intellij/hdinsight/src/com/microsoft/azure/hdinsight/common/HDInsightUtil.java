@@ -32,9 +32,14 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
 import com.microsoft.azure.hdinsight.serverexplore.action.AddNewClusterAction;
 import com.microsoft.intellij.ToolWindowKey;
+import com.microsoft.intellij.hdinsight.messages.HDInsightBundle;
+import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
+import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule;
 
 import javax.swing.*;
@@ -52,6 +57,15 @@ public class HDInsightUtil {
 
     public static void setHDInsightRootModule(@NotNull AzureServiceModule azureServiceModule) {
         HDInsightRootModuleImpl hdInsightRootModule =  new HDInsightRootModuleImpl(azureServiceModule);
+
+        // add telemetry for HDInsight Node
+        hdInsightRootModule.addClickActionListener(new NodeActionListener() {
+            @Override
+            protected void actionPerformed(NodeActionEvent e) throws AzureCmdException {
+                AppInsightsCustomEvent.create(HDInsightBundle.message("HDInsightExplorerHDInsightNodeExpand"), null);
+            }
+        });
+
         azureServiceModule.setHdInsightModule(hdInsightRootModule);
     }
 

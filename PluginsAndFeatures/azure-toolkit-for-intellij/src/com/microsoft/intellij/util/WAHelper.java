@@ -39,7 +39,7 @@ public class WAHelper {
      * @return resource filename in plugin's directory
      */
     public static String getTemplateFile(String fileName) {
-        return String.format("%s%s%s%s%s", PathManager.getPluginsPath(), File.separator, AzurePlugin.PLUGIN_ID, File.separator, fileName);
+        return PluginHelper.getTemplateFile(fileName);
     }
 
     /**

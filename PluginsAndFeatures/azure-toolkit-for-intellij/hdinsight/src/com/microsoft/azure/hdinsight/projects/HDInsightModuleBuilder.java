@@ -39,13 +39,13 @@ import com.intellij.packaging.elements.CompositePackagingElement;
 import com.intellij.packaging.elements.PackagingElementFactory;
 import com.intellij.packaging.impl.artifacts.JarArtifactType;
 import com.microsoft.azure.hdinsight.common.CommonConst;
-import com.microsoft.azure.hdinsight.common.TelemetryCommon;
-import com.microsoft.azure.hdinsight.common.TelemetryManager;
 import com.microsoft.azure.hdinsight.projects.samples.ProjectSampleUtil;
 import com.microsoft.azure.hdinsight.projects.template.CustomHDInsightTemplateItem;
 import com.microsoft.azure.hdinsight.projects.template.CustomModuleWizardSetup;
 import com.microsoft.azure.hdinsight.projects.template.CustomTemplateInfo;
 import com.microsoft.azure.hdinsight.projects.template.TemplatesUtil;
+import com.microsoft.intellij.hdinsight.messages.HDInsightBundle;
+import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import org.jetbrains.annotations.NotNull;
 
@@ -207,13 +207,13 @@ public class HDInsightModuleBuilder extends JavaModuleBuilder implements ModuleB
 
     private void addTelemetry(HDInsightTemplatesType templatesType){
         if(templatesType == HDInsightTemplatesType.Java){
-            TelemetryManager.postEvent(TelemetryCommon.SparkProjectSystemJavaCreation, null, null);
+            AppInsightsCustomEvent.create(HDInsightBundle.message("SparkProjectSystemJavaCreation"), null);
         }else if(templatesType == HDInsightTemplatesType.JavaLocalSample){
-            TelemetryManager.postEvent(TelemetryCommon.SparkProjectSystemJavaSampleCreation, null, null);
+            AppInsightsCustomEvent.create(HDInsightBundle.message("SparkProjectSystemJavaSampleCreation"), null);
         }else if(templatesType == HDInsightTemplatesType.Scala) {
-            TelemetryManager.postEvent(TelemetryCommon.SparkProjectSystemScalaCreation, null, null);
+            AppInsightsCustomEvent.create(HDInsightBundle.message("SparkProjectSystemScalaCreation"), null);
         }else if(templatesType == HDInsightTemplatesType.ScalaClusterSample || templatesType == HDInsightTemplatesType.ScalaLocalSample){
-            TelemetryManager.postEvent(TelemetryCommon.SparkProjectSystemScalaSampleCreation, null, null);
+            AppInsightsCustomEvent.create(HDInsightBundle.message("SparkProjectSystemScalaSampleCreation"), null);
         }
     }
 

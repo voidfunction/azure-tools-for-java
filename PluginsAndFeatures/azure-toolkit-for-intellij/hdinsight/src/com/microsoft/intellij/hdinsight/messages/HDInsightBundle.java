@@ -19,29 +19,27 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.common;
+package com.microsoft.intellij.hdinsight.messages;
 
-import com.microsoft.applicationinsights.TelemetryClient;
+import com.intellij.AbstractBundle;
+import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.PropertyKey;
 
-import java.util.HashMap;
-import java.util.Map;
+public class HDInsightBundle extends AbstractBundle {
+    protected HDInsightBundle(@NonNls @NotNull String pathToBundle) {
+        super(pathToBundle);
+    }
 
-public class TelemetryManager {
+    public static String message(@NotNull @PropertyKey(resourceBundle = BUNDLE) String key, @NotNull Object... params) {
+        return ourInstance.getMessage(key, params);
+    }
 
-    private static final String Instrumentation_Key = "9de190e1-4c5f-4d76-9883-68bc53af267a";
+    @NonNls
+    private static final String BUNDLE = "com.microsoft.intellij.hdinsight.messages.messages";
+    private static final HDInsightBundle ourInstance = new HDInsightBundle();
 
-    public static void postEvent(String eventName, Map<String, String> properties, Map<String, Double> metrics){
-        if(properties == null){
-            properties = new HashMap<>();
-        }
-
-        if(metrics == null){
-            metrics = new HashMap<>();
-        }
-
-        TelemetryClient telemetry = new TelemetryClient();
-        telemetry.getContext().setInstrumentationKey(Instrumentation_Key);
-        telemetry.trackEvent(eventName, properties, metrics);
-        telemetry.flush();
+    private HDInsightBundle() {
+        super(BUNDLE);
     }
 }

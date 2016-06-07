@@ -36,6 +36,8 @@ import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.spark.uihelper.InteractiveRenderer;
 import com.microsoft.azure.hdinsight.spark.uihelper.InteractiveTableModel;
 import com.microsoft.azure.hdinsight.spark.common.*;
+import com.microsoft.intellij.hdinsight.messages.HDInsightBundle;
+import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import org.jetbrains.annotations.NotNull;
@@ -671,7 +673,7 @@ public class SparkSubmissionExDialog extends JDialog {
 
     private void OnHelper() {
         try {
-            TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionHelpClickEvent, null, null);
+            AppInsightsCustomEvent.create(HDInsightBundle.message("SparkSubmissionHelpClickEvent"), null);
             Desktop.getDesktop().browse(new URI(SparkSubmitHelper.HELP_LINK));
         } catch (Exception e) {
             DefaultLoader.getUIHelper().showException("An error occurred while attempting to browse link.", e,
