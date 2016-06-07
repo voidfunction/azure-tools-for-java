@@ -1,24 +1,25 @@
-package com.microsoft.azure.hdinsight.spark.common;
-
 /**
- * For batches spark job:
- * <p>
- * proxyUser	        The user to impersonate that will execute the job	            string
- * file	            Archive holding the file	                                    path (required)
- * args	            Command line arguments	                                        list of strings
- * className	        Application's java/spark main class	                            string
- * jars	            Files to be placed on the java classpath	                    list of paths
- * pyFiles	            Files to be placed on the PYTHONPATH	                        list of paths
- * files	            Files to be placed in executor working directory	            list of paths
- * driverMemory	    Memory for driver (e.g. 1000M, 2G)	                            string
- * driverCores	        Number of cores used by driver	                                int
- * executorMemory	    Memory for executor (e.g. 1000M, 2G)	                        string
- * executorCores	    Number of cores used by executor	                            int
- * numExecutors	    Number of executor	                                            int
- * archives	        Archives to be uncompressed (YARN mode only)	                list of paths
- * queue	            The YARN queue to submit too (YARN mode only)	                string
- * name	            Name of the application	string
+ * Copyright (c) Microsoft Corporation
+ * <p/>
+ * All rights reserved.
+ * <p/>
+ * MIT License
+ * <p/>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * <p/>
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ * <p/>
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
+package com.microsoft.azure.hdinsight.spark.common;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,27 +32,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * For interactive spark job:
- * <p>
- * kind	            The session kind (required)	session kind
- * proxyUser	        The user to impersonate that will run this session (e.g. bob)	                string
- * jars	            Files to be placed on the java classpath	                                    list of paths
- * pyFiles	            Files to be placed on the PYTHONPATH	                                        list of paths
- * files	            Files to be placed in executor working directory	                            list of paths
- * driverMemory	    Memory for driver (e.g. 1000M, 2G)	                                            string
- * driverCores	        Number of cores used by driver (YARN mode only)	                                int
- * executorMemory	    Memory for executor (e.g. 1000M, 2G)	                                        string
- * executorCores	    Number of cores used by executor	                                            int
- * numExecutors	    Number of executors (YARN mode only)	                                        int
- * archives	        Archives to be uncompressed in the executor working directory (YARN mode only)	list of paths
- * queue	            The YARN queue to submit too (YARN mode only)	string
- * name	            Name of the application	string
- */
-
 
 public class SparkSubmissionParameter {
-
+    /**
+     * For interactive spark job:
+     * <p>
+     * kind	            The session kind (required)	session kind
+     * proxyUser	        The user to impersonate that will run this session (e.g. bob)	                string
+     * jars	            Files to be placed on the java classpath	                                    list of paths
+     * pyFiles	            Files to be placed on the PYTHONPATH	                                        list of paths
+     * files	            Files to be placed in executor working directory	                            list of paths
+     * driverMemory	    Memory for driver (e.g. 1000M, 2G)	                                            string
+     * driverCores	        Number of cores used by driver (YARN mode only)	                                int
+     * executorMemory	    Memory for executor (e.g. 1000M, 2G)	                                        string
+     * executorCores	    Number of cores used by executor	                                            int
+     * numExecutors	    Number of executors (YARN mode only)	                                        int
+     * archives	        Archives to be uncompressed in the executor working directory (YARN mode only)	list of paths
+     * queue	            The YARN queue to submit too (YARN mode only)	string
+     * name	            Name of the application	string
+     */
     private String file = "";
     private String className = "";
 
