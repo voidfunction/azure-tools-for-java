@@ -245,13 +245,13 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
         final String managementUri = settings.getAzureServiceManagementUri();
 
         // FIXME.shch: need to extend interface?
-        com.microsoft.auth.AuthenticationResult res = ((AADManagerImpl)aadManager).auth(null, null);
+        com.microsoft.auth.AuthenticationResult res = ((AADManagerImpl)aadManager).auth(null, null, com.microsoft.auth.PromptBehavior.Always);
 
         try {
             List<Tenant> tenants = TenantsClient.getByToken(res.getAccessToken());
             for (Tenant t : tenants) {
                 String tid = t.getTenantId();
-                res = ((AADManagerImpl)aadManager).auth(null, tid);
+                res = ((AADManagerImpl)aadManager).auth(null, tid, com.microsoft.auth.PromptBehavior.Auto);
                 UserInfo userInfo = new UserInfo(tid, res.getUserInfo().getUniqueId());
                 List<com.microsoft.auth.subsriptions.Subscription> subscriptions = com.microsoft.auth.subsriptions.SubscriptionsClient.getByToken(res.getAccessToken());
                 for (com.microsoft.auth.subsriptions.Subscription s : subscriptions) {

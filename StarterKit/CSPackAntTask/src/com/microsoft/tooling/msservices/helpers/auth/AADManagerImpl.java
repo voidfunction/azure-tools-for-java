@@ -107,7 +107,7 @@ public class AADManagerImpl implements AADManager {
 
         com.microsoft.auth.
                 UserIdentifier userIdentifier = new UserIdentifier(userInfo.getUniqueName(), UserIdentifierType.UniqueId);
-        com.microsoft.auth.AuthenticationResult res = auth(userIdentifier, userInfo.getTenantId());
+        com.microsoft.auth.AuthenticationResult res = auth(userIdentifier, userInfo.getTenantId(), com.microsoft.auth.PromptBehavior.Auto);
         try {
             return requestCallback.execute(res.getAccessToken());
         } catch (Throwable throwable) {
@@ -116,7 +116,7 @@ public class AADManagerImpl implements AADManager {
         }
     }
 
-    public com.microsoft.auth.AuthenticationResult auth(com.microsoft.auth.UserIdentifier userIdentifier, String tenantName) throws AzureCmdException {
+    public com.microsoft.auth.AuthenticationResult auth(com.microsoft.auth.UserIdentifier userIdentifier, String tenantName, com.microsoft.auth.PromptBehavior pb) throws AzureCmdException {
         if (tenantName == null) {
             tenantName = COMMON_TENANT;
         }
@@ -124,7 +124,7 @@ public class AADManagerImpl implements AADManager {
             AuthContext authContext = new com.microsoft.auth.AuthContext(String.format("%s/%s", AUTHORITY, tenantName), tokenCache);
             com.microsoft.auth.
                     AuthenticationResult result = authContext.acquireToken(RESOURCE, CLIENT_ID, REDIRECT_URI,
-                    com.microsoft.auth.PromptBehavior.Auto, userIdentifier);
+                    pb, userIdentifier);
             return result;
         } catch (Throwable throwable) {
             logger.warning(throwable.getMessage());
