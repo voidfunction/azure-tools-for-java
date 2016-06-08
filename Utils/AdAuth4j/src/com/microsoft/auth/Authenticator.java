@@ -31,6 +31,13 @@ class Authenticator {
     public void setAuthority(String val) {
         this.authority = val;
     }
+    
+    public boolean getIsTenantless() throws URISyntaxException {
+    	URI authorityUri = new URI(this.getAuthority());
+    	String path = authorityUri.getPath().substring(1);
+        String tenant = path.substring(0, path.indexOf("/"));
+        return (tenant.compareToIgnoreCase(tenantlessTenantName) == 0);
+    }
 
     public Authenticator(String authority, boolean validateAuthority) throws Exception {
     	this.authenticatorTemplateList = new AuthenticatorTemplateList();

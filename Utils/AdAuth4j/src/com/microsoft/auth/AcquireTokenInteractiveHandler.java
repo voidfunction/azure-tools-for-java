@@ -15,7 +15,6 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     private PromptBehavior promptBehavior;
     private final IWebUi webUi;
     private final UserIdentifier userId;
-    private final boolean isTenantLess;
 
     AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, String resource,
             String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, IWebUi webUi) throws Exception {
@@ -41,7 +40,6 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
                 && this.promptBehavior != PromptBehavior.Always 
                 && this.promptBehavior != PromptBehavior.RefreshSession);
         this.supportADFS = true;
-        this.isTenantLess = authenticator.isTenantless;
     }
 
     private void setRedirectUriRequestParameter() {
@@ -57,7 +55,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     	log.info("acquireAuthorization...");
         long allowedInterval = 300000; // authorization code ttl
         if(authorizationResult != null
-            && !isTenantLess
+            && !authenticator.getIsTenantless()
             && System.currentTimeMillis() - authorizationResultTimestamp < allowedInterval) {
             // use existing authorization code
         	log.info("using existing authorization code");
