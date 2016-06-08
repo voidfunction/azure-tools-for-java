@@ -29,13 +29,19 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.LabeledComponent;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.ui.DocumentAdapter;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
+import com.microsoft.intellij.forms.WebSiteDeployForm;
+import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tasks.WebSiteDeployTask;
+import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
+import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,6 +50,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.event.*;
 import java.util.*;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfiguration> {
     JPanel myPanel;
@@ -56,15 +64,14 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
     private JTextField myPortField;
     private JPanel myShmemPanel;
     private JPanel mySocketPanel;
-    private ConfigurationArgumentsHelpArea myHelpArea;
-    @NonNls private ConfigurationArgumentsHelpArea myJDK13HelpArea;
-    private ConfigurationArgumentsHelpArea myJDK14HelpArea;
     private LabeledComponent<ModulesComboBox> myModule;
-    private String myHostName = "";
+    private String myHostName = "localhost";
     @NonNls
     protected static final String LOCALHOST = "localhost";
     private final ConfigurationModuleSelector myModuleSelector;
     private JComboBox webAppCombo;
+    private JPanel webAppPanel;
+    private JXHyperlink link;
     Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
     List<WebSite> webSiteList = new ArrayList<WebSite>();
     Project project;
@@ -73,14 +80,6 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
     public AzureRemoteConfigurable(final Project project, final Module module) {
         this.project = project;
         this.module = module;
-
-        myHelpArea.setLabelText(ExecutionBundle.message("remote.configuration.remote.debugging.allows.you.to.connect.idea.to.a.running.jvm.label"));
-        myHelpArea.setToolbarVisible();
-
-        myJDK13HelpArea.setLabelText(ExecutionBundle.message("environment.variables.helper.use.arguments.jdk13.label"));
-        myJDK13HelpArea.setToolbarVisible();
-        myJDK14HelpArea.setLabelText(ExecutionBundle.message("environment.variables.helper.use.arguments.jdk14.label"));
-        myJDK14HelpArea.setToolbarVisible();
 
         final ButtonGroup transportGroup = new ButtonGroup();
         transportGroup.add(myRbSocket);
@@ -98,7 +97,6 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
         myAddressField.getDocument().addDocumentListener(helpTextUpdater);
         myHostField.getDocument().addDocumentListener(helpTextUpdater);
         myPortField.getDocument().addDocumentListener(helpTextUpdater);
-        myRbSocket.setSelected(true);
         final ActionListener listener = new ActionListener() {
             public void actionPerformed(final ActionEvent e) {
                 final Object source = e.getSource();
@@ -120,15 +118,8 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
         final ItemListener updateListener = new ItemListener() {
             public void itemStateChanged(final ItemEvent e) {
                 final boolean isAttach = myRbAttach.isSelected();
-
-                if(!isAttach && myHostField.isEditable()) {
-                    myHostName = myHostField.getText();
-                }
-
-                myHostField.setEditable(isAttach);
                 myHostField.setEnabled(isAttach);
-
-                myHostField.setText(isAttach ? myHostName : LOCALHOST);
+                myHostField.setText(LOCALHOST);
                 updateHelpText();
             }
         };
@@ -144,10 +135,13 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
         myPortField.addFocusListener(fieldFocusListener);
 
         myModuleSelector = new ConfigurationModuleSelector(project, myModule.getComponent(), "<whole project>");
+        // default
+        myRbSocket.doClick();
+        myRbAttach.doClick();
     }
 
     public void applyEditorTo(@NotNull final AzureRemoteConfiguration configuration) throws ConfigurationException {
-        configuration.HOST = (myHostField.isEditable() ? myHostField.getText() : myHostName).trim();
+        configuration.HOST = (myHostField.getText()).trim();
         if (configuration.HOST != null && configuration.HOST.isEmpty()) {
             configuration.HOST = null;
         }
@@ -172,8 +166,8 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
             myAddressField.setEditable(false);
         }
         myAddressField.setText(configuration.SHMEM_ADDRESS);
-        myHostName = configuration.HOST;
-        myHostField.setText(configuration.HOST);
+        myHostName = LOCALHOST;
+        myHostField.setText(LOCALHOST);
         myPortField.setText(configuration.PORT);
         if (configuration.USE_SOCKET_TRANSPORT) {
             myRbSocket.doClick();
@@ -187,39 +181,35 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
         else {
             myRbAttach.doClick();
         }
-        myRbShmem.setEnabled(SystemInfo.isWindows);
+
         myModuleSelector.reset(configuration);
         List<String> listToDisplay = loadWebApps();
         String website = configuration.WEBAPP;
         if (!listToDisplay.isEmpty()) {
-            if (!website.isEmpty() && listToDisplay.contains(website)) {
+            if (website != null && !website.isEmpty() && listToDisplay.contains(website)) {
                 webAppCombo.setSelectedItem(website);
             } else {
                 webAppCombo.setSelectedItem(listToDisplay.get(0));
             }
         }
+
     }
 
     @NotNull
     public JComponent createEditor() {
+        link.setAction(createLinkAction());
+        link.setVisible(true);
         return myPanel;
     }
 
     private void updateHelpText() {
         boolean useSockets = !myRbShmem.isSelected();
-
         final RemoteConnection connection = new RemoteConnection(
                 useSockets,
                 myHostName,
                 useSockets ? myPortField.getText().trim() : myAddressField.getText().trim(),
                 myRbListen.isSelected()
         );
-        final String cmdLine = connection.getLaunchCommandLine();
-        // -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=7007
-        final String jvmtiCmdLine = cmdLine.replace("-Xdebug", "").replace("-Xrunjdwp:", "-agentlib:jdwp=").trim();
-        myHelpArea.updateText(jvmtiCmdLine);
-        myJDK14HelpArea.updateText(cmdLine);
-        myJDK13HelpArea.updateText("-Xnoagent -Djava.compiler=NONE " + cmdLine);
     }
 
     public static List<String> prepareListToDisplay(Map<WebSite, WebSiteConfiguration> webSiteConfigMap, List<WebSite> webSiteList) {
@@ -287,5 +277,33 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
             AzurePlugin.log(e.getMessage(), e);
         }
         return listToDisplay;
+    }
+
+    private Action createLinkAction() {
+        return new AbstractAction("Azure Web App") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String prevSelection = (String) webAppCombo.getSelectedItem();
+                WebSiteDeployForm form = new WebSiteDeployForm(module);
+                form.show();
+                if (form.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+                    try {
+                        String url = form.deploy();
+                        WebSiteDeployTask task = new WebSiteDeployTask(project, form.getSelectedWebSite(), url);
+                        task.queue();
+                    } catch (AzureCmdException ex) {
+                        PluginUtil.displayErrorDialogAndLog(message("webAppDplyErr"), ex.getMessage(), ex);
+                    }
+                }
+                List<String> listToDisplay = loadWebApps();
+                if (!listToDisplay.isEmpty()) {
+                    if (!prevSelection.isEmpty() && listToDisplay.contains(prevSelection)) {
+                        webAppCombo.setSelectedItem(prevSelection);
+                    } else {
+                        webAppCombo.setSelectedItem(listToDisplay.get(0));
+                    }
+                }
+            }
+        };
     }
 }

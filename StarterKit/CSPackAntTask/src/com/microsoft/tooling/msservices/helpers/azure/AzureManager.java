@@ -249,7 +249,8 @@ public interface AzureManager {
 	void deployWebArchiveArtifact(@NotNull ProjectDescriptor projectDescriptor,
 			@NotNull ArtifactDescriptor artifactDescriptor,
 			@NotNull WebSite webSite,
-			@NotNull boolean isDeployRoot);
+			@NotNull boolean isDeployRoot,
+			AzureManager manager);
 
 	void publishWebArchiveArtifact(@NotNull String subscriptionId, @NotNull String webSpaceName,
 			@NotNull String webSiteName, @NotNull String artifactPath,

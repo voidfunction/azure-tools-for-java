@@ -149,40 +149,44 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                                                 public void run() {
                                                     try {
                                                         final Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
-                                                        ExecutorService executor = Executors.newFixedThreadPool(subscriptions.size());
-                                                        for (final Subscription subscription : subscriptions) {
-                                                            executor.execute(new Runnable() {
-                                                                @Override
-                                                                public void run() {
-                                                                    List<String> resList = null;
-                                                                    try {
-                                                                        resList = apiManager.getResourceGroupNames(subscription.getId());
-                                                                        for (String res : resList) {
-                                                                            List<WebSite> webList = null;
-                                                                            webList = apiManager.getWebSites(subscription.getId(), res);
-                                                                            for (WebSite webSite : webList) {
-                                                                                WebSiteConfiguration webSiteConfiguration = apiManager.getWebSiteConfiguration(webSite.getSubscriptionId(),
-                                                                                        webSite.getWebSpaceName(), webSite.getName());
+                                                        if (subscriptions.size() > 0) {
+                                                            ExecutorService executor = Executors.newFixedThreadPool(subscriptions.size());
+                                                            for (final Subscription subscription : subscriptions) {
+                                                                executor.execute(new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        List<String> resList = null;
+                                                                        try {
+                                                                            resList = apiManager.getResourceGroupNames(subscription.getId());
+                                                                            for (String res : resList) {
+                                                                                List<WebSite> webList = null;
+                                                                                webList = apiManager.getWebSites(subscription.getId(), res);
+                                                                                for (WebSite webSite : webList) {
+                                                                                    WebSiteConfiguration webSiteConfiguration = apiManager.getWebSiteConfiguration(webSite.getSubscriptionId(),
+                                                                                            webSite.getWebSpaceName(), webSite.getName());
 
-                                                                                webSiteConfigMap.put(webSite, webSiteConfiguration);
+                                                                                    webSiteConfigMap.put(webSite, webSiteConfiguration);
+                                                                                }
                                                                             }
+                                                                        } catch (Exception ex) {
+                                                                            PluginUtil.displayErrorDialogInAWTAndLog("Error loading webapps", "Error loading webapps...", ex);
                                                                         }
-                                                                    } catch (Exception ex) {
-                                                                        PluginUtil.displayErrorDialogInAWTAndLog("Error loading webapps", "Error loading webapps...", ex);
                                                                     }
-                                                                }
-                                                            });
+                                                                });
+                                                            }
+                                                            executor.shutdown();
+                                                            AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
+                                                            AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
+                                                            AppInsightsMngmtPanel.updateApplicationInsightsResourceRegistry(subscriptions, project);
                                                         }
-                                                        executor.shutdown();
-                                                        AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
-                                                        AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
-                                                        AppInsightsMngmtPanel.updateApplicationInsightsResourceRegistry(subscriptions, project);
                                                     } catch (Exception ex) {
                                                         PluginUtil.displayErrorDialogInAWTAndLog("Error caching webapps", "Error caching webapps", ex);
                                                     }
                                                 }
                                             });
-                                            pd.setCurrentSubscription(publishProfile.getSubscriptions().get(0));
+                                            if (publishProfile.getSubscriptions().size() > 0) {
+                                                pd.setCurrentSubscription(publishProfile.getSubscriptions().get(0));
+                                            }
 
                                             WizardCacheManager.cachePublishData(null, pd, null, project);
                                             AzureSettings.getSafeInstance(project).savePublishDatas();

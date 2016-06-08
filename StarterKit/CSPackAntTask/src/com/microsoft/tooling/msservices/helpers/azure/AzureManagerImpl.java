@@ -748,7 +748,8 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
     public void deployWebArchiveArtifact(@NotNull final ProjectDescriptor projectDescriptor,
     		@NotNull final ArtifactDescriptor artifactDescriptor,
     		@NotNull final WebSite webSite,
-    		@NotNull final boolean isDeployRoot) {
+    		@NotNull final boolean isDeployRoot,
+    		final AzureManager manager) {
     	ListenableFuture<String> future = DefaultLoader.getIdeHelper().buildArtifact(projectDescriptor, artifactDescriptor);
 
     	Futures.addCallback(future, new FutureCallback<String>() {
@@ -758,7 +759,6 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
     				DefaultLoader.getIdeHelper().runInBackground(projectDescriptor, "Deploying web app", "Deploying web app...", new CancellableTask() {
     					@Override
     					public void run(CancellationHandle cancellationHandle) throws Throwable {
-    						AzureManager manager = AzureManagerImpl.getManager();
     						manager.publishWebArchiveArtifact(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName(),
     								artifactPath, isDeployRoot, artifactDescriptor.getName());
     					}
