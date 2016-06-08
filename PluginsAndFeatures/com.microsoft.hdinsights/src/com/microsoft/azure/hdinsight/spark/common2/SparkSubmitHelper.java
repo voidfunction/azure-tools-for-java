@@ -15,8 +15,6 @@ import java.util.regex.Pattern;
 import com.google.common.base.Joiner;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.microsoft.azure.hdinsight.common.TelemetryCommon;
-import com.microsoft.azure.hdinsight.common.TelemetryManager;
 import com.microsoft.azure.hdinsight.common2.HDInsightUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
@@ -140,7 +138,7 @@ public class SparkSubmitHelper {
 
             if (isKilledJob) {
                 postEventProperty.put("IsKilled", "true");
-                TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
+//                TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
                 return;
             }
 
@@ -152,14 +150,14 @@ public class SparkSubmitHelper {
                 HDInsightUtil.getSparkSubmissionToolWindowView().setInfo("The Spark application completed successfully");
             }
 
-            TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
+//            TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
 
         } catch (Exception e) {
             if (HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().isJobKilled() == false) {
                 HDInsightUtil.getSparkSubmissionToolWindowView().setError("Error : Failed to getting running log. Exception : " + e.toString());
             } else {
                 postEventProperty.put("IsKilled", "true");
-                TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
+//                TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
             }
         }
     }

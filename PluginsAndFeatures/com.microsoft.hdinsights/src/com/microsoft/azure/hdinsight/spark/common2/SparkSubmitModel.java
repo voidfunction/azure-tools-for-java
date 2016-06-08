@@ -48,6 +48,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -223,7 +224,9 @@ public class SparkSubmitModel {
 
 		@Override
 		protected IStatus run(final IProgressMonitor monitor) {
-			try {			
+			try {
+				project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
+				super.setName("");
 				final JarPackageData jarPackageData = new JarPackageData();
 				jarPackageData.setElements(new Object[] { project });
 				jarPackageData.setExportClassFiles(true);
@@ -259,8 +262,6 @@ public class SparkSubmitModel {
 						
 					}
 				});
-				// cdkProjectJarFile.createLink(cdkProjectJarLocation,
-				// IResource.HIDDEN | IResource.REPLACE, null);
 			} catch (Exception ex) {
 				errorMessage = ex.getMessage();
 				return Status.CANCEL_STATUS;

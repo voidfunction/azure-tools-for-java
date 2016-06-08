@@ -23,8 +23,8 @@ import org.eclipse.ui.part.ViewPart;
 import com.microsoft.azure.hdinsight.common.CommonConst;
 import com.microsoft.azure.hdinsight.common.JobStatusManager;
 import com.microsoft.azure.hdinsight.common.MessageInfoType;
-import com.microsoft.azure.hdinsight.common.TelemetryCommon;
-import com.microsoft.azure.hdinsight.common.TelemetryManager;
+//import com.microsoft.azure.hdinsight.common.TelemetryCommon;
+//import com.microsoft.azure.hdinsight.common.TelemetryManager;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import com.microsoft.azure.hdinsight.spark.common.SparkBatchSubmission;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -67,7 +67,7 @@ public class SparkSubmissionToolWindowView extends ViewPart {
                     @Override
                     public void run() {
                         if (!StringHelper.isNullOrWhiteSpace(connectionUrl)) {
-                            TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionStopButtionClickEvent, null, null);
+//                            TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionStopButtionClickEvent, null, null);
                             try {
                                 HttpResponse deleteResponse = SparkBatchSubmission.getInstance().killBatchJob(connectionUrl + "/livy/batches", batchId);
                                 if (deleteResponse.getCode() == 201 || deleteResponse.getCode() == 200) {
