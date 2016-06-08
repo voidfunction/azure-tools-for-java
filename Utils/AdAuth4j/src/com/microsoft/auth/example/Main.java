@@ -7,7 +7,12 @@ import com.microsoft.auth.tenants.Tenant;
 import com.microsoft.auth.tenants.TenantsClient;
 import com.microsoft.azure.management.resources.ResourceManagementClient;
 import com.microsoft.azure.management.resources.ResourceManagementService;
+import com.microsoft.azure.management.resources.models.GenericResourceExtended;
 import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
+import com.microsoft.azure.management.resources.models.ResourceListParameters;
+import com.microsoft.azure.management.storage.StorageManagementClient;
+import com.microsoft.azure.management.storage.StorageManagementService;
+import com.microsoft.azure.management.storage.models.StorageAccount;
 import com.microsoft.azure.management.websites.WebSiteManagementClient;
 import com.microsoft.azure.management.websites.WebSiteManagementService;
 import com.microsoft.azure.management.websites.models.WebSite;
@@ -62,13 +67,11 @@ public class Main {
                 }
             };
 
-//            for (int i = 0; i < 16; ++i) 
-            {
-
+            worker.run();
+//            for (int i = 0; i < 16; ++i)  {
 //                new Thread(worker).start();
 //                new Thread(worker).start();
-                worker.run();
-            }
+//            }
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -77,7 +80,7 @@ public class Main {
         }
     }
 
-    private static void getDataFromAzure(TokenCache cache) throws Exception{
+    private static void getDataFromAzure(TokenCache cache) throws Exception {
 
         System.out.println(String.format("\n======> tenantId: %s ======================\n", tenant));
         AuthContext ac = new AuthContext(String.format("%s/%s", authority, tenant), cache);
@@ -96,6 +99,7 @@ public class Main {
             printSubsriptins(result1.getAccessToken());
         }
     }
+    
 
     private static void printSubsriptins(String accessToken) throws Exception {
         List<Subscription> subscriptions = SubscriptionsClient.getByToken(accessToken);
@@ -103,9 +107,82 @@ public class Main {
         for (Subscription s : subscriptions) {
             String sid = s.getSubscriptionId().toString();
             System.out.println(String.format("\t======> %s: %s ======================", s.getDisplayName(), sid ));
-            listSitesForSubscription(sid, accessToken);
+            //listSitesForSubscription(sid, accessToken);
+            //listStorageAccountsForSubscriptionClassic(sid, accessToken);
+            listStorageAccountsForSubscriptionClassicRmc(sid, accessToken);
         }
     }
+    
+    private static void listStorageAccountsForSubscription(String sid, String token)  {
+    	try {
+    		final URI baseUri = new URI("https://management.azure.com/");
+    		Configuration config  = ManagementConfiguration.configure(
+    				null,
+    				Configuration.getInstance(),
+    				baseUri,
+    				sid,
+    				token);
+    		StorageManagementClient storageManagementClient = StorageManagementService.create(config);
+    		ArrayList<StorageAccount> saList = storageManagementClient.getStorageAccountsOperations().list().getStorageAccounts();
+    		for(StorageAccount sa : saList) {
+    			System.out.println("\tStorage accoutn name : " + sa.getName());
+    		}
+    		
+    	} catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+    
+    private static void listStorageAccountsForSubscriptionClassic(String sid, String token)  {
+    	try {
+    		final URI baseUri = new URI("https://management.azure.com/");
+    		Configuration config  = ManagementConfiguration.configure(
+    				null,
+    				Configuration.getInstance(),
+    				baseUri,
+    				sid,
+    				token);
+    		com.microsoft.windowsazure.management.storage.
+    		StorageManagementClient storageManagementClient = com.microsoft.windowsazure.management.storage.StorageManagementService.create(config);
+    		ArrayList<com.microsoft.windowsazure.management.storage.models.StorageAccount> saList = storageManagementClient.getStorageAccountsOperations().list().getStorageAccounts();
+    		for(com.microsoft.windowsazure.management.storage.models.StorageAccount sa : saList) {
+    			System.out.println("\tStorage accoutn name : " + sa.getName());
+    		}
+    		
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	
+    }
+    
+    private static void listStorageAccountsForSubscriptionClassicRmc(String sid, String token)  {
+    	System.out.println("listStorageAccountsForSubscriptionClassicRmc");
+    	try {
+    		final URI baseUri = new URI("https://management.azure.com/");
+    		Configuration config  = ManagementConfiguration.configure(
+    				null,
+    				Configuration.getInstance(),
+    				baseUri,
+    				sid,
+    				token);    		
+    		ResourceManagementClient managementClient = ResourceManagementService.create(config);
+    		ResourceListParameters resourceListParameters = new ResourceListParameters();
+//    		resourceListParameters.setResourceType("Microsoft.ClassicStorage/storageAccounts");
+    		
+    		ArrayList<GenericResourceExtended> list = managementClient.getResourcesOperations().list(resourceListParameters).getResources();
+    		for(GenericResourceExtended item : list) {
+    			System.out.println("\tGenericResourceExtended name : " + item.getName() + " [" + item.getType() + "]");
+    		}
+    		
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	
+    }
+    
+    
+    
     private static void listSitesForSubscription(String sid, String token) {
 
         try {

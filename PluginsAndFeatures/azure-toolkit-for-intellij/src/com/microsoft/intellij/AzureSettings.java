@@ -57,6 +57,7 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
     private boolean subscriptionLoaded;
     private boolean webAppLoaded;
     private boolean appInsightsLoaded;
+    Map<String, Boolean> websiteDebugPrep = new HashMap<String, Boolean>();
 
     public static AzureSettings getSafeInstance(Project project) {
         AzureSettings settings = ServiceManager.getService(project, AzureSettings.class);
@@ -300,6 +301,14 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
 
     public void setAppInsightsLoaded(boolean appInsightsLoaded) {
         this.appInsightsLoaded = appInsightsLoaded;
+    }
+
+    public Map<String, Boolean> getWebsiteDebugPrep() {
+        return websiteDebugPrep;
+    }
+
+    public void setWebsiteDebugPrep(Map<String, Boolean> websiteDebugPrep) {
+        this.websiteDebugPrep = websiteDebugPrep;
     }
 
     public String[] getProperties(String name) {

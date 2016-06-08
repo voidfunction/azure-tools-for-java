@@ -21,17 +21,12 @@
  */
 package com.microsoft.tooling.msservices.helpers;
 
+import java.util.List;
+
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
-import com.microsoft.tooling.msservices.model.storage.*;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 public interface IDEHelper {
     class ProjectDescriptor {

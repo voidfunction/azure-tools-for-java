@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.Socket;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,6 +62,7 @@ import com.microsoft.webapp.activator.Activator;
 import com.microsoft.webapp.config.Messages;
 import com.microsoft.webapp.util.WebAppUtils;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
+import com.microsoftopentechnologies.azurecommons.wacommonutil.Utils;
 import com.microsoftopentechnologies.azurecommons.xmlhandling.WebAppConfigOperations;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
@@ -81,9 +81,9 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 			}
 		}
 		final String portToDisplayError = port;
-		// check port availability
-		if (isPortAvailable(Integer.parseInt(port))) {
-			try {
+		try {
+			// check port availability
+			if (Utils.isPortAvailable(Integer.parseInt(port))) {
 				// get web app name to which user want to debug his application
 				String website = config.getAttribute(AzureLaunchConfigurationAttributes.WEBSITE_DISPLAY, "");
 				if (!website.isEmpty()) {
@@ -153,39 +153,20 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 						}
 					}
 				}
-			} catch(Exception ex) {
-				Activator.getDefault().log(ex.getMessage(), ex);
-			}
-		} else {
-			Display.getDefault().syncExec(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), Messages.errTtl, String.format(Messages.portMsg, portToDisplayError));
-					WebAppUtils.openDebugLaunchDialog(configToUse);
-				}
-			});
-		}
-	}
 
-	private boolean isPortAvailable(int port) {
-		Socket s = null;
-		try {
-			s = new Socket("localhost", port);
-			// something is using the port and has responded
-			// port not available
-			return false;
-		} catch (IOException e) {
-			return true;
-		} finally {
-			if(s != null){
-				try {
-					s.close();
-				} catch (IOException e) {
-					Activator.getDefault().log(Messages.errTtl, e);
-				}
+			} else {
+				Display.getDefault().syncExec(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), Messages.errTtl, String.format(Messages.portMsg, portToDisplayError));
+						WebAppUtils.openDebugLaunchDialog(configToUse);
+					}
+				});
 			}
+		} catch(Exception ex) {
+			Activator.getDefault().log(ex.getMessage(), ex);
 		}
 	}
 
@@ -349,7 +330,7 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 								}
 							}
 						}.start();
-						Thread.sleep(2000);
+						Thread.sleep(5000);
 					}
 					Activator.getDefault().getWebsiteDebugPrep().put(webSiteName, true);
 					Thread.sleep(10000);

@@ -97,7 +97,7 @@ public class AzureTab extends AbstractLaunchConfigurationTab {
 			}
 		});
 
-		// InstrumentationKey Link
+
 		lnkWebApp = new Link(container, SWT.RIGHT);
 		lnkWebApp.setText(Messages.lnkWebApp);
 		gridData = new GridData();

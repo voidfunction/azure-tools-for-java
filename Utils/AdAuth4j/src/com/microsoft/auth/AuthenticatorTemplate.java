@@ -3,9 +3,11 @@ package com.microsoft.auth;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 class AuthenticatorTemplate {
+	private static final Logger log = Logger.getLogger(AuthenticatorTemplate.class.getName());
     private static final String authorizeEndpointTemplate = "https://{host}/{tenant}/oauth2/authorize";
     private static final String metadataTemplate = "{\"Host\":\"{host}\", \"Authority\":\"https://{host}/{tenant}/\", \"InstanceDiscoveryEndpoint\":\"https://{host}/common/discovery/instance\", \"AuthorizeEndpoint\":\"" + authorizeEndpointTemplate + "\", \"TokenEndpoint\":\"https://{host}/{tenant}/oauth2/token\", \"UserRealmEndpoint\":\"https://{host}/common/UserRealm\"}";
 
@@ -54,13 +56,17 @@ class AuthenticatorTemplate {
         // process a response
         int responseCode = connection.getResponseCode();
         if(responseCode != 200) {
-            throw new AuthException(AuthError.AuthorityNotInValidList);
+        	String message = AuthError.AuthorityNotInValidList;
+        	log.error(message);
+            throw new AuthException(message);
         }
         
         HttpHelper.verifyCorrelationIdInReponseHeader(connection, callState);
         InstanceDiscoveryResponse discoveryResponse = JsonHelper.deserialize(InstanceDiscoveryResponse.class, connection.getInputStream());
         if (discoveryResponse.tenantDiscoveryEndpoint == null) {
-            throw new AuthException(AuthError.AuthorityNotInValidList);
+        	String message = AuthError.AuthorityNotInValidList;
+        	log.error(message);
+            throw new AuthException(message);
         }
     }
 

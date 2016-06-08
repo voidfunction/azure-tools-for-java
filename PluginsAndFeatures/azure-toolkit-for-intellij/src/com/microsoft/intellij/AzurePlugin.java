@@ -309,6 +309,23 @@ public class AzurePlugin extends AbstractProjectComponent {
                     }
                 }
             }
+            // copy remote debugging files
+            File remoteDebugFolder = new File(WAHelper.getTemplateFile("remotedebug"));
+            if (!remoteDebugFolder.exists()) {
+                remoteDebugFolder.mkdir();
+            }
+            String debugBat = WAHelper.getDebugFile("DebugSession.bat");
+            if (!new File(debugBat).exists()) {
+                copyResourceFile(message("debugBat"), debugBat);
+            }
+            String debugJar = WAHelper.getDebugFile("azure-websites-remote-debugging.jar");
+            if (!new File(debugJar).exists()) {
+                copyResourceFile(message("debugJar"), debugJar);
+            }
+            String debugConfig = WAHelper.getDebugFile("web.config");
+            if (!new File(debugConfig).exists()) {
+                copyResourceFile(message("debugConfig"), debugConfig);
+            }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }

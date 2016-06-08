@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -106,4 +107,24 @@ public class Utils {
 		return result;
 	}
 
+	public static boolean isPortAvailable(int port) throws Exception {
+		Socket s = null;
+		try {
+			s = new Socket("localhost", port);
+			// something is using the port and has responded
+			// port not available
+			return false;
+		} catch (IOException e) {
+			return true;
+		} finally {
+			if(s != null){
+				try {
+					s.close();
+					Thread.sleep(3000);
+				} catch (Exception e) {
+					throw new Exception(e.getMessage());
+				}
+			}
+		}
+	}
 }
