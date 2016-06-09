@@ -73,15 +73,10 @@ import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 public final class DeploymentManager {
 
     private final HashMap<String, DeployDescriptor> deployments = new HashMap<String, DeployDescriptor>();
+    private Project myProject;
 
-    private static final DeploymentManager DEFAULT_MANAGER = new DeploymentManager();
-
-    public static DeploymentManager getInstance() {
-        return DEFAULT_MANAGER;
-    }
-
-    private DeploymentManager() {
-
+    public DeploymentManager(Project project) {
+        this.myProject = project;
     }
 
     public void addDeployment(String name, DeployDescriptor deployment) {
@@ -196,7 +191,7 @@ public final class DeploymentManager {
                     deployState,
                     dateFormat.format(new Date()));
             OperationStatusResponse operationStatusResponse = DeploymentManagerUtilMethods.createDeployment(deploymentDesc, cspkgUrl, deploymentName);
-            OperationStatus status = AzureManagerImpl.getManager().waitForStatus(deploymentDesc.getSubscriptionId(), operationStatusResponse).getStatus();
+            OperationStatus status = AzureManagerImpl.getManager(myProject).waitForStatus(deploymentDesc.getSubscriptionId(), operationStatusResponse).getStatus();
 
             DeploymentManagerUtilMethods.deletePackage(WizardCacheManager.createStorageServiceHelper(),
                     message("eclipseDeployContainer").toLowerCase(),
@@ -308,7 +303,7 @@ public final class DeploymentManager {
         }
         do {
             Thread.sleep(5000);
-            deployment = AzureManagerImpl.getManager().getDeploymentBySlot(subscriptionId, serviceName, deploymentSlot);
+            deployment = AzureManagerImpl.getManager(myProject).getDeploymentBySlot(subscriptionId, serviceName, deploymentSlot);
 
             for (RoleInstance instance : deployment.getRoleInstances()) {
                 status = instance.getInstanceStatus();
@@ -331,7 +326,7 @@ public final class DeploymentManager {
         DeploymentStatus deploymentStatus = null;
         do {
             Thread.sleep(10000);
-            deployment = AzureManagerImpl.getManager().getDeploymentBySlot(subscriptionId, serviceName, deploymentSlot);
+            deployment = AzureManagerImpl.getManager(myProject).getDeploymentBySlot(subscriptionId, serviceName, deploymentSlot);
             deploymentStatus = deployment.getStatus();
         } while (deploymentStatus != null
                 && (deploymentStatus.equals(DeploymentStatus.RunningTransitioning)
@@ -439,8 +434,8 @@ public final class DeploymentManager {
                 //            );
                 //			waitForStatus(configuration, service, requestId);
                 notifyProgress(deplymentName, startDate, null, progressArr[0], OperationStatus.InProgress, message("undeployProgressMsg"), deplymentName);
-                OperationStatusResponse operationStatusResponse = AzureManagerImpl.getManager().deleteDeployment(subscriptionId, serviceName, deplymentName, true);
-                AzureManagerImpl.getManager().waitForStatus(subscriptionId, operationStatusResponse);
+                OperationStatusResponse operationStatusResponse = AzureManagerImpl.getManager(myProject).deleteDeployment(subscriptionId, serviceName, deplymentName, true);
+                AzureManagerImpl.getManager(myProject).waitForStatus(subscriptionId, operationStatusResponse);
                 notifyProgress(deplymentName, startDate, null, progressArr[1], OperationStatus.Succeeded, message("undeployCompletedMsg"), serviceName);
                 successfull = true;
             } catch (Exception e) {

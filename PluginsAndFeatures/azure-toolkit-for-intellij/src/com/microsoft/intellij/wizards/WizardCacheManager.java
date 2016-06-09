@@ -337,8 +337,8 @@ public final class WizardCacheManager {
         }
     }
 
-    public static CloudService getHostedServiceWithDeployments(CloudService hostedService) throws Exception {
-        return WizardCacheManagerUtilMethods.getHostedServiceWithDeployments(hostedService, currentPublishData);
+    public static CloudService getHostedServiceWithDeployments(CloudService hostedService, Object projectObject) throws Exception {
+        return WizardCacheManagerUtilMethods.getHostedServiceWithDeployments(hostedService, projectObject);
     }
 
     public static void setCurrentPublishData(PublishData currentSubscription2) {

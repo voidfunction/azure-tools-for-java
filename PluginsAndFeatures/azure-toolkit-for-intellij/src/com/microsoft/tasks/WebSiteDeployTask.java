@@ -67,7 +67,7 @@ public class WebSiteDeployTask extends Task.Backgroundable {
         };
         AzurePlugin.addDeploymentEventListener(deployListnr);
         AzurePlugin.depEveList.add(deployListnr);
-        DeploymentManager.getInstance().deployToWebApps(webSite, url);
+        new DeploymentManager(project).deployToWebApps(webSite, url);
 
         new Thread("Warm up the target site") {
             public void run() {

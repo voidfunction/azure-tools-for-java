@@ -443,7 +443,7 @@ public final class WizardCacheManager {
 
 	public static CloudService getHostedServiceWithDeployments(CloudService hostedService)
 			throws Exception {
-		return WizardCacheManagerUtilMethods.getHostedServiceWithDeployments(hostedService, currentPublishData);
+		return WizardCacheManagerUtilMethods.getHostedServiceWithDeployments(hostedService, null);
 	}
 
 	public static void setCurrentPublishData(PublishData currentSubscription2) {

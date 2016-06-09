@@ -377,7 +377,7 @@ public class DeployAction extends AnAction {
 
         private void doTask() {
             try {
-                DeploymentManager.getInstance().deploy(myModule);
+                new DeploymentManager(myModule.getProject()).deploy(myModule);
             } catch (InterruptedException e) {
             } catch (DeploymentException e) {
                 log(message("error"), e);
