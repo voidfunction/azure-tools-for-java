@@ -41,6 +41,7 @@ import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.util.WAHelper;
+import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.ws.WebAppsContainers;
@@ -59,6 +60,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 import java.net.URI;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
@@ -80,63 +82,39 @@ public class AzureRemoteStateState implements RemoteState {
 
     public ExecutionResult execute(final Executor executor, @NotNull final ProgramRunner runner) throws ExecutionException {
         try {
-            // check port availability
-            if (Utils.isPortAvailable(Integer.parseInt(socketPort))) {
-                // get web app name to which user want to debug his application
-                String website = webAppName;
-                if (!website.isEmpty()) {
-                    website = website.substring(0, website.indexOf('(')).trim();
-                    Map<WebSite, WebSiteConfiguration> webSiteConfigMap = AzureSettings.getSafeInstance(project).loadWebApps();
-                    // retrieve web apps configurations
-                    for (Map.Entry<WebSite, WebSiteConfiguration> entry : webSiteConfigMap.entrySet()) {
-                        final WebSite websiteTemp = entry.getKey();
-                        if (websiteTemp.getName().equals(website)) {
-                            // check is there a need for preparation
-                            AzureManager manager = AzureManagerImpl.getManager(project);
-                            final WebSiteConfiguration webSiteConfiguration = entry.getValue();
-                            final WebSitePublishSettings webSitePublishSettings = manager.getWebSitePublishSettings(
-                                    webSiteConfiguration.getSubscriptionId(), webSiteConfiguration.getWebSpaceName(), website);
-                            // case - if user uses shortcut without going to Azure Tab
-                            Map<String, Boolean> mp = AzureSettings.getSafeInstance(project).getWebsiteDebugPrep();
-                            if (!mp.containsKey(website)) {
-                                mp.put(website, false);
-                            }
-                            AzureSettings.getSafeInstance(project).setWebsiteDebugPrep(mp);
-
+            // get web app name to which user want to debug his application
+            String website = webAppName;
+            if (!website.isEmpty()) {
+                website = website.substring(0, website.indexOf('(')).trim();
+                Map<WebSite, WebSiteConfiguration> webSiteConfigMap = AzureSettings.getSafeInstance(project).loadWebApps();
+                // retrieve web apps configurations
+                for (Map.Entry<WebSite, WebSiteConfiguration> entry : webSiteConfigMap.entrySet()) {
+                    final WebSite websiteTemp = entry.getKey();
+                    if (websiteTemp.getName().equals(website)) {
+                        final WebSiteConfiguration webSiteConfiguration = entry.getValue();
+                        // case - if user uses shortcut without going to Azure Tab
+                        Map<String, Boolean> mp = AzureSettings.getSafeInstance(project).getWebsiteDebugPrep();
+                        if (!mp.containsKey(website)) {
+                            mp.put(website, false);
+                        }
+                        AzureSettings.getSafeInstance(project).setWebsiteDebugPrep(mp);
+                        // check if web app prepared for debugging and process has started
+                        if (AzureSettings.getSafeInstance(project).getWebsiteDebugPrep().get(website).booleanValue()
+                                && !Utils.isPortAvailable(Integer.parseInt(socketPort))) {
+                            ConsoleViewImpl consoleView = new ConsoleViewImpl(project, false);
+                            RemoteDebugProcessHandler process = new RemoteDebugProcessHandler(project);
+                            consoleView.attachToProcess(process);
+                            return new DefaultExecutionResult(consoleView, process);
+                        } else {
                             if (AzureSettings.getSafeInstance(project).getWebsiteDebugPrep().get(website).booleanValue()) {
-                                // already prepared. Just start debugSession.bat
-                                // retrieve MSDeploy publish profile
-                                WebSitePublishSettings.MSDeployPublishProfile msDeployProfile = null;
-                                for (WebSitePublishSettings.PublishProfile pp : webSitePublishSettings.getPublishProfileList()) {
-                                    if (pp instanceof WebSitePublishSettings.MSDeployPublishProfile) {
-                                        msDeployProfile = (WebSitePublishSettings.MSDeployPublishProfile) pp;
-                                        break;
-                                    }
-                                }
-                                if (msDeployProfile != null) {
-                                    String command = String.format(message("debugCmd"), socketPort, website,
-                                            msDeployProfile.getUserName(), msDeployProfile.getPassword());
-                                    ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", command);
-                                    pb.directory(new File(WAHelper.getTemplateFile("remotedebug")));
-                                    try {
-                                        pb.start();
-                                        Thread.sleep(5000);
-                                    } catch (Exception e) {
-                                        AzurePlugin.log(e.getMessage(), e);
-                                    }
-                                    ConsoleViewImpl consoleView = new ConsoleViewImpl(project, false);
-                                    RemoteDebugProcessHandler process = new RemoteDebugProcessHandler(project);
-                                    consoleView.attachToProcess(process);
-                                    return new DefaultExecutionResult(consoleView, process);
-                                }
-                            } else {
-                                // start the process of preparing the web app, in a blocking way
+                                // process not started
                                 ApplicationManager.getApplication().invokeLater(new Runnable() {
                                     @Override
                                     public void run() {
-                                        int choice = Messages.showOkCancelDialog(message("remoteDebug"), "Azure Web App", Messages.getQuestionIcon());
+                                        int choice = Messages.showOkCancelDialog(message("processDebug"), "Azure Web App", Messages.getQuestionIcon());
                                         if (choice == Messages.OK) {
-                                            PrepareForDebug task = new PrepareForDebug(websiteTemp, webSiteConfiguration, webSitePublishSettings);
+                                            // check is there a need for preparation
+                                            ProcessForDebug task = new ProcessForDebug(websiteTemp, webSiteConfiguration);
                                             try {
                                                 task.queue();
                                                 Messages.showInfoMessage(message("debugReady"), "Azure Web App");
@@ -146,18 +124,38 @@ public class AzureRemoteStateState implements RemoteState {
                                         }
                                     }
                                 }, ModalityState.defaultModalityState());
+                            } else {
+                                // start the process of preparing the web app, in a blocking way
+                                if (Utils.isPortAvailable(Integer.parseInt(socketPort))) {
+                                    ApplicationManager.getApplication().invokeLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            int choice = Messages.showOkCancelDialog(message("remoteDebug"), "Azure Web App", Messages.getQuestionIcon());
+                                            if (choice == Messages.OK) {
+                                                // check is there a need for preparation
+                                                PrepareForDebug task = new PrepareForDebug(websiteTemp, webSiteConfiguration);
+                                                try {
+                                                    task.queue();
+                                                    Messages.showInfoMessage(message("debugReady"), "Azure Web App");
+                                                } catch (Exception e) {
+                                                    AzurePlugin.log(e.getMessage(), e);
+                                                }
+                                            }
+                                        }
+                                    }, ModalityState.defaultModalityState());
+                                } else {
+                                    ApplicationManager.getApplication().invokeLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            PluginUtil.displayErrorDialog(String.format(message("portMsg")), socketPort);
+                                        }
+                                    }, ModalityState.defaultModalityState());
+                                }
                             }
-                            break;
                         }
+                        break;
                     }
                 }
-            } else {
-                ApplicationManager.getApplication().invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        PluginUtil.displayErrorDialog(String.format(message("portMsg")), socketPort);
-                    }
-                }, ModalityState.defaultModalityState());
             }
         } catch(Exception ex) {
             AzurePlugin.log(ex.getMessage(), ex);
@@ -168,13 +166,11 @@ public class AzureRemoteStateState implements RemoteState {
     private class PrepareForDebug extends Task.Modal {
         WebSite webSite;
         WebSiteConfiguration webSiteConfiguration;
-        WebSitePublishSettings webSitePublishSettings;
 
-        public PrepareForDebug(WebSite webSite, WebSiteConfiguration webSiteConfiguration, WebSitePublishSettings webSitePublishSettings) {
+        public PrepareForDebug(WebSite webSite, WebSiteConfiguration webSiteConfiguration) {
             super(project, "Preparing web app for remote debugging", true);
             this.webSite = webSite;
             this.webSiteConfiguration = webSiteConfiguration;
-            this.webSitePublishSettings = webSitePublishSettings;
         }
 
         @Override
@@ -186,6 +182,8 @@ public class AzureRemoteStateState implements RemoteState {
             try {
                 // retrieve web apps configurations
                 AzureManager manager = AzureManagerImpl.getManager(project);
+                WebSitePublishSettings webSitePublishSettings = manager.getWebSitePublishSettings(
+                        webSiteConfiguration.getSubscriptionId(), webSiteConfiguration.getWebSpaceName(), webSiteName);
                 indicator.setFraction(0.2);
                 // retrieve ftp publish profile
                 WebSitePublishSettings.FTPPublishProfile ftpProfile = null;
@@ -322,12 +320,80 @@ public class AzureRemoteStateState implements RemoteState {
                     }
                     AzureSettings.getSafeInstance(project).getWebsiteDebugPrep().put(webSiteName, true);
                     Thread.sleep(10000);
+                    // already prepared. Just start debugSession.bat
+                    // retrieve MSDeploy publish profile
+                    WebSitePublishSettings.MSDeployPublishProfile msDeployProfile = null;
+                    for (WebSitePublishSettings.PublishProfile pp : webSitePublishSettings.getPublishProfileList()) {
+                        if (pp instanceof WebSitePublishSettings.MSDeployPublishProfile) {
+                            msDeployProfile = (WebSitePublishSettings.MSDeployPublishProfile) pp;
+                            break;
+                        }
+                    }
+                    if (msDeployProfile != null) {
+                        String command = String.format(message("debugCmd"), socketPort, webSiteName,
+                                msDeployProfile.getUserName(), msDeployProfile.getPassword());
+                        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", command);
+                        pb.directory(new File(WAHelper.getTemplateFile("remotedebug")));
+                        try {
+                            pb.start();
+                            Thread.sleep(30000);
+                        } catch (Exception e) {
+                            AzurePlugin.log(e.getMessage(), e);
+                        }
+                    }
                     indicator.setFraction(1.0);
                 }
             } catch (Exception e) {
                 AzurePlugin.log(e.getMessage(), e);
             } finally {
                 indicator.setFraction(1.0);
+            }
+        }
+    }
+
+    private class ProcessForDebug extends Task.Modal {
+        WebSite webSite;
+        WebSiteConfiguration webSiteConfiguration;
+
+        public ProcessForDebug(WebSite webSite, WebSiteConfiguration webSiteConfiguration) {
+            super(project, "Starting debug process", true);
+            this.webSite = webSite;
+            this.webSiteConfiguration = webSiteConfiguration;
+        }
+
+        @Override
+        public void run(@NotNull final ProgressIndicator indicator) {
+            try {
+                indicator.setFraction(0.1);
+                String webSiteName = webSite.getName();
+                AzureManager manager = AzureManagerImpl.getManager(project);
+                WebSitePublishSettings webSitePublishSettings = manager.getWebSitePublishSettings(
+                        webSiteConfiguration.getSubscriptionId(), webSiteConfiguration.getWebSpaceName(), webSiteName);
+                // already prepared. Just start debugSession.bat
+                // retrieve MSDeploy publish profile
+                WebSitePublishSettings.MSDeployPublishProfile msDeployProfile = null;
+                for (WebSitePublishSettings.PublishProfile pp : webSitePublishSettings.getPublishProfileList()) {
+                    if (pp instanceof WebSitePublishSettings.MSDeployPublishProfile) {
+                        msDeployProfile = (WebSitePublishSettings.MSDeployPublishProfile) pp;
+                        break;
+                    }
+                }
+                indicator.setFraction(0.5);
+                if (msDeployProfile != null) {
+                    String command = String.format(message("debugCmd"), socketPort, webSiteName,
+                            msDeployProfile.getUserName(), msDeployProfile.getPassword());
+                    ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", command);
+                    pb.directory(new File(WAHelper.getTemplateFile("remotedebug")));
+                    try {
+                        pb.start();
+                        Thread.sleep(30000);
+                    } catch (Exception e) {
+                        AzurePlugin.log(e.getMessage(), e);
+                    }
+                }
+                indicator.setFraction(1.0);
+            } catch(AzureCmdException ex) {
+                AzurePlugin.log(ex.getMessage(), ex);
             }
         }
     }

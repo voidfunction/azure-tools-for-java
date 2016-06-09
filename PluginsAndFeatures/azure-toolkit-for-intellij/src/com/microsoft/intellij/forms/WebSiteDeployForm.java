@@ -181,7 +181,7 @@ public class WebSiteDeployForm extends DialogWrapper {
         AzureManager manager = AzureManagerImpl.getManager(project);
         ArtifactDescriptor artifactDescriptor = manager.getWebArchiveArtifact(projectDescriptor);
         if (artifactDescriptor != null && webSite != null) {
-            manager.deployWebArchiveArtifact(projectDescriptor, artifactDescriptor, webSite, chkBoxDeployRoot.isSelected());
+            manager.deployWebArchiveArtifact(projectDescriptor, artifactDescriptor, webSite, chkBoxDeployRoot.isSelected(), manager);
             WebSitePublishSettings webSitePublishSettings = manager.
                     getWebSitePublishSettings(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
             WebSitePublishSettings.PublishProfile profile = webSitePublishSettings.getPublishProfileList().get(0);

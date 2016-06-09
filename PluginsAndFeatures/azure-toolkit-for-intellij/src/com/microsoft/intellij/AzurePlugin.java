@@ -430,7 +430,7 @@ public class AzurePlugin extends AbstractProjectComponent {
         depEveList.clear();
     }
 
-    public static void log(String message, Exception ex) {
+    public static void log(String message, Throwable ex) {
         LOG.error(message, ex);
         LOG.info(message);
     }

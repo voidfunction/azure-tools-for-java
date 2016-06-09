@@ -62,7 +62,7 @@ public class WindowsAzureUndeploymentTask extends Task.Backgroundable {
         AzurePlugin.depEveList.add(undeployListnr);
 
         try {
-            DeploymentManager.getInstance().undeploy(serviceName, deploymentName, deploymentState);
+            new DeploymentManager(myProject).undeploy(serviceName, deploymentName, deploymentState);
         } catch (RestAPIException e) {
             log(message("error"), e);
         } catch (InterruptedException e) {

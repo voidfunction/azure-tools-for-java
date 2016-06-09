@@ -47,6 +47,8 @@ public class DeployDescriptor {
 	private final boolean displayHttpsLink;
     private final Configuration configuration;
 
+	private Object project;
+
 	public DeployDescriptor(WindowsAzurePackageType deployMode,
 							String subscriptionId, StorageAccount storageAcount,
 							KeyName accessKey, CloudService hostedService, String cspkgFile,
@@ -165,4 +167,12 @@ public class DeployDescriptor {
     public Configuration getConfiguration() {
         return configuration;
     }
+
+	public Object getProject() {
+		return project;
+	}
+
+	public void setProject(Object project) {
+		this.project = project;
+	}
 }

@@ -245,13 +245,13 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
         final String managementUri = settings.getAzureServiceManagementUri();
 
         // FIXME.shch: need to extend interface?
-        com.microsoft.auth.AuthenticationResult res = ((AADManagerImpl)aadManager).auth(null, null);
+        com.microsoft.auth.AuthenticationResult res = ((AADManagerImpl)aadManager).auth(null, null, com.microsoft.auth.PromptBehavior.Always);
 
         try {
             List<Tenant> tenants = TenantsClient.getByToken(res.getAccessToken());
             for (Tenant t : tenants) {
                 String tid = t.getTenantId();
-                res = ((AADManagerImpl)aadManager).auth(null, tid);
+                res = ((AADManagerImpl)aadManager).auth(null, tid, com.microsoft.auth.PromptBehavior.Auto);
                 UserInfo userInfo = new UserInfo(tid, res.getUserInfo().getUniqueId());
                 List<com.microsoft.auth.subsriptions.Subscription> subscriptions = com.microsoft.auth.subsriptions.SubscriptionsClient.getByToken(res.getAccessToken());
                 for (com.microsoft.auth.subsriptions.Subscription s : subscriptions) {
@@ -748,7 +748,8 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
     public void deployWebArchiveArtifact(@NotNull final ProjectDescriptor projectDescriptor,
     		@NotNull final ArtifactDescriptor artifactDescriptor,
     		@NotNull final WebSite webSite,
-    		@NotNull final boolean isDeployRoot) {
+    		@NotNull final boolean isDeployRoot,
+    		final AzureManager manager) {
     	ListenableFuture<String> future = DefaultLoader.getIdeHelper().buildArtifact(projectDescriptor, artifactDescriptor);
 
     	Futures.addCallback(future, new FutureCallback<String>() {
@@ -758,7 +759,6 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
     				DefaultLoader.getIdeHelper().runInBackground(projectDescriptor, "Deploying web app", "Deploying web app...", new CancellableTask() {
     					@Override
     					public void run(CancellationHandle cancellationHandle) throws Throwable {
-    						AzureManager manager = AzureManagerImpl.getManager();
     						manager.publishWebArchiveArtifact(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName(),
     								artifactPath, isDeployRoot, artifactDescriptor.getName());
     					}
