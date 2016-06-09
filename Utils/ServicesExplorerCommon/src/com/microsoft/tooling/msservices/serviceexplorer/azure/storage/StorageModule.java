@@ -21,6 +21,7 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.ExternalStorageHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -98,7 +99,7 @@ public class StorageModule extends AzureRefreshableNode {
             for (Pair error : failedSubscriptions) {
                 errorMessage.append(error.getKey()).append(": ").append(error.getValue()).append("\n");
             }
-            throw new AzureCmdException("An error occurred when trying to load Storage Accounts", errorMessage.toString());
+            DefaultLoader.getUIHelper().logError("An error occurred when trying to load Storage Accounts\n\n" + errorMessage.toString(), null);
         }
     }
 }

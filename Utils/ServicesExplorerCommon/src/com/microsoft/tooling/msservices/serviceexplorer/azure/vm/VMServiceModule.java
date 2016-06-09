@@ -21,6 +21,7 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.vm;
 
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
@@ -73,7 +74,7 @@ public class VMServiceModule extends AzureRefreshableNode {
             for (Pair error : failedSubscriptions) {
                 errorMessage.append(error.getKey()).append(": ").append(error.getValue()).append("\n");
             }
-            throw new AzureCmdException("An error occurred when trying to load VMs", errorMessage.toString());
+            DefaultLoader.getUIHelper().logError("An error occurred when trying to load VMs\n\n" + errorMessage.toString(), null);
         }
     }
 }

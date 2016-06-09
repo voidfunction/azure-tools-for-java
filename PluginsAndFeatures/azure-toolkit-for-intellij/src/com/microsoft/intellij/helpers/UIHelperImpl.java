@@ -101,6 +101,11 @@ public class UIHelperImpl implements UIHelper {
         return (optionDialog == JOptionPane.YES_OPTION);
     }
 
+    @Override
+    public void logError(String message, Throwable ex) {
+        AzurePlugin.log(message, ex);
+    }
+
     /**
      * returns File if file chosen and OK pressed; otherwise returns null
      */

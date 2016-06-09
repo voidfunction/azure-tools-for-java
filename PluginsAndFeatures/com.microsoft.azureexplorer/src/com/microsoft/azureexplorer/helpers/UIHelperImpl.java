@@ -95,6 +95,11 @@ public class UIHelperImpl implements UIHelper {
     }
 
     @Override
+    public void logError(String message, Throwable ex) {
+        Activator.getDefault().log(message, ex);
+    }
+
+    @Override
     public File showFileChooser(String title) {
         FileDialog dialog = new FileDialog(new Shell(), SWT.SAVE);
         dialog.setOverwrite(true);
