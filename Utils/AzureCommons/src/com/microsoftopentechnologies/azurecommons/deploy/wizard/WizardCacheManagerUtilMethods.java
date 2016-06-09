@@ -301,9 +301,9 @@ public final class WizardCacheManagerUtilMethods {
 		return currentPublishData.getServicesPerSubscription().get(subbscriptionId);
 	}
 
-	public static CloudService getHostedServiceWithDeployments(CloudService cloudService, PublishData currentPublishData)
+	public static CloudService getHostedServiceWithDeployments(CloudService cloudService, Object projectObject)
 					throws Exception, InvalidThumbprintException {
-		return AzureManagerImpl.getManager().getCloudServiceDetailed(cloudService);
+		return AzureManagerImpl.getManager(projectObject).getCloudServiceDetailed(cloudService);
 	}
 
 	public static boolean empty(PublishData data) {
