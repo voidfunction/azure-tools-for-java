@@ -94,7 +94,7 @@ public final class DeploymentManager {
     public void deploy(Module selectedModule) throws InterruptedException, DeploymentException {
 
         DeployDescriptor deploymentDesc = WizardCacheManager.collectConfiguration();
-
+        deploymentDesc.setProject(selectedModule.getProject());
         String deployState = deploymentDesc.getDeployState();
         Date startDate = new Date();
         try {

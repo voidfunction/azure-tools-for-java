@@ -310,7 +310,7 @@ public class DeploymentManagerUtilMethods {
 				}
 			}
 
-			AzureManagerImpl.getManager().createServiceCertificate(subscriptionId, deploymentDesc.getHostedService().getName(), buff, pfxPwd, false);
+			AzureManagerImpl.getManager(deploymentDesc.getProject()).createServiceCertificate(subscriptionId, deploymentDesc.getHostedService().getName(), buff, pfxPwd, false);
 
 		} catch (Exception e) {
 			throw new DeploymentException("Error uploading certificate", e);
@@ -371,7 +371,7 @@ public class DeploymentManagerUtilMethods {
 		parameters.setStartDeployment(true);
 
 
-		return AzureManagerImpl.getManager().createDeployment(
+		return AzureManagerImpl.getManager(deploymentDesc.getProject()).createDeployment(
 				deploymentDesc.getSubscriptionId(),
 				deploymentDesc.getHostedService().getName(),
 				deployState,
