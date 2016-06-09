@@ -1,3 +1,24 @@
+/**
+ * Copyright (c) Microsoft Corporation
+ * <p/>
+ * All rights reserved.
+ * <p/>
+ * MIT License
+ * <p/>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * <p/>
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ * <p/>
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package com.microsoft.azure.hdinsight.spark.common;
 
 import com.google.common.base.Joiner;
@@ -5,12 +26,12 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.intellij.openapi.project.Project;
 import com.microsoft.azure.hdinsight.common.HDInsightUtil;
-import com.microsoft.azure.hdinsight.common.TelemetryCommon;
-import com.microsoft.azure.hdinsight.common.TelemetryManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
+import com.microsoft.intellij.hdinsight.messages.HDInsightBundle;
+import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.CallableSingleArg;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
@@ -132,7 +153,7 @@ public class SparkSubmitHelper {
 
             if (isKilledJob) {
                 postEventProperty.put("IsKilled", "true");
-                TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
+                AppInsightsCustomEvent.create(HDInsightBundle.message("SparkSubmissionButtonClickEvent"), null, postEventProperty);
                 return;
             }
 
@@ -144,14 +165,13 @@ public class SparkSubmitHelper {
                 HDInsightUtil.getSparkSubmissionToolWindowManager(project).setInfo("The Spark application completed successfully");
             }
 
-            TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
-
+            AppInsightsCustomEvent.create(HDInsightBundle.message("SparkSubmissionButtonClickEvent"), null, postEventProperty);
         } catch (Exception e) {
             if (HDInsightUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().isJobKilled() == false) {
                 HDInsightUtil.getSparkSubmissionToolWindowManager(project).setError("Error : Failed to getting running log. Exception : " + e.toString());
             } else {
                 postEventProperty.put("IsKilled", "true");
-                TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
+                AppInsightsCustomEvent.create(HDInsightBundle.message("SparkSubmissionButtonClickEvent"), null, postEventProperty);
             }
         }
     }

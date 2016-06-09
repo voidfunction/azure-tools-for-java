@@ -1,3 +1,24 @@
+/**
+ * Copyright (c) Microsoft Corporation
+ * <p/>
+ * All rights reserved.
+ * <p/>
+ * MIT License
+ * <p/>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * <p/>
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ * <p/>
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package com.microsoft.azure.hdinsight.projects;
 
 import com.intellij.facet.impl.ui.libraries.LibraryCompositionSettings;
@@ -18,13 +39,13 @@ import com.intellij.packaging.elements.CompositePackagingElement;
 import com.intellij.packaging.elements.PackagingElementFactory;
 import com.intellij.packaging.impl.artifacts.JarArtifactType;
 import com.microsoft.azure.hdinsight.common.CommonConst;
-import com.microsoft.azure.hdinsight.common.TelemetryCommon;
-import com.microsoft.azure.hdinsight.common.TelemetryManager;
 import com.microsoft.azure.hdinsight.projects.samples.ProjectSampleUtil;
 import com.microsoft.azure.hdinsight.projects.template.CustomHDInsightTemplateItem;
 import com.microsoft.azure.hdinsight.projects.template.CustomModuleWizardSetup;
 import com.microsoft.azure.hdinsight.projects.template.CustomTemplateInfo;
 import com.microsoft.azure.hdinsight.projects.template.TemplatesUtil;
+import com.microsoft.intellij.hdinsight.messages.HDInsightBundle;
+import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import org.jetbrains.annotations.NotNull;
 
@@ -186,13 +207,13 @@ public class HDInsightModuleBuilder extends JavaModuleBuilder implements ModuleB
 
     private void addTelemetry(HDInsightTemplatesType templatesType){
         if(templatesType == HDInsightTemplatesType.Java){
-            TelemetryManager.postEvent(TelemetryCommon.SparkProjectSystemJavaCreation, null, null);
+            AppInsightsCustomEvent.create(HDInsightBundle.message("SparkProjectSystemJavaCreation"), null);
         }else if(templatesType == HDInsightTemplatesType.JavaLocalSample){
-            TelemetryManager.postEvent(TelemetryCommon.SparkProjectSystemJavaSampleCreation, null, null);
+            AppInsightsCustomEvent.create(HDInsightBundle.message("SparkProjectSystemJavaSampleCreation"), null);
         }else if(templatesType == HDInsightTemplatesType.Scala) {
-            TelemetryManager.postEvent(TelemetryCommon.SparkProjectSystemScalaCreation, null, null);
+            AppInsightsCustomEvent.create(HDInsightBundle.message("SparkProjectSystemScalaCreation"), null);
         }else if(templatesType == HDInsightTemplatesType.ScalaClusterSample || templatesType == HDInsightTemplatesType.ScalaLocalSample){
-            TelemetryManager.postEvent(TelemetryCommon.SparkProjectSystemScalaSampleCreation, null, null);
+            AppInsightsCustomEvent.create(HDInsightBundle.message("SparkProjectSystemScalaSampleCreation"), null);
         }
     }
 

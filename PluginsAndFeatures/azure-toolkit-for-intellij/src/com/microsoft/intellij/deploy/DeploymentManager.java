@@ -34,19 +34,14 @@ import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.WizardCacheManager;
-import com.microsoft.tooling.msservices.helpers.IDEHelper;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.wacommon.utils.WACommonException;
-import com.microsoft.windowsazure.Configuration;
+import com.wacommon.utils.WACommonException;
 import com.microsoft.windowsazure.core.OperationStatus;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.*;
 import com.microsoft.windowsazure.management.compute.models.DeploymentSlot;
-import com.microsoft.windowsazure.management.storage.models.StorageAccountCreateParameters;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentManagerUtilMethods;
 import com.microsoftopentechnologies.azurecommons.deploy.model.CertificateUpload;
@@ -157,7 +152,7 @@ public final class DeploymentManager {
                 notifyProgress(deploymentDesc.getDeploymentId(), startDate, null, conditionalProgress, OperationStatus.InProgress, message("deplConfigRdp"));
 
                 DeploymentManagerUtilMethods.configureRemoteDesktop(deploymentDesc, WizardCacheManager.getCurrentDeployConfigFile(),
-                        String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, AzurePlugin.PLUGIN_ID));
+                        String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID));
             } else {
                 notifyProgress(deploymentDesc.getDeploymentId(), startDate, null, conditionalProgress, OperationStatus.InProgress, message("deplConfigRdp"));
             }
@@ -233,7 +228,7 @@ public final class DeploymentManager {
             AppInsightsCustomEvent.create(message("successEvent"), "");
             // RDP prompt will come only on windows
             if (deploymentDesc.isStartRdpOnDeploy() && AzurePlugin.IS_WINDOWS) {
-                String pluginFolder = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, AzurePlugin.PLUGIN_ID);
+                String pluginFolder = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID);
                 WindowsAzureRestUtils.getInstance().launchRDP(deployment, deploymentDesc.getRemoteDesktopDescriptor().getUserName(), pluginFolder);
             }
         } catch (Throwable t) {
