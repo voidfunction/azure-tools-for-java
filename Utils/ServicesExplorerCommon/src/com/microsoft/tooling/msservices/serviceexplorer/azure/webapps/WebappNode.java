@@ -26,6 +26,7 @@ import java.util.List;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
@@ -69,8 +70,9 @@ public class WebappNode extends Node {
 					@Override
 					public void run() {
 						try {
-							AzureManagerImpl.getManager().stopWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
-							webSite = AzureManagerImpl.getManager().getWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
+							AzureManager azureManager = AzureManagerImpl.getManager(getProject());
+							azureManager.stopWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
+							webSite = azureManager.getWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
 							setIconPath(WEB_STOP_ICON);
 						} catch (AzureCmdException e) {
 							DefaultLoader.getUIHelper().showException("An error occurred while attempting to stop the Web App", e,
@@ -87,8 +89,9 @@ public class WebappNode extends Node {
 					@Override
 					public void run() {
 						try {
-							AzureManagerImpl.getManager().startWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
-							webSite = AzureManagerImpl.getManager(getProject()).getWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
+							AzureManager azureManager = AzureManagerImpl.getManager(getProject());
+							azureManager.startWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
+							webSite = azureManager.getWebSite(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName());
 							setIconPath(WEB_RUN_ICON);
 						} catch (AzureCmdException e) {
 							DefaultLoader.getUIHelper().showException("An error occurred while attempting to start the Web App", e,
