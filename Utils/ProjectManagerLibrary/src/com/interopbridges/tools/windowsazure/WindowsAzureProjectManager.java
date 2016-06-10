@@ -485,7 +485,7 @@ public class WindowsAzureProjectManager {
 					.hasNext();) {
 				WindowsAzureRole windowsAzureRole = iterator.next();
 				if (sdkVersion == null) {
-					sdkVersion = "2.9.1.0";
+					sdkVersion = "2.9.0.0";
 				}
 				// If Session affinity is enabled
 				if (sdkVersion != null

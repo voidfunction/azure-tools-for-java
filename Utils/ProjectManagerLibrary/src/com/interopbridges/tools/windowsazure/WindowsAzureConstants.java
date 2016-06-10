@@ -490,8 +490,12 @@ public final class WindowsAzureConstants {
 
 	public static final String THRD_PARTY_JDK_NAME = "project.%s.jdk.name";
 	public static final String THRD_PARTY_SRV_NAME = "project.%s.server.name.cloud";
-
-	public static final String MIN_SDK_VERSION = "v2.9.1";
+	
+	/*
+	 * Temporary fix for Azure SDK 2.9.1
+	 * Even though SDK version is 2.9.1, directory name is 2.9
+	 */
+	public static final String MIN_SDK_VERSION = "v2.9";
 	public static final String SA_NEW_VERSION_ATTR = "/configuration/runtime/assemblyBinding/dependentAssembly/bindingRedirect/@newVersion";
 
 	public static final String WR_CERTS = WORKER_ROLE
