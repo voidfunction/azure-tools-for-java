@@ -116,9 +116,22 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 									}
 								}
 								if (msDeployProfile != null) {
-									String command = String.format(Messages.command, port, website,
-											msDeployProfile.getUserName(), msDeployProfile.getPassword());
-									ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", command);
+									ProcessBuilder pb = null;
+									String os = System.getProperty("os.name");
+									if (Activator.IS_WINDOWS) {
+										String command = String.format(Messages.command, port, website,
+												msDeployProfile.getUserName(), msDeployProfile.getPassword());
+										pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", command);
+									} else if (os.contains("linux")) {
+										String command = String.format(Messages.commandSh, port, website,
+												msDeployProfile.getUserName(), msDeployProfile.getPassword());
+										pb = new ProcessBuilder("/bin/bash", "-c", "gnome-terminal -x sh -c", command);
+									} else {
+										String command = String.format(Messages.commandMac, port, website,
+												msDeployProfile.getUserName(), msDeployProfile.getPassword());
+										String commandNext = "tell application \"Terminal\" to do script \"" + command + "\"";
+										pb = new ProcessBuilder("osascript", "-e", commandNext);
+									}
 									pb.directory(new File(String.format("%s%s%s", PluginUtil.pluginFolder, File.separator, com.microsoft.webapp.util.Messages.webAppPluginID)));
 									try {
 										pb.start();

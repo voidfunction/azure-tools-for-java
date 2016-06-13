@@ -380,9 +380,22 @@ public class AzureRemoteStateState implements RemoteState {
                 }
                 indicator.setFraction(0.5);
                 if (msDeployProfile != null) {
-                    String command = String.format(message("debugCmd"), socketPort, webSiteName,
-                            msDeployProfile.getUserName(), msDeployProfile.getPassword());
-                    ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", command);
+                    ProcessBuilder pb = null;
+                    String os = System.getProperty("os.name");
+                    if (AzurePlugin.IS_WINDOWS) {
+                        String command = String.format(message("debugCmd"), socketPort, webSiteName,
+                                msDeployProfile.getUserName(), msDeployProfile.getPassword());
+                        pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", command);
+                    } else if (os.contains("linux")) {
+                        String command = String.format(message("commandSh"), socketPort, webSiteName,
+                                msDeployProfile.getUserName(), msDeployProfile.getPassword());
+                        pb = new ProcessBuilder("/bin/bash", "-c", "gnome-terminal -x sh -c", command);
+                    } else {
+                        String command = String.format(message("commandMac"), socketPort, webSiteName,
+                                msDeployProfile.getUserName(), msDeployProfile.getPassword());
+                        String commandNext = "tell application \"Terminal\" to do script \"" + command + "\"";
+                        pb = new ProcessBuilder("osascript", "-e", commandNext);
+                    }
                     pb.directory(new File(WAHelper.getTemplateFile("remotedebug")));
                     try {
                         pb.start();
