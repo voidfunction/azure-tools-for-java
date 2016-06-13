@@ -333,6 +333,8 @@
       <include name="src"/>
       <include name="hdinsight/src"/>
       <include name="resources"/>
+      <include name="common/resources"/>
+      <include name="hdinsight/resources"/>
     </dirset>
   </path>
 
@@ -358,8 +360,16 @@
         <patternset refid="compiler.resources"/>
         <type type="file"/>
       </fileset>
-      <fileset dir="${module.azure-toolkit-for-intellij.basedir}//resources">
+      <fileset dir="${module.azure-toolkit-for-intellij.basedir}/resources">
         <include name="hdinsight/templates/**"/>
+        <type type="file"/>
+      </fileset>
+      <fileset dir="${module.azure-toolkit-for-intellij.basedir}/common/resources">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+      <fileset dir="${module.azure-toolkit-for-intellij.basedir}/hdinsight/resources">
+        <patternset refid="compiler.resources"/>
         <type type="file"/>
       </fileset>
     </copy>
