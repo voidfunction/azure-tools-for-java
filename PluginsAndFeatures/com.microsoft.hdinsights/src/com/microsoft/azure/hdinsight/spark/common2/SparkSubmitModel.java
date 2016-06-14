@@ -126,27 +126,11 @@ public class SparkSubmitModel {
 //    public IClusterDetail getSelectedClusterDetail() {
 //        return mapClusterNameToClusterDetail.get((String) clusterComboBoxModel.getSelectedItem());
 //    }
-//
-//    public DefaultComboBoxModel getClusterComboBoxModel() {
-//        return clusterComboBoxModel;
-//    }
-//
-//    public DefaultComboBoxModel getArtifactComboBoxModel() {
-//        return artifactComboBoxModel;
-//    }
-//
+
     public boolean isLocalArtifact() {
         return submissionParameter.isLocalArtifact();
     }
-//
-//    public Project getProject() {
-//        return project;
-//    }
-//
-//    public InteractiveTableModel getTableModel() {
-//        return tableModel;
-//    }
-//
+
     public void setClusterDetailsMap(List<IClusterDetail> cachedClusterDetails) {
         mapClusterNameToClusterDetail.clear();
 
