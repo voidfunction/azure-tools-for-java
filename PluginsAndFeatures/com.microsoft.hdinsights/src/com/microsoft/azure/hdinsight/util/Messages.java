@@ -17,32 +17,37 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.projects;
+package com.microsoft.azure.hdinsight.util;
 
-import org.eclipse.core.expressions.PropertyTester;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.preference.PreferenceNode;
+import org.eclipse.osgi.util.NLS;
 
-import com.microsoft.azure.hdinsight.Activator;
-import com.persistent.ui.propertypage.WAProjectNature;
+public class Messages extends NLS {
+    private static final String BUNDLE_NAME =
+    		"com.microsoft.azure.hdinsight.util.messages";
+    
+    static {
+        // initialize resource bundle
+        NLS.initializeMessages(BUNDLE_NAME, Messages.class);
+    }
+    public static String SparkProjectSystemJavaCreation;
+    public static String SparkProjectSystemJavaSampleCreation;
+    public static String SparkProjectSystemScalaCreation;
+    public static String SparkProjectSystemScalaSampleCreation;
 
-public class HDInsightProjectPropertyTester extends PropertyTester {
+	public static String SparkSubmissionRightClickProject;
+	public static String SparkSubmissionButtonClickEvent;
+	public static String SparkSubmissionHelpClickEvent;
+	public static String SparkSubmissionStopButtionClickEvent;
 
-	@Override
-	public boolean test(Object object, String property, Object[] args, Object expectedValue) {
-		try {
-			if (object instanceof IProject) {
-				IProject project = (IProject) object;
-				if (project.isOpen()) {
-					if (project.hasNature(WAProjectNature.NATURE_ID)) {
-						return true;
-					}
-				}
-			}
-		} catch (Exception ex) {
-			Activator.getDefault().log("Error", ex);
-		}
-		return false;
-	}
+	public static String HDInsightExplorerHDInsightNodeExpand;
+	public static String HDInsightExplorerSparkNodeExpand;
+	public static String HDInsightExplorerStorageAccountExpand;
+	public static String HDInsightExplorerContainerOpen;
+	
+    /**
+     * Constructor.
+     */
+    private Messages() {
+        super();
+    }
 }

@@ -1,3 +1,22 @@
+/**
+ * Copyright (c) Microsoft Corporation
+ * 
+ * All rights reserved. 
+ * 
+ * MIT License
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files 
+ * (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, 
+ * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, 
+ * subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package com.microsoft.azure.hdinsight;
 
 import java.beans.PropertyChangeEvent;
@@ -23,12 +42,12 @@ import org.eclipse.ui.part.ViewPart;
 import com.microsoft.azure.hdinsight.common.CommonConst;
 import com.microsoft.azure.hdinsight.common.JobStatusManager;
 import com.microsoft.azure.hdinsight.common.MessageInfoType;
-//import com.microsoft.azure.hdinsight.common.TelemetryCommon;
-//import com.microsoft.azure.hdinsight.common.TelemetryManager;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import com.microsoft.azure.hdinsight.spark.common.SparkBatchSubmission;
+import com.microsoft.azure.hdinsight.util.Messages;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 
 public class SparkSubmissionToolWindowView extends ViewPart {
     private static final String yarnRunningUIUrlFormat = "%s/yarnui/hn/proxy/%s/";
@@ -67,7 +86,7 @@ public class SparkSubmissionToolWindowView extends ViewPart {
                     @Override
                     public void run() {
                         if (!StringHelper.isNullOrWhiteSpace(connectionUrl)) {
-//                            TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionStopButtionClickEvent, null, null);
+                        	AppInsightsCustomEvent.create(Messages.SparkSubmissionStopButtionClickEvent, null);
                             try {
                                 HttpResponse deleteResponse = SparkBatchSubmission.getInstance().killBatchJob(connectionUrl + "/livy/batches", batchId);
                                 if (deleteResponse.getCode() == 201 || deleteResponse.getCode() == 200) {

@@ -34,16 +34,19 @@ public class AppInsightsCustomEvent {
 	static String dataFile = String.format("%s%s%s", pluginInstLoc,
 			File.separator, Messages.dataFileName);
 	static String key = "824aaa4c-052b-4c43-bdcb-48f915d71b3f";
-
-	public static void create(String eventName, String version) {
+	
+    public static void create(String eventName, String version) {
+    	create(eventName, version, null);
+    }
+    
+	public static void create(String eventName, String version, Map<String, String> myProperties) {
 		if (new File(pluginInstLoc).exists() && new File(dataFile).exists()) {
 			String prefValue = DataOperations.getProperty(dataFile, Messages.prefVal);
 			if (prefValue != null && !prefValue.isEmpty() && prefValue.equalsIgnoreCase("true")) {
 				TelemetryClient telemetry = new TelemetryClient();
 				telemetry.getContext().setInstrumentationKey(key);
 
-				Map<String, String> properties = new HashMap<String, String>();
-
+				Map<String, String> properties = myProperties == null ? new HashMap<String, String>() : new HashMap<String, String>(myProperties);
 				if (version != null && !version.isEmpty()) {
 					properties.put("Library Version", version);
 				}
