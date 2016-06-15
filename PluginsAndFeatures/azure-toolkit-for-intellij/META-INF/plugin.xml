@@ -168,7 +168,7 @@
            popup="false">
         <separator/>
         <reference ref="Actions.AzureWebDeploy"/>
-        <add-to-group group-id="PublishToAzureGroup" anchor="last"/>
+        <add-to-group group-id="PublishGroup" anchor="last"/>
     </group>
 
   </actions>
