@@ -23,6 +23,7 @@ package com.microsoft.azure.hdinsight.spark.ui;
 
 import com.microsoft.azure.hdinsight.Activator;
 import com.microsoft.azure.hdinsight.common.CommonConst;
+import com.microsoft.azure.hdinsight.projects.HDInsightProjectNature;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.spark.common.SparkSubmissionParameter;
 import com.microsoft.azure.hdinsight.spark.common2.SparkSubmitModel;
@@ -271,6 +272,9 @@ public class SparkSubmissionExDialog extends Dialog {
         
         Label jobConfigurationLabel = new Label(container, SWT.LEFT);
         jobConfigurationLabel.setText("Job configurations");
+        gridData = new GridData();
+        gridData.verticalAlignment = SWT.TOP;
+        jobConfigurationLabel.setLayoutData(gridData);
         
         jobConfigurationTable = new Table(container, SWT.BORDER);
         jobConfigurationTable.setHeaderVisible(true);
@@ -480,16 +484,13 @@ public class SparkSubmissionExDialog extends Dialog {
         ArrayList<String> projList = new ArrayList<String>();
         try {
             for (IProject wRoot : root.getProjects()) {
-//                if (wRoot.isOpen()
-//                        && !wRoot.hasNature(Messages.waProjNature)) {
+            	if (wRoot.hasNature(HDInsightProjectNature.NATURE_ID)) {
                     projList.add(wRoot.getProject().getName());
-//                }
+                }
             }
             projects = new String[projList.size()];
             projects = projList.toArray(projects);
-        } catch (Exception e) {
-        	DefaultLoader.getUIHelper().showError("A blob container with the specified name already exists.", "Azure Explorer");
-            
+        } catch (Exception e) {        
             PluginUtil.displayErrorDialogAndLog(this.getShell(),
             		"Project Selection Error",
             		"Error occurred while selecting the project.", e);
