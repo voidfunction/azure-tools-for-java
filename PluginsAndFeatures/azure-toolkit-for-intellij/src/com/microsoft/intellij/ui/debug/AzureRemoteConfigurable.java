@@ -21,9 +21,7 @@
 package com.microsoft.intellij.ui.debug;
 
 import com.intellij.application.options.ModulesComboBox;
-import com.intellij.execution.ExecutionBundle;
 import com.intellij.execution.configurations.RemoteConnection;
-import com.intellij.execution.ui.ConfigurationArgumentsHelpArea;
 import com.intellij.execution.ui.ConfigurationModuleSelector;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.ConfigurationException;
@@ -41,6 +39,8 @@ import com.microsoft.tasks.WebSiteDeployTask;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
+import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
+import com.microsoftopentechnologies.azurecommons.wacommonutil.Utils;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -168,7 +168,17 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
         myAddressField.setText(configuration.SHMEM_ADDRESS);
         myHostName = LOCALHOST;
         myHostField.setText(LOCALHOST);
-        myPortField.setText(configuration.PORT);
+        if (configuration.PORT == null) {
+            // new run/debug configuration
+            int portToUse = getAvailablePort();
+            if (portToUse == 0) {
+                myPortField.setText(configuration.PORT);
+            } else {
+                myPortField.setText(Integer.toString(portToUse));
+            }
+        } else {
+            myPortField.setText(configuration.PORT);
+        }
         if (configuration.USE_SOCKET_TRANSPORT) {
             myRbSocket.doClick();
         }
@@ -212,36 +222,6 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
         );
     }
 
-    public static List<String> prepareListToDisplay(Map<WebSite, WebSiteConfiguration> webSiteConfigMap, List<WebSite> webSiteList) {
-        // prepare list to display
-        List<String> listToDisplay = new ArrayList<String>();
-        for (WebSite webSite : webSiteList) {
-            WebSiteConfiguration webSiteConfiguration = webSiteConfigMap.get(webSite);
-            StringBuilder builder = new StringBuilder(webSite.getName());
-            if (!webSiteConfiguration.getJavaVersion().isEmpty()) {
-                builder.append(" (JRE ");
-                builder.append(webSiteConfiguration.getJavaVersion());
-                if (!webSiteConfiguration.getJavaContainer().isEmpty()) {
-                    builder.append("; ");
-                    builder.append(webSiteConfiguration.getJavaContainer());
-                    builder.append(" ");
-                    builder.append(webSiteConfiguration.getJavaContainerVersion());
-                }
-                builder.append(")");
-            } else {
-                builder.append(" (.NET ");
-                builder.append(webSiteConfiguration.getNetFrameworkVersion());
-                if (!webSiteConfiguration.getPhpVersion().isEmpty()) {
-                    builder.append("; PHP ");
-                    builder.append(webSiteConfiguration.getPhpVersion());
-                }
-                builder.append(")");
-            }
-            listToDisplay.add(builder.toString());
-        }
-        return listToDisplay;
-    }
-
     private List<String> loadWebApps() {
         List<String> listToDisplay = new ArrayList<>();
         try {
@@ -262,7 +242,7 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
                     }
                 });
 
-                listToDisplay = prepareListToDisplay(webSiteConfigMap, webSiteList);
+                listToDisplay = WAEclipseHelperMethods.prepareListToDisplay(webSiteConfigMap, webSiteList);
                 webAppCombo.setModel(new DefaultComboBoxModel(listToDisplay.toArray(new String[listToDisplay.size()])));
                 Map<String, Boolean> mp = AzureSettings.getSafeInstance(project).getWebsiteDebugPrep();
                 for (WebSite webSite : webSiteList) {
@@ -305,5 +285,17 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
                 }
             }
         };
+    }
+
+    private int getAvailablePort() {
+        int defaultPort = 49876;
+        try {
+            while (!Utils.isPortAvailable(defaultPort) && defaultPort < 65535) {
+                defaultPort = defaultPort + 1;
+            }
+        } catch(Exception ex) {
+            defaultPort = 0;
+        }
+        return defaultPort;
     }
 }

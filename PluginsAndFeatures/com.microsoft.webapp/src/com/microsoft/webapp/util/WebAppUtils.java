@@ -52,36 +52,6 @@ public class WebAppUtils {
 		return image;
 	}
 
-	public static List<String> prepareListToDisplay(Map<WebSite, WebSiteConfiguration> webSiteConfigMap, List<WebSite> webSiteList) {
-		// prepare list to display
-		List<String> listToDisplay = new ArrayList<String>();
-		for (WebSite webSite : webSiteList) {
-			WebSiteConfiguration webSiteConfiguration = webSiteConfigMap.get(webSite);
-			StringBuilder builder = new StringBuilder(webSite.getName());
-			if (!webSiteConfiguration.getJavaVersion().isEmpty()) {
-				builder.append(" (JRE ");
-				builder.append(webSiteConfiguration.getJavaVersion());
-				if (!webSiteConfiguration.getJavaContainer().isEmpty()) {
-					builder.append("; ");
-					builder.append(webSiteConfiguration.getJavaContainer());
-					builder.append(" ");
-					builder.append(webSiteConfiguration.getJavaContainerVersion());
-				}
-				builder.append(")");
-			} else {
-				builder.append(" (.NET ");
-				builder.append(webSiteConfiguration.getNetFrameworkVersion());
-				if (!webSiteConfiguration.getPhpVersion().isEmpty()) {
-					builder.append("; PHP ");
-					builder.append(webSiteConfiguration.getPhpVersion());
-				}
-				builder.append(")");
-			}
-			listToDisplay.add(builder.toString());
-		}
-		return listToDisplay;
-	}
-
 	// HTTP GET request
 	public static void sendGet(String sitePath) throws Exception {
 		URL url = new URL(sitePath);

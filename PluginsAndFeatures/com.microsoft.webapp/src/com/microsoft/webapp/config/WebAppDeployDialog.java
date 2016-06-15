@@ -74,6 +74,7 @@ import com.microsoft.webapp.util.WebAppUtils;
 import com.microsoft.windowsazure.core.OperationStatus;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
+import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
@@ -313,7 +314,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 			}
 		});
 		// prepare list to display
-		listToDisplay = WebAppUtils.prepareListToDisplay(webSiteConfigMap, webSiteList);
+		listToDisplay = WAEclipseHelperMethods.prepareListToDisplay(webSiteConfigMap, webSiteList);
 		list.setItems(listToDisplay.toArray(new String[listToDisplay.size()]));
 	}
 

@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +44,8 @@ import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperation
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureRole;
 import com.interopbridges.tools.windowsazure.WindowsAzureRoleComponent;
+import com.microsoft.tooling.msservices.model.ws.WebSite;
+import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoftopentechnologies.azurecommons.messagehandler.PropUtil;
 
 public class WAEclipseHelperMethods {
@@ -664,5 +667,35 @@ public class WAEclipseHelperMethods {
 			}
 		}
 		return retVal;
+	}
+	
+	public static List<String> prepareListToDisplay(Map<WebSite, WebSiteConfiguration> webSiteConfigMap, List<WebSite> webSiteList) {
+		// prepare list to display
+		List<String> listToDisplay = new ArrayList<String>();
+		for (WebSite webSite : webSiteList) {
+			WebSiteConfiguration webSiteConfiguration = webSiteConfigMap.get(webSite);
+			StringBuilder builder = new StringBuilder(webSite.getName());
+			if (!webSiteConfiguration.getJavaVersion().isEmpty()) {
+				builder.append(" (JRE ");
+				builder.append(webSiteConfiguration.getJavaVersion());
+				if (!webSiteConfiguration.getJavaContainer().isEmpty()) {
+					builder.append("; ");
+					builder.append(webSiteConfiguration.getJavaContainer());
+					builder.append(" ");
+					builder.append(webSiteConfiguration.getJavaContainerVersion());
+				}
+				builder.append(")");
+			} else {
+				builder.append(" (.NET ");
+				builder.append(webSiteConfiguration.getNetFrameworkVersion());
+				if (!webSiteConfiguration.getPhpVersion().isEmpty()) {
+					builder.append("; PHP ");
+					builder.append(webSiteConfiguration.getPhpVersion());
+				}
+				builder.append(")");
+			}
+			listToDisplay.add(builder.toString());
+		}
+		return listToDisplay;
 	}
 }

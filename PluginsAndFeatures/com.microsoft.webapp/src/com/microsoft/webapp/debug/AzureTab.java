@@ -51,6 +51,7 @@ import com.microsoft.webapp.activator.Activator;
 import com.microsoft.webapp.config.Messages;
 import com.microsoft.webapp.config.WebAppDeployDialog;
 import com.microsoft.webapp.util.WebAppUtils;
+import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 
 
 public class AzureTab extends AbstractLaunchConfigurationTab {
@@ -165,7 +166,7 @@ public class AzureTab extends AbstractLaunchConfigurationTab {
 					}
 				});
 
-				listToDisplay = WebAppUtils.prepareListToDisplay(webSiteConfigMap, webSiteList);
+				listToDisplay = WAEclipseHelperMethods.prepareListToDisplay(webSiteConfigMap, webSiteList);
 				txtName.setItems(listToDisplay.toArray(new String[listToDisplay.size()]));
 				Map<String, Boolean> mp = Activator.getDefault().getWebsiteDebugPrep();
 				for (WebSite webSite : webSiteList) {
