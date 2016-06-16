@@ -25,10 +25,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.google.common.collect.ImmutableList;
-import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
-import com.microsoft.azureexplorer.NodeActionsMap;
-
 /**
  * The activator class controls the plug-in life cycle
  */
