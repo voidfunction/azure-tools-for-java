@@ -19,16 +19,11 @@
  */
 package com.microsoft.azure.hdinsight.projects;
 
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -41,11 +36,9 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.PlatformUI;
-import org.osgi.framework.Bundle;
 
 import com.microsoft.azure.hdinsight.Activator;
 import com.microsoft.azure.hdinsight.common.CommonConst;
-import com.microsoft.azure.hdinsight.spark.ui.SparkSubmissionExDialog;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 public class SparkLibraryOptionsPanel extends Composite {

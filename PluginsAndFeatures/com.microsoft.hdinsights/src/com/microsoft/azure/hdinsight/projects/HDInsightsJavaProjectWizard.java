@@ -19,7 +19,6 @@
  */
 package com.microsoft.azure.hdinsight.projects;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -52,7 +51,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+
+import com.microsoft.auth.StringUtils;
 import com.microsoft.azure.hdinsight.Activator;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 public class HDInsightsJavaProjectWizard extends JavaProjectWizard implements IExecutableExtension {
 	private String id;
@@ -87,16 +89,21 @@ public class HDInsightsJavaProjectWizard extends JavaProjectWizard implements IE
 			final IClasspathEntry[] entries = super.getDefaultClasspathEntries();
 			final IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];			
 			Display.getDefault().syncExec(new Runnable() {
-				
 				@Override
 				public void run() {
-					IPath jarPath = new Path(sparkLibraryOptionsPanel.getSparkLibraryPath());
-					IClasspathEntry sparkEntry = JavaCore.newLibraryEntry(jarPath, null, null);
-					System.arraycopy(entries, 0, newEntries, 0, entries.length);
-					newEntries[entries.length] = sparkEntry;
+					final String jarPathString = sparkLibraryOptionsPanel.getSparkLibraryPath();
+					if (StringUtils.isNullOrEmpty(jarPathString)) {
+						DefaultLoader.getUIHelper().showError("Spark Library Path cannot be null",
+								"Spark Project Settings");
+					} else {
+						IPath jarPath = new Path(jarPathString);
+						IClasspathEntry sparkEntry = JavaCore.newLibraryEntry(jarPath, null, null);
+						System.arraycopy(entries, 0, newEntries, 0, entries.length);
+						newEntries[entries.length] = sparkEntry;
+					}
 				}
 			});
-			return newEntries;
+			return newEntries[0] == null ? entries : newEntries;
 		}
 
 		@Override
