@@ -220,7 +220,7 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
     }
 
     @NotNull
-    public static synchronized AzureManager getManager(Object currentProject) {
+    public static synchronized AzureManagerImpl getManager(Object currentProject) {
         if (currentProject == null) {
             currentProject = DEFAULT_PROJECT;
         }
@@ -1425,40 +1425,38 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
         }
     }
 
-//    @NotNull
-//    private <T> T requestWithToken(@NotNull final UserInfo userInfo, @NotNull final RequestCallback<T> requestCallback)
-//            throws AzureCmdException {
-//        PluginSettings settings = DefaultLoader.getPluginComponent().getSettings();
-//
-//        com.microsoft.tooling.msservices.helpers.auth.RequestCallback<T> aadRequestCB =
-//                new com.microsoft.tooling.msservices.helpers.auth.RequestCallback<T>() {
-//                    @NotNull
-//                    @Override
-//                    public T execute(@NotNull String accessToken) throws Throwable {
-//                        if (!hasAccessToken(userInfo) ||
-//                                !accessToken.equals(getAccessToken(userInfo))) {
-//                            ReentrantReadWriteLock userLock = getUserLock(userInfo, true);
-//                            userLock.writeLock().lock();
-//
-//                            try {
-//                                if (!hasAccessToken(userInfo) ||
-//                                        !accessToken.equals(getAccessToken(userInfo))) {
-//                                    setAccessToken(userInfo, accessToken);
-//                                }
-//                            } finally {
-//                                userLock.writeLock().unlock();
-//                            }
-//                        }
-//
-//                        return requestCallback.execute();
-//                    }
-//                };
-//
-//        return aadManager.request(userInfo,
-//                settings.getAzureServiceManagementUri(),
-//                "Sign in to your Azure account",
-//                aadRequestCB);
-//    }
+    @NotNull
+    public <T> T requestWithToken(@NotNull final UserInfo userInfo, @NotNull final RequestCallback<T> requestCallback)
+            throws AzureCmdException {
+        PluginSettings settings = DefaultLoader.getPluginComponent().getSettings();
+
+        com.microsoft.tooling.msservices.helpers.auth.RequestCallback<T> aadRequestCB =
+                new com.microsoft.tooling.msservices.helpers.auth.RequestCallback<T>() {
+                    @NotNull
+                    @Override
+                    public T execute(@NotNull String accessToken) throws Throwable {
+                        if (!hasAccessToken(userInfo) || !accessToken.equals(getAccessToken(userInfo))) {
+                            ReentrantReadWriteLock userLock = getUserLock(userInfo, true);
+                            userLock.writeLock().lock();
+
+                            try {
+                                if (!hasAccessToken(userInfo) || !accessToken.equals(getAccessToken(userInfo))) {
+                                    setAccessToken(userInfo, accessToken);
+                                }
+                            } finally {
+                                userLock.writeLock().unlock();
+                            }
+                        }
+
+                        return requestCallback.execute();
+                    }
+                };
+
+        return aadManager.request(userInfo,
+                settings.getAzureServiceManagementUri(),
+                "Sign in to your Azure account",
+                aadRequestCB);
+    }
 
     @NotNull
     private static String readFile(@NotNull String filePath)

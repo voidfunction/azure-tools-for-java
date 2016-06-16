@@ -206,7 +206,7 @@ abstract class AzureManagerBaseImpl {
     }
 
     @NotNull
-    String getAccessToken(@NotNull UserInfo userInfo)
+    public String getAccessToken(@NotNull UserInfo userInfo)
             throws AzureCmdException {
         authDataLock.readLock().lock();
 

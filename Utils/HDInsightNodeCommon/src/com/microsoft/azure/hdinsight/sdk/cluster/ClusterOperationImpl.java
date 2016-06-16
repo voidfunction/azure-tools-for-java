@@ -29,6 +29,7 @@ import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.RequestCallback;
 import com.microsoft.tooling.msservices.helpers.azure.rest.AzureAADHelper;
 import com.microsoft.tooling.msservices.helpers.azure.rest.RestServiceManager;
 import com.microsoft.tooling.msservices.helpers.azure.rest.RestServiceManagerBaseImpl;
@@ -56,30 +57,36 @@ public class ClusterOperationImpl implements IClusterOperation {
      * @return cluster raw data info
      * @throws IOException
      */
-    public List<ClusterRawInfo> listCluster(Subscription subscription) throws IOException, HDIException, AzureCmdException {
-        String accessToken = AzureManagerImpl.getManager(project).getAccessToken(subscription.getId());
-        String response = AzureAADHelper.executeRequest(
-                CommonConstant.HDINSIGHT_CLUSTER_URI,
-                String.format("api/Clusters/GetAll?subscriptionIds=%s;&_=%d", subscription.getId(), new Date().getTime()),
-                RestServiceManager.ContentType.Json,
-                "GET",
-                null,
-                accessToken,
-                new RestServiceManagerBaseImpl() {
-                    @NotNull
-                    @Override
-                    public String executePollRequest(@NotNull String managementUrl,
-                                                     @NotNull String path,
-                                                     @NotNull ContentType contentType,
-                                                     @NotNull String method,
-                                                     @Nullable String postData,
-                                                     @NotNull String pollPath,
-                                                     @NotNull HttpsURLConnectionProvider sslConnectionProvider)
-                            throws AzureCmdException {
-                        throw new UnsupportedOperationException();
-                    }
-                });
+    public List<ClusterRawInfo> listCluster(final Subscription subscription) throws IOException, HDIException, AzureCmdException {
+        final AzureManagerImpl azureManager = AzureManagerImpl.getManager(project);
+        final UserInfo userInfo = azureManager.getUserInfo(subscription.getId());
 
+        String response = azureManager.requestWithToken(userInfo, new RequestCallback<String>() {
+            @Override
+            public String execute() throws Throwable {
+                String accessToken = azureManager.getAccessToken(userInfo);
+                return AzureAADHelper.executeRequest(CommonConstant.HDINSIGHT_CLUSTER_URI,
+                        String.format("api/Clusters/GetAll?subscriptionIds=%s;&_=%d", subscription.getId(), new Date().getTime()),
+                        RestServiceManager.ContentType.Json,
+                        "GET",
+                        null,
+                        accessToken,
+                        new RestServiceManagerBaseImpl() {
+                            @NotNull
+                            @Override
+                            public String executePollRequest(@NotNull String managementUrl,
+                                                             @NotNull String path,
+                                                             @NotNull ContentType contentType,
+                                                             @NotNull String method,
+                                                             @Nullable String postData,
+                                                             @NotNull String pollPath,
+                                                             @NotNull HttpsURLConnectionProvider sslConnectionProvider)
+                                    throws AzureCmdException {
+                                throw new UnsupportedOperationException();
+                            }
+                        });
+            }
+        });
         return new AuthenticationErrorHandler<List<ClusterRawInfo>>() {
             @Override
             public List<ClusterRawInfo> execute(String response) {
@@ -99,30 +106,36 @@ public class ClusterOperationImpl implements IClusterOperation {
      * @return cluster configuration info
      * @throws IOException
      */
-    public ClusterConfiguration getClusterConfiguration(Subscription subscription, String clusterId) throws IOException, HDIException, AzureCmdException {
-        String accessToken = AzureManagerImpl.getManager(project).getAccessToken(subscription.getId());
-        String response = AzureAADHelper.executeRequest(
-                CommonConstant.MANAGEMENT_URI,
-                String.format("%s/configurations?api-version=%s", clusterId.replaceAll("/+$", ""), VERSION),
-                null,
-                "GET",
-                null,
-                accessToken,
-                new RestServiceManagerBaseImpl() {
-                    @NotNull
-                    @Override
-                    public String executePollRequest(@NotNull String managementUrl,
-                                                     @NotNull String path,
-                                                     @NotNull ContentType contentType,
-                                                     @NotNull String method,
-                                                     @Nullable String postData,
-                                                     @NotNull String pollPath,
-                                                     @NotNull HttpsURLConnectionProvider sslConnectionProvider)
-                            throws AzureCmdException {
-                        throw new UnsupportedOperationException();
-                    }
-                });
+    public ClusterConfiguration getClusterConfiguration(final Subscription subscription, final String clusterId) throws IOException, HDIException, AzureCmdException {
+        final AzureManagerImpl azureManager = AzureManagerImpl.getManager(project);
+        final UserInfo userInfo = azureManager.getUserInfo(subscription.getId());
 
+        String response = azureManager.requestWithToken(userInfo, new RequestCallback<String>() {
+            @Override
+            public String execute() throws Throwable {
+                String accessToken = azureManager.getAccessToken(userInfo);
+                return AzureAADHelper.executeRequest(CommonConstant.MANAGEMENT_URI,
+                        String.format("%s/configurations?api-version=%s", clusterId.replaceAll("/+$", ""), VERSION),
+                        null,
+                        "GET",
+                        null,
+                        accessToken,
+                        new RestServiceManagerBaseImpl() {
+                            @NotNull
+                            @Override
+                            public String executePollRequest(@NotNull String managementUrl,
+                                                             @NotNull String path,
+                                                             @NotNull ContentType contentType,
+                                                             @NotNull String method,
+                                                             @Nullable String postData,
+                                                             @NotNull String pollPath,
+                                                             @NotNull HttpsURLConnectionProvider sslConnectionProvider)
+                                    throws AzureCmdException {
+                                throw new UnsupportedOperationException();
+                            }
+                        });
+            }
+        });
         return new AuthenticationErrorHandler<ClusterConfiguration>() {
             @Override
             public ClusterConfiguration execute(String response) {
