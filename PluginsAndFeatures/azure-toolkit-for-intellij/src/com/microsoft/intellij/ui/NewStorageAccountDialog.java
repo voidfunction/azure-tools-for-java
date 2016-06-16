@@ -122,7 +122,7 @@ public class NewStorageAccountDialog extends DialogWrapper {
         String storageAccountLocation = (String) locationComb.getSelectedItem();
 
         try {
-            boolean isNameAvailable = WizardCacheManager.isStorageAccountNameAvailable(storageAccountNameToCreate);
+            boolean isNameAvailable = WizardCacheManager.isStorageAccountNameAvailable(storageAccountNameToCreate, myProject);
             if (isNameAvailable) {
                 /*
                  * case 1 : Invoked through publish wizard
@@ -142,7 +142,7 @@ public class NewStorageAccountDialog extends DialogWrapper {
 
                     if (maxStorageAccounts > publishData.getStoragesPerSubscription().get(curSub.getId()).size()) {
                         NewStorageAccountWithProgressWindow task = new NewStorageAccountWithProgressWindow(pubData,
-                                storageAccountTxt.getText(), storageAccountTxt.getText(), (String) locationComb.getSelectedItem(), descriptionTxt.getText());
+                                storageAccountTxt.getText(), storageAccountTxt.getText(), (String) locationComb.getSelectedItem(), descriptionTxt.getText(), myProject);
                         ProgressManager.getInstance().runProcessWithProgressSynchronously(task, "Progress Information", true, myProject);
                         storageService = task.getStorageService();
                     } else {

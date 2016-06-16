@@ -295,7 +295,7 @@ public class DeployWizardDialog extends WindowsAzurePage {
                     String currentSubscriptionId = publishData.getCurrentSubscription().getId();
                     if (maxHostedServices > publishData.getServicesPerSubscription().get(currentSubscriptionId).size()) {
 
-                        NewHostedServiceDialog hostedServiceDialog = new NewHostedServiceDialog();
+                        NewHostedServiceDialog hostedServiceDialog = new NewHostedServiceDialog(myModule.getProject());
                         if (defaultLocation != null) { // user has created a storage account before creating the hosted service
                             hostedServiceDialog.setDefaultLocation(defaultLocation);
                         }

@@ -136,7 +136,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
 
     private void loadInfoFirstTime() {
         try {
-            AzureManager manager = AzureManagerImpl.getManager();
+            AzureManager manager = AzureManagerImpl.getManager(myProject);
             List<Subscription> subList = manager.getSubscriptionList();
             if (subList.size() > 0) {
                 if (!AzureSettings.getSafeInstance(myProject).isAppInsightsLoaded()) {
@@ -180,7 +180,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
                 signInBtn.doClick();
             }
             subscriptionsDialog.show();
-            List<Subscription> subList = AzureManagerImpl.getManager().getSubscriptionList();
+            List<Subscription> subList = AzureManagerImpl.getManager(myProject).getSubscriptionList();
             if (subList.size() == 0) {
                 keeepManuallyAddedList(myProject);
             } else {

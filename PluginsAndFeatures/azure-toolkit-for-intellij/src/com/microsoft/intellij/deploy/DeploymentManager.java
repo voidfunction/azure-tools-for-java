@@ -256,7 +256,7 @@ public final class DeploymentManager {
     private void createStorageAccount(final String storageServiceName, final String label, final String location, final String description)
             throws Exception {
         com.microsoft.tooling.msservices.model.storage.StorageAccount storageService =
-                WizardCacheManager.createStorageAccount(storageServiceName, label, location, description);
+                WizardCacheManager.createStorageAccount(storageServiceName, label, location, description, myProject);
         /*
 		 * Add newly created storage account
 		 * in centralized storage account registry.
@@ -265,7 +265,7 @@ public final class DeploymentManager {
                 storageService.getPrimaryKey(),
                 storageService.getBlobsUri());
         StorageAccountRegistry.addAccount(storageAccount);
-        AzureSettings.getSafeInstance(PluginUtil.getSelectedProject()).saveStorage();
+        AzureSettings.getSafeInstance(myProject).saveStorage();
     }
 
     private void createHostedService(final String hostedServiceName, final String label, final String location, final String description)
@@ -276,7 +276,7 @@ public final class DeploymentManager {
 //        createHostedService.setLocation(location);
 //        createHostedService.setDescription(description);
 
-        WizardCacheManager.createHostedService(hostedServiceName, label, location, description);
+        WizardCacheManager.createHostedService(hostedServiceName, label, location, description, myProject);
     }
 
     private void checkContainerExistance() throws Exception {

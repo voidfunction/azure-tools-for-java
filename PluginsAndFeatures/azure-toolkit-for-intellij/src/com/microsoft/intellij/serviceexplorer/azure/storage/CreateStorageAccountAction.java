@@ -50,7 +50,7 @@ public class CreateStorageAccountAction extends NodeActionListener {
     @Override
     public void actionPerformed(NodeActionEvent e) {
         // check if we have a valid subscription handy
-        AzureManager apiManager = AzureManagerImpl.getManager();
+        AzureManager apiManager = AzureManagerImpl.getManager(storageModule.getProject());
 
         if (!apiManager.authenticated() && !apiManager.usingCertificate()) {
             DefaultLoader.getUIHelper().showException("Please configure an Azure subscription by right-clicking on the \"Azure\" " +

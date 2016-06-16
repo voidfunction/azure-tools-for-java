@@ -166,7 +166,7 @@ public class CreateWebHostingPlanForm extends DialogWrapper {
 
     private void fillGeoRegions() {
         try {
-            List<Location> locationList = AzureManagerImpl.getManager().getLocations(subscriptionId);
+            List<Location> locationList = AzureManagerImpl.getManager(project).getLocations(subscriptionId);
             List<String> locationNameList = new ArrayList<String>();
             for (Location location : locationList) {
                 locationNameList.add(location.getName());

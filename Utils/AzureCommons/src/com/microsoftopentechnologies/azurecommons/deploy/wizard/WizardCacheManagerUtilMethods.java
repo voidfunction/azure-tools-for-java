@@ -187,15 +187,15 @@ public final class WizardCacheManagerUtilMethods {
 		return certsInService;
 	}
 
-	public static CloudService createHostedService(CloudService cloudService, PublishData currentPublishData)
+	public static CloudService createHostedService(CloudService cloudService, PublishData currentPublishData, Object project)
 					throws AzureCmdException {
 		Subscription subscription = currentPublishData.getCurrentSubscription();
 
 		String subscriptionId = subscription.getId();
-		AzureManagerImpl.getManager().createCloudService(cloudService);
+		AzureManagerImpl.getManager(project).createCloudService(cloudService);
 		// todo?
 		// do we really need this call?
-		cloudService = AzureManagerImpl.getManager().getCloudServiceDetailed(cloudService);
+		cloudService = AzureManagerImpl.getManager(project).getCloudServiceDetailed(cloudService);
 		// remove previos mock if existed
 		for (CloudService cs : currentPublishData.getServicesPerSubscription().get(subscriptionId)) {
 			if (cloudService.getName().equals(cs.getName())) {
@@ -207,7 +207,7 @@ public final class WizardCacheManagerUtilMethods {
 	}
 
 	public static StorageAccount createStorageAccount(String name, String label, String location, String description,
-													  PublishData currentPublishData, String prefFilePath)
+													  PublishData currentPublishData, String prefFilePath, Object project)
 			throws Exception {
 		StorageAccount storageAccount = new StorageAccount(name, currentPublishData.getCurrentSubscription().getId());
 		storageAccount.setLabel(label);
@@ -215,11 +215,11 @@ public final class WizardCacheManagerUtilMethods {
 		storageAccount.setDescription(description);
 		storageAccount.setType(STORAGE_ACCOUNT_DEFAULT_ACCOUNT_TYPE);
 
-		OperationStatusResponse response = AzureManagerImpl.getManager().createStorageAccount(storageAccount);
+		OperationStatusResponse response = AzureManagerImpl.getManager(project).createStorageAccount(storageAccount);
 
-		AzureManagerImpl.getManager().waitForStatus(currentPublishData.getCurrentSubscription().getId(), response);
+		AzureManagerImpl.getManager(project).waitForStatus(currentPublishData.getCurrentSubscription().getId(), response);
 
-		storageAccount = AzureManagerImpl.getManager().refreshStorageAccountInformation(storageAccount);
+		storageAccount = AzureManagerImpl.getManager(project).refreshStorageAccountInformation(storageAccount);
 
 		String mngmntUrl = MethodUtils.getManagementUrlAsPerPubFileVersion(currentPublishData,
 				currentPublishData.getCurrentSubscription(), prefFilePath);
@@ -258,15 +258,15 @@ public final class WizardCacheManagerUtilMethods {
 //	}
 
 	public static boolean isHostedServiceNameAvailable(final String hostedServiceName,
-			PublishData currentPublishData)
+			PublishData currentPublishData, Object project)
 					throws Exception, RestAPIException {
-			return AzureManagerImpl.getManager()
+			return AzureManagerImpl.getManager(project)
 					.checkHostedServiceNameAvailability(currentPublishData.getCurrentSubscription().getId(), hostedServiceName);
 	}
 
-	public static boolean isStorageAccountNameAvailable(final String storageAccountName, PublishData currentPublishData)
+	public static boolean isStorageAccountNameAvailable(final String storageAccountName, PublishData currentPublishData, Object project)
 					throws AzureCmdException {
-		return AzureManagerImpl.getManager()
+		return AzureManagerImpl.getManager(project)
 					.checkStorageNameAvailability(currentPublishData.getCurrentSubscription().getId(),storageAccountName);
 	}
 
@@ -283,13 +283,6 @@ public final class WizardCacheManagerUtilMethods {
 	public static CloudService createHostedServiceMock(String hostedServiceNameToCreate,
 			String hostedServiceLocation,
 			String description) {
-//		HostedServiceProperties props = new HostedServiceProperties();
-//		props.setDescription(description);
-//		props.setLocation(hostedServiceLocation);
-//
-//		HostedService hostedService = new HostedService();
-//		hostedService.setProperties(props);
-//		hostedService.setServiceName(hostedServiceNameToCreate);
 		CloudService cloudService = new CloudService(hostedServiceNameToCreate, hostedServiceLocation, "", null);
 		return cloudService;
 	}

@@ -133,7 +133,7 @@ public class SubscriptionsPanel implements AzureAbstractPanel {
                 if (importSubscriptionDialog.isOK()) {
                     String fileName = importSubscriptionDialog.getPublishSettingsPath();
                     try {
-                        AzureManager apiManager = AzureManagerImpl.getManager();
+                        AzureManager apiManager = AzureManagerImpl.getManager(myProject);
                         apiManager.clearAuthentication();
                         apiManager.importPublishSettingsFile(fileName);
                         MethodUtils.handleFile(fileName, myProject);

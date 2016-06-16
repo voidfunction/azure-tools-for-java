@@ -514,7 +514,7 @@ public class TableFileEditor implements FileEditor {
             throws AzureCmdException {
         synchronized (subscriptionsChangedSync) {
             if (subscriptionsChanged == null) {
-                subscriptionsChanged = AzureManagerImpl.getManager().registerSubscriptionsChanged();
+                subscriptionsChanged = AzureManagerImpl.getManager(project).registerSubscriptionsChanged();
             }
 
             registeredSubscriptionsChanged = true;
@@ -548,7 +548,7 @@ public class TableFileEditor implements FileEditor {
             registeredSubscriptionsChanged = false;
 
             if (subscriptionsChanged != null) {
-                AzureManagerImpl.getManager().unregisterSubscriptionsChanged(subscriptionsChanged);
+                AzureManagerImpl.getManager(project).unregisterSubscriptionsChanged(subscriptionsChanged);
                 subscriptionsChanged = null;
             }
         }
