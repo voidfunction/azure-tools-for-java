@@ -21,7 +21,7 @@ public class AppInsightsCustomEvent {
      * @return resource filename in plugin's directory
      */
     private static String getTemplateFile(String fileName) {
-        return String.format("%s%s%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID, File.separator, fileName);
+        return String.format("%s%s%s", PluginUtil.getPluginRootDirectory(), File.separator, fileName);
     }
 
     public static void create(String eventName, String version,@Nullable Map<String, String> myProperties) {

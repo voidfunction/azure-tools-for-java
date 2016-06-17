@@ -96,7 +96,7 @@ public class PackageAction extends AnAction {
     private WindowsAzureProjectManager createWaProjMgr() {
         WindowsAzureProjectManager waProjMgr = null;
         try {
-            String zipFile = String.format("%s%s%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID, File.separator,
+            String zipFile = String.format("%s%s%s", PluginUtil.getPluginRootDirectory(), File.separator,
                     message("starterKitFileName"));
 
             //Extract the WAStarterKitForJava.zip to temp dir

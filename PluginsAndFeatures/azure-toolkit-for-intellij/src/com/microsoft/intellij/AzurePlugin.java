@@ -90,7 +90,7 @@ public class AzurePlugin extends AbstractProjectComponent {
 
     public static File cmpntFile = new File(WAHelper.getTemplateFile(message("cmpntFileName")));
     public static String prefFilePath = WAHelper.getTemplateFile(message("prefFileName"));
-    public static String pluginFolder = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID);
+    public static String pluginFolder = PluginUtil.getPluginRootDirectory();
 
     private static final EventListenerList DEPLOYMENT_EVENT_LISTENERS = new EventListenerList();
     public static List<DeploymentEventListener> depEveList = new ArrayList<DeploymentEventListener>();
@@ -271,20 +271,18 @@ public class AzurePlugin extends AbstractProjectComponent {
     }
 
     /**
-     * Copies MS Open Tech Tools for Azure
+     * Copies Azure Toolkit for IntelliJ
      * related files in azure-toolkit-for-intellij plugin folder at startup.
      */
     private void copyPluginComponents() {
         try {
-            String pluginInstLoc = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID);
-
-            String cmpntFile = String.format("%s%s%s", pluginInstLoc,
+            String cmpntFile = String.format("%s%s%s", pluginFolder,
                     File.separator, AzureBundle.message("cmpntFileName"));
-            String starterKit = String.format("%s%s%s", pluginInstLoc,
+            String starterKit = String.format("%s%s%s", pluginFolder,
                     File.separator, AzureBundle.message("starterKitFileName"));
-            String enctFile = String.format("%s%s%s", pluginInstLoc,
+            String enctFile = String.format("%s%s%s", pluginFolder,
                     File.separator, message("encFileName"));
-            String prefFile = String.format("%s%s%s", pluginInstLoc,
+            String prefFile = String.format("%s%s%s", pluginFolder,
                     File.separator, AzureBundle.message("prefFileName"));
 
             // upgrade component sets and preference sets
@@ -302,10 +300,10 @@ public class AzurePlugin extends AbstractProjectComponent {
             copyResourceFile(message("starterKitEntry"), starterKit);
             copyResourceFile(message("encFileName"), enctFile);
             for (AzureLibrary azureLibrary : AzureLibrary.LIBRARIES) {
-                if (!new File(pluginInstLoc + File.separator + azureLibrary.getLocation()).exists()) {
-                    for (String entryName : Utils.getJarEntries(pluginInstLoc + File.separator + "lib" + File.separator + PluginUtil.PLUGIN_ID + ".jar", azureLibrary.getLocation())) {
-                        new File(pluginInstLoc + File.separator + entryName).getParentFile().mkdirs();
-                        copyResourceFile(entryName, pluginInstLoc + File.separator + entryName);
+                if (!new File(pluginFolder + File.separator + azureLibrary.getLocation()).exists()) {
+                    for (String entryName : Utils.getJarEntries(pluginFolder + File.separator + "lib" + File.separator + PluginUtil.PLUGIN_NAME + ".jar", azureLibrary.getLocation())) {
+                        new File(pluginFolder + File.separator + entryName).getParentFile().mkdirs();
+                        copyResourceFile(entryName, pluginFolder + File.separator + entryName);
                     }
                 }
             }

@@ -32,13 +32,13 @@ public class PluginHelper {
      * @return resource filename in plugin's directory
      */
     public static String getTemplateFile(String fileName) {
-        return String.format("%s%s%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID, File.separator, fileName);
+        return String.format("%s%s%s", PluginUtil.getPluginRootDirectory(), File.separator, fileName);
     }
 
     public static String getAzureLibLocation() throws WACommonException {
         String libLocation;
         try {
-            String pluginInstLoc = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID);
+            String pluginInstLoc = PluginUtil.getPluginRootDirectory();
             libLocation = String.format(pluginInstLoc + "%s%s", File.separator, "lib");
             File file = new File(String.format(libLocation + "%s%s", File.separator, AzureBundle.message("sdkLibBaseJar")));
             if (!file.exists()) {

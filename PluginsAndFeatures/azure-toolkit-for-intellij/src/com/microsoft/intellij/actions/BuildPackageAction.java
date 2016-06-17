@@ -53,7 +53,7 @@ public class BuildPackageAction extends AnAction {
                 waProjManager.setPackageType(WindowsAzurePackageType.CLOUD);
             }
             try {
-                String pluginInstLoc = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID);
+                String pluginInstLoc = PluginUtil.getPluginRootDirectory();
                 String prefFile = String.format("%s%s%s", pluginInstLoc, File.separator, AzureBundle.message("prefFileName"));
                 String prefSetUrl = PreferenceSetUtil.getSelectedPortalURL(PreferenceSetUtil.getSelectedPreferenceSetName(prefFile), prefFile);
                 /*

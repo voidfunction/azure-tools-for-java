@@ -44,7 +44,7 @@ public class WAHelper {
     }
 
     public static String getDebugFile(String fileName) {
-        return String.format("%s%s%s%s%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID, File.separator, "remotedebug", File.separator, fileName);
+        return String.format("%s%s%s%s%s", PluginUtil.getPluginRootDirectory(), File.separator, "remotedebug", File.separator, fileName);
     }
 
     /**

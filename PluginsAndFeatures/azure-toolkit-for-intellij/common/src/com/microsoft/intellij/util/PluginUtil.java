@@ -56,7 +56,7 @@ public class PluginUtil {
     private static final Logger LOG = Logger.getInstance("#com.microsoft.intellij.util.PluginUtil");
     public static final String BASE_PATH = "${basedir}" + File.separator + "..";
     public static final String PLUGIN_ID = "com.microsoft.tooling.msservices.intellij.azure";
-
+    public static final String PLUGIN_NAME = "azure-toolkit-for-intellij";
 
     //todo: check with multiple Idea projects open in separate windows
     private static HashMap<ToolWindowKey, IToolWindowProcessor> toolWindowManagerCollection = new HashMap<>();

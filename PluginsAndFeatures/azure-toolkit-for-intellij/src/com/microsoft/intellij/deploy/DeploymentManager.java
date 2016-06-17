@@ -152,7 +152,7 @@ public final class DeploymentManager {
                 notifyProgress(deploymentDesc.getDeploymentId(), startDate, null, conditionalProgress, OperationStatus.InProgress, message("deplConfigRdp"));
 
                 DeploymentManagerUtilMethods.configureRemoteDesktop(deploymentDesc, WizardCacheManager.getCurrentDeployConfigFile(),
-                        String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID));
+                        PluginUtil.getPluginRootDirectory());
             } else {
                 notifyProgress(deploymentDesc.getDeploymentId(), startDate, null, conditionalProgress, OperationStatus.InProgress, message("deplConfigRdp"));
             }
@@ -228,7 +228,7 @@ public final class DeploymentManager {
             AppInsightsCustomEvent.create(message("successEvent"), "");
             // RDP prompt will come only on windows
             if (deploymentDesc.isStartRdpOnDeploy() && AzurePlugin.IS_WINDOWS) {
-                String pluginFolder = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PluginUtil.PLUGIN_ID);
+                String pluginFolder = PluginUtil.getPluginRootDirectory();
                 WindowsAzureRestUtils.getInstance().launchRDP(deployment, deploymentDesc.getRemoteDesktopDescriptor().getUserName(), pluginFolder);
             }
         } catch (Throwable t) {
