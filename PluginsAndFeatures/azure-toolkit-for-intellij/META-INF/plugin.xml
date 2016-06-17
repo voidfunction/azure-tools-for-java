@@ -49,6 +49,10 @@
                     serviceImplementation="com.microsoft.intellij.AzureSettings"/>
     <applicationService serviceInterface="com.microsoft.intellij.ApplicationSettings"
                         serviceImplementation="com.microsoft.intellij.ApplicationSettings"/>
+    <applicationService serviceInterface="com.microsoft.azure.hdinsight.jobs.JobViewService"
+                            serviceImplementation="com.microsoft.azure.hdinsight.jobs.JobViewService"/>
+    <fileEditorProvider implementation="com.microsoft.azure.hdinsight.jobs.framework.JobViewEditorProvider" />
+
       <fileEditorProvider implementation="com.microsoft.intellij.helpers.storage.BlobExplorerFileEditorProvider"/>
       <fileEditorProvider implementation="com.microsoft.intellij.helpers.storage.QueueExplorerFileEditorProvider"/>
       <fileEditorProvider implementation="com.microsoft.intellij.helpers.storage.TableExplorerFileEditorProvider"/>
@@ -64,7 +68,7 @@
       <toolWindow
             anchor="bottom"
             factoryClass="com.microsoft.azure.hdinsight.spark.ui.SparkSubmissionToolWindowFactory"
-            id="Spark Submission"
+            id="HDInsight Spark Submission"
             canCloseContents="false"
             icon="/icons/SparkSubmissionToolWindow.png"/>
 

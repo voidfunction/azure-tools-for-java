@@ -23,7 +23,11 @@ package com.microsoft.intellij.components;
 
 import com.google.gson.Gson;
 import com.intellij.openapi.components.AbstractProjectComponent;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
+import com.microsoft.azure.hdinsight.common.HDInsightHelperImpl;
+import com.microsoft.azure.hdinsight.common.HDInsightLoader;
+import com.microsoft.azure.hdinsight.jobs.JobViewService;
 import com.microsoft.intellij.helpers.IDEHelperImpl;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.intellij.serviceexplorer.NodeActionsMap;
@@ -66,6 +70,9 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
         DefaultLoader.setUiHelper(new UIHelperImpl());
         DefaultLoader.setIdeHelper(new IDEHelperImpl());
         Node.setNode2Actions(NodeActionsMap.node2Actions);
+
+        HDInsightLoader.setHHDInsightHelper(new HDInsightHelperImpl());
+        ServiceManager.getService(JobViewService.class).init();
 
         // load up the plugin settings
         try {

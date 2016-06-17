@@ -21,6 +21,12 @@
 		<fileset dir="lib">
 				<include name="*.jar"/>
 		</fileset>
+		<fileset dir="${jdk.home}/jre/lib">
+			<include name="jfxrt.jar"/>
+		</fileset>
+		<fileset dir="${path.variable.maven_repository}/org/jsoup/jsoup/1.9.1/">
+			<include name="jsoup-1.9.1.jar" />
+		</fileset>
 	</path>
 
 	<!-- top level targets -->

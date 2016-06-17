@@ -23,6 +23,7 @@ package com.microsoft.azure.hdinsight.serverexplore.hdinsightnode;
 
 import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
 import com.microsoft.azure.hdinsight.common.CommonConst;
+import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.ClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.HDInsightAdditionalClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
@@ -36,6 +37,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNo
 import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
+import java.util.UUID;
 
 public class ClusterNode extends AzureRefreshableNode {
     private static final String CLUSTER_MODULE_ID = ClusterNode.class.getName();
@@ -114,6 +116,10 @@ public class ClusterNode extends AzureRefreshableNode {
     protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
             {
         removeAllChildNodes();
+        final String uuid = UUID.randomUUID().toString();
+        JobViewManager.registerJovViewNode(uuid, clusterDetail);
+        JobViewNode jobViewNode = new JobViewNode(this, uuid);
+        addChildNode(jobViewNode);
         //TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerSparkNodeExpand, null, null);
         RefreshableNode storageAccountNode = new StorageAccountFolderNode(this, clusterDetail);
         addChildNode(storageAccountNode);

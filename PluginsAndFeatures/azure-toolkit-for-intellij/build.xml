@@ -160,10 +160,15 @@
   <fileset id="scala.libraries" dir="${scala.plugin.home}">
     <include name="lib/scala-plugin.jar"/>
   </fileset>
+    <!--javafx should be include manually if jdk if lower than 1.8-->
+  <fileset id="javafx.library" dir="${jdk.home}">
+    <include name="jre/lib/jfxrt.jar" />
+  </fileset>
 
   <path id="jdk.classpath.idea">
     <resources refid="idea.libraries" />
     <resources refid="scala.libraries"/>
+    <resources refid="javafx.library" />
   </path>
 
   <!-- Project Libraries -->
@@ -459,7 +464,7 @@
     <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/okhttp-urlconnection-3.1.1.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/okhttp-urlconnection-3.1.1.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/okio-1.6.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/okio-1.6.0.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/arm/retrofit-2.0.0-beta4.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/retrofit-2.0.0-beta4.jar"/>
-
+    <copydir src="${module.azure-toolkit-for-intellij.basedir}/hdinsight/hdinsight" dest="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/hdinsight" forceoverwrite="true"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/ThirdPartyNotices.txt" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/ThirdPartyNotices.txt"/>
     <zip destfile="${azure-toolkit-for-intellij.plugin.path.jar}">
       <fileset dir="${module.azure-toolkit-for-intellij.basedir}/../temp"/>
