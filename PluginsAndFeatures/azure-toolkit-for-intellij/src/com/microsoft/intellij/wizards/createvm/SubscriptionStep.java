@@ -103,7 +103,7 @@ public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
     }
 
     private void loadSubscriptions() {
-        try {
+//        try {
             AzureManager manager = AzureManagerImpl.getManager(project);
 
             if (manager.authenticated()) {
@@ -123,9 +123,9 @@ public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
             }
 
             model.getCurrentNavigationState().NEXT.setEnabled(!subscriptions.isEmpty());
-        } catch (AzureCmdException e) {
-            String msg = "An error occurred while attempting to load the subscriptions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
-        }
+//        } catch (AzureCmdException e) {
+//            String msg = "An error occurred while attempting to load the subscriptions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+//            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
+//        }
     }
 }

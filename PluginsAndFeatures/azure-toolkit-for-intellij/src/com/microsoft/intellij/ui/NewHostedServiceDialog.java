@@ -21,6 +21,7 @@
  */
 package com.microsoft.intellij.ui;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TitlePanel;
 import com.intellij.openapi.ui.ValidationInfo;
@@ -44,10 +45,13 @@ public class NewHostedServiceDialog extends DialogWrapper {
 
     private String defaultLocation;
 
-    public NewHostedServiceDialog() {
+    private Project myProject;
+
+    public NewHostedServiceDialog(Project myProject) {
         super(true);
         setTitle(message("cldSrv"));
         init();
+        this.myProject = myProject;
     }
 
     protected void init() {
@@ -77,7 +81,7 @@ public class NewHostedServiceDialog extends DialogWrapper {
         String hostedServiceLocation = (String) locationComb.getSelectedItem();
         boolean isNameAvailable;
         try {
-            isNameAvailable = WizardCacheManager.isHostedServiceNameAvailable(hostedServiceNameToCreate);
+            isNameAvailable = WizardCacheManager.isHostedServiceNameAvailable(hostedServiceNameToCreate, myProject);
             if (isNameAvailable) {
                 WizardCacheManager.createHostedServiceMock(hostedServiceNameToCreate, hostedServiceLocation, descriptionTxt.getText());
 //                valid = true;

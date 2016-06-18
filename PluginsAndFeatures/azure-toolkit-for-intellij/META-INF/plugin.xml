@@ -14,8 +14,8 @@
 
   <!-- please see https://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
   <idea-version since-build="141"/>
-
   <resource-bundle>com.microsoft.intellij.ui.messages.messages</resource-bundle>
+  <resource-bundle>com.microsoft.intellij.hdinsight.messages.messages</resource-bundle>
 
   <!-- please see https://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
        on how to target different products -->
@@ -25,6 +25,7 @@
   <depends optional="true">AntSupport</depends>
   <depends>com.intellij.modules.java</depends>
   <depends>com.intellij.modules.lang</depends>
+  <depends optional="true">org.intellij.scala</depends>
 
   <extensions defaultExtensionNs="com.intellij">
     <toolWindow
@@ -46,6 +47,11 @@
                   order="before javaDirectory"/>
     <projectService serviceInterface="com.microsoft.intellij.AzureSettings"
                     serviceImplementation="com.microsoft.intellij.AzureSettings"/>
+    <applicationService serviceInterface="com.microsoft.intellij.ApplicationSettings"
+                        serviceImplementation="com.microsoft.intellij.ApplicationSettings"/>
+    <applicationService serviceInterface="com.microsoft.azure.hdinsight.jobs.JobViewService"
+                            serviceImplementation="com.microsoft.azure.hdinsight.jobs.JobViewService"/>
+    <fileEditorProvider implementation="com.microsoft.azure.hdinsight.jobs.framework.JobViewEditorProvider" />
 
       <fileEditorProvider implementation="com.microsoft.intellij.helpers.storage.BlobExplorerFileEditorProvider"/>
       <fileEditorProvider implementation="com.microsoft.intellij.helpers.storage.QueueExplorerFileEditorProvider"/>
@@ -56,11 +62,26 @@
               id="Service Explorer"
               canCloseContents="false"
               icon="/icons/azure_explorer.png"/>
+
+      <projectTemplatesFactory implementation="com.microsoft.azure.hdinsight.projects.HDInsightProjectTemplatesFactory"/>
+      <projectStructureDetector implementation="com.microsoft.azure.hdinsight.projects.HDInsightProjectStructureDetector"/>
+      <toolWindow
+            anchor="bottom"
+            factoryClass="com.microsoft.azure.hdinsight.spark.ui.SparkSubmissionToolWindowFactory"
+            id="HDInsight Spark Submission"
+            canCloseContents="false"
+            icon="/icons/SparkSubmissionToolWindow.png"/>
+
+      <library.type implementation="com.microsoft.azure.hdinsight.projects.SparkLibraryType" />
+    <configurationType implementation="com.microsoft.intellij.ui.debug.AzureRemoteConfigurationType"/>
   </extensions>
 
   <application-components>
     <component>
       <implementation-class>com.microsoft.intellij.AzureActionsComponent</implementation-class>
+    </component>
+    <component>
+      <implementation-class>com.microsoft.azure.hdinsight.projects.HDInsightActionsComponent</implementation-class>
     </component>
   </application-components>
 
@@ -121,6 +142,10 @@
             icon="/icons/small/CodeSamples_16.png">
     </action>
 
+    <action id="Actions.SubmitSparkApplicationAction"
+            class="com.microsoft.azure.hdinsight.spark.actions.SubmitAction" text="Submit Spark Application to HDInsight"
+            description="Submit Spark Application to HDInsight" icon="/icons/Spark.png"/>
+
     <group id="AzurePopupGroup" text="Azure" description="Azure" icon="/icons/azure.png" popup="true"
            class="com.microsoft.intellij.actions.AzurePopupGroup">
       <reference ref="Actions.AzureWebDeploy"/>
@@ -156,6 +181,7 @@
         <reference ref="Actions.AzureWebDeploy"/>
         <add-to-group group-id="PublishGroup" anchor="last"/>
     </group>
+
   </actions>
 
     <helpset file="azure-toolkit-for-intellij-help.jar" path="/helpset.hs"/>

@@ -23,7 +23,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import com.microsoftopentechnologies.azurecommons.xmlhandling.ParseXMLUtilMethods;
+import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 
 public class ParseXML {
 
@@ -38,7 +38,7 @@ public class ParseXML {
 	public static void setProjectNameinLaunch(String filePath,
 			String oldName, String newName) throws Exception {
 		Document doc = null;
-		doc = ParseXMLUtilMethods.parseFile(filePath);
+		doc = ParserXMLUtility.parseXMLFile(filePath);
 
 		if (doc != null) {
 			Node root = doc.getDocumentElement();
@@ -70,7 +70,7 @@ public class ParseXML {
 					}
 				}
 			}
-			ParseXMLUtilMethods.saveXMLDocument(filePath, doc);
+			ParserXMLUtility.saveXMLFile(filePath, doc);
 		}
 	}
 }

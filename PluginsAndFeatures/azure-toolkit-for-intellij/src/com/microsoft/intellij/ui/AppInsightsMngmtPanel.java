@@ -136,7 +136,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
 
     private void loadInfoFirstTime() {
         try {
-            AzureManager manager = AzureManagerImpl.getManager();
+            AzureManager manager = AzureManagerImpl.getManager(myProject);
             List<Subscription> subList = manager.getSubscriptionList();
             if (subList.size() > 0) {
                 if (!AzureSettings.getSafeInstance(myProject).isAppInsightsLoaded()) {
@@ -180,7 +180,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
                 signInBtn.doClick();
             }
             subscriptionsDialog.show();
-            List<Subscription> subList = AzureManagerImpl.getManager().getSubscriptionList();
+            List<Subscription> subList = AzureManagerImpl.getManager(myProject).getSubscriptionList();
             if (subList.size() == 0) {
                 keeepManuallyAddedList(myProject);
             } else {
@@ -214,7 +214,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
         return new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    AzureManager manager = AzureManagerImpl.getManager();
+                    AzureManager manager = AzureManagerImpl.getManager(myProject);
                     List<Subscription> subList = manager.getSubscriptionList();
                     if (subList.size() > 0) {
                         if (manager.authenticated()) {
@@ -337,7 +337,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
         return new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    AzureManager manager = AzureManagerImpl.getManager();
+                    AzureManager manager = AzureManagerImpl.getManager(myProject);
                     List<Subscription> subList = manager.getSubscriptionList();
                     if (subList.size() > 0) {
                         if (!manager.authenticated()) {
@@ -359,28 +359,23 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
 
     private void createNewDilaog() {
         try {
-            SwingUtilities.invokeAndWait(new Runnable() {
+            ApplicationManager.getApplication().invokeAndWait(new Runnable() {
                 @Override
                 public void run() {
-                    ApplicationManager.getApplication().invokeAndWait(new Runnable() {
-                        @Override
-                        public void run() {
-                            ApplicationInsightsNewDialog dialog = new ApplicationInsightsNewDialog();
-                            dialog.show();
-                            if (dialog.isOK()) {
-                                ApplicationInsightsResource resource = ApplicationInsightsNewDialog.getResource();
-                                if (resource != null &&
-                                        !ApplicationInsightsResourceRegistry.getAppInsightsResrcList().contains(resource)) {
-                                    ApplicationInsightsResourceRegistry.getAppInsightsResrcList().add(resource);
-                                    AzureSettings.getSafeInstance(myProject).saveAppInsights();
-                                    ((InsightsTableModel) insightsTable.getModel()).setResources(getTableContent());
-                                    ((InsightsTableModel) insightsTable.getModel()).fireTableDataChanged();
-                                }
-                            }
+                    ApplicationInsightsNewDialog dialog = new ApplicationInsightsNewDialog();
+                    dialog.show();
+                    if (dialog.isOK()) {
+                        ApplicationInsightsResource resource = ApplicationInsightsNewDialog.getResource();
+                        if (resource != null &&
+                                !ApplicationInsightsResourceRegistry.getAppInsightsResrcList().contains(resource)) {
+                            ApplicationInsightsResourceRegistry.getAppInsightsResrcList().add(resource);
+                            AzureSettings.getSafeInstance(myProject).saveAppInsights();
+                            ((InsightsTableModel) insightsTable.getModel()).setResources(getTableContent());
+                            ((InsightsTableModel) insightsTable.getModel()).fireTableDataChanged();
                         }
-                    }, ModalityState.defaultModalityState());
+                    }
                 }
-            });
+            }, ModalityState.defaultModalityState());
         } catch(Exception ex) {
             AzurePlugin.log(ex.getMessage(), ex);
         }

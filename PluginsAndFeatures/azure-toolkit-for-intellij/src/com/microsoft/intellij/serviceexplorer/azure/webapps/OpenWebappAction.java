@@ -29,7 +29,7 @@ public class OpenWebappAction extends NodeActionListener {
         WebSite webapp = webappNode.getWebSite();
         try {
             if (webapp.getWebSitePublishSettings() == null) {
-                webapp.setWebSitePublishSettings(AzureManagerImpl.getManager().
+                webapp.setWebSitePublishSettings(AzureManagerImpl.getManager(webappNode.getProject()).
                         getWebSitePublishSettings(webapp.getSubscriptionId(), webapp.getWebSpaceName(), webapp.getName()));
             }
             WebSitePublishSettings.PublishProfile profile = webapp.getWebSitePublishSettings().getPublishProfileList().get(0);

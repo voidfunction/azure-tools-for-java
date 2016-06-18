@@ -76,4 +76,53 @@
          </command>
    </menuContribution>
    </extension>
+   
+   <!-- Custom debug configuration-->
+    <extension point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="com.microsoft.webapp.debug.WebAppLaunchConfigurationDelegate"
+            id="com.microsoft.ui.webapp.launchConfigurationType"
+            modes="debug"
+            name="Azure Web App"
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="org.eclipse.jst.server.tomcat.core.sourcePathComputer"/>
+   </extension>
+   
+    <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            class="com.microsoft.webapp.debug.WebAppLaunchConfigurationTabGroup"
+            id="com.microsoft.ui.webapp.LaunchConfigurationTabGroup"
+            type="com.microsoft.ui.webapp.launchConfigurationType"/>
+   </extension>
+   
+   <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+     <launchConfigurationTypeImage
+            id="com.microsoft.webapp.debug.webappimage"
+            configTypeID="com.microsoft.ui.webapp.launchConfigurationType"
+            icon="icons/small/website.png">
+     </launchConfigurationTypeImage>
+   </extension>
+   
+   	<extension point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+        id="com.microsoft.webapp.debug.webappshortcut"
+        class="com.microsoft.webapp.debug.WebAppLaunchShortcut"
+        label="Azure Web App"
+        icon="icons/small/website.png"
+        modes="debug">
+        <contextualLaunch>
+       <enablement>
+    <with variable="selection">
+     <count value="1"/>
+      <iterate
+			operator="or">
+            		<adapt type="org.eclipse.core.resources.IProject">
+        				<test property="com.microsoft.ui.webapp.property.isWebProj"/>
+            		</adapt>
+				</iterate>
+     </with>
+  </enablement>
+  </contextualLaunch>
+      </shortcut>
+   </extension>
 </plugin>

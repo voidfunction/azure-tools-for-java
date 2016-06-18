@@ -28,6 +28,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindowId;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -43,12 +44,10 @@ import com.microsoft.intellij.ui.messages.AzureBundle;
 import com.microsoft.intellij.util.AntHelper;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.WizardCacheManager;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
-import com.microsoft.wacommon.utils.WACommonException;
+import com.wacommon.utils.WACommonException;
 import com.microsoft.windowsazure.management.compute.models.ServiceCertificateListResponse;
-import com.microsoft.windowsazure.management.storage.models.StorageAccountCreateParameters;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
 import com.microsoftopentechnologies.azurecommons.deploy.model.AutoUpldCmpnts;
@@ -100,7 +99,7 @@ public class DeployAction extends AnAction {
                 WindowsAzureProjectManager waProjManager = WindowsAzureProjectManager.load(new File(modulePath));
 
                 // Update global properties in package.xml
-                updateGlobalPropertiesinPackage(waProjManager);
+                updateGlobalPropertiesinPackage(waProjManager, module.getProject());
 
                 // Configure or remove remote access settings
                 boolean status = handleRDPSettings(waProjManager, deployDialog, modulePath);
@@ -189,7 +188,7 @@ public class DeployAction extends AnAction {
         }
     }
 
-    private void updateGlobalPropertiesinPackage(WindowsAzureProjectManager waProjManager) throws WindowsAzureInvalidProjectOperationException {
+    private void updateGlobalPropertiesinPackage(WindowsAzureProjectManager waProjManager, Project project) throws WindowsAzureInvalidProjectOperationException {
         String currentSubscriptionID = WizardCacheManager.getCurrentPublishData().getCurrentSubscription().getSubscriptionID();
         waProjManager.setPublishSubscriptionId(currentSubscriptionID);
         waProjManager.setPublishSettingsPath(WizardCacheManager.getPublishSettingsPath(currentSubscriptionID));
@@ -198,7 +197,7 @@ public class DeployAction extends AnAction {
         waProjManager.setPublishStorageAccountName(WizardCacheManager.getCurrentStorageAcount().getName());
         waProjManager.setPublishDeploymentSlot(DeploymentSlot.valueOf(WizardCacheManager.getCurrentDeplyState()));
         waProjManager.setPublishOverwritePreviousDeployment(Boolean.parseBoolean(WizardCacheManager.getUnpublish()));
-        waProjManager.setPublishAccessToken(AzureManagerImpl.getManager().getAccessToken(currentSubscriptionID));
+        waProjManager.setPublishAccessToken(AzureManagerImpl.getManager(project).getAccessToken(currentSubscriptionID));
     }
 
     private class WindowsAzureBuildProjectTask extends Task.Backgroundable {
@@ -288,7 +287,7 @@ public class DeployAction extends AnAction {
             if (storageAccount.getManagementUri() == null || storageAccount.getManagementUri().isEmpty()) {
                 com.microsoft.tooling.msservices.model.storage.StorageAccount storageService =
                         WizardCacheManager.createStorageAccount(storageAccount.getName(), storageAccount.getName(), storageAccount.getLocation(),
-                                storageAccount.getDescription());
+                                storageAccount.getDescription(), myModule.getProject());
             /*
              * Add newly created storage account
 			 * in centralized storage account registry.
@@ -377,7 +376,7 @@ public class DeployAction extends AnAction {
 
         private void doTask() {
             try {
-                DeploymentManager.getInstance().deploy(myModule);
+                new DeploymentManager(myModule.getProject()).deploy(myModule);
             } catch (InterruptedException e) {
             } catch (DeploymentException e) {
                 log(message("error"), e);

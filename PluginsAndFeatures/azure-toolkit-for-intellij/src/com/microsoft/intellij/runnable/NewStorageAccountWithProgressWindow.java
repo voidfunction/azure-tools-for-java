@@ -21,6 +21,7 @@
  */
 package com.microsoft.intellij.runnable;
 
+import com.intellij.openapi.project.Project;
 import com.microsoft.intellij.wizards.WizardCacheManager;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.windowsazure.management.storage.models.StorageAccountCreateParameters;
@@ -38,12 +39,15 @@ public class NewStorageAccountWithProgressWindow extends AccountActionRunnable i
     private String description;
     private StorageAccount storageService;
 
-    public NewStorageAccountWithProgressWindow(PublishData data, String name, String label, String location, String description) {
+    private Project myProject;
+
+    public NewStorageAccountWithProgressWindow(PublishData data, String name, String label, String location, String description, Project myProject) {
         super(data);
         this.name = name;
         this.label = label;
         this.location = location;
         this.description = description;
+        this.myProject = myProject;
     }
 
     void setIndicatorText() {
@@ -57,7 +61,7 @@ public class NewStorageAccountWithProgressWindow extends AccountActionRunnable i
     @Override
     public void doTask() {
         try {
-            storageService = WizardCacheManager.createStorageAccount(name, label, location, description);
+            storageService = WizardCacheManager.createStorageAccount(name, label, location, description, myProject);
         } catch (Exception e) {
             AccountCachingExceptionEvent event = new AccountCachingExceptionEvent(this);
             event.setException(e);

@@ -40,58 +40,62 @@ public abstract class AcquireTokenHandlerBase {
         this.supportADFS = false;
     }
 
-    Future<AuthenticationResult> runAsync() throws Exception {
-        return service.submit(new Callable<AuthenticationResult>() {
-            @Override
-            public AuthenticationResult call() throws Exception {
-                boolean notifiedBeforeAccessCache = false;
-                try {
-                    synchronized (cacheLock) {
-                        preRun();
-                        AuthenticationResult result = null;
-                        long start = System.currentTimeMillis();
-                        if (loadFromCache) {
+    AuthenticationResult run() throws Exception {
+        boolean notifiedBeforeAccessCache = false;
+        try {
+            synchronized (cacheLock) {
+                preRun();
+                AuthenticationResult result = null;
+                long start = System.currentTimeMillis();
+                if (loadFromCache) {
+                    notifyBeforeAccessCache();
+                    notifiedBeforeAccessCache = true;
+                    log.info(String.format("=== Token Acquisition started:\n\tAuthority: %s\n\tResource: %s\n\tClientId: %s\n\tCacheType: %s\n\tAuthentication Target: %s\n\tthread name: %s\n\t",
+                            authenticator.getAuthority(), resource, clientKey.clientId,
+                            (tokenCache != null) ? tokenCache.getClass().getName() + String.format(" (%d items)", tokenCache.getCount()) : "null", tokenSubjectType, Thread.currentThread().getName() ));
+                    result = tokenCache.loadFromCache(authenticator.getAuthority(), resource,
+                            clientKey.clientId, tokenSubjectType, uniqueId, displayableId);
+                    result = validateResult(result);
+                    if (result != null && result.accessToken == null
+                            && result.refreshToken != null) {
+                        result = refreshAccessTokenAsync(result).get();
+                        if (result != null) {
+                            tokenCache.storeToCache(result, authenticator.getAuthority(), resource, clientKey.clientId, tokenSubjectType);
+                        }
+                    }
+                }
+                if (result == null) {
+                    preTokenRequest();
+                    result = acquireTokenAsync().get();
+                    postTokenRequest(result);
+                    if (storeToCache) {
+                        if (!notifiedBeforeAccessCache) {
                             notifyBeforeAccessCache();
                             notifiedBeforeAccessCache = true;
-                            log.info(String.format("=== Token Acquisition started:\n\tAuthority: %s\n\tResource: %s\n\tClientId: %s\n\tCacheType: %s\n\tAuthentication Target: %s\n\tthread name: %s\n\t",
-                                    authenticator.getAuthority(), resource, clientKey.clientId,
-                                    (tokenCache != null) ? tokenCache.getClass().getName() + String.format(" (%d items)", tokenCache.getCount()) : "null", tokenSubjectType, Thread.currentThread().getName() ));
-                            result = tokenCache.loadFromCache(authenticator.getAuthority(), resource,
-                                    clientKey.clientId, tokenSubjectType, uniqueId, displayableId);
-                            result = validateResult(result);
-                            if (result != null && result.accessToken == null
-                                    && result.refreshToken != null) {
-                                result = refreshAccessTokenAsync(result).get();
-                                if (result != null) {
-                                    tokenCache.storeToCache(result, authenticator.getAuthority(), resource, clientKey.clientId, tokenSubjectType);
-                                }
-                            }
                         }
-                        if (result == null) {
-                            preTokenRequest();
-                            result = acquireTokenAsync().get();
-                            postTokenRequest(result);
-                            if (storeToCache) {
-                                if (!notifiedBeforeAccessCache) {
-                                    notifyBeforeAccessCache();
-                                    notifiedBeforeAccessCache = true;
-                                }
-                                tokenCache.storeToCache(result, authenticator.getAuthority(), resource, clientKey.clientId, tokenSubjectType);
-                            }
-                        }
-                        postRunAsync(result);
-                        long end = System.currentTimeMillis();
-                        log.info(String.format("====> %s: %d ms to get access token =========", Thread.currentThread().getName(), end-start));
-                        return result;
+                        tokenCache.storeToCache(result, authenticator.getAuthority(), resource, clientKey.clientId, tokenSubjectType);
                     }
                 }
-                finally {
-                    if (notifiedBeforeAccessCache) {
-                        notifyAfterAccessCache();
-                    }
-                }
+                postRunAsync(result);
+                long end = System.currentTimeMillis();
+                log.info(String.format("====> %s: %d ms to get access token =========", Thread.currentThread().getName(), end-start));
+                return result;
             }
-        });
+        }
+        finally {
+            if (notifiedBeforeAccessCache) {
+                notifyAfterAccessCache();
+            }
+        }
+    }
+    
+    Future<AuthenticationResult> runAsync() throws Exception {
+    	return service.submit(new Callable<AuthenticationResult>() {
+    		@Override
+    		public AuthenticationResult call() throws Exception {
+    			return run();
+    		}
+    	});
     }
 
     protected void preRun() throws Exception {
@@ -102,11 +106,16 @@ public abstract class AcquireTokenHandlerBase {
     protected abstract void preTokenRequest() throws Exception;
     
     protected Future<AuthenticationResult> acquireTokenAsync() throws Exception {
-        Map<String, String> requestParameters = new HashMap<>();
-        requestParameters.put(OAuthParameter.Resource, this.resource);
-        requestParameters.put(OAuthParameter.ClientId, this.clientKey.clientId);
-        addAditionalRequestParameters(requestParameters);
-        return sendHttpMessageAsync(requestParameters);        
+        return Executors.newSingleThreadExecutor().submit(new Callable<AuthenticationResult>() {
+            @Override
+            public AuthenticationResult call() throws Exception {
+            	Map<String, String> requestParameters = new HashMap<>();
+            	requestParameters.put(OAuthParameter.Resource, resource);
+            	requestParameters.put(OAuthParameter.ClientId, clientKey.clientId);
+            	addAditionalRequestParameters(requestParameters);
+            	return sendHttpMessage(requestParameters);  
+            }
+        });
     }
 
     protected void postTokenRequest(AuthenticationResult result) throws Exception {
@@ -140,9 +149,15 @@ public abstract class AcquireTokenHandlerBase {
                 AuthenticationResult newResult = null;
                 if (resource != null) {
                     log.info("Refreshing access token...");
-                    newResult = sendTokenRequestByRefreshTokenAsync(result.refreshToken).get();
-                        authenticator.updateTenantId(result.tenantId);
-                    if (newResult.idToken == null) {
+                    try {
+                    	newResult = sendTokenRequestByRefreshToken(result.refreshToken);
+                   	
+                    } catch (AuthException e) {
+                    	log.info("Error getting token - need to re-loggin.");
+                    	return null;
+                    }
+                    authenticator.updateTenantId(result.tenantId);
+                    if (newResult != null && newResult.idToken == null) {
                         // If Id token is not returned by token endpoint when refresh token is redeemed, we should copy tenant and user information from the cached token.
                         newResult.updateTenantAndUserInfo(result.tenantId, result.idToken, result.userInfo);
                     }
@@ -152,30 +167,25 @@ public abstract class AcquireTokenHandlerBase {
         });
     }
     
-    protected Future<AuthenticationResult> sendTokenRequestByRefreshTokenAsync(String refreshToken) {
+    protected AuthenticationResult sendTokenRequestByRefreshToken(String refreshToken) throws AuthException, Exception {
         Map<String, String> requestParameters = new HashMap<>();
         requestParameters.put(OAuthParameter.Resource, this.resource);
         requestParameters.put(OAuthParameter.ClientId, this.clientKey.clientId);
         requestParameters.put(OAuthParameter.GrantType, OAuthGrantType.RefreshToken);
         requestParameters.put(OAuthParameter.RefreshToken, refreshToken);
-        return sendHttpMessageAsync(requestParameters);
+        return sendHttpMessage(requestParameters);
     }
 
-    private Future<AuthenticationResult> sendHttpMessageAsync(final Map<String, String> requestParameters) {
-        return Executors.newSingleThreadExecutor().submit(new Callable<AuthenticationResult>(){
-            @Override
-            public AuthenticationResult call() throws Exception {
-                String uri = authenticator.tokenUri;
-                TokenResponse tokenResponse = HttpHelper.sendPostRequestAndDeserializeJsonResponseAsync(uri, requestParameters, callState, TokenResponse.class).get();
-                AuthenticationResult result = ResponseUtils.parseTokenResponse(tokenResponse);
-                if (result.refreshToken == null && requestParameters.containsKey(OAuthParameter.RefreshToken)) {
-                    result.refreshToken = requestParameters.get(OAuthParameter.RefreshToken);
-                    log.info("Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
-                }
-                result.isMultipleResourceRefreshToken = (!StringUtils.isNullOrWhiteSpace(result.refreshToken) && !StringUtils.isNullOrWhiteSpace(tokenResponse.resource));
-                return result;
-            }
-        });
+    private AuthenticationResult sendHttpMessage(final Map<String, String> requestParameters) throws AuthException, Exception {
+    	String uri = authenticator.tokenUri;
+    	TokenResponse tokenResponse = HttpHelper.sendPostRequestAndDeserializeJsonResponse(uri, requestParameters, callState, TokenResponse.class);
+    	AuthenticationResult result = ResponseUtils.parseTokenResponse(tokenResponse);
+    	if (result.refreshToken == null && requestParameters.containsKey(OAuthParameter.RefreshToken)) {
+    		result.refreshToken = requestParameters.get(OAuthParameter.RefreshToken);
+    		log.info("Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+    	}
+    	result.isMultipleResourceRefreshToken = (!StringUtils.isNullOrWhiteSpace(result.refreshToken) && !StringUtils.isNullOrWhiteSpace(tokenResponse.resource));
+    	return result;
     }
 
     private void notifyBeforeAccessCache() throws Exception {
@@ -197,7 +207,8 @@ public abstract class AcquireTokenHandlerBase {
 
     private void validateAuthorityType() throws Exception {
         if (!this.supportADFS && this.authenticator.authorityType == AuthorityType.ADFS) {
-            throw new AuthException(AuthError.InvalidAuthorityType + ": " + this.authenticator.getAuthority());
+        	String message = AuthError.InvalidAuthorityType + ": " + this.authenticator.getAuthority();
+            throw new AuthException(message);
         }
     }
 }

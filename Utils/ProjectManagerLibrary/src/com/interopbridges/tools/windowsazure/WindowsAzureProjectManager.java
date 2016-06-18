@@ -504,7 +504,7 @@ public class WindowsAzureProjectManager {
 									.getResourceAsStream(
 											"/arrconfig/ARRAgent.exe.config"));
 					/*
-					 * Temporary fix for Azure SDK 2.9
+					 * Temporary fix for Azure SDK 2.9.1
 					 * Microsoft.WindowsAzure.ServiceRuntime.dll version is still 2.7.0.0
 					ParserXMLUtility.setExpressionValue(saConfigDoc,
 							WindowsAzureConstants.SA_NEW_VERSION_ATTR,
@@ -2258,7 +2258,7 @@ public class WindowsAzureProjectManager {
 				if (versionedSdkDir.isDirectory()) {
 
 					// Since we are iterating in descending manner , below if
-					// will be true only if SDK 2.9 or greater version is not
+					// will be true only if SDK 2.9.1 or greater version is not
 					// installed.
 					// If greater version is installed we always break loop and
 					// return the value.
@@ -2357,7 +2357,7 @@ public class WindowsAzureProjectManager {
 		if (storageEmulatorDir.exists()) {
 			return storageEmulatorDir.toString();
 		} else {
-			throw new IOException("Azure SDK v2.9 or later is not installed.");
+			throw new IOException("Azure SDK v2.9.1 or later is not installed.");
 		}
 	}
 

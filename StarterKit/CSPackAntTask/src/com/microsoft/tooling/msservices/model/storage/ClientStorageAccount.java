@@ -25,6 +25,7 @@ import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.model.ServiceTreeItem;
 
 public class ClientStorageAccount implements ServiceTreeItem {
+    private static final String DEFAULT_PROTOCOL = "https";
     public static final String DEFAULT_ENDPOINTS_PROTOCOL_KEY = "DefaultEndpointsProtocol";
     public static final String ACCOUNT_NAME_KEY = "AccountName";
     public static final String ACCOUNT_KEY_KEY = "AccountKey";
@@ -39,6 +40,7 @@ public class ClientStorageAccount implements ServiceTreeItem {
             TABLE_ENDPOINT_KEY + "=%s;" +
             ACCOUNT_NAME_KEY + "=%s;" +
             ACCOUNT_KEY_KEY + "=%s";
+    protected String subscriptionId;
 
     private String name;
     private String primaryKey = "";
@@ -51,6 +53,7 @@ public class ClientStorageAccount implements ServiceTreeItem {
 
     public ClientStorageAccount(@NotNull String name) {
         this.name = name;
+        this.protocol = DEFAULT_PROTOCOL;
     }
 
     @Override
@@ -139,5 +142,10 @@ public class ClientStorageAccount implements ServiceTreeItem {
     @Override
     public String toString() {
         return name + (loading ? " (loading...)" : "");
+    }
+
+    @NotNull
+    public String getSubscriptionId() {
+        return subscriptionId;
     }
 }

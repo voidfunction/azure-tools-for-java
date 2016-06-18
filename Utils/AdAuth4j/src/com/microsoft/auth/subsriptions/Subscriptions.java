@@ -1,19 +1,14 @@
 package com.microsoft.auth.subsriptions;
 
-import java.util.ArrayList;
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement( name="Subscriptions", namespace = "http://schemas.microsoft.com/windowsazure" )
-//@XmlType
 public class Subscriptions {
-   
-   @XmlElement(name="Subscription")
-   private List<Subscription> subscriptions = new ArrayList<Subscription>();
-   
-   
+
+   @JsonProperty("value")
+   private List<Subscription> subscriptions;
+
    public List<Subscription> getSubscriptions() {
       return subscriptions;
    }

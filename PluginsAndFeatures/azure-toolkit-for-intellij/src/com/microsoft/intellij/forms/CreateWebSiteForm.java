@@ -170,7 +170,7 @@ public class CreateWebSiteForm extends DialogWrapper {
     @Override
     protected void doOKAction() {
         boolean isOK = true;
-        AzureManager manager = AzureManagerImpl.getManager();
+        AzureManager manager = AzureManagerImpl.getManager(project);
         mainPanel.getRootPane().getParent().setCursor(new Cursor(Cursor.WAIT_CURSOR));
 
         try {
@@ -224,24 +224,24 @@ public class CreateWebSiteForm extends DialogWrapper {
     }
 
     private void fillSubscriptions() {
-        try {
-            List<Subscription> subscriptionList = AzureManagerImpl.getManager().getSubscriptionList();
+//        try {
+            List<Subscription> subscriptionList = AzureManagerImpl.getManager(project).getSubscriptionList();
             DefaultComboBoxModel subscriptionComboModel = new DefaultComboBoxModel(subscriptionList.toArray());
             subscriptionComboModel.setSelectedItem(null);
             subscriptionComboBox.setModel(subscriptionComboModel);
             if (!subscriptionList.isEmpty()) {
                 subscriptionComboBox.setSelectedIndex(0);
             }
-        } catch (AzureCmdException e) {
-            String msg = "An error occurred while trying to load the subscriptions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
-        }
+//        } catch (AzureCmdException e) {
+//            String msg = "An error occurred while trying to load the subscriptions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+//            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
+//        }
     }
 
     private void fillResourceGroups(String valToSet) {
         try {
             if (subscription != null) {
-                final List<String> groupList = AzureManagerImpl.getManager().getResourceGroupNames(subscription.getId());
+                final List<String> groupList = AzureManagerImpl.getManager(project).getResourceGroupNames(subscription.getId());
                 DefaultComboBoxModel model = new DefaultComboBoxModel(groupList.toArray());
                 model.insertElementAt(createResGrpLabel, 0);
                 model.setSelectedItem(null);
@@ -301,7 +301,7 @@ public class CreateWebSiteForm extends DialogWrapper {
                 webHostingPlanComboBox.addItem(createWebHostingPlanLabel);
 
                 // get web hosting service plans from Azure
-                List<WebHostingPlanCache> webHostingPlans = AzureManagerImpl.getManager().getWebHostingPlans(subscription.getId(), resourceGroup);
+                List<WebHostingPlanCache> webHostingPlans = AzureManagerImpl.getManager(project).getWebHostingPlans(subscription.getId(), resourceGroup);
                 if (webHostingPlans.size() > 0) {
                     // sort the list
                     Collections.sort(webHostingPlans, new Comparator<WebHostingPlanCache>() {

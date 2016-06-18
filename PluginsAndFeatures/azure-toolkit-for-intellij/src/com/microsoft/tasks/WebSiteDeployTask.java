@@ -31,14 +31,12 @@ import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
 import com.microsoft.intellij.components.ServerExplorerToolWindowFactory;
 import com.microsoft.intellij.deploy.DeploymentManager;
+import com.microsoft.intellij.util.WAHelper;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
-import com.microsoftopentechnologies.azurecommons.deploy.model.DeployDescriptor;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
@@ -69,14 +67,14 @@ public class WebSiteDeployTask extends Task.Backgroundable {
         };
         AzurePlugin.addDeploymentEventListener(deployListnr);
         AzurePlugin.depEveList.add(deployListnr);
-        DeploymentManager.getInstance().deployToWebApps(webSite, url);
+        new DeploymentManager(project).deployToWebApps(webSite, url);
 
         new Thread("Warm up the target site") {
             public void run() {
                 try {
 
                     LOG.info("To warm the site up - implicitly trying to connect it");
-                    sendGet(url);
+                    WAHelper.sendGet(url);
                 }
                 catch (Exception ex) {
                     LOG.info(ex.getMessage(), ex);
@@ -94,16 +92,5 @@ public class WebSiteDeployTask extends Task.Backgroundable {
 
             }
         });
-    }
-
-    // HTTP GET request
-    private void sendGet(String sitePath) throws Exception {
-        URL url = new URL(sitePath);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("User-Agent", "AzureToolkit for Intellij");
-        int responseCode = con.getResponseCode();
-        LOG.info("\nSending 'GET' request to URL : " + sitePath + " ...");
-        LOG.info("Response Code : " + responseCode);
     }
 }

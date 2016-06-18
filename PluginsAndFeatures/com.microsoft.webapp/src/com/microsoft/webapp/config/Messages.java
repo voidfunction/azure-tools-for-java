@@ -70,6 +70,20 @@ public final class Messages extends NLS {
 	public static String maxPlanMsg;
 	public static String webappKey;
 	public static String webappExpMsg;
+	public static String command;
+	public static String portMsg;
+	public static String dlgImgPathSmall;
+	public static String selProj;
+	public static String lnkWebApp;
+	public static String remoteDebug;
+	public static String debugReady;
+	public static String debugType;
+	public static String prepareDebug;
+	public static String title;
+	public static String noDebugApp;
+	public static String appComboLbl;
+	public static String commandSh;
+	public static String commandMac;
 	
 	static {
 		// initialize resource bundle

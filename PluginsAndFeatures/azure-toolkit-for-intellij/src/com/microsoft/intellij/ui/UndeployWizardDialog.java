@@ -155,7 +155,7 @@ public class UndeployWizardDialog extends DialogWrapper {
             CloudService hostedServiceDetailed;
             FetchDeploymentsForHostedServiceWithProgressWindow progress =
                     new FetchDeploymentsForHostedServiceWithProgressWindow(null,
-                            ((ElementWrapper<CloudService>) hostedServiceCombo.getSelectedItem()).getValue());
+                            ((ElementWrapper<CloudService>) hostedServiceCombo.getSelectedItem()).getValue(), myProject);
             ProgressManager.getInstance().runProcessWithProgressSynchronously(progress, "Progress Information", true, myProject);
 
             hostedServiceDetailed = progress.getHostedServiceDetailed();

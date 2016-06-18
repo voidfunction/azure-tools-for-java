@@ -34,6 +34,7 @@ import com.intellij.openapi.startup.StartupManager;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.util.PlatformUtils;
 import com.intellij.util.containers.HashSet;
+import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
@@ -49,7 +50,6 @@ import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.FileUtil;
-import com.microsoftopentechnologies.azurecommons.xmlhandling.ParseXMLUtilMethods;
 import com.microsoftopentechnologies.windowsazure.tools.cspack.Utils;
 
 import javax.swing.event.EventListenerList;
@@ -72,7 +72,6 @@ import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class AzurePlugin extends AbstractProjectComponent {
     private static final Logger LOG = Logger.getInstance("#com.microsoft.intellij.AzurePlugin");
-    public static final String PLUGIN_ID = "azure-toolkit-for-intellij";
     public static final String COMPONENTSETS_VERSION = "2.9.1"; // todo: temporary fix!
     public static final String PLUGIN_VERSION = "1.4";
     private static final String PREFERENCESETS_VERSION = "2.9.1";
@@ -91,7 +90,7 @@ public class AzurePlugin extends AbstractProjectComponent {
 
     public static File cmpntFile = new File(WAHelper.getTemplateFile(message("cmpntFileName")));
     public static String prefFilePath = WAHelper.getTemplateFile(message("prefFileName"));
-    public static String pluginFolder = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, AzurePlugin.PLUGIN_ID);
+    public static String pluginFolder = PluginUtil.getPluginRootDirectory();
 
     private static final EventListenerList DEPLOYMENT_EVENT_LISTENERS = new EventListenerList();
     public static List<DeploymentEventListener> depEveList = new ArrayList<DeploymentEventListener>();
@@ -152,10 +151,10 @@ public class AzurePlugin extends AbstractProjectComponent {
                     if (prefValue == null || prefValue.isEmpty()) {
                         setValues(dataFile);
                     } else if (instID == null || instID.isEmpty()) {
-                        Document doc = ParseXMLUtilMethods.parseFile(dataFile);
+                        Document doc = ParserXMLUtility.parseXMLFile(dataFile);
                         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
                         DataOperations.updatePropertyValue(doc, message("instID"), dateFormat.format(new Date()));
-                        ParseXMLUtilMethods.saveXMLDocument(dataFile, doc);
+                        ParserXMLUtility.saveXMLFile(dataFile, doc);
                     }
                 } else {
                     // proceed with setValues method. Case of new plugin installation
@@ -200,7 +199,7 @@ public class AzurePlugin extends AbstractProjectComponent {
     }
 
     private void setValues(final String dataFile) throws Exception {
-        final Document doc = ParseXMLUtilMethods.parseFile(dataFile);
+        final Document doc = ParserXMLUtility.parseXMLFile(dataFile);
         ApplicationManager.getApplication().invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -211,7 +210,7 @@ public class AzurePlugin extends AbstractProjectComponent {
                 DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
                 DataOperations.updatePropertyValue(doc, message("instID"), dateFormat.format(new Date()));
                 try {
-                    ParseXMLUtilMethods.saveXMLDocument(dataFile, doc);
+                    ParserXMLUtility.saveXMLFile(dataFile, doc);
                 } catch (Exception ex) {
                     LOG.error(message("error"), ex);
                 }
@@ -272,20 +271,18 @@ public class AzurePlugin extends AbstractProjectComponent {
     }
 
     /**
-     * Copies MS Open Tech Tools for Azure
+     * Copies Azure Toolkit for IntelliJ
      * related files in azure-toolkit-for-intellij plugin folder at startup.
      */
     private void copyPluginComponents() {
         try {
-            String pluginInstLoc = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, PLUGIN_ID);
-
-            String cmpntFile = String.format("%s%s%s", pluginInstLoc,
+            String cmpntFile = String.format("%s%s%s", pluginFolder,
                     File.separator, AzureBundle.message("cmpntFileName"));
-            String starterKit = String.format("%s%s%s", pluginInstLoc,
+            String starterKit = String.format("%s%s%s", pluginFolder,
                     File.separator, AzureBundle.message("starterKitFileName"));
-            String enctFile = String.format("%s%s%s", pluginInstLoc,
+            String enctFile = String.format("%s%s%s", pluginFolder,
                     File.separator, message("encFileName"));
-            String prefFile = String.format("%s%s%s", pluginInstLoc,
+            String prefFile = String.format("%s%s%s", pluginFolder,
                     File.separator, AzureBundle.message("prefFileName"));
 
             // upgrade component sets and preference sets
@@ -303,12 +300,29 @@ public class AzurePlugin extends AbstractProjectComponent {
             copyResourceFile(message("starterKitEntry"), starterKit);
             copyResourceFile(message("encFileName"), enctFile);
             for (AzureLibrary azureLibrary : AzureLibrary.LIBRARIES) {
-                if (!new File(pluginInstLoc + File.separator + azureLibrary.getLocation()).exists()) {
-                    for (String entryName : Utils.getJarEntries(pluginInstLoc + File.separator + "lib" + File.separator + PLUGIN_ID + ".jar", azureLibrary.getLocation())) {
-                        new File(pluginInstLoc + File.separator + entryName).getParentFile().mkdirs();
-                        copyResourceFile(entryName, pluginInstLoc + File.separator + entryName);
+                if (!new File(pluginFolder + File.separator + azureLibrary.getLocation()).exists()) {
+                    for (String entryName : Utils.getJarEntries(pluginFolder + File.separator + "lib" + File.separator + PluginUtil.PLUGIN_NAME + ".jar", azureLibrary.getLocation())) {
+                        new File(pluginFolder + File.separator + entryName).getParentFile().mkdirs();
+                        copyResourceFile(entryName, pluginFolder + File.separator + entryName);
                     }
                 }
+            }
+            // copy remote debugging files
+            File remoteDebugFolder = new File(WAHelper.getTemplateFile("remotedebug"));
+            if (!remoteDebugFolder.exists()) {
+                remoteDebugFolder.mkdir();
+            }
+            String debugBat = WAHelper.getDebugFile("DebugSession.bat");
+            if (!new File(debugBat).exists()) {
+                copyResourceFile(message("debugBat"), debugBat);
+            }
+            String debugJar = WAHelper.getDebugFile("azure-websites-remote-debugging.jar");
+            if (!new File(debugJar).exists()) {
+                copyResourceFile(message("debugJar"), debugJar);
+            }
+            String debugConfig = WAHelper.getDebugFile("web.config");
+            if (!new File(debugConfig).exists()) {
+                copyResourceFile(message("debugConfig"), debugConfig);
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -414,7 +428,7 @@ public class AzurePlugin extends AbstractProjectComponent {
         depEveList.clear();
     }
 
-    public static void log(String message, Exception ex) {
+    public static void log(String message, Throwable ex) {
         LOG.error(message, ex);
         LOG.info(message);
     }

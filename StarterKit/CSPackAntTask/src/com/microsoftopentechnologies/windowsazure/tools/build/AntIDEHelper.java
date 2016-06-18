@@ -20,6 +20,7 @@
 package com.microsoftopentechnologies.windowsazure.tools.build;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.microsoft.auth.IWebUi;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
@@ -60,6 +61,32 @@ public class AntIDEHelper implements IDEHelper {
     @Override
     public CancellableTask.CancellableTaskHandle runInBackground(@NotNull ProjectDescriptor projectDescriptor, @NotNull String name, @Nullable String indicatorText, @NotNull CancellableTask cancellableTask) throws AzureCmdException {
         return null;
+    }
+
+    public void setApplicationProperty(@NotNull String name, @NotNull String value) {
+    }
+
+    public void unsetApplicationProperty(@NotNull String name) {
+    }
+
+    @Nullable
+    public String getApplicationProperty(@NotNull String name) {
+        return null;
+    }
+
+    public void setApplicationProperties(@NotNull String name, @NotNull String[] value) {
+    }
+
+    public void unsetApplicatonProperties(@NotNull String name) {
+    }
+
+    @Nullable
+    public String[] getApplicationProperties(@NotNull String name) {
+        return new String[0];
+    }
+
+    public boolean isApplicationPropertySet(@NotNull String name) {
+        return false;
     }
 
     @Override
@@ -128,4 +155,10 @@ public class AntIDEHelper implements IDEHelper {
     public Object getCurrentProject() {
         return AzureManagerImpl.DEFAULT_PROJECT;
     }
+
+	@Override
+	public IWebUi getWebUi() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

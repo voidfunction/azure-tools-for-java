@@ -352,7 +352,9 @@ public class TokenCache {
                     log.info("A Multi Resource Refresh Token for a different resource was found which can be used");
                 }
             } else {
-                throw new AuthException(AuthError.MultipleTokensMatched);
+            	String message = AuthError.MultipleTokensMatched;
+            	log.error(message);
+                throw new AuthException(message);
             }
             return returnValue;
         }

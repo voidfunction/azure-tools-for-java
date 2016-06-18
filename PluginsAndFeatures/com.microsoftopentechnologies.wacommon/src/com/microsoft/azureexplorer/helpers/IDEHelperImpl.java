@@ -19,29 +19,22 @@
  */
 package com.microsoft.azureexplorer.helpers;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.IDEHelper;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
-import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
-import com.microsoft.tooling.msservices.model.storage.*;
-import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoftopentechnologies.wacommon.adauth.BrowserLauncherEclipse;
-import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
+import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.microsoft.tooling.msservices.helpers.IDEHelper;
+import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.Nullable;
+import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
+import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
 
 public class IDEHelperImpl implements IDEHelper {
 
@@ -188,11 +181,49 @@ public class IDEHelperImpl implements IDEHelper {
 		return null;
 	}
 
-    public BrowserLauncher getBrowserLauncher() {
-        return new BrowserLauncherEclipse(null);
-    }
-
     public Object getCurrentProject() {
         return AzureManagerImpl.DEFAULT_PROJECT;
+    }
+
+    @Override
+    public void setApplicationProperty(@NotNull String name, @NotNull String value) {
+    	setProperty(name, value);
+    }
+
+    @Override
+    public void unsetApplicationProperty(@NotNull String name) {
+    	unsetProperty(name);
+    }
+
+    @Override
+    @Nullable
+    public String getApplicationProperty(@NotNull String name) {
+    	return getProperty(name);
+    }
+
+    @Override
+    public void setApplicationProperties(@NotNull String name, @NotNull String[] value) {
+    	setProperties(name, value);
+    }
+
+    @Override
+    public void unsetApplicatonProperties(@NotNull String name) {
+    	unsetProperty(name);
+    }
+
+    @Override
+    @Nullable
+    public String[] getApplicationProperties(@NotNull String name) {
+    	return getProperties(name);
+    }
+
+    @Override
+    public boolean isApplicationPropertySet(@NotNull String name) {
+    	return isPropertySet(name);
+    }
+    
+    @Override
+    public  com.microsoft.auth.IWebUi getWebUi() {
+    	return new com.microsoftopentechnologies.wacommon.adauth.SwtBrowserWIndow();
     }
 }

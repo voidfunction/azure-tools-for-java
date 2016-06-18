@@ -1,7 +1,11 @@
 package com.microsoft.auth;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.util.List;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 class IdToken {
     @JsonProperty
     String aud;
@@ -74,4 +78,7 @@ class IdToken {
 
     @JsonProperty(IdTokenClaim.IdentityProvider)
     String identityProvider;
+
+    @JsonProperty
+    List<String> wids;
 }

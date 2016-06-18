@@ -53,7 +53,7 @@ public class UploadBlobFileForm extends DialogWrapper {
 
         setModal(true);
         setTitle("Upload Blob File");
-
+        validateForm();
         blobFolderLink.addMouseListener(new LinkListener(linkBlob));
         nameTextField.setEditable(false);
 

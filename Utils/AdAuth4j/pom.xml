@@ -34,5 +34,23 @@
         <artifactId>azure-mgmt-resources</artifactId>
         <version>0.9.3</version>
       </dependency>
+      	<!-- http://mvnrepository.com/artifact/com.microsoft.azure/azure-storage -->
+		<dependency>
+		    <groupId>com.microsoft.azure</groupId>
+		    <artifactId>azure-storage</artifactId>
+		    <version>4.2.0</version>
+		</dependency>
+		<!-- http://mvnrepository.com/artifact/com.microsoft.azure/azure-mgmt-storage -->
+		<dependency>
+		    <groupId>com.microsoft.azure</groupId>
+		    <artifactId>azure-mgmt-storage</artifactId>
+		    <version>0.9.3</version>
+		</dependency>
+		<!-- http://mvnrepository.com/artifact/com.microsoft.azure/azure-svc-mgmt-storage -->
+		<dependency>
+		    <groupId>com.microsoft.azure</groupId>
+		    <artifactId>azure-svc-mgmt-storage</artifactId>
+		    <version>0.9.3</version>
+		</dependency>
     </dependencies>
 </project>

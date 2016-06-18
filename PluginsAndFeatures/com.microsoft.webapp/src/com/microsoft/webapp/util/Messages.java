@@ -31,6 +31,13 @@ public final class Messages extends NLS {
 	public static String propWebProj;
 	public static String propErr;
 	public static String resCLJobName;
+	public static String webAppPluginID;
+	public static String debugBatName;
+	public static String debugBatEntry;
+	public static String debugJarName;
+	public static String debugJarEntry;
+	public static String configName;
+	public static String configEntry;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

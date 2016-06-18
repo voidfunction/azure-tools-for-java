@@ -34,19 +34,14 @@ import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.WizardCacheManager;
-import com.microsoft.tooling.msservices.helpers.IDEHelper;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.wacommon.utils.WACommonException;
-import com.microsoft.windowsazure.Configuration;
+import com.wacommon.utils.WACommonException;
 import com.microsoft.windowsazure.core.OperationStatus;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.compute.models.*;
 import com.microsoft.windowsazure.management.compute.models.DeploymentSlot;
-import com.microsoft.windowsazure.management.storage.models.StorageAccountCreateParameters;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentManagerUtilMethods;
 import com.microsoftopentechnologies.azurecommons.deploy.model.CertificateUpload;
@@ -73,15 +68,10 @@ import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 public final class DeploymentManager {
 
     private final HashMap<String, DeployDescriptor> deployments = new HashMap<String, DeployDescriptor>();
+    private Project myProject;
 
-    private static final DeploymentManager DEFAULT_MANAGER = new DeploymentManager();
-
-    public static DeploymentManager getInstance() {
-        return DEFAULT_MANAGER;
-    }
-
-    private DeploymentManager() {
-
+    public DeploymentManager(Project project) {
+        this.myProject = project;
     }
 
     public void addDeployment(String name, DeployDescriptor deployment) {
@@ -99,7 +89,7 @@ public final class DeploymentManager {
     public void deploy(Module selectedModule) throws InterruptedException, DeploymentException {
 
         DeployDescriptor deploymentDesc = WizardCacheManager.collectConfiguration();
-
+        deploymentDesc.setProject(selectedModule.getProject());
         String deployState = deploymentDesc.getDeployState();
         Date startDate = new Date();
         try {
@@ -162,7 +152,7 @@ public final class DeploymentManager {
                 notifyProgress(deploymentDesc.getDeploymentId(), startDate, null, conditionalProgress, OperationStatus.InProgress, message("deplConfigRdp"));
 
                 DeploymentManagerUtilMethods.configureRemoteDesktop(deploymentDesc, WizardCacheManager.getCurrentDeployConfigFile(),
-                        String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, AzurePlugin.PLUGIN_ID));
+                        PluginUtil.getPluginRootDirectory());
             } else {
                 notifyProgress(deploymentDesc.getDeploymentId(), startDate, null, conditionalProgress, OperationStatus.InProgress, message("deplConfigRdp"));
             }
@@ -196,7 +186,7 @@ public final class DeploymentManager {
                     deployState,
                     dateFormat.format(new Date()));
             OperationStatusResponse operationStatusResponse = DeploymentManagerUtilMethods.createDeployment(deploymentDesc, cspkgUrl, deploymentName);
-            OperationStatus status = AzureManagerImpl.getManager().waitForStatus(deploymentDesc.getSubscriptionId(), operationStatusResponse).getStatus();
+            OperationStatus status = AzureManagerImpl.getManager(myProject).waitForStatus(deploymentDesc.getSubscriptionId(), operationStatusResponse).getStatus();
 
             DeploymentManagerUtilMethods.deletePackage(WizardCacheManager.createStorageServiceHelper(),
                     message("eclipseDeployContainer").toLowerCase(),
@@ -238,7 +228,7 @@ public final class DeploymentManager {
             AppInsightsCustomEvent.create(message("successEvent"), "");
             // RDP prompt will come only on windows
             if (deploymentDesc.isStartRdpOnDeploy() && AzurePlugin.IS_WINDOWS) {
-                String pluginFolder = String.format("%s%s%s", PathManager.getPluginsPath(), File.separator, AzurePlugin.PLUGIN_ID);
+                String pluginFolder = PluginUtil.getPluginRootDirectory();
                 WindowsAzureRestUtils.getInstance().launchRDP(deployment, deploymentDesc.getRemoteDesktopDescriptor().getUserName(), pluginFolder);
             }
         } catch (Throwable t) {
@@ -266,7 +256,7 @@ public final class DeploymentManager {
     private void createStorageAccount(final String storageServiceName, final String label, final String location, final String description)
             throws Exception {
         com.microsoft.tooling.msservices.model.storage.StorageAccount storageService =
-                WizardCacheManager.createStorageAccount(storageServiceName, label, location, description);
+                WizardCacheManager.createStorageAccount(storageServiceName, label, location, description, myProject);
         /*
 		 * Add newly created storage account
 		 * in centralized storage account registry.
@@ -275,7 +265,7 @@ public final class DeploymentManager {
                 storageService.getPrimaryKey(),
                 storageService.getBlobsUri());
         StorageAccountRegistry.addAccount(storageAccount);
-        AzureSettings.getSafeInstance(PluginUtil.getSelectedProject()).saveStorage();
+        AzureSettings.getSafeInstance(myProject).saveStorage();
     }
 
     private void createHostedService(final String hostedServiceName, final String label, final String location, final String description)
@@ -286,7 +276,7 @@ public final class DeploymentManager {
 //        createHostedService.setLocation(location);
 //        createHostedService.setDescription(description);
 
-        WizardCacheManager.createHostedService(hostedServiceName, label, location, description);
+        WizardCacheManager.createHostedService(hostedServiceName, label, location, description, myProject);
     }
 
     private void checkContainerExistance() throws Exception {
@@ -308,7 +298,7 @@ public final class DeploymentManager {
         }
         do {
             Thread.sleep(5000);
-            deployment = AzureManagerImpl.getManager().getDeploymentBySlot(subscriptionId, serviceName, deploymentSlot);
+            deployment = AzureManagerImpl.getManager(myProject).getDeploymentBySlot(subscriptionId, serviceName, deploymentSlot);
 
             for (RoleInstance instance : deployment.getRoleInstances()) {
                 status = instance.getInstanceStatus();
@@ -331,7 +321,7 @@ public final class DeploymentManager {
         DeploymentStatus deploymentStatus = null;
         do {
             Thread.sleep(10000);
-            deployment = AzureManagerImpl.getManager().getDeploymentBySlot(subscriptionId, serviceName, deploymentSlot);
+            deployment = AzureManagerImpl.getManager(myProject).getDeploymentBySlot(subscriptionId, serviceName, deploymentSlot);
             deploymentStatus = deployment.getStatus();
         } while (deploymentStatus != null
                 && (deploymentStatus.equals(DeploymentStatus.RunningTransitioning)
@@ -439,8 +429,8 @@ public final class DeploymentManager {
                 //            );
                 //			waitForStatus(configuration, service, requestId);
                 notifyProgress(deplymentName, startDate, null, progressArr[0], OperationStatus.InProgress, message("undeployProgressMsg"), deplymentName);
-                OperationStatusResponse operationStatusResponse = AzureManagerImpl.getManager().deleteDeployment(subscriptionId, serviceName, deplymentName, true);
-                AzureManagerImpl.getManager().waitForStatus(subscriptionId, operationStatusResponse);
+                OperationStatusResponse operationStatusResponse = AzureManagerImpl.getManager(myProject).deleteDeployment(subscriptionId, serviceName, deplymentName, true);
+                AzureManagerImpl.getManager(myProject).waitForStatus(subscriptionId, operationStatusResponse);
                 notifyProgress(deplymentName, startDate, null, progressArr[1], OperationStatus.Succeeded, message("undeployCompletedMsg"), serviceName);
                 successfull = true;
             } catch (Exception e) {

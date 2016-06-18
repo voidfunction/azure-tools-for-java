@@ -20,8 +20,6 @@
 package com.microsoft.webapp.config;
 
 import java.io.File;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -76,6 +74,7 @@ import com.microsoft.webapp.util.WebAppUtils;
 import com.microsoft.windowsazure.core.OperationStatus;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
+import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
@@ -102,7 +101,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText(Messages.webAppTtl);
-		Image image = WebAppUtils.getImage();
+		Image image = WebAppUtils.getImage(Messages.dlgImgPath);
 		if (image != null) {
 			setTitleImage(image);
 		}
@@ -293,21 +292,16 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 	}
 
 	private void createSubscriptionDialog(boolean invokeSignIn) {
-		try {
-			ManageSubscriptionDialog dialog = new ManageSubscriptionDialog(getShell(), false, invokeSignIn);
-			dialog.create();
-			dialog.open();
-			subList = AzureManagerImpl.getManager().getSubscriptionList();
-			if (subList.size() == 0) {
-				setErrorMessage(Messages.noSubErrMsg);
-				list.setItems(new String[]{""});
-				selectedWebSite = null;
-			} else {
-				fillList(PreferenceUtil.loadPreference(String.format(Messages.webappKey, PluginUtil.getSelectedProject().getName())));
-			}
-		} catch(AzureCmdException ex) {
-			String msg = Messages.loadSubErrMsg + "\n" + String.format(Messages.webappExpMsg, ex.getMessage());
-			PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, msg, ex);
+		ManageSubscriptionDialog dialog = new ManageSubscriptionDialog(getShell(), false, invokeSignIn);
+		dialog.create();
+		dialog.open();
+		subList = AzureManagerImpl.getManager().getSubscriptionList();
+		if (subList.size() == 0) {
+			setErrorMessage(Messages.noSubErrMsg);
+			list.setItems(new String[]{""});
+			selectedWebSite = null;
+		} else {
+			fillList(PreferenceUtil.loadPreference(String.format(Messages.webappKey, PluginUtil.getSelectedProject().getName())));
 		}
 	}
 
@@ -320,31 +314,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 			}
 		});
 		// prepare list to display
-		listToDisplay = new ArrayList<String>();
-		for (WebSite webSite : webSiteList) {
-			WebSiteConfiguration webSiteConfiguration = webSiteConfigMap.get(webSite);
-			StringBuilder builder = new StringBuilder(webSite.getName());
-			if (!webSiteConfiguration.getJavaVersion().isEmpty()) {
-				builder.append(" (JRE ");
-				builder.append(webSiteConfiguration.getJavaVersion());
-				if (!webSiteConfiguration.getJavaContainer().isEmpty()) {
-					builder.append("; ");
-					builder.append(webSiteConfiguration.getJavaContainer());
-					builder.append(" ");
-					builder.append(webSiteConfiguration.getJavaContainerVersion());
-				}
-				builder.append(")");
-			} else {
-				builder.append(" (.NET ");
-				builder.append(webSiteConfiguration.getNetFrameworkVersion());
-				if (!webSiteConfiguration.getPhpVersion().isEmpty()) {
-					builder.append("; PHP ");
-					builder.append(webSiteConfiguration.getPhpVersion());
-				}
-				builder.append(")");
-			}
-			listToDisplay.add(builder.toString());
-		}
+		listToDisplay = WAEclipseHelperMethods.prepareListToDisplay(webSiteConfigMap, webSiteList);
 		list.setItems(listToDisplay.toArray(new String[listToDisplay.size()]));
 	}
 
@@ -643,7 +613,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 						new Thread("Warm up the target site") {
 							public void run() {
 								try {
-									sendGet(sitePath);
+									WebAppUtils.sendGet(sitePath);
 								}
 								catch (Exception ex) {
 									Activator.getDefault().log(ex.getMessage(), ex);
@@ -677,15 +647,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 			monitor.done();
 			super.done(Status.OK_STATUS);
 			return Status.OK_STATUS;
-		}
-		
-		// HTTP GET request
-		private void sendGet(String sitePath) throws Exception {
-			URL url = new URL(sitePath);
-			HttpURLConnection con = (HttpURLConnection) url.openConnection();
-			con.setRequestMethod("GET");
-			con.setRequestProperty("User-Agent", "AzureToolkit for Eclipse");
-			con.getResponseCode();
 		}
 	}
 }

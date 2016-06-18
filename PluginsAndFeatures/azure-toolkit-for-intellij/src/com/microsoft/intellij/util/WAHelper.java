@@ -28,6 +28,7 @@ import com.interopbridges.tools.windowsazure.WindowsAzureRole;
 import com.microsoft.intellij.AzurePlugin;
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
 
@@ -39,7 +40,11 @@ public class WAHelper {
      * @return resource filename in plugin's directory
      */
     public static String getTemplateFile(String fileName) {
-        return String.format("%s%s%s%s%s", PathManager.getPluginsPath(), File.separator, AzurePlugin.PLUGIN_ID, File.separator, fileName);
+        return PluginHelper.getTemplateFile(fileName);
+    }
+
+    public static String getDebugFile(String fileName) {
+        return String.format("%s%s%s%s%s", PluginUtil.getPluginRootDirectory(), File.separator, "remotedebug", File.separator, fileName);
     }
 
     /**
@@ -162,5 +167,14 @@ public class WAHelper {
             log(e.getMessage());
         }
         return windowsAzureRole;
+    }
+
+    // HTTP GET request
+    public static void sendGet(String sitePath) throws Exception {
+        URL url = new URL(sitePath);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
+        con.setRequestProperty("User-Agent", "AzureToolkit for Intellij");
+        int responseCode = con.getResponseCode();
     }
 }

@@ -56,6 +56,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 import com.gigaspaces.azure.util.PreferenceWebAppUtil;
+import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -133,7 +134,9 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
 
         private void initialize() {
             azureServiceModule = new AzureServiceModule(null, true);
-
+            HDInsightRootModuleImpl hdInsightRootModule =  new HDInsightRootModuleImpl(azureServiceModule);
+            azureServiceModule.setHdInsightModule(hdInsightRootModule);
+            
             invisibleRoot = new TreeNode(null);
             invisibleRoot.add(createTreeNode(azureServiceModule));
 

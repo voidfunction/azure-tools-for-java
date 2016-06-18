@@ -26,7 +26,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.deploy.DeploymentManager;
-import com.microsoft.wacommon.utils.WACommonException;
+import com.wacommon.utils.WACommonException;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
 import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
@@ -62,7 +62,7 @@ public class WindowsAzureUndeploymentTask extends Task.Backgroundable {
         AzurePlugin.depEveList.add(undeployListnr);
 
         try {
-            DeploymentManager.getInstance().undeploy(serviceName, deploymentName, deploymentState);
+            new DeploymentManager(myProject).undeploy(serviceName, deploymentName, deploymentState);
         } catch (RestAPIException e) {
             log(message("error"), e);
         } catch (InterruptedException e) {

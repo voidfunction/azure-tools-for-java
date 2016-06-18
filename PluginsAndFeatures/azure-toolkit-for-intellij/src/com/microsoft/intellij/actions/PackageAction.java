@@ -37,6 +37,7 @@ import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.ui.AzureWizardDialog;
 import com.microsoft.intellij.ui.AzureWizardModel;
 import com.microsoft.intellij.ui.messages.AzureBundle;
+import com.microsoft.intellij.util.PluginHelper;
 import com.microsoft.intellij.util.PluginUtil;
 
 import java.awt.*;
@@ -95,7 +96,7 @@ public class PackageAction extends AnAction {
     private WindowsAzureProjectManager createWaProjMgr() {
         WindowsAzureProjectManager waProjMgr = null;
         try {
-            String zipFile = String.format("%s%s%s%s%s", PathManager.getPluginsPath(), File.separator, AzurePlugin.PLUGIN_ID, File.separator,
+            String zipFile = String.format("%s%s%s", PluginUtil.getPluginRootDirectory(), File.separator,
                     message("starterKitFileName"));
 
             //Extract the WAStarterKitForJava.zip to temp dir
@@ -103,7 +104,7 @@ public class PackageAction extends AnAction {
             //	By deafult - disabling remote access
             //  when creating new project
             waProjMgr.setRemoteAccessAllRoles(false);
-            waProjMgr.setClassPathInPackage("azure.lib.dir", PluginUtil.getAzureLibLocation());
+            waProjMgr.setClassPathInPackage("azure.lib.dir", PluginHelper.getAzureLibLocation());
             WindowsAzureRole waRole = waProjMgr.getRoles().get(0);
             // remove http endpoint
             waRole.getEndpoint(AzureBundle.message("httpEp")).delete();

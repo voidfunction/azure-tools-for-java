@@ -1,7 +1,9 @@
 package com.microsoft.auth;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class TokenResponse {
 	
     private final static String CorrelationIdClaim = "correlation_id";

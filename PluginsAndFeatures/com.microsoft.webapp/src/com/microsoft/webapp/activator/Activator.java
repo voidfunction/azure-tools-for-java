@@ -19,6 +19,9 @@
  */
 package com.microsoft.webapp.activator;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -31,10 +34,14 @@ public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.microsoft.webapp"; //$NON-NLS-1$
+	
+	public static boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
 
 	// The shared instance
 	private static Activator plugin;
 
+	Map<String, Boolean> websiteDebugPrep = new HashMap<String, Boolean>();
+	
 	/**
 	 * The constructor
 	 */
@@ -80,5 +87,13 @@ public class Activator extends AbstractUIPlugin {
 
 	public void log(String message) {
 		getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, message));
+	}
+
+	public Map<String, Boolean> getWebsiteDebugPrep() {
+		return websiteDebugPrep;
+	}
+
+	public void setWebsiteDebugPrep(Map<String, Boolean> websiteDebugPrep) {
+		this.websiteDebugPrep = websiteDebugPrep;
 	}
 }

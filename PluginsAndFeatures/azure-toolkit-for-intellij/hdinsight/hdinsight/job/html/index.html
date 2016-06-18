@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="static/jquery-2.2.3.min.js"></script>
+    <script src="sparkjobview.js"></script>
+    <script src="common.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.11.4/jquery-ui.js"></script>
+    <link rel="stylesheet" href="static/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="static/vis.min.css" type="text/css" />
+    <link rel="stylesheet" href="static/webui.css" type="text/css" />
+    <link rel="stylesheet" href="static/timeline-view.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="indexpage.css">
+    <script src="static/sorttable.js"></script>
+    <script src="static/vis.min.js"></script>
+    <script src="static/bootstrap-tooltip.js"></script>
+    <script src="static/initialize-tooltips.js"></script>
+    <script src="static/table.js"></script>
+    <script src="static/additional-metrics.js"></script>
+    <script src="static/timeline-view.js"></script>
+</head>
+
+<body>
+    <div id="bodydiv">
+        <div id="leftDiv" class="ui-widget-content">
+            <p id="htitle"><strong>Spark Job History</strong></p>
+            <div id="tableDIv" class="ui-widget-content">
+                <table id="myTable" class="table table-bordered table-condensed table-striped sortable ui-widget-content">
+                    <thead class="ui-widget-content">
+                        <tr align="center" class="ui-widget-content">
+                            <th class="ui-widget-content">State</th>
+                            <th class="ui-widget-content">Job Name</th>
+                            <th class="ui-widget-content">Application ID</th>
+                        </tr>
+                    </thead>
+                    <tbody id="JobHistoryTbody" class="ui-widget-content">
+                        <tr class="ui-widget-content"></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div id="rightDiv">
+            <div id="rightButtonPanel">
+                <button id="refreshButtion">Refresh</button>
+                <button id="openSparkUIButton">Open Spark History UI</button>
+                <button id="openYarnUIButton">Open Yarn UI</button>
+            </div>
+            <hr class="rightPanelhr">
+            <div id="basicInformationDIv" class="well">
+                <table id="basicInformationTable">
+                    <thead>
+                        <tr>
+                            <td colspan="2">Basic Job Information</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <p style="margin-left:20px;">Job Started Time:</p>
+                            </td>
+                            <td id="startTime"></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p style="margin-left:20px;">Job Ended Time:</p>
+                            </td>
+                            <td id="endTime"></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p style="margin-left:20px;margin-bottom:0px;">AM Container Number:</p>
+                            </td>
+                            <td id="containerNumber"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="jobDetailDiv">
+                <div id="errorMessageDiv" class="well">
+                    <h2 style="margin:5px 0 5px;">Error Message</h2>
+                    <textarea id="errorMessage" rows="5" readonly="readonly" class="resultTextArea"></textarea>
+                </div>
+                <div id="JobOutputDiv" class="well">
+                    <h2 style="margin:10px 0 0 0;">Job Output</h2>
+                    <textarea id="jobOutput" rows="10" readonly="readonly" class="resultTextArea"></textarea>
+                </div>
+                <div id="LibyJobLogsDiv" class="well">
+                    <h2 style="margin:10px 0 0 0;">Livy Job Logs</h2>
+                    <textarea id="livyJobLog" rows="10" readonly="readonly" class="resultTextArea">	
+					</textarea>
+                </div>
+                <div id="SparkDriverLogDiv" class="well">
+                    <h2 style="margin:10px 0 0 0;;">Spark Driver Logs</h2>
+                    <textarea id="sparkDriverLog" rows="10" readonly="readonly" class="resultTextArea">	
+					</textarea>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

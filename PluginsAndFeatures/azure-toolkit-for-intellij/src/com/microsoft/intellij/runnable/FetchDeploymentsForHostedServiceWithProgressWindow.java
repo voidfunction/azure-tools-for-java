@@ -22,6 +22,7 @@
 
 package com.microsoft.intellij.runnable;
 
+import com.intellij.openapi.project.Project;
 import com.microsoft.intellij.wizards.WizardCacheManager;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
 import com.microsoft.windowsazure.management.compute.models.HostedServiceGetDetailedResponse;
@@ -35,10 +36,12 @@ public class FetchDeploymentsForHostedServiceWithProgressWindow extends AccountA
 
     private CloudService hostedService;
     private HostedServiceGetDetailedResponse hostedServiceDetailed;
+    private Project myProject;
 
-    public FetchDeploymentsForHostedServiceWithProgressWindow(PublishData data, CloudService hostedService) {
+    public FetchDeploymentsForHostedServiceWithProgressWindow(PublishData data, CloudService hostedService, Project project) {
         super(data);
         this.hostedService = hostedService;
+        this.myProject = project;
     }
 
     void setIndicatorText() {
@@ -48,7 +51,7 @@ public class FetchDeploymentsForHostedServiceWithProgressWindow extends AccountA
     @Override
     public void doTask() {
         try {
-            this.hostedService = WizardCacheManager.getHostedServiceWithDeployments(hostedService);
+            this.hostedService = WizardCacheManager.getHostedServiceWithDeployments(hostedService, myProject);
         } catch (Exception e) {
             AccountCachingExceptionEvent event = new AccountCachingExceptionEvent(this);
             event.setException(e);

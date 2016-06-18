@@ -27,6 +27,8 @@
     <module>com.microsoft.azureexplorer.feature</module>
     <module>com.microsoft.webapp</module>
     <module>com.microsoft.webapp.feature</module>
+<!--    <module>com.microsoft.hdinsights</module>
+    <module>com.microsoft.hdinsights.feature</module>-->
     <module>com.persistent.winazure.eclipseplugin</module>
 	<module>com.persistent.winazure.eclipseplugin.feature</module>   
 	<module>WindowsAzurePlugin4EJ</module>   

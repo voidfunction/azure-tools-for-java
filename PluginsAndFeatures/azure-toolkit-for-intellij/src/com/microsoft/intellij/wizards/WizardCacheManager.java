@@ -239,18 +239,18 @@ public final class WizardCacheManager {
         return WizardCacheManagerUtilMethods.fetchUploadedCertificates(currentPublishData, currentHostedService);
     }
 
-    public static CloudService createHostedService(final String hostedServiceName, final String label, final String location, final String description)
+    public static CloudService createHostedService(final String hostedServiceName, final String label, final String location, final String description, Project project)
             throws Exception {
         CloudService cloudService = new CloudService(hostedServiceName, location, "", currentPublishData.getCurrentSubscription().getId(), description);
-        CloudService hostedService = WizardCacheManagerUtilMethods.createHostedService(cloudService, currentPublishData);
+        CloudService hostedService = WizardCacheManagerUtilMethods.createHostedService(cloudService, currentPublishData, project);
         currentPublishData.getServicesPerSubscription().get(currentPublishData.getCurrentSubscription().getId()).add(hostedService);
         return hostedService;
     }
 
-    public static StorageAccount createStorageAccount(String name, String label, String location, String description) throws Exception {
+    public static StorageAccount createStorageAccount(String name, String label, String location, String description, Project project) throws Exception {
         Subscription subscription = currentPublishData.getCurrentSubscription();
         com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount =
-                WizardCacheManagerUtilMethods.createStorageAccount(name, label, location, description, currentPublishData, AzurePlugin.prefFilePath);
+                WizardCacheManagerUtilMethods.createStorageAccount(name, label, location, description, currentPublishData, AzurePlugin.prefFilePath, project);
         // remove previous mock if existed
         for (com.microsoft.tooling.msservices.model.storage.StorageAccount sa : currentPublishData.getStoragesPerSubscription().get(subscription.getId())) {
             if (name.equals(sa.getName())) {
@@ -262,12 +262,12 @@ public final class WizardCacheManager {
         return storageAccount;
     }
 
-    public static boolean isHostedServiceNameAvailable(final String hostedServiceName) throws Exception {
-        return WizardCacheManagerUtilMethods.isHostedServiceNameAvailable(hostedServiceName, currentPublishData);
+    public static boolean isHostedServiceNameAvailable(final String hostedServiceName, Project project) throws Exception {
+        return WizardCacheManagerUtilMethods.isHostedServiceNameAvailable(hostedServiceName, currentPublishData, project);
     }
 
-    public static boolean isStorageAccountNameAvailable(final String storageAccountName) throws Exception {
-        return WizardCacheManagerUtilMethods.isStorageAccountNameAvailable(storageAccountName, currentPublishData);
+    public static boolean isStorageAccountNameAvailable(final String storageAccountName, Project project) throws Exception {
+        return WizardCacheManagerUtilMethods.isStorageAccountNameAvailable(storageAccountName, currentPublishData, project);
     }
 
     public static StorageAccount createStorageServiceMock(String storageAccountNameToCreate, String storageAccountLocation, String description) {
@@ -337,8 +337,8 @@ public final class WizardCacheManager {
         }
     }
 
-    public static CloudService getHostedServiceWithDeployments(CloudService hostedService) throws Exception {
-        return WizardCacheManagerUtilMethods.getHostedServiceWithDeployments(hostedService, currentPublishData);
+    public static CloudService getHostedServiceWithDeployments(CloudService hostedService, Object projectObject) throws Exception {
+        return WizardCacheManagerUtilMethods.getHostedServiceWithDeployments(hostedService, projectObject);
     }
 
     public static void setCurrentPublishData(PublishData currentSubscription2) {

@@ -21,17 +21,12 @@
  */
 package com.microsoft.tooling.msservices.helpers;
 
+import java.util.List;
+
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
-import com.microsoft.tooling.msservices.model.storage.*;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 public interface IDEHelper {
     class ProjectDescriptor {
@@ -78,6 +73,8 @@ public interface IDEHelper {
         }
     }
 
+    com.microsoft.auth.IWebUi getWebUi();
+    
     void closeFile(@NotNull Object projectObject, @NotNull Object openedFile);
 
     void invokeLater(@NotNull Runnable runnable);
@@ -133,4 +130,21 @@ public interface IDEHelper {
 
     @NotNull
     Object getCurrentProject();
+
+    void setApplicationProperty(@NotNull String name, @NotNull String value);
+
+    void unsetApplicationProperty(@NotNull String name);
+
+    @Nullable
+    String getApplicationProperty(@NotNull String name);
+
+    void setApplicationProperties(@NotNull String name, @NotNull String[] value);
+
+    void unsetApplicatonProperties(@NotNull String name);
+
+    @Nullable
+    String[] getApplicationProperties(@NotNull String name);
+
+    boolean isApplicationPropertySet(@NotNull String name);
+    
 }
