@@ -506,6 +506,7 @@
                    tooltip="Unpublish"
                    style="push">
 			</command>
+            
 			
 			<command
 				commandId="com.persistent.ui.toolbar.WANewCertificate"
@@ -513,6 +514,14 @@
                 label="New Self Signed Certificate"
 				tooltip="New Self Signed Certificate"
 				style="push">
+			</command>
+			
+            <command
+                   commandId="com.persistent.ui.toolbar.AzureSamplesCmd"
+                   icon="icons/small/CodeSamples_16.png"
+                   label="Azure Code Samples"
+                   tooltip="Azure Code Samples"
+                   style="push">
 			</command>
 			
 		</toolbar>
@@ -569,7 +578,10 @@
             class="com.persistent.ui.toolbar.WANewCertificate"
             commandId="com.persistent.ui.toolbar.WANewCertificate">
       </handler>
-
+	  <handler
+            class="com.persistent.ui.toolbar.AzureSamples"
+            commandId="com.persistent.ui.toolbar.AzureSamplesCmd">
+      </handler>
      
       <handler
             class="com.persistent.ui.toolbar.WABuildCloud"

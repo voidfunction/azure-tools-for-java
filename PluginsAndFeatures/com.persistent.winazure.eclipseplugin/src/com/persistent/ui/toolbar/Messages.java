@@ -53,6 +53,8 @@ public final class Messages extends NLS {
 	 public static String noLocalServerMsg;
 	 public static String noLocalJDKMsg;
 	 public static String instSDK;
+	 public static String azureSamplesPageLinkMS;
+	 public static String azureSamplesDlgErMsg;
 
 	 static {
 	        // initialize resource bundle
