@@ -114,6 +114,12 @@
             text="Publish as Azure Web App..." description="Azure website deployment for Java"
             icon="/icons/publishWebsite.png">
     </action>
+    <action id="Actions.AzureCodeSamples"
+            class="com.microsoft.intellij.actions.AzureCodeSamples"
+            text="Azure Code Samples"
+            description="Opens an Azure Code Samples page in your default browser"
+            icon="/icons/small/CodeSamples_16.png">
+    </action>
 
     <group id="AzurePopupGroup" text="Azure" description="Azure" icon="/icons/azure.png" popup="true"
            class="com.microsoft.intellij.actions.AzurePopupGroup">
@@ -141,6 +147,7 @@
       <reference ref="Actions.BuildPackageAction"/>
       <reference ref="Actions.PackageAction"/>
       <reference ref="Actions.UnpublishAction"/>
+      <reference ref="Actions.AzureCodeSamples"/>
     </group>
 
     <group id="AzureWebDeployGroup" text="Azure Web Deploy" description="Azure website deployment for Java"
