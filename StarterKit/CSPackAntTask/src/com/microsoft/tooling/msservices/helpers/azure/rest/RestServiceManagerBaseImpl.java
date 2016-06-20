@@ -153,7 +153,7 @@ public abstract class RestServiceManagerBaseImpl implements RestServiceManager {
         String version = DefaultLoader.getPluginComponent().getSettings().getPluginVersion();
         return String.format(
                 "%s/%s (lang=%s; os=%s; version=%s)",
-                DefaultLoader.PLUGIN_ID,
+                DefaultLoader.getPluginComponent().getPluginId(),
                 version,
                 "Java",
                 System.getProperty("os.name"),
