@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.microsoft.hdinsights.feature"
-      label="Azure HDInsights plugin for Java"
+      label="Azure HDInsight plugin for Java"
       version="1.0.0.qualifier"
       provider-name="Microsoft Corp.">
 

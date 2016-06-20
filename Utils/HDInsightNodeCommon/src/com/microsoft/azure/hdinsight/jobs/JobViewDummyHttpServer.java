@@ -36,6 +36,8 @@ import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -45,21 +47,27 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class JobViewDummyHttpServer {
-    private static HttpServer server;
+
     private static final String sparkPreRestUrl = "https://%s.azurehdinsight.net/sparkhistory/api/v1";
     private static final String yarnPreRestUrl = "https://%s.azurehdinsight.net/yarnui/ws/v1";
     private static final String yarnHistoryUrl = "https://%s.azurehdinsight.net/yarnui";
     private static final String LivyBatchesRestUrl = "https://%s.azurehdinsight.net/livy/batches";
 
     private static Logger LOGGER = Logger.getLogger(JobViewDummyHttpServer.class);
-
     private static Pattern clusterPattern = Pattern.compile("^/clusters/([^/]*)(/.*)");
 
     private static RequestDetail requestDetail;
+    public  static final int PORT = 39129;
+    private static HttpServer server;
+    private static final int NO_OF_THREADS = 10;
+   private static  ExecutorService executorService;
 
     public static RequestDetail getCurrentRequestDetail() {
         return requestDetail;
@@ -67,7 +75,15 @@ public class JobViewDummyHttpServer {
 
     public static void close() {
         if (server != null) {
-            server.stop(1);
+            server.stop(0);
+        }
+        if(executorService != null) {
+            executorService.shutdown();
+            try {
+                executorService.awaitTermination(2, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                // do nothing
+            }
         }
     }
 
@@ -85,8 +101,7 @@ public class JobViewDummyHttpServer {
 
     public static void initlize() {
         try {
-            server = HttpServer.create(new InetSocketAddress(39128), 10);
-
+            server = HttpServer.create(new InetSocketAddress(PORT), 10);
             server.createContext("/clusters/", new HttpHandler() {
                 @Override
                 public void handle(final HttpExchange httpExchange) throws IOException {
@@ -231,7 +246,9 @@ public class JobViewDummyHttpServer {
 
                 }
             });
-            server.setExecutor(null);
+
+            executorService = Executors.newFixedThreadPool(NO_OF_THREADS);
+            server.setExecutor(executorService);
             server.start();
         } catch (IOException e) {
             LOGGER.error("Get job history error", e);

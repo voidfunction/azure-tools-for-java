@@ -49,8 +49,6 @@
                     serviceImplementation="com.microsoft.intellij.AzureSettings"/>
     <applicationService serviceInterface="com.microsoft.intellij.ApplicationSettings"
                         serviceImplementation="com.microsoft.intellij.ApplicationSettings"/>
-    <applicationService serviceInterface="com.microsoft.azure.hdinsight.jobs.JobViewService"
-                            serviceImplementation="com.microsoft.azure.hdinsight.jobs.JobViewService"/>
     <fileEditorProvider implementation="com.microsoft.azure.hdinsight.jobs.framework.JobViewEditorProvider" />
 
       <fileEditorProvider implementation="com.microsoft.intellij.helpers.storage.BlobExplorerFileEditorProvider"/>
@@ -77,6 +75,9 @@
   </extensions>
 
   <application-components>
+    <component>
+      <implementation-class>com.microsoft.azure.hdinsight.jobs.JobViewApplicationComponent</implementation-class>
+    </component>
     <component>
       <implementation-class>com.microsoft.intellij.AzureActionsComponent</implementation-class>
     </component>
@@ -145,7 +146,6 @@
     <action id="Actions.SubmitSparkApplicationAction"
             class="com.microsoft.azure.hdinsight.spark.actions.SubmitAction" text="Submit Spark Application to HDInsight"
             description="Submit Spark Application to HDInsight" icon="/icons/Spark.png"/>
-
     <group id="AzurePopupGroup" text="Azure" description="Azure" icon="/icons/azure.png" popup="true"
            class="com.microsoft.intellij.actions.AzurePopupGroup">
       <reference ref="Actions.AzureWebDeploy"/>

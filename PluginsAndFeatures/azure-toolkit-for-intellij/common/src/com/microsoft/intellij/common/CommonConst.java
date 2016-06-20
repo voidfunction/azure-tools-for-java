@@ -19,11 +19,10 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.jobs;
+package com.microsoft.intellij.common;
 
-public class JobViewService {
-
-    public void init() {
-        JobViewDummyHttpServer.initlize();
-    }
+public class CommonConst {
+    public static final String SPARK_SUBMISSION_WINDOW_ID = "HDInsight Spark Submission";
+    public static final String PLUGIN_ID = "com.microsoft.tooling.msservices.intellij.azure";
+    public static final String PLUGIN_NAME = "azure-toolkit-for-intellij";
 }
