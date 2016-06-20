@@ -7,7 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="jdk" jdkName="IntelliJ IDEA Community Edition IC-143.1184.17" jdkType="IDEA JDK" />
+    <orderEntry type="jdk" jdkName="IntelliJ IDEA Community Edition IC-143.1184.17 (1)" jdkType="IDEA JDK" />
     <orderEntry type="library" name="AzureCommons" level="project" />
     <orderEntry type="library" name="azure-sdk" level="project" />
     <orderEntry type="library" name="azure-arm-sdk" level="project" />
@@ -38,5 +38,6 @@
     <orderEntry type="module" module-name="common" />
     <orderEntry type="library" name="services-explorer-common" level="project" />
     <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="project" />
+    <orderEntry type="library" name="com.google.code.gson:gson:2.4" level="application" />
   </component>
 </module>

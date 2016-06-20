@@ -23,11 +23,10 @@ package com.microsoft.azure.hdinsight.projects.template;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.util.io.FileUtil;
-import com.microsoft.azure.hdinsight.common.HDInsightUtil;
 import com.microsoft.azure.hdinsight.projects.samples.ProjectSampleUtil;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -114,7 +113,7 @@ public class TemplatesUtil {
     }
 
     private static File getTemplateRootFolder() {
-        File templateRoot = new File(StringHelper.concat(HDInsightUtil.getPluginRootDirectory(), File.separator, TEMPLATE_ROOT_FOLDER_NAME));
+        File templateRoot = new File(StringHelper.concat(PluginUtil.getPluginRootDirectory(), File.separator, TEMPLATE_ROOT_FOLDER_NAME));
         return templateRoot;
     }
 

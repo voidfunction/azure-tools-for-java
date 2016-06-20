@@ -23,11 +23,10 @@ package com.microsoft.intellij.components;
 
 import com.google.gson.Gson;
 import com.intellij.openapi.components.AbstractProjectComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.microsoft.azure.hdinsight.common.HDInsightHelperImpl;
 import com.microsoft.azure.hdinsight.common.HDInsightLoader;
-import com.microsoft.azure.hdinsight.jobs.JobViewService;
+import com.microsoft.intellij.common.CommonConst;
 import com.microsoft.intellij.helpers.IDEHelperImpl;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.intellij.serviceexplorer.NodeActionsMap;
@@ -36,7 +35,6 @@ import com.microsoft.tooling.msservices.components.AppSettingsNames;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginComponent;
 import com.microsoft.tooling.msservices.components.PluginSettings;
-import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +50,7 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
     private PluginSettings settings;
 
     // TODO: This needs to be the plugin ID from plugin.xml somehow.
-    public static final String PLUGIN_ID = "com.microsoft.intellij";
+    public static final String PLUGIN_ID = CommonConst.PLUGIN_ID;
 
     protected MSToolsApplication(Project project) {
         super(project);
@@ -72,7 +70,6 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
         Node.setNode2Actions(NodeActionsMap.node2Actions);
 
         HDInsightLoader.setHHDInsightHelper(new HDInsightHelperImpl());
-        ServiceManager.getService(JobViewService.class).init();
 
         // load up the plugin settings
         try {
