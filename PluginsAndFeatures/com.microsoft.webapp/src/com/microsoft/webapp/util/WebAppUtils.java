@@ -64,6 +64,6 @@ public class WebAppUtils {
 	public static void openDebugLaunchDialog(Object toSelect) {
 		ILaunchGroup[] grp = DebugUITools.getLaunchGroups();
 		DebugUITools.openLaunchConfigurationDialogOnGroup(PluginUtil.getParentShell(),
-				new StructuredSelection(toSelect), grp[3].getIdentifier());
+				new StructuredSelection(toSelect), grp[1].getIdentifier());
 	}
 }
