@@ -38,6 +38,7 @@ public class CommonConst {
     public static final String StopDisableIconPath = "/icons/Stop-Disable.png";
     public static final String OpenSparkUIIconPath = "/icons/OpenSparkUI.png";
     public static final String OpenSparkUIDisableIconPath = "/icons/OpenSparkUI-Disable.png";
+    public static final String SPARK_JOBVIEW_ICONPATH = "/icons/JobViewTitle.png";
 
     public static final String HDINSIGHT_ADDITIONAL_CLUSTERS = "com.microsoft.azure.hdinsight.AdditionalClusters";
     public static final String CACHED_SPARK_SDK_PATHS = "com.microsoft.azure.hdinsight.cachedSparkSDKpath";
