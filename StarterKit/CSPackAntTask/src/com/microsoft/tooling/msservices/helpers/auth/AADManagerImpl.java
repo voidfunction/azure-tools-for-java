@@ -60,10 +60,13 @@ public class AADManagerImpl implements AADManager {
         com.microsoft.auth.IWebUi webUi = DefaultLoader.getIdeHelper().getWebUi();
         if(webUi != null)
         	com.microsoft.auth.AuthContext.setUserDefinedWebUi(webUi);
+        
 
         try {
+        	String psPath = DefaultLoader.getIdeHelper().getProjectSettingsPath();
+        	System.out.println(String.format("\n\n========> %s \n\n", psPath));
             final com.microsoft.auth.
-                    TokenFileStorage tokenFileStorage = new com.microsoft.auth.TokenFileStorage();
+                    TokenFileStorage tokenFileStorage = new com.microsoft.auth.TokenFileStorage(psPath);
             byte[] data = tokenFileStorage.read();
             tokenCache.deserialize(data);
 
@@ -72,8 +75,7 @@ public class AADManagerImpl implements AADManager {
                 public void run() {
                     try {
                         if(tokenCache.getHasStateChanged()) {
-                            tokenFileStorage.write(tokenCache.serialize());
-                            //DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.AAD_TOKEN_CACHE, new String(tokenCache.serialize()), projectObject);
+                            tokenFileStorage.write(tokenCache.serialize());;
                             tokenCache.setHasStateChanged(false);
                         }
                     } catch (Exception e) {
@@ -82,7 +84,7 @@ public class AADManagerImpl implements AADManager {
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
+        	logger.warning (e.getMessage());
         }
 
     }

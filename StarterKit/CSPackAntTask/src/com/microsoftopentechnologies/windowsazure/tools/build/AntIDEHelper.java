@@ -161,4 +161,9 @@ public class AntIDEHelper implements IDEHelper {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	public String getProjectSettingsPath() {
+		return null;
+	}
 }
