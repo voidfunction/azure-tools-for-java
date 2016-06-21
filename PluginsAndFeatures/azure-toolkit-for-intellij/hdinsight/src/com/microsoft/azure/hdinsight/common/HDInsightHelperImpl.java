@@ -28,7 +28,6 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
-import com.microsoft.azure.hdinsight.jobs.framework.JobViewEditor;
 import com.microsoft.azure.hdinsight.jobs.framework.JobViewEditorProvider;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -103,7 +102,7 @@ public class HDInsightHelperImpl implements HDInsightHelper {
             @Nullable
             @Override
             public Icon getIcon() {
-                return StreamUtil.getImageResourceFile(CommonConst.ClusterIConPath);
+                return StreamUtil.getImageResourceFile(CommonConst.SPARK_JOBVIEW_ICONPATH);
             }
 
             @Override
