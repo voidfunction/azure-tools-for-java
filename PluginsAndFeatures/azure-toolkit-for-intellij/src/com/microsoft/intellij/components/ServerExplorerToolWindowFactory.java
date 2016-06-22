@@ -34,13 +34,10 @@ import com.intellij.openapi.wm.ex.ToolWindowEx;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
 import com.microsoft.azure.hdinsight.common.HDInsightUtil;
-import com.microsoft.azure.hdinsight.toolwindow.ServerExploreToolWindowProcessor;
 import com.microsoft.intellij.AzureSettings;
-import com.microsoft.intellij.ToolWindowKey;
 import com.microsoft.intellij.forms.ManageSubscriptionPanel;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
-import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangeListener;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangedEvent;
@@ -62,27 +59,27 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ServerExplorerToolWindowFactory implements ToolWindowFactory, PropertyChangeListener {
-    private JTree tree;
-    private AzureServiceModule azureServiceModule;
-    private DefaultTreeModel treeModel;
     public static final String EXPLORER_WINDOW = "Service Explorer";
+
+    private Map<Project, DefaultTreeModel> treeModelMap = new HashMap<>();
 
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
         // initialize azure service module
-        azureServiceModule = new AzureServiceModule(project, false);
-        ServerExploreToolWindowProcessor serverExploreToolWindowProcessor = new ServerExploreToolWindowProcessor(null/*azureServiceModule*/);
-        PluginUtil.registerToolWindowManager(new ToolWindowKey(project, EXPLORER_WINDOW), serverExploreToolWindowProcessor);
+        AzureServiceModule azureServiceModule = new AzureServiceModule(project, false);
 
         HDInsightUtil.setHDInsightRootModule(azureServiceModule);
 
         // initialize with all the service modules
-        treeModel = new DefaultTreeModel(initRoot(project));
+        DefaultTreeModel treeModel = new DefaultTreeModel(initRoot(project, azureServiceModule));
+        treeModelMap.put(project, treeModel);
 
         // initialize tree
-        tree = new Tree(treeModel);
+        final JTree tree = new Tree(treeModel);
         tree.setRootVisible(false);
         tree.setCellRenderer(new NodeTreeCellRenderer());
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -91,7 +88,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         tree.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                treeMousePressed(e);
+                treeMousePressed(e, tree);
             }
         });
 
@@ -99,7 +96,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         toolWindow.getComponent().add(new JBScrollPane(tree));
 
         // setup toolbar icons
-        addToolbarItems(toolWindow);
+        addToolbarItems(toolWindow, azureServiceModule);
 
         try {
             azureServiceModule.registerSubscriptionsChanged();
@@ -107,11 +104,11 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         }
     }
 
-    private DefaultMutableTreeNode initRoot(Project project) {
+    private DefaultMutableTreeNode initRoot(Project project, AzureServiceModule azureServiceModule) {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
 
         // add the azure service root service module
-        root.add(createTreeNode(azureServiceModule));
+        root.add(createTreeNode(azureServiceModule, project));
 
         // kick-off asynchronous load of child nodes on all the modules
         if (AzureSettings.getSafeInstance(project).iswebAppLoaded()) {
@@ -122,7 +119,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         return root;
     }
 
-    private void treeMousePressed(MouseEvent e) {
+    private void treeMousePressed(MouseEvent e, JTree tree) {
         // get the tree node associated with this mouse click
         TreePath treePath = tree.getPathForLocation(e.getX(), e.getY());
         if (treePath == null)
@@ -176,7 +173,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         return menu;
     }
 
-    private DefaultMutableTreeNode createTreeNode(Node node) {
+    private DefaultMutableTreeNode createTreeNode(Node node, Project project) {
         DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(node, true);
 
         // associate the DefaultMutableTreeNode with the Node via it's "viewData"
@@ -189,12 +186,12 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
 
         // listen for structure changes on the node, i.e. when child nodes are
         // added or removed
-        node.getChildNodes().addChangeListener(new NodeListChangeListener(treeNode));
+        node.getChildNodes().addChangeListener(new NodeListChangeListener(treeNode, project));
 
         // create child tree nodes for each child node
         if (node.hasChildNodes()) {
             for (Node childNode : node.getChildNodes()) {
-                treeNode.add(createTreeNode(childNode));
+                treeNode.add(createTreeNode(childNode, project));
             }
         }
 
@@ -238,6 +235,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         // the treeModel object can be null before it is initialized
         // from createToolWindowContent; we ignore property change
         // notifications till we have a valid model object
+        DefaultTreeModel treeModel = treeModelMap.get(node.getProject());
         if (treeModel != null) {
             treeModel.nodeChanged((TreeNode) node.getViewData());
         }
@@ -245,9 +243,11 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
 
     private class NodeListChangeListener implements ListChangeListener {
         private DefaultMutableTreeNode treeNode;
+        private Project project;
 
-        public NodeListChangeListener(DefaultMutableTreeNode treeNode) {
+        NodeListChangeListener(DefaultMutableTreeNode treeNode, Project project) {
             this.treeNode = treeNode;
+            this.project = project;
         }
 
         @Override
@@ -269,7 +269,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                 case add:
                     // create child tree nodes for the new nodes
                     for (Node childNode : (Collection<Node>) e.getNewItems()) {
-                        treeNode.add(createTreeNode(childNode));
+                        treeNode.add(createTreeNode(childNode, project));
                     }
                     break;
                 case remove:
@@ -284,7 +284,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                     break;
             }
 
-            treeModel.reload(treeNode);
+            treeModelMap.get(project).reload(treeNode);
         }
     }
 
@@ -303,7 +303,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                                           boolean isLeaf,
                                           int row,
                                           boolean focused) {
-            super.customizeCellRenderer(tree, value, selected, expanded, isLeaf, row, focused);
+            super.customizeCellRenderer(jTree, value, selected, expanded, isLeaf, row, focused);
 
             // if the node has an icon set then we use that
             DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) value;
@@ -325,7 +325,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         }
     }
 
-    private void addToolbarItems(ToolWindow toolWindow) {
+    private void addToolbarItems(ToolWindow toolWindow, final AzureServiceModule azureServiceModule) {
         if (toolWindow instanceof ToolWindowEx) {
             ToolWindowEx toolWindowEx = (ToolWindowEx) toolWindow;
 
