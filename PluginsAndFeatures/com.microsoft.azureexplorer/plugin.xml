@@ -48,6 +48,11 @@
                name="[Queue]"
                extensions="mtl"
                id="com.microsoft.azureexplorer.editors.QueueFileEditor"/>
+       <editor
+               class="com.microsoft.azureexplorer.editors.JobViewEditor"
+               icon="icons/JobViewTitle.png"
+               name="Spark JobView"
+               id="com.microsoft.azure.hdinsight.jobview"/>        
     </extension>
 
     <extension
