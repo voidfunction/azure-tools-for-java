@@ -80,7 +80,8 @@ public class TableFileEditor implements FileEditor {
     private boolean registeredSubscriptionsChanged;
     private final Object subscriptionsChangedSync = new Object();
 
-    public TableFileEditor() {
+    public TableFileEditor(final Project project) {
+        this.project = project;
         ActionListener queryActionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -410,10 +411,6 @@ public class TableFileEditor implements FileEditor {
 
     public void setStorageAccount(ClientStorageAccount storageAccount) {
         this.storageAccount = storageAccount;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
     }
 
     public void setTable(Table table) {

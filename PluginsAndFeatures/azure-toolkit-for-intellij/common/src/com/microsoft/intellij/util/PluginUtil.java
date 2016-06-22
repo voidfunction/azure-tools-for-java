@@ -70,10 +70,6 @@ public class PluginUtil {
         return toolWindowManagerCollection.get(toolWindowKey);
     }
 
-    public static Map<ToolWindowKey, IToolWindowProcessor> getToolWindowsCollection() {
-        return toolWindowManagerCollection;
-    }
-
     public static boolean isContainsToolWindowKey(ToolWindowKey key) {
         return toolWindowManagerCollection.containsKey(key);
     }

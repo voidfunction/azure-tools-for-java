@@ -50,14 +50,13 @@ public class QueueExplorerFileEditorProvider implements FileEditorProvider, Dumb
     @NotNull
     @Override
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        QueueFileEditor queueFileEditor = new QueueFileEditor();
+        QueueFileEditor queueFileEditor = new QueueFileEditor(project);
 
         ClientStorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
         Queue queue = virtualFile.getUserData(QUEUE_KEY);
 
         queueFileEditor.setQueue(queue);
         queueFileEditor.setStorageAccount(storageAccount);
-        queueFileEditor.setProject(project);
 
         queueFileEditor.fillGrid();
 
