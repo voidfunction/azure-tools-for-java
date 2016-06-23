@@ -86,17 +86,21 @@ public class Main {
         AuthContext ac = new AuthContext(String.format("%s/%s", authority, tenant), cache);
         AuthenticationResult result = ac.acquireToken(resource, clientId, redirectUri, PromptBehavior.Auto, null);
         System.out.println("token: " + result.getAccessToken());
-        printSubsriptins(result.getAccessToken());
+//        printSubsriptins(result.getAccessToken());
 
         List<Tenant> tenants = TenantsClient.getByToken(result.getAccessToken());
         for (Tenant t : tenants) {
             String tid = t.getTenantId();
             System.out.println(String.format("\n======> tenantId: %s ======================\n", tid));
 
-            AuthContext ac1 = new AuthContext(String.format("%s/%s", authority, tid), cache);
-            AuthenticationResult result1 = ac1.acquireToken(resource, clientId, redirectUri, PromptBehavior.Auto, null);
-            System.out.println("token: " + result1.getAccessToken());
-            printSubsriptins(result1.getAccessToken());
+            try {
+                AuthContext ac1 = new AuthContext(String.format("%s/%s", authority, tid), cache);
+                AuthenticationResult result1 = ac1.acquireToken(resource, clientId, redirectUri, PromptBehavior.Auto, null);
+                System.out.println("token: " + result1.getAccessToken());
+                printSubsriptins(result1.getAccessToken());
+            } catch (Exception e) {
+                System.out.println("Auth exeption: " + e.getMessage());
+            }
         }
     }
     
