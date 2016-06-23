@@ -4,8 +4,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class AuthenticatorTemplate {
 	private static final Logger log = Logger.getLogger(AuthenticatorTemplate.class.getName());
     private static final String authorizeEndpointTemplate = "https://{host}/{tenant}/oauth2/authorize";

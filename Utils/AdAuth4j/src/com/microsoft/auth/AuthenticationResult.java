@@ -1,7 +1,9 @@
 package com.microsoft.auth;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AuthenticationResult {
     private final static String Oauth2AuthorizationHeader = "Bearer ";
 

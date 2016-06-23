@@ -1,5 +1,6 @@
 package com.microsoft.auth;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 enum AuthorizationStatus
@@ -8,6 +9,7 @@ enum AuthorizationStatus
     Success
 };
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AuthorizationResult
 {
     AuthorizationResult(String code)
