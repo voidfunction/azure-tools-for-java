@@ -1,7 +1,9 @@
 package com.microsoft.auth.subsriptions;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Subscription {
 
     @JsonProperty
@@ -40,6 +42,7 @@ public class Subscription {
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class SubscriptionPolicies {
     @JsonProperty
     public String locationPlacementId;
