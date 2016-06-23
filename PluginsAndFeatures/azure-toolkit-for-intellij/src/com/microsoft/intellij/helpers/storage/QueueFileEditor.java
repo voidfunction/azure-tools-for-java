@@ -75,7 +75,8 @@ public class QueueFileEditor implements FileEditor {
     private boolean registeredSubscriptionsChanged;
     private final Object subscriptionsChangedSync = new Object();
 
-    public QueueFileEditor() {
+    public QueueFileEditor(final Project project) {
+        this.project = project;
         queueTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         DefaultTableModel model = new DefaultTableModel() {
@@ -337,11 +338,6 @@ public class QueueFileEditor implements FileEditor {
         viewMessageForm.setMessage(queueMessages.get(queueTable.getSelectedRow()).getContent());
         viewMessageForm.show();
     }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
 
     public void setStorageAccount(ClientStorageAccount storageAccount) {
         this.storageAccount = storageAccount;

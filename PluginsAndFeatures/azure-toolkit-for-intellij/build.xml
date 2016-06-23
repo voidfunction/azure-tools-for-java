@@ -414,6 +414,7 @@
     <copy file="${path.variable.maven_repository}/com/microsoft/azure/azure-storage/4.0.0/azure-storage-4.0.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-storage-4.0.0.jar"/>
     <copy file="${path.variable.maven_repository}/com/fasterxml/jackson/core/jackson-core/2.6.0/jackson-core-2.6.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/jackson-core-2.6.0.jar"/>
     <copy file="${path.variable.maven_repository}/org/slf4j/slf4j-api/1.7.12/slf4j-api-1.7.12.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/slf4j-api-1.7.12.jar"/>
+    <copy file="${path.variable.maven_repository}/org/jsoup/jsoup/1.9.1/jsoup-1.9.1.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/jsoup-1.9.1.jar"/>
     <copy file="${path.variable.maven_repository}/org/apache/commons/commons-lang3/3.4/commons-lang3-3.4.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/commons-lang3-3.4.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/azure-sdk/azure-core-0.9.2.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-core-0.9.2.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/azure-sdk/azure-svc-mgmt-0.9.2.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-svc-mgmt-0.9.2.jar"/>

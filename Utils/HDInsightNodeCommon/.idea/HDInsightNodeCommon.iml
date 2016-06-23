@@ -12,6 +12,5 @@
     <orderEntry type="library" name=".cspack" level="project" />
     <orderEntry type="library" name="services-explorer-common" level="project" />
     <orderEntry type="library" name="dependencies" level="project" />
-    <orderEntry type="library" name="java-json" level="project" />
   </component>
 </module>

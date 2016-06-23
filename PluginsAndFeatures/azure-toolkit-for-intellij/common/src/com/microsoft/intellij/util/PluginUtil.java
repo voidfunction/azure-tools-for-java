@@ -45,6 +45,7 @@ import com.interopbridges.tools.windowsazure.WindowsAzureRole;
 import com.interopbridges.tools.windowsazure.WindowsAzureRoleComponentImportMethod;
 import com.microsoft.intellij.IToolWindowProcessor;
 import com.microsoft.intellij.ToolWindowKey;
+import com.microsoft.intellij.common.CommonConst;
 
 import javax.swing.*;
 import java.io.File;
@@ -55,8 +56,6 @@ import java.util.Map;
 public class PluginUtil {
     private static final Logger LOG = Logger.getInstance("#com.microsoft.intellij.util.PluginUtil");
     public static final String BASE_PATH = "${basedir}" + File.separator + "..";
-    public static final String PLUGIN_ID = "com.microsoft.tooling.msservices.intellij.azure";
-    public static final String PLUGIN_NAME = "azure-toolkit-for-intellij";
 
     //todo: check with multiple Idea projects open in separate windows
     private static HashMap<ToolWindowKey, IToolWindowProcessor> toolWindowManagerCollection = new HashMap<>();
@@ -69,10 +68,6 @@ public class PluginUtil {
 
     public static IToolWindowProcessor getToolWindowManager(ToolWindowKey toolWindowKey) {
         return toolWindowManagerCollection.get(toolWindowKey);
-    }
-
-    public static Map<ToolWindowKey, IToolWindowProcessor> getToolWindowsCollection() {
-        return toolWindowManagerCollection;
     }
 
     public static boolean isContainsToolWindowKey(ToolWindowKey key) {
@@ -220,7 +215,7 @@ public class PluginUtil {
     }
 
     public static String getPluginRootDirectory() {
-        IdeaPluginDescriptor pluginDescriptor = PluginManager.getPlugin(PluginId.findId(PLUGIN_ID));
+        IdeaPluginDescriptor pluginDescriptor = PluginManager.getPlugin(PluginId.findId(CommonConst.PLUGIN_ID));
         return pluginDescriptor.getPath().getAbsolutePath();
     }
 

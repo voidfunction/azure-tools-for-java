@@ -95,7 +95,8 @@ public class BlobExplorerFileEditor implements FileEditor {
     private boolean registeredSubscriptionsChanged;
     private final Object subscriptionsChangedSync = new Object();
 
-    public BlobExplorerFileEditor() {
+    public BlobExplorerFileEditor(Project project) {
+        this.project = project;
         blobListTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         DefaultTableModel model = new DefaultTableModel() {
@@ -871,10 +872,6 @@ public class BlobExplorerFileEditor implements FileEditor {
 
     public void setBlobContainer(BlobContainer blobContainer) {
         this.blobContainer = blobContainer;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
     }
 
     private void registerSubscriptionsChanged()

@@ -22,15 +22,11 @@
 package com.microsoft.azure.hdinsight.common;
 
 
-import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
-import com.microsoft.azure.hdinsight.serverexplore.action.AddNewClusterAction;
 import com.microsoft.intellij.ToolWindowKey;
 import com.microsoft.intellij.hdinsight.messages.HDInsightBundle;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
@@ -41,6 +37,7 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule;
+import com.microsoft.intellij.common.CommonConst;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -49,11 +46,6 @@ import static com.microsoft.azure.hdinsight.common.MessageInfoType.*;
 
 public class HDInsightUtil {
     private static final Object LOCK = new Object();
-
-    public static String getPluginRootDirectory() {
-        IdeaPluginDescriptor pluginDescriptor = PluginManager.getPlugin(PluginId.findId(CommonConst.PLUGIN_ID));
-        return pluginDescriptor.getPath().getAbsolutePath();
-    }
 
     public static void setHDInsightRootModule(@NotNull AzureServiceModule azureServiceModule) {
         HDInsightRootModuleImpl hdInsightRootModule =  new HDInsightRootModuleImpl(azureServiceModule);

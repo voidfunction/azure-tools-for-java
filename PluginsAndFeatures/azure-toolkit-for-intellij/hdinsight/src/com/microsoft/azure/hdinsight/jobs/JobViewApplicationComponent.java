@@ -19,22 +19,26 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.toolwindow;
+package com.microsoft.azure.hdinsight.jobs;
 
-import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
-import com.microsoft.intellij.IToolWindowProcessor;
+import com.intellij.openapi.components.ApplicationComponent;
+import org.jetbrains.annotations.NotNull;
 
-public class ServerExploreToolWindowProcessor implements IToolWindowProcessor {
-    private HDInsightRootModule hdInsightModule;
+public class JobViewApplicationComponent implements ApplicationComponent {
 
-    public ServerExploreToolWindowProcessor(HDInsightRootModule azureServiceModule) {
-        this.hdInsightModule = azureServiceModule;
+    @NotNull
+    @Override
+    public String getComponentName() {
+        return JobViewApplicationComponent.class.getName();
     }
 
-    public void initialize() {
+    @Override
+    public void initComponent() {
+        JobViewDummyHttpServer.initlize();
     }
 
-    public HDInsightRootModule getHDInsightModule() {
-        return hdInsightModule;
+    @Override
+    public void disposeComponent() {
+        JobViewDummyHttpServer.close();
     }
 }

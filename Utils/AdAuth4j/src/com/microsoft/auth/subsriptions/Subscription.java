@@ -42,6 +42,7 @@ public class Subscription {
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class SubscriptionPolicies {
     @JsonProperty
     public String locationPlacementId;

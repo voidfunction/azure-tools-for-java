@@ -75,6 +75,8 @@ public interface IDEHelper {
 
     com.microsoft.auth.IWebUi getWebUi();
     
+    String getProjectSettingsPath();
+    
     void closeFile(@NotNull Object projectObject, @NotNull Object openedFile);
 
     void invokeLater(@NotNull Runnable runnable);

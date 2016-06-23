@@ -21,9 +21,6 @@
  */
 package com.microsoft.azure.hdinsight.projects;
 
-import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManager;
-import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.roots.impl.libraries.LibraryTypeServiceImpl;
@@ -37,6 +34,7 @@ import com.intellij.openapi.roots.ui.configuration.libraryEditor.LibraryEditor;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.microsoft.azure.hdinsight.common.CommonConst;
+import com.microsoft.intellij.util.PluginUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,8 +70,8 @@ public class SparkLibraryDescription extends CustomLibraryDescription {
         FileChooserDescriptor chooserDescriptor = new FileChooserDescriptor(false, false, true, false, true, false);
         chooserDescriptor.setTitle("Select Spark SDK");
 
-        IdeaPluginDescriptor ideaPluginDescriptor = PluginManager.getPlugin(PluginId.findId(CommonConst.PLUGIN_ID));
-        String pluginPath = ideaPluginDescriptor.getPath().getAbsolutePath();
+        String pluginPath = PluginUtil.getPluginRootDirectory();
+
         VirtualFile pluginVfs = LocalFileSystem.getInstance().findFileByPath(pluginPath);
 
         VirtualFile chooseFile = FileChooser.chooseFile(chooserDescriptor, null, pluginVfs);

@@ -51,14 +51,13 @@ public class BlobExplorerFileEditorProvider implements FileEditorProvider, DumbA
     @NotNull
     @Override
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        BlobExplorerFileEditor blobExplorerFileEditor = new BlobExplorerFileEditor();
+        BlobExplorerFileEditor blobExplorerFileEditor = new BlobExplorerFileEditor(project);
 
         ClientStorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
         BlobContainer blobContainer = virtualFile.getUserData(CONTAINER_KEY);
 
         blobExplorerFileEditor.setBlobContainer(blobContainer);
         blobExplorerFileEditor.setStorageAccount(storageAccount);
-        blobExplorerFileEditor.setProject(project);
 
         blobExplorerFileEditor.fillGrid();
 

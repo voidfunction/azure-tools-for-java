@@ -106,6 +106,11 @@ public class IDEHelperImpl implements IDEHelper {
     }
 
     @Override
+    public String getProjectSettingsPath() {
+        return PluginUtil.getPluginRootDirectory();
+    }
+
+    @Override
     public void closeFile(@NotNull final Object projectObject, @NotNull final Object openedFile) {
         ApplicationManager.getApplication().invokeLater(new Runnable() {
             @Override

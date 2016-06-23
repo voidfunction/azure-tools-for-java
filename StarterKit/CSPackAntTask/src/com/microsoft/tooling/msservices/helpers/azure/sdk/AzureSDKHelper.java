@@ -1461,7 +1461,7 @@ public class AzureSDKHelper {
     	ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
     	try {
     		// change classloader only for intellij plugin - for some reason Eclipse does not need it
-    		if (DefaultLoader.getPluginComponent() != null && DefaultLoader.PLUGIN_ID.equals(DefaultLoader.getPluginComponent().getPluginId())) {
+    		if (DefaultLoader.getPluginComponent() != null && isIntelliJPlugin()) {
     			// Change context classloader to class context loader
     			Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
     		}
@@ -2720,7 +2720,7 @@ public class AzureSDKHelper {
     		throws IOException, URISyntaxException {
     	ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
     	try {
-    		if (DefaultLoader.PLUGIN_ID.equals(DefaultLoader.getPluginComponent().getPluginId())) {
+    		if (isIntelliJPlugin()) {
     			// Change context classloader to class context loader
     			Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
     		}
@@ -2746,7 +2746,7 @@ public class AzureSDKHelper {
         String azureServiceManagementUri = DefaultLoader.getPluginComponent().getSettings().getAzureServiceManagementUri();
 
         ClassLoader old = Thread.currentThread().getContextClassLoader();
-        if (DefaultLoader.PLUGIN_ID.equals(DefaultLoader.getPluginComponent().getPluginId())) {
+        if (isIntelliJPlugin()) {
             Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
         }
 
@@ -2858,7 +2858,7 @@ public class AzureSDKHelper {
     	ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
     	try {
     		// change classloader only for intellij plugin - for some reason Eclipse does not need it
-    		if (DefaultLoader.getPluginComponent() != null && DefaultLoader.PLUGIN_ID.equals(DefaultLoader.getPluginComponent().getPluginId())) {
+    		if (DefaultLoader.getPluginComponent() != null && isIntelliJPlugin()) {
     			// Change context classloader to class context loader
     			Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
     		}
@@ -2877,7 +2877,7 @@ public class AzureSDKHelper {
         ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
         try {
             // change classloader only for intellij plugin - for some reason Eclipse does not need it
-            if (DefaultLoader.getPluginComponent() != null && DefaultLoader.PLUGIN_ID.equals(DefaultLoader.getPluginComponent().getPluginId())) {
+            if (DefaultLoader.getPluginComponent() != null && isIntelliJPlugin()) {
                 // Change context classloader to class context loader
                 Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
             }
@@ -2911,5 +2911,9 @@ public class AzureSDKHelper {
     			return null;
     		}
     	};
+    }
+
+    private static boolean isIntelliJPlugin() {
+        return DefaultLoader.getPluginComponent().getPluginId().contains("intellij");
     }
 }

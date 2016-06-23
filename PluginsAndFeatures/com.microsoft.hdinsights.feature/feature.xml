@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.microsoft.hdinsights.feature"
-      label="Azure HDInsights plugin for Java"
+      label="Azure HDInsight plugin for Java"
       version="1.0.0.qualifier"
       provider-name="Microsoft Corp.">
 
@@ -65,6 +65,10 @@ Subject to the foregoing clause (ii), Microsoft will only be liable for slight n
 This limitation applies to (a) anything related to the software, services, content (including code) on third party Internet sites, or third party applications; and (b) claims for breach of contract, warranty, guarantee, or condition; strict liability, negligence, or other tort; or any other claim; in each case to the extent permitted by applicable law.
 It also applies even if Microsoft knew or should have known about the possibility of the damages. The above limitation or exclusion may not apply to you because your country may not allow the exclusion or limitation of incidental, consequential, or other damages.
    </license>
+
+   <url>
+      <discovery label="Scala IDE" url="http://download.scala-ide.org/sdk/lithium/e44/scala211/stable/site"/>
+   </url>
 
    <plugin
          id="com.microsoft.hdinsights"

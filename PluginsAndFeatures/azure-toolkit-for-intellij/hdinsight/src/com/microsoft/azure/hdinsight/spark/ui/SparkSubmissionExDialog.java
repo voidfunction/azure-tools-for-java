@@ -592,8 +592,9 @@ public class SparkSubmissionExDialog extends JDialog {
 
     private SparkSubmissionParameter constructSubmissionParameter() {
         IClusterDetail selectedClusterDetail = submitModel.getSelectedClusterDetail();
-
-        String selectedArtifactName = selectedArtifactComboBox.getSelectedItem().toString();
+        Object selectedItem = selectedArtifactComboBox.getSelectedItem();
+        String selectedArtifactName = selectedItem == null ? "" : selectedItem.toString();
+        
         String className = mainClassTextField.getText().trim();
         String commandLine = commandLineTextField.getText().trim();
         String localArtifactPath = selectedArtifactTextField.getText();

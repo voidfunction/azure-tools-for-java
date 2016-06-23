@@ -25,7 +25,6 @@ import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.helpers.UIHelper;
 
 public class DefaultLoader {
-    public static final String PLUGIN_ID = "com.microsoft.intellij";
     private static UIHelper uiHelper;
     private static IDEHelper ideHelper;
     private static PluginComponent pluginComponent;

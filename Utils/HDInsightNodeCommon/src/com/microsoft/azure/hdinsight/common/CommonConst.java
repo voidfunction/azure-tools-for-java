@@ -38,17 +38,8 @@ public class CommonConst {
     public static final String StopDisableIconPath = "/icons/Stop-Disable.png";
     public static final String OpenSparkUIIconPath = "/icons/OpenSparkUI.png";
     public static final String OpenSparkUIDisableIconPath = "/icons/OpenSparkUI-Disable.png";
+    public static final String SPARK_JOBVIEW_ICONPATH = "/icons/JobViewTitle.png";
 
-    public static final String PLUGIN_NAME = "Microsoft Azure HDInsight Tools for IntelliJ";
-    public static final String PLUGIN_VERSION = "0.9";
-    public static final String PLUGIN_ID = "com.microsoft.tooling.msservices.intellij.azure";
-    public static final String SPARK_SUBMISSION_WINDOW_ID = "Spark Submission";
-
-    public static final String CURRENT_PLUGIN_VERSION = "com.microsoft.azure.hdinsight.intellij.PluginVersion";
-    public static final String AAD_AUTHENTICATION_RESULTS = "com.microsoft.azure.hdinsight.intellij.AADAuthenticationResults";
-    public static final String AZURE_SUBSCRIPTIONS = "com.microsoft.azure.hdinsight.intellij.AzureSubscriptions";
-    public static final String AZURE_USER_INFO = "com.microsoft.azure.hdinsight.intellij.AzureUserInfo";
-    public static final String AZURE_USER_SUBSCRIPTIONS = "com.microsoft.azure.hdinsight.intellij.AzureUserSubscriptions";
     public static final String HDINSIGHT_ADDITIONAL_CLUSTERS = "com.microsoft.azure.hdinsight.AdditionalClusters";
     public static final String CACHED_SPARK_SDK_PATHS = "com.microsoft.azure.hdinsight.cachedSparkSDKpath";
 }

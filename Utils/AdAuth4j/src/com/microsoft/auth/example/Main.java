@@ -36,7 +36,7 @@ public class Main {
     public static void main(String[] args) {
         try {
 
-            final TokenFileStorage tokenFileStorage = new TokenFileStorage();
+            final TokenFileStorage tokenFileStorage = new TokenFileStorage(null);
 
             final TokenCache cache = new TokenCache();
             byte[] data = tokenFileStorage.read();

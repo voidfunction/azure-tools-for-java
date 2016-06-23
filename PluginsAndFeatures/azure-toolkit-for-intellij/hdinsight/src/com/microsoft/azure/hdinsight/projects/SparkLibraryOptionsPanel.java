@@ -49,6 +49,7 @@ import com.intellij.util.PlatformIcons;
 import com.intellij.util.containers.hash.HashMap;
 import com.microsoft.azure.hdinsight.common.CommonConst;
 import com.microsoft.azure.hdinsight.common.HDInsightUtil;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import org.jetbrains.annotations.NotNull;
@@ -269,7 +270,7 @@ public class SparkLibraryOptionsPanel extends JPanel {
     }
 
     private void doCreate() {
-        VirtualFile root = LocalFileSystem.getInstance().findFileByPath(HDInsightUtil.getPluginRootDirectory());
+        VirtualFile root = LocalFileSystem.getInstance().findFileByPath(PluginUtil.getPluginRootDirectory());
         NewLibraryConfiguration libraryConfiguration = this.myLibraryDescription.createNewLibrary(this.button, root);
 
         if (libraryConfiguration != null) {

@@ -19,6 +19,7 @@
  */
 package com.microsoft.azureexplorer.helpers;
 
+import java.io.File;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,6 +36,8 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.microsoftopentechnologies.wacommon.utils.Messages;
 
 public class IDEHelperImpl implements IDEHelper {
 
@@ -226,4 +229,9 @@ public class IDEHelperImpl implements IDEHelper {
     public  com.microsoft.auth.IWebUi getWebUi() {
     	return new com.microsoftopentechnologies.wacommon.adauth.SwtBrowserWIndow();
     }
+
+	@Override
+	public String getProjectSettingsPath() {
+		return String.format("%s%s%s", PluginUtil.pluginFolder, File.separator, Messages.commonPluginID);
+	}
 }

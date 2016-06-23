@@ -33,7 +33,7 @@ public class HDInsightActionsComponent implements ApplicationComponent {
     public void initComponent() {
         ActionManager actionManager = ActionManager.getInstance();
         DefaultActionGroup projectPopupGroup = (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_PROJECT_VIEW_POPUP);
-        projectPopupGroup.add(actionManager.getAction("Actions.SubmitSparkApplicationAction"), Constraints.FIRST);
+        projectPopupGroup.add(actionManager.getAction("Actions.SubmitSparkApplicationAction"));
     }
 
     @Override

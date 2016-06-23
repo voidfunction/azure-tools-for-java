@@ -38,6 +38,7 @@ import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
+import com.microsoft.intellij.common.CommonConst;
 import com.microsoft.intellij.ui.libraries.AILibraryHandler;
 import com.microsoft.intellij.ui.libraries.AzureLibrary;
 import com.microsoft.intellij.ui.messages.AzureBundle;
@@ -301,7 +302,7 @@ public class AzurePlugin extends AbstractProjectComponent {
             copyResourceFile(message("encFileName"), enctFile);
             for (AzureLibrary azureLibrary : AzureLibrary.LIBRARIES) {
                 if (!new File(pluginFolder + File.separator + azureLibrary.getLocation()).exists()) {
-                    for (String entryName : Utils.getJarEntries(pluginFolder + File.separator + "lib" + File.separator + PluginUtil.PLUGIN_NAME + ".jar", azureLibrary.getLocation())) {
+                    for (String entryName : Utils.getJarEntries(pluginFolder + File.separator + "lib" + File.separator + CommonConst.PLUGIN_NAME + ".jar", azureLibrary.getLocation())) {
                         new File(pluginFolder + File.separator + entryName).getParentFile().mkdirs();
                         copyResourceFile(entryName, pluginFolder + File.separator + entryName);
                     }

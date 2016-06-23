@@ -50,14 +50,13 @@ public class TableExplorerFileEditorProvider implements FileEditorProvider, Dumb
     @NotNull
     @Override
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        TableFileEditor tableFileEditor = new TableFileEditor();
+        TableFileEditor tableFileEditor = new TableFileEditor(project);
 
         ClientStorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
         Table table = virtualFile.getUserData(TABLE_KEY);
 
         tableFileEditor.setTable(table);
         tableFileEditor.setStorageAccount(storageAccount);
-        tableFileEditor.setProject(project);
 
         tableFileEditor.fillGrid();
 
