@@ -250,6 +250,7 @@ public class WebSiteDeployForm extends DialogWrapper {
 
                             try {
                                 Futures.allAsList(subscriptionFutures).get();
+                                AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
                             } catch (InterruptedException e) {
                                 throw new AzureCmdException(e.getMessage(), e);
                             } catch (ExecutionException e) {
@@ -382,7 +383,6 @@ public class WebSiteDeployForm extends DialogWrapper {
                     synchronized (lock) {
                         webSiteConfigMap.put(webSite, webSiteConfiguration);
                         AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
-                        AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
                     }
                     webSiteFuture.set(null);
                 }
