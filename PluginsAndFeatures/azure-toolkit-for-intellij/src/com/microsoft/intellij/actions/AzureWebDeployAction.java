@@ -27,6 +27,7 @@ import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleTypeId;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.util.PlatformUtils;
 import com.microsoft.intellij.forms.WebSiteDeployForm;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tasks.WebSiteDeployTask;
@@ -53,6 +54,7 @@ public class AzureWebDeployAction extends AnAction {
     @Override
     public void update(AnActionEvent e) {
         final Module module = e.getData(LangDataKeys.MODULE);
+        e.getPresentation().setVisible(PlatformUtils.isIdeaUltimate());
         e.getPresentation().setEnabled(module != null && ModuleTypeId.JAVA_MODULE.equals(module.getOptionValue(Module.ELEMENT_TYPE)));
     }
 }
