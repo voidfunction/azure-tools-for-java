@@ -22,10 +22,12 @@
 package com.microsoft.intellij;
 
 
+import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.IdeActions;
 import com.intellij.openapi.components.ApplicationComponent;
+import com.intellij.util.PlatformUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class AzureActionsComponent implements ApplicationComponent {
@@ -41,6 +43,11 @@ public class AzureActionsComponent implements ApplicationComponent {
             toolbarGroup.addAll((DefaultActionGroup) am.getAction("AzureToolbarGroup"));
             DefaultActionGroup popupGroup = (DefaultActionGroup) am.getAction(IdeActions.GROUP_PROJECT_VIEW_POPUP);
             popupGroup.add(am.getAction("AzurePopupGroup"));
+            if (PlatformUtils.isIdeaUltimate()) {
+                ActionManager actionManager = ActionManager.getInstance();
+                DefaultActionGroup actionGroup = (DefaultActionGroup) actionManager.getAction("PublishGroup");
+                actionGroup.addAll((ActionGroup) actionManager.getAction("AzureWebDeployGroup"));
+            }
         }
     }
 

@@ -240,14 +240,7 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 						if (ftpProfile.isFtpPassiveMode()) {
 							ftp.enterLocalPassiveMode();
 						}
-						boolean webConfigPresent = false;
-						FTPFile[] files = ftp.listFiles("/site/wwwroot");
-						for (FTPFile file : files) {
-							if (file.getName().equalsIgnoreCase(com.microsoft.webapp.util.Messages.configName)) {
-								webConfigPresent = true;
-								break;
-							}
-						}
+						boolean webConfigPresent = isWebConfigPresent(ftp);
 
 						directories = ftp.listDirectories("/site/wwwroot/webapps");
 
@@ -299,11 +292,20 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 						if (updateRequired) {
 							// web app restart gives problem some times. So stop and start service
 							manager.stopWebSite(subId, webSpace, webSiteName);
+							Thread.sleep(5000);
 							WebAppConfigOperations.prepareWebConfigForDebug(tmpPath, serverFolder);
 							// delete old file and copy new file
 							ftp.deleteFile(remoteFile);
+							Thread.sleep(5000);
 							InputStream input = new FileInputStream(tmpPath);
 							ftp.storeFile("/site/wwwroot/web.config", input);
+							int attempts = 0;
+							while (!isWebConfigPresent(ftp) && attempts < 5) {
+								attempts++;
+								ftp.storeFile("/site/wwwroot/web.config", input);
+								Activator.getDefault().log("Web.config copy attempt : " + attempts);
+								Thread.sleep(2000);
+							}
 							input.close();
 						}
 						monitor.worked(60);
@@ -362,5 +364,17 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 				return;
 			}
 		}
+	}
+
+	private boolean isWebConfigPresent(FTPClient ftp) throws IOException {
+		boolean webConfigPresent = false;
+		FTPFile[] files = ftp.listFiles("/site/wwwroot");
+		for (FTPFile file : files) {
+			if (file.getName().equalsIgnoreCase(com.microsoft.webapp.util.Messages.configName)) {
+				webConfigPresent = true;
+				break;
+			}
+		}
+		return webConfigPresent;
 	}
 }
