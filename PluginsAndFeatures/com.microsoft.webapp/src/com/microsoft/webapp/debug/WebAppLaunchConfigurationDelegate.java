@@ -117,12 +117,12 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 								}
 								if (msDeployProfile != null) {
 									ProcessBuilder pb = null;
-									String os = System.getProperty("os.name");
+									String os = System.getProperty("os.name").toLowerCase();
 									if (Activator.IS_WINDOWS) {
 										String command = String.format(Messages.command, port, website,
 												msDeployProfile.getUserName(), msDeployProfile.getPassword());
 										pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", command);
-									} else if (os.contains("linux")) {
+									} else if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("aix") > 0 ) {
 										String command = String.format(Messages.commandSh, port, website,
 												msDeployProfile.getUserName(), msDeployProfile.getPassword());
 										pb = new ProcessBuilder("/bin/bash", "-c", "gnome-terminal -x sh -c", command);
