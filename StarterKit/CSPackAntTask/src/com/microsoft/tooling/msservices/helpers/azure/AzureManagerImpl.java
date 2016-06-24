@@ -251,7 +251,16 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
             List<Tenant> tenants = TenantsClient.getByToken(res.getAccessToken());
             for (Tenant t : tenants) {
                 String tid = t.getTenantId();
-                res = ((AADManagerImpl)aadManager).auth(null, tid, com.microsoft.auth.PromptBehavior.Auto);
+
+                // FIXME.shch: fast fix to ignore self-made AAD tenants
+                res = null;
+                try {
+                    res = ((AADManagerImpl)aadManager).auth(null, tid, com.microsoft.auth.PromptBehavior.Auto);
+                } catch (Exception e) {
+                    logger.warning(String.format("TenantId '%s' auth error: %s", t, e.getMessage()));
+                }
+                if(res == null) continue;;
+
                 UserInfo userInfo = new UserInfo(tid, res.getUserInfo().getUniqueId());
                 List<com.microsoft.auth.subsriptions.Subscription> subscriptions = com.microsoft.auth.subsriptions.SubscriptionsClient.getByToken(res.getAccessToken());
                 for (com.microsoft.auth.subsriptions.Subscription s : subscriptions) {
