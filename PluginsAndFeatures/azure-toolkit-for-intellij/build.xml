@@ -411,6 +411,7 @@
     <copy file="${module.azure-toolkit-for-intellij.basedir}/lib/services-explorer-common.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/services-explorer-common.jar"/>
 	<copy file="${module.azure-toolkit-for-intellij.basedir}/lib/hdinsight-node-common.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/hdinsight-node-common.jar"/>
     <copy file="${module.azure-toolkit-for-intellij.basedir}/../AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk/dependencies/adauth4j.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/adauth4j.jar"/>
+    <copy file="${basedir}/lib/java-json.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/java-json.jar" />
     <copy file="${path.variable.maven_repository}/com/microsoft/azure/azure-storage/4.0.0/azure-storage-4.0.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-storage-4.0.0.jar"/>
     <copy file="${path.variable.maven_repository}/com/fasterxml/jackson/core/jackson-core/2.6.0/jackson-core-2.6.0.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/jackson-core-2.6.0.jar"/>
     <copy file="${path.variable.maven_repository}/org/slf4j/slf4j-api/1.7.12/slf4j-api-1.7.12.jar" tofile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/slf4j-api-1.7.12.jar"/>
