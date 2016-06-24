@@ -32,7 +32,7 @@
       <dependency>
         <groupId>com.microsoft.azure</groupId>
         <artifactId>azure-mgmt-resources</artifactId>
-        <version>0.9.3</version>
+        <version>0.9.2</version>
       </dependency>
       	<!-- http://mvnrepository.com/artifact/com.microsoft.azure/azure-storage -->
 		<dependency>
@@ -44,13 +44,13 @@
 		<dependency>
 		    <groupId>com.microsoft.azure</groupId>
 		    <artifactId>azure-mgmt-storage</artifactId>
-		    <version>0.9.3</version>
+		    <version>0.9.2</version>
 		</dependency>
 		<!-- http://mvnrepository.com/artifact/com.microsoft.azure/azure-svc-mgmt-storage -->
 		<dependency>
 		    <groupId>com.microsoft.azure</groupId>
 		    <artifactId>azure-svc-mgmt-storage</artifactId>
-		    <version>0.9.3</version>
+		    <version>0.9.2</version>
 		</dependency>
     </dependencies>
 </project>

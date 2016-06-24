@@ -2,8 +2,10 @@ package com.microsoft.auth;
 
 import java.net.URI;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class UserInfo {
     UserInfo(){}
     
