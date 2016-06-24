@@ -23,11 +23,13 @@ package com.microsoft.intellij.ui.debug;
 import com.intellij.application.options.ModulesComboBox;
 import com.intellij.execution.configurations.RemoteConnection;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.LabeledComponent;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.ui.DocumentAdapter;
 import com.microsoft.intellij.AzurePlugin;
@@ -74,11 +76,11 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
     Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
     List<WebSite> webSiteList = new ArrayList<WebSite>();
     Project project;
-    Module module;
+    Collection<Module> modules;
 
-    public AzureRemoteConfigurable(final Project project, final Module module) {
+    public AzureRemoteConfigurable(final Project project, final Collection<Module> modules) {
         this.project = project;
-        this.module = module;
+        this.modules = modules;
 
         final ButtonGroup transportGroup = new ButtonGroup();
         transportGroup.add(myRbSocket);
@@ -264,24 +266,30 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
             @Override
             public void actionPerformed(ActionEvent e) {
                 String prevSelection = (String) webAppCombo.getSelectedItem();
-                WebSiteDeployForm form = new WebSiteDeployForm(module);
-                form.show();
-                if (form.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
-                    try {
-                        String url = form.deploy();
-                        WebSiteDeployTask task = new WebSiteDeployTask(project, form.getSelectedWebSite(), url);
-                        task.queue();
-                    } catch (AzureCmdException ex) {
-                        PluginUtil.displayErrorDialogAndLog(message("webAppDplyErr"), ex.getMessage(), ex);
+                Module module = PluginUtil.getSelectedModule();
+                if (module == null && !modules.isEmpty()) {
+                    module = modules.iterator().next();
+                    WebSiteDeployForm form = new WebSiteDeployForm(module);
+                    form.show();
+                    if (form.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+                        try {
+                            String url = form.deploy();
+                            WebSiteDeployTask task = new WebSiteDeployTask(project, form.getSelectedWebSite(), url);
+                            task.queue();
+                        } catch (AzureCmdException ex) {
+                            PluginUtil.displayErrorDialogAndLog(message("webAppDplyErr"), ex.getMessage(), ex);
+                        }
                     }
-                }
-                List<String> listToDisplay = loadWebApps();
-                if (!listToDisplay.isEmpty()) {
-                    if (!prevSelection.isEmpty() && listToDisplay.contains(prevSelection)) {
-                        webAppCombo.setSelectedItem(prevSelection);
-                    } else {
-                        webAppCombo.setSelectedItem(listToDisplay.get(0));
+                    List<String> listToDisplay = loadWebApps();
+                    if (!listToDisplay.isEmpty()) {
+                        if (!prevSelection.isEmpty() && listToDisplay.contains(prevSelection)) {
+                            webAppCombo.setSelectedItem(prevSelection);
+                        } else {
+                            webAppCombo.setSelectedItem(listToDisplay.get(0));
+                        }
                     }
+                } else {
+                    Messages.showErrorDialog(message("noModule"), message("error"));
                 }
             }
         };

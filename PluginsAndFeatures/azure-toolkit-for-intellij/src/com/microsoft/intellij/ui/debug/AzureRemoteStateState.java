@@ -272,9 +272,11 @@ public class AzureRemoteStateState implements RemoteState {
                         if (updateRequired) {
                             // web app restart gives problem some times. So stop and start service
                             manager.stopWebSite(subId, webSpace, webSiteName);
+                            Thread.sleep(5000);
                             WebAppConfigOperations.prepareWebConfigForDebug(tmpPath, serverFolder);
                             // delete old file and copy new file
                             ftp.deleteFile(remoteFile);
+                            Thread.sleep(5000);
                             InputStream input = new FileInputStream(tmpPath);
                             ftp.storeFile("/site/wwwroot/web.config", input);
                             input.close();
