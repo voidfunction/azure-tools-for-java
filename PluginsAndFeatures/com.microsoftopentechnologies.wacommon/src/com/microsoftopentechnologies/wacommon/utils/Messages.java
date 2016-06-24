@@ -36,11 +36,14 @@ public final class Messages extends NLS {
 	public static String preferenceQueMsg;
 	public static String preferenceQueTtl;
 	public static String lnkOpenErrMsg;
+	public static String hdinsgihtPrefTil;
+	public static String hdinsightPerenceQueMsg;
 	public static String encFileName;
 	public static String encFileEntry;
 	public static String version;
 	public static String instID;
 	public static String prefVal;
+	public static String hdinshgtPrefVal;
 	public static String preferenceMsg;
 	public static String preferenceLinkMsg;
 	/* Common messages - end */

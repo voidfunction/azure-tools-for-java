@@ -89,7 +89,7 @@ public class AzureRemoteConfiguration extends ModuleBasedConfiguration<JavaRunCo
     @NotNull
     public SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
         SettingsEditorGroup group = new SettingsEditorGroup();
-        group.addEditor("Azure", new AzureRemoteConfigurable(getProject(), getConfigurationModule().getModule()));
+        group.addEditor("Azure", new AzureRemoteConfigurable(getProject(), getValidModules()));
         return group;
     }
 

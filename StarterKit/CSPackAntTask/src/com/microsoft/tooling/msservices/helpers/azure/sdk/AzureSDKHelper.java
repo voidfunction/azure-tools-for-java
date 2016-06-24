@@ -2914,6 +2914,7 @@ public class AzureSDKHelper {
     }
 
     private static boolean isIntelliJPlugin() {
-        return DefaultLoader.getPluginComponent().getPluginId().contains("intellij");
+        String pluginId = DefaultLoader.getPluginComponent().getPluginId();
+        return pluginId != null && pluginId.contains("intellij");
     }
 }

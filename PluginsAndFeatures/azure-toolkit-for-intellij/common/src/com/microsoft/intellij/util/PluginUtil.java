@@ -81,13 +81,18 @@ public class PluginUtil {
     public enum ProjExportType {WAR, EAR, JAR}
 
     /**
-     * This method returns currently selected project in workspace.
+     * This method returns current project.
      *
      * @return Project
      */
     public static Project getSelectedProject() {
         DataContext dataContext = DataManager.getInstance().getDataContextFromFocus().getResult();
         return DataKeys.PROJECT.getData(dataContext);
+    }
+
+    public static Module getSelectedModule() {
+        DataContext dataContext = DataManager.getInstance().getDataContextFromFocus().getResult();
+        return DataKeys.MODULE.getData(dataContext);
     }
 
     public static String getModulePath(Module module) {
