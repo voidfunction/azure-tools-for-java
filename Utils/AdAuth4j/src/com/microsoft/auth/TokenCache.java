@@ -272,7 +272,7 @@ public class TokenCache {
         synchronized(lock) {
             log.info("Storing token in the cache...");
             TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType, result.userInfo);
-            log.info(String.format("==> tokenCacheKey:\n \t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n", 
+            log.info(String.format("\n==> tokenCacheKey:\n \t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n", 
                   authority
                   , resource.toLowerCase()
                   , clientId.toLowerCase()
@@ -352,8 +352,8 @@ public class TokenCache {
                     log.info("A Multi Resource Refresh Token for a different resource was found which can be used");
                 }
             } else {
-            	String message = AuthError.MultipleTokensMatched;
-            	log.error(message);
+                String message = AuthError.MultipleTokensMatched;
+                log.error(message);
                 throw new AuthException(message);
             }
             return returnValue;
