@@ -3,7 +3,8 @@ package com.microsoft.auth;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -59,7 +60,7 @@ class AuthenticatorTemplate {
         int responseCode = connection.getResponseCode();
         if(responseCode != 200) {
         	String message = AuthError.AuthorityNotInValidList;
-        	log.error(message);
+        	log.log(Level.SEVERE, message);
             throw new AuthException(message);
         }
         
@@ -67,7 +68,7 @@ class AuthenticatorTemplate {
         InstanceDiscoveryResponse discoveryResponse = JsonHelper.deserialize(InstanceDiscoveryResponse.class, connection.getInputStream());
         if (discoveryResponse.tenantDiscoveryEndpoint == null) {
         	String message = AuthError.AuthorityNotInValidList;
-        	log.error(message);
+        	log.log(Level.SEVERE, message);
             throw new AuthException(message);
         }
     }

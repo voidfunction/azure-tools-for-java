@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 public abstract class AcquireTokenHandlerBase {
     final static Logger log = Logger.getLogger(AcquireTokenHandlerBase.class.getName());
@@ -153,7 +153,7 @@ public abstract class AcquireTokenHandlerBase {
                         newResult = sendTokenRequestByRefreshToken(result.refreshToken);
                        
                     } catch (AuthException e) {
-                        log.info("Error getting token - need to re-loggin.");
+                        log.info("Error getting token - need to re-login.");
                         return null;
                     }
                     authenticator.updateTenantId(result.tenantId);
