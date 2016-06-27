@@ -2,7 +2,7 @@
   <id>com.microsoft.tooling.msservices.intellij.azure</id>
   <name>Azure Toolkit for IntelliJ</name>
   <version>1.4</version>
-  <vendor email="xplatjava@microsoft.com" url="http://www.microsoft.com">Microsoft</vendor>
+  <vendor email="java@microsoft.com" url="http://www.microsoft.com">Microsoft</vendor>
 
   <description><![CDATA[
       Azure Toolkit for IntelliJ IDEA.
