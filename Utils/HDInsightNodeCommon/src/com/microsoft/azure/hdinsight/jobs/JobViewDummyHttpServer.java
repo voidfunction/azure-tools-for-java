@@ -64,16 +64,21 @@ public class JobViewDummyHttpServer {
     private static Pattern clusterPattern = Pattern.compile("^/clusters/([^/]*)(/.*)");
 
     private static RequestDetail requestDetail;
-    public  static final int PORT = 39129;
+    public  static final int PORT = 39128;
     private static HttpServer server;
     private static final int NO_OF_THREADS = 10;
-   private static  ExecutorService executorService;
+    private static  ExecutorService executorService;
+    private static boolean isEnabled = false;
 
     public static RequestDetail getCurrentRequestDetail() {
         return requestDetail;
     }
 
-    public static void close() {
+    public synchronized static boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public synchronized static void close() {
         if (server != null) {
             server.stop(0);
         }
@@ -85,6 +90,7 @@ public class JobViewDummyHttpServer {
                 // do nothing
             }
         }
+        isEnabled = false;
     }
 
     @Nullable
@@ -99,7 +105,10 @@ public class JobViewDummyHttpServer {
         return null;
     }
 
-    public static void initlize() {
+    public synchronized static void initlize() {
+        if(isEnabled) {
+            return;
+        }
         try {
             server = HttpServer.create(new InetSocketAddress(PORT), 10);
             server.createContext("/clusters/", new HttpHandler() {
@@ -250,6 +259,7 @@ public class JobViewDummyHttpServer {
             executorService = Executors.newFixedThreadPool(NO_OF_THREADS);
             server.setExecutor(executorService);
             server.start();
+            isEnabled = true;
         } catch (IOException e) {
             LOGGER.error("Get job history error", e);
             DefaultLoader.getUIHelper().showError(e.getClass().getName(), e.getMessage());
