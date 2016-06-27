@@ -454,5 +454,5 @@ Export-Package: com.fasterxml.jackson.core,
  org.joda.time,
  retrofit2,
  org.json
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: dir

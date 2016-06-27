@@ -9,5 +9,5 @@ Export-Package: com.microsoftopentechnologies.acs.federation,
  com.microsoftopentechnologies.acs.saml,
  com.microsoftopentechnologies.acs.util,
  com.microsoftopentechnologies.acs.xmldsig
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: dir

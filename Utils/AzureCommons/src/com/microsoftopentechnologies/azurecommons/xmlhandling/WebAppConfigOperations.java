@@ -63,33 +63,25 @@ public class WebAppConfigOperations {
 		if (server.contains("tomcat")) {
 			nodeAttribites.put("processPath", serverPath + "\\bin\\startup.bat");
 			ParserXMLUtility.updateOrCreateElement(doc, platformExp, webServerExp, platform, false, nodeAttribites);
+			if (!ParserXMLUtility.doesNodeExists(doc, varsExp)) {
+				createTag(doc, platformExp, variables);
+			}
+			// update CATALINA_HOME
+			updateVarValue(doc, "CATALINA_HOME", serverPath);
+			// update CATALINA_OPTS
+			updateVarValue(doc, "CATALINA_OPTS", catalinaOpts);
+			// update JAVA_OPTS
+			updateVarValue(doc, "JAVA_OPTS", javaOptsString);
 		} else {
 			nodeAttribites.put("processPath", "%JAVA_HOME%\\bin\\java.exe");
-			nodeAttribites.put("startupTimeLimit", "20");
+			nodeAttribites.put("startupTimeLimit", "30");
 			nodeAttribites.put("startupRetryCount", "10");
-			nodeAttribites.put("stdoutLogEnabled", "true");
-			String arg = "-Djava.net.preferIPv4Stack=true -Djetty.port=%HTTP_PLATFORM_PORT% -Djetty.base=&quot;" +
-					serverPath + "&quot; -jar &quot;" + serverPath + "\\start.jar&quot;";
+			String arg = "-Djava.net.preferIPv4Stack=true  -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=127.0.0.1:%HTTP_PLATFORM_DEBUG_PORT% -Djetty.port=%HTTP_PLATFORM_PORT% -Djetty.base=\"" + 
+					serverPath + "\" -Djetty.webapps=\"d:\\home\\site\\wwwroot\\webapps\"  -jar \"" + serverPath + "\\start.jar\" etc\\jetty-logging.xml";
 			nodeAttribites.put("arguments", arg);
 			ParserXMLUtility.updateOrCreateElement(doc, platformExp, webServerExp, platform, false, nodeAttribites);
 		}
-
-		if (!ParserXMLUtility.doesNodeExists(doc, varsExp)) {
-			createTag(doc, platformExp, variables);
-		}
-
-		if (server.contains("tomcat")) {
-			// update CATALINA_HOME
-			updateVarValue(doc, "CATALINA_HOME", serverPath);
-			// update JAVA_OPTS
-			updateVarValue(doc, "CATALINA_OPTS", catalinaOpts);
-		} 
-
-		// update JAVA_OPTS
-		updateVarValue(doc, "JAVA_OPTS", javaOptsString);
-
 		ParserXMLUtility.saveXMLFile(fileName, doc);
-
 	}
 
 	public static void updateVarValue(Document doc, String propertyName, String value) throws WindowsAzureInvalidProjectOperationException {
@@ -110,32 +102,47 @@ public class WebAppConfigOperations {
 			Element element = null;
 			element = (Element) xPath.evaluate(addExp, doc, XPathConstants.NODE);
 			if (element != null
-					&& element.hasAttribute("name") && element.getAttribute("name").equalsIgnoreCase("httppPlatformHandler")
-					&& element.hasAttribute("path") && element.getAttribute("path").equalsIgnoreCase("*")
-					&& element.hasAttribute("verb") && element.getAttribute("verb").equalsIgnoreCase("*")
-					&& element.hasAttribute("modules") && element.getAttribute("modules").equalsIgnoreCase("httpPlatformHandler")
-					&& element.hasAttribute("resourceType") && element.getAttribute("resourceType").equalsIgnoreCase("Unspecified")) {
+					&& element.hasAttribute("name") && element.getAttribute("name").equals("httppPlatformHandler")
+					&& element.hasAttribute("path") && element.getAttribute("path").equals("*")
+					&& element.hasAttribute("verb") && element.getAttribute("verb").equals("*")
+					&& element.hasAttribute("modules") && element.getAttribute("modules").equals("httpPlatformHandler")
+					&& element.hasAttribute("resourceType") && element.getAttribute("resourceType").equals("Unspecified")) {
 				element = (Element) xPath.evaluate(platformExp, doc, XPathConstants.NODE);
-				// current logic is only for tomcat
-				if (element != null
-						&& element.hasAttribute("processPath") && element.getAttribute("processPath").equalsIgnoreCase(serverPath + "\\bin\\startup.bat")
-						&& ParserXMLUtility.doesNodeExists(doc, varsExp)) {
-					// JAVA_OPTS
-					String nodeExpr = String.format(varExp, "JAVA_OPTS");
-					element = (Element) xPath.evaluate(nodeExpr, doc, XPathConstants.NODE);
-					if (element != null && element.hasAttribute("value") && element.getAttribute("value").equalsIgnoreCase(javaOptsString)) {
-						// CATALINA_HOME
-						nodeExpr = String.format(varExp, "CATALINA_HOME");
+				if (server.contains("tomcat")) {
+					if (element != null
+							&& element.hasAttribute("processPath") && element.getAttribute("processPath").equals(serverPath + "\\bin\\startup.bat")
+							&& ParserXMLUtility.doesNodeExists(doc, varsExp)) {
+						// JAVA_OPTS
+						String nodeExpr = String.format(varExp, "JAVA_OPTS");
 						element = (Element) xPath.evaluate(nodeExpr, doc, XPathConstants.NODE);
-						if (element != null && element.hasAttribute("value") && element.getAttribute("value").equalsIgnoreCase(serverPath)) {
-							nodeExpr = String.format(varExp, "CATALINA_OPTS");
+						if (element != null && element.hasAttribute("value") && element.getAttribute("value").equals(javaOptsString)) {
+							// CATALINA_HOME
+							nodeExpr = String.format(varExp, "CATALINA_HOME");
 							element = (Element) xPath.evaluate(nodeExpr, doc, XPathConstants.NODE);
-							if (element != null && element.hasAttribute("value") && element.getAttribute("value").equalsIgnoreCase(catalinaOpts)) {
-								editRequired = false;
+							if (element != null && element.hasAttribute("value") && element.getAttribute("value").equals(serverPath)) {
+								nodeExpr = String.format(varExp, "CATALINA_OPTS");
+								element = (Element) xPath.evaluate(nodeExpr, doc, XPathConstants.NODE);
+								if (element != null && element.hasAttribute("value") && element.getAttribute("value").equals(catalinaOpts)) {
+									editRequired = false;
+								}
 							}
 						}
 					}
-				} 
+				} else {
+					String arg = "-Djava.net.preferIPv4Stack=true  -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=127.0.0.1:%HTTP_PLATFORM_DEBUG_PORT% -Djetty.port=%HTTP_PLATFORM_PORT% -Djetty.base=\"" + 
+							serverPath + "\" -Djetty.webapps=\"d:\\home\\site\\wwwroot\\webapps\"  -jar \"" + serverPath + "\\start.jar\" etc\\jetty-logging.xml";
+					if (element != null
+							&& element.hasAttribute("processPath")
+							&& element.getAttribute("processPath").equals("%JAVA_HOME%\\bin\\java.exe")
+							&& element.hasAttribute("startupTimeLimit")
+							&& element.getAttribute("startupTimeLimit").equals("30")
+							&& element.hasAttribute("startupRetryCount")
+							&& element.getAttribute("startupRetryCount").equals("10")
+							&& element.hasAttribute("arguments")
+							&& element.getAttribute("arguments").equals(arg)) {
+						editRequired = false;
+					}
+				}
 			}
 		}
 		return editRequired;

@@ -123,8 +123,10 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 												msDeployProfile.getUserName(), msDeployProfile.getPassword());
 										pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", command);
 									} else if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("aix") > 0) {
+										// escape $ for linux
+										String userName = "\\" + msDeployProfile.getUserName();
 										String command = String.format(Messages.commandSh, port, website,
-												msDeployProfile.getUserName(), msDeployProfile.getPassword());
+												userName, msDeployProfile.getPassword());
 										pb = new ProcessBuilder("/bin/bash", "-c", command);
 									} else {
 										String command = String.format(Messages.commandMac, port, website,

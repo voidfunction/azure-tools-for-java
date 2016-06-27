@@ -14,7 +14,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.workbench,
  org.scala-ide.sdt.core,
  org.eclipse.jface
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: com.microsoft.azure.hdinsight.common2,
  com.microsoft.azure.hdinsight.sdk.cluster,

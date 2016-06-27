@@ -24,7 +24,7 @@
 	<target name="package" description="Package JARs" depends="clean">
 		<mkdir dir="${basedir}\build" />
 		<mkdir dir="${basedir}\jar" />
-		<javac srcdir="src" destdir="build" source="1.7" target="1.7" classpathref="build.classpath" debug="true" debuglevel="vars,lines,source"/>
+		<javac srcdir="src" destdir="build" source="1.8" target="1.8" classpathref="build.classpath" debug="true" debuglevel="vars,lines,source"/>
 		<jar destfile="${basedir}\jar\.cspack.jar" basedir="${basedir}\build">
             <fileset dir="${basedir}\src">
                 <include name="**/*.hbs"/>
