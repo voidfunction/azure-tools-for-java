@@ -37,9 +37,11 @@
 	<target name="copy-resource" depends="init" description="copy resources to build folder">
 		<copy todir="${basedir}/build">
 			<fileset dir="${basedir}/resources">
+				<exclude name="/hdinsight/**"/>
 				<type type="file"/>
 			</fileset>
 		</copy>
+		<zip destfile="${basedir}/build/hdinsight_jobview_html.zip" basedir="${basedir}/resources/hdinsight" />
 	</target>
 
   <target name="dist" depends="compile-sources,copy-resource" description="generate the distributable files " >
@@ -50,6 +52,8 @@
   	</jar>
 		<copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\..\PluginsAndFeatures\com.microsoftopentechnologies.wacommon\resources\${jar_name}" overwrite="true" />
 		<copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\..\PluginsAndFeatures\azure-toolkit-for-intellij\lib\${jar_name}" overwrite="true" />
+	    <copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\..\PluginsAndFeatures\com.microsoft.azureexplorer\resources\${jar_name}" overwrite="true" />
+	    <copy file="${basedir}\build\hdinsight_jobview_html.zip" tofile="${basedir}\..\..\PluginsAndFeatures\com.microsoft.azureexplorer\resources\hdinsight_jobview_html.zip" overwrite="true" />
   </target>
 
   <target name="clean" description="clean up" >
