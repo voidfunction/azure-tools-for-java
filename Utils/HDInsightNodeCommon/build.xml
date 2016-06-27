@@ -41,7 +41,7 @@
 				<type type="file"/>
 			</fileset>
 		</copy>
-		<zip destfile="${basedir}/build/hdinsight_jobview_html.zip" basedir="${basedir}/resources/hdinsight" />
+		<zip destfile="${basedir}/build/hdinsight_jobview_html.zip" basedir="${basedir}/resources" />
 	</target>
 
   <target name="dist" depends="compile-sources,copy-resource" description="generate the distributable files " >
