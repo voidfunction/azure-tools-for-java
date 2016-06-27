@@ -6,7 +6,9 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ResponseUtils {
     private final static Logger log = Logger.getLogger(ResponseUtils.class.getName());
@@ -27,11 +29,11 @@ public class ResponseUtils {
                 try {
                     UUID correlationId = UUID.fromString(correlationIdHeader);
                     if (!correlationId.equals(callState.correlationId)) {
-                        log.warn("Returned correlation id '" + correlationId + "' does not match the sent correlation id '" + callState.correlationId + "'");
+                        log.log(Level.WARNING, "Returned correlation id '" + correlationId + "' does not match the sent correlation id '" + callState.correlationId + "'");
                     }
                 }
                 catch(IllegalArgumentException ex) {
-                    log.warn("Returned correlation id '" + correlationIdHeader + "' is not in GUID format.");
+                    log.log(Level.WARNING, "Returned correlation id '" + correlationIdHeader + "' is not in GUID format.");
                 }
             }
 
@@ -92,12 +94,12 @@ public class ResponseUtils {
          }
          else if (tokenResponse.error != null) {
         	 String message = tokenResponse.error + tokenResponse.errorDescription;
-         	 log.error(message);
+         	 log.log(Level.SEVERE, message);
              throw new AuthException(tokenResponse.error, tokenResponse.errorDescription);
          }
          else {
         	 String message = AuthError.Unknown + AuthErrorMessage.Unknown;
-         	 log.error(message);
+         	 log.log(Level.SEVERE, message);
              throw new AuthException(AuthError.Unknown, AuthErrorMessage.Unknown);
          }
          return result;

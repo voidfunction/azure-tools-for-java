@@ -21,7 +21,7 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 class Params implements java.io.Serializable {
     private static final long serialVersionUID = 1L;

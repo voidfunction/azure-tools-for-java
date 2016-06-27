@@ -9,7 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FileTokenCache extends TokenCache {
     final static Logger log = Logger.getLogger(AcquireTokenHandlerBase.class.getName());
@@ -43,7 +44,7 @@ public class FileTokenCache extends TokenCache {
                 lock = raf.getChannel().tryLock();
                 break;
             } catch(OverlappingFileLockException ex) {
-                log.warn(String.format("The file has been locked by another process - waiting %s sec to release [%d attempt(s) left].", sleepSec, tryCount));
+                log.log(Level.WARNING, String.format("The file has been locked by another process - waiting %s sec to release [%d attempt(s) left].", sleepSec, tryCount));
                 Thread.sleep(sleepSec*1000);
                 tryCount--;
             }

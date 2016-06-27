@@ -8,7 +8,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;//import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TokenCache {
     private final static Logger log = Logger.getLogger(TokenCache.class.getName());
@@ -117,7 +118,7 @@ public class TokenCache {
           DataInputStream reader = new DataInputStream(inputStream);
             int schemaVersion = reader.readInt();
             if (schemaVersion != SchemaVersion) {
-                log.warn("The version of the persistent state of the cache does not match the current schema, so skipping deserialization.");
+                log.log(Level.WARNING, "The version of the persistent state of the cache does not match the current schema, so skipping deserialization.");
                 return;
             }
             tokenCacheDictionary.clear();
@@ -272,7 +273,7 @@ public class TokenCache {
         synchronized(lock) {
             log.info("Storing token in the cache...");
             TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType, result.userInfo);
-            log.info(String.format("==> tokenCacheKey:\n \t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n", 
+            log.info(String.format("\n==> tokenCacheKey:\n \t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n", 
                   authority
                   , resource.toLowerCase()
                   , clientId.toLowerCase()
@@ -352,8 +353,8 @@ public class TokenCache {
                     log.info("A Multi Resource Refresh Token for a different resource was found which can be used");
                 }
             } else {
-            	String message = AuthError.MultipleTokensMatched;
-            	log.error(message);
+                String message = AuthError.MultipleTokensMatched;
+                log.log(Level.SEVERE, message);
                 throw new AuthException(message);
             }
             return returnValue;

@@ -12,9 +12,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms,
  org.eclipse.ui.editors,
  org.eclipse.text
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ resources/hdinsight-node-common.jar
 Import-Package: org.eclipse.core.resources,
  org.eclipse.jface.text.revisions
 Export-Package: com.microsoft.azureexplorer,

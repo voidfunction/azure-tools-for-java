@@ -20,7 +20,7 @@
         <mkdir dir="${out}\build" />
         <mkdir dir="${out}\jar" />
         <!--on mac javaFx only works on java8+-->
-        <javac srcdir="${basedir}\src" destdir="${out}\build" source="1.7" target="1.7" classpathref="build.classpath" debug="true" debuglevel="vars,lines,source">
+        <javac srcdir="${basedir}\src" destdir="${out}\build" source="1.8" target="1.8" classpathref="build.classpath" debug="true" debuglevel="vars,lines,source">
             <exclude name="**/com/microsoft/auth/example/*.java" />
         </javac>
 

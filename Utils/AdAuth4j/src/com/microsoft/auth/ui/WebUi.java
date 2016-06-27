@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 import com.microsoft.auth.IWebUi;
 
 import javafx.application.Application;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 public class WebUi implements IWebUi {
     final static Logger log = Logger.getLogger(WebUi.class.getName());

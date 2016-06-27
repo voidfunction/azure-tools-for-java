@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class HttpHelper {
 	final static Logger log = Logger.getLogger(HttpHelper.class.getName());
@@ -59,7 +60,7 @@ public class HttpHelper {
 			}
 			String message = "AD Auth token endpoint returned HTTP status code " + Integer.toString(statusCode)
 					+ ". Error info: " + err.toString();
-			log.error(message);
+			log.log(Level.SEVERE, message);
 
 			TokenResponse r = JsonHelper.deserialize(TokenResponse.class, err.toString());
 			if (r.error.equals("invalid_grant"))
@@ -123,11 +124,11 @@ public class HttpHelper {
 			try {
 				UUID correlationId = UUID.fromString(correlationIdHeader);
 				if (!correlationId.equals(callState.correlationId)) {
-					log.warn("Returned correlation id '" + correlationId + "' does not match the sent correlation id '"
+					log.log(Level.WARNING, "Returned correlation id '" + correlationId + "' does not match the sent correlation id '"
 							+ callState.correlationId + "'");
 				}
 			} catch (IllegalArgumentException ex) {
-				log.warn("Returned correlation id '" + correlationIdHeader + "' is not in GUID format.");
+				log.log(Level.WARNING, "Returned correlation id '" + correlationIdHeader + "' is not in GUID format.");
 			}
 		}
 	}

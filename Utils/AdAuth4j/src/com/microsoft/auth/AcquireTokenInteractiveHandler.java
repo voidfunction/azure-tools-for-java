@@ -4,10 +4,11 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
-	final static Logger log = Logger.getLogger(AcquireTokenInteractiveHandler.class.getName());
+    final static Logger log = Logger.getLogger(AcquireTokenInteractiveHandler.class.getName());
     private static AuthorizationResult authorizationResult;
     private static long authorizationResultTimestamp = -1;
     private URI redirectUri;
@@ -40,6 +41,12 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
                 && this.promptBehavior != PromptBehavior.Always 
                 && this.promptBehavior != PromptBehavior.RefreshSession);
         this.supportADFS = true;
+        log.info(String.format(
+                "\n=== AcquireTokenInteractiveHandler params:\n\tpromptBehavior: %s\n\twebUi: %s\n\tuniqueId: %s\n\tdisplayableId: %s"
+                , promptBehavior.toString()
+                , webUi.getClass().getName()
+                , uniqueId 
+                , displayableId));
     }
 
     private void setRedirectUriRequestParameter() {
@@ -52,13 +59,13 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     }
     
     private void acquireAuthorization() throws Exception {
-    	log.info("acquireAuthorization...");
+        log.info("acquireAuthorization...");
         long allowedInterval = 300000; // authorization code ttl
         if(authorizationResult != null
             && !authenticator.getIsTenantless()
             && System.currentTimeMillis() - authorizationResultTimestamp < allowedInterval) {
             // use existing authorization code
-        	log.info("using existing authorization code");
+            log.info("using existing authorization code");
             return;
         }
 
@@ -66,8 +73,8 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
         log.info("Starting web ui...");
         String resultUri = this.webUi.authenticateAsync(authorizationUri, this.redirectUri).get();
         if(resultUri == null) {
-        	String message = "Authorization failed";
-        	log.error(message);
+            String message = "Authorization failed";
+            log.log(Level.SEVERE, message);
             throw new AuthException(message);
         }
         authorizationResult = ResponseUtils.parseAuthorizeResponse(resultUri, this.callState);
@@ -119,13 +126,13 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     private void verifyAuthorizationResult() throws Exception {
         if (this.promptBehavior == PromptBehavior.Never 
                 && authorizationResult.error.equals(OAuthError.LoginRequired)) {
-        	String message = AuthError.UserInteractionRequired;
-        	log.error(message);
+            String message = AuthError.UserInteractionRequired;
+            log.log(Level.SEVERE, message);
             throw new AuthException(message);
         }
         if (authorizationResult.status != AuthorizationStatus.Success) {
-        	String message = authorizationResult.error + ": " + authorizationResult.errorDescription;
-        	log.error(message);
+            String message = authorizationResult.error + ": " + authorizationResult.errorDescription;
+            log.log(Level.SEVERE, message);
             throw new AuthException(message);
         }
     }
@@ -148,14 +155,14 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
         String displayableId = (result.userInfo != null) ? result.userInfo.displayableId : "NULL";
         if (this.userIdentifierType == UserIdentifierType.UniqueId 
                 && uniqueId.compareTo(this.uniqueId) != 0) {
-        	String message = this.uniqueId + " != " + uniqueId;
-        	log.error(message);
+            String message = "Expected and returned userInfo.uniqueId doesn't match: " + this.uniqueId + " != " + uniqueId;
+            log.log(Level.SEVERE, message);
             throw new AuthException(message);
         }
         if (this.userIdentifierType == UserIdentifierType.RequiredDisplayableId 
                 && displayableId.compareToIgnoreCase(this.displayableId) != 0) {
-        	String message = this.displayableId + " != " + displayableId;
-        	log.error(message);
+            String message = "Expected and returned userInfo.displayableId doesn't match: " + this.displayableId + " != " + displayableId;
+            log.log(Level.SEVERE, message);
             throw new AuthException(message);
         }
     }

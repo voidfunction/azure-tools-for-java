@@ -37,14 +37,14 @@ public final class UserIdentifier
     public static final UserIdentifier anyUser = anyUserSingleton;
 
     boolean isAnyUser() {
-    	return (this.type == anyUser.type && this.id == anyUser.id);
+        return (this.type == anyUser.type && this.id == anyUser.id);
     }
 
     String uniqueId() {
-    	return (!this.isAnyUser() && this.type == UserIdentifierType.UniqueId) ? this.id : null;
+        return (!this.isAnyUser() && this.type == UserIdentifierType.UniqueId) ? this.id : null;
     }
 
     String displayableId() {
-    	return (!this.isAnyUser() && (this.type == UserIdentifierType.OptionalDisplayableId || this.type == UserIdentifierType.RequiredDisplayableId)) ? this.id : null;
+        return (!this.isAnyUser() && (this.type == UserIdentifierType.OptionalDisplayableId || this.type == UserIdentifierType.RequiredDisplayableId)) ? this.id : null;
     }
 }
