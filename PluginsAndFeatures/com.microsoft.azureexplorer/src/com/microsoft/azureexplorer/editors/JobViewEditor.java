@@ -15,15 +15,15 @@ import com.microsoft.azureexplorer.helpers.HDInsightJobViewUtils;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker;
-import javafx.embed.swt.FXCanvas;
-import javafx.scene.Scene;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
-import netscape.javascript.JSObject;
+//import javafx.application.Platform;
+//import javafx.beans.value.ChangeListener;
+//import javafx.beans.value.ObservableValue;
+//import javafx.concurrent.Worker;
+//import javafx.embed.swt.FXCanvas;
+//import javafx.scene.Scene;
+//import javafx.scene.web.WebEngine;
+//import javafx.scene.web.WebView;
+//import netscape.javascript.JSObject;
 
 public class JobViewEditor extends EditorPart {
 
@@ -65,35 +65,35 @@ public class JobViewEditor extends EditorPart {
 	@Override
 	public void createPartControl(Composite composite) {
 		composite.setLayout(new FillLayout());
-		FXCanvas canvas = new FXCanvas(composite, SWT.FULL_SELECTION);
-		String indexPath = PluginUtil.pluginFolder  + "/com.microsoft.azure.hdinsight" + "/job/html/index.html";
-		final String queryString = "?projectid=" + uuid + "&engintype=javafx";
-		final String webUrl = "file:///" + indexPath.replace("\\", "") + queryString;
-		final WebView webView = new WebView();
-		Scene scene = new Scene(webView);
-		canvas.setScene(scene);
-		Platform.setImplicitExit(false);
-		Platform.runLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				WebEngine webEngine = webView.getEngine();
-				webEngine.load(webUrl);
-				
-                webEngine.getLoadWorker().stateProperty().addListener(
-                        new ChangeListener<Worker.State>() {
-                            @Override
-                            public void changed(ObservableValue<? extends Worker.State> ov,
-                                                Worker.State oldState, Worker.State newState) {
-                                if (newState == Worker.State.SUCCEEDED) {
-                                    JSObject win = (JSObject) webEngine.executeScript("window");
-                                    win.setMember("JobUtils", new JobUtils());
-                                }
-                            }
-                        }
-                );
-			}
-		});
+//		FXCanvas canvas = new FXCanvas(composite, SWT.FULL_SELECTION);
+//		String indexPath = PluginUtil.pluginFolder  + "/com.microsoft.azure.hdinsight" + "/job/html/index.html";
+//		final String queryString = "?projectid=" + uuid + "&engintype=javafx";
+//		final String webUrl = "file:///" + indexPath.replace("\\", "") + queryString;
+//		final WebView webView = new WebView();
+//		Scene scene = new Scene(webView);
+//		canvas.setScene(scene);
+//		Platform.setImplicitExit(false);
+//		Platform.runLater(new Runnable() {
+//			
+//			@Override
+//			public void run() {
+//				WebEngine webEngine = webView.getEngine();
+//				webEngine.load(webUrl);
+//				
+//                webEngine.getLoadWorker().stateProperty().addListener(
+//                        new ChangeListener<Worker.State>() {
+//                            @Override
+//                            public void changed(ObservableValue<? extends Worker.State> ov,
+//                                                Worker.State oldState, Worker.State newState) {
+//                                if (newState == Worker.State.SUCCEEDED) {
+//                                    JSObject win = (JSObject) webEngine.executeScript("window");
+//                                    win.setMember("JobUtils", new JobUtils());
+//                                }
+//                            }
+//                        }
+//                );
+//			}
+//		});
 	}
 
 	@Override
