@@ -27,8 +27,8 @@
     <module>com.microsoft.azureexplorer.feature</module>
     <module>com.microsoft.webapp</module>
     <module>com.microsoft.webapp.feature</module>
-<!--    <module>com.microsoft.hdinsights</module>
-    <module>com.microsoft.hdinsights.feature</module>-->
+   <module>com.microsoft.hdinsights</module>
+    <module>com.microsoft.hdinsights.feature</module>
     <module>com.persistent.winazure.eclipseplugin</module>
 	<module>com.persistent.winazure.eclipseplugin.feature</module>   
 	<module>WindowsAzurePlugin4EJ</module>   
@@ -40,13 +40,18 @@
 
   <repositories>
     <repository>
-      <id>juno</id>
+      <id>luna</id>
       <layout>p2</layout>
-      <url>http://download.eclipse.org/releases/juno</url>
+      <url>http://download.eclipse.org/releases/luna</url>
+    </repository>
+    <repository>
+      <id>scala</id>
+      <layout>p2</layout>
+      <url>http://download.scala-ide.org/sdk/lithium/e44/scala211/stable/site</url>
     </repository>
   </repositories>
 
-  <build>
+ <build>
     <plugins>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
@@ -57,37 +62,13 @@
 
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-p2-director-plugin</artifactId>
-        <version>${tycho-version}</version>
-        <executions>
-          <execution>
-            <id>materialize-products</id>
-            <goals>
-              <goal>materialize-products</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>archive-products</id>
-            <goals>
-              <goal>archive-products</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-	  <plugin>
-        <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
         <version>${tycho-version}</version>
         <configuration>
-         <!-- <environments>
-            <environment>
-              <os>win32</os>
-              <ws>win32</ws>
-              <arch>x86</arch>
-            </environment>
-			</environments>-->
+         
         </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-compiler-plugin</artifactId>
@@ -96,7 +77,9 @@
           <compilerArgument>-warn:+discouraged,forbidden</compilerArgument>
         </configuration>
       </plugin>
-    </plugins>
-  </build> 
+
+</plugins>
+
+</build> 
 
 </project>
