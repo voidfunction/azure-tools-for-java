@@ -45,13 +45,7 @@ import java.io.InputStreamReader;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
-public class MSToolsApplication extends AbstractProjectComponent implements PluginComponent {
-
-    private PluginSettings settings;
-
-    // TODO: This needs to be the plugin ID from plugin.xml somehow.
-    public static final String PLUGIN_ID = CommonConst.PLUGIN_ID;
-
+public class MSToolsApplication extends AbstractProjectComponent {
     protected MSToolsApplication(Project project) {
         super(project);
     }
@@ -64,57 +58,7 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
 
     @Override
     public void initComponent() {
-        DefaultLoader.setPluginComponent(this);
-        DefaultLoader.setUiHelper(new UIHelperImpl());
-        DefaultLoader.setIdeHelper(new IDEHelperImpl());
-        Node.setNode2Actions(NodeActionsMap.node2Actions);
-
-        HDInsightLoader.setHHDInsightHelper(new HDInsightHelperImpl());
-
-        // load up the plugin settings
-        try {
-            loadPluginSettings();
-        } catch (IOException e) {
-            PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting to load settings", e);
-        }
-
         cleanTempData();
-
-    }
-
-    @Override
-    public PluginSettings getSettings() {
-        return settings;
-    }
-
-    @Override
-    public String getPluginId() {
-        return PLUGIN_ID;
-    }
-
-    private void loadPluginSettings() throws IOException {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(
-                    new InputStreamReader(
-                            MSToolsApplication.class.getResourceAsStream("/settings.json")));
-            StringBuilder sb = new StringBuilder();
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-
-            Gson gson = new Gson();
-            settings = gson.fromJson(sb.toString(), PluginSettings.class);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ignored) {
-                }
-            }
-        }
     }
 
     private void cleanTempData() {
@@ -129,7 +73,7 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
         String currentPluginVersion = DefaultLoader.getIdeHelper().getProperty(AppSettingsNames.CURRENT_PLUGIN_VERSION, myProject);
 
         if (StringHelper.isNullOrWhiteSpace(currentPluginVersion) ||
-                !getSettings().getPluginVersion().equals(currentPluginVersion)) {
+                !DefaultLoader.getPluginComponent().getSettings().getPluginVersion().equals(currentPluginVersion)) {
 
             String[] settings = new String[]{
                     AppSettingsNames.AAD_AUTHENTICATION_RESULTS,
@@ -145,7 +89,6 @@ public class MSToolsApplication extends AbstractProjectComponent implements Plug
         }
 
         // save the current plugin version
-        DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.CURRENT_PLUGIN_VERSION, getSettings().getPluginVersion(), myProject);
+        DefaultLoader.getIdeHelper().setProperty(AppSettingsNames.CURRENT_PLUGIN_VERSION, DefaultLoader.getPluginComponent().getSettings().getPluginVersion(), myProject);
     }
-
 }

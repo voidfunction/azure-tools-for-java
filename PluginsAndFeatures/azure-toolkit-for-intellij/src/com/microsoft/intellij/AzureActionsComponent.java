@@ -22,15 +22,51 @@
 package com.microsoft.intellij;
 
 
+import com.google.gson.Gson;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.IdeActions;
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.util.PlatformUtils;
+import com.microsoft.azure.hdinsight.common.HDInsightHelperImpl;
+import com.microsoft.azure.hdinsight.common.HDInsightLoader;
+import com.microsoft.intellij.common.CommonConst;
+import com.microsoft.intellij.helpers.IDEHelperImpl;
+import com.microsoft.intellij.helpers.UIHelperImpl;
+import com.microsoft.intellij.serviceexplorer.NodeActionsMap;
+import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.components.PluginComponent;
+import com.microsoft.tooling.msservices.components.PluginSettings;
+import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import org.jetbrains.annotations.NotNull;
 
-public class AzureActionsComponent implements ApplicationComponent {
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
+
+public class AzureActionsComponent implements ApplicationComponent, PluginComponent {
+    public static final String PLUGIN_ID = CommonConst.PLUGIN_ID;
+
+    private PluginSettings settings;
+
+    public AzureActionsComponent() {
+        DefaultLoader.setPluginComponent(this);
+        DefaultLoader.setUiHelper(new UIHelperImpl());
+        DefaultLoader.setIdeHelper(new IDEHelperImpl());
+        Node.setNode2Actions(NodeActionsMap.node2Actions);
+
+        HDInsightLoader.setHHDInsightHelper(new HDInsightHelperImpl());
+        try {
+            loadPluginSettings();
+        } catch (IOException e) {
+            PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting to load settings", e);
+        }
+    }
+
     @NotNull
     public String getComponentName() {
         return this.getClass().getName();
@@ -52,5 +88,38 @@ public class AzureActionsComponent implements ApplicationComponent {
     }
 
     public void disposeComponent() {
+    }
+
+    @Override
+    public PluginSettings getSettings() {
+        return settings;
+    }
+
+    @Override
+    public String getPluginId() {
+        return PLUGIN_ID;
+    }
+
+    private void loadPluginSettings() throws IOException {
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(AzureActionsComponent.class.getResourceAsStream("/settings.json")));
+            StringBuilder sb = new StringBuilder();
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+
+            Gson gson = new Gson();
+            settings = gson.fromJson(sb.toString(), PluginSettings.class);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
     }
 }
