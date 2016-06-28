@@ -22,6 +22,7 @@ package com.microsoft.intellij.ui.debug;
 
 import com.intellij.application.options.ModulesComboBox;
 import com.intellij.execution.configurations.RemoteConnection;
+import com.intellij.execution.ui.ConfigurationModuleSelector;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.options.ConfigurationException;
@@ -135,8 +136,12 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
         myAddressField.addFocusListener(fieldFocusListener);
         myPortField.addFocusListener(fieldFocusListener);
 
-        // custom class to avoid NULL pointer exception
-        myModuleSelector = new ConfigurationModuleSelector(project, myModule.getComponent(), "<whole project>");
+        if (myModule.getComponent() == null) {
+            myModuleSelector = new ConfigurationModuleSelector(project, new ModulesComboBox(), "<whole project>");
+        } else {
+            myModuleSelector = new ConfigurationModuleSelector(project, myModule.getComponent(), "<whole project>");
+        }
+
         // default
         myRbSocket.doClick();
         myRbAttach.doClick();
