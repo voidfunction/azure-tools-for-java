@@ -384,6 +384,7 @@ public class AzureRemoteStateState implements RemoteState {
                 if (msDeployProfile != null) {
                     ProcessBuilder pb = null;
                     String os = System.getProperty("os.name").toLowerCase();
+                    String webAppDirPath = WAHelper.getTemplateFile("remotedebug");
                     if (AzurePlugin.IS_WINDOWS) {
                         String command = String.format(message("debugCmd"), socketPort, webSiteName,
                                 msDeployProfile.getUserName(), msDeployProfile.getPassword());
@@ -395,12 +396,12 @@ public class AzureRemoteStateState implements RemoteState {
                                userName, msDeployProfile.getPassword());
                         pb = new ProcessBuilder("/bin/bash", "-c", command);
                     } else {
-                        String command = String.format(message("commandMac"), socketPort, webSiteName,
+                        String command = String.format(message("commandMac"), webAppDirPath + "/", socketPort, webSiteName,
                                 msDeployProfile.getUserName(), msDeployProfile.getPassword());
                         String commandNext = "tell application \"Terminal\" to do script \"" + command + "\"";
                         pb = new ProcessBuilder("osascript", "-e", commandNext);
                     }
-                    pb.directory(new File(WAHelper.getTemplateFile("remotedebug")));
+                    pb.directory(new File(webAppDirPath));
                     try {
                         pb.start();
                         Thread.sleep(30000);

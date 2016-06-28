@@ -118,6 +118,7 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 								if (msDeployProfile != null) {
 									ProcessBuilder pb = null;
 									String os = System.getProperty("os.name").toLowerCase();
+									String webAppDirPath = String.format("%s%s%s", PluginUtil.pluginFolder, File.separator, com.microsoft.webapp.util.Messages.webAppPluginID);
 									if (Activator.IS_WINDOWS) {
 										String command = String.format(Messages.command, port, website,
 												msDeployProfile.getUserName(), msDeployProfile.getPassword());
@@ -129,12 +130,12 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 												userName, msDeployProfile.getPassword());
 										pb = new ProcessBuilder("/bin/bash", "-c", command);
 									} else {
-										String command = String.format(Messages.commandMac, port, website,
+										String command = String.format(Messages.commandMac, webAppDirPath + "/", port, website,
 												msDeployProfile.getUserName(), msDeployProfile.getPassword());
 										String commandNext = "tell application \"Terminal\" to do script \"" + command + "\"";
 										pb = new ProcessBuilder("osascript", "-e", commandNext);
 									}
-									pb.directory(new File(String.format("%s%s%s", PluginUtil.pluginFolder, File.separator, com.microsoft.webapp.util.Messages.webAppPluginID)));
+									pb.directory(new File(webAppDirPath));
 									try {
 										pb.start();
 										Thread.sleep(10000);
