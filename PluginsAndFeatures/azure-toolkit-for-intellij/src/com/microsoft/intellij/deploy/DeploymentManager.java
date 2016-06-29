@@ -56,6 +56,8 @@ import com.microsoftopentechnologies.azuremanagementutil.rest.WindowsAzureRestUt
 import com.microsoftopentechnologies.azuremanagementutil.rest.WindowsAzureStorageServices;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -377,6 +379,13 @@ public final class DeploymentManager {
 
         DeploymentEventArgs arg = new DeploymentEventArgs(this);
         arg.setId(deploymentId);
+        if (deploymentURL != null) {
+            try {
+                new URL(deploymentURL);
+            } catch (MalformedURLException e) {
+                deploymentURL = null;
+            }
+        }
         arg.setDeploymentURL(deploymentURL);
         arg.setDeployMessage(String.format(message, args));
         arg.setDeployCompleteness(progress);
