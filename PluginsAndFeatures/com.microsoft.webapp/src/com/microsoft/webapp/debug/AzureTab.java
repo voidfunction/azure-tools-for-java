@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
 import com.gigaspaces.azure.util.PreferenceWebAppUtil;
+import com.microsoft.azureexplorer.helpers.PreferenceUtil;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoft.webapp.activator.Activator;
@@ -52,6 +53,7 @@ import com.microsoft.webapp.config.Messages;
 import com.microsoft.webapp.config.WebAppDeployDialog;
 import com.microsoft.webapp.util.WebAppUtils;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 
 public class AzureTab extends AbstractLaunchConfigurationTab {
@@ -138,7 +140,20 @@ public class AzureTab extends AbstractLaunchConfigurationTab {
 				if (!website.isEmpty() && listToDisplay.contains(website)) {
 					txtName.setText(website);
 				} else {
-					txtName.setText(listToDisplay.get(0));
+					// coming to dialog for the first time
+					String publishedTo = PreferenceUtil.loadPreference(
+							String.format(Messages.webappKey, PluginUtil.getSelectedProject().getName()));
+					int index = 0;
+					if (publishedTo != null && !publishedTo.isEmpty()) {
+						for (int i = 0; i < webSiteList.size(); i++) {
+							WebSite websiteTemp = webSiteList.get(i);
+							if (websiteTemp.getName().equalsIgnoreCase(publishedTo)) {
+								index = i;
+								break;
+							}
+						}
+					}
+					txtName.setText(listToDisplay.get(index));
 				}
 			}
 		} catch (CoreException e) {
