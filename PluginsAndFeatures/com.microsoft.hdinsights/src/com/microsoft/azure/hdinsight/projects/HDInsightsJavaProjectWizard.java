@@ -58,7 +58,7 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 public class HDInsightsJavaProjectWizard extends JavaProjectWizard implements IExecutableExtension {
 	private String id;
-	private HDInsightJavaPageOne page11;
+	private HDInsightJavaPageOne pageOne;
 	
 	public HDInsightsJavaProjectWizard() {
 			this(new HDInsightJavaPageOne());
@@ -66,8 +66,19 @@ public class HDInsightsJavaProjectWizard extends JavaProjectWizard implements IE
 	
 	public HDInsightsJavaProjectWizard(HDInsightJavaPageOne page1) {
 		super(page1, new HDInsightJavaPageTwo(page1));
+		this.pageOne = page1;
 	}
-
+	
+	@Override
+	public boolean performFinish() {
+		try {
+			CreateProjectUtil.createSampleFile(this.id, this.pageOne.getProjectName());
+		} catch (CoreException e) {
+			Activator.getDefault().log("Create HDInsight project error", e);
+		}
+		return super.performFinish();
+	}
+	
 	@Override
 	public void setInitializationData(IConfigurationElement parameter, String arg1, Object arg2) {
 		super.setInitializationData(parameter, arg1, arg2);
@@ -105,7 +116,7 @@ public class HDInsightsJavaProjectWizard extends JavaProjectWizard implements IE
 			});
 			return newEntries[0] == null ? entries : newEntries;
 		}
-
+		
 		@Override
 		public void createControl(Composite parent) {
 			final IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -140,7 +151,6 @@ public class HDInsightsJavaProjectWizard extends JavaProjectWizard implements IE
 	}
 	
 	static class HDInsightJavaPageTwo extends NewJavaProjectWizardPageTwo {
-
 		public HDInsightJavaPageTwo(NewJavaProjectWizardPageOne mainPage) {
 			super(mainPage);
 		}

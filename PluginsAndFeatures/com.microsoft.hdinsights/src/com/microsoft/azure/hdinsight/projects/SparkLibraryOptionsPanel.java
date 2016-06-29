@@ -82,7 +82,7 @@ public class SparkLibraryOptionsPanel extends Composite {
 
 			comboBox.add(cachedLibraryPath.get(i));
 			try {
-				SparkLibraryInfo info = new SparkLibraryInfo(cachedLibraryPath.get(i));
+				SparkLibraryInfoForEclipse info = new SparkLibraryInfoForEclipse(cachedLibraryPath.get(i));
 				comboBox.setData(cachedLibraryPath.get(i), info);
 			} catch (Exception e) {
 				// do nothing if we can not get the library info
@@ -101,7 +101,7 @@ public class SparkLibraryOptionsPanel extends Composite {
 				if (file != null) {
 					try {
 						comboBox.add(file);
-						comboBox.setData(file, new SparkLibraryInfo(file));
+						comboBox.setData(file, new SparkLibraryInfoForEclipse(file));
 						comboBox.select(comboBox.getItems().length - 1);
 					} catch (Exception e) {
 						Activator.getDefault().log("Error adding Spark library", e);

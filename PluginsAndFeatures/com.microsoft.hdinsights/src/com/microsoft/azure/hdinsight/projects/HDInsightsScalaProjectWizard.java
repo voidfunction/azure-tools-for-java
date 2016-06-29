@@ -52,6 +52,7 @@ import org.scalaide.ui.ScalaImages;
 import org.scalaide.ui.internal.wizards.NewScalaProjectWizardPageOne;
 
 import com.microsoft.auth.StringUtils;
+import com.microsoft.azure.hdinsight.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements IExecutableExtension {
@@ -59,11 +60,11 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 	private Composite sparkLibraryOptionsPanel;
 	private HDInsightScalaPageOne pageOne;
 	private HDInsightScalaPageTwo pageTwo;
-	
+
 	public HDInsightsScalaProjectWizard() {
 		this(new HDInsightScalaPageOne());
 	}
-	
+
 	public HDInsightsScalaProjectWizard(HDInsightScalaPageOne page1) {
 		this(page1, new HDInsightScalaPageTwo(page1));
 	}
@@ -92,11 +93,10 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 		try {
 			CreateProjectUtil.createSampleFile(this.id, this.pageOne.getProjectName());
 		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Activator.getDefault().log("Create HDInsight project error", e);
 		}
-	
-		return true;
+
+		return super.performFinish();
 	}
 
 	static class HDInsightScalaPageOne extends NewScalaProjectWizardPageOne {
