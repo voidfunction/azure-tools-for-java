@@ -397,7 +397,7 @@ public class AzureRemoteStateState implements RemoteState {
                         pb = new ProcessBuilder("/bin/bash", "-c", command);
                     } else {
                         // escape $ for mac
-                        String userName = "\\" + msDeployProfile.getUserName();
+                        String userName = "'" + msDeployProfile.getUserName() + "'";
                         // On mac, you need to specify exact path of JAR
                         String command = String.format(message("commandMac"), webAppDirPath + "/", socketPort, webSiteName,
                                 userName, msDeployProfile.getPassword());
