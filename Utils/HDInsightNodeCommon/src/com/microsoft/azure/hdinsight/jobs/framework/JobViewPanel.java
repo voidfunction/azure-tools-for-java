@@ -34,28 +34,20 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 public final class JobViewPanel extends JFXPanel {
 
     private final Object jobUtil;
     private final String rootPath;
     private final String id;
-    private WebView webView = new WebView();
-    private WebEngine webEngine = webView.getEngine();
+    private WebView webView;
+    private WebEngine webEngine;
     private boolean alreadyLoad = false;
 
     public JobViewPanel(@NotNull String rootPath, @NotNull String uuid) {
         this.rootPath = rootPath;
         this.id = uuid;
-        webEngine.setJavaScriptEnabled(true);
         this.jobUtil = new JobUtils();
         init(this);
-    }
-
-    public WebView getWebView() {
-        return webView;
     }
 
     private void init(final JFXPanel panel) {
@@ -68,7 +60,11 @@ public final class JobViewPanel extends JFXPanel {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+                webView = new WebView();
                 panel.setScene(new Scene(webView));
+                webEngine = webView.getEngine();
+                webEngine.setJavaScriptEnabled(true);
+
                 if (!alreadyLoad) {
                     webEngine.load(weburl);
                     alreadyLoad = true;
