@@ -33,10 +33,11 @@ function getProjectId() {
 var asyncMessageCounter = 0;
 
 function getMessageAsync(url, callback) {
+    ++asyncMessageCounter;
     console.log("http request for " + url);
     $('body').css("cursor", "progress");
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.timeout = 250 * 1000;
+    xmlHttp.timeout = 60 * 1000;
     xmlHttp.ontimeout = function () {
         if (--asyncMessageCounter == 0) {
             $('body').css("cursor", "default");
@@ -58,7 +59,6 @@ function getMessageAsync(url, callback) {
         }
     };
     xmlHttp.open("GET", url, true);
-    ++asyncMessageCounter;
     xmlHttp.send(null);
 }
 

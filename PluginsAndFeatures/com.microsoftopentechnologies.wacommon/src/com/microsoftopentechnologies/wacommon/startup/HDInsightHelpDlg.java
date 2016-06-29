@@ -66,7 +66,7 @@ public class HDInsightHelpDlg extends Dialog {
 			}
 		});
 		final Button checkButton = new Button(container, SWT.CHECK);
-		checkButton.setText("Don't show it again?");
+		checkButton.setText("Do not ask again");
 		checkButton.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {

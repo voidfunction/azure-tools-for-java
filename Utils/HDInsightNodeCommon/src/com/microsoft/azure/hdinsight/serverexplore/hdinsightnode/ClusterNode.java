@@ -42,8 +42,13 @@ import java.util.UUID;
 public class ClusterNode extends AzureRefreshableNode {
     private static final String CLUSTER_MODULE_ID = ClusterNode.class.getName();
     private static final String ICON_PATH = CommonConst.ClusterIConPath;
+    private static boolean isHDInsightPlugin;
 
     private IClusterDetail clusterDetail;
+
+    static {
+        isHDInsightPlugin = ClusterNode.class.getClassLoader().toString().contains("intellij");
+    }
 
     public ClusterNode(Node parent, IClusterDetail clusterDetail) {
         super(CLUSTER_MODULE_ID, getClusterNameWitStatus(clusterDetail), parent, ICON_PATH, true);
@@ -116,10 +121,15 @@ public class ClusterNode extends AzureRefreshableNode {
     protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
             {
         removeAllChildNodes();
-        final String uuid = UUID.randomUUID().toString();
-        JobViewManager.registerJovViewNode(uuid, clusterDetail);
-        JobViewNode jobViewNode = new JobViewNode(this, uuid);
-        addChildNode(jobViewNode);
+
+        // disable JobView Node on Eclipse Plugin
+        if(isHDInsightPlugin) {
+            final String uuid = UUID.randomUUID().toString();
+            JobViewManager.registerJovViewNode(uuid, clusterDetail);
+            JobViewNode jobViewNode = new JobViewNode(this, uuid);
+            addChildNode(jobViewNode);
+        }
+
         //TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerSparkNodeExpand, null, null);
         RefreshableNode storageAccountNode = new StorageAccountFolderNode(this, clusterDetail);
         addChildNode(storageAccountNode);

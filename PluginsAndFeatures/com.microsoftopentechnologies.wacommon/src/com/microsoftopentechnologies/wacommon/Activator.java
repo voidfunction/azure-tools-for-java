@@ -40,6 +40,7 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import com.gigaspaces.azure.views.Messages;
@@ -77,6 +78,8 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
 	
 	private static final EventListenerList DEPLOYMENT_EVENT_LISTENERS = new EventListenerList();
 
+	private boolean isHDInsightEnabled = false;
+	
 	private static final EventListenerList UPLOAD_PROGRESS_EVENT_LISTENERS = new EventListenerList();
 	public static List<DeploymentEventListener> depEveList = new ArrayList<DeploymentEventListener>();
 
@@ -103,8 +106,26 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
 			DefaultLoader.getUIHelper().showException("An error occurred while attempting to load " +
 					"settings for the WACommon plugin.", e, "WACommon", false, true);
 		}
+		isHDInsightEnabled = isHDInsightEnabled(context);
 	}
-
+	
+	public boolean isHDInsightEnabled() {
+		return isHDInsightEnabled;
+	}
+	
+	private boolean isHDInsightEnabled(BundleContext context) {
+		Bundle [] bundles = context.getBundles();
+		boolean isScalaEnabled = false, isHDIEnabled = false;
+		for(int i = 0; i < bundles.length; ++i) {
+			String symbolicName = bundles[i].getSymbolicName().toLowerCase();
+			if(symbolicName.contains("scala-ide")) {
+				isScalaEnabled = true;
+			} else if(symbolicName.equals("com.microsoft.hdinsights")) {
+				isHDIEnabled = true;
+			}
+		}
+		return isScalaEnabled && isHDIEnabled;
+	}
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
