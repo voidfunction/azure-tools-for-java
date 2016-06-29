@@ -50,17 +50,6 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-mgmt-resources-0.9.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-net-3.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/applicationinsights-management-1.0.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-client-authentication-1.0.0-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-client-runtime-1.0.0-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-mgmt-compute-1.0.0-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/client-runtime-1.0.0-beta1.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/converter-jackson-2.0.0-beta4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/jackson-datatype-joda-2.7.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/joda-time-2.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/okhttp-3.1.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/okhttp-urlconnection-3.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/okio-1.6.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/retrofit-2.0.0-beta4.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/java-json.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
