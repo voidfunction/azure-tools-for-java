@@ -34,7 +34,6 @@ import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappsModule;
 
 import java.util.List;
