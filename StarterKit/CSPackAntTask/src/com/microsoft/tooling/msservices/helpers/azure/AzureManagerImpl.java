@@ -262,6 +262,9 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
                 if(res == null) continue;;
 
                 UserInfo userInfo = new UserInfo(tid, res.getUserInfo().getUniqueId());
+
+                List<Subscription> legacySubscriptions = getLegacySubscriptions(managementUri, userInfo);
+
                 List<com.microsoft.auth.subsriptions.Subscription> subscriptions = com.microsoft.auth.subsriptions.SubscriptionsClient.getByToken(res.getAccessToken());
                 for (com.microsoft.auth.subsriptions.Subscription s : subscriptions) {
                     Subscription sub = new Subscription();
@@ -270,6 +273,12 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
                     sub.setTenantId(tid);
                     sub.setServiceManagementUrl(managementUri);
                     sub.setSelected(true);
+                    for (Subscription subscription : legacySubscriptions) {
+                        if (s.getSubscriptionId().equals(subscription.getId())) {
+                            sub.setMaxHostedServices(subscription.getMaxHostedServices());
+                            sub.setMaxStorageAccounts(subscription.getMaxStorageAccounts());
+                        }
+                    }
                     updateSubscription(sub, userInfo);
                 }
                 setUserInfo(userInfo);
@@ -277,6 +286,37 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
         } catch (Exception ex) {
             throw new AzureCmdException("Error loading tenants", ex);
         }
+    }
+
+    private List<Subscription> getLegacySubscriptions(final String managementUri, final UserInfo userInfo) throws AzureCmdException {
+        return requestWithToken(userInfo, new RequestCallback<List<Subscription>>() {
+            @Override
+            public List<Subscription> execute()
+                    throws Throwable {
+                String accessToken = getAccessToken(userInfo);
+                String subscriptionsXML = AzureAADHelper.executeRequest(managementUri,
+                        "subscriptions",
+                        ContentType.Json,
+                        "GET",
+                        null,
+                        accessToken,
+                        new RestServiceManagerBaseImpl() {
+                            @NotNull
+                            @Override
+                            public String executePollRequest(@NotNull String managementUrl,
+                                                             @NotNull String path,
+                                                             @NotNull ContentType contentType,
+                                                             @NotNull String method,
+                                                             @Nullable String postData,
+                                                             @NotNull String pollPath,
+                                                             @NotNull HttpsURLConnectionProvider sslConnectionProvider)
+                                    throws AzureCmdException {
+                                throw new UnsupportedOperationException();
+                            }
+                        });
+                return parseSubscriptionsXML(subscriptionsXML);
+            }
+        });
     }
 
     @Override
