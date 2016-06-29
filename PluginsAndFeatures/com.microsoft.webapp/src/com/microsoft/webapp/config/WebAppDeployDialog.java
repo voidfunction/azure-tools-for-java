@@ -242,6 +242,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							listToDisplay.remove(index);
 							list.setItems(listToDisplay.toArray(new String[listToDisplay.size()]));
 							webSiteConfigMap.remove(selectedWebSite);
+							Activator.getDefault().getWebsiteDebugPrep().remove(selectedWebSite.getName());
 							PreferenceWebAppUtil.save(webSiteConfigMap);
 							if (webSiteConfigMap.isEmpty()) {
 								setErrorMessage(Messages.noWebAppErrMsg);
@@ -249,6 +250,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							// always disable button as after delete no entry is selected
 							delBtn.setEnabled(false);
 							selectedWebSite = null;
+							
 						}
 					} catch (AzureCmdException e) {
 						String msg = Messages.delErr + "\n" + String.format(Messages.webappExpMsg, e.getMessage());

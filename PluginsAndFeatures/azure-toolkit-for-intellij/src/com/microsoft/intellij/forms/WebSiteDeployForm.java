@@ -130,6 +130,7 @@ public class WebSiteDeployForm extends DialogWrapper {
                             selectedWebSite.getWebSpaceName(), name);
                     webSiteList.remove(webSiteJList.getSelectedIndex());
                     webSiteConfigMap.remove(selectedWebSite);
+                    AzureSettings.getSafeInstance(project).getWebsiteDebugPrep().remove(selectedWebSite.getName());
                     AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
                     selectedWebSite = null;
                     if (webSiteConfigMap.isEmpty()) {

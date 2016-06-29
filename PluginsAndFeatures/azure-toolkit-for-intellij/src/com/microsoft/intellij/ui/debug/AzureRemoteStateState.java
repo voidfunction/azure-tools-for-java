@@ -168,7 +168,7 @@ public class AzureRemoteStateState implements RemoteState {
         WebSiteConfiguration webSiteConfiguration;
 
         public PrepareForDebug(WebSite webSite, WebSiteConfiguration webSiteConfiguration) {
-            super(project, "Preparing web app for remote debugging", true);
+            super(project, "Preparing web app for remote debugging (if needed)", true);
             this.webSite = webSite;
             this.webSiteConfiguration = webSiteConfiguration;
         }
