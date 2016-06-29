@@ -150,7 +150,7 @@ public class WACPStartUp implements IStartup {
 				if(isHDInsight && !Activator.getDefault().isHDInsightEnabled()) {
 					boolean isShowHDInsightTips = true;
 					HDInsightHelpDlg hdInsightHelpDlg = new HDInsightHelpDlg(Display.getDefault().getActiveShell());
-					if(hdInsightHelpDlg.open() == Window.OK && !hdInsightHelpDlg.isShowTipsStatus()) {
+					if(hdInsightHelpDlg.open() == Window.CANCEL && !hdInsightHelpDlg.isShowTipsStatus()) {
 						isShowHDInsightTips = false;
 						DataOperations.updatePropertyValue(doc, Messages.hdinshgtPrefVal, String.valueOf(isShowHDInsightTips));
 					}

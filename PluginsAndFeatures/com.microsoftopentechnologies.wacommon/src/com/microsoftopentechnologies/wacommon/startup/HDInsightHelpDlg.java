@@ -41,8 +41,9 @@ public class HDInsightHelpDlg extends Dialog {
 	@Override
 	protected Control createButtonBar(Composite parent) {
 		Control ctrl = super.createButtonBar(parent);
-		getButton(IDialogConstants.OK_ID).setText("Yes");
-		getButton(IDialogConstants.CANCEL_ID).setText("No");
+		getButton(IDialogConstants.OK_ID).setVisible(false);
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		getButton(IDialogConstants.CANCEL_ID).setText("Ok");
 		return ctrl;
 	}
 
