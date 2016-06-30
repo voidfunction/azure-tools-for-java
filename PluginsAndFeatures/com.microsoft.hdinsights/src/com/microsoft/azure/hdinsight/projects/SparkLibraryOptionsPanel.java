@@ -87,7 +87,9 @@ public class SparkLibraryOptionsPanel extends Composite {
 			} catch (Exception e) {
 				// do nothing if we can not get the library info
 			}
-
+		}
+		if (cachedLibraryPath.size() > 0) {
+			comboBox.select(0);
 		}
 		button = new Button(composite, SWT.PUSH);
 		button.setText("Select...");
@@ -103,6 +105,7 @@ public class SparkLibraryOptionsPanel extends Composite {
 						comboBox.add(file);
 						comboBox.setData(file, new SparkLibraryInfoForEclipse(file));
 						comboBox.select(comboBox.getItems().length - 1);
+						DefaultLoader.getIdeHelper().setProperties(CommonConst.CACHED_SPARK_SDK_PATHS, comboBox.getItems());
 					} catch (Exception e) {
 						Activator.getDefault().log("Error adding Spark library", e);
 					}
