@@ -38,6 +38,7 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.packaging.artifacts.Artifact;
 import com.intellij.packaging.impl.artifacts.ArtifactUtil;
@@ -45,7 +46,6 @@ import com.intellij.packaging.impl.compiler.ArtifactCompileScope;
 import com.intellij.packaging.impl.compiler.ArtifactsWorkspaceSettings;
 import com.microsoft.auth.IWebUi;
 import com.microsoft.intellij.ApplicationSettings;
-import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.helpers.tasks.CancellableTaskHandleImpl;
 import com.microsoft.intellij.util.PluginUtil;
@@ -55,14 +55,26 @@ import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.*;
 
 public class IDEHelperImpl implements IDEHelper {
     @Override
@@ -102,7 +114,108 @@ public class IDEHelperImpl implements IDEHelper {
 
     @Override
     public IWebUi getWebUi() {
-        return null;
+
+        class LoginWindow extends DialogWrapper {
+            public final String redirectUri;
+            public final String requestUri;
+            private String res = null;
+
+            final JFXPanel fxPanel;
+
+            private void setResult(String res) {
+                this.res = res;
+            }
+
+            public String getResult() {
+                return res;
+            }
+
+            public LoginWindow(String requestUri, String redirectUri) {
+                super(null, false, IdeModalityType.IDE);
+
+                this.redirectUri =  redirectUri;
+                this.requestUri =  requestUri;
+
+                fxPanel = new JFXPanel();
+
+                setModal(true);
+                setTitle("Azure Login Dialog");
+                setSize(500, 750);
+                setButtonsMargin(new Insets(0, 0, 0, 0));
+                init();
+            }
+
+            @Override
+            protected JComponent createCenterPanel() {
+                Platform.setImplicitExit(false);
+                Runnable fxWorker = new Runnable() {
+                    @Override
+                    public void run() {
+                        Group root = new Group();
+                        final WebView browser = new WebView();
+                        final WebEngine webEngine = browser.getEngine();
+                        webEngine.locationProperty().addListener(new ChangeListener<String>(){
+                            @Override
+                            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+
+                                if(newValue.startsWith(redirectUri)) {
+                                    setResult(newValue);
+                                    closeDlg();
+                                }
+                            }
+                        });
+
+                        Scene scene = new Scene(browser);
+                        fxPanel.setScene(scene);
+                        webEngine.load(requestUri);
+                    }
+                };
+
+                Platform.runLater(fxWorker);
+                return  fxPanel;
+            }
+
+            private void closeDlg() {
+                System.out.println("closeDlg isDispatchThread(): " + ApplicationManager.getApplication().isDispatchThread());
+                ApplicationManager.getApplication().invokeLater( new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("invokeLater");
+                        doOKAction();
+                    }
+                }, ModalityState.any());
+            }
+
+            @Override
+            protected JComponent createSouthPanel() {
+                return null;
+            }
+
+            @Override
+            protected String getDimensionServiceKey() {
+                return "FrameSwitcherCloseProjects";
+            }
+        }
+
+        class WebUi implements IWebUi {
+            @Override
+            public Future<String> authenticateAsync(URI requestUri, URI redirectUri) {
+                LoginWindow w = new LoginWindow(requestUri.toString(), redirectUri.toString());
+                w.show();
+
+                final Callable<String> worker = new Callable<String>() {
+                    @Override
+                    public String call() {
+                        return w.getResult();
+                    }
+                };
+
+                // just to return future to comply interface
+                return Executors.newSingleThreadExecutor().submit(worker);
+            }
+        }
+
+        return new WebUi();
     }
 
     @Override
