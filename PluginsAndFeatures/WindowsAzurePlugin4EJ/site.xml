@@ -27,10 +27,10 @@
    <feature url="features/com.microsoft.hdinsights.feature_1.0.0.qualifier.jar" id="com.microsoft.hdinsights.feature" version="1.0.0.qualifier">
       <category name="com.persistent.winazure.eclipseplugin.category"/>
    </feature>
-   <feature url="features/com.microsoftopentechnologies.wacommon.feature_2.9.1.qualifier.jar" id="com.microsoftopentechnologies.wacommon.feature" version="2.9.1.qualifier">
+   <feature url="features/com.microsoftopentechnologies.wacommon.feature_2.9.2.qualifier.jar" id="com.microsoftopentechnologies.wacommon.feature" version="2.9.2.qualifier">
       <category name="com.persistent.winazure.eclipseplugin.category"/>
    </feature>
-   <feature url="features/com.persistent.winazure.eclipseplugin.feature_2.9.1.qualifier.jar" id="com.persistent.winazure.eclipseplugin.feature" version="2.9.1.qualifier">
+   <feature url="features/com.persistent.winazure.eclipseplugin.feature_2.9.2.qualifier.jar" id="com.persistent.winazure.eclipseplugin.feature" version="2.9.2.qualifier">
       <category name="com.persistent.winazure.eclipseplugin.category"/>
    </feature>
    <category-def name="com.persistent.winazure.eclipseplugin.category" label="Azure Toolkit for Eclipse">
