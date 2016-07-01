@@ -137,11 +137,10 @@ public class IDEHelperImpl implements IDEHelper {
                 this.requestUri =  requestUri;
 
                 fxPanel = new JFXPanel();
-
+                fxPanel.setSize(500, 750);
                 setModal(true);
                 setTitle("Azure Login Dialog");
-                setSize(500, 750);
-                setButtonsMargin(new Insets(0, 0, 0, 0));
+                //setSize(500, 750);
                 init();
             }
 
@@ -200,8 +199,15 @@ public class IDEHelperImpl implements IDEHelper {
         class WebUi implements IWebUi {
             @Override
             public Future<String> authenticateAsync(URI requestUri, URI redirectUri) {
-                LoginWindow w = new LoginWindow(requestUri.toString(), redirectUri.toString());
-                w.show();
+
+                final LoginWindow w = new LoginWindow(requestUri.toString(), redirectUri.toString());
+                ApplicationManager.getApplication().invokeAndWait( new Runnable() {
+                    @Override
+                    public void run() {
+                        w.show();
+                    }
+                }, ModalityState.any());
+
 
                 final Callable<String> worker = new Callable<String>() {
                     @Override
