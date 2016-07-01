@@ -430,6 +430,7 @@ public class JdkServerPanel {
                 modified = true;
             }
         });
+        serverPath.getTextField().getDocument().addDocumentListener(createSrvPathListenerDoc());
         serverCheckBox.addItemListener(createServerListener());
         serverCheckBox.setSelected(false);
         serverType.addItemListener(createServerTypeListener());
@@ -437,6 +438,7 @@ public class JdkServerPanel {
 
     private void initForPreference() {
         jdkPath.addFocusListener(createJdkPathPreferenceListener());
+        jdkPath.getTextField().getDocument().addDocumentListener(createJdkPathListener());
         jdkCheckBox.addItemListener(createJdkCheckBoxPreferenceListener());
         jdkPath.addBrowseFolderListener(new TextBrowseFolderListener(FileChooserDescriptorFactory.createSingleFolderDescriptor()) {
             protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
@@ -450,6 +452,7 @@ public class JdkServerPanel {
             }
         });
         serverPath.addFocusListener(createServerPathPreferenceListener());
+        serverPath.getTextField().getDocument().addDocumentListener(createSrvPathListenerDoc());
         serverCheckBox.addItemListener(createServerPreferenceListener());
         serverType.addItemListener(createServerTypePreferenceListener());
         serverPath.addBrowseFolderListener(new TextBrowseFolderListener(FileChooserDescriptorFactory.createSingleFolderDescriptor()) {
@@ -846,6 +849,29 @@ public class JdkServerPanel {
         };
     }
 
+    private DocumentListener createSrvPathListenerDoc() {
+        return new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                handleUpdate();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                handleUpdate();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                handleUpdate();
+            }
+
+            private void handleUpdate() {
+               updateServerHome(serverPath.getText());
+            }
+        };
+    }
+
     private DocumentListener createJdkUrlListener() {
         return new DocumentListener() {
             @Override
@@ -949,16 +975,6 @@ public class JdkServerPanel {
                         updateServerHomeForThirdParty();
                     }
                 }
-            }
-        };
-    }
-
-    private ActionListener createServerPathListener() {
-        return new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                modifySrvText(waRole, message("dlNtLblDirSrv"));
-//                handlePageComplete();
             }
         };
     }
