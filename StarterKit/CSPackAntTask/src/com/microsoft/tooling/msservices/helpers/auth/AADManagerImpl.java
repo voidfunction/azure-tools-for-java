@@ -21,19 +21,19 @@
  */
 package com.microsoft.tooling.msservices.helpers.auth;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.microsoft.auth.AuthContext;
-import com.microsoft.auth.UserIdentifier;
-import com.microsoft.auth.UserIdentifierType;
+import com.microsoft.auth.AuthenticationResult;
+import com.microsoft.auth.TokenCache;
+import com.microsoft.auth.IWebUi;
+import com.microsoft.auth.TokenFileStorage;
+import com.microsoft.auth.AuthenticationResult;
+import com.microsoft.auth.PromptBehavior;
+
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginSettings;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 
-import java.util.Map;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 
 public class AADManagerImpl implements AADManager {
@@ -52,21 +52,20 @@ public class AADManagerImpl implements AADManager {
 //    private Map<UserInfo, ReentrantReadWriteLock> authResultLockByUser;
 //    private Map<UserInfo, ReentrantReadWriteLock> tempLockByUser;
 
-    final private com.microsoft.auth.TokenCache tokenCache;
+    final private TokenCache tokenCache;
 
     public AADManagerImpl() {
-        tokenCache = new com.microsoft.auth.TokenCache();
+        tokenCache = new TokenCache();
         
-        com.microsoft.auth.IWebUi webUi = DefaultLoader.getIdeHelper().getWebUi();
-        if(webUi != null)
-        	com.microsoft.auth.AuthContext.setUserDefinedWebUi(webUi);
-        
+        IWebUi webUi = DefaultLoader.getIdeHelper().getWebUi();
+        if(webUi != null) {
+            AuthContext.setUserDefinedWebUi(webUi);
+        }
 
         try {
-        	String psPath = DefaultLoader.getIdeHelper().getProjectSettingsPath();
-        	System.out.println(String.format("\n\n========> %s \n\n", psPath));
-            final com.microsoft.auth.
-                    TokenFileStorage tokenFileStorage = new com.microsoft.auth.TokenFileStorage(psPath);
+            String psPath = DefaultLoader.getIdeHelper().getProjectSettingsPath();
+            System.out.println(String.format("\n\n========> Project settings path: %s \n\n", psPath));
+            final TokenFileStorage tokenFileStorage = new TokenFileStorage(psPath);
             byte[] data = tokenFileStorage.read();
             tokenCache.deserialize(data);
 
@@ -84,7 +83,7 @@ public class AADManagerImpl implements AADManager {
                 }
             });
         } catch (Exception e) {
-        	logger.warning (e.getMessage());
+            logger.warning (e.getMessage());
         }
 
     }
@@ -107,9 +106,7 @@ public class AADManagerImpl implements AADManager {
                          @NotNull RequestCallback<T> requestCallback)
             throws AzureCmdException {
 
-        com.microsoft.auth.
-                UserIdentifier userIdentifier = new UserIdentifier(userInfo.getUniqueName(), UserIdentifierType.UniqueId);
-        com.microsoft.auth.AuthenticationResult res = auth(userIdentifier, userInfo.getTenantId(), com.microsoft.auth.PromptBehavior.Auto);
+        AuthenticationResult res = auth(userInfo.getTenantId(), PromptBehavior.Auto);
         try {
             return requestCallback.execute(res.getAccessToken());
         } catch (Throwable throwable) {
@@ -118,15 +115,13 @@ public class AADManagerImpl implements AADManager {
         }
     }
 
-    public com.microsoft.auth.AuthenticationResult auth(com.microsoft.auth.UserIdentifier userIdentifier, String tenantName, com.microsoft.auth.PromptBehavior pb) throws AzureCmdException {
+    public AuthenticationResult auth(String tenantName, PromptBehavior pb) throws AzureCmdException {
         if (tenantName == null) {
             tenantName = COMMON_TENANT;
         }
         try {
-            AuthContext authContext = new com.microsoft.auth.AuthContext(String.format("%s/%s", AUTHORITY, tenantName), tokenCache);
-            com.microsoft.auth.
-                    AuthenticationResult result = authContext.acquireToken(RESOURCE, CLIENT_ID, REDIRECT_URI,
-                    pb, userIdentifier);
+            AuthContext authContext = new AuthContext(String.format("%s/%s", AUTHORITY, tenantName), tokenCache);
+            AuthenticationResult result = authContext.acquireToken(RESOURCE, CLIENT_ID, REDIRECT_URI, pb, null);
             return result;
         } catch (Throwable throwable) {
             logger.warning(throwable.getMessage());
