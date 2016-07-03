@@ -868,6 +868,7 @@ public class JdkServerPanel {
 
             private void handleUpdate() {
                updateServerHome(serverPath.getText());
+                updateServerDlURL();
             }
         };
     }
@@ -1504,7 +1505,9 @@ public class JdkServerPanel {
     public void thirdPartySrvComboListener() {
         updateServerDlURL();
         try {
-            serverHomeDir.setText(WindowsAzureProjectManager.getThirdPartyServerHome((String) thrdPrtSrvCmb.getSelectedItem(), AzurePlugin.cmpntFile));
+            if (thrdPrtSrvBtn.isSelected()) {
+                serverHomeDir.setText(WindowsAzureProjectManager.getThirdPartyServerHome((String) thrdPrtSrvCmb.getSelectedItem(), AzurePlugin.cmpntFile));
+            }
         } catch (WindowsAzureInvalidProjectOperationException e) {
             AzurePlugin.log(e.getMessage());
         }
