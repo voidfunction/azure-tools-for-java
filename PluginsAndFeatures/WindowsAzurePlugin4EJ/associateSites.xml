@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<associateSites>
+<associateSite url="http://download.scala-ide.org/sdk/lithium/e44/scala211/stable/site" label="Scala IDE"/>
+</associateSites>
