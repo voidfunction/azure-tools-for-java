@@ -1,11 +1,9 @@
 package com.microsoft.azureexplorer.forms;
 
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -23,7 +21,7 @@ import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
-public class AddNewClusterForm extends Dialog {
+public class AddNewClusterForm extends TitleAreaDialog {
 	
     private String clusterName;
     private String userName;
@@ -34,18 +32,13 @@ public class AddNewClusterForm extends Dialog {
 
     private HDStorageAccount storageAccount;
 
-    private String errorMessage;
     private boolean isCarryOnNextStep;
-	
-	
-	private Text clusterNameFiled;
+		
+	private Text clusterNameField;
     private Text userNameField;
     private Text storageNameField;
     private Text storageKeyField;
     private Text passwordField;
-    private Label errorMessageField;
-    private Button okButton;
-    private Button cancelButton;
 	
     private HDInsightRootModule hdInsightModule;
 
@@ -61,63 +54,88 @@ public class AddNewClusterForm extends Dialog {
         super.configureShell(newShell);
         newShell.setText("Link New HDInsight Cluster");
     }
-	
-    @Override
-    protected Control createButtonBar(Composite parent) {
-        GridData gridData = new GridData();
-        gridData.verticalAlignment = SWT.FILL;
-        gridData.horizontalAlignment = SWT.FILL;
-        parent.setLayoutData(gridData);
-        Control ctrl = super.createButtonBar(parent);
-        okButton = getButton(IDialogConstants.OK_ID);
-        okButton.setEnabled(false);
-//        okButton.setText("Create");
-        cancelButton = getButton(IDialogConstants.CANCEL_ID);
-//        buttonCancel.setText("Close");
-        return ctrl;
-    }
     
     @Override
-    protected Control createContents(Composite parent) {
+    protected Control createDialogArea(Composite parent) {
+		setTitle("Link New HDInsight Cluster");
+		setMessage("Please enter HDInsight Cluster details");
+		setHelpAvailable(false);
+    	
         Composite container = new Composite(parent, SWT.NONE);
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 2;
         container.setLayout(gridLayout);
         GridData gridData = new GridData();
         gridData.widthHint = 350;
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
         container.setLayoutData(gridData);
 
         Label clusterNameLabel = new Label(container, SWT.LEFT);
         clusterNameLabel.setText("Cluster Name:");
-        clusterNameFiled = new Text(container, SWT.LEFT | SWT.BORDER);
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.RIGHT;
+        clusterNameLabel.setLayoutData(gridData);
+        clusterNameField = new Text(container, SWT.BORDER);
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        clusterNameField.setLayoutData(gridData);
         
         Label storageNameLabel = new Label(container, SWT.LEFT);
         storageNameLabel.setText("Storage Name:");
-        storageNameField = new Text(container, SWT.LEFT | SWT.BORDER);
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.RIGHT;
+        storageNameLabel.setLayoutData(gridData);
+        storageNameField = new Text(container, SWT.BORDER);
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        storageNameField.setLayoutData(gridData);
 
         Label storageKeyLabel = new Label(container, SWT.LEFT);
         storageKeyLabel.setText("Storage Key:");
-        storageKeyField = new Text(container, SWT.LEFT | SWT.BORDER);
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.RIGHT;
+        storageKeyLabel.setLayoutData(gridData);
+        storageKeyField = new Text(container, SWT.BORDER);
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        storageKeyField.setLayoutData(gridData);
 
         Label userNameLabel = new Label(container, SWT.LEFT);
-        storageKeyLabel.setText("User Name:");
-        userNameField = new Text(container, SWT.LEFT | SWT.BORDER);
+        userNameLabel.setText("User Name:");
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.RIGHT;
+        userNameLabel.setLayoutData(gridData);
+        userNameField = new Text(container, SWT.BORDER);
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        userNameField.setLayoutData(gridData);
 
         Label passwordLabel = new Label(container, SWT.LEFT);
         passwordLabel.setText("Password:");
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.RIGHT;
+        passwordLabel.setLayoutData(gridData);
         passwordField = new Text(container, SWT.PASSWORD | SWT.BORDER);
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.grabExcessHorizontalSpace = true;
+        passwordField.setLayoutData(gridData);
         
-        return super.createContents(parent);
+        return super.createDialogArea(parent);
     }
 
     @Override
     protected void okPressed() {
     	synchronized (AddNewClusterForm.class) {
             isCarryOnNextStep = true;
-            errorMessage = null;
-            errorMessageField.setVisible(false);
+            setErrorMessage(null);
 
-            String clusterNameOrUrl = clusterNameFiled.getText().trim();
+            String clusterNameOrUrl = clusterNameField.getText().trim();
             userName = userNameField.getText().trim();
             storageName = storageNameField.getText().trim();
 
@@ -126,16 +144,16 @@ public class AddNewClusterForm extends Dialog {
             password = passwordField.getText();
 
             if (StringHelper.isNullOrWhiteSpace(clusterNameOrUrl) || StringHelper.isNullOrWhiteSpace(storageName) || StringHelper.isNullOrWhiteSpace(storageKey) || StringHelper.isNullOrWhiteSpace(userName) || StringHelper.isNullOrWhiteSpace(password)) {
-                errorMessage = "Cluster Name, Storage Key, User Name, or Password shouldn't be empty";
+                setErrorMessage("Cluster Name, Storage Key, User Name, or Password shouldn't be empty");
                 isCarryOnNextStep = false;
             } else {
                 clusterName = getClusterName(clusterNameOrUrl);
 
                 if (clusterName == null) {
-                    errorMessage = "Wrong cluster name or endpoint";
+                    setErrorMessage("Wrong cluster name or endpoint");
                     isCarryOnNextStep = false;
                 } else if (ClusterManagerEx.getInstance().isHDInsightAdditionalStorageExist(clusterName, storageName)) {
-                    errorMessage = "Storage already exist!";
+                    setErrorMessage("Storage already exist!");
                     isCarryOnNextStep = false;
                 }
             }
@@ -151,16 +169,8 @@ public class AddNewClusterForm extends Dialog {
                     hdInsightModule.refreshWithoutAsync();
                 }
                 super.okPressed();
-            } else {
-                errorMessageField.setText(errorMessage);
-                errorMessageField.setVisible(true);
             }
         }
-
-//        PluginUtil.showBusy(true, getShell());
-////        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-//        PluginUtil.showBusy(false, getShell());
     }
     
   //format input string
@@ -173,7 +183,6 @@ public class AddNewClusterForm extends Dialog {
     }
     
     private void getStorageAccount() {
-//        addNewClusterPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     	PluginUtil.showBusy(true, getShell());
     	Display.getDefault().syncExec(new Runnable() {
             @Override
@@ -183,11 +192,10 @@ public class AddNewClusterForm extends Dialog {
                     isCarryOnNextStep = true;
                 } catch (AzureCmdException | HDIException e) {
                     isCarryOnNextStep = false;
-                    errorMessage = e.getMessage();
+                    setErrorMessage(e.getMessage());
                 }
             }
         });
         PluginUtil.showBusy(false, getShell());
-//        addNewClusterPanel.setCursor(Cursor.getDefaultCursor());
     }
 }

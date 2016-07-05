@@ -50,7 +50,7 @@ public abstract class AzureNodeActionPromptListener extends AzureNodeActionListe
                     public void run() {
                         optionDialog = DefaultLoader.getUIHelper().showConfirmation(
                                 promptMessage,
-                                "Service explorer",
+                                "Azure Explorer",
                                 new String[]{"Yes", "No"},
                                 null);
                     }

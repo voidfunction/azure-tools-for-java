@@ -34,7 +34,6 @@ import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
 
-import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
 import java.util.UUID;
@@ -107,8 +106,9 @@ public class ClusterNode extends AzureRefreshableNode {
             addAction("Unlink", new NodeActionListener() {
                 @Override
                 protected void actionPerformed(NodeActionEvent e) {
-                    int exitCode = JOptionPane.showConfirmDialog(null, "Do you really want to unlink the HDInsight cluster?", "Unlink HDInsight Cluster", JOptionPane.OK_CANCEL_OPTION);
-                    if(exitCode == JOptionPane.OK_OPTION) {
+                    boolean choice = DefaultLoader.getUIHelper().showConfirmation("Do you really want to unlink the HDInsight cluster?",
+                            "Unlink HDInsight Cluster", new String[]{"Yes", "No"}, null);
+                    if(choice) {
                         ClusterManagerEx.getInstance().removeHDInsightAdditionalCluster((HDInsightAdditionalClusterDetail)clusterDetail);
                         ((HDInsightRootModule) getParent()).refreshWithoutAsync();
                     }
