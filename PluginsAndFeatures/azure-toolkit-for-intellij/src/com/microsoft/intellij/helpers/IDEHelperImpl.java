@@ -120,7 +120,7 @@ public class IDEHelperImpl implements IDEHelper {
             public final String requestUri;
             private String res = null;
 
-            final JFXPanel fxPanel;
+            private final JFXPanel fxPanel;
 
             private void setResult(String res) {
                 this.res = res;
@@ -137,15 +137,14 @@ public class IDEHelperImpl implements IDEHelper {
                 this.requestUri =  requestUri;
 
                 fxPanel = new JFXPanel();
-                fxPanel.setSize(500, 750);
                 setModal(true);
                 setTitle("Azure Login Dialog");
-                //setSize(500, 750);
                 init();
             }
 
             @Override
             protected JComponent createCenterPanel() {
+                fxPanel.setPreferredSize(new Dimension(500, 750));
                 Platform.setImplicitExit(false);
                 Runnable fxWorker = new Runnable() {
                     @Override
@@ -175,11 +174,9 @@ public class IDEHelperImpl implements IDEHelper {
             }
 
             private void closeDlg() {
-                System.out.println("closeDlg isDispatchThread(): " + ApplicationManager.getApplication().isDispatchThread());
                 ApplicationManager.getApplication().invokeLater( new Runnable() {
                     @Override
                     public void run() {
-                        System.out.println("invokeLater");
                         doOKAction();
                     }
                 }, ModalityState.any());
@@ -192,32 +189,43 @@ public class IDEHelperImpl implements IDEHelper {
 
             @Override
             protected String getDimensionServiceKey() {
-                return "FrameSwitcherCloseProjects";
+                return "Auth4jLoginDialog";
             }
         }
 
         class WebUi implements IWebUi {
+            LoginWindow loginWindow;
             @Override
             public Future<String> authenticateAsync(URI requestUri, URI redirectUri) {
+                System.out.println("==> requestUri: " + requestUri);
 
-                final LoginWindow w = new LoginWindow(requestUri.toString(), redirectUri.toString());
-                ApplicationManager.getApplication().invokeAndWait( new Runnable() {
-                    @Override
-                    public void run() {
-                        w.show();
-                    }
-                }, ModalityState.any());
-
+                if(ApplicationManager.getApplication().isDispatchThread()) {
+                    buildAndShow(requestUri.toString(), redirectUri.toString());
+                } else {
+                    ApplicationManager.getApplication().invokeAndWait( new Runnable() {
+                        @Override
+                        public void run() {
+                            buildAndShow(requestUri.toString(), redirectUri.toString());
+                            //loginWindow = new LoginWindow(requestUri.toString(), redirectUri.toString());
+                            //loginWindow.show();
+                        }
+                    }, ModalityState.any());
+                }
 
                 final Callable<String> worker = new Callable<String>() {
                     @Override
                     public String call() {
-                        return w.getResult();
+                        return loginWindow.getResult();
                     }
                 };
 
                 // just to return future to comply interface
                 return Executors.newSingleThreadExecutor().submit(worker);
+            }
+
+            private void buildAndShow(String requestUri, String redirectUri) {
+                loginWindow = new LoginWindow(requestUri, redirectUri);
+                loginWindow.show();
             }
         }
 
