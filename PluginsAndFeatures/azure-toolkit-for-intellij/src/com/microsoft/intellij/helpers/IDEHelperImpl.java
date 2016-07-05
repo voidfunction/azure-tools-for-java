@@ -198,6 +198,8 @@ public class IDEHelperImpl implements IDEHelper {
             @Override
             public Future<String> authenticateAsync(URI requestUri, URI redirectUri) {
                 System.out.println("==> requestUri: " + requestUri);
+                final String requestUriStr = requestUri.toString();
+                final String redirectUriStr = redirectUri.toString();
 
                 if(ApplicationManager.getApplication().isDispatchThread()) {
                     buildAndShow(requestUri.toString(), redirectUri.toString());
@@ -205,9 +207,7 @@ public class IDEHelperImpl implements IDEHelper {
                     ApplicationManager.getApplication().invokeAndWait( new Runnable() {
                         @Override
                         public void run() {
-                            buildAndShow(requestUri.toString(), redirectUri.toString());
-                            //loginWindow = new LoginWindow(requestUri.toString(), redirectUri.toString());
-                            //loginWindow.show();
+                            buildAndShow(requestUriStr, redirectUriStr);
                         }
                     }, ModalityState.any());
                 }
