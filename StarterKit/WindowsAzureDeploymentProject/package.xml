@@ -27,7 +27,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	<property name="storageaccountname" value=""/>
 	<property name="deploymentslot" value="Staging"/>
 	<property name="overwritepreviousdeployment" value="true"/>
-	<property name="creator.version" value="2.9.2"/>
+	<property name="creator.version" value="2.9.5"/>
 	<property name="accesstoken" value=""/>
 
 	<path id="build.classpath">
