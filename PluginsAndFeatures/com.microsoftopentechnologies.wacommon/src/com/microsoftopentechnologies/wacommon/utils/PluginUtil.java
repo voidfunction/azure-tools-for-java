@@ -22,12 +22,11 @@ package com.microsoftopentechnologies.wacommon.utils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -63,12 +62,28 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.service.prefs.Preferences;
 
+import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
+import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.wacommon.Activator;
+import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 
 
 public class PluginUtil {
 
 	public static final String pluginFolder = getPluginFolderPathUsingBundle();
+	private static final String COMPONENTSETS_TYPE = "COMPONENTSETS";
+
+	/**
+	 * @return Template(componentssets.xml)
+	 */
+	public static String getTemplateFile(String fileName) {
+		String file = String.format("%s%s%s%s%s", PluginUtil.pluginFolder,
+				File.separator, Messages.commonPluginID, File.separator, fileName);
+		return file;
+	}
 
 	/**
 	 * This method returns currently selected project in workspace.
@@ -122,7 +137,7 @@ public class PluginUtil {
 		Activator.getDefault().log(message, e);
 		displayErrorDialog(shell, title, message);
 	}
-	
+
 	public static void displayErrorDialogWithAzureMsg(Shell shell, String title, String message, Exception e) {
 		Activator.getDefault().log(message, e);
 		message = message + "\n" + String.format(Messages.azExpMsg, e.getMessage());
@@ -386,5 +401,92 @@ public class PluginUtil {
 		} catch (AzureCmdException e) {
 			Activator.getDefault().log(e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * Checks for pluginComponent file.
+	 * If exists checks its version.
+	 * If it has latest version then no upgrade action is needed,
+	 * else checks with older componentsets.xml,
+	 * if identical then deletes existing and copies new one
+	 * else renames existing and copies new one.
+	 * @param pluginComponent
+	 * @param resourceFile
+	 * @param componentType
+	 * @throws Exception
+	 */
+	public static void upgradePluginComponent(String pluginComponentPath, String resource, 
+			String oldResource, String componentType) throws Exception {
+		File pluginComponentFile = new File(pluginComponentPath);
+		if (pluginComponentFile.exists()) {
+			String pluginComponentVersion = null;
+			String resourceFileVersion = null;
+			try {
+				File resourceFile = getResourceAsFile(Messages.cmpntFileEntry);
+				if (COMPONENTSETS_TYPE.equals(componentType)) {
+					pluginComponentVersion = WindowsAzureProjectManager.
+							getComponentSetsVersion(pluginComponentFile);
+					resourceFileVersion = WindowsAzureProjectManager.
+							getComponentSetsVersion(resourceFile);
+				} else {
+					pluginComponentVersion = WindowsAzureProjectManager.
+							getPreferenceSetsVersion(pluginComponentFile);
+					resourceFileVersion = WindowsAzureProjectManager.
+							getPreferenceSetsVersion(resourceFile);
+				}
+			} catch(Exception e ) {
+				Activator.getDefault().log(
+						"Error occurred while getting version of plugin component "
+								+ componentType
+								+ ", considering version as null");
+			}
+
+			if ((pluginComponentVersion != null
+					&& !pluginComponentVersion.isEmpty())
+					&& pluginComponentVersion.equals(resourceFileVersion)) {
+				// Do not do anything
+			} else {
+				// Check with old plugin component for upgrade scenarios
+				File oldPluginComponentFile = getResourceAsFile(Messages.oldCmpntFileEntry);
+				boolean isIdenticalWithOld = WAEclipseHelperMethods.
+						isFilesIdentical(
+								oldPluginComponentFile, pluginComponentFile);
+				if (isIdenticalWithOld) {
+					// Delete old one
+					pluginComponentFile.delete();
+				} else {
+					// Rename old one
+					DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+					Date date = new Date();
+					WAEclipseHelperMethods.copyFile(pluginComponentPath,
+							pluginComponentPath
+							+ ".old"
+							+ dateFormat.format(date));
+				}
+				FileUtil.copyResourceFile(resource, pluginComponentPath);
+			}
+		} else {
+			FileUtil.copyResourceFile(resource, pluginComponentPath);
+		}
+	}
+
+	/**
+	 * This returns the resource has a file.
+	 * 
+	 * @param fileEntry
+	 *            : File pointing to resource. null if file doesn't exists
+	 * @return
+	 */
+	public static File getResourceAsFile(String fileEntry) {
+		File file = null;
+		try {
+			URL url = Activator.getDefault().getBundle().getEntry(fileEntry);
+			URL fileURL = FileLocator.toFileURL(url);
+			URL resolve = FileLocator.resolve(fileURL);
+			file = new File(resolve.getFile());
+		} catch (Exception e) {
+			Activator.getDefault().log(e.getMessage(), e);
+		}
+		return file;
 	}
 }

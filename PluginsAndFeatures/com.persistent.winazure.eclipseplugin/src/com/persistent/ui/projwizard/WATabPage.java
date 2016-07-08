@@ -46,16 +46,16 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.PlatformUI;
 
-import waeclipseplugin.Activator;
-
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureRole;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.persistent.util.AppCmpntParam;
 import com.persistent.util.JdkSrvConfig;
 import com.persistent.util.JdkSrvConfigListener;
-import com.persistent.util.WAEclipseHelper;
+
+import waeclipseplugin.Activator;
 /**
  * Class creates wizard page which has
  * JDK, Server and Application tabs.
@@ -74,7 +74,7 @@ public class WATabPage extends WizardPage {
 	private WindowsAzureRole waRole;
 	private boolean inHandlePgComplete = false;
 	private boolean inHndlPgCmpltBackBtn = false;
-	private File cmpntFile = new File(WAEclipseHelper.
+	private File cmpntFile = new File(PluginUtil.
 			getTemplateFile(Messages.cmpntFile));
 	private int prevTabIndex;
 	private static boolean accepted = false;

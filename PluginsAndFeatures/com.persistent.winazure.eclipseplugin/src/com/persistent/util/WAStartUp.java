@@ -60,7 +60,7 @@ public class WAStartUp implements IStartup {
     private static final int BUFF_SIZE = 1024;
     private static final String COMPONENTSETS_TYPE = "COMPONENTSETS";
     private static final String PREFERENCESETS_TYPE = "PREFERENCESETS";
-    protected static File cmpntFile = new File(WAEclipseHelper.getTemplateFile(Messages.cmpntFileName));
+    protected static File cmpntFile = new File(PluginUtil.getTemplateFile(Messages.cmpntFileName));
     @Override
     public void earlyStartup() {
         try {
@@ -264,18 +264,13 @@ public class WAStartUp implements IStartup {
             if (!new File(pluginInstLoc).exists()) {
                 new File(pluginInstLoc).mkdir();
             }
-            String cmpntFile = String.format("%s%s%s", pluginInstLoc,
-            		File.separator, Messages.cmpntFileName);
+            
             String starterKit = String.format("%s%s%s", pluginInstLoc,
             		File.separator, Messages.starterKitFileName);
             String prefFile = String.format("%s%s%s", pluginInstLoc,
             		File.separator, Messages.prefFileName);
 
             // upgrade component sets and preference sets
-            upgradePluginComponent(cmpntFile,
-            		Messages.cmpntFileEntry,
-            		Messages.oldCmpntFileEntry,
-            		COMPONENTSETS_TYPE);
             upgradePluginComponent(prefFile,
             		Messages.prefFileEntry,
             		Messages.oldPrefFileEntry,

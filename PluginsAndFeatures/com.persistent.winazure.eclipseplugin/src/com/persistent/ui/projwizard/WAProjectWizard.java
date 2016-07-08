@@ -72,7 +72,6 @@ import com.persistent.util.AppCmpntParam;
 import com.persistent.util.JdkSrvConfig;
 import com.persistent.util.ParseXML;
 import com.persistent.util.SDKInstallationDlg;
-import com.persistent.util.WAEclipseHelper;
 
 import waeclipseplugin.Activator;
 
@@ -478,7 +477,7 @@ implements INewWizard, IPageChangedListener {
     			tabPg.isSrvChecked()).toString());
     	values.put("servername", JdkSrvConfig.getServerName());
     	values.put("serLoc", tabPg.getServerLoc());
-    	values.put("tempFile", WAEclipseHelper.
+    	values.put("tempFile", PluginUtil.
     			getTemplateFile(Messages.cmpntFile));
     	// Server download group
     	values.put("srvDwnldChecked" , Boolean.valueOf(

@@ -48,12 +48,11 @@ import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.persistent.builder.WADependencyBuilder;
 import com.persistent.ui.propertypage.WAProjectNature;
 import com.persistent.util.ParseXML;
-import com.persistent.util.WAEclipseHelper;
 
 import waeclipseplugin.Activator;
 
 public class SingleClickPublishUtils {
-	static File cmpntFile = new File(WAEclipseHelper.getTemplateFile(Messages.cmpntFileName));
+	static File cmpntFile = new File(PluginUtil.getTemplateFile(Messages.cmpntFileName));
 	static String auto = "auto";
 	static String httpEp = "http";
 	static String HTTP_PORT = "80";

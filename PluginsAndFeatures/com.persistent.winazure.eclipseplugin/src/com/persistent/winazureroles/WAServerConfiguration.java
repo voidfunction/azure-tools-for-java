@@ -81,7 +81,7 @@ public class WAServerConfiguration extends PropertyPage {
 	private WindowsAzureProjectManager waProjManager;
 	private WindowsAzureRole windowsAzureRole;
     private ArrayList<AppCmpntParam> appList = new ArrayList<AppCmpntParam>();
-	private File cmpntFile = new File(WAEclipseHelper.getTemplateFile(
+	private File cmpntFile = new File(PluginUtil.getTemplateFile(
 			Messages.cmpntSetFlName));
 	private IWorkspace workspace = ResourcesPlugin.getWorkspace();
 	private IWorkspaceRoot root = workspace.getRoot();

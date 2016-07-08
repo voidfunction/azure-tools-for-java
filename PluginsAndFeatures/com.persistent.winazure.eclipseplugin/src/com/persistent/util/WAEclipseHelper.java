@@ -633,6 +633,6 @@ public class WAEclipseHelper {
 	}
 
 	public static String detectServer(File path) {
-		return WAEclipseHelperMethods.detectServer(path, getTemplateFile(Messages.cmpntFileName));
+		return WAEclipseHelperMethods.detectServer(path, PluginUtil.getTemplateFile(Messages.cmpntFileName));
 	}
 }

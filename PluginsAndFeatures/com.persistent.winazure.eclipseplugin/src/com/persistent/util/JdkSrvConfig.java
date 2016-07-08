@@ -122,7 +122,7 @@ public class JdkSrvConfig {
 	public static final String NONE_TXT = "(none)";
 	public static final String AUTO_TXT = "(auto)";
 	public static final String FWD_SLASH = "/";
-	protected static File cmpntFile = new File(WAEclipseHelper.getTemplateFile(Messages.cmpntFileName));
+	protected static File cmpntFile = new File(PluginUtil.getTemplateFile(Messages.cmpntFileName));
 
 	/*
 	 * Getter methods for UI components.

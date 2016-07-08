@@ -42,6 +42,8 @@ import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
  * This class gets executed after the Workbench initializes.
  */
 public class WACPStartUp implements IStartup {
+	
+	private static final String COMPONENTSETS_TYPE = "COMPONENTSETS";
 
 	public void earlyStartup() {
 		//this code is for copying encutil.exe in plugins folder
@@ -120,6 +122,13 @@ public class WACPStartUp implements IStartup {
 				FileUtil.copyResourceFile(Messages.dataFileEntry, dataFile);
 				setValues(dataFile);
 			}
+
+			String cmpntFile = String.format("%s%s%s", pluginInstLoc,
+					File.separator, Messages.cmpntFileName);
+			PluginUtil.upgradePluginComponent(cmpntFile,
+					Messages.cmpntFileEntry,
+					Messages.oldCmpntFileEntry,
+					COMPONENTSETS_TYPE);
 		} catch(Exception ex) {
 			Activator.getDefault().log(ex.getMessage(), ex);
 		}

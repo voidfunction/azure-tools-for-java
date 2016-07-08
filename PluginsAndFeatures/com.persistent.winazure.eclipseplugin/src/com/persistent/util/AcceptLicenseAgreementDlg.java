@@ -41,6 +41,7 @@ import waeclipseplugin.Activator;
 
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class AcceptLicenseAgreementDlg extends Dialog {
 	private Button acceptBtn;
@@ -51,7 +52,7 @@ public class AcceptLicenseAgreementDlg extends Dialog {
 	 */
 	private boolean isForJdk;
 	protected static File cmpntFile = new
-			File(WAEclipseHelper.getTemplateFile(Messages.cmpntFileName));
+			File(PluginUtil.getTemplateFile(Messages.cmpntFileName));
 
 	protected AcceptLicenseAgreementDlg(Shell parentShell, boolean isForJdk) {
 		super(parentShell);

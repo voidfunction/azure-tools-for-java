@@ -46,6 +46,9 @@ public final class Messages extends NLS {
 	public static String hdinshgtPrefVal;
 	public static String preferenceMsg;
 	public static String preferenceLinkMsg;
+	public static String cmpntFileName;
+	public static String oldCmpntFileEntry;
+	public static String cmpntFileEntry;
 	/* Common messages - end */
 	
     /* Base64 messages - start */
