@@ -53,7 +53,7 @@ public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
     private JLabel userInfoLabel;
     private Project project;
 
-    public SubscriptionStep(final CreateVMWizardModel model, Project project) {
+    public SubscriptionStep(final CreateVMWizardModel model, final Project project) {
         super("Choose a Subscription", null, null);
 
         this.model = model;
@@ -64,7 +64,7 @@ public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
         buttonLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                final ManageSubscriptionPanel manageSubscriptionPanel = new ManageSubscriptionPanel(null, true);
+                final ManageSubscriptionPanel manageSubscriptionPanel = new ManageSubscriptionPanel(project, true);
                 final DefaultDialogWrapper subscriptionsDialog = new DefaultDialogWrapper(null, manageSubscriptionPanel) {
                     @Nullable
                     @Override
