@@ -19,6 +19,7 @@
  */
 package com.microsoft.webapp.config;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,6 +55,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
+import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
+import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -65,6 +68,7 @@ import com.microsoft.webapp.activator.Activator;
 import com.microsoft.webapp.util.WebAppUtils;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.wacommon.commoncontrols.NewResourceGroupDialog;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class CreateWebAppDialog extends TitleAreaDialog {
 	Text txtName;
@@ -72,9 +76,12 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	Combo groupCombo;
 	Combo servicePlanCombo;
 	Combo containerCombo;
+	Combo jdkCombo;
 	Button newGroupBtn;
 	Button newPlanBtn;
 	Button okButton;
+	Button defaultJDK;
+	Button customJDK;
 	Label servicePlanDetailsLocationLbl;
 	Label servicePlanDetailsPricingTierLbl;
 	Label servicePlanDetailsInstanceSizeLbl;
@@ -87,6 +94,8 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	String finalSubId = "";
 	WebHostingPlanCache finalPlan = null;
 	String finalContainer = "";
+	String finalJDK = "";
+	File cmpntFile = new File(PluginUtil.getTemplateFile(com.microsoftopentechnologies.wacommon.utils.Messages.cmpntFileName));
 
 	public CreateWebAppDialog(Shell parentShell, List<WebSite> webSiteList) {
 		super(parentShell);
@@ -136,6 +145,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		container.setLayout(gridLayout);
 		container.setLayoutData(gridData);
 		createNameCmpnt(container);
+		createJDKCmpnt(container);
 		createWebContainerCmpnt(container);
 		createSubCmpnt(container);
 		createResGrpCmpnt(container);
@@ -156,7 +166,6 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	 */
 	private GridData gridDataForText(int width) {
 		GridData gridData = new GridData();
-		gridData.horizontalAlignment = SWT.END;
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.widthHint = width;
 		gridData.verticalIndent = 10;
@@ -247,8 +256,9 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		newGroupBtn = new Button(container, SWT.PUSH);
 		newGroupBtn.setText(Messages.newBtn);
 		gridData = new GridData();
-		gridData.widthHint = 100;
 		gridData.verticalIndent = 10;
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
 		newGroupBtn.setLayoutData(gridData);
 		newGroupBtn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -298,7 +308,8 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		newPlanBtn.setText(Messages.newBtn);
 		gridData = new GridData();
 		gridData.verticalIndent = 10;
-		gridData.widthHint = 100;
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
 		newPlanBtn.setLayoutData(gridData);
 		newPlanBtn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -391,6 +402,57 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		containerCombo.setText(containerArray[0]);
 
 		new Link(container, SWT.NO);
+	}
+
+	private void createJDKCmpnt(Composite container) {
+		defaultJDK =  new Button(container, SWT.RADIO);
+		defaultJDK.setText("Default JDK");
+		defaultJDK.setLayoutData(gridDataForLbl());
+
+		customJDK =  new Button(container, SWT.RADIO);
+		customJDK.setText("Custom JDK");
+		customJDK.setLayoutData(gridDataForLbl());
+
+		jdkCombo = new Combo(container, SWT.READ_ONLY);
+		jdkCombo.setLayoutData(gridDataForText(150));
+		try {
+			String [] thrdPrtJdkArr = WindowsAzureProjectManager.getThirdPartyJdkNames(cmpntFile, "");
+			// check at least one element is present
+			if (thrdPrtJdkArr.length >= 1) {
+				jdkCombo.setItems(thrdPrtJdkArr);
+				String valueToSet = "";
+				valueToSet = WindowsAzureProjectManager.getFirstDefaultThirdPartyJdkName(cmpntFile);
+				if (valueToSet.isEmpty()) {
+					valueToSet = thrdPrtJdkArr[0];
+				}
+				jdkCombo.setText(valueToSet);
+			}
+		} catch (WindowsAzureInvalidProjectOperationException e) {
+			Activator.getDefault().log(e.getMessage());
+		}
+		jdkCombo.setVisible(false);
+
+		defaultJDK.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				jdkCombo.setVisible(false);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+		});
+
+		customJDK.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				jdkCombo.setVisible(true);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+		});
 	}
 
 	private String findKeyAsPerValue(String subName) {
@@ -565,6 +627,11 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		finalSubId = findKeyAsPerValue(subscriptionCombo.getText());
 		finalPlan = hostingPlanMap.get(servicePlanCombo.getText());
 		finalContainer = containerCombo.getText();
+		if (defaultJDK.getSelection()) {
+			finalJDK = "";
+		} else {
+			finalJDK = jdkCombo.getText();
+		}
 		super.okPressed();
 	}
 
@@ -582,5 +649,9 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 
 	public String getFinalContainer() {
 		return finalContainer;
+	}
+	
+	public String getFinalJDK() {
+		return finalJDK;
 	}
 }

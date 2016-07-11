@@ -38,6 +38,18 @@ public final class Messages extends NLS {
 	public static String debugJarEntry;
 	public static String configName;
 	public static String configEntry;
+	public static String washName;
+	public static String downloadName;
+	public static String edmDll;
+	public static String odataDll;
+	public static String clientDll;
+	public static String configDll;
+	public static String storageDll;
+	public static String jsonDll;
+	public static String spatialDll;
+	public static String washCmd;
+	public static String psConfig;
+	public static String customEntry;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

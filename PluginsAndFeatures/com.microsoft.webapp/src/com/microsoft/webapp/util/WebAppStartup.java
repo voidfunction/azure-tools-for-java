@@ -94,6 +94,80 @@ public class WebAppStartup implements IStartup {
 				new File(configFile).delete();
 			}
 			copyResourceFile(Messages.configEntry, configFile);
+			
+			// copy files required for custom JDK and server
+			String customFolderLoc = String.format("%s%s%s%s%s",
+					PluginUtil.pluginFolder,
+					File.separator, Messages.webAppPluginID, File.separator, "customConfiguration");
+			if (!new File(customFolderLoc).exists()) {
+				new File(customFolderLoc).mkdir();
+			}
+
+			// wash.ps1
+			String washPs1 = String.format("%s%s%s", customFolderLoc, File.separator, Messages.washName);
+			if (!new File(washPs1).exists()) {
+				copyResourceFile(Messages.customEntry +  Messages.washName, washPs1);
+			}
+			
+			// download.vbs
+			String downloadName = String.format("%s%s%s", customFolderLoc, File.separator, Messages.downloadName);
+			if (!new File(downloadName).exists()) {
+				copyResourceFile(Messages.customEntry +  Messages.downloadName, downloadName);
+			}
+
+			// edmDll
+			String edmDll = String.format("%s%s%s", customFolderLoc, File.separator, Messages.edmDll);
+			if (!new File(edmDll).exists()) {
+				copyResourceFile(Messages.customEntry +  Messages.edmDll, edmDll);
+			}
+
+			// odataDll
+			String odataDll = String.format("%s%s%s", customFolderLoc, File.separator, Messages.odataDll);
+			if (!new File(odataDll).exists()) {
+				copyResourceFile(Messages.customEntry +  Messages.odataDll, odataDll);
+			}
+			
+			// clientDll
+			String clientDll = String.format("%s%s%s", customFolderLoc, File.separator, Messages.clientDll);
+			if (!new File(clientDll).exists()) {
+				copyResourceFile(Messages.customEntry +  Messages.clientDll, clientDll);
+			}
+
+			// configDll
+			String configDll = String.format("%s%s%s", customFolderLoc, File.separator, Messages.configDll);
+			if (!new File(configDll).exists()) {
+				copyResourceFile(Messages.customEntry +  Messages.configDll, configDll);
+			}
+
+			// storageDll
+			String storageDll = String.format("%s%s%s", customFolderLoc, File.separator, Messages.storageDll);
+			if (!new File(storageDll).exists()) {
+				copyResourceFile(Messages.customEntry +  Messages.storageDll, storageDll);
+			}
+			
+			// jsonDll
+			String jsonDll = String.format("%s%s%s", customFolderLoc, File.separator, Messages.jsonDll);
+			if (!new File(jsonDll).exists()) {
+				copyResourceFile(Messages.customEntry +  Messages.jsonDll, jsonDll);
+			}
+
+			// spatialDll
+			String spatialDll = String.format("%s%s%s", customFolderLoc, File.separator, Messages.spatialDll);
+			if (!new File(spatialDll).exists()) {
+				copyResourceFile(Messages.customEntry +  Messages.spatialDll, spatialDll);
+			}
+
+			// washCmd
+			String washCmd = String.format("%s%s%s", customFolderLoc, File.separator, Messages.washCmd);
+			if (!new File(washCmd).exists()) {
+				copyResourceFile(Messages.customEntry +  Messages.washCmd, washCmd);
+			}
+
+			// psConfig
+			String psConfig = String.format("%s%s%s", customFolderLoc, File.separator, Messages.psConfig);
+			if (!new File(psConfig).exists()) {
+				copyResourceFile(Messages.customEntry +  Messages.psConfig, psConfig);
+			}
 		} catch (Exception e) {
 			Activator.getDefault().log(e.getMessage(), e);
 		}
