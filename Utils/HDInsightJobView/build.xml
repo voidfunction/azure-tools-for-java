@@ -1,0 +1,49 @@
+<project name="HDInsightJobView" default="dist" basedir=".">
+    <description>
+			HDInsight Job View Project(For Eclipse only)
+    </description>
+	
+	  <!-- set global properties for this build -->
+
+	  <property name="project_name" value="HDInsightJobView"/>
+	  <property name="src" location="src"/>
+	  <property name="jar_name" value="hdinsight-job-view.jar"/>
+	
+	<property file="build.properties"/>
+	
+	<path id="build.classpath">
+		<fileset dir="${jdk.home}/jre/lib">
+			<include name="jfxrt.jar"/>
+			<include name="jfxswt.jar" />
+		</fileset>
+		<fileset dir="${path.variable.maven_repository}/org/eclipse/swt/win32/win32/x86/3.2.1-v3235/">
+			<include name="x86-3.2.1-v3235.jar"/>
+		</fileset>
+	</path>
+
+	<!-- top level targets -->
+	
+	<target name="compile-sources" depends="init" description="compile the source code " >
+		<javac includeantruntime="true" srcdir="${src}" destdir="build" debug="true" debuglevel="lines,vars,source" source="1.8" target="1.8" classpathref="build.classpath" />
+	</target>
+
+
+  <target name="dist" depends="compile-sources" description="generate the distributable files " >
+	  <jar destfile="${basedir}\jar\${jar_name}" basedir="${basedir}\build" />
+	  <copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\..\PluginsAndFeatures\com.microsoft.hdinsights\resources\${jar_name}" overwrite="true" />
+  </target>
+
+  <target name="clean" description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+  	<delete dir="${basedir}\build"/>
+  	<delete dir="${basedir}\jar"/>
+  </target>
+	
+  <target name="init" depends="clean" description="initialize the build environment" >
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create directory structures -->
+    <mkdir dir="${basedir}\build"/>
+    <mkdir dir="${basedir}\jar"/>
+  </target>
+</project>
