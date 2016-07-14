@@ -27,6 +27,7 @@ import com.intellij.ui.wizard.WizardStep;
 import com.microsoft.intellij.forms.ManageSubscriptionPanel;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
@@ -45,7 +46,7 @@ import java.util.Vector;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
-    CreateVMWizardModel model;
+    VMWizardModel model;
     private JPanel rootPanel;
     private JList createVmStepsList;
     private JButton buttonLogin;

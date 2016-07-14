@@ -31,6 +31,7 @@ import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -59,7 +60,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     private JEditorPane imageDescriptionTextPane;
     private JPanel imageInfoPanel;
 
-    CreateVMWizardModel model;
+    VMWizardModel model;
 
     private void createUIComponents() {
         imageInfoPanel = new JPanel() {
@@ -140,7 +141,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     Map<Enum, List<VirtualMachineImage>> virtualMachineImages;
     private Project project;
 
-    public SelectImageStep(final CreateVMWizardModel model, Project project) {
+    public SelectImageStep(final VMWizardModel model, Project project) {
         super("Select a Virtual Machine Image", null, null);
 
         this.model = model;
@@ -215,7 +216,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
                     imageDescriptionTextPane.setCaretPosition(0);
                     model.getCurrentNavigationState().NEXT.setEnabled(true);
 
-                    model.setSize(null);
+//                    model.setSize(null);
                 }
             }
         });

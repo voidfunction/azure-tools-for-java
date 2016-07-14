@@ -19,18 +19,16 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-package com.microsoft.intellij.wizards.createvm;
+package com.microsoft.intellij.wizards.createarmvm;
 
 import com.intellij.ui.wizard.WizardDialog;
-import com.microsoft.intellij.wizards.VMWizardModel;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class CreateVMWizard extends WizardDialog<VMWizardModel> {
-    public CreateVMWizard(VMServiceModule node) {
+public class CreateVMWizard extends WizardDialog<CreateVMWizardModel> {
+    public CreateVMWizard(VMArmServiceModule node) {
         super(true, true, new CreateVMWizardModel(node));
     }
 
@@ -66,7 +64,7 @@ public class CreateVMWizard extends WizardDialog<VMWizardModel> {
                 }
             }
         }
-
         return southPanelComp;
     }
 }
+

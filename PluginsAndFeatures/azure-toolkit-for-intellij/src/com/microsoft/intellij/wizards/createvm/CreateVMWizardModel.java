@@ -25,6 +25,7 @@ package com.microsoft.intellij.wizards.createvm;
 import com.intellij.openapi.application.ApplicationNamesInfo;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.wizard.WizardModel;
+import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.*;
@@ -37,39 +38,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.text.SimpleDateFormat;
 
-public class CreateVMWizardModel extends WizardModel {
+public class CreateVMWizardModel extends VMWizardModel {
 
-    private final String BASE_HTML_VM_IMAGE = "<html>\n" +
-            "<body style=\"padding: 5px; width: 250px\">\n" +
-            "    <p style=\"font-family: 'Segoe UI';font-size: 14pt;font-weight: bold;\">#TITLE#</p>\n" +
-            "    <p style=\"font-family: 'Segoe UI';font-size: 11pt; width:200px \">#DESCRIPTION#</p>\n" +
-            "    <p>\n" +
-            "        <table style='width:200px'>\n" +
-            "            <tr>\n" +
-            "                <td style=\"font-family: 'Segoe UI';font-size: 12pt;width:60px;vertical-align:top;\"><b>PUBLISHED</b></td>\n" +
-            "                <td style=\"font-family: 'Segoe UI';font-size: 12pt;\">#PUBLISH_DATE#</td>\n" +
-            "            </tr>\n" +
-            "            <tr>\n" +
-            "                <td style=\"font-family: 'Segoe UI';font-size: 12pt;vertical-align:top;\"><b>PUBLISHER</b></td>\n" +
-            "                <td style=\"font-family: 'Segoe UI';font-size: 12pt;\">#PUBLISH_NAME#</td>\n" +
-            "            </tr>\n" +
-            "            <tr>\n" +
-            "                <td style=\"font-family: 'Segoe UI';font-size: 12pt;vertical-align:top;\"><b>OS FAMILY</b></td>\n" +
-            "                <td style =\"font-family: 'Segoe UI';font-size: 12pt;\">#OS#</td>\n" +
-            "            </tr>\n" +
-            "            <tr>\n" +
-            "                <td style=\"font-family: 'Segoe UI';font-size: 12pt;v-align:top;font-weight:bold;\">LOCATION</td>\n" +
-            "                <td style=\"font-family: 'Segoe UI';font-size: 12pt;\">#LOCATION#</td>\n" +
-            "            </tr>\n" +
-            "        </table>\n" +
-            "    </p>\n" +
-            "    #PRIVACY#\n" +
-            "    #LICENCE#\n" +
-            "</body>\n" +
-            "</html>";
-
-    private Subscription subscription;
-    private VirtualMachineImage virtualMachineImage;
     private String name;
     private VirtualMachineSize size;
     private String userName;
@@ -84,7 +54,7 @@ public class CreateVMWizardModel extends WizardModel {
     private Endpoint[] endpoints;
 
     public CreateVMWizardModel(VMServiceModule node) {
-        super(ApplicationNamesInfo.getInstance().getFullProductName() + " - Create new Virtual Machine");
+        super();
 
         Project project = (Project) node.getProject();
 
@@ -105,65 +75,6 @@ public class CreateVMWizardModel extends WizardModel {
                 "Cloud Service",
                 "Endpoints"
         };
-    }
-
-    public String getHtmlFromVMImage(VirtualMachineImage virtualMachineImage) {
-        String html = BASE_HTML_VM_IMAGE;
-        html = html.replace("#TITLE#", virtualMachineImage.getLabel());
-        html = html.replace("#DESCRIPTION#", virtualMachineImage.getDescription());
-        html = html.replace("#PUBLISH_DATE#", new SimpleDateFormat("dd-M-yyyy").format(virtualMachineImage.getPublishedDate().getTime()));
-        html = html.replace("#PUBLISH_NAME#", virtualMachineImage.getPublisherName());
-        html = html.replace("#OS#", virtualMachineImage.getOperatingSystemType());
-        html = html.replace("#LOCATION#", virtualMachineImage.getLocation());
-
-        html = html.replace("#PRIVACY#", virtualMachineImage.getPrivacyUri().isEmpty()
-                ? ""
-                : "<p><a href='" + virtualMachineImage.getPrivacyUri() + "' style=\"font-family: 'Segoe UI';font-size: 12pt;\">Privacy statement</a></p>");
-
-
-        html = html.replace("#LICENCE#", virtualMachineImage.getEulaUri().isEmpty()
-                ? ""
-                : "<p><a href='" + virtualMachineImage.getEulaUri() + "' style=\"font-family: 'Segoe UI';font-size: 12pt;\">Licence agreement</a></p>");
-
-        return html;
-    }
-
-    public Subscription getSubscription() {
-        return subscription;
-    }
-
-    public void setSubscription(Subscription subscription) {
-        this.subscription = subscription;
-    }
-
-    public VirtualMachineImage getVirtualMachineImage() {
-        return virtualMachineImage;
-    }
-
-    public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
-        this.virtualMachineImage = virtualMachineImage;
-    }
-
-    public void configStepList(JList jList, int step) {
-
-        jList.setListData(getStepTitleList());
-        jList.setSelectedIndex(step);
-        jList.setBorder(new EmptyBorder(10, 0, 10, 0));
-
-        jList.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList jList, Object o, int i, boolean b, boolean b1) {
-                return super.getListCellRendererComponent(jList, "  " + o.toString(), i, b, b1);
-            }
-        });
-
-        for (MouseListener mouseListener : jList.getMouseListeners()) {
-            jList.removeMouseListener(mouseListener);
-        }
-
-        for (MouseMotionListener mouseMotionListener : jList.getMouseMotionListeners()) {
-            jList.removeMouseMotionListener(mouseMotionListener);
-        }
     }
 
     public String getName() {
