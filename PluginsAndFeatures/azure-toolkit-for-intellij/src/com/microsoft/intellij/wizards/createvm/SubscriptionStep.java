@@ -54,7 +54,7 @@ public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
     private JLabel userInfoLabel;
     private Project project;
 
-    public SubscriptionStep(final CreateVMWizardModel model, final Project project) {
+    public SubscriptionStep(final VMWizardModel model, final Project project) {
         super("Choose a Subscription", null, null);
 
         this.model = model;
