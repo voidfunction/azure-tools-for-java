@@ -55,8 +55,8 @@ public class HDInsightJobViewUtils {
     }
     
 	 private static void extractJobViewResource() {
-			URL url = HDInsightJobViewUtils.class.getResource("/" + HTML_ZIP_FILE_NAME);
-			URL hdinsightJobViewJarUrl = HDInsightJobViewUtils.class.getResource("/" + HDINSIGHT_JOB_VIEW_JAR_NAME);
+			URL url = HDInsightJobViewUtils.class.getResource("/resources/" + HTML_ZIP_FILE_NAME);
+			URL hdinsightJobViewJarUrl = HDInsightJobViewUtils.class.getResource("/resources/" + HDINSIGHT_JOB_VIEW_JAR_NAME);
 			File indexRootFile = new File(PluginUtil.pluginFolder + File.separator + HTML_FOLDER_NAME);
 			if(!indexRootFile.exists()) {
 				indexRootFile.mkdir();
