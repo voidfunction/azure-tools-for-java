@@ -84,6 +84,7 @@ public final class Messages extends NLS {
 	public static String appComboLbl;
 	public static String commandSh;
 	public static String commandMac;
+	public static String cmpntFileName;
 	
 	static {
 		// initialize resource bundle

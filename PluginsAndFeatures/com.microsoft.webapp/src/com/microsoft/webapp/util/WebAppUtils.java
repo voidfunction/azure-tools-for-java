@@ -20,20 +20,19 @@
 package com.microsoft.webapp.util;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.ILaunchGroup;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.graphics.Image;
 
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
+import com.microsoft.tooling.msservices.model.ws.WebAppsContainers;
 import com.microsoft.webapp.activator.Activator;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
@@ -65,5 +64,46 @@ public class WebAppUtils {
 		ILaunchGroup[] grp = DebugUITools.getLaunchGroups();
 		DebugUITools.openLaunchConfigurationDialogOnGroup(PluginUtil.getParentShell(),
 				new StructuredSelection(toSelect), grp[1].getIdentifier());
+	}
+
+	public static boolean isFilePresentOnFTPServer(FTPClient ftp, String fileName) throws IOException {
+		boolean filePresent = false;
+		FTPFile[] files = ftp.listFiles("/site/wwwroot");
+		for (FTPFile file : files) {
+			if (file.getName().equalsIgnoreCase(fileName)) {
+				filePresent = true;
+				break;
+			}
+		}
+		return filePresent;
+	}
+
+	public static boolean checkFileCountOnFTPServer(FTPClient ftp, String path, int fileCount) throws IOException {
+		boolean fileExtracted = false;
+		FTPFile[] files = ftp.listFiles(path);
+		if (files.length == fileCount) {
+			fileExtracted = true;
+		}
+		return fileExtracted;
+	}
+
+	public static String generateServerFolderName(String server, String version) {
+		String serverFolder = "";
+		if (server.equalsIgnoreCase("TOMCAT")) {
+			if (version.equalsIgnoreCase(WebAppsContainers.TOMCAT_8.getValue())) {
+				version = WebAppsContainers.TOMCAT_8.getCurrentVersion();
+			} else if (version.equalsIgnoreCase(WebAppsContainers.TOMCAT_7.getValue())) {
+				version = WebAppsContainers.TOMCAT_7.getCurrentVersion();
+			}
+			serverFolder = String.format("%s%s%s", "apache-tomcat", "-", version);
+		} else {
+			if (version.equalsIgnoreCase(WebAppsContainers.JETTY_9.getValue())) {
+				version = WebAppsContainers.JETTY_9.getCurrentVersion();
+			}
+			String version1 = version.substring(0, version.lastIndexOf('.') + 1);
+			String version2 = version.substring(version.lastIndexOf('.') + 1, version.length());
+			serverFolder = String.format("%s%s%s%s%s", "jetty-distribution", "-", version1, "v", version2);
+		}
+		return serverFolder;
 	}
 }

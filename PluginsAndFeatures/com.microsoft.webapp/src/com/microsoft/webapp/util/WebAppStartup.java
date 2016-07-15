@@ -168,6 +168,12 @@ public class WebAppStartup implements IStartup {
 			if (!new File(psConfig).exists()) {
 				copyResourceFile(Messages.customEntry +  Messages.psConfig, psConfig);
 			}
+			
+			// web.config
+			String configName = String.format("%s%s%s", customFolderLoc, File.separator, Messages.configName);
+			if (!new File(configName).exists()) {
+				copyResourceFile(Messages.customEntry +  Messages.configName, configName);
+			}
 		} catch (Exception e) {
 			Activator.getDefault().log(e.getMessage(), e);
 		}
