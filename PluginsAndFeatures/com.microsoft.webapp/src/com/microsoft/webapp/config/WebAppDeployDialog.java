@@ -21,7 +21,6 @@ package com.microsoft.webapp.config;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -68,6 +67,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import com.gigaspaces.azure.util.PreferenceWebAppUtil;
 import com.gigaspaces.azure.views.WindowsAzureActivityLogView;
 import com.gigaspaces.azure.wizards.WizardCacheManager;
+import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.microsoft.azureexplorer.helpers.PreferenceUtil;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
@@ -85,6 +85,7 @@ import com.microsoft.windowsazure.core.OperationStatus;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
+import com.microsoftopentechnologies.azurecommons.xmlhandling.WebAppConfigOperations;
 import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
@@ -102,6 +103,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 	String webAppCreated = "";
 	AzureCmdException exp = new AzureCmdException("");
 	List<String> listToDisplay = new ArrayList<String>();
+	File cmpntFile = new File(PluginUtil.getTemplateFile(Messages.cmpntFileName));
 
 	public WebAppDeployDialog(Shell parentShell) {
 		super(parentShell);
@@ -260,7 +262,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							// always disable button as after delete no entry is selected
 							delBtn.setEnabled(false);
 							selectedWebSite = null;
-							
 						}
 					} catch (AzureCmdException e) {
 						String msg = Messages.delErr + "\n" + String.format(Messages.webappExpMsg, e.getMessage());
@@ -387,6 +388,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 		CreateWebAppDialog dialog;
 		WebSiteConfiguration config = null;
 		AzureManager manager = AzureManagerImpl.getManager();
+		String ftpPath = "/site/wwwroot/";
+		String customFolderLoc = String.format("%s%s%s%s%s",
+				PluginUtil.pluginFolder,
+				File.separator, com.microsoft.webapp.util.Messages.webAppPluginID, File.separator, "customConfiguration");
 
 		public CreateWebAppJob(String name) {
 			super(name);
@@ -403,6 +408,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 				WebSite webSite = manager.createWebSite(dialog.getFinalSubId(), dialog.getFinalPlan(), dialog.getFinalName());
 				WebSiteConfiguration webSiteConfiguration = manager.getWebSiteConfiguration(dialog.getFinalSubId(),
 						webSite.getWebSpaceName(), webSite.getName());
+				config = webSiteConfiguration;
+				if (!dialog.getFinalJDK().isEmpty()) {
+					enableCustomJDK();
+				}
 				webSiteConfiguration.setJavaVersion("1.8");
 				String selectedContainer = dialog.getFinalContainer();
 				if (selectedContainer.equalsIgnoreCase(WebAppsContainers.TOMCAT_8.getName())) {
@@ -421,6 +430,9 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 				// update eclipse workspace preferences
 				webSiteConfigMap.put(webSite, webSiteConfiguration);
 				PreferenceWebAppUtil.save(webSiteConfigMap);
+				if (!dialog.getFinalJDK().isEmpty()) {
+					copyWebConfigForCustom();
+				}
 			} catch(AzureCmdException ex) {
 				Activator.getDefault().log(Messages.createErrMsg, ex);
 				super.setName("");
@@ -432,11 +444,11 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 			monitor.done();
 			return Status.OK_STATUS;
 		}
-		
+
 		private void enableCustomJDK() throws AzureCmdException {
 			if (config != null) {
 				WebSitePublishSettings webSitePublishSettings = manager.getWebSitePublishSettings(
-						dialog.getFinalSubId(), dialog.getFinalPlan().getName(), dialog.getFinalName());
+						dialog.getFinalSubId(), config.getWebSpaceName(), dialog.getFinalName());
 				// retrieve ftp publish profile
 				WebSitePublishSettings.FTPPublishProfile ftpProfile = null;
 				for (PublishProfile pp : webSitePublishSettings.getPublishProfileList()) {
@@ -463,10 +475,34 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 						if (ftpProfile.isFtpPassiveMode()) {
 							ftp.enterLocalPassiveMode();
 						}
-						// copy files
-						copyFilesUsingFTP(ftp);
-						
-						
+						// stop and restart web app
+						manager.stopWebSite(dialog.getFinalSubId(), config.getWebSpaceName(), dialog.getFinalName());
+						Thread.sleep(5000);
+						// copy files required for download
+						copyFilesForDownload(ftp);
+						Thread.sleep(2000);
+						manager.startWebSite(dialog.getFinalSubId(), config.getWebSpaceName(), dialog.getFinalName());
+						// wait till zip files download
+						while (!WebAppUtils.isFilePresentOnFTPServer(ftp, "jdk.zip")) {
+							Thread.sleep(15000);
+						}
+						// copy files required for extraction
+						manager.stopWebSite(dialog.getFinalSubId(), config.getWebSpaceName(), dialog.getFinalName());
+						Thread.sleep(5000);
+						copyFilesForExtract(ftp);
+						Thread.sleep(2000);
+						manager.startWebSite(dialog.getFinalSubId(), config.getWebSpaceName(), dialog.getFinalName());
+						// wait till zip files extracted
+						Thread.sleep(60000);
+						while (!WebAppUtils.isFilePresentOnFTPServer(ftp, "jdk")) {
+							Thread.sleep(15000);
+						}
+						String cloudVal = WindowsAzureProjectManager.getCloudValue(dialog.getFinalJDK(), cmpntFile);
+						String jdkFolderName =  cloudVal.substring(cloudVal.indexOf("\\") + 1, cloudVal.length());
+						String jdkPath = "/site/wwwroot/jdk/" + jdkFolderName;
+						while (!WebAppUtils.checkFileCountOnFTPServer(ftp, jdkPath, 14)) {
+							Thread.sleep(15000);
+						}
 						ftp.logout();
 					} catch (Exception e) {
 						Activator.getDefault().log(e.getMessage(), e);
@@ -482,11 +518,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 			}
 		}
 
-		private void copyFilesUsingFTP(FTPClient ftp) throws IOException {
-			String customFolderLoc = String.format("%s%s%s%s%s",
-					PluginUtil.pluginFolder,
-					File.separator, com.microsoft.webapp.util.Messages.webAppPluginID, File.separator, "customConfiguration");
-			String ftpPath = "/site/wwwroot/";
+		private void copyFilesForDownload(FTPClient ftp) throws Exception {
 			// wash.ps1
 			String washPs1 = String.format("%s%s%s", customFolderLoc, File.separator, com.microsoft.webapp.util.Messages.washName);
 			InputStream input = new FileInputStream(washPs1);
@@ -541,6 +573,161 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 			String psConfig = String.format("%s%s%s", customFolderLoc, File.separator, com.microsoft.webapp.util.Messages.psConfig);
 			input = new FileInputStream(psConfig);
 			ftp.storeFile(ftpPath + com.microsoft.webapp.util.Messages.psConfig, input);
+
+			// download.aspx
+			String tmpDownloadPath = String.format("%s%s%s", System.getProperty("java.io.tmpdir"), File.separator, com.microsoft.webapp.util.Messages.downloadAspx);
+			File file = new File(tmpDownloadPath);
+			if (file.exists()) {
+				file.delete();
+			}
+			WebAppConfigOperations.prepareDownloadAspx(tmpDownloadPath,
+					WindowsAzureProjectManager.getCloudAltSrc(dialog.getFinalJDK(), cmpntFile), true);
+			input = new FileInputStream(tmpDownloadPath);
+			ftp.storeFile(ftpPath + com.microsoft.webapp.util.Messages.downloadAspx, input);
+
+			// web.config for custom download
+			String tmpPath = String.format("%s%s%s", System.getProperty("java.io.tmpdir"), File.separator, com.microsoft.webapp.util.Messages.configName);
+			file = new File(tmpPath);
+			if (file.exists()) {
+				file.delete();
+			}
+			String configFile = String.format("%s%s%s", customFolderLoc, File.separator, com.microsoft.webapp.util.Messages.configName);
+			WAEclipseHelperMethods.copyFile(configFile, tmpPath);
+			String[] pages = {com.microsoft.webapp.util.Messages.downloadAspx};
+			WebAppConfigOperations.prepareWebConfigForAppInit(tmpPath, pages);
+			input = new FileInputStream(tmpPath);
+			ftp.storeFile(ftpPath + com.microsoft.webapp.util.Messages.configName, input);
+		}
+
+		private void copyFilesForExtract(FTPClient ftp) throws Exception {
+			// extract.aspx
+			String tmpExtractPath = String.format("%s%s%s", System.getProperty("java.io.tmpdir"), File.separator, com.microsoft.webapp.util.Messages.extractAspx);
+			File file = new File(tmpExtractPath);
+			if (file.exists()) {
+				file.delete();
+			}
+			WebAppConfigOperations.prepareExtractAspx(tmpExtractPath, true);
+			InputStream input = new FileInputStream(tmpExtractPath);
+			ftp.storeFile(ftpPath + com.microsoft.webapp.util.Messages.extractAspx, input);
+			
+
+			// web.config for custom download
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.configName);
+			String tmpPath = String.format("%s%s%s", System.getProperty("java.io.tmpdir"), File.separator, com.microsoft.webapp.util.Messages.configName);
+			file = new File(tmpPath);
+			if (file.exists()) {
+				file.delete();
+			}
+			String configFile = String.format("%s%s%s", customFolderLoc, File.separator, com.microsoft.webapp.util.Messages.configName);
+			WAEclipseHelperMethods.copyFile(configFile, tmpPath);
+			String[] pages = {com.microsoft.webapp.util.Messages.extractAspx};
+			WebAppConfigOperations.prepareWebConfigForAppInit(tmpPath, pages);
+			input = new FileInputStream(tmpPath);
+			ftp.storeFile(ftpPath + com.microsoft.webapp.util.Messages.configName, input);
+		}
+
+		private void copyWebConfigForCustom() throws AzureCmdException {
+			if (config != null) {
+				WebSitePublishSettings webSitePublishSettings = manager.getWebSitePublishSettings(
+						dialog.getFinalSubId(), config.getWebSpaceName(), dialog.getFinalName());
+				// retrieve ftp publish profile
+				WebSitePublishSettings.FTPPublishProfile ftpProfile = null;
+				for (PublishProfile pp : webSitePublishSettings.getPublishProfileList()) {
+					if (pp instanceof FTPPublishProfile) {
+						ftpProfile = (FTPPublishProfile) pp;
+						break;
+					}
+				}
+
+				if (ftpProfile != null) {
+					FTPClient ftp = new FTPClient();
+					try {
+						URI uri = null;
+						uri = new URI(ftpProfile.getPublishUrl());
+						ftp.connect(uri.getHost());
+						final int replyCode = ftp.getReplyCode();
+						if (!FTPReply.isPositiveCompletion(replyCode)) {
+							ftp.disconnect();
+						}
+						if (!ftp.login(ftpProfile.getUserName(), ftpProfile.getPassword())) {
+							ftp.logout();
+						}
+						ftp.setFileType(FTP.BINARY_FILE_TYPE);
+						if (ftpProfile.isFtpPassiveMode()) {
+							ftp.enterLocalPassiveMode();
+						}
+						ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.configName);
+						String tmpPath = String.format("%s%s%s", System.getProperty("java.io.tmpdir"), File.separator, com.microsoft.webapp.util.Messages.configName);
+						File file = new File(tmpPath);
+						if (file.exists()) {
+							file.delete();
+						}
+						String pluginInstLoc = String.format("%s%s%s", PluginUtil.pluginFolder, File.separator, com.microsoft.webapp.util.Messages.webAppPluginID);
+						String configFile = String.format("%s%s%s", pluginInstLoc, File.separator, com.microsoft.webapp.util.Messages.configName);
+						WAEclipseHelperMethods.copyFile(configFile, tmpPath);
+						String cloudVal = WindowsAzureProjectManager.getCloudValue(dialog.getFinalJDK(), cmpntFile);
+						String jdkFolderName =  cloudVal.substring(cloudVal.indexOf("\\") + 1, cloudVal.length());
+						String jdkPath = "%HOME%\\site\\wwwroot\\jdk\\" + jdkFolderName;
+						String serverPath = "%programfiles(x86)%\\" +
+								WebAppUtils.generateServerFolderName(config.getJavaContainer(), config.getJavaContainerVersion());
+						WebAppConfigOperations.prepareWebConfigForCustomJDKServer(tmpPath, jdkPath, serverPath);
+						InputStream input = new FileInputStream(tmpPath);
+						ftp.storeFile(ftpPath + com.microsoft.webapp.util.Messages.configName, input);
+						cleanup(ftp);
+						ftp.logout();
+					} catch (Exception e) {
+						Activator.getDefault().log(e.getMessage(), e);
+					} finally {
+						if (ftp.isConnected()) {
+							try {
+								ftp.disconnect();
+							} catch (IOException ignored) {
+							}
+						}
+					}
+				}
+			}
+		}
+
+		private void cleanup(FTPClient ftp) throws IOException {
+			// wash.ps1
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.washName);
+
+			// download.vbs
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.downloadName);
+
+			// edmDll
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.edmDll);
+
+			// odataDll
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.odataDll);
+
+			// clientDll
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.clientDll);
+
+			// configDll
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.configDll);
+
+			// storageDll
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.storageDll);
+
+			// jsonDll
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.jsonDll);
+
+			// spatialDll
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.spatialDll);
+
+			// washCmd
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.washCmd);
+
+			// psConfig
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.psConfig);
+
+			// download.aspx
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.downloadAspx);
+			
+			//extract.aspx
+			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.extractAspx);
 		}
 	}
 

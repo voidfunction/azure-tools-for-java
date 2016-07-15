@@ -51,7 +51,6 @@ import org.eclipse.swt.widgets.Display;
 import com.gigaspaces.azure.util.PreferenceWebAppUtil;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.ws.WebAppsContainers;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings;
@@ -246,7 +245,7 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 						if (ftpProfile.isFtpPassiveMode()) {
 							ftp.enterLocalPassiveMode();
 						}
-						boolean webConfigPresent = isWebConfigPresent(ftp);
+						boolean webConfigPresent = WebAppUtils.isFilePresentOnFTPServer(ftp, com.microsoft.webapp.util.Messages.configName);
 
 						directories = ftp.listDirectories("/site/wwwroot/webapps");
 
@@ -265,22 +264,7 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 						// prepare server directory path as per server configuration
 						String server = webSiteConfiguration.getJavaContainer();
 						String version = webSiteConfiguration.getJavaContainerVersion();
-						String serverFolder = "";
-						if (server.equalsIgnoreCase("TOMCAT")) {
-							if (version.equalsIgnoreCase(WebAppsContainers.TOMCAT_8.getValue())) {
-								version = WebAppsContainers.TOMCAT_8.getCurrentVersion();
-							} else if (version.equalsIgnoreCase(WebAppsContainers.TOMCAT_7.getValue())) {
-								version = WebAppsContainers.TOMCAT_7.getCurrentVersion();
-							}
-							serverFolder = String.format("%s%s%s", "apache-tomcat", "-", version);
-						} else {
-							if (version.equalsIgnoreCase(WebAppsContainers.JETTY_9.getValue())) {
-								version = WebAppsContainers.JETTY_9.getCurrentVersion();
-							}
-							String version1 = version.substring(0, version.lastIndexOf('.') + 1);
-							String version2 = version.substring(version.lastIndexOf('.') + 1, version.length());
-							serverFolder = String.format("%s%s%s%s%s", "jetty-distribution", "-", version1, "v", version2);
-						}
+						String serverFolder = WebAppUtils.generateServerFolderName(server, version);
 
 						boolean updateRequired = true;
 						if (webConfigPresent) {
@@ -305,13 +289,6 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 							Thread.sleep(5000);
 							InputStream input = new FileInputStream(tmpPath);
 							ftp.storeFile("/site/wwwroot/web.config", input);
-							int attempts = 0;
-							while (!isWebConfigPresent(ftp) && attempts < 5) {
-								attempts++;
-								ftp.storeFile("/site/wwwroot/web.config", input);
-								Activator.getDefault().log("Web.config copy attempt : " + attempts);
-								Thread.sleep(2000);
-							}
 							input.close();
 						}
 						monitor.worked(60);
@@ -370,17 +347,5 @@ public class WebAppLaunchConfigurationDelegate extends JavaRemoteApplicationLaun
 				return;
 			}
 		}
-	}
-
-	private boolean isWebConfigPresent(FTPClient ftp) throws IOException {
-		boolean webConfigPresent = false;
-		FTPFile[] files = ftp.listFiles("/site/wwwroot");
-		for (FTPFile file : files) {
-			if (file.getName().equalsIgnoreCase(com.microsoft.webapp.util.Messages.configName)) {
-				webConfigPresent = true;
-				break;
-			}
-		}
-		return webConfigPresent;
 	}
 }
