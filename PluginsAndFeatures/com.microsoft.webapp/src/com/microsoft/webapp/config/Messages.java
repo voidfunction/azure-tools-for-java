@@ -85,6 +85,10 @@ public final class Messages extends NLS {
 	public static String commandSh;
 	public static String commandMac;
 	public static String cmpntFileName;
+	public static String dplSerBtnMsg;
+	public static String defaultJdk;
+	public static String thirdJdk;
+	public static String dplDlgSerBtn;
 	
 	static {
 		// initialize resource bundle

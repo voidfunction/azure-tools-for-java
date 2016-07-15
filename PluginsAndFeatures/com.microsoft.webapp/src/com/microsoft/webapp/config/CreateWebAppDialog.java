@@ -29,11 +29,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -52,8 +55,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
@@ -136,21 +144,44 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		setTitle(Messages.crtWebAppTtl);
+		GridData gridData = new GridData(GridData.FILL_BOTH);
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.horizontalAlignment = SWT.FILL;
+
+		// Tab controls
+		TabFolder folder = new TabFolder(parent, SWT.NONE);
+		folder.setLayoutData(gridData);
+
+		TabItem tabBasic = new TabItem(folder, SWT.NONE);
+		tabBasic.setText("Basic");
+		tabBasic.setControl(createBasicTab(folder));
+
+		TabItem tabJDK = new TabItem(folder, SWT.NONE);
+		tabJDK.setText("JDK");
+		tabJDK.setControl(createJDKCmpnt(folder));
+		
+		//initialize
+		defaultJDK.setSelection(true);
+		
+		return super.createDialogArea(parent);
+	}
+
+	public Control createBasicTab(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
 		GridLayout gridLayout = new GridLayout();
-		GridData gridData = new GridData();
 		gridLayout.numColumns = 3;
+		GridData gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.grabExcessHorizontalSpace = true;
 		container.setLayout(gridLayout);
 		container.setLayoutData(gridData);
+
 		createNameCmpnt(container);
-		createJDKCmpnt(container);
 		createWebContainerCmpnt(container);
 		createSubCmpnt(container);
 		createResGrpCmpnt(container);
 		createAppPlanCmpnt(container);
-		return super.createDialogArea(parent);
+		return container;
 	}
 
 	private GridData gridDataForLbl() {
@@ -404,14 +435,25 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		new Link(container, SWT.NO);
 	}
 
-	private void createJDKCmpnt(Composite container) {
+	private Control createJDKCmpnt(Composite parent) {
+		Composite container = new Composite(parent, SWT.NONE);
+		GridLayout gridLayout = new GridLayout();
+		gridLayout.numColumns = 2;
+		GridData gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+		container.setLayout(gridLayout);
+		container.setLayoutData(gridData);
+
 		defaultJDK =  new Button(container, SWT.RADIO);
-		defaultJDK.setText("Default JDK");
-		defaultJDK.setLayoutData(gridDataForLbl());
+		defaultJDK.setText(Messages.defaultJdk);
+		gridData = gridDataForLbl();
+		gridData.horizontalSpan = 2;
+		defaultJDK.setLayoutData(gridData);
 
 		customJDK =  new Button(container, SWT.RADIO);
-		customJDK.setText("Custom JDK");
-		customJDK.setLayoutData(gridDataForLbl());
+		customJDK.setText(Messages.thirdJdk);
+		customJDK.setLayoutData(gridData);
 
 		jdkCombo = new Combo(container, SWT.READ_ONLY);
 		jdkCombo.setLayoutData(gridDataForText(150));
@@ -430,12 +472,44 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		} catch (WindowsAzureInvalidProjectOperationException e) {
 			Activator.getDefault().log(e.getMessage());
 		}
-		jdkCombo.setVisible(false);
+		jdkCombo.setEnabled(false);
+
+		Link link = new Link(container, SWT.LEFT);
+		link.setText(Messages.dplDlgSerBtn);
+		link.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				boolean choice = MessageDialog.openConfirm(getShell(), Messages.title, Messages.dplSerBtnMsg);
+				if (choice) {
+					try {
+						// create new web app dialog
+						getShell().close();
+						// deploy web app dialog
+						getParentShell().close();
+						if (cmpntFile.exists() && cmpntFile.isFile()) {
+							IFileStore store = EFS.getLocalFileSystem().
+									getStore(cmpntFile.toURI());
+							IWorkbenchPage benchPage = PlatformUI.
+									getWorkbench().getActiveWorkbenchWindow()
+									.getActivePage();
+							IDE.openEditorOnFileStore(benchPage, store);
+						}
+					} catch (PartInitException e) {
+						Activator.getDefault().log(e.getMessage(), e);
+					}
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+		});
 
 		defaultJDK.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				jdkCombo.setVisible(false);
+				jdkCombo.setEnabled(false);
 			}
 
 			@Override
@@ -446,13 +520,14 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		customJDK.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				jdkCombo.setVisible(true);
+				jdkCombo.setEnabled(true);
 			}
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 			}
 		});
+		return container;
 	}
 
 	private String findKeyAsPerValue(String subName) {

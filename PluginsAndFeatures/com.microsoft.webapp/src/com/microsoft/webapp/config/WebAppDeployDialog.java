@@ -725,7 +725,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 
 			// download.aspx
 			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.downloadAspx);
-
+			
 			//extract.aspx
 			ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.extractAspx);
 		}
