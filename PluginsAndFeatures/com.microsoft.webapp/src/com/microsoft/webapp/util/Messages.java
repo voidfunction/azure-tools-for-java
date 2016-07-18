@@ -52,6 +52,8 @@ public final class Messages extends NLS {
 	public static String customEntry;
 	public static String downloadAspx;
 	public static String extractAspx;
+	public static String configDownload;
+	public static String configExtract;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
