@@ -40,3 +40,5 @@ Export-Package: com.microsoft.azure.hdinsight,
  com.microsoft.azure.hdinsight.spark.actions,
  com.microsoft.azure.hdinsight.spark.common2,
  com.microsoft.azure.hdinsight.spark.ui
+Bundle-ClassPath: .,
+ resources/hdinsight-node-common.jar

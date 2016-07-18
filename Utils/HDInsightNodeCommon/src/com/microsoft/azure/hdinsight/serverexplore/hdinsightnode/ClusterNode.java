@@ -122,15 +122,11 @@ public class ClusterNode extends AzureRefreshableNode {
             {
         removeAllChildNodes();
 
-        // disable JobView Node on Eclipse Plugin
-        if(isHDInsightPlugin) {
-            final String uuid = UUID.randomUUID().toString();
-            JobViewManager.registerJovViewNode(uuid, clusterDetail);
-            JobViewNode jobViewNode = new JobViewNode(this, uuid);
-            addChildNode(jobViewNode);
-        }
+        final String uuid = UUID.randomUUID().toString();
+        JobViewManager.registerJovViewNode(uuid, clusterDetail);
+        JobViewNode jobViewNode = new JobViewNode(this, uuid);
+        addChildNode(jobViewNode);
 
-        //TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerSparkNodeExpand, null, null);
         RefreshableNode storageAccountNode = new StorageAccountFolderNode(this, clusterDetail);
         addChildNode(storageAccountNode);
     }

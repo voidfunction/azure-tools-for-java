@@ -17,7 +17,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoft.azureexplorer.helpers;
+package com.microsoft.azure.hdinsight.util;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -25,14 +25,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
 
 import com.microsoft.azure.hdinsight.jobs.JobViewDummyHttpServer;
 import com.microsoft.azureexplorer.Activator;
-import com.microsoft.azureexplorer.editors.JobViewEditor;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
@@ -40,8 +38,13 @@ import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 public class HDInsightJobViewUtils {
     private static final int BUFFER_SIZE = 4096;
     private static final String HTML_ZIP_FILE_NAME = "hdinsight_jobview_html.zip";
+    private static final String HDINSIGHT_JOB_VIEW_JAR_NAME = "hdinsight-job-view.jar";
     private static final String HTML_FOLDER_NAME = "com.microsoft.azure.hdinsight";
     private static final String HDINSIGHT_JOBVIEW_EXTRACT_FLAG = "com.microsoft.azure.hdinsight.html.extract";
+    
+    public static void closeJobViewHttpServer() {
+    	JobViewDummyHttpServer.close();
+    }
     
     public static void checkInitlize() {
 		final String property = DefaultLoader.getIdeHelper().getProperty(HDINSIGHT_JOBVIEW_EXTRACT_FLAG);
@@ -50,15 +53,19 @@ public class HDInsightJobViewUtils {
 		}
 		JobViewDummyHttpServer.initlize();
     }
+    
 	 private static void extractJobViewResource() {
-			URL url = JobViewEditor.class.getResource("/" + HTML_ZIP_FILE_NAME);
+			URL url = HDInsightJobViewUtils.class.getResource("/resources/" + HTML_ZIP_FILE_NAME);
+			URL hdinsightJobViewJarUrl = HDInsightJobViewUtils.class.getResource("/resources/" + HDINSIGHT_JOB_VIEW_JAR_NAME);
 			File indexRootFile = new File(PluginUtil.pluginFolder + File.separator + HTML_FOLDER_NAME);
 			if(!indexRootFile.exists()) {
 				indexRootFile.mkdir();
 			}
 			File toFile = new File(indexRootFile.getAbsolutePath(), HTML_ZIP_FILE_NAME);
+			File hdinsightJobViewToFile = new File(indexRootFile.getAbsolutePath(), HDINSIGHT_JOB_VIEW_JAR_NAME);
 			try {
 				FileUtils.copyURLToFile(url, toFile);
+				FileUtils.copyURLToFile(hdinsightJobViewJarUrl, hdinsightJobViewToFile);
 				HDInsightJobViewUtils.unzip(toFile.getAbsolutePath(), toFile.getParent());
 				DefaultLoader.getIdeHelper().setProperty(HDINSIGHT_JOBVIEW_EXTRACT_FLAG, "true");
 			} catch (IOException e) {
