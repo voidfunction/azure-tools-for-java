@@ -57,7 +57,7 @@
       <toolWindow
               anchor="left"
               factoryClass="com.microsoft.intellij.components.ServerExplorerToolWindowFactory"
-              id="Service Explorer"
+              id="Azure Explorer"
               canCloseContents="false"
               icon="/icons/azure_explorer.png"/>
 

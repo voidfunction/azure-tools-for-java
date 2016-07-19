@@ -19,22 +19,22 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
+package com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm;
 
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.ExternalStorageHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.model.storage.StorageAccount;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
-import com.microsoft.windowsazure.management.storage.models.StorageAccountTypes;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -42,9 +42,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StorageModule extends AzureRefreshableNode {
-    private static final String STORAGE_MODULE_ID = StorageModule.class.getName();
+    private static final String STORAGE_MODULE_ID = com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule.class.getName();
     private static final String ICON_PATH = "storage.png";
-    private static final String BASE_MODULE_NAME = "Storage Accounts (Classic)";
+    private static final String BASE_MODULE_NAME = "Storage Accounts";
 
     public StorageModule(Node parent) {
         super(STORAGE_MODULE_ID, BASE_MODULE_NAME, parent, ICON_PATH);
@@ -61,22 +61,22 @@ public class StorageModule extends AzureRefreshableNode {
         List<Pair<String, String>> failedSubscriptions = new ArrayList<>();
         for (Subscription subscription : subscriptionList) {
             try {
-                List<StorageAccount> storageAccounts = azureManager.getStorageAccounts(subscription.getId(), true);
+                List<StorageAccount> storageAccounts = AzureArmManagerImpl.getManager(getProject()).getStorageAccounts(subscription.getId());
 
                 if (eventState.isEventTriggered()) {
                     return;
                 }
 
                 for (StorageAccount sm : storageAccounts) {
-                    String type = sm.getType();
+                    String type = sm.type();
 
-                    if (type.equals(StorageAccountTypes.STANDARD_GRS)
-                            || type.equals(StorageAccountTypes.STANDARD_LRS)
-                            || type.equals(StorageAccountTypes.STANDARD_RAGRS)
-                            || type.equals(StorageAccountTypes.STANDARD_ZRS)) {
+//                    if (type.equals(StorageAccountTypes.STANDARD_GRS)
+//                            || type.equals(StorageAccountTypes.STANDARD_LRS)
+//                            || type.equals(StorageAccountTypes.STANDARD_RAGRS)
+//                            || type.equals(StorageAccountTypes.STANDARD_ZRS)) {
 
-                        addChildNode(new StorageNode(this, sm, false));
-                    }
+                    addChildNode(new StorageNode(this, subscription.getId(), sm));
+//                    }
                 }
             } catch (Exception ex) {
                 failedSubscriptions.add(new ImmutablePair<>(subscription.getName(), ex.getMessage()));
@@ -92,7 +92,7 @@ public class StorageModule extends AzureRefreshableNode {
                 return;
             }
 
-            addChildNode(new ExternalStorageNode(this, storageAccount));
+//            addChildNode(new ExternalStorageNode(this, storageAccount));
         }
         if (!failedSubscriptions.isEmpty()) {
             StringBuilder errorMessage = new StringBuilder("An error occurred when trying to load Storage Accounts for the subscriptions:\n\n");

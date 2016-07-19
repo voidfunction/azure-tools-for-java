@@ -23,6 +23,7 @@ package com.microsoft.tooling.msservices.helpers.azure.sdk;
 
 import com.microsoft.azure.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.rest.credentials.TokenCredentials;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -73,6 +74,29 @@ public class AzureArmSDKHelper {
             public Void execute(@NotNull Azure azure) throws Throwable {
                 azure.virtualMachines().powerOff(virtualMachine.resourceGroupName(), virtualMachine.name());
                 virtualMachine.refreshInstanceView();
+                return null;
+            }
+        };
+    }
+
+    @NotNull
+    public static AzureRequestCallback<List<StorageAccount>> getStorageAccounts(@NotNull final String subscriptionId) {
+        return new AzureRequestCallback<List<StorageAccount>>() {
+            @NotNull
+            @Override
+            public List<StorageAccount> execute(@NotNull Azure azure) throws Throwable {
+                return azure.storageAccounts().list();
+            }
+        };
+    }
+
+    @NotNull
+    public static AzureRequestCallback<Void> deleteStorageAccount(@NotNull final String subscriptionId, @NotNull StorageAccount storageAccount) {
+        return new AzureRequestCallback<Void>() {
+            @NotNull
+            @Override
+            public Void execute(@NotNull Azure azure) throws Throwable {
+                azure.storageAccounts().delete(storageAccount.id());
                 return null;
             }
         };

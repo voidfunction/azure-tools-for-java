@@ -49,6 +49,7 @@ public class AzureServiceModule extends RefreshableNode {
     private VMServiceModule vmServiceModule;
     private VMArmServiceModule vmArmServiceModule;
     private StorageModule storageServiceModule;
+    private com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageModule storageModule;
     private WebappsModule webappsModule;
     private HDInsightRootModule hdInsightModule;
     private boolean storageModuleOnly;
@@ -63,6 +64,7 @@ public class AzureServiceModule extends RefreshableNode {
         this.project = project;
         this.storageModuleOnly = storageModuleOnly;
         storageServiceModule = new StorageModule(this);
+        storageModule = new com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageModule(this);
         webappsModule = new WebappsModule(this);
         //hdInsightModule = new HDInsightRootModule(this);
         if (!storageModuleOnly) {
@@ -126,7 +128,12 @@ public class AzureServiceModule extends RefreshableNode {
 
             storageServiceModule.load();
         }
-
+        if (!storageModule.isLoading()) {
+            if (!isDirectChild(storageModule)) {
+                addChildNode(storageModule);
+            }
+            storageModule.load();
+        }
         if (!webappsModule.isLoading()) {
             if (!isDirectChild(webappsModule)) {
                 addChildNode(webappsModule);

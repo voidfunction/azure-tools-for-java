@@ -24,6 +24,7 @@ package com.microsoft.tooling.msservices.helpers.azure;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginSettings;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -31,17 +32,11 @@ import com.microsoft.tooling.msservices.helpers.auth.AADManagerImpl;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureArmSDKHelper;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureRequestCallback;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.SDKRequestCallback;
-import com.microsoft.tooling.msservices.model.Subscription;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class AzureArmManagerImpl extends AzureManagerBaseImpl {
@@ -191,5 +186,13 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
     public void shutdownVirtualMachine(String subscriptionId, @NotNull VirtualMachine vm)
             throws AzureCmdException {
         requestAzureSDK(subscriptionId, AzureArmSDKHelper.shutdownVirtualMachine(vm));
+    }
+
+    public List<StorageAccount> getStorageAccounts(@NotNull String subscriptionId) throws AzureCmdException {
+        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getStorageAccounts(subscriptionId));
+    }
+
+    public void deleteStorageAccount(@NotNull String subscriptionId, @NotNull StorageAccount storageAccount) throws AzureCmdException {
+        requestAzureSDK(subscriptionId, AzureArmSDKHelper.deleteStorageAccount(subscriptionId, storageAccount));
     }
 }
