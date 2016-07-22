@@ -147,7 +147,7 @@ public class AzureRemoteStateState implements RemoteState {
                                     ApplicationManager.getApplication().invokeLater(new Runnable() {
                                         @Override
                                         public void run() {
-                                            PluginUtil.displayErrorDialog(String.format(message("portMsg")), socketPort);
+                                            PluginUtil.displayErrorDialog(String.format(message("portMsg"), socketPort));
                                         }
                                     }, ModalityState.defaultModalityState());
                                 }
