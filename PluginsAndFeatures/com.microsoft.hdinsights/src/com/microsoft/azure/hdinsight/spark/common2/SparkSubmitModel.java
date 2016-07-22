@@ -216,6 +216,7 @@ public class SparkSubmitModel {
 				final JarPackageData jarPackageData = new JarPackageData();
 				jarPackageData.setElements(new Object[] { project });
 				jarPackageData.setExportClassFiles(true);
+				jarPackageData.setBuildIfNeeded(true);
 				jarPackageData.setExportOutputFolders(true);
 				jarPackageData.setExportJavaFiles(false);
 				jarPackageData.setExportErrors(false);
