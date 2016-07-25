@@ -47,7 +47,7 @@ public class StorageNode extends ClientStorageNode {
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
                 throws AzureCmdException {
             try {
-                AzureManagerImpl.getManager().deleteStorageAccount(storageAccount);
+                AzureManagerImpl.getManager(getProject()).deleteStorageAccount(storageAccount);
 
                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                     @Override
