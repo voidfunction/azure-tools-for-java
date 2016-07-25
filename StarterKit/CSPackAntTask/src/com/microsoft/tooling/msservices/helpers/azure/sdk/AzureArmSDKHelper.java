@@ -23,6 +23,8 @@ package com.microsoft.tooling.msservices.helpers.azure.sdk;
 
 import com.microsoft.azure.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.rest.credentials.TokenCredentials;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -40,6 +42,17 @@ public class AzureArmSDKHelper {
             throws IOException, URISyntaxException, AzureCmdException {
         TokenCredentials credentials = new TokenCredentials(null, accessToken);
         return Azure.configure().authenticate(credentials).withSubscription(subscriptionId);
+    }
+
+    @NotNull
+    public static AzureRequestCallback<List<ResourceGroup>> getResourceGroups(@NotNull final String subscriptionId) {
+        return new AzureRequestCallback<List<ResourceGroup>>() {
+            @NotNull
+            @Override
+            public List<ResourceGroup> execute(@NotNull Azure azure) throws Throwable {
+                return azure.resourceGroups().list();
+            }
+        };
     }
 
     @NotNull
@@ -91,13 +104,32 @@ public class AzureArmSDKHelper {
     }
 
     @NotNull
-    public static AzureRequestCallback<Void> deleteStorageAccount(@NotNull final String subscriptionId, @NotNull StorageAccount storageAccount) {
+    public static AzureRequestCallback<Void> deleteStorageAccount(@NotNull StorageAccount storageAccount) {
         return new AzureRequestCallback<Void>() {
             @NotNull
             @Override
             public Void execute(@NotNull Azure azure) throws Throwable {
                 azure.storageAccounts().delete(storageAccount.id());
                 return null;
+            }
+        };
+    }
+
+    @NotNull
+    public static AzureRequestCallback<StorageAccount> createStorageAccount(@NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount) {
+        return new AzureRequestCallback<StorageAccount>() {
+            @NotNull
+            @Override
+            public StorageAccount execute(@NotNull Azure azure) throws Throwable {
+                StorageAccount.DefinitionStages.WithGroup newStorageAccountBlank = azure.storageAccounts().define(storageAccount.getName())
+                        .withRegion(storageAccount.getLocation());
+                StorageAccount.DefinitionStages.WithCreate newStorageAccountWithGroup;
+                if (storageAccount.isNewResourceGroup()) {
+                    newStorageAccountWithGroup = newStorageAccountBlank.withNewResourceGroup(storageAccount.getResourceGroupName());
+                } else {
+                    newStorageAccountWithGroup = newStorageAccountBlank.withExistingResourceGroup(storageAccount.getResourceGroupName());
+                }
+                return newStorageAccountWithGroup.withSku(SkuName.fromString(storageAccount.getType())).create();
             }
         };
     }

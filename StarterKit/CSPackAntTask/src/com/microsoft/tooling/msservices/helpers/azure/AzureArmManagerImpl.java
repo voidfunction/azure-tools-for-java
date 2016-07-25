@@ -24,6 +24,8 @@ package com.microsoft.tooling.msservices.helpers.azure;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.resources.fluentcore.arm.models.Resource;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginSettings;
@@ -174,6 +176,11 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
 //    }
 
     @NotNull
+    public List<ResourceGroup> getResourceGroups(@NotNull String subscriptionId) throws AzureCmdException {
+        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getResourceGroups(subscriptionId));
+    }
+
+    @NotNull
     public List<VirtualMachine> getVirtualMachines(@NotNull String subscriptionId)
             throws AzureCmdException {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getVirtualMachines(subscriptionId));
@@ -193,6 +200,10 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
     }
 
     public void deleteStorageAccount(@NotNull String subscriptionId, @NotNull StorageAccount storageAccount) throws AzureCmdException {
-        requestAzureSDK(subscriptionId, AzureArmSDKHelper.deleteStorageAccount(subscriptionId, storageAccount));
+        requestAzureSDK(subscriptionId, AzureArmSDKHelper.deleteStorageAccount(storageAccount));
+    }
+
+    public void createStorageAccount(@NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount) throws AzureCmdException {
+        requestAzureSDK(storageAccount.getSubscriptionId(), AzureArmSDKHelper.createStorageAccount(storageAccount));
     }
 }

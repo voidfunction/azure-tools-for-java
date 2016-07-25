@@ -41,6 +41,9 @@ public class StorageAccount extends ClientStorageAccount {
     private String secondaryRegionStatus = "";
     private Calendar lastFailover = new GregorianCalendar();
 
+    private String resourceGroupName = "";
+    private boolean isNewResourceGroup;
+
     public StorageAccount(@NotNull String name,
                           @NotNull String subscriptionId) {
         super(name);
@@ -164,4 +167,19 @@ public class StorageAccount extends ClientStorageAccount {
         this.lastFailover = lastFailover;
     }
 
+    public String getResourceGroupName() {
+        return resourceGroupName;
+    }
+
+    public void setResourceGroupName(String resourceGroupName) {
+        this.resourceGroupName = resourceGroupName;
+    }
+
+    public boolean isNewResourceGroup() {
+        return isNewResourceGroup;
+    }
+
+    public void setNewResourceGroup(boolean newResourceGroup) {
+        isNewResourceGroup = newResourceGroup;
+    }
 }
