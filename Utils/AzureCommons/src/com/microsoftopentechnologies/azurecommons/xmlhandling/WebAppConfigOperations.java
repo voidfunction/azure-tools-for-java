@@ -14,6 +14,7 @@ import org.w3c.dom.Element;
 
 import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
+import com.microsoftopentechnologies.azurecommons.storageregistry.StorageRegistryUtilMethods;
 
 
 public class WebAppConfigOperations {
@@ -152,10 +153,24 @@ public class WebAppConfigOperations {
 		return editRequired;
 	}
 	
-	public static void prepareDownloadAspx(String filePath, String url, boolean isJDK) {
+	public static void prepareDownloadAspx(String filePath, String url, String key, boolean isJDK) {
 		String zipName = "server.zip";
 		if (isJDK) {
 			zipName = "jdk.zip";
+		}
+		String arguments = "";
+		if (key.isEmpty()) {
+			// public download
+			arguments = "si.StartInfo.Arguments = \"/c wash.cmd file download \\\"" + url + "\\\" \\\"" + zipName + "\\\"\";";
+		} else {
+			// private download
+			String jdkDir = url.substring(url.lastIndexOf("/") + 1, url.length());
+			String container = url.split("/")[3];
+			String accName = StorageRegistryUtilMethods.getAccNameFromUrl(url);
+			String endpoint = StorageRegistryUtilMethods.getServiceEndpoint(url);
+			endpoint = "http://" + endpoint.substring(endpoint.indexOf('.') + 1, endpoint.length());
+			arguments = "si.StartInfo.Arguments = \"/c wash.cmd blob download \\\"" + zipName + "\\\" \\\"" + jdkDir + "\\\" "
+					+ container + " " + accName + " \\\"" + key + "\\\" \\\"" + endpoint + "\\\"\";";
 		}
 		String[] aspxLines = {"<%@ Page Language=\"C#\" %>",
 				"<script runat=server>",
@@ -164,7 +179,7 @@ public class WebAppConfigOperations {
 				"si.StartInfo.WorkingDirectory = @\"d:\\home\\site\\wwwroot\";",
 				"si.StartInfo.UseShellExecute = false;",
 				"si.StartInfo.FileName = \"cmd.exe\";",
-				"si.StartInfo.Arguments = \"/c wash.cmd file download \\\"" + url + "\\\" \\\"" + zipName + "\\\"\";",
+				arguments,
 				"si.StartInfo.CreateNoWindow = true;",
 				"si.Start();",
 				"si.Close();",

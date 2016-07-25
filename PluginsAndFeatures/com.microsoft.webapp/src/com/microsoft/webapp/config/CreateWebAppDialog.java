@@ -74,6 +74,9 @@ import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoft.webapp.activator.Activator;
 import com.microsoft.webapp.util.WebAppUtils;
+import com.microsoftopentechnologies.azurecommons.roleoperations.JdkSrvConfigUtilMethods;
+import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccountRegistry;
+import com.microsoftopentechnologies.azurecommons.storageregistry.StorageRegistryUtilMethods;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.wacommon.commoncontrols.NewResourceGroupDialog;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
@@ -90,6 +93,9 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	Button okButton;
 	Button defaultJDK;
 	Button customJDK;
+	Button customJDKUser;
+	Text customJDKUserUrl;
+	Combo storageCombo;
 	Label servicePlanDetailsLocationLbl;
 	Label servicePlanDetailsPricingTierLbl;
 	Label servicePlanDetailsInstanceSizeLbl;
@@ -103,6 +109,8 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	WebHostingPlanCache finalPlan = null;
 	String finalContainer = "";
 	String finalJDK = "";
+	String finalURL = "";
+	String finalKey = "";
 	File cmpntFile = new File(PluginUtil.getTemplateFile(com.microsoftopentechnologies.wacommon.utils.Messages.cmpntFileName));
 
 	public CreateWebAppDialog(Shell parentShell, List<WebSite> webSiteList) {
@@ -184,10 +192,13 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		return container;
 	}
 
-	private GridData gridDataForLbl() {
+	private GridData gridDataForLbl(int span) {
 		GridData gridData = new GridData();
 		gridData.horizontalIndent = 5;
 		gridData.verticalIndent = 10;
+		if (span > 0) {
+			gridData.horizontalSpan = span;
+		}
 		return gridData;
 	}
 
@@ -206,7 +217,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 
 	private void createNameCmpnt(Composite container) {
 		Label lblName = new Label(container, SWT.LEFT);
-		GridData gridData = gridDataForLbl();
+		GridData gridData = gridDataForLbl(0);
 		lblName.setLayoutData(gridData);
 		lblName.setText(Messages.dnsName);
 
@@ -221,14 +232,14 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		});
 
 		Label lblWebsite = new Label(container, SWT.LEFT);
-		gridData = gridDataForLbl();
+		gridData = gridDataForLbl(0);
 		lblWebsite.setLayoutData(gridData);
 		lblWebsite.setText(Messages.dnsWebsite);
 	}
 
 	private void createSubCmpnt(Composite container) {
 		Label lblName = new Label(container, SWT.LEFT);
-		GridData gridData = gridDataForLbl();
+		GridData gridData = gridDataForLbl(0);
 		lblName.setLayoutData(gridData);
 		lblName.setText(Messages.sub);
 
@@ -260,7 +271,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 
 	private void createResGrpCmpnt(Composite container) {
 		Label lblName = new Label(container, SWT.LEFT);
-		GridData gridData = gridDataForLbl();
+		GridData gridData = gridDataForLbl(0);
 		lblName.setLayoutData(gridData);
 		lblName.setText(Messages.resGrp);
 
@@ -315,7 +326,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	
 	private void createAppPlanCmpnt(Composite container) {
 		Label lblName = new Label(container, SWT.LEFT);
-		GridData gridData = gridDataForLbl();
+		GridData gridData = gridDataForLbl(0);
 		lblName.setLayoutData(gridData);
 		lblName.setText(Messages.appPlan);
 
@@ -417,7 +428,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 
 	private void createWebContainerCmpnt(Composite container) {
 		Label lblName = new Label(container, SWT.LEFT);
-		GridData gridData = gridDataForLbl();
+		GridData gridData = gridDataForLbl(0);
 		lblName.setLayoutData(gridData);
 		lblName.setText(Messages.container);
 
@@ -447,32 +458,15 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 
 		defaultJDK =  new Button(container, SWT.RADIO);
 		defaultJDK.setText(Messages.defaultJdk);
-		gridData = gridDataForLbl();
-		gridData.horizontalSpan = 2;
-		defaultJDK.setLayoutData(gridData);
+		defaultJDK.setLayoutData(gridDataForLbl(2));
 
-		customJDK =  new Button(container, SWT.RADIO);
+		customJDK = new Button(container, SWT.RADIO);
 		customJDK.setText(Messages.thirdJdk);
-		customJDK.setLayoutData(gridData);
+		customJDK.setLayoutData(gridDataForLbl(2));
 
 		jdkCombo = new Combo(container, SWT.READ_ONLY);
 		jdkCombo.setLayoutData(gridDataForText(150));
-		try {
-			String [] thrdPrtJdkArr = WindowsAzureProjectManager.getThirdPartyJdkNames(cmpntFile, "");
-			// check at least one element is present
-			if (thrdPrtJdkArr.length >= 1) {
-				jdkCombo.setItems(thrdPrtJdkArr);
-				String valueToSet = "";
-				valueToSet = WindowsAzureProjectManager.getFirstDefaultThirdPartyJdkName(cmpntFile);
-				if (valueToSet.isEmpty()) {
-					valueToSet = thrdPrtJdkArr[0];
-				}
-				jdkCombo.setText(valueToSet);
-			}
-		} catch (WindowsAzureInvalidProjectOperationException e) {
-			Activator.getDefault().log(e.getMessage());
-		}
-		jdkCombo.setEnabled(false);
+		enableCustomJDK(false);
 
 		Link link = new Link(container, SWT.LEFT);
 		link.setText(Messages.dplDlgSerBtn);
@@ -506,10 +500,30 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 			}
 		});
 
+		customJDKUser = new Button(container, SWT.RADIO);
+		customJDKUser.setText(Messages.customJdk);
+		customJDKUser.setLayoutData(gridDataForLbl(2));
+
+		customJDKUserUrl = new Text(container, SWT.LEFT | SWT.BORDER);
+		gridData = gridDataForText(150);
+		customJDKUserUrl.setLayoutData(gridData);
+		
+		Link linkTemp = new Link(container, SWT.LEFT);
+		linkTemp.setVisible(false);
+
+		storageCombo = new Combo(container, SWT.READ_ONLY);
+		storageCombo.setLayoutData(gridDataForText(150));
+		enableCustomJDKUser(false);
+
+		Link linkStorage = new Link(container, SWT.LEFT);
+		linkStorage.setText(Messages.linkLblAcc);
+
 		defaultJDK.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				jdkCombo.setEnabled(false);
+				enableCustomJDK(false);
+				enableCustomJDKUser(false);
+				enableOkBtn();
 			}
 
 			@Override
@@ -520,14 +534,122 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		customJDK.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				jdkCombo.setEnabled(true);
+				enableCustomJDK(true);
+				enableCustomJDKUser(false);
+				enableOkBtn();
 			}
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 			}
 		});
+
+		customJDKUser.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				enableCustomJDK(false);
+				enableCustomJDKUser(true);
+				enableOkBtn();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+		});
+
+		storageCombo.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				storageComboListener();
+				enableOkBtn();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+		});
+
+		customJDKUserUrl.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent arg0) {
+				String url = customJDKUserUrl.getText().trim();
+				String nameInUrl = StorageRegistryUtilMethods.getAccNameFromUrl(url);
+				storageCombo.setText(JdkSrvConfigUtilMethods.getNameToSet(
+						url, nameInUrl, StorageRegistryUtilMethods.getStorageAccountNames(false)));
+				enableOkBtn();
+			}
+		});
 		return container;
+	}
+
+	private void storageComboListener() {
+		int index = storageCombo.getSelectionIndex();
+		String url = customJDKUserUrl.getText().trim();
+		// check value is not none
+		if (index > 0) {
+			String newUrl = StorageAccountRegistry.
+					getStrgList().get(index - 1).getStrgUrl();
+			/*
+			 * If URL is blank and new storage account selected
+			 * then auto generate with storage accounts URL.
+			 */
+			if (url.isEmpty()) {
+				customJDKUserUrl.setText(newUrl);
+			} else {
+				/*
+				 * If storage account in combo box and URL
+				 * are in sync then update
+				 * corresponding portion of the URL
+				 * with the URI of the newly selected storage account
+				 * (leaving the container and blob name unchanged.
+				 */
+				String oldVal = StorageRegistryUtilMethods.
+						getSubStrAccNmSrvcUrlFrmUrl(url);
+				String newVal = StorageRegistryUtilMethods.
+						getSubStrAccNmSrvcUrlFrmUrl(newUrl);
+				if (oldVal.equalsIgnoreCase(url)) {
+					// old URL is not correct blob storage URL then set new url
+					customJDKUserUrl.setText(newUrl);
+				} else {
+					customJDKUserUrl.setText(url.replaceFirst(oldVal, newVal));
+				}
+			}
+		}
+	}
+
+	private void enableCustomJDK(boolean enable) {
+		if (!enable) {
+			try {
+				String [] thrdPrtJdkArr = WindowsAzureProjectManager.getThirdPartyJdkNames(cmpntFile, "");
+				// check at least one element is present
+				if (thrdPrtJdkArr.length >= 1) {
+					jdkCombo.setItems(thrdPrtJdkArr);
+					String valueToSet = "";
+					valueToSet = WindowsAzureProjectManager.getFirstDefaultThirdPartyJdkName(cmpntFile);
+					if (valueToSet.isEmpty()) {
+						valueToSet = thrdPrtJdkArr[0];
+					}
+					jdkCombo.setText(valueToSet);
+				}
+			} catch (WindowsAzureInvalidProjectOperationException e) {
+				Activator.getDefault().log(e.getMessage());
+			}
+		}
+		jdkCombo.setEnabled(enable);
+	}
+
+	private void enableCustomJDKUser(boolean enable) {
+		customJDKUserUrl.setEnabled(enable);
+		storageCombo.setEnabled(enable);
+		if (!enable) {
+			customJDKUserUrl.setText("");
+			String [] storageAccs = StorageRegistryUtilMethods.getStorageAccountNames(false);
+			if (storageAccs.length >= 1) {
+				storageCombo.setItems(storageAccs);
+				storageCombo.setText(storageAccs[0]);
+			}
+		}
 	}
 
 	private String findKeyAsPerValue(String subName) {
@@ -688,6 +810,10 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 				} else if (webSiteNames.contains(name)) {
 					setErrorMessage(Messages.inUseErrMsg);
 					okButton.setEnabled(false);
+				} else if (customJDKUser.getSelection() && !(WAEclipseHelperMethods.isBlobStorageUrl(customJDKUserUrl.getText())
+						&& customJDKUserUrl.getText().endsWith(".zip"))) {
+					setErrorMessage(Messages.noURLMsg);
+					okButton.setEnabled(false);
 				} else {
 					okButton.setEnabled(true);
 					setErrorMessage(null);
@@ -702,10 +828,14 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		finalSubId = findKeyAsPerValue(subscriptionCombo.getText());
 		finalPlan = hostingPlanMap.get(servicePlanCombo.getText());
 		finalContainer = containerCombo.getText();
-		if (defaultJDK.getSelection()) {
-			finalJDK = "";
-		} else {
+		if (customJDK.getSelection()) {
 			finalJDK = jdkCombo.getText();
+		} else if (customJDKUser.getSelection()) {
+			finalURL = customJDKUserUrl.getText().trim();
+			int strgAccIndex = storageCombo.getSelectionIndex();
+			if (strgAccIndex > 0 && !storageCombo.getText().isEmpty()) {
+				finalKey = StorageAccountRegistry.getStrgList().get(strgAccIndex - 1).getStrgKey();
+			}
 		}
 		super.okPressed();
 	}
@@ -728,5 +858,13 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	
 	public String getFinalJDK() {
 		return finalJDK;
+	}
+
+	public String getFinalURL() {
+		return finalURL;
+	}
+
+	public String getFinalKey() {
+		return finalKey;
 	}
 }

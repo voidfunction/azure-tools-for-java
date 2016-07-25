@@ -412,7 +412,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 				WebSiteConfiguration webSiteConfiguration = manager.getWebSiteConfiguration(dialog.getFinalSubId(),
 						webSite.getWebSpaceName(), webSite.getName());
 				config = webSiteConfiguration;
-				if (!dialog.getFinalJDK().isEmpty()) {
+				if (!dialog.getFinalJDK().isEmpty() || !dialog.getFinalURL().isEmpty()) {
 					Display.getDefault().syncExec(new Runnable()
 					{
 						@Override
@@ -421,7 +421,9 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							try {
 								IRunnableWithProgress op = new CustomJDK();
 								new ProgressMonitorDialog(getShell()).run(true, true, op);
-							} catch (Exception e) {
+							} catch (InterruptedException e) {
+								Activator.getDefault().log(e.getMessage(), e);
+							} catch (InvocationTargetException e) {
 								Activator.getDefault().log(e.getMessage(), e);
 							}
 						}
@@ -445,7 +447,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 				// update eclipse workspace preferences
 				webSiteConfigMap.put(webSite, webSiteConfiguration);
 				PreferenceWebAppUtil.save(webSiteConfigMap);
-				if (!dialog.getFinalJDK().isEmpty()) {
+				if (!dialog.getFinalJDK().isEmpty() || !dialog.getFinalURL().isEmpty()) {
 					copyWebConfigForCustom();
 				}
 			} catch(AzureCmdException ex) {
@@ -511,7 +513,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 								while (!WebAppUtils.isFilePresentOnFTPServer(ftp, "jdk.zip")) {
 									Thread.sleep(15000);
 								}
-								
+								Thread.sleep(60000);
 								monitor.setTaskName(com.microsoft.webapp.util.Messages.configExtract);
 								monitor.worked(50);
 								// copy files required for extraction
@@ -526,10 +528,20 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 								while (!WebAppUtils.isFilePresentOnFTPServer(ftp, "jdk")) {
 									Thread.sleep(15000);
 								}
-								String cloudVal = WindowsAzureProjectManager.getCloudValue(dialog.getFinalJDK(), cmpntFile);
-								String jdkFolderName =  cloudVal.substring(cloudVal.indexOf("\\") + 1, cloudVal.length());
-								String jdkPath = "/site/wwwroot/jdk/" + jdkFolderName;
-								while (!WebAppUtils.checkFileCountOnFTPServer(ftp, jdkPath, 14)) {
+								String jdkPath = "/site/wwwroot/jdk/";
+								if (dialog.getFinalJDK().isEmpty()) {
+									String url = dialog.getFinalURL();
+									String jdkFolderName = url.substring(url.lastIndexOf("/") + 1, url.length());
+									jdkFolderName = jdkFolderName.substring(0, jdkFolderName.indexOf(".zip"));
+									jdkPath = jdkPath + jdkFolderName;
+								} else {
+									String cloudVal = WindowsAzureProjectManager.getCloudValue(dialog.getFinalJDK(), cmpntFile);
+									String jdkFolderName =  cloudVal.substring(cloudVal.indexOf("\\") + 1, cloudVal.length());
+									jdkPath = jdkPath + jdkFolderName;
+								}
+								int timeout = 0;
+								while (!WebAppUtils.checkFileCountOnFTPServer(ftp, jdkPath, 10) && timeout < 420000) {
+									timeout = timeout + 15000;
 									Thread.sleep(15000);
 								}
 								ftp.logout();
@@ -619,8 +631,13 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 				if (file.exists()) {
 					file.delete();
 				}
-				WebAppConfigOperations.prepareDownloadAspx(tmpDownloadPath,
-						WindowsAzureProjectManager.getCloudAltSrc(dialog.getFinalJDK(), cmpntFile), true);
+				if (dialog.getFinalJDK().isEmpty()) {
+					WebAppConfigOperations.prepareDownloadAspx(tmpDownloadPath,
+							dialog.getFinalURL(), dialog.getFinalKey(), true);
+				} else {
+					WebAppConfigOperations.prepareDownloadAspx(tmpDownloadPath,
+							WindowsAzureProjectManager.getCloudAltSrc(dialog.getFinalJDK(), cmpntFile), "", true);
+				}
 				input = new FileInputStream(tmpDownloadPath);
 				ftp.storeFile(ftpPath + com.microsoft.webapp.util.Messages.downloadAspx, input);
 
@@ -648,7 +665,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 				WebAppConfigOperations.prepareExtractAspx(tmpExtractPath, true);
 				InputStream input = new FileInputStream(tmpExtractPath);
 				ftp.storeFile(ftpPath + com.microsoft.webapp.util.Messages.extractAspx, input);
-
 
 				// web.config for custom download
 				ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.configName);
@@ -705,8 +721,15 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 						String pluginInstLoc = String.format("%s%s%s", PluginUtil.pluginFolder, File.separator, com.microsoft.webapp.util.Messages.webAppPluginID);
 						String configFile = String.format("%s%s%s", pluginInstLoc, File.separator, com.microsoft.webapp.util.Messages.configName);
 						WAEclipseHelperMethods.copyFile(configFile, tmpPath);
-						String cloudVal = WindowsAzureProjectManager.getCloudValue(dialog.getFinalJDK(), cmpntFile);
-						String jdkFolderName =  cloudVal.substring(cloudVal.indexOf("\\") + 1, cloudVal.length());
+						String jdkFolderName = "";
+						if (dialog.getFinalJDK().isEmpty()) {
+							String url = dialog.getFinalURL();
+							jdkFolderName = url.substring(url.lastIndexOf("/") + 1, url.length());
+							jdkFolderName = jdkFolderName.substring(0, jdkFolderName.indexOf(".zip"));
+						} else {
+							String cloudVal = WindowsAzureProjectManager.getCloudValue(dialog.getFinalJDK(), cmpntFile);
+							jdkFolderName =  cloudVal.substring(cloudVal.indexOf("\\") + 1, cloudVal.length());
+						}
 						String jdkPath = "%HOME%\\site\\wwwroot\\jdk\\" + jdkFolderName;
 						String serverPath = "%programfiles(x86)%\\" +
 								WebAppUtils.generateServerFolderName(config.getJavaContainer(), config.getJavaContainerVersion());

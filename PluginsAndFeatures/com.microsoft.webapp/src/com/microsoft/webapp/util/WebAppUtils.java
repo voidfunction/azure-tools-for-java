@@ -81,7 +81,7 @@ public class WebAppUtils {
 	public static boolean checkFileCountOnFTPServer(FTPClient ftp, String path, int fileCount) throws IOException {
 		boolean fileExtracted = false;
 		FTPFile[] files = ftp.listFiles(path);
-		if (files.length == fileCount) {
+		if (files.length >= fileCount) {
 			fileExtracted = true;
 		}
 		return fileExtracted;

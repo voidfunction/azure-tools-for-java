@@ -89,6 +89,9 @@ public final class Messages extends NLS {
 	public static String defaultJdk;
 	public static String thirdJdk;
 	public static String dplDlgSerBtn;
+	public static String customJdk;
+	public static String linkLblAcc;
+	public static String noURLMsg;
 	
 	static {
 		// initialize resource bundle
