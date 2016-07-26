@@ -21,11 +21,13 @@
  */
 package com.microsoft.tooling.msservices.helpers.azure.sdk;
 
+import com.google.common.base.Strings;
 import com.microsoft.azure.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
+import com.microsoft.azure.management.storage.StorageAccountKey;
 import com.microsoft.rest.credentials.TokenCredentials;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -93,23 +95,41 @@ public class AzureArmSDKHelper {
     }
 
     @NotNull
-    public static AzureRequestCallback<List<StorageAccount>> getStorageAccounts(@NotNull final String subscriptionId) {
-        return new AzureRequestCallback<List<StorageAccount>>() {
+    public static AzureRequestCallback<List<com.microsoft.tooling.msservices.model.storage.StorageAccount>> getStorageAccounts(@NotNull final String subscriptionId) {
+        return new AzureRequestCallback<List<com.microsoft.tooling.msservices.model.storage.StorageAccount>>() {
             @NotNull
             @Override
-            public List<StorageAccount> execute(@NotNull Azure azure) throws Throwable {
-                return azure.storageAccounts().list();
+            public List<com.microsoft.tooling.msservices.model.storage.StorageAccount> execute(@NotNull Azure azure) throws Throwable {
+                List<com.microsoft.tooling.msservices.model.storage.StorageAccount> storageAccounts = new ArrayList<>();
+                for (StorageAccount storageAccount : azure.storageAccounts().list()){
+                    com.microsoft.tooling.msservices.model.storage.StorageAccount sa =
+                            new com.microsoft.tooling.msservices.model.storage.StorageAccount(storageAccount.name(), subscriptionId);
+
+                    sa.setProtocol("https");
+                    sa.setType(storageAccount.sku().name().toString());
+                    sa.setLocation(Strings.nullToEmpty(storageAccount.regionName()));
+                    List<StorageAccountKey> keys = storageAccount.keys();
+                    if (!(keys == null || keys.isEmpty())) {
+                        sa.setPrimaryKey(keys.get(0).value());
+                        if (keys.size() > 1) {
+                            sa.setSecondaryKey(keys.get(1).value());
+                        }
+                    }
+                    sa.setResourceGroupName(storageAccount.resourceGroupName());
+                    storageAccounts.add(sa);
+                }
+                return storageAccounts;
             }
         };
     }
 
     @NotNull
-    public static AzureRequestCallback<Void> deleteStorageAccount(@NotNull StorageAccount storageAccount) {
+    public static AzureRequestCallback<Void> deleteStorageAccount(@NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount) {
         return new AzureRequestCallback<Void>() {
             @NotNull
             @Override
             public Void execute(@NotNull Azure azure) throws Throwable {
-                azure.storageAccounts().delete(storageAccount.id());
+                azure.storageAccounts().delete(storageAccount.getResourceGroupName(), storageAccount.getName());
                 return null;
             }
         };

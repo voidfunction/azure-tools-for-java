@@ -89,7 +89,7 @@ public class ContainerNode extends Node {
     private final BlobContainer blobContainer;
     private final ClientStorageAccount storageAccount;
 
-    public ContainerNode(final BlobModule parent, ClientStorageAccount sa, BlobContainer bc) {
+    public ContainerNode(final Node parent, ClientStorageAccount sa, BlobContainer bc) {
         super(CONTAINER_MODULE_ID, bc.getName(), parent, ICON_PATH, true);
 
         blobContainer = bc;

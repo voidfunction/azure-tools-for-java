@@ -195,11 +195,11 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
         requestAzureSDK(subscriptionId, AzureArmSDKHelper.shutdownVirtualMachine(vm));
     }
 
-    public List<StorageAccount> getStorageAccounts(@NotNull String subscriptionId) throws AzureCmdException {
+    public List<com.microsoft.tooling.msservices.model.storage.StorageAccount> getStorageAccounts(@NotNull String subscriptionId) throws AzureCmdException {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getStorageAccounts(subscriptionId));
     }
 
-    public void deleteStorageAccount(@NotNull String subscriptionId, @NotNull StorageAccount storageAccount) throws AzureCmdException {
+    public void deleteStorageAccount(@NotNull String subscriptionId, @NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount) throws AzureCmdException {
         requestAzureSDK(subscriptionId, AzureArmSDKHelper.deleteStorageAccount(storageAccount));
     }
 

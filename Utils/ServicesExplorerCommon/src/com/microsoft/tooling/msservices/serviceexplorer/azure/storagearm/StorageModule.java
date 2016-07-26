@@ -31,12 +31,13 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.azure.management.storage.StorageAccount;
+import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import com.microsoft.windowsazure.management.storage.models.StorageAccountTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,15 +69,15 @@ public class StorageModule extends AzureRefreshableNode {
                 }
 
                 for (StorageAccount sm : storageAccounts) {
-                    String type = sm.type();
+                    String type = sm.getType();
 
-//                    if (type.equals(StorageAccountTypes.STANDARD_GRS)
-//                            || type.equals(StorageAccountTypes.STANDARD_LRS)
-//                            || type.equals(StorageAccountTypes.STANDARD_RAGRS)
-//                            || type.equals(StorageAccountTypes.STANDARD_ZRS)) {
+                    if (type.equals(StorageAccountTypes.STANDARD_GRS)
+                            || type.equals(StorageAccountTypes.STANDARD_LRS)
+                            || type.equals(StorageAccountTypes.STANDARD_RAGRS)
+                            || type.equals(StorageAccountTypes.STANDARD_ZRS)) {
 
-                    addChildNode(new StorageNode(this, subscription.getId(), sm));
-//                    }
+                        addChildNode(new StorageNode(this, subscription.getId(), sm));
+                    }
                 }
             } catch (Exception ex) {
                 failedSubscriptions.add(new ImmutablePair<>(subscription.getName(), ex.getMessage()));

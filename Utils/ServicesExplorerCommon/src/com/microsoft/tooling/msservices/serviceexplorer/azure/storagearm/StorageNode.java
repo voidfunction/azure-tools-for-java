@@ -21,18 +21,22 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm;
 
-import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.model.storage.BlobContainer;
+import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.ContainerNode;
 
+import java.util.List;
 import java.util.Map;
 
 public class StorageNode extends AzureRefreshableNode {
@@ -42,7 +46,7 @@ public class StorageNode extends AzureRefreshableNode {
     private String subscriptionId;
 
     public StorageNode(Node parent, String subscriptionId, StorageAccount storageAccount) {
-        super(storageAccount.name(), storageAccount.name(), parent, STORAGE_ACCOUNT_ICON_PATH,  true);
+        super(storageAccount.getName(), storageAccount.getName(), parent, STORAGE_ACCOUNT_ICON_PATH,  true);
 
         this.subscriptionId = subscriptionId;
         this.storageAccount = storageAccount;
@@ -53,7 +57,7 @@ public class StorageNode extends AzureRefreshableNode {
     public class DeleteStorageAccountAction extends AzureNodeActionPromptListener {
         public DeleteStorageAccountAction() {
             super(StorageNode.this,
-                    String.format("This operation will delete storage account %s.\nAre you sure you want to continue?", storageAccount.name()),
+                    String.format("This operation will delete storage account %s.\nAre you sure you want to continue?", storageAccount.getName()),
                     "Deleting Storage Account");
         }
 
@@ -85,7 +89,19 @@ public class StorageNode extends AzureRefreshableNode {
             throws AzureCmdException {
         removeAllChildNodes();
 
-        fillChildren(eventState);
+        try {
+            List<BlobContainer> containerList = StorageClientSDKManagerImpl.getManager().getBlobContainers(storageAccount);
+            for (BlobContainer blobContainer : containerList) {
+                addChildNode(new ContainerNode(this, storageAccount, blobContainer));
+            }
+        } catch (AzureCmdException ex) {
+            throw new AzureCmdException(ex.getMessage(), ex);
+        }
+    }
+
+    @Override
+    protected void onNodeClick(NodeActionEvent e) {
+        this.load();
     }
 
     @Override
@@ -94,32 +110,7 @@ public class StorageNode extends AzureRefreshableNode {
         return super.initActions();
     }
 
-    protected void fillChildren(@NotNull EventHelper.EventStateHandle eventState) {
-//        BlobModule blobsNode = new BlobModule(this, clientStorageAccount);
-//        blobsNode.load();
-//
-//        if (eventState.isEventTriggered()) {
-//            return;
-//        }
-//
-//        addChildNode(blobsNode);
-//
-//        QueueModule queueNode = new QueueModule(this, clientStorageAccount);
-//        queueNode.load();
-//
-//        if (eventState.isEventTriggered()) {
-//            return;
-//        }
-//
-//        addChildNode(queueNode);
-//
-//        TableModule tableNode = new TableModule(this, clientStorageAccount);
-//        tableNode.load();
-//
-//        if (eventState.isEventTriggered()) {
-//            return;
-//        }
-//
-//        addChildNode(tableNode);
+    public StorageAccount getStorageAccount() {
+        return storageAccount;
     }
 }

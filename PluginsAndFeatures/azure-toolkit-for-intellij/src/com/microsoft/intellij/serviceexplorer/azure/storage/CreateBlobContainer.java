@@ -26,27 +26,35 @@ import com.microsoft.intellij.forms.CreateBlobContainerForm;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.BlobModule;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.ClientStorageNode;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageNode;
 
 @Name("Create blob container")
 public class CreateBlobContainer extends NodeActionListener {
-    private BlobModule blobModule;
+    private RefreshableNode parent;
 
-    public CreateBlobContainer(BlobModule blobModule) {
-        this.blobModule = blobModule;
+    public CreateBlobContainer(BlobModule parent) {
+        this.parent = parent;
+    }
+
+    public CreateBlobContainer(StorageNode parent) {
+        this.parent = parent;
     }
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        CreateBlobContainerForm form = new CreateBlobContainerForm((Project) blobModule.getProject());
-        form.setStorageAccount(blobModule.getStorageAccount());
-
+        CreateBlobContainerForm form = new CreateBlobContainerForm((Project) parent.getProject());
+        if (parent instanceof BlobModule) {
+            form.setStorageAccount(((BlobModule) parent).getStorageAccount());
+        } else if (parent instanceof StorageNode) {
+            form.setStorageAccount(((StorageNode) parent).getStorageAccount());
+        }
         form.setOnCreate(new Runnable() {
             @Override
             public void run() {
-                blobModule.getParent().removeAllChildNodes();
-                ((ClientStorageNode) blobModule.getParent()).load();
+                parent.removeAllChildNodes();
+                parent.load();
             }
         });
 
