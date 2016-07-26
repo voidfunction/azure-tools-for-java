@@ -37,11 +37,11 @@
 	<target name="copy-resource" depends="init" description="copy resources to build folder">
 		<copy todir="${basedir}/build">
 			<fileset dir="${basedir}/resources">
-				<exclude name="/hdinsight/**"/>
+				<exclude name="/htmlResources/**"/>
 				<type type="file"/>
 			</fileset>
 		</copy>
-		<zip destfile="${basedir}/build/hdinsight_jobview_html.zip" basedir="${basedir}/resources" />
+		<zip destfile="${basedir}/build/hdinsight_jobview_html.zip" basedir="${basedir}/resources/htmlResources" />
 	</target>
 
   <target name="dist" depends="compile-sources,copy-resource" description="generate the distributable files " >
@@ -50,6 +50,10 @@
   	          <include name="**/*.properties"/>
   	      </fileset>
   	</jar>
+		<!--overwrite html resources in azure-toolkit-for-intellij/hdinsight -->
+	  	<delete dir="${basedir}\..\..\PluginsAndFeatures\azure-toolkit-for-intellij\hdinsight\hdinsight"/>
+        <copydir src="${basedir}\resources\htmlResources" dest="${basedir}\..\..\PluginsAndFeatures\azure-toolkit-for-intellij\hdinsight" forceoverwrite="true"/>
+
 		<copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\..\PluginsAndFeatures\com.microsoftopentechnologies.wacommon\resources\${jar_name}" overwrite="true" />
 		<copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\..\PluginsAndFeatures\azure-toolkit-for-intellij\lib\${jar_name}" overwrite="true" />
 	    <copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\..\PluginsAndFeatures\com.microsoft.azureexplorer\resources\${jar_name}" overwrite="true" />
@@ -59,6 +63,7 @@
 
   <target name="clean" description="clean up" >
     <!-- Delete the ${build} and ${dist} directory trees -->
+
   	<delete dir="${basedir}\build"/>
   	<delete dir="${basedir}\jar"/>
   </target>

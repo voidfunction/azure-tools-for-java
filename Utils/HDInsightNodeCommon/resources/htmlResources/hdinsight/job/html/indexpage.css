@@ -1,0 +1,139 @@
+#htitle {
+    font-size: 14px;
+    margin: 2px;
+}
+
+body {
+    overflow: auto;
+}
+
+#leftDIv {
+    width: 40%;
+    overflow: scroll;
+    display: inline-block;
+}
+
+#tableDIv {
+    overflow-y: auto;
+    overflow-x: auto;
+    font-size: 12px;
+    padding: 8px;
+    margin: 0px 20px 0 0;
+    float: left;
+    height: 880px;
+}
+
+#myTable > thead > tr > th {
+    text-align: center;
+    font-size: 13px;
+}
+
+#myTable > tbody > tr > td {
+    text-align: center;
+    font-size: 11px;
+}
+
+#rightButtonPanel button {
+    margin: 5px;
+    font-size: 11px;
+}
+
+#basicInformationDIv {
+    margin: 0;
+    padding: 2px;
+}
+
+#basicInformationTable {
+    margin-top: 2px;
+    border-collapse: separate;
+    border-spacing: 0px;
+    margin-bottom: 0px;
+    width: 100%;
+}
+
+#basicInformationTable thead tr td {
+    font-size: 10px;
+    font-weight: bold;
+    text-align: left;
+    margin: 0;
+    padding: 0;
+}
+
+#basicInformationTable tbody {
+    margin: 10px;
+    text-align: left;
+}
+
+#basicInformationTable tbody > tr {
+    margin: 0px;
+    padding: 0px;
+}
+
+#basicInformationTable tbody > tr > td,
+#basicInformationTable tbody > tr > th {
+    padding: 0px;
+    margin-left: 10px;
+    text-align: left;
+    font-family: inherit;
+    font-size: 11px;
+    float: left;
+}
+
+#jobDetailDiv div {
+    margin: 10px 0 0 0;
+    padding: 0;
+}
+
+#jobDetailDiv h2 {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.resultTextArea {
+    width: 95%;
+    resize: none;
+    background-color: #FFFFFF;
+    font-size: 11px;
+    margin: 5px 15px 5px;
+}
+
+.table-striped#myTable tbody {
+    font-size: 11px;
+}
+
+.table-striped#myTable tbody > tr.selected-hight > td,
+.table-striped tbody > tr.selected-hight > th {
+    background-color: #FECA40;
+}
+
+.table-striped#myTable thead >tr > td,
+.table-striped#myTable thead > tr> th {
+    text-align: center;
+}
+
+.table-striped#myTable tbody > tr> td:first-child,
+.table-striped.table-striped#myTable tbody > tr > th:first-child {
+    text-align: center;
+}
+
+#rightDiv {
+    height: 80%;
+    width: 50%;
+    overflow: auto;
+    background-color: #f5f5f5;
+    padding: 8px;
+    display: inline-block;
+}
+
+.rightPanelhr {
+    height: 2px;
+    border: none;
+    border-top: 2px solid #185598;
+    margin-top: 2px;
+    margin-bottom: 0px;
+}
+
+.vsplitbar {
+    width: 5px;
+    background: #cab;
+}

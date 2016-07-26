@@ -41,13 +41,8 @@ import java.util.UUID;
 public class ClusterNode extends AzureRefreshableNode {
     private static final String CLUSTER_MODULE_ID = ClusterNode.class.getName();
     private static final String ICON_PATH = CommonConst.ClusterIConPath;
-    private static boolean isHDInsightPlugin;
 
     private IClusterDetail clusterDetail;
-
-    static {
-        isHDInsightPlugin = ClusterNode.class.getClassLoader().toString().contains("intellij");
-    }
 
     public ClusterNode(Node parent, IClusterDetail clusterDetail) {
         super(CLUSTER_MODULE_ID, getClusterNameWitStatus(clusterDetail), parent, ICON_PATH, true);
