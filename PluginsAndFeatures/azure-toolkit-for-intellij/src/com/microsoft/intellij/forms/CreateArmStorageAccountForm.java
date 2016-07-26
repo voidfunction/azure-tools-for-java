@@ -335,10 +335,10 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                 progressIndicator.setIndeterminate(true);
 
                 try {
-                    List<ResourceGroup> locations = AzureArmManagerImpl.getManager(project).getResourceGroups(subscription.getId());
+                    List<ResourceGroup> resourceGroups = AzureArmManagerImpl.getManager(project).getResourceGroups(subscription.getId());
 
                     final Vector<Object> vector = new Vector<Object>();
-                    vector.addAll(locations);
+                    vector.addAll(resourceGroups);
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                         @Override
                         public void run() {
