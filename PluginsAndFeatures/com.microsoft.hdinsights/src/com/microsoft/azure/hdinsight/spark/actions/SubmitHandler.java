@@ -22,8 +22,11 @@ package com.microsoft.azure.hdinsight.spark.actions;
 import java.util.HashSet;
 import java.util.List;
 
+import com.microsoft.azure.hdinsight.Activator;
 import com.microsoft.azure.hdinsight.common.CallBack;
 import com.microsoft.azure.hdinsight.spark.ui.SparkSubmissionExDialog;
+import com.microsoft.azure.hdinsight.util.Messages;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -33,6 +36,7 @@ import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
 import com.microsoft.azure.hdinsight.common2.HDInsightUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class SubmitHandler extends AbstractHandler {
@@ -42,9 +46,9 @@ public class SubmitHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		synchronized (SubmitHandler.class) {
-
+					AppInsightsCustomEvent.create(Messages.SparkSubmissionRightClickProject,Activator.getDefault().getBundle().getVersion().toString());
                     HDInsightUtil.showInfoOnSubmissionMessageWindow("List spark clusters ...", true);
-
+                   
                     cachedClusterDetails = ClusterManagerEx.getInstance().getClusterDetailsWithoutAsync(true, null);
                     if(!ClusterManagerEx.getInstance().isSelectedSubscriptionExist()) {
                         HDInsightUtil.showWarningMessageOnSubmissionMessageWindow("No selected subscription(s), Please go to HDInsight Explorer to sign in....");

@@ -43,7 +43,7 @@ public class Messages extends NLS {
 	public static String HDInsightExplorerSparkNodeExpand;
 	public static String HDInsightExplorerStorageAccountExpand;
 	public static String HDInsightExplorerContainerOpen;
-	
+	public static String HDInsightFeatureEnabled;
     /**
      * Constructor.
      */
