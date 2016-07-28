@@ -39,8 +39,12 @@ import java.io.IOException;
 
 public class SparkBatchSubmission {
 
-    private static final String UserAgentName = "Azure Toolkit for IntelliJ";
+    private static String UserAgentName;
 
+    static {
+        UserAgentName = SparkBatchSubmission.class.getClassLoader().getClass().getName().toLowerCase().contains("intellij")
+                                ? "Azure Toolkit for IntelliJ" : "Azure Toolkit for Eclipse";
+    }
     // Singleton Instance
     private static SparkBatchSubmission instance = null;
 
