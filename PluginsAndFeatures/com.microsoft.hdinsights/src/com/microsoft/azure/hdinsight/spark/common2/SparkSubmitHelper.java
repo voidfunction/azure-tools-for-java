@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import com.google.common.base.Joiner;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.microsoft.azure.hdinsight.Activator;
 import com.microsoft.azure.hdinsight.common2.HDInsightUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
@@ -42,6 +43,7 @@ import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
 import com.microsoft.azure.hdinsight.spark.common.SparkBatchSubmission;
 import com.microsoft.azure.hdinsight.spark.common.SparkJobLog;
 import com.microsoft.azure.hdinsight.spark.common.SparkSubmitResponse;
+import com.microsoft.azure.hdinsight.util.Messages;
 import com.microsoft.tooling.msservices.helpers.CallableSingleArg;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
@@ -49,6 +51,7 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
+import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class SparkSubmitHelper {
@@ -157,7 +160,7 @@ public class SparkSubmitHelper {
 
             if (isKilledJob) {
                 postEventProperty.put("IsKilled", "true");
-//                TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
+                AppInsightsCustomEvent.create(Messages.SparkSubmissionButtonClickEvent, Activator.getDefault().getBundle().getVersion().toString(), postEventProperty);
                 return;
             }
 
@@ -169,14 +172,13 @@ public class SparkSubmitHelper {
                 HDInsightUtil.getSparkSubmissionToolWindowView().setInfo("The Spark application completed successfully");
             }
 
-//            TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
-
+            AppInsightsCustomEvent.create(Messages.SparkSubmissionButtonClickEvent, Activator.getDefault().getBundle().getVersion().toString(), postEventProperty);
         } catch (Exception e) {
             if (HDInsightUtil.getSparkSubmissionToolWindowView().getJobStatusManager().isJobKilled() == false) {
                 HDInsightUtil.getSparkSubmissionToolWindowView().setError("Error : Failed to getting running log. Exception : " + e.toString());
             } else {
                 postEventProperty.put("IsKilled", "true");
-//                TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
+                AppInsightsCustomEvent.create(Messages.SparkSubmissionButtonClickEvent, Activator.getDefault().getBundle().getVersion().toString(), postEventProperty);
             }
         }
     }
