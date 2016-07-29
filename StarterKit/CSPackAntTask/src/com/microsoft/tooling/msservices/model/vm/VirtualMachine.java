@@ -56,8 +56,46 @@ public class VirtualMachine implements ServiceTreeItem {
     private String subscriptionId;
     private List<Endpoint> endpoints;
 
+    private String resourceGroup;
+
+    /**
+     * constructor for ASM virtual machine representation
+     * @param name
+     * @param serviceName
+     * @param deploymentName
+     * @param availabilitySet
+     * @param subnet
+     * @param size
+     * @param status
+     * @param subscriptionId
+     */
     public VirtualMachine(@NotNull String name, @NotNull String serviceName, @NotNull String deploymentName,
                           @NotNull String availabilitySet, @NotNull String subnet, @NotNull String size,
+                          @NotNull Status status, @NotNull String subscriptionId) {
+        this.name = name;
+        this.resourceGroup = resourceGroup;
+        this.serviceName = serviceName;
+        this.deploymentName = deploymentName;
+        this.availabilitySet = availabilitySet;
+        this.subnet = subnet;
+        this.size = size;
+        this.status = status;
+        this.subscriptionId = subscriptionId;
+        this.endpoints = new ArrayList<Endpoint>();
+    }
+
+    /**
+     * constructor for ARM virtual machine representation
+     * @param name
+     * @param serviceName
+     * @param deploymentName
+     * @param availabilitySet
+     * @param subnet
+     * @param size
+     * @param status
+     * @param subscriptionId
+     */
+    public VirtualMachine(@NotNull String name, @NotNull String resourceGroup, @NotNull String availabilitySet, @NotNull String subnet, @NotNull String size,
                           @NotNull Status status, @NotNull String subscriptionId) {
         this.name = name;
         this.serviceName = serviceName;
@@ -83,6 +121,10 @@ public class VirtualMachine implements ServiceTreeItem {
     @NotNull
     public String getName() {
         return name;
+    }
+
+    public String getResourceGroup() {
+        return resourceGroup;
     }
 
     @NotNull

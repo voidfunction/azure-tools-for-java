@@ -23,8 +23,12 @@ package com.microsoft.tooling.msservices.helpers.azure.sdk;
 
 import com.google.common.base.Strings;
 import com.microsoft.azure.Azure;
+import com.microsoft.azure.management.compute.KnownWindowsVirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.compute.VirtualMachineSizeTypes;
+import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azure.management.storage.StorageAccountKey;
@@ -47,7 +51,7 @@ public class AzureArmSDKHelper {
     }
 
     @NotNull
-    public static AzureRequestCallback<List<ResourceGroup>> getResourceGroups(@NotNull final String subscriptionId) {
+    public static AzureRequestCallback<List<ResourceGroup>> getResourceGroups() {
         return new AzureRequestCallback<List<ResourceGroup>>() {
             @NotNull
             @Override
@@ -58,7 +62,7 @@ public class AzureArmSDKHelper {
     }
 
     @NotNull
-    public static AzureRequestCallback<List<VirtualMachine>> getVirtualMachines(@NotNull final String subscriptionId) {
+    public static AzureRequestCallback<List<VirtualMachine>> getVirtualMachines() {
         return new AzureRequestCallback<List<VirtualMachine>>() {
             @NotNull
             @Override
@@ -90,6 +94,30 @@ public class AzureArmSDKHelper {
                 azure.virtualMachines().powerOff(virtualMachine.resourceGroupName(), virtualMachine.name());
                 virtualMachine.refreshInstanceView();
                 return null;
+            }
+        };
+    }
+
+    @NotNull
+    public static AzureRequestCallback<VirtualMachine> createVirtualMachine(@NotNull final com.microsoft.tooling.msservices.model.vm.VirtualMachine vm, @NotNull final com.microsoft.tooling.msservices.model.vm.VirtualMachineImage vmImage,
+                                                                                         @NotNull final com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount, @NotNull final String virtualNetwork,
+                                                                                         @NotNull final String username, @NotNull final String password, @NotNull final byte[] certificate) {
+        return new AzureRequestCallback<VirtualMachine>() {
+            @NotNull
+            @Override
+            public VirtualMachine execute(@NotNull Azure azure) throws Throwable {
+                return azure.virtualMachines().define(vm.getName())
+                        .withRegion(Region.US_WEST)
+                        .withNewResourceGroup()
+                        .withNewPrimaryNetwork("10.0.0.0/28")
+                        .withPrimaryPrivateIpAddressDynamic()
+                        .withoutPrimaryPublicIpAddress()
+                        .withPopularWindowsImage(KnownWindowsVirtualMachineImage.WINDOWS_SERVER_2012_R2_DATACENTER)
+//                        .withStoredWindowsImage("")
+                        .withAdminUserName(username)
+                        .withPassword(password)
+                        .withSize(VirtualMachineSizeTypes.STANDARD_D3_V2)
+                        .create();
             }
         };
     }
@@ -150,6 +178,17 @@ public class AzureArmSDKHelper {
                     newStorageAccountWithGroup = newStorageAccountBlank.withExistingResourceGroup(storageAccount.getResourceGroupName());
                 }
                 return newStorageAccountWithGroup.withSku(SkuName.fromString(storageAccount.getType())).create();
+            }
+        };
+    }
+
+    @NotNull
+    public static AzureRequestCallback<List<Network>> getVirtualNetworks() {
+        return new AzureRequestCallback<List<Network>>() {
+            @NotNull
+            @Override
+            public List<Network> execute(@NotNull Azure azure) throws Throwable {
+                return azure.networks().list();
             }
         };
     }

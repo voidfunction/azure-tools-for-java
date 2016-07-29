@@ -35,7 +35,7 @@ import com.intellij.ui.wizard.WizardStep;
 import com.intellij.util.Consumer;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
@@ -58,7 +58,7 @@ import java.util.List;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
-public class MachineSettingsStep extends WizardStep<CreateVMWizardModel> {
+public class MachineSettingsStep extends WizardStep<VMWizardModel> {
     private JPanel rootPanel;
     private JList createVmStepsList;
     private JEditorPane imageDescriptionTextPane;
@@ -75,9 +75,9 @@ public class MachineSettingsStep extends WizardStep<CreateVMWizardModel> {
     private JPanel passwordPanel;
 
     Project project;
-    CreateVMWizardModel model;
+    VMWizardModel model;
 
-    public MachineSettingsStep(CreateVMWizardModel mModel, Project project) {
+    public MachineSettingsStep(VMWizardModel mModel, Project project) {
         super("Virtual Machine Basic Settings", null, null);
 
         this.project = project;
@@ -259,7 +259,7 @@ public class MachineSettingsStep extends WizardStep<CreateVMWizardModel> {
     }
 
     @Override
-    public WizardStep onNext(CreateVMWizardModel model) {
+    public WizardStep onNext(VMWizardModel model) {
         WizardStep wizardStep = super.onNext(model);
 
         String name = vmNameTextField.getText();

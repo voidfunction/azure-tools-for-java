@@ -21,12 +21,10 @@
  */
 package com.microsoft.tooling.msservices.helpers.azure;
 
-import com.google.gson.GsonBuilder;
 import com.microsoft.azure.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azure.management.resources.fluentcore.arm.models.Resource;
-import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginSettings;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -34,6 +32,7 @@ import com.microsoft.tooling.msservices.helpers.auth.AADManagerImpl;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureArmSDKHelper;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureRequestCallback;
+import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -177,13 +176,13 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
 
     @NotNull
     public List<ResourceGroup> getResourceGroups(@NotNull String subscriptionId) throws AzureCmdException {
-        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getResourceGroups(subscriptionId));
+        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getResourceGroups());
     }
 
     @NotNull
     public List<VirtualMachine> getVirtualMachines(@NotNull String subscriptionId)
             throws AzureCmdException {
-        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getVirtualMachines(subscriptionId));
+        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getVirtualMachines());
     }
 
     public void restartVirtualMachine(String subscriptionId, @NotNull VirtualMachine virtualMachine) throws AzureCmdException {
@@ -193,6 +192,14 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
     public void shutdownVirtualMachine(String subscriptionId, @NotNull VirtualMachine vm)
             throws AzureCmdException {
         requestAzureSDK(subscriptionId, AzureArmSDKHelper.shutdownVirtualMachine(vm));
+    }
+
+    public VirtualMachine createVirtualMachine(@NotNull String subscriptionId, @NotNull com.microsoft.tooling.msservices.model.vm.VirtualMachine virtualMachine, @NotNull VirtualMachineImage vmImage,
+                                     @NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount, @NotNull String virtualNetwork,
+                                     @NotNull String username, @NotNull String password, @NotNull byte[] certificate)
+            throws AzureCmdException {
+        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.createVirtualMachine(virtualMachine,
+                vmImage, storageAccount, virtualNetwork, username, password, certificate));
     }
 
     public List<com.microsoft.tooling.msservices.model.storage.StorageAccount> getStorageAccounts(@NotNull String subscriptionId) throws AzureCmdException {
@@ -205,5 +212,10 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
 
     public void createStorageAccount(@NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount) throws AzureCmdException {
         requestAzureSDK(storageAccount.getSubscriptionId(), AzureArmSDKHelper.createStorageAccount(storageAccount));
+    }
+
+    @NotNull
+    public List<Network> getVirtualNetworks(@NotNull String subscriptionId) throws AzureCmdException {
+        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getVirtualNetworks());
     }
 }

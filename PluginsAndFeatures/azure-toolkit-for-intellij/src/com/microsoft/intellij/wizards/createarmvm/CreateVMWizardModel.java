@@ -21,18 +21,12 @@
  */
 package com.microsoft.intellij.wizards.createarmvm;
 
-import com.intellij.openapi.application.ApplicationNamesInfo;
 import com.intellij.openapi.project.Project;
 import com.microsoft.intellij.wizards.VMWizardModel;
+import com.microsoft.intellij.wizards.createvm.MachineSettingsStep;
 import com.microsoft.intellij.wizards.createvm.SelectImageStep;
 import com.microsoft.intellij.wizards.createvm.SubscriptionStep;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 
 public class CreateVMWizardModel extends VMWizardModel {
 
@@ -42,8 +36,6 @@ public class CreateVMWizardModel extends VMWizardModel {
     private String userName;
     private String password;
     private String certificate;
-//    private CloudService cloudService;
-//    private boolean filterByCloudService;
 //    private StorageAccount storageAccount;
 //    private VirtualNetwork virtualNetwork;
 //    private String subnet;
@@ -57,51 +49,18 @@ public class CreateVMWizardModel extends VMWizardModel {
 
         add(new SubscriptionStep(this, project));
         add(new SelectImageStep(this, project));
-//        add(new MachineSettingsStep(this, project));
-//        add(new CloudServiceStep(this, project));
-//        add(new EndpointStep(this, project, node));
-
-//        filterByCloudService = true;
+        add(new MachineSettingsStep(this, project));
+        add(new SettingsStep(this, project, node));
     }
 
     public String[] getStepTitleList() {
         return new String[]{
                 "Subscription",
                 "Select Image",
-                /*"Machine Settings",
-                "Cloud Service",
-                "Endpoints"*/
+                "Machine Settings",
+                "Settings"
         };
     }
-
-//    public String getHtmlFromVMImage(VirtualMachineImage virtualMachineImage) {
-//        String html = BASE_HTML_VM_IMAGE;
-//        html = html.replace("#TITLE#", virtualMachineImage.getLabel());
-//        html = html.replace("#DESCRIPTION#", virtualMachineImage.getDescription());
-//        html = html.replace("#PUBLISH_DATE#", new SimpleDateFormat("dd-M-yyyy").format(virtualMachineImage.getPublishedDate().getTime()));
-//        html = html.replace("#PUBLISH_NAME#", virtualMachineImage.getPublisherName());
-//        html = html.replace("#OS#", virtualMachineImage.getOperatingSystemType());
-//        html = html.replace("#LOCATION#", virtualMachineImage.getLocation());
-//
-//        html = html.replace("#PRIVACY#", virtualMachineImage.getPrivacyUri().isEmpty()
-//                ? ""
-//                : "<p><a href='" + virtualMachineImage.getPrivacyUri() + "' style=\"font-family: 'Segoe UI';font-size: 12pt;\">Privacy statement</a></p>");
-//
-//
-//        html = html.replace("#LICENCE#", virtualMachineImage.getEulaUri().isEmpty()
-//                ? ""
-//                : "<p><a href='" + virtualMachineImage.getEulaUri() + "' style=\"font-family: 'Segoe UI';font-size: 12pt;\">Licence agreement</a></p>");
-//
-//        return html;
-//    }
-
-//    public VirtualMachineImage getVirtualMachineImage() {
-//        return virtualMachineImage;
-//    }
-
-//    public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
-//        this.virtualMachineImage = virtualMachineImage;
-//    }
 
     public String getName() {
         return name;
@@ -143,44 +102,12 @@ public class CreateVMWizardModel extends VMWizardModel {
         this.certificate = certificate;
     }
 
-//    public CloudService getCloudService() {
-//        return cloudService;
-//    }
-
-//    public void setCloudService(CloudService cloudService) {
-//        this.cloudService = cloudService;
-//    }
-
-//    public boolean isFilterByCloudService() {
-//        return filterByCloudService;
-//    }
-
-//    public void setFilterByCloudService(boolean filterByCloudService) {
-//        this.filterByCloudService = filterByCloudService;
-//    }
-
 //    public VirtualNetwork getVirtualNetwork() {
 //        return virtualNetwork;
 //    }
 
 //    public void setVirtualNetwork(VirtualNetwork virtualNetwork) {
 //        this.virtualNetwork = virtualNetwork;
-//    }
-
-//    public String getSubnet() {
-//        return subnet;
-//    }
-
-//    public void setSubnet(String subnet) {
-//        this.subnet = subnet;
-//    }
-//
-//    public StorageAccount getStorageAccount() {
-//        return storageAccount;
-//    }
-//
-//    public void setStorageAccount(StorageAccount storageAccount) {
-//        this.storageAccount = storageAccount;
 //    }
 
 //    public String getAvailabilitySet() {

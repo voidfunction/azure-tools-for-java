@@ -24,7 +24,10 @@ package com.microsoft.intellij.wizards;
 import com.intellij.openapi.application.ApplicationNamesInfo;
 import com.intellij.ui.wizard.WizardModel;
 import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
+import com.microsoft.tooling.msservices.model.vm.VirtualMachineSize;
+import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -62,10 +65,19 @@ public abstract class VMWizardModel extends WizardModel {
             "    #LICENCE#\n" +
             "</body>\n" +
             "</html>";
+    protected String subnet;
 
 
     private Subscription subscription;
     private VirtualMachineImage virtualMachineImage;
+    private StorageAccount storageAccount;
+    private String availabilitySet;
+    private VirtualNetwork virtualNetwork;
+    private String name;
+    private VirtualMachineSize size;
+    private String userName;
+    private String password;
+    private String certificate;
 
     public VMWizardModel() {
         super(ApplicationNamesInfo.getInstance().getFullProductName() + " - Create new Virtual Machine");
@@ -130,5 +142,77 @@ public abstract class VMWizardModel extends WizardModel {
 
     public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
         this.virtualMachineImage = virtualMachineImage;
+    }
+
+    public StorageAccount getStorageAccount() {
+        return storageAccount;
+    }
+
+    public void setStorageAccount(StorageAccount storageAccount) {
+        this.storageAccount = storageAccount;
+    }
+
+    public String getSubnet() {
+        return subnet;
+    }
+
+    public void setSubnet(String subnet) {
+        this.subnet = subnet;
+    }
+
+    public String getAvailabilitySet() {
+        return availabilitySet;
+    }
+
+    public void setAvailabilitySet(String availabilitySet) {
+        this.availabilitySet = availabilitySet;
+    }
+
+    public VirtualNetwork getVirtualNetwork() {
+        return virtualNetwork;
+    }
+
+    public void setVirtualNetwork(VirtualNetwork virtualNetwork) {
+        this.virtualNetwork = virtualNetwork;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public VirtualMachineSize getSize() {
+        return size;
+    }
+
+    public void setSize(VirtualMachineSize size) {
+        this.size = size;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getCertificate() {
+        return certificate;
+    }
+
+    public void setCertificate(String certificate) {
+        this.certificate = certificate;
     }
 }
