@@ -49,7 +49,7 @@ public class JobViewEditor extends EditorPart {
 	@Override
 	public void createPartControl(Composite composite) {
 		composite.setLayout(new FillLayout());
-		final String indexPath = PluginUtil.pluginFolder + "/com.microsoft.azure.hdinsight" + "/job/html/index.html";
+		final String indexPath = PluginUtil.pluginFolder + "/com.microsoft.azure.hdinsight" + "/hdinsight/job/html/index.html";
 		final String jobViewFxJarPath = PluginUtil.pluginFolder + "/com.microsoft.azure.hdinsight" + "/hdinsight-job-view.jar"; 
 		final String queryString = "?projectid=" + uuid + "&engintype=javafx";
 		final String webUrl = "file:///" + indexPath.replace("\\", "") + queryString;
