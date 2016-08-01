@@ -941,9 +941,11 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
     				ftpClient.deleteFile(filePath);
     			}
     		}
+    	} else {
     		// remove the empty directory
     		ftpClient.removeDirectory(dirToList);
     	}
+    	ftpClient.removeDirectory(dirToList);
     }
 
     @NotNull

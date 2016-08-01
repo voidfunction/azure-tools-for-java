@@ -2408,6 +2408,7 @@ public class AzureSDKHelper {
     		@NotNull com.microsoft.azure.management.websites.models.WebSite webSite) {
     	ws.setStatus(Strings.nullToEmpty(webSite.getProperties().getState().toString()));
     	ws.setUrl(webSite.getProperties().getUri() != null ? webSite.getProperties().getUri().toString() : "");
+    	ws.setServerFarm(Strings.nullToEmpty(webSite.getProperties().getServerFarm()));
     	return ws;
     }
 

@@ -22,6 +22,7 @@ package com.microsoft.webapp.config;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -72,6 +73,7 @@ import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.ws.WebAppsContainers;
 import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
+import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoft.webapp.activator.Activator;
 import com.microsoft.webapp.util.WebAppUtils;
 import com.microsoftopentechnologies.azurecommons.roleoperations.JdkSrvConfigUtilMethods;
@@ -103,28 +105,37 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	Map<String, String> subMap = new HashMap<String, String>();
 	List<String> plansAcrossSub = new ArrayList<String>();
 	List<String> webSiteNames = new ArrayList<String>();
+	File cmpntFile = new File(PluginUtil.getTemplateFile(com.microsoftopentechnologies.wacommon.utils.Messages.cmpntFileName));
+	WebSite webSiteToEdit = null;
 	// values to be used in WebAppDeployDialog
 	String finalName = "";
 	String finalSubId = "";
 	WebHostingPlanCache finalPlan = null;
+	String finalResGrp = "";
 	String finalContainer = "";
 	String finalJDK = "";
 	String finalURL = "";
 	String finalKey = "";
-	File cmpntFile = new File(PluginUtil.getTemplateFile(com.microsoftopentechnologies.wacommon.utils.Messages.cmpntFileName));
 
-	public CreateWebAppDialog(Shell parentShell, List<WebSite> webSiteList) {
+	public CreateWebAppDialog(Shell parentShell, List<WebSite> webSiteList, WebSite webSiteToEdit) {
 		super(parentShell);
 		setHelpAvailable(false);
 		for (WebSite ws : webSiteList) {
 			webSiteNames.add(ws.getName());
+		}
+		if (webSiteToEdit != null) {
+			this.webSiteToEdit = webSiteToEdit;
 		}
 	}
 
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText(Messages.crtWebAppTtl);
+		if (webSiteToEdit != null) {
+			newShell.setText(Messages.editWebAppTtl);
+		} else {
+			newShell.setText(Messages.crtWebAppTtl);
+		}
 		Image image = WebAppUtils.getImage(Messages.dlgImgPath);
 		if (image != null) {
 			setTitleImage(image);
@@ -135,14 +146,46 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 	protected Control createButtonBar(Composite parent) {
 		Control ctrl = super.createButtonBar(parent);
 		okButton = getButton(IDialogConstants.OK_ID);
-		populateSubscriptions();
+		String subIdTemp = "";
+		String resourceGrpTemp = "";
+		String appPlanTemp = "";
+		WebAppsContainers containerTemp = WebAppsContainers.TOMCAT_8;
+		if (webSiteToEdit != null) {
+			subIdTemp = webSiteToEdit.getSubscriptionId();
+			resourceGrpTemp = webSiteToEdit.getWebSpaceName();
+			appPlanTemp = webSiteToEdit.getServerFarm();
+			try {
+				WebSiteConfiguration config = AzureManagerImpl.getManager().getWebSiteConfiguration(
+						subIdTemp, resourceGrpTemp, webSiteToEdit.getName());
+				String type = config.getJavaContainer();
+				String version = config.getJavaContainerVersion();
+				if (type.equalsIgnoreCase("TOMCAT") && (version.equalsIgnoreCase("8.0") || version.equalsIgnoreCase("8.0.23"))) {
+					containerTemp = WebAppsContainers.TOMCAT_8;
+				} else if (type.equalsIgnoreCase("TOMCAT") && (version.equalsIgnoreCase("7.0") || version.equalsIgnoreCase("7.0.62"))) {
+					containerTemp = WebAppsContainers.TOMCAT_7;
+				} else if (type.equalsIgnoreCase("TOMCAT") && version.equalsIgnoreCase("7.0.50")) {
+					containerTemp = WebAppsContainers.TOMCAT_750;
+				} else {
+					containerTemp = WebAppsContainers.JETTY_9;
+				}
+			} catch (AzureCmdException e) {
+				Activator.getDefault().log(e.getMessage(), e);
+			}
+			txtName.setText(webSiteToEdit.getName());
+			txtName.setEnabled(false);
+			subscriptionCombo.setEnabled(false);
+			groupCombo.setEnabled(false);
+			servicePlanCombo.setEnabled(false);
+		}
+		populateContainers(containerTemp);
+		populateSubscriptions(subIdTemp);
 		String subName = subscriptionCombo.getText();
 		if (subName != null && !subName.isEmpty()) {
 			String subId = findKeyAsPerValue(subName);
-			populateResourceGroups(subId, "");
+			populateResourceGroups(subId, resourceGrpTemp);
 			String resName = groupCombo.getText();
 			if (resName != null && !resName.isEmpty()) {
-				populateServicePlans(subId, resName, null);
+				populateServicePlans(subId, resName, appPlanTemp);
 			}
 		}
 		enableOkBtn();
@@ -435,13 +478,6 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		containerCombo = new Combo(container, SWT.READ_ONLY);
 		gridData = gridDataForText(180);
 		containerCombo.setLayoutData(gridData);
-		List<String> containerList = new ArrayList<String>();
-		for (WebAppsContainers type : WebAppsContainers.values()) {
-			containerList.add(type.getName());
-		}
-		String[] containerArray = containerList.toArray(new String[containerList.size()]);
-		containerCombo.setItems(containerArray);
-		containerCombo.setText(containerArray[0]);
 
 		new Link(container, SWT.NO);
 	}
@@ -517,6 +553,10 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 
 		Link linkStorage = new Link(container, SWT.LEFT);
 		linkStorage.setText(Messages.linkLblAcc);
+		
+		Label note = new Label(container, SWT.LEFT);
+		note.setText(Messages.customNote);
+		note.setLayoutData(gridDataForLbl(2));
 
 		defaultJDK.addSelectionListener(new SelectionListener() {
 			@Override
@@ -663,7 +703,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		return key;
 	}
 
-	private void populateSubscriptions() {
+	private void populateSubscriptions(String valToSetId) {
 		List<Subscription> subList = AzureManagerImpl.getManager().getSubscriptionList();
 		if (subList.size() > 0) {
 			for (Subscription sub : subList) {
@@ -672,7 +712,12 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 			Collection<String> values = subMap.values();
 			String[] subNameArray = values.toArray(new String[values.size()]);
 			subscriptionCombo.setItems(subNameArray);
-			subscriptionCombo.setText(subNameArray[0]);
+
+			if (valToSetId != null && !valToSetId.isEmpty() && subMap.containsKey(valToSetId)) {
+				subscriptionCombo.setText(subMap.get(valToSetId));
+			} else {
+				subscriptionCombo.setText(subNameArray[0]);
+			}
 			newGroupBtn.setEnabled(true);
 		} else {
 			subscriptionCombo.removeAll();
@@ -681,16 +726,28 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		}
 	}
 
+	private void populateContainers(WebAppsContainers container) {
+		List<String> containerList = new ArrayList<String>();
+		for (WebAppsContainers type : WebAppsContainers.values()) {
+			if (!type.isOptional() || type.equals(container)) {
+				containerList.add(type.getName());
+			}
+		}
+		String[] containerArray = containerList.toArray(new String[containerList.size()]);
+		containerCombo.setItems(containerArray);
+		containerCombo.setText(container.getName());
+	}
+
 	private void populateResourceGroups(String subId, String valToSet) {
 		try {
 			List<String> groupList = AzureManagerImpl.getManager().getResourceGroupNames(subId);
 			if (groupList.size() > 0) {
 				String[] groupArray = groupList.toArray(new String[groupList.size()]);
 				groupCombo.setItems(groupArray);
-				if (valToSet.isEmpty()) {
-					groupCombo.setText(groupArray[0]);
-				} else {
+				if (valToSet != null && !valToSet.isEmpty() && Arrays.asList(groupArray).contains(valToSet)) {
 					groupCombo.setText(valToSet);
+				} else {
+					groupCombo.setText(groupArray[0]);
 				}
 				newPlanBtn.setEnabled(true);
 			} else {
@@ -764,11 +821,10 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 					servicePlanCombo.add(plan.getName());
 					hostingPlanMap.put(plan.getName(), plan);
 				}	
-
-				if (valToSet == null || valToSet.isEmpty()) {
-					servicePlanCombo.setText(servicePlanCombo.getItem(0));
-				} else {
+				if (valToSet != null && !valToSet.isEmpty() && hostingPlanMap.containsKey(valToSet)) {
 					servicePlanCombo.setText(valToSet);
+				} else {
+					servicePlanCombo.setText(servicePlanCombo.getItem(0));
 				}	
 				pupulateServicePlanDetails(hostingPlanMap.get(servicePlanCombo.getText()));				
 			} else {
@@ -807,7 +863,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 				if (!WAEclipseHelperMethods.isAlphaNumericHyphen(name) || name.length() > 60) {
 					setErrorMessage(Messages.nameErrMsg);
 					okButton.setEnabled(false);
-				} else if (webSiteNames.contains(name)) {
+				} else if (webSiteNames.contains(name) && webSiteToEdit == null) {
 					setErrorMessage(Messages.inUseErrMsg);
 					okButton.setEnabled(false);
 				} else if (customJDKUser.getSelection() && !(WAEclipseHelperMethods.isBlobStorageUrl(customJDKUserUrl.getText())
@@ -828,6 +884,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 		finalSubId = findKeyAsPerValue(subscriptionCombo.getText());
 		finalPlan = hostingPlanMap.get(servicePlanCombo.getText());
 		finalContainer = containerCombo.getText();
+		finalResGrp = groupCombo.getText();
 		if (customJDK.getSelection()) {
 			finalJDK = jdkCombo.getText();
 		} else if (customJDKUser.getSelection()) {
@@ -866,5 +923,9 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 
 	public String getFinalKey() {
 		return finalKey;
+	}
+
+	public String getFinalResGrp() {
+		return finalResGrp;
 	}
 }

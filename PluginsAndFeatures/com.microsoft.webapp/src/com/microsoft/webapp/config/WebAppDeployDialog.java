@@ -102,6 +102,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 	WebSite selectedWebSite;
 	Button okButton;
 	Button delBtn;
+	Button updateBtn;
 	Button deployToRoot;
 	String webAppCreated = "";
 	AzureCmdException exp = new AzureCmdException("");
@@ -189,6 +190,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 				if (index >= 0 && webSiteList.size() > index) {
 					selectedWebSite = webSiteList.get(index);
 					delBtn.setEnabled(true);
+					updateBtn.setEnabled(true);
 					if (webSiteConfigMap.get(webSiteList.get(index)).getJavaContainer().isEmpty()) {
 						okButton.setEnabled(false);
 					} else {
@@ -221,10 +223,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 		newBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				CreateWebAppDialog dialog = new CreateWebAppDialog(getShell(), webSiteList);
+				CreateWebAppDialog dialog = new CreateWebAppDialog(getShell(), webSiteList, null);
 				int result = dialog.open();
 				if (result == Window.OK) {
-					createWebApp(dialog);
+					createWebApp(dialog, false);
 				}
 			}
 
@@ -264,6 +266,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 							}
 							// always disable button as after delete no entry is selected
 							delBtn.setEnabled(false);
+							updateBtn.setEnabled(false);
 							selectedWebSite = null;
 						}
 					} catch (AzureCmdException e) {
@@ -272,6 +275,36 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 					}
 				} else {
 					PluginUtil.displayErrorDialog(getShell(), Messages.errTtl, "Select a web app container to delete.");
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+		});
+
+		updateBtn = new Button(containerButtons, SWT.PUSH);
+		updateBtn.setText(Messages.updateBtn);
+		gridData = new GridData();
+		gridData.widthHint = 70;
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+		updateBtn.setLayoutData(gridData);
+		updateBtn.setEnabled(false);
+		// setVisible to true if we decide to include web app update feature in future
+		updateBtn.setVisible(false);
+		updateBtn.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				if (selectedWebSite != null) {
+					CreateWebAppDialog dialog = new CreateWebAppDialog(getShell(), webSiteList, selectedWebSite);
+					int result = dialog.open();
+					if (result == Window.OK) {
+						createWebApp(dialog, true);
+					}
+				} else {
+					PluginUtil.displayErrorDialog(getShell(), Messages.errTtl, "Select a web app container to update.");
 				}
 			}
 
@@ -395,9 +428,11 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 		String customFolderLoc = String.format("%s%s%s%s%s",
 				PluginUtil.pluginFolder,
 				File.separator, com.microsoft.webapp.util.Messages.webAppPluginID, File.separator, "customConfiguration");
+		boolean isEdit;
 
-		public CreateWebAppJob(String name) {
+		public CreateWebAppJob(String name, boolean isEdit) {
 			super(name);
+			this.isEdit = isEdit; 
 		}
 
 		public void setDialog(CreateWebAppDialog dialog) {
@@ -408,10 +443,21 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			monitor.beginTask(Messages.createWebApps, IProgressMonitor.UNKNOWN);
 			try {
-				WebSite webSite = manager.createWebSite(dialog.getFinalSubId(), dialog.getFinalPlan(), dialog.getFinalName());
+				WebSite webSite;
+				if (!isEdit) {
+					webSite = manager.createWebSite(dialog.getFinalSubId(), dialog.getFinalPlan(), dialog.getFinalName());
+				} else {
+					webSite = manager.getWebSite(dialog.getFinalSubId(), dialog.getFinalResGrp(), dialog.getFinalName());
+				}
 				WebSiteConfiguration webSiteConfiguration = manager.getWebSiteConfiguration(dialog.getFinalSubId(),
 						webSite.getWebSpaceName(), webSite.getName());
 				config = webSiteConfiguration;
+				if (isEdit) {
+					// make web app .NET inorder to load aspx page
+					webSiteConfiguration.setJavaVersion("");
+					manager.updateWebSiteConfiguration(dialog.getFinalSubId(), webSite.getWebSpaceName(), webSite.getName(),
+							webSite.getLocation(), webSiteConfiguration);
+				}
 				if (!dialog.getFinalJDK().isEmpty() || !dialog.getFinalURL().isEmpty()) {
 					Display.getDefault().syncExec(new Runnable()
 					{
@@ -444,6 +490,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 				config = manager.updateWebSiteConfiguration(dialog.getFinalSubId(), webSite.getWebSpaceName(), webSite.getName(),
 						webSite.getLocation(), webSiteConfiguration);
 				webAppCreated = webSite.getName();
+				if (isEdit) {
+					webSiteConfigMap.remove(selectedWebSite);
+					webSiteList.remove(selectedWebSite);
+				}
 				// update eclipse workspace preferences
 				webSiteConfigMap.put(webSite, webSiteConfiguration);
 				PreferenceWebAppUtil.save(webSiteConfigMap);
@@ -505,9 +555,11 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 								// stop and restart web app
 								manager.stopWebSite(dialog.getFinalSubId(), config.getWebSpaceName(), dialog.getFinalName());
 								Thread.sleep(5000);
+								// delete old jdk zip and folder if exists
+								ftp.deleteFile(ftpPath + "jdk.zip");
 								// copy files required for download
 								copyFilesForDownload(ftp);
-								Thread.sleep(2000);
+								Thread.sleep(5000);
 								manager.startWebSite(dialog.getFinalSubId(), config.getWebSpaceName(), dialog.getFinalName());
 								// wait till zip files download
 								while (!WebAppUtils.isFilePresentOnFTPServer(ftp, "jdk.zip")) {
@@ -520,10 +572,18 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 								manager.stopWebSite(dialog.getFinalSubId(), config.getWebSpaceName(), dialog.getFinalName());
 								Thread.sleep(5000);
 								copyFilesForExtract(ftp);
-								Thread.sleep(2000);
+								// delete old jdk folder if exists
+								if (WebAppUtils.isFilePresentOnFTPServer(ftp, "jdk")) {
+									AzureManagerImpl.removeFtpDirectory(ftp, ftpPath + "jdk", "");
+									Thread.sleep(60000);
+									while (WebAppUtils.isFilePresentOnFTPServer(ftp, "jdk")) {
+										Thread.sleep(15000);
+									}
+								}
+								Thread.sleep(5000);
 								manager.startWebSite(dialog.getFinalSubId(), config.getWebSpaceName(), dialog.getFinalName());
 								monitor.worked(60);
-								// wait till zip files extracted
+								// wait till zip files starts extracting and jdk folder has been created
 								Thread.sleep(60000);
 								while (!WebAppUtils.isFilePresentOnFTPServer(ftp, "jdk")) {
 									Thread.sleep(15000);
@@ -539,6 +599,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 									String jdkFolderName =  cloudVal.substring(cloudVal.indexOf("\\") + 1, cloudVal.length());
 									jdkPath = jdkPath + jdkFolderName;
 								}
+								// count number of files in extracted folder. Else extraction is not complete yet.
 								int timeout = 0;
 								while (!WebAppUtils.checkFileCountOnFTPServer(ftp, jdkPath, 10) && timeout < 420000) {
 									timeout = timeout + 15000;
@@ -815,6 +876,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 										selectedWebSite = webSiteList.get(i);
 										okButton.setEnabled(true);
 										delBtn.setEnabled(true);
+										updateBtn.setEnabled(true);
 										break;
 									}
 								}
@@ -836,10 +898,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 		});
 	}
 
-	private void createWebApp(CreateWebAppDialog dialog) {
+	private void createWebApp(CreateWebAppDialog dialog, boolean isEdit) {
 		list.setItems(new String[]{Messages.createWebApps});
 		PluginUtil.showBusy(true, getShell());
-		CreateWebAppJob job = new CreateWebAppJob(Messages.createWebApps);
+		CreateWebAppJob job = new CreateWebAppJob(Messages.createWebApps, isEdit);
 		job.setPriority(Job.SHORT);
 		job.setDialog(dialog);
 		job.schedule();

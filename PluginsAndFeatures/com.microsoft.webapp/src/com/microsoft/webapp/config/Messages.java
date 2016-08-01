@@ -92,6 +92,9 @@ public final class Messages extends NLS {
 	public static String customJdk;
 	public static String linkLblAcc;
 	public static String noURLMsg;
+	public static String customNote;
+	public static String updateBtn;
+	public static String editWebAppTtl;
 	
 	static {
 		// initialize resource bundle

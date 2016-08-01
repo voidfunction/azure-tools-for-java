@@ -29,6 +29,7 @@ public class WebSite implements ServiceTreeItem, Serializable {
     private String url = "";
     private String subscriptionId;
     private String location;
+    private String serverFarm;
 
     // this field is here for lazy loading and caching; is null unless set explicitely
     private WebSitePublishSettings webSitePublishSettings;
@@ -100,4 +101,12 @@ public class WebSite implements ServiceTreeItem, Serializable {
     public String toString() {
         return name + (loading ? " (loading...)" : "");
     }
+
+	public String getServerFarm() {
+		return serverFarm;
+	}
+
+	public void setServerFarm(String serverFarm) {
+		this.serverFarm = serverFarm;
+	}
 }
