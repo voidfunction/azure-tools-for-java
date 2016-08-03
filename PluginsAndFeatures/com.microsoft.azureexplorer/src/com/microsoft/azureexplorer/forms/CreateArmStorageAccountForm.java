@@ -9,7 +9,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -37,7 +36,6 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
-import com.microsoft.tooling.msservices.model.vm.AffinityGroup;
 import com.microsoft.tooling.msservices.model.vm.Location;
 import com.microsoft.tooling.msservices.model.ReplicationTypes;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
@@ -229,37 +227,43 @@ public class CreateArmStorageAccountForm extends Dialog {
             DefaultLoader.getUIHelper().showError("Invalid storage account name. The name should be between 3 and 24 characters long and \n" +
                     "can contain only lowercase letters and numbers.", "Azure Explorer");
             return;
-        }
-        PluginUtil.showBusy(true, getShell());
+		}
+		String name = nameTextField.getText();
 
-        try {
-            String name = nameTextField.getText();
+		String region = ((IStructuredSelection) regionViewer.getSelection()).getFirstElement().toString();
+		String replication = replicationComboBox.getData(replicationComboBox.getText()).toString();
+		final boolean isNewResourceGroup = createNewRadioButton.getSelection();
+		final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getText();
 
-            String region = ((IStructuredSelection) regionViewer.getSelection()).getFirstElement().toString();
-            String replication = replicationComboBox.getData(replicationComboBox.getText()).toString();
-            final boolean isNewResourceGroup = createNewRadioButton.getSelection();
-            final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getText();
-            
-            storageAccount = new StorageAccount(name, subscription.getId().toString());
-            storageAccount.setType(replication);
-            storageAccount.setLocation(region);
-            storageAccount.setNewResourceGroup(isNewResourceGroup);
-            storageAccount.setResourceGroupName(resourceGroupName);
+		storageAccount = new StorageAccount(name, subscription.getId().toString());
+		storageAccount.setType(replication);
+		storageAccount.setLocation(region);
+		storageAccount.setNewResourceGroup(isNewResourceGroup);
+		storageAccount.setResourceGroupName(resourceGroupName);
 
-            AzureArmManagerImpl.getManager(null).createStorageAccount(storageAccount);
-//            AzureManagerImpl.getManager().refreshStorageAccountInformation(storageAccount);
-
-            if (onCreate != null) {
-                onCreate.run();
-            }
-        } catch (AzureCmdException e) {
-            storageAccount = null;
-            PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
-        			"An error occurred while creating the storage account.", e);
-        }
-        PluginUtil.showBusy(false, getShell());
-
-        super.okPressed();
+		DefaultLoader.getIdeHelper().runInBackground(null, "Creating storage account...", false, true,
+				"Creating storage account...", new Runnable() {
+					@Override
+					public void run() {
+						try {
+							AzureArmManagerImpl.getManager(null).createStorageAccount(storageAccount);
+							// AzureManagerImpl.getManager().refreshStorageAccountInformation(storageAccount);
+							if (onCreate != null) {
+								onCreate.run();
+							}
+						} catch (AzureCmdException e) {
+							storageAccount = null;
+							DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+								@Override
+								public void run() {
+									PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+											"An error occurred while creating the storage account.", e);
+								}
+							});
+						}
+					}
+				});
+		super.okPressed();
     }
 
     @Override

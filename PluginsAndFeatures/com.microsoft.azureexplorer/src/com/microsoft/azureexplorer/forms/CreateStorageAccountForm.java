@@ -24,6 +24,7 @@ import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.model.ReplicationTypes;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.AffinityGroup;
@@ -51,24 +52,6 @@ import java.util.Vector;
 
 public class CreateStorageAccountForm extends Dialog {
     private static final String PRICING_LINK = "<a href=\"http://go.microsoft.com/fwlink/?LinkID=400838\">Read more about replication services and pricing details</a>";
-    private enum ReplicationTypes {
-        Standard_LRS,
-        Standard_GRS,
-        Standard_RAGRS;
-
-        public String getDescription() {
-            switch (this) {
-                case Standard_GRS:
-                    return "Geo-Redundant";
-                case Standard_LRS:
-                    return "Locally Redundant";
-                case Standard_RAGRS:
-                    return "Read Access Geo-Redundant";
-            }
-
-            return super.toString();
-        }
-    }
 
     private Button buttonOK;
     private Button buttonCancel;
