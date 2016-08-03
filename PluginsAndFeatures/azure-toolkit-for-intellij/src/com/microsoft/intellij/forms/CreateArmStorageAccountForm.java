@@ -35,6 +35,7 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.model.ReplicationTypes;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.vm.Location;
 import org.jetbrains.annotations.NotNull;
@@ -71,28 +72,6 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     private boolean isLoading = true;
 
     private final String PRICING_LINK = "http://go.microsoft.com/fwlink/?LinkID=400838";
-
-    private enum ReplicationTypes {
-        Standard_ZRS,
-        Standard_LRS,
-        Standard_GRS,
-        Standard_RAGRS;
-
-        public String getDescription() {
-            switch (this) {
-                case Standard_ZRS:
-                    return "Zone-Redundant";
-                case Standard_GRS:
-                    return "Geo-Redundant";
-                case Standard_LRS:
-                    return "Locally Redundant";
-                case Standard_RAGRS:
-                    return "Read Access Geo-Redundant";
-            }
-
-            return super.toString();
-        }
-    }
 
     public CreateArmStorageAccountForm(Project project) {
         super(project, true);
