@@ -173,30 +173,35 @@ public class ClusterManagerEx {
         saveAdditionalClusters();
     }
 
-    public boolean isHDInsightAdditionalStorageExist(String clusterName, String storageName) {
+    /*
+        return 0: cluster can be added to additional cluster list
+        return 1: cluster already exist in current cluster list
+        return 2: cluster is valid to add to cluster list but storage account is not default
+     */
+    public int isHDInsightAdditionalStorageExist(String clusterName, String storageName) {
 
         for (IClusterDetail clusterDetail : cachedClusterDetails) {
             if (clusterDetail.getName().equals(clusterName)) {
                 try {
                     if (clusterDetail.getStorageAccount().getName().equals(storageName)) {
-                        return true;
+                        return 1;
                     }
                 } catch (HDIException e) {
-                    return false;
+                    return 0;
                 }
 
                 List<HDStorageAccount> additionalStorageAccount = clusterDetail.getAdditionalStorageAccounts();
                 if (additionalStorageAccount != null) {
                     for (ClientStorageAccount storageAccount : additionalStorageAccount) {
                         if (storageAccount.getName().equals(storageName)) {
-                            return true;
+                            return 2;
                         }
                     }
                 }
             }
         }
 
-        return false;
+        return 0;
     }
 
     private void saveAdditionalClusters() {

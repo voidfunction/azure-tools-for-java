@@ -152,9 +152,15 @@ public class AddNewClusterForm extends TitleAreaDialog {
                 if (clusterName == null) {
                     setErrorMessage("Wrong cluster name or endpoint");
                     isCarryOnNextStep = false;
-                } else if (ClusterManagerEx.getInstance().isHDInsightAdditionalStorageExist(clusterName, storageName)) {
-                    setErrorMessage("Storage already exist!");
-                    isCarryOnNextStep = false;
+                } else {
+                	int status = ClusterManagerEx.getInstance().isHDInsightAdditionalStorageExist(clusterName, storageName);
+                	if(status == 1) {
+                		setErrorMessage("Cluster already exist in current list");
+                		isCarryOnNextStep = false;
+                	} else if(status == 2) {
+                		setErrorMessage("Default storage account is required");
+                		isCarryOnNextStep = false;
+                	}
                 }
             }
 

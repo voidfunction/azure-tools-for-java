@@ -113,9 +113,15 @@ public class AddNewClusterFrom extends DialogWrapper {
                         if (clusterName == null) {
                             errorMessage = "Wrong cluster name or endpoint";
                             isCarryOnNextStep = false;
-                        } else if (ClusterManagerEx.getInstance().isHDInsightAdditionalStorageExist(clusterName, storageName)) {
-                            errorMessage = "Storage already exist!";
-                            isCarryOnNextStep = false;
+                        } else {
+                            int status = ClusterManagerEx.getInstance().isHDInsightAdditionalStorageExist(clusterName, storageName);
+                            if(status == 1) {
+                                errorMessage = "Cluster already exist in current list";
+                                isCarryOnNextStep = false;
+                            } else if(status == 2) {
+                                errorMessage = "Default storage account is required";
+                                isCarryOnNextStep = false;
+                            }
                         }
                     }
 
