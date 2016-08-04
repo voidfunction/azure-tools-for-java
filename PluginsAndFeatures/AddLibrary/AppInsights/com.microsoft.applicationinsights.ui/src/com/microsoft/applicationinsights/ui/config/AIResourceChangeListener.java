@@ -65,7 +65,6 @@ public class AIResourceChangeListener implements IResourceChangeListener {
 			WorkspaceJob job = new WorkspaceJob(Messages.refreshJobName) {
 				@Override
 				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-					PluginUtil.refreshWorkspace();
 					return Status.OK_STATUS;
 				}
 			};

@@ -86,7 +86,6 @@ public class WAResourceChangeListener implements IResourceChangeListener {
 				@Override
 				public IStatus runInWorkspace(IProgressMonitor monitor)
 						throws CoreException {
-					PluginUtil.refreshWorkspace();
 					return Status.OK_STATUS;
 				}
 			};
