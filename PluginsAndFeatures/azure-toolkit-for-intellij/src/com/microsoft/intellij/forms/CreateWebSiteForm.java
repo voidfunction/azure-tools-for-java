@@ -344,7 +344,7 @@ public class CreateWebSiteForm extends DialogWrapper {
             WebSite webSite = manager.createWebSite(subscription.getId(), webHostingPlan, nameTextField.getText().trim());
             WebSiteConfiguration webSiteConfiguration = manager.getWebSiteConfiguration(subscription.getId(),
                     webSite.getWebSpaceName(), webSite.getName());
-            webSiteConfiguration.setJavaVersion("1.8");
+            webSiteConfiguration.setJavaVersion("1.8.0_73");
             String selectedContainer = (String) webContainerComboBox.getSelectedItem();
             if (selectedContainer.equalsIgnoreCase(WebAppsContainers.TOMCAT_8.getName())) {
                 webSiteConfiguration.setJavaContainer("TOMCAT");

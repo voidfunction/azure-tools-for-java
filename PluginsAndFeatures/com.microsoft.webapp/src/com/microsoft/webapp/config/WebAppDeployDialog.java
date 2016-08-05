@@ -475,7 +475,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 						}
 					});
 				}
-				webSiteConfiguration.setJavaVersion("1.8");
+				webSiteConfiguration.setJavaVersion("1.8.0_73");
 				String selectedContainer = dialog.getFinalContainer();
 				if (selectedContainer.equalsIgnoreCase(WebAppsContainers.TOMCAT_8.getName())) {
 					webSiteConfiguration.setJavaContainer("TOMCAT");
