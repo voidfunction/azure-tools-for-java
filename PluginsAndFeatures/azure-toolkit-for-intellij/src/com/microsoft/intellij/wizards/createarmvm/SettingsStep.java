@@ -30,6 +30,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
+import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.forms.CreateStorageAccountForm;
@@ -38,7 +39,8 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
-import com.microsoft.tooling.msservices.model.vm.*;
+import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
+import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import org.jetbrains.annotations.NotNull;
 
@@ -172,7 +174,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         model.getCurrentNavigationState().NEXT.setEnabled(false);
 
         final VirtualMachineImage virtualMachineImage = model.getVirtualMachineImage();
-        imageDescriptionTextPane.setText(model.getHtmlFromVMImage(virtualMachineImage));
+//        imageDescriptionTextPane.setText(model.getHtmlFromVMImage(virtualMachineImage));
         imageDescriptionTextPane.setCaretPosition(0);
 
 //        retrieveCloudServices(model.getVirtualNetwork(), model.isFilterByCloudService());
@@ -182,7 +184,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
 //        if (model.isFilterByCloudService()) {
 //            fillCloudServices(null, true);
 //        } else {
-        fillVirtualNetworks(null, true);
+        fillVirtualNetworks(true);
 //        }
 
         return rootPanel;
@@ -196,20 +198,20 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
 //        return super.onPrevious(model);
 //    }
 
-    private Collection<CloudService> filterCS(VirtualNetwork selectedVN) {
-        Collection<CloudService> services = /*selectedVN == null ? cloudServices.values() :*/ new Vector<CloudService>();
-
-        if (selectedVN != null) {
-//            for (CloudService cloudService : cloudServices.values()) {
-//                if ((isDeploymentEmpty(cloudService, PRODUCTION) && areSameRegion(cloudService, selectedVN)) ||
-//                        areSameNetwork(cloudService, selectedVN)) {
-//                    services.add(cloudService);
-//                }
-//            }
-        }
-
-        return services;
-    }
+//    private Collection<CloudService> filterCS(VirtualNetwork selectedVN) {
+//        Collection<CloudService> services = /*selectedVN == null ? cloudServices.values() :*/ new Vector<CloudService>();
+//
+//        if (selectedVN != null) {
+////            for (CloudService cloudService : cloudServices.values()) {
+////                if ((isDeploymentEmpty(cloudService, PRODUCTION) && areSameRegion(cloudService, selectedVN)) ||
+////                        areSameNetwork(cloudService, selectedVN)) {
+////                    services.add(cloudService);
+////                }
+////            }
+//        }
+//
+//        return services;
+//    }
 
     private void retrieveVirtualNetworks() {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading virtual networks...", false) {
@@ -261,8 +263,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         }
     }
 
-    private void fillVirtualNetworks(final CloudService selectedCS,
-                                     final boolean cascade) {
+    private void fillVirtualNetworks(final boolean cascade) {
         ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
@@ -281,13 +282,12 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                     vnLock.unlock();
                 }
 
-                refreshVirtualNetworks(selectedCS, selectedVN, selectedSN, cascade);
+                refreshVirtualNetworks(selectedVN, selectedSN, cascade);
             }
         });
     }
 
-    private void refreshVirtualNetworks(final CloudService selectedCS,
-                                        VirtualNetwork selectedVN,
+    private void refreshVirtualNetworks(VirtualNetwork selectedVN,
                                         String selectedSN,
                                         boolean cascade) {
         final DefaultComboBoxModel refreshedVNModel = getVirtualNetworkModel(/*selectedCS, */selectedVN, selectedSN);
@@ -296,7 +296,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             @Override
             public void run() {
                 networkComboBox.setModel(refreshedVNModel);
-                networkComboBox.setEnabled(selectedCS == null || isDeploymentEmpty(selectedCS, PRODUCTION));
+//                networkComboBox.setEnabled(selectedCS == null || isDeploymentEmpty(selectedCS, PRODUCTION));
             }
         }, ModalityState.any());
     }
@@ -380,7 +380,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         return refreshedVNModel;
     }
 
-    private Vector<VirtualNetwork> filterVN(CloudService selectedCS) {
+    private Vector<VirtualNetwork> filterVN() {
         Vector<VirtualNetwork> networks = /*selectedCS == null ?*/
                 new Vector<VirtualNetwork>(virtualNetworks.values()) /*:
                 new Vector<VirtualNetwork>()*/;
@@ -549,15 +549,11 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         return accounts;
     }
 
-    private void fillAvailabilitySets(final CloudService selectedCS) {
+    private void fillAvailabilitySets() {
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                if (selectedCS != null) {
-                    availabilityComboBox.setModel(new DefaultComboBoxModel(selectedCS.getProductionDeployment().getAvailabilitySets().toArray()));
-                } else {
-                    availabilityComboBox.setModel(new DefaultComboBoxModel(new String[]{}));
-                }
+                availabilityComboBox.setModel(new DefaultComboBoxModel(new String[]{}));
             }
         }, ModalityState.any());
     }
@@ -586,25 +582,16 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         form.show();
     }
 
-    private static boolean isDeploymentEmpty(CloudService cloudService, String deploymentSlot) {
-        if (deploymentSlot.equals(PRODUCTION)) {
-            return cloudService.getProductionDeployment().getName().isEmpty();
-        } else {
-            return cloudService.getStagingDeployment().getName().isEmpty();
-        }
+//    private static boolean areSameRegion(CloudService cloudService, VirtualNetwork virtualNetwork) {
+//        return (!virtualNetwork.getLocation().isEmpty() &&
+//                virtualNetwork.getLocation().equals(cloudService.getLocation())) ||
+//                (!virtualNetwork.getAffinityGroup().isEmpty() &&
+//                        virtualNetwork.getAffinityGroup().equals(cloudService.getAffinityGroup()));
+//    }
 
-    }
-
-    private static boolean areSameRegion(CloudService cloudService, VirtualNetwork virtualNetwork) {
-        return (!virtualNetwork.getLocation().isEmpty() &&
-                virtualNetwork.getLocation().equals(cloudService.getLocation())) ||
-                (!virtualNetwork.getAffinityGroup().isEmpty() &&
-                        virtualNetwork.getAffinityGroup().equals(cloudService.getAffinityGroup()));
-    }
-
-    private static boolean areSameNetwork(CloudService cloudService, VirtualNetwork virtualNetwork) {
-        return virtualNetwork.getName().equals(cloudService.getProductionDeployment().getVirtualNetwork());
-    }
+//    private static boolean areSameNetwork(CloudService cloudService, VirtualNetwork virtualNetwork) {
+//        return virtualNetwork.getName().equals(cloudService.getProductionDeployment().getVirtualNetwork());
+//    }
 
     private void validateNext() {
         model.getCurrentNavigationState().NEXT.setEnabled(storageComboBox.getSelectedItem() instanceof StorageAccount &&

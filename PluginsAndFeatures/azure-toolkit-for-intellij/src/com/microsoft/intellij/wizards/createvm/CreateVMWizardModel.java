@@ -29,6 +29,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule
 
 public class CreateVMWizardModel extends VMWizardModel {
 
+    private VirtualMachineImage virtualMachineImage;
     private CloudService cloudService;
     private boolean filterByCloudService;
     private Endpoint[] endpoints;
@@ -55,6 +56,14 @@ public class CreateVMWizardModel extends VMWizardModel {
                 "Cloud Service",
                 "Endpoints"
         };
+    }
+
+    public VirtualMachineImage getVirtualMachineImage() {
+        return virtualMachineImage;
+    }
+
+    public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
+        this.virtualMachineImage = virtualMachineImage;
     }
 
     public CloudService getCloudService() {

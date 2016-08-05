@@ -69,7 +69,6 @@ public abstract class VMWizardModel extends WizardModel {
 
 
     private Subscription subscription;
-    private VirtualMachineImage virtualMachineImage;
     private StorageAccount storageAccount;
     private String availabilitySet;
     private VirtualNetwork virtualNetwork;
@@ -134,14 +133,6 @@ public abstract class VMWizardModel extends WizardModel {
                 : "<p><a href='" + virtualMachineImage.getEulaUri() + "' style=\"font-family: 'Segoe UI';font-size: 12pt;\">Licence agreement</a></p>");
 
         return html;
-    }
-
-    public VirtualMachineImage getVirtualMachineImage() {
-        return virtualMachineImage;
-    }
-
-    public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
-        this.virtualMachineImage = virtualMachineImage;
     }
 
     public StorageAccount getStorageAccount() {

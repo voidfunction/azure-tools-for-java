@@ -186,23 +186,23 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
     public JComponent prepare(WizardNavigationState wizardNavigationState) {
         rootPanel.revalidate();
 
-        final VirtualMachineImage virtualMachineImage = model.getVirtualMachineImage();
-
-        if (virtualMachineImage.getOperatingSystemType().equals("Linux")) {
-            certificateCheckBox.setEnabled(true);
-            passwordCheckBox.setEnabled(true);
-            certificateCheckBox.setSelected(true);
-            passwordCheckBox.setSelected(false);
-        } else {
-            certificateCheckBox.setSelected(false);
-            passwordCheckBox.setSelected(true);
-            certificateCheckBox.setEnabled(false);
-            passwordCheckBox.setEnabled(false);
-        }
+//        final VirtualMachineImage virtualMachineImage = model.getVirtualMachineImage();
+//
+//        if (virtualMachineImage.getOperatingSystemType().equals("Linux")) {
+//            certificateCheckBox.setEnabled(true);
+//            passwordCheckBox.setEnabled(true);
+//            certificateCheckBox.setSelected(true);
+//            passwordCheckBox.setSelected(false);
+//        } else {
+//            certificateCheckBox.setSelected(false);
+//            passwordCheckBox.setSelected(true);
+//            certificateCheckBox.setEnabled(false);
+//            passwordCheckBox.setEnabled(false);
+//        }
 
         validateEmptyFields();
 
-        imageDescriptionTextPane.setText(model.getHtmlFromVMImage(virtualMachineImage));
+//        imageDescriptionTextPane.setText(model.getHtmlFromVMImage(virtualMachineImage));
         imageDescriptionTextPane.setCaretPosition(0);
 
         if (vmSizeComboBox.getItemCount() == 0) {
@@ -308,17 +308,17 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                String recommendedVMSize = model.getVirtualMachineImage().getRecommendedVMSize().isEmpty()
-                        ? "Small"
-                        : model.getVirtualMachineImage().getRecommendedVMSize();
-
-                for (int i = 0; i < vmSizeComboBox.getItemCount(); i++) {
-                    VirtualMachineSize virtualMachineSize = (VirtualMachineSize) vmSizeComboBox.getItemAt(i);
-                    if (virtualMachineSize.getName().equals(recommendedVMSize)) {
-                        vmSizeComboBox.setSelectedItem(virtualMachineSize);
-                        break;
-                    }
-                }
+//                String recommendedVMSize = model.getVirtualMachineImage().getRecommendedVMSize().isEmpty()
+//                        ? "Small"
+//                        : model.getVirtualMachineImage().getRecommendedVMSize();
+//
+//                for (int i = 0; i < vmSizeComboBox.getItemCount(); i++) {
+//                    VirtualMachineSize virtualMachineSize = (VirtualMachineSize) vmSizeComboBox.getItemAt(i);
+//                    if (virtualMachineSize.getName().equals(recommendedVMSize)) {
+//                        vmSizeComboBox.setSelectedItem(virtualMachineSize);
+//                        break;
+//                    }
+//                }
             }
         }, ModalityState.any());
     }

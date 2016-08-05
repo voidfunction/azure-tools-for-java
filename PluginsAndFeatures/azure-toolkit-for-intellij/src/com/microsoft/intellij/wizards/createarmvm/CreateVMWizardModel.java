@@ -22,15 +22,15 @@
 package com.microsoft.intellij.wizards.createarmvm;
 
 import com.intellij.openapi.project.Project;
+import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.intellij.wizards.createvm.MachineSettingsStep;
-import com.microsoft.intellij.wizards.createvm.SelectImageStep;
 import com.microsoft.intellij.wizards.createvm.SubscriptionStep;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
 
 public class CreateVMWizardModel extends VMWizardModel {
 
-//    private VirtualMachineImage virtualMachineImage;
+    private VirtualMachineImage virtualMachineImage;
     private String name;
 //    private VirtualMachineSize size;
     private String userName;
@@ -58,8 +58,16 @@ public class CreateVMWizardModel extends VMWizardModel {
                 "Subscription",
                 "Select Image",
                 "Machine Settings",
-                "Settings"
+                "Associated Resources"
         };
+    }
+
+    public VirtualMachineImage getVirtualMachineImage() {
+        return virtualMachineImage;
+    }
+
+    public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
+        this.virtualMachineImage = virtualMachineImage;
     }
 
     public String getName() {

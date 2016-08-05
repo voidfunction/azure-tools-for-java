@@ -23,8 +23,11 @@ package com.microsoft.tooling.msservices.helpers.azure;
 
 import com.microsoft.azure.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.compute.VirtualMachineImage;
+import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginSettings;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -32,7 +35,6 @@ import com.microsoft.tooling.msservices.helpers.auth.AADManagerImpl;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureArmSDKHelper;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureRequestCallback;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -194,12 +196,22 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
         requestAzureSDK(subscriptionId, AzureArmSDKHelper.shutdownVirtualMachine(vm));
     }
 
-    public VirtualMachine createVirtualMachine(@NotNull String subscriptionId, @NotNull com.microsoft.tooling.msservices.model.vm.VirtualMachine virtualMachine, @NotNull VirtualMachineImage vmImage,
-                                     @NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount, @NotNull String virtualNetwork,
-                                     @NotNull String username, @NotNull String password, @NotNull byte[] certificate)
+    public VirtualMachine createVirtualMachine(@NotNull String subscriptionId, @NotNull com.microsoft.tooling.msservices.model.vm.VirtualMachine virtualMachine,
+                                               @NotNull VirtualMachineImage vmImage,
+                                               @NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount, @NotNull String virtualNetwork,
+                                               @NotNull String username, @NotNull String password, @NotNull byte[] certificate)
             throws AzureCmdException {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.createVirtualMachine(virtualMachine,
                 vmImage, storageAccount, virtualNetwork, username, password, certificate));
+    }
+
+    @NotNull
+    public List<com.microsoft.azure.management.compute.VirtualMachineImage> getVirtualMachineImages(@NotNull String subscriptionId, @NotNull Region region) throws AzureCmdException {
+        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getVirtualMachineImages(region));
+    }
+
+    public List<VirtualMachinePublisher> getVirtualMachinePublishers(@NotNull String subscriptionId, @NotNull Region region) throws AzureCmdException {
+        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getVirtualMachinePublishers(region));
     }
 
     public List<com.microsoft.tooling.msservices.model.storage.StorageAccount> getStorageAccounts(@NotNull String subscriptionId) throws AzureCmdException {

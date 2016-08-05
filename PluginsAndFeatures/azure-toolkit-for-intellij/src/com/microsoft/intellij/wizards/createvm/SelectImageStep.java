@@ -141,7 +141,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     Map<Enum, List<VirtualMachineImage>> virtualMachineImages;
     private Project project;
 
-    public SelectImageStep(final VMWizardModel model, Project project) {
+    public SelectImageStep(final CreateVMWizardModel model, Project project) {
         super("Select a Virtual Machine Image", null, null);
 
         this.model = model;
