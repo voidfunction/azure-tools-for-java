@@ -18,24 +18,25 @@ Section A: Microsoft is offering you a license to use the following components w
 10.	Apache HttpComponents Core  (http://hc.apache.org/downloads.cgi)
 11.	Apache Qpid (http://qpid.apache.org/)
 12.	Application Insights SDK for Java  (https://github.com/Microsoft/AppInsights-Java)
-13.	Gson (https://github.com/google/gson)
-14.	Guava (http://code.google.com/p/guava-libraries/)
-15.	Handlebars (https://github.com/jknack/handlebars.java )
-16.	Jackson-annotations (https://github.com/FasterXML/jackson-annotations)
-17.	Jackson-core (http://wiki.fasterxml.com/JacksonHome)
-18.	Jackson-core-asl (http://wiki.fasterxml.com/JacksonHome)
-19.	Jackson-databind (https://github.com/FasterXML/jackson-databind)
-20.	Jackson-jaxrs (http://wiki.fasterxml.com/JacksonHome)
-21.	Jackson-mapper-asl (http://wiki.fasterxml.com/JacksonHome)
-22.	Jackson-xc (http://wiki.fasterxml.com/JacksonHome)
-23.	Javax.Inject (http://code.google.com/p/atinject/)
-24.	Jettison (http://jettison.codehaus.org/)
-25.	JJWT (https://github.com/jwtk/jjwt )
-26.	Json.NET (http://www.newtonsoft.com/json)
-27.	JSR-305 (http://code.google.com/p/jsr-305/)
-28.	Microsoft Azure SDK for Java (https://github.com/Azure/azure-sdk-for-java)
-29.	Rhino (https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino)
-30.	Simple Logging Façade for Java  (http://www.slf4j.org/ )
+13.	Bootstrap (https://github.com/twbs/bootstrap)
+14.	Gson (https://github.com/google/gson)
+15.	Guava (http://code.google.com/p/guava-libraries/)
+16.	Handlebars (https://github.com/jknack/handlebars.java )
+17.	Jackson-annotations (https://github.com/FasterXML/jackson-annotations)
+18.	Jackson-core (http://wiki.fasterxml.com/JacksonHome)
+19.	Jackson-core-asl (http://wiki.fasterxml.com/JacksonHome)
+20.	Jackson-databind (https://github.com/FasterXML/jackson-databind)
+21.	Jackson-jaxrs (http://wiki.fasterxml.com/JacksonHome)
+22.	Jackson-mapper-asl (http://wiki.fasterxml.com/JacksonHome)
+23.	Jackson-xc (http://wiki.fasterxml.com/JacksonHome)
+24.	Javax.Inject (http://code.google.com/p/atinject/)
+25.	Jettison (http://jettison.codehaus.org/)
+26.	JJWT (https://github.com/jwtk/jjwt )
+27.	Json.NET (http://www.newtonsoft.com/json)
+28.	JSR-305 (http://code.google.com/p/jsr-305/)
+29.	Microsoft Azure SDK for Java (https://github.com/Azure/azure-sdk-for-java)
+30.	Rhino (https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino)
+31.	Simple Logging Façade for Java  (http://www.slf4j.org/ )
 
 
 %% annotation-detector (INFOMAS PCM Application Suite) NOTICES AND INFORMATION BEGIN HERE
@@ -440,6 +441,25 @@ DEALINGS IN THE SOFTWARE.
 
 =========================================
 END OF Application Insights SDK for Java  NOTICES AND INFORMATION
+
+%% Bootstrap  NOTICES AND INFORMATION BEGIN HERE
+=========================================
+Copyright 2013 Twitter, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+=========================================
+END OF Bootstrap  NOTICES AND INFORMATION
 
 %% Gson  NOTICES AND INFORMATION BEGIN HERE
 =========================================
