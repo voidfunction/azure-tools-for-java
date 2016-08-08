@@ -131,8 +131,9 @@ public class SparkSubmitHelper {
 
                 // only the lines of the log are same between two http requests, we try to get the job status
                 if (from_index == pre_index) {
-                    if (status.getState().toLowerCase().equals("error") || status.getState().toLowerCase().equals("success")) {
-                        if (status.getState().toLowerCase().equals("error")) {
+                    String finalStatus = status.getState().toLowerCase();
+                    if (finalStatus.equals("error") || finalStatus.equals("success") || finalStatus.equals("dead")) {
+                        if (finalStatus.equals("error") || finalStatus.equals("dead")) {
                             isFailedJob = true;
                         }
 
