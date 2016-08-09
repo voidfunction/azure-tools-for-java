@@ -31,6 +31,7 @@ import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginSettings;
 import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.auth.AADManagerImpl;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureArmSDKHelper;
@@ -198,11 +199,12 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
 
     public VirtualMachine createVirtualMachine(@NotNull String subscriptionId, @NotNull com.microsoft.tooling.msservices.model.vm.VirtualMachine virtualMachine,
                                                @NotNull VirtualMachineImage vmImage,
-                                               @NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount, @NotNull String virtualNetwork,
+                                               @NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount,
+                                               @NotNull Network network, @NotNull String subnet,
                                                @NotNull String username, @NotNull String password, @NotNull byte[] certificate)
             throws AzureCmdException {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.createVirtualMachine(virtualMachine,
-                vmImage, storageAccount, virtualNetwork, username, password, certificate));
+                vmImage, storageAccount, network, subnet, username, password, certificate));
     }
 
     @NotNull
@@ -212,6 +214,12 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
 
     public List<VirtualMachinePublisher> getVirtualMachinePublishers(@NotNull String subscriptionId, @NotNull Region region) throws AzureCmdException {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getVirtualMachinePublishers(region));
+    }
+
+    public Network createVirtualNetwork(@NotNull String subscriptionId, @NotNull String networkName, @NotNull Region region,  String addressSpace,
+                                        @NotNull String groupName, boolean isNewGroup)
+            throws AzureCmdException {
+        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.createVirtualNetwork(networkName, region, addressSpace, groupName, isNewGroup));
     }
 
     public List<com.microsoft.tooling.msservices.model.storage.StorageAccount> getStorageAccounts(@NotNull String subscriptionId) throws AzureCmdException {

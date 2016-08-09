@@ -71,7 +71,6 @@ public abstract class VMWizardModel extends WizardModel {
     private Subscription subscription;
     private StorageAccount storageAccount;
     private String availabilitySet;
-    private VirtualNetwork virtualNetwork;
     private String name;
     private VirtualMachineSize size;
     private String userName;
@@ -157,14 +156,6 @@ public abstract class VMWizardModel extends WizardModel {
 
     public void setAvailabilitySet(String availabilitySet) {
         this.availabilitySet = availabilitySet;
-    }
-
-    public VirtualNetwork getVirtualNetwork() {
-        return virtualNetwork;
-    }
-
-    public void setVirtualNetwork(VirtualNetwork virtualNetwork) {
-        this.virtualNetwork = virtualNetwork;
     }
 
     public String getName() {

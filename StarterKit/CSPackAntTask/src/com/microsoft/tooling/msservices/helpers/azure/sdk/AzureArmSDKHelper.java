@@ -103,8 +103,8 @@ public class AzureArmSDKHelper {
 
     @NotNull
     public static AzureRequestCallback<VirtualMachine> createVirtualMachine(@NotNull final com.microsoft.tooling.msservices.model.vm.VirtualMachine vm, @NotNull final VirtualMachineImage vmImage,
-                                                                                         @NotNull final com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount, @NotNull final String virtualNetwork,
-                                                                                         @NotNull final String username, @NotNull final String password, @NotNull final byte[] certificate) {
+                                                                                         @NotNull final com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount, @NotNull final Network network,
+                                                                                         @NotNull String subnet, @NotNull final String username, @NotNull final String password, @NotNull final byte[] certificate) {
         return new AzureRequestCallback<VirtualMachine>() {
             @NotNull
             @Override
@@ -113,8 +113,9 @@ public class AzureArmSDKHelper {
                 if (isWindows) {
                     return azure.virtualMachines().define(vm.getName())
                             .withRegion(vmImage.location())
-                            .withNewResourceGroup()
-                            .withNewPrimaryNetwork("10.0.0.0/28")
+                            .withExistingResourceGroup(vm.getResourceGroup())
+                            .withExistingPrimaryNetwork(network)
+                            .withSubnet(subnet)
                             .withPrimaryPrivateIpAddressDynamic()
                             .withoutPrimaryPublicIpAddress()
                             .withSpecificWindowsImageVersion(vmImage.imageReference())
@@ -125,8 +126,9 @@ public class AzureArmSDKHelper {
                 } else {
                     return azure.virtualMachines().define(vm.getName())
                             .withRegion(vmImage.location())
-                            .withNewResourceGroup()
-                            .withNewPrimaryNetwork("10.0.0.0/28")
+                            .withExistingResourceGroup(vm.getResourceGroup())
+                            .withExistingPrimaryNetwork(network)
+                            .withSubnet(subnet)
                             .withPrimaryPrivateIpAddressDynamic()
                             .withoutPrimaryPublicIpAddress()
                             .withSpecificLinuxImageVersion(vmImage.imageReference())
@@ -157,6 +159,30 @@ public class AzureArmSDKHelper {
             @Override
             public List<VirtualMachinePublisher> execute(@NotNull Azure azure) throws Throwable {
                 return azure.virtualMachineImages().publishers().listByRegion(region);
+            }
+        };
+    }
+
+    @NotNull
+    public static AzureRequestCallback<Network> createVirtualNetwork(@NotNull String name, @NotNull Region region,  String addressSpace,
+                                                                     @NotNull String groupName, boolean isNewGroup) {
+        return new AzureRequestCallback<Network>() {
+            @NotNull
+            @Override
+            public Network execute(@NotNull Azure azure) throws Throwable {
+                if (isNewGroup) {
+                    return azure.networks().define(name)
+                            .withRegion(region)
+                            .withNewResourceGroup(groupName)
+                            .withAddressSpace(addressSpace)
+                            .create();
+                } else {
+                    return azure.networks().define(name)
+                            .withRegion(region)
+                            .withExistingResourceGroup(groupName)
+                            .withAddressSpace(addressSpace)
+                            .create();
+                }
             }
         };
     }

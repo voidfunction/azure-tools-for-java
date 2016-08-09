@@ -33,6 +33,7 @@ public class CreateVMWizardModel extends VMWizardModel {
     private CloudService cloudService;
     private boolean filterByCloudService;
     private Endpoint[] endpoints;
+    private VirtualNetwork virtualNetwork;
 
     public CreateVMWizardModel(VMServiceModule node) {
         super();
@@ -88,5 +89,13 @@ public class CreateVMWizardModel extends VMWizardModel {
 
     public void setEndpoints(Endpoint[] endpoints) {
         this.endpoints = endpoints;
+    }
+
+    public VirtualNetwork getVirtualNetwork() {
+        return virtualNetwork;
+    }
+
+    public void setVirtualNetwork(VirtualNetwork virtualNetwork) {
+        this.virtualNetwork = virtualNetwork;
     }
 }

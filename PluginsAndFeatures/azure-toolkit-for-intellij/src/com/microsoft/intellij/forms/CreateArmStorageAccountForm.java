@@ -37,6 +37,7 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.ReplicationTypes;
 import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -225,30 +226,37 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     }
 
 
-    public void fillFields() {
+    public void fillFields(final Subscription subscription) {
         final CreateArmStorageAccountForm createStorageAccountForm = this;
-        try {
-            subscriptionComboBox.setEnabled(true);
+        if (subscription == null) {
+            try {
+                subscriptionComboBox.setEnabled(true);
 
-            java.util.List<Subscription> fullSubscriptionList = AzureManagerImpl.getManager(project).getFullSubscriptionList();
-            subscriptionComboBox.setModel(new DefaultComboBoxModel(new Vector<Subscription>(fullSubscriptionList)));
-            subscriptionComboBox.addItemListener(new ItemListener() {
-                @Override
-                public void itemStateChanged(ItemEvent itemEvent) {
-                    createStorageAccountForm.subscription = (Subscription) itemEvent.getItem();
+                java.util.List<Subscription> fullSubscriptionList = AzureManagerImpl.getManager(project).getFullSubscriptionList();
+                subscriptionComboBox.setModel(new DefaultComboBoxModel(new Vector<Subscription>(fullSubscriptionList)));
+                subscriptionComboBox.addItemListener(new ItemListener() {
+                    @Override
+                    public void itemStateChanged(ItemEvent itemEvent) {
+                        createStorageAccountForm.subscription = (Subscription) itemEvent.getItem();
+                        loadRegions();
+                        loadGroups();
+                    }
+                });
+
+                if (fullSubscriptionList.size() > 0) {
+                    createStorageAccountForm.subscription = fullSubscriptionList.get(0);
                     loadRegions();
                     loadGroups();
                 }
-            });
-
-            if (fullSubscriptionList.size() > 0) {
-                createStorageAccountForm.subscription = fullSubscriptionList.get(0);
-                loadRegions();
-                loadGroups();
+            } catch (AzureCmdException e) {
+                String msg = "An error occurred while attempting to get subscriptions." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
             }
-        } catch (AzureCmdException e) {
-            String msg = "An error occurred while attempting to get subscriptions." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
+        } else {
+            this.subscription = subscription;
+            subscriptionComboBox.addItem(subscription.getName());
+
+            loadRegions();
         }
     }
 
@@ -256,9 +264,9 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         this.onCreate = onCreate;
     }
 
-//    public StorageAccount getStorageAccount() {
-//        return storageAccount;
-//    }
+    public StorageAccount getStorageAccount() {
+        return storageAccount;
+    }
 
     public void loadRegions() {
         isLoading = true;

@@ -23,19 +23,23 @@ package com.microsoft.intellij.wizards.createarmvm;
 
 import com.intellij.openapi.project.Project;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
+import com.microsoft.azure.management.network.Network;
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.intellij.wizards.createvm.MachineSettingsStep;
 import com.microsoft.intellij.wizards.createvm.SubscriptionStep;
+import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
 
 public class CreateVMWizardModel extends VMWizardModel {
-
+    private Region region;
     private VirtualMachineImage virtualMachineImage;
     private String name;
 //    private VirtualMachineSize size;
     private String userName;
     private String password;
     private String certificate;
+    private Network virtualNetwork;
 //    private StorageAccount storageAccount;
 //    private VirtualNetwork virtualNetwork;
 //    private String subnet;
@@ -68,6 +72,14 @@ public class CreateVMWizardModel extends VMWizardModel {
 
     public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
         this.virtualMachineImage = virtualMachineImage;
+    }
+
+    public Region getRegion() {
+        return region;
+    }
+
+    public void setRegion(Region region) {
+        this.region = region;
     }
 
     public String getName() {
@@ -108,6 +120,14 @@ public class CreateVMWizardModel extends VMWizardModel {
 
     public void setCertificate(String certificate) {
         this.certificate = certificate;
+    }
+
+    public Network getVirtualNetwork() {
+        return virtualNetwork;
+    }
+
+    public void setVirtualNetwork(Network virtualNetwork) {
+        this.virtualNetwork = virtualNetwork;
     }
 
 //    public VirtualNetwork getVirtualNetwork() {

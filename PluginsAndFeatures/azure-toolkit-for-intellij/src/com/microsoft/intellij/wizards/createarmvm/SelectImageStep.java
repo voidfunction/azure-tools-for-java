@@ -36,7 +36,6 @@ import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.compute.VirtualMachineSku;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 
@@ -61,9 +60,10 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     private JEditorPane imageDescriptionTextPane;
     private JComboBox publisherComboBox;
     private JComboBox offerComboBox;
+    private JComboBox skuComboBox;
     private JPanel imageInfoPanel;
 
-    VMWizardModel model;
+    private CreateVMWizardModel model;
 
     private void createUIComponents() {
         imageInfoPanel = new JPanel() {
@@ -93,14 +93,16 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
 
         model.configStepList(createVmStepsList, 1);
 
-        regionComboBox.setModel(new DefaultComboBoxModel(Region.values()));
-
-        regionComboBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                fillPublishers();
-            }
-        });
+//        regionComboBox.addItemListener(new ItemListener() {
+//            @Override
+//            public void itemStateChanged(ItemEvent e) {
+//                fillPublishers();
+//                model.setRegion((Region) regionComboBox.getSelectedItem());
+//            }
+//        });
+//
+//        regionComboBox.setModel(new DefaultComboBoxModel(Region.values()));
+//        regionComboBox.setSelectedIndex(0);
 
         publisherComboBox.setRenderer(new ListCellRendererWrapper<Object>() {
             @Override
@@ -114,7 +116,9 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
         publisherComboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                fillOffers();
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    fillOffers();
+                }
             }
         });
 
@@ -130,8 +134,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
         offerComboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                fillImages();
-                imageLabelList.setEnabled(true);
+                fillSkus();
             }
         });
 
@@ -167,6 +170,18 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     public JComponent prepare(WizardNavigationState wizardNavigationState) {
         rootPanel.revalidate();
 
+        regionComboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    selectRegion();
+                }
+            }
+        });
+
+        regionComboBox.setModel(new DefaultComboBoxModel(Region.values()));
+        selectRegion();
+
         if (virtualMachineImages == null) {
             model.getCurrentNavigationState().NEXT.setEnabled(false);
 
@@ -175,6 +190,11 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
         }
 
         return rootPanel;
+    }
+
+    private void selectRegion() {
+        fillPublishers();
+        model.setRegion((Region) regionComboBox.getSelectedItem());
     }
 
     private void fillPublishers() {
@@ -186,9 +206,15 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
                 progressIndicator.setIndeterminate(true);
 
                 try {
-                    List<VirtualMachinePublisher> publishers = AzureArmManagerImpl.getManager(project)
+                    final List<VirtualMachinePublisher> publishers = AzureArmManagerImpl.getManager(project)
                             .getVirtualMachinePublishers(model.getSubscription().getId(), (Region) regionComboBox.getSelectedItem());
-                    publisherComboBox.setModel(new DefaultComboBoxModel(publishers.toArray()));
+                    ApplicationManager.getApplication().invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            publisherComboBox.setModel(new DefaultComboBoxModel(publishers.toArray()));
+                            fillOffers();
+                        }
+                    });
                 } catch (AzureCmdException e) {
                     String msg = "An error occurred while attempting to retrieve images list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                     PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
@@ -200,6 +226,8 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     private void fillOffers() {
         model.getCurrentNavigationState().NEXT.setEnabled(false);
 
+        skuComboBox.setEnabled(true);
+
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading offers...", false) {
             @Override
             public void run(@org.jetbrains.annotations.NotNull ProgressIndicator progressIndicator) {
@@ -208,13 +236,39 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
                 try {
                     final List<VirtualMachineOffer> offers = ((VirtualMachinePublisher) publisherComboBox.getSelectedItem()).offers().list();
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                offerComboBox.setModel(new DefaultComboBoxModel(offers.toArray()));
-                            }
-                        });
+                        @Override
+                        public void run() {
+                            offerComboBox.setModel(new DefaultComboBoxModel(offers.toArray()));
+                            fillSkus();
+                        }
+                    });
                 } catch (CloudException | IOException e) {
-                    String msg = "An error occurred while attempting to retrieve images list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    String msg = "An error occurred while attempting to retrieve offers list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                }
+            }
+        });
+    }
+
+    private void fillSkus() {
+        model.getCurrentNavigationState().NEXT.setEnabled(false);
+
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading skus...", false) {
+            @Override
+            public void run(@org.jetbrains.annotations.NotNull ProgressIndicator progressIndicator) {
+                progressIndicator.setIndeterminate(true);
+
+                try {
+                    final List<VirtualMachineSku> skus = ((VirtualMachineOffer) offerComboBox.getSelectedItem()).skus().list();
+                    ApplicationManager.getApplication().invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            skuComboBox.setModel(new DefaultComboBoxModel(skus.toArray()));
+                            fillImages();
+                        }
+                    });
+                } catch (CloudException | IOException e) {
+                    String msg = "An error occurred while attempting to retrieve skus list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                     PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
                 }
             }
@@ -230,16 +284,14 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
                 progressIndicator.setIndeterminate(true);
                 final List<VirtualMachineImage> images = new ArrayList<VirtualMachineImage>();
                 try {
-                    VirtualMachineOffer offer = (VirtualMachineOffer) offerComboBox.getSelectedItem();
-                    List<VirtualMachineSku> skus = offer.skus().list();
-                    for (VirtualMachineSku sku : skus) {
-                        List<VirtualMachineImage> skuImages = sku.images().list();
-                        images.addAll(skuImages);
-                    }
+                    VirtualMachineSku sku = (VirtualMachineSku) skuComboBox.getSelectedItem();
+                    List<VirtualMachineImage> skuImages = sku.images().list();
+                    images.addAll(skuImages);
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
                         @Override
                         public void run() {
                             imageLabelList.setListData(images.toArray());
+                            imageLabelList.setEnabled(true);
                         }
                     });
                 } catch (CloudException | IOException e) {
