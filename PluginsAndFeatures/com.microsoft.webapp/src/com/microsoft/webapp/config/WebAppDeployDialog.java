@@ -585,8 +585,15 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 								monitor.worked(60);
 								// wait till zip files starts extracting and jdk folder has been created
 								Thread.sleep(60000);
+								int timeout = 0;
 								while (!WebAppUtils.isFilePresentOnFTPServer(ftp, "jdk")) {
 									Thread.sleep(15000);
+									timeout = timeout + 15000;
+									if (timeout > 300000) {
+										manager.restartWebSite(dialog.getFinalSubId(), config.getWebSpaceName(), dialog.getFinalName());
+										Thread.sleep(15000);
+										timeout = 0;
+									}
 								}
 								String jdkPath = "/site/wwwroot/jdk/";
 								if (dialog.getFinalJDK().isEmpty()) {
@@ -600,7 +607,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 									jdkPath = jdkPath + jdkFolderName;
 								}
 								// count number of files in extracted folder. Else extraction is not complete yet.
-								int timeout = 0;
+								timeout = 0;
 								while (!WebAppUtils.checkFileCountOnFTPServer(ftp, jdkPath, 10) && timeout < 420000) {
 									timeout = timeout + 15000;
 									Thread.sleep(15000);

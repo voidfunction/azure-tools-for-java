@@ -326,6 +326,59 @@ public class AzurePlugin extends AbstractProjectComponent {
             if (!new File(debugConfig).exists()) {
                 copyResourceFile(message("debugConfig"), debugConfig);
             }
+            // copy custom JDK configuration files
+            File customFolder = new File(WAHelper.getTemplateFile("customConfiguration"));
+            if (!customFolder.exists()) {
+                customFolder.mkdir();
+            }
+            String washFile = WAHelper.getCustomJdkFile(".wash.ps1");
+            if (!new File(washFile).exists()) {
+                copyResourceFile(message("washName"), washFile);
+            }
+            String downloadName = WAHelper.getCustomJdkFile("download.vbs");
+            if (!new File(downloadName).exists()) {
+                copyResourceFile(message("downloadName"), downloadName);
+            }
+            String edmDll = WAHelper.getCustomJdkFile("Microsoft.Data.Edm.dll");
+            if (!new File(edmDll).exists()) {
+                copyResourceFile(message("edmDll"), edmDll);
+            }
+            String odataDll = WAHelper.getCustomJdkFile("Microsoft.Data.OData.dll");
+            if (!new File(odataDll).exists()) {
+                copyResourceFile(message("odataDll"), odataDll);
+            }
+            String clientDll = WAHelper.getCustomJdkFile("Microsoft.Data.Services.Client.dll");
+            if (!new File(clientDll).exists()) {
+                copyResourceFile(message("clientDll"), clientDll);
+            }
+            String configDll = WAHelper.getCustomJdkFile("Microsoft.WindowsAzure.Configuration.dll");
+            if (!new File(configDll).exists()) {
+                copyResourceFile(message("configDll"), configDll);
+            }
+            String storageDll = WAHelper.getCustomJdkFile("Microsoft.WindowsAzure.Storage.dll");
+            if (!new File(storageDll).exists()) {
+                copyResourceFile(message("storageDll"), storageDll);
+            }
+            String jsonDll = WAHelper.getCustomJdkFile("Newtonsoft.Json.dll");
+            if (!new File(jsonDll).exists()) {
+                copyResourceFile(message("jsonDll"), jsonDll);
+            }
+            String spatialDll = WAHelper.getCustomJdkFile("System.Spatial.dll");
+            if (!new File(spatialDll).exists()) {
+                copyResourceFile(message("spatialDll"), spatialDll);
+            }
+            String washCmd = WAHelper.getCustomJdkFile("wash.cmd");
+            if (!new File(washCmd).exists()) {
+                copyResourceFile(message("washCmd"), washCmd);
+            }
+            String psConfig = WAHelper.getCustomJdkFile("powershell.exe.activation_config");
+            if (!new File(psConfig).exists()) {
+                copyResourceFile(message("psConfig"), psConfig);
+            }
+            String washConfig = WAHelper.getCustomJdkFile(message("configName"));
+            if (!new File(washConfig).exists()) {
+                copyResourceFile(message("configFile"), washConfig);
+            }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }

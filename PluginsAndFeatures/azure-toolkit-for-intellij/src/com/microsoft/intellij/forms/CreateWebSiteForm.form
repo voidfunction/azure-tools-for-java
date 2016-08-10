@@ -196,7 +196,7 @@
               </component>
             </children>
           </grid>
-          <grid id="d2be9" layout-manager="GridLayoutManager" row-count="9" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="d2be9" layout-manager="GridLayoutManager" row-count="10" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="JDK"/>
@@ -231,14 +231,6 @@
                 </constraints>
                 <properties/>
               </component>
-              <component id="53c6e" class="org.jdesktop.swingx.JXHyperlink" binding="customizeLink">
-                <constraints>
-                  <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="Customize..."/>
-                </properties>
-              </component>
               <component id="4a43b" class="javax.swing.JRadioButton" binding="customJDKUser">
                 <constraints>
                   <grid row="3" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -257,16 +249,14 @@
               </component>
               <component id="e0274" class="javax.swing.JComboBox" binding="storageNames">
                 <constraints>
-                  <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                    <preferred-size width="33" height="69"/>
-                  </grid>
+                  <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="27c2" class="org.jdesktop.swingx.JXHyperlink" binding="accLink">
                 <constraints>
                   <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false">
-                    <preferred-size width="60" height="69"/>
+                    <preferred-size width="60" height="24"/>
                   </grid>
                 </constraints>
                 <properties>
@@ -297,6 +287,11 @@
                   <text value="with small instance size.)"/>
                 </properties>
               </component>
+              <vspacer id="95842">
+                <constraints>
+                  <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
             </children>
           </grid>
         </children>
