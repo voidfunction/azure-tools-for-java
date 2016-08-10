@@ -147,6 +147,13 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
             }
         });
 
+        skuComboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                fillImages();
+            }
+        });
+
         imageLabelList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList jList, Object o, int i, boolean b, boolean b1) {
@@ -287,7 +294,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     private void fillImages() {
         model.getCurrentNavigationState().NEXT.setEnabled(false);
 
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading offers...", false) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading images...", false) {
             @Override
             public void run(@org.jetbrains.annotations.NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);

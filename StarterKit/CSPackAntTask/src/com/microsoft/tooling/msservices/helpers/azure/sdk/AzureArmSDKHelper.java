@@ -101,6 +101,16 @@ public class AzureArmSDKHelper {
         };
     }
 
+    public static AzureRequestCallback<Void> deleteVirtualMachine(@NotNull final VirtualMachine virtualMachine) {
+        return new AzureRequestCallback<Void>() {
+            @Override
+            public Void execute(@NotNull Azure azure) throws Throwable {
+                azure.virtualMachines().delete(virtualMachine.resourceGroupName(), virtualMachine.name());
+                return null;
+            }
+        };
+    }
+
     @NotNull
     public static AzureRequestCallback<VirtualMachine> createVirtualMachine(@NotNull final com.microsoft.tooling.msservices.model.vm.VirtualMachine vm, @NotNull final VirtualMachineImage vmImage,
                                                                                          @NotNull final com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount, @NotNull final Network network,
@@ -135,6 +145,7 @@ public class AzureArmSDKHelper {
                             .withRootUserName(username)
                             .withPassword(password)
                             .withSize(VirtualMachineSizeTypes.STANDARD_D3_V2)
+                            .withExistingStorageAccount(storageAccount)
                             .create();
                 }
             }

@@ -197,6 +197,11 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
         requestAzureSDK(subscriptionId, AzureArmSDKHelper.shutdownVirtualMachine(vm));
     }
 
+    public void deleteVirtualMachine(String subscriptionId, @NotNull VirtualMachine vm)
+            throws AzureCmdException {
+        requestAzureSDK(subscriptionId, AzureArmSDKHelper.deleteVirtualMachine(vm));
+    }
+
     public VirtualMachine createVirtualMachine(@NotNull String subscriptionId, @NotNull com.microsoft.tooling.msservices.model.vm.VirtualMachine virtualMachine,
                                                @NotNull VirtualMachineImage vmImage,
                                                @NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount,
