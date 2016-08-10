@@ -31,6 +31,7 @@ import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.microsoft.azure.management.network.Network;
+import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -453,7 +454,8 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         Vector<ArmStorageAccount> filteredStorageAccounts = new Vector<>();
 
         for (ArmStorageAccount storageAccount : storageAccounts.values()) {
-            if (storageAccount.getLocation().equals(model.getRegion().toString())) {
+            // VM and storage account need to be in the same region; only general purpose accounts support page blobs, so only they can be used to create vm
+            if (storageAccount.getLocation().equals(model.getRegion().toString()) && storageAccount.getStorageAccount().kind() == Kind.STORAGE) {
                 filteredStorageAccounts.add(storageAccount);
             }
         }

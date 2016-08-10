@@ -269,26 +269,30 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     private void fillSkus() {
         model.getCurrentNavigationState().NEXT.setEnabled(false);
 
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading skus...", false) {
-            @Override
-            public void run(@org.jetbrains.annotations.NotNull ProgressIndicator progressIndicator) {
-                progressIndicator.setIndeterminate(true);
+        if (offerComboBox.getItemCount() > 0) {
+            ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading skus...", false) {
+                @Override
+                public void run(@org.jetbrains.annotations.NotNull ProgressIndicator progressIndicator) {
+                    progressIndicator.setIndeterminate(true);
 
-                try {
-                    final List<VirtualMachineSku> skus = ((VirtualMachineOffer) offerComboBox.getSelectedItem()).skus().list();
-                    ApplicationManager.getApplication().invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            skuComboBox.setModel(new DefaultComboBoxModel(skus.toArray()));
-                            fillImages();
-                        }
-                    });
-                } catch (CloudException | IOException e) {
-                    String msg = "An error occurred while attempting to retrieve skus list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                    try {
+                        final List<VirtualMachineSku> skus = ((VirtualMachineOffer) offerComboBox.getSelectedItem()).skus().list();
+                        ApplicationManager.getApplication().invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                skuComboBox.setModel(new DefaultComboBoxModel(skus.toArray()));
+                                fillImages();
+                            }
+                        });
+                    } catch (CloudException | IOException e) {
+                        String msg = "An error occurred while attempting to retrieve skus list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                        PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            // todo
+        }
     }
 
     private void fillImages() {

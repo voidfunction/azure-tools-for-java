@@ -76,12 +76,14 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
 
     Project project;
     VMWizardModel model;
+    boolean isArmVM;
 
-    public MachineSettingsStep(VMWizardModel mModel, Project project) {
+    public MachineSettingsStep(VMWizardModel mModel, Project project, boolean isArmVm) {
         super("Virtual Machine Basic Settings", null, null);
 
         this.project = project;
         this.model = mModel;
+        this.isArmVM = isArmVm;
 
         model.configStepList(createVmStepsList, 2);
 

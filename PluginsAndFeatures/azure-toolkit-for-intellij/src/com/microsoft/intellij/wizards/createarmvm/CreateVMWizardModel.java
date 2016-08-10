@@ -49,7 +49,7 @@ public class CreateVMWizardModel extends VMWizardModel {
 
         add(new SubscriptionStep(this, project));
         add(new SelectImageStep(this, project));
-        add(new MachineSettingsStep(this, project));
+        add(new MachineSettingsStep(this, project, true));
         add(new SettingsStep(this, project, node));
     }
 
