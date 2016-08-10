@@ -98,6 +98,7 @@ public class VirtualMachine implements ServiceTreeItem {
     public VirtualMachine(@NotNull String name, @NotNull String resourceGroup, @NotNull String availabilitySet, @NotNull String subnet, @NotNull String size,
                           @NotNull Status status, @NotNull String subscriptionId) {
         this.name = name;
+        this.resourceGroup = resourceGroup;
         this.serviceName = serviceName;
         this.deploymentName = deploymentName;
         this.availabilitySet = availabilitySet;

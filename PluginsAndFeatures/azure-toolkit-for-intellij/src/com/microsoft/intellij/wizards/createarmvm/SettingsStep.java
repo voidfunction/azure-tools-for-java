@@ -183,45 +183,12 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
 
         model.getCurrentNavigationState().NEXT.setEnabled(false);
 
-//        final VirtualMachineImage virtualMachineImage = model.getVirtualMachineImage();
-//        imageDescriptionTextPane.setText(model.getHtmlFromVMImage(virtualMachineImage));
-//        imageDescriptionTextPane.setCaretPosition(0);
-
         fillResourceGroups();
         retrieveStorageAccounts();
         retrieveVirtualNetworks();
 
-//        if (model.isFilterByCloudService()) {
-//            fillCloudServices(null, true);
-//        } else {
-//        fillVirtualNetworks(true);
-//        }
-
         return rootPanel;
     }
-
-//    @Override
-//    public WizardStep onPrevious(CreateVMWizardModel model) {
-//        Vector<Endpoint> endpointData = ((EndpointTableModel) endpointsTable.getModel()).getData();
-////        model.setEndpoints(endpointData.toArray(new Endpoint[endpointData.size()]));
-//
-//        return super.onPrevious(model);
-//    }
-
-//    private Collection<CloudService> filterCS(VirtualNetwork selectedVN) {
-//        Collection<CloudService> services = /*selectedVN == null ? cloudServices.values() :*/ new Vector<CloudService>();
-//
-//        if (selectedVN != null) {
-////            for (CloudService cloudService : cloudServices.values()) {
-////                if ((isDeploymentEmpty(cloudService, PRODUCTION) && areSameRegion(cloudService, selectedVN)) ||
-////                        areSameNetwork(cloudService, selectedVN)) {
-////                    services.add(cloudService);
-////                }
-////            }
-//        }
-//
-//        return services;
-//    }
 
     private void retrieveVirtualNetworks() {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading virtual networks...", false) {
@@ -473,8 +440,8 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         }, ModalityState.any());
     }
 
-    private DefaultComboBoxModel getStorageAccountModel(/*final CloudService selectedCS, */StorageAccount selectedSA) {
-        Vector<StorageAccount> accounts = filterSA(/*selectedCS*/);
+    private DefaultComboBoxModel getStorageAccountModel(StorageAccount selectedSA) {
+        Vector<StorageAccount> accounts = filterSA();
 
         final String createSA = "<< Create new storage account >>";
 
@@ -502,21 +469,15 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         return refreshedSAModel;
     }
 
-    private Vector<StorageAccount> filterSA(/*CloudService selectedCS*/) {
-        Vector<StorageAccount> accounts = new Vector<StorageAccount>();
+    private Vector<StorageAccount> filterSA() {
+        Vector<StorageAccount> filteredStorageAccounts = new Vector<>();
 
-//        if (selectedCS != null) {
-//            for (StorageAccount storageAccount : storageAccounts.values()) {
-//                if ((!storageAccount.getLocation().isEmpty() &&
-//                        storageAccount.getLocation().equals(selectedCS.getLocation())) ||
-//                        (!storageAccount.getAffinityGroup().isEmpty() &&
-//                                storageAccount.getAffinityGroup().equals(selectedCS.getAffinityGroup()))) {
-//                    accounts.add(storageAccount);
-//                }
-//            }
-//        }
-
-        return accounts;
+        for (StorageAccount storageAccount : storageAccounts.values()) {
+            if (storageAccount.getLocation().equals(model.getRegion().toString())) {
+                filteredStorageAccounts.add(storageAccount);
+            }
+        }
+        return filteredStorageAccounts;
     }
 
     private void fillAvailabilitySets() {

@@ -138,6 +138,15 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
             }
         });
 
+        skuComboBox.setRenderer(new ListCellRendererWrapper<Object>() {
+            @Override
+            public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
+                if (o instanceof VirtualMachineSku) {
+                    setText(((VirtualMachineSku) o).name());
+                }
+            }
+        });
+
         imageLabelList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList jList, Object o, int i, boolean b, boolean b1) {

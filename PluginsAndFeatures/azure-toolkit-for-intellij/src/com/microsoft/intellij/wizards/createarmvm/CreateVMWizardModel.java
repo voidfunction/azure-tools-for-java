@@ -34,11 +34,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmService
 public class CreateVMWizardModel extends VMWizardModel {
     private Region region;
     private VirtualMachineImage virtualMachineImage;
-    private String name;
 //    private VirtualMachineSize size;
-    private String userName;
-    private String password;
-    private String certificate;
     private Network virtualNetwork;
 //    private StorageAccount storageAccount;
 //    private VirtualNetwork virtualNetwork;
@@ -82,14 +78,6 @@ public class CreateVMWizardModel extends VMWizardModel {
         this.region = region;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
 //    public VirtualMachineSize getSize() {
 //        return size;
 //    }
@@ -97,30 +85,6 @@ public class CreateVMWizardModel extends VMWizardModel {
 //    public void setSize(VirtualMachineSize size) {
 //        this.size = size;
 //    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getCertificate() {
-        return certificate;
-    }
-
-    public void setCertificate(String certificate) {
-        this.certificate = certificate;
-    }
 
     public Network getVirtualNetwork() {
         return virtualNetwork;
