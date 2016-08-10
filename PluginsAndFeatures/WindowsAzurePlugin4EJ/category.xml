@@ -9,9 +9,6 @@
    <feature url="features/com.microsoft.azureexplorer.feature_1.0.0.qualifier.jar" id="com.microsoft.azureexplorer.feature" version="1.0.0.qualifier">
       <category name="com.persistent.winazure.eclipseplugin.category"/>
    </feature>
-   <feature url="features/com.microsoft.sqljdbc4.feature_4.2.6420.100.jar" id="com.microsoft.sqljdbc4.feature" version="4.2.6420.100">
-      <category name="com.persistent.winazure.eclipseplugin.category"/>
-   </feature>
    <feature url="features/com.microsoft.applicationinsights.feature_1.0.3.qualifier.jar" id="com.microsoft.applicationinsights.feature" version="1.0.3.qualifier">
       <category name="com.persistent.winazure.eclipseplugin.category"/>
    </feature>
@@ -28,6 +25,9 @@
       <category name="com.persistent.winazure.eclipseplugin.category"/>
    </feature>
    <feature url="features/com.persistent.winazure.eclipseplugin.feature_2.9.5.qualifier.jar" id="com.persistent.winazure.eclipseplugin.feature" version="2.9.5.qualifier">
+      <category name="com.persistent.winazure.eclipseplugin.category"/>
+   </feature>
+   <feature url="features/com.microsoft.sqljdbc4.feature_6.0.7507.100.jar" id="com.microsoft.sqljdbc4.feature" version="6.0.7507.100">
       <category name="com.persistent.winazure.eclipseplugin.category"/>
    </feature>
    <category-def name="com.persistent.winazure.eclipseplugin.category" label="Azure Toolkit for Java">

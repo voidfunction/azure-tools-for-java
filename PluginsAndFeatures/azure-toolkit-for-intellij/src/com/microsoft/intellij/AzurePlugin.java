@@ -78,6 +78,7 @@ public class AzurePlugin extends AbstractProjectComponent {
     private static final String PREFERENCESETS_VERSION = "2.9.2";
     public static final String AZURE_LIBRARIES_VERSION = "0.9.2";
     public static final String QPID_LIBRARIES_VERSION = "0.19.0";
+    public static final String JDBC_LIBRARIES_VERSION = "6.0.7507.100";
     public final static int REST_SERVICE_MAX_RETRY_COUNT = 7;
 
     // User-agent header for Azure SDK calls
