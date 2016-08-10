@@ -38,6 +38,7 @@ import com.microsoft.azure.management.storage.StorageAccountKey;
 import com.microsoft.rest.credentials.TokenCredentials;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -113,7 +114,7 @@ public class AzureArmSDKHelper {
 
     @NotNull
     public static AzureRequestCallback<VirtualMachine> createVirtualMachine(@NotNull final com.microsoft.tooling.msservices.model.vm.VirtualMachine vm, @NotNull final VirtualMachineImage vmImage,
-                                                                                         @NotNull final com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount, @NotNull final Network network,
+                                                                                         @NotNull final ArmStorageAccount storageAccount, @NotNull final Network network,
                                                                                          @NotNull String subnet, @NotNull final String username, @NotNull final String password, @NotNull final byte[] certificate) {
         return new AzureRequestCallback<VirtualMachine>() {
             @NotNull
@@ -132,6 +133,7 @@ public class AzureArmSDKHelper {
                             .withAdminUserName(username)
                             .withPassword(password)
                             .withSize(VirtualMachineSizeTypes.STANDARD_D3_V2)
+                            .withExistingStorageAccount(storageAccount.getStorageAccount())
                             .create();
                 } else {
                     return azure.virtualMachines().define(vm.getName())
@@ -145,7 +147,7 @@ public class AzureArmSDKHelper {
                             .withRootUserName(username)
                             .withPassword(password)
                             .withSize(VirtualMachineSizeTypes.STANDARD_D3_V2)
-                            .withExistingStorageAccount(storageAccount)
+                            .withExistingStorageAccount(storageAccount.getStorageAccount())
                             .create();
                 }
             }
@@ -199,15 +201,14 @@ public class AzureArmSDKHelper {
     }
 
     @NotNull
-    public static AzureRequestCallback<List<com.microsoft.tooling.msservices.model.storage.StorageAccount>> getStorageAccounts(@NotNull final String subscriptionId) {
-        return new AzureRequestCallback<List<com.microsoft.tooling.msservices.model.storage.StorageAccount>>() {
+    public static AzureRequestCallback<List<ArmStorageAccount>> getStorageAccounts(@NotNull final String subscriptionId) {
+        return new AzureRequestCallback<List<ArmStorageAccount>>() {
             @NotNull
             @Override
-            public List<com.microsoft.tooling.msservices.model.storage.StorageAccount> execute(@NotNull Azure azure) throws Throwable {
-                List<com.microsoft.tooling.msservices.model.storage.StorageAccount> storageAccounts = new ArrayList<>();
+            public List<ArmStorageAccount> execute(@NotNull Azure azure) throws Throwable {
+                List<ArmStorageAccount> storageAccounts = new ArrayList<>();
                 for (StorageAccount storageAccount : azure.storageAccounts().list()){
-                    com.microsoft.tooling.msservices.model.storage.StorageAccount sa =
-                            new com.microsoft.tooling.msservices.model.storage.StorageAccount(storageAccount.name(), subscriptionId);
+                    ArmStorageAccount sa = new ArmStorageAccount(storageAccount.name(), subscriptionId, storageAccount);
 
                     sa.setProtocol("https");
                     sa.setType(storageAccount.sku().name().toString());

@@ -28,7 +28,8 @@ import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.intellij.wizards.createvm.MachineSettingsStep;
 import com.microsoft.intellij.wizards.createvm.SubscriptionStep;
-import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
+import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
+import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
 
 public class CreateVMWizardModel extends VMWizardModel {
@@ -36,8 +37,7 @@ public class CreateVMWizardModel extends VMWizardModel {
     private VirtualMachineImage virtualMachineImage;
 //    private VirtualMachineSize size;
     private Network virtualNetwork;
-//    private StorageAccount storageAccount;
-//    private VirtualNetwork virtualNetwork;
+    private ArmStorageAccount storageAccount;
 //    private String subnet;
 //    private String availabilitySet;
 //    private Endpoint[] endpoints;
@@ -92,6 +92,14 @@ public class CreateVMWizardModel extends VMWizardModel {
 
     public void setVirtualNetwork(Network virtualNetwork) {
         this.virtualNetwork = virtualNetwork;
+    }
+
+    public ArmStorageAccount getStorageAccount() {
+        return storageAccount;
+    }
+
+    public void setStorageAccount(ArmStorageAccount storageAccount) {
+        this.storageAccount = storageAccount;
     }
 
 //    public VirtualNetwork getVirtualNetwork() {

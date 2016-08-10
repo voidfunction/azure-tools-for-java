@@ -31,13 +31,12 @@ import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.microsoft.azure.management.network.Network;
-import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
-import com.microsoft.intellij.forms.CreateStorageAccountForm;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
 import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
@@ -45,8 +44,6 @@ import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -84,7 +81,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
     private final Lock vnLock = new ReentrantLock();
     private final Condition vnInitialized = vnLock.newCondition();
 
-    private Map<String, StorageAccount> storageAccounts;
+    private Map<String, ArmStorageAccount> storageAccounts;
     private final Lock saLock = new ReentrantLock();
     private final Condition saInitialized = saLock.newCondition();
 
@@ -151,21 +148,6 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                 availabilityComboBox.setEnabled(availabilitySetCheckBox.isSelected());
             }
         });
-
-//        imageDescriptionTextPane.addHyperlinkListener(new HyperlinkListener() {
-//            @Override
-//            public void hyperlinkUpdate(HyperlinkEvent hyperlinkEvent) {
-//                if (hyperlinkEvent.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-//                    if (Desktop.isDesktopSupported()) {
-//                        try {
-//                            Desktop.getDesktop().browse(hyperlinkEvent.getURL().toURI());
-//                        } catch (Exception e) {
-//                            AzurePlugin.log(e.getStackTrace().toString());
-//                        }
-//                    }
-//                }
-//            }
-//        });
     }
 
     private void fillResourceGroups() {
@@ -358,10 +340,10 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                 progressIndicator.setIndeterminate(true);
                 if (storageAccounts == null) {
                     try {
-                        java.util.List<StorageAccount> accounts = AzureArmManagerImpl.getManager(project).getStorageAccounts(model.getSubscription().getId());
-                        storageAccounts = new TreeMap<String, StorageAccount>();
+                        java.util.List<ArmStorageAccount> accounts = AzureArmManagerImpl.getManager(project).getStorageAccounts(model.getSubscription().getId());
+                        storageAccounts = new TreeMap<String, ArmStorageAccount>();
 
-                        for (StorageAccount storageAccount : accounts) {
+                        for (ArmStorageAccount storageAccount : accounts) {
                             storageAccounts.put(storageAccount.getName(), storageAccount);
                         }
                     } catch (AzureCmdException e) {
@@ -403,7 +385,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
-                StorageAccount selectedSA = model.getStorageAccount();
+                ArmStorageAccount selectedSA = model.getStorageAccount();
 
                 saLock.lock();
 
@@ -426,22 +408,20 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         });
     }
 
-    private void refreshStorageAccounts(final StorageAccount selectedSA) {
-        final DefaultComboBoxModel refreshedSAModel = getStorageAccountModel(/*selectedCS, */selectedSA);
+    private void refreshStorageAccounts(final ArmStorageAccount selectedSA) {
+        final DefaultComboBoxModel refreshedSAModel = getStorageAccountModel(selectedSA);
 
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
             public void run() {
                 storageComboBox.setModel(refreshedSAModel);
-                model.getCurrentNavigationState().NEXT.setEnabled(/*selectedCS != null &&*/
-                        selectedSA != null/* &&
-                        selectedSA.getLocation().equals(selectedCS.getLocation())*/);
+                model.getCurrentNavigationState().NEXT.setEnabled(selectedSA != null);
             }
         }, ModalityState.any());
     }
 
-    private DefaultComboBoxModel getStorageAccountModel(StorageAccount selectedSA) {
-        Vector<StorageAccount> accounts = filterSA();
+    private DefaultComboBoxModel getStorageAccountModel(ArmStorageAccount selectedSA) {
+        Vector<ArmStorageAccount> accounts = filterSA();
 
         final String createSA = "<< Create new storage account >>";
 
@@ -452,7 +432,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                     showNewStorageForm();
                 } else {
                     super.setSelectedItem(o);
-                    model.setStorageAccount((StorageAccount) o);
+                    model.setStorageAccount((ArmStorageAccount) o);
                 }
             }
         };
@@ -469,10 +449,10 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         return refreshedSAModel;
     }
 
-    private Vector<StorageAccount> filterSA() {
-        Vector<StorageAccount> filteredStorageAccounts = new Vector<>();
+    private Vector<ArmStorageAccount> filterSA() {
+        Vector<ArmStorageAccount> filteredStorageAccounts = new Vector<>();
 
-        for (StorageAccount storageAccount : storageAccounts.values()) {
+        for (ArmStorageAccount storageAccount : storageAccounts.values()) {
             if (storageAccount.getLocation().equals(model.getRegion().toString())) {
                 filteredStorageAccounts.add(storageAccount);
             }
@@ -499,7 +479,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        StorageAccount newStorageAccount = form.getStorageAccount();
+                        ArmStorageAccount newStorageAccount = form.getStorageAccount();
 
                         if (newStorageAccount != null) {
                             model.setStorageAccount(newStorageAccount);
@@ -567,7 +547,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         }
                     }
 
-                    StorageAccount storageAccount = model.getStorageAccount();
+                    ArmStorageAccount storageAccount = model.getStorageAccount();
 
 //                    for (StorageAccount account : AzureManagerImpl.getManager(project).getStorageAccounts(
 //                            model.getSubscription().getId(), true)) {
@@ -588,8 +568,6 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                                     certData);
 
 //                    virtualMachine = AzureManagerImpl.getManager(project).refreshVirtualMachineInformation(virtualMachine);
-
-//                    final VirtualMachine vm = virtualMachine;
 
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
                         @Override

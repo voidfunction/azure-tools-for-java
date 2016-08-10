@@ -37,6 +37,7 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.ReplicationTypes;
 import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.Location;
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +68,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
     private Runnable onCreate;
     private Subscription subscription;
-    private com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount;
+    private ArmStorageAccount storageAccount;
     private Project project;
 
     private boolean isLoading = true;
@@ -197,7 +198,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             @Override
             public void run() {
                 try {
-                    storageAccount = new com.microsoft.tooling.msservices.model.storage.StorageAccount(name, subscription.getId());
+                    storageAccount = new ArmStorageAccount(name, subscription.getId(), null);
                     storageAccount.setType(replication);
                     storageAccount.setLocation(region);
                     storageAccount.setNewResourceGroup(isNewResourceGroup);
@@ -264,7 +265,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         this.onCreate = onCreate;
     }
 
-    public StorageAccount getStorageAccount() {
+    public ArmStorageAccount getStorageAccount() {
         return storageAccount;
     }
 

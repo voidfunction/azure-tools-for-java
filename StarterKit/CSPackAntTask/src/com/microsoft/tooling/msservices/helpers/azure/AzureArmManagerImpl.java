@@ -28,6 +28,7 @@ import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginSettings;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -36,6 +37,7 @@ import com.microsoft.tooling.msservices.helpers.auth.AADManagerImpl;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureArmSDKHelper;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureRequestCallback;
+import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -204,7 +206,7 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
 
     public VirtualMachine createVirtualMachine(@NotNull String subscriptionId, @NotNull com.microsoft.tooling.msservices.model.vm.VirtualMachine virtualMachine,
                                                @NotNull VirtualMachineImage vmImage,
-                                               @NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount,
+                                               @NotNull ArmStorageAccount storageAccount,
                                                @NotNull Network network, @NotNull String subnet,
                                                @NotNull String username, @NotNull String password, @NotNull byte[] certificate)
             throws AzureCmdException {
@@ -227,7 +229,7 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.createVirtualNetwork(networkName, region, addressSpace, groupName, isNewGroup));
     }
 
-    public List<com.microsoft.tooling.msservices.model.storage.StorageAccount> getStorageAccounts(@NotNull String subscriptionId) throws AzureCmdException {
+    public List<ArmStorageAccount> getStorageAccounts(@NotNull String subscriptionId) throws AzureCmdException {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getStorageAccounts(subscriptionId));
     }
 
@@ -235,8 +237,10 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
         requestAzureSDK(subscriptionId, AzureArmSDKHelper.deleteStorageAccount(storageAccount));
     }
 
-    public void createStorageAccount(@NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount) throws AzureCmdException {
-        requestAzureSDK(storageAccount.getSubscriptionId(), AzureArmSDKHelper.createStorageAccount(storageAccount));
+    public ArmStorageAccount createStorageAccount(@NotNull ArmStorageAccount storageAccount) throws AzureCmdException {
+        StorageAccount inner = requestAzureSDK(storageAccount.getSubscriptionId(), AzureArmSDKHelper.createStorageAccount(storageAccount));
+        storageAccount.setInner(inner);
+        return storageAccount;
     }
 
     @NotNull
