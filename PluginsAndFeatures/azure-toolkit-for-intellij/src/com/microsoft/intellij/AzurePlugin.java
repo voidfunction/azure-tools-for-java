@@ -205,6 +205,11 @@ public class AzurePlugin extends AbstractProjectComponent {
             @Override
             public void run() {
                 boolean accepted = Messages.showYesNoDialog(message("preferenceQueMsg"), message("preferenceQueTtl"), null) == Messages.YES;
+                if(accepted) {
+                    AppInsightsCustomEvent.create(message("telemetryAcceptAction"),"");
+                } else {
+                    AppInsightsCustomEvent.create(message("telemetryDenyAction"),"");
+                }
                 DataOperations.updatePropertyValue(doc, message("prefVal"), String.valueOf(accepted));
 
                 DataOperations.updatePropertyValue(doc, message("pluginVersion"), PLUGIN_VERSION);

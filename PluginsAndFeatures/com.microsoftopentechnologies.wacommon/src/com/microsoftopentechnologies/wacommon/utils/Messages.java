@@ -83,6 +83,8 @@ public final class Messages extends NLS {
 	public static String aiTxt;
 	public static String crtErrMsg;
 	public static String azExpMsg;
+	public static String telemetryDenyAction;
+	public static String telemetryAcceptAction;
 	
     static {
         // initialize resource bundle
