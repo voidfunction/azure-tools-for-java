@@ -204,7 +204,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                     storageAccount.setNewResourceGroup(isNewResourceGroup);
                     storageAccount.setResourceGroupName(resourceGroupName);
 
-                    AzureArmManagerImpl.getManager(project).createStorageAccount(storageAccount);
+                    storageAccount = AzureArmManagerImpl.getManager(project).createStorageAccount(storageAccount);
 //                    AzureManagerImpl.getManager(project).refreshStorageAccountInformation(storageAccount);
 
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {

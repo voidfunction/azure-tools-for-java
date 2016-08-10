@@ -132,7 +132,7 @@ public class AzureArmSDKHelper {
                             .withSpecificWindowsImageVersion(vmImage.imageReference())
                             .withAdminUserName(username)
                             .withPassword(password)
-                            .withSize(VirtualMachineSizeTypes.STANDARD_D3_V2)
+                            .withSize(vm.getSize())
                             .withExistingStorageAccount(storageAccount.getStorageAccount())
                             .create();
                 } else {
@@ -146,7 +146,7 @@ public class AzureArmSDKHelper {
                             .withSpecificLinuxImageVersion(vmImage.imageReference())
                             .withRootUserName(username)
                             .withPassword(password)
-                            .withSize(VirtualMachineSizeTypes.STANDARD_D3_V2)
+                            .withSize(vm.getSize())
                             .withExistingStorageAccount(storageAccount.getStorageAccount())
                             .create();
                 }

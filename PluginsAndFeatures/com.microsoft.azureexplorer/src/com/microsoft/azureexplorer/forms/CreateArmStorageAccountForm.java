@@ -35,6 +35,7 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.Location;
 import com.microsoft.tooling.msservices.model.ReplicationTypes;
@@ -69,7 +70,7 @@ public class CreateArmStorageAccountForm extends Dialog {
 
     private Runnable onCreate;
     private Subscription subscription;
-    private StorageAccount storageAccount;
+    private ArmStorageAccount storageAccount;
 
     public CreateArmStorageAccountForm(Shell parentShell, Subscription subscription) {
         super(parentShell);
@@ -235,7 +236,7 @@ public class CreateArmStorageAccountForm extends Dialog {
 		final boolean isNewResourceGroup = createNewRadioButton.getSelection();
 		final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getText();
 
-		storageAccount = new StorageAccount(name, subscription.getId().toString());
+		storageAccount = new ArmStorageAccount(name, subscription.getId().toString(), null);
 		storageAccount.setType(replication);
 		storageAccount.setLocation(region);
 		storageAccount.setNewResourceGroup(isNewResourceGroup);
@@ -246,7 +247,7 @@ public class CreateArmStorageAccountForm extends Dialog {
 					@Override
 					public void run() {
 						try {
-							AzureArmManagerImpl.getManager(null).createStorageAccount(storageAccount);
+							storageAccount = AzureArmManagerImpl.getManager(null).createStorageAccount(storageAccount);
 							// AzureManagerImpl.getManager().refreshStorageAccountInformation(storageAccount);
 							if (onCreate != null) {
 								onCreate.run();
