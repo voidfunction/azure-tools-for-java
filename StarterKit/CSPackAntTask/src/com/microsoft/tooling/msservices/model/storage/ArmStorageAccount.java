@@ -21,10 +21,12 @@
  */
 package com.microsoft.tooling.msservices.model.storage;
 
+import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 
 public class ArmStorageAccount extends StorageAccount{
-    com.microsoft.azure.management.storage.StorageAccount inner;
+    private com.microsoft.azure.management.storage.StorageAccount inner;
+    private Kind kind;
 
     public ArmStorageAccount(@NotNull String name,
                           @NotNull String subscriptionId, com.microsoft.azure.management.storage.StorageAccount inner) {
@@ -38,5 +40,13 @@ public class ArmStorageAccount extends StorageAccount{
 
     public void setInner(com.microsoft.azure.management.storage.StorageAccount inner) {
         this.inner = inner;
+    }
+
+    public Kind getKind() {
+        return kind;
+    }
+
+    public void setKind(Kind kind) {
+        this.kind = kind;
     }
 }

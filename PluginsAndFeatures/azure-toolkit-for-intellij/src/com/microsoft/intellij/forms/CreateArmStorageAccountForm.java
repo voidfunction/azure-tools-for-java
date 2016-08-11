@@ -29,6 +29,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.ListCellRendererWrapper;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.intellij.helpers.LinkListener;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -65,6 +66,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     private JRadioButton useExistingRadioButton;
     private JTextField resourceGrpField;
     private JComboBox resourceGrpCombo;
+    private JComboBox accoountKindCombo;
 
     private Runnable onCreate;
     private Subscription subscription;
@@ -145,6 +147,14 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             userInfoLabel.setText("");
         }
 
+        accoountKindCombo.setModel(new DefaultComboBoxModel(Kind.values()));
+        accoountKindCombo.setRenderer(new ListCellRendererWrapper<Kind>() {
+            @Override
+            public void customize(JList jList, Kind kind, int i, boolean b, boolean b1) {
+                setText(kind == Kind.STORAGE ? "General purpose" : "Blob storage");
+            }
+        });
+
         replicationComboBox.setModel(new DefaultComboBoxModel(ReplicationTypes.values()));
         replicationComboBox.setRenderer(new ListCellRendererWrapper<ReplicationTypes>() {
             @Override
@@ -203,6 +213,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                     storageAccount.setLocation(region);
                     storageAccount.setNewResourceGroup(isNewResourceGroup);
                     storageAccount.setResourceGroupName(resourceGroupName);
+                    storageAccount.setKind((Kind) accoountKindCombo.getSelectedItem());
 
                     storageAccount = AzureArmManagerImpl.getManager(project).createStorageAccount(storageAccount);
 //                    AzureManagerImpl.getManager(project).refreshStorageAccountInformation(storageAccount);

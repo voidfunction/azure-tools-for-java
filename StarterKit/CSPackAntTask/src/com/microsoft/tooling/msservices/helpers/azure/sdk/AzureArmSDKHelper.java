@@ -32,6 +32,7 @@ import com.microsoft.azure.management.compute.VirtualMachineSizeTypes;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azure.management.storage.StorageAccountKey;
@@ -241,7 +242,7 @@ public class AzureArmSDKHelper {
     }
 
     @NotNull
-    public static AzureRequestCallback<StorageAccount> createStorageAccount(@NotNull com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount) {
+    public static AzureRequestCallback<StorageAccount> createStorageAccount(@NotNull com.microsoft.tooling.msservices.model.storage.ArmStorageAccount storageAccount) {
         return new AzureRequestCallback<StorageAccount>() {
             @NotNull
             @Override
@@ -253,6 +254,11 @@ public class AzureArmSDKHelper {
                     newStorageAccountWithGroup = newStorageAccountBlank.withNewResourceGroup(storageAccount.getResourceGroupName());
                 } else {
                     newStorageAccountWithGroup = newStorageAccountBlank.withExistingResourceGroup(storageAccount.getResourceGroupName());
+                }
+                if (storageAccount.getKind() == Kind.BLOB_STORAGE) {
+                    newStorageAccountWithGroup.withBlobStorageAccountKind();
+                } else {
+                    newStorageAccountWithGroup.withGeneralPurposeAccountKind();
                 }
                 return newStorageAccountWithGroup.withSku(SkuName.fromString(storageAccount.getType())).create();
             }
