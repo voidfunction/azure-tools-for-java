@@ -58,7 +58,7 @@ public class AttachExternalStorageAccountAction extends NodeActionListener {
                     if (clientStorageAccount.getName().equals(name)) {
                         JOptionPane.showMessageDialog(form.getContentPane(),
                                 "Storage account with name '" + name + "' already exists.",
-                                "Service Explorer",
+                                "Azure Explorer",
                                 JOptionPane.ERROR_MESSAGE);
 
                         return;

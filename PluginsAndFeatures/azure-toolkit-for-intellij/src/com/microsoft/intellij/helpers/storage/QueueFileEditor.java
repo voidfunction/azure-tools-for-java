@@ -196,7 +196,7 @@ public class QueueFileEditor implements FileEditor {
             public void actionPerformed(ActionEvent actionEvent) {
                 int optionDialog = JOptionPane.showOptionDialog(null,
                         "Are you sure you want to clear the queue \"" + queue.getName() + "\"?",
-                        "Service explorer",
+                        "Azure Explorer",
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.QUESTION_MESSAGE,
                         null,
@@ -304,7 +304,7 @@ public class QueueFileEditor implements FileEditor {
     private void dequeueFirstMessage() {
         if (JOptionPane.showConfirmDialog(mainPanel,
                 "Are you sure you want to dequeue the first message in the queue?",
-                "Service Explorer",
+                "Azure Explorer",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.INFORMATION_MESSAGE) == JOptionPane.YES_OPTION) {
             ProgressManager.getInstance().run(new Task.Backgroundable(project, "Dequeuing message", false) {
