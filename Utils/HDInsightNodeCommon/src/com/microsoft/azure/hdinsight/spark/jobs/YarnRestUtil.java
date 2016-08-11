@@ -19,14 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.jobs;
+package com.microsoft.azure.hdinsight.spark.jobs;
 
-import com.microsoft.azure.hdinsight.sdk.common.HDIException;
-
-
-public class HDINetException extends HDIException {
-
-    public HDINetException(int code, String message, Throwable throwable ) {
-        super(message, throwable);
-    }
+public class YarnRestUtil {
 }

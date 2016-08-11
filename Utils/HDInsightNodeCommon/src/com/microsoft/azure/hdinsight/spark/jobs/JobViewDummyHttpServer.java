@@ -19,25 +19,21 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.jobs;
+package com.microsoft.azure.hdinsight.spark.jobs;
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.common.task.LivyTask;
 import com.microsoft.azure.hdinsight.common.task.RestTask;
 import com.microsoft.azure.hdinsight.common.task.TaskExecutor;
 import com.microsoft.azure.hdinsight.common.task.YarnHistoryTask;
-import com.microsoft.azure.hdinsight.jobs.framework.RequestDetail;
+import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
-import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

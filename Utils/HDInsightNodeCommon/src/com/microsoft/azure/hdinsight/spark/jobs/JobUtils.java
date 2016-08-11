@@ -19,14 +19,14 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.jobs;
+package com.microsoft.azure.hdinsight.spark.jobs;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.microsoft.azure.hdinsight.jobs.framework.RequestDetail;
-import com.microsoft.azure.hdinsight.jobs.livy.LivyBatchesInformation;
-import com.microsoft.azure.hdinsight.jobs.livy.LivySession;
+import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
+import com.microsoft.azure.hdinsight.spark.jobs.livy.LivyBatchesInformation;
+import com.microsoft.azure.hdinsight.spark.jobs.livy.LivySession;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;

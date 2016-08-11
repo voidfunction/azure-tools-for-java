@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
-package com.microsoft.azure.hdinsight.jobs.framework;
+package com.microsoft.azure.hdinsight.spark.jobs.framework;
 
-import com.microsoft.azure.hdinsight.jobs.JobUtils;
+import com.microsoft.azure.hdinsight.spark.jobs.JobUtils;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
