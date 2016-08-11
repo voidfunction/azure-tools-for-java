@@ -153,6 +153,11 @@ public class WACPStartUp implements IStartup {
 					if (dlg.open() == Window.OK) {
 						accepted = true;
 					}
+					if(accepted) {
+						AppInsightsCustomEvent.create(Messages.telemetryAcceptAction, "");
+					} else {
+						AppInsightsCustomEvent.create(Messages.telemetryDenyAction, "");
+					}
 					DataOperations.updatePropertyValue(doc, Messages.prefVal, String.valueOf(accepted));
 				}
 

@@ -42,7 +42,7 @@ public class AppInsightsCustomEvent {
 	public static void create(String eventName, String version, Map<String, String> myProperties) {
 		if (new File(pluginInstLoc).exists() && new File(dataFile).exists()) {
 			String prefValue = DataOperations.getProperty(dataFile, Messages.prefVal);
-			if (prefValue != null && !prefValue.isEmpty() && prefValue.equalsIgnoreCase("true")) {
+			if (prefValue == null || prefValue.isEmpty() || prefValue.equalsIgnoreCase("true")) {
 				TelemetryClient telemetry = new TelemetryClient();
 				telemetry.getContext().setInstrumentationKey(key);
 
