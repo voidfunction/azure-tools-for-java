@@ -30,6 +30,8 @@ import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.compute.VirtualMachineSizeTypes;
 import com.microsoft.azure.management.network.Network;
+import com.microsoft.azure.management.network.NetworkSecurityGroup;
+import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.Kind;
@@ -272,6 +274,28 @@ public class AzureArmSDKHelper {
             @Override
             public List<Network> execute(@NotNull Azure azure) throws Throwable {
                 return azure.networks().list();
+            }
+        };
+    }
+
+    @NotNull
+    public static AzureRequestCallback<List<PublicIpAddress>> getPublicIpAddresses() {
+        return new AzureRequestCallback<List<PublicIpAddress>>() {
+            @NotNull
+            @Override
+            public List<PublicIpAddress> execute(@NotNull Azure azure) throws Throwable {
+                return azure.publicIpAddresses().list();
+            }
+        };
+    }
+
+    @NotNull
+    public static AzureRequestCallback<List<NetworkSecurityGroup>> getNetworkSecurityGroups() {
+        return new AzureRequestCallback<List<NetworkSecurityGroup>>() {
+            @NotNull
+            @Override
+            public List<NetworkSecurityGroup> execute(@NotNull Azure azure) throws Throwable {
+                return azure.networkSecurityGroups().list();
             }
         };
     }

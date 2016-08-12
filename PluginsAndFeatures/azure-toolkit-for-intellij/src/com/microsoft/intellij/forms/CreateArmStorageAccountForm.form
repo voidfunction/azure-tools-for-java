@@ -19,8 +19,8 @@
         <rowspec value="top:3dlu:noGrow"/>
         <rowspec value="center:max(d;4px):noGrow"/>
         <rowspec value="top:3dlu:noGrow"/>
-        <rowspec value="center:33px:noGrow"/>
-        <rowspec value="center:max(d;4px):noGrow"/>
+        <rowspec value="top:15dlu:noGrow"/>
+        <rowspec value="center:d:noGrow"/>
         <rowspec value="center:19px:noGrow"/>
         <rowspec value="center:max(d;4px):noGrow"/>
         <rowspec value="top:3dlu:noGrow"/>

@@ -24,6 +24,8 @@ package com.microsoft.intellij.wizards.createarmvm;
 import com.intellij.openapi.project.Project;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.network.Network;
+import com.microsoft.azure.management.network.NetworkSecurityGroup;
+import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.intellij.wizards.createvm.MachineSettingsStep;
@@ -40,7 +42,8 @@ public class CreateVMWizardModel extends VMWizardModel {
     private ArmStorageAccount storageAccount;
 //    private String subnet;
 //    private String availabilitySet;
-//    private Endpoint[] endpoints;
+    private PublicIpAddress publicIpAddress;
+    private NetworkSecurityGroup networkSecurityGroup;
 
     public CreateVMWizardModel(VMArmServiceModule node) {
         super();
@@ -102,27 +105,27 @@ public class CreateVMWizardModel extends VMWizardModel {
         this.storageAccount = storageAccount;
     }
 
-//    public VirtualNetwork getVirtualNetwork() {
-//        return virtualNetwork;
-//    }
+    public PublicIpAddress getPublicIpAddress() {
+        return publicIpAddress;
+    }
 
-//    public void setVirtualNetwork(VirtualNetwork virtualNetwork) {
-//        this.virtualNetwork = virtualNetwork;
-//    }
+    public void setPublicIpAddress(PublicIpAddress publicIpAddress) {
+        this.publicIpAddress = publicIpAddress;
+    }
 
-//    public String getAvailabilitySet() {
+    public NetworkSecurityGroup getNetworkSecurityGroup() {
+        return networkSecurityGroup;
+    }
+
+    public void setNetworkSecurityGroup(NetworkSecurityGroup networkSecurityGroup) {
+        this.networkSecurityGroup = networkSecurityGroup;
+    }
+
+    //    public String getAvailabilitySet() {
 //        return availabilitySet;
 //    }
 //
 //    public void setAvailabilitySet(String availabilitySet) {
 //        this.availabilitySet = availabilitySet;
-//    }
-
-//    public Endpoint[] getEndpoints() {
-//        return endpoints;
-//    }
-//
-//    public void setEndpoints(Endpoint[] endpoints) {
-//        this.endpoints = endpoints;
 //    }
 }

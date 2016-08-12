@@ -26,6 +26,8 @@ import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.network.Network;
+import com.microsoft.azure.management.network.NetworkSecurityGroup;
+import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.StorageAccount;
@@ -229,6 +231,7 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.createVirtualNetwork(networkName, region, addressSpace, groupName, isNewGroup));
     }
 
+    @NotNull
     public List<ArmStorageAccount> getStorageAccounts(@NotNull String subscriptionId) throws AzureCmdException {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getStorageAccounts(subscriptionId));
     }
@@ -246,5 +249,15 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
     @NotNull
     public List<Network> getVirtualNetworks(@NotNull String subscriptionId) throws AzureCmdException {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getVirtualNetworks());
+    }
+
+    @NotNull
+    public List<PublicIpAddress> getPublicIpAddresses(@NotNull String subscriptionId) throws AzureCmdException {
+        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getPublicIpAddresses());
+    }
+
+    @NotNull
+    public List<NetworkSecurityGroup> getNetworkSecurityGroups(@NotNull String subscriptionId) throws AzureCmdException {
+        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getNetworkSecurityGroups());
     }
 }
