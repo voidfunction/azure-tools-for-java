@@ -2,6 +2,8 @@ package com.microsoft.azureexplorer.forms;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -42,10 +44,16 @@ import com.microsoft.tooling.msservices.model.ReplicationTypes;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.storage.Kind;
 
 public class CreateArmStorageAccountForm extends Dialog {
     private static final String PRICING_LINK = "<a href=\"http://go.microsoft.com/fwlink/?LinkID=400838\">Read more about replication services and pricing details</a>";
-
+    private static Map<String, Kind> ACCOUNT_KIND = new TreeMap<>();
+    static {
+    	ACCOUNT_KIND.put("General purpose", Kind.STORAGE);
+    	ACCOUNT_KIND.put("Blob storage", Kind.BLOB_STORAGE);
+    }
+    
     private Button buttonOK;
     private Button buttonCancel;
 
@@ -60,6 +68,8 @@ public class CreateArmStorageAccountForm extends Dialog {
     private Combo resourceGrpCombo;
     private Label regionLabel;
     private Combo regionComboBox;
+    private Label kindLabel;
+    private Combo kindCombo;
     private Label replicationLabel;
     private Combo replicationComboBox;
     private Link pricingLabel;
@@ -158,6 +168,16 @@ public class CreateArmStorageAccountForm extends Dialog {
         regionComboBox.setLayoutData(gridData);
         regionViewer = new ComboViewer(regionComboBox);
         regionViewer.setContentProvider(ArrayContentProvider.getInstance());
+        
+        kindLabel = new Label(container, SWT.LEFT);
+        kindLabel.setText("Account kind:");
+        kindCombo = new Combo(container, SWT.READ_ONLY);
+        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+        kindCombo.setLayoutData(gridData);
+        for (Map.Entry<String, Kind> entry : ACCOUNT_KIND.entrySet()) {
+        	kindCombo.add(entry.getKey());
+        	kindCombo.setData(entry.getKey(), entry.getValue());
+        }
 
         replicationLabel = new Label(container, SWT.LEFT);
         replicationLabel.setText("Replication");
@@ -241,6 +261,7 @@ public class CreateArmStorageAccountForm extends Dialog {
 		storageAccount.setLocation(region);
 		storageAccount.setNewResourceGroup(isNewResourceGroup);
 		storageAccount.setResourceGroupName(resourceGroupName);
+		storageAccount.setKind((Kind) kindCombo.getData(kindCombo.getText())); 
 
 		DefaultLoader.getIdeHelper().runInBackground(null, "Creating storage account...", false, true,
 				"Creating storage account...", new Runnable() {

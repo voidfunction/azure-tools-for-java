@@ -177,7 +177,7 @@
               <forms/>
             </constraints>
             <properties>
-              <text value="Account kind"/>
+              <text value="Account kind:"/>
             </properties>
           </component>
           <component id="f5bf9" class="javax.swing.JComboBox" binding="accoountKindCombo">

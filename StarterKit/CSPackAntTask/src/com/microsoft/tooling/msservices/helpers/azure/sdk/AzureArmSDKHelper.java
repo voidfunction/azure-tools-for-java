@@ -40,6 +40,7 @@ import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azure.management.storage.StorageAccountKey;
 import com.microsoft.rest.credentials.TokenCredentials;
 import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 
@@ -117,36 +118,32 @@ public class AzureArmSDKHelper {
 
     @NotNull
     public static AzureRequestCallback<VirtualMachine> createVirtualMachine(@NotNull final com.microsoft.tooling.msservices.model.vm.VirtualMachine vm, @NotNull final VirtualMachineImage vmImage,
-                                                                                         @NotNull final ArmStorageAccount storageAccount, @NotNull final Network network,
-                                                                                         @NotNull String subnet, @NotNull final String username, @NotNull final String password, @NotNull final byte[] certificate) {
+                                                                            @NotNull final ArmStorageAccount storageAccount, @NotNull final Network network,
+                                                                            @NotNull String subnet, @Nullable PublicIpAddress pip,
+                                                                            @NotNull final String username, @NotNull final String password, @NotNull final byte[] certificate) {
         return new AzureRequestCallback<VirtualMachine>() {
             @NotNull
             @Override
             public VirtualMachine execute(@NotNull Azure azure) throws Throwable {
                 boolean isWindows = vmImage.osDiskImage().operatingSystem().equals(OperatingSystemTypes.WINDOWS);
+                VirtualMachine.DefinitionStages.WithPublicIpAddress withPublicIpAddress = azure.virtualMachines().define(vm.getName())
+                        .withRegion(vmImage.location())
+                        .withExistingResourceGroup(vm.getResourceGroup())
+                        .withExistingPrimaryNetwork(network)
+                        .withSubnet(subnet)
+                        .withPrimaryPrivateIpAddressDynamic();
+
+                VirtualMachine.DefinitionStages.WithOS withOS = pip == null ?
+                        withPublicIpAddress.withoutPrimaryPublicIpAddress() : withPublicIpAddress.withExistingPrimaryPublicIpAddress(pip);
                 if (isWindows) {
-                    return azure.virtualMachines().define(vm.getName())
-                            .withRegion(vmImage.location())
-                            .withExistingResourceGroup(vm.getResourceGroup())
-                            .withExistingPrimaryNetwork(network)
-                            .withSubnet(subnet)
-                            .withPrimaryPrivateIpAddressDynamic()
-                            .withoutPrimaryPublicIpAddress()
-                            .withSpecificWindowsImageVersion(vmImage.imageReference())
+                    return withOS.withSpecificWindowsImageVersion(vmImage.imageReference())
                             .withAdminUserName(username)
                             .withPassword(password)
                             .withSize(vm.getSize())
                             .withExistingStorageAccount(storageAccount.getStorageAccount())
                             .create();
                 } else {
-                    return azure.virtualMachines().define(vm.getName())
-                            .withRegion(vmImage.location())
-                            .withExistingResourceGroup(vm.getResourceGroup())
-                            .withExistingPrimaryNetwork(network)
-                            .withSubnet(subnet)
-                            .withPrimaryPrivateIpAddressDynamic()
-                            .withoutPrimaryPublicIpAddress()
-                            .withSpecificLinuxImageVersion(vmImage.imageReference())
+                    return withOS.withSpecificLinuxImageVersion(vmImage.imageReference())
                             .withRootUserName(username)
                             .withPassword(password)
                             .withSize(vm.getSize())
@@ -175,6 +172,17 @@ public class AzureArmSDKHelper {
             @Override
             public List<VirtualMachinePublisher> execute(@NotNull Azure azure) throws Throwable {
                 return azure.virtualMachineImages().publishers().listByRegion(region);
+            }
+        };
+    }
+
+    @NotNull
+    public static AzureRequestCallback<List<Network>> getVirtualNetworks() {
+        return new AzureRequestCallback<List<Network>>() {
+            @NotNull
+            @Override
+            public List<Network> execute(@NotNull Azure azure) throws Throwable {
+                return azure.networks().list();
             }
         };
     }
@@ -268,23 +276,28 @@ public class AzureArmSDKHelper {
     }
 
     @NotNull
-    public static AzureRequestCallback<List<Network>> getVirtualNetworks() {
-        return new AzureRequestCallback<List<Network>>() {
-            @NotNull
-            @Override
-            public List<Network> execute(@NotNull Azure azure) throws Throwable {
-                return azure.networks().list();
-            }
-        };
-    }
-
-    @NotNull
     public static AzureRequestCallback<List<PublicIpAddress>> getPublicIpAddresses() {
         return new AzureRequestCallback<List<PublicIpAddress>>() {
             @NotNull
             @Override
             public List<PublicIpAddress> execute(@NotNull Azure azure) throws Throwable {
                 return azure.publicIpAddresses().list();
+            }
+        };
+    }
+
+    @NotNull
+    public static AzureRequestCallback<PublicIpAddress> createPublicIpAddress(@NotNull String name, @NotNull Region region,  String addressSpace,
+                                                                     @NotNull String groupName) {
+        return new AzureRequestCallback<PublicIpAddress>() {
+            @NotNull
+            @Override
+            public PublicIpAddress execute(@NotNull Azure azure) throws Throwable {
+                return azure.publicIpAddresses().define(name)
+                        .withRegion(region)
+                        .withExistingResourceGroup(groupName)
+                        .withDynamicIp()
+                        .create();
             }
         };
     }

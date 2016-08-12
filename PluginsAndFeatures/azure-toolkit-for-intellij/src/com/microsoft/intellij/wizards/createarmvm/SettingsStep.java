@@ -717,6 +717,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                                     storageAccount,
                                     model.getVirtualNetwork(),
                                     model.getSubnet(),
+                                    model.getPublicIpAddress(),
                                     model.getUserName(),
                                     model.getPassword(),
                                     certData);
