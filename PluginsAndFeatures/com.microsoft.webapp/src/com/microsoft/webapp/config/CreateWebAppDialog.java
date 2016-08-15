@@ -553,6 +553,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 
 		Link linkStorage = new Link(container, SWT.LEFT);
 		linkStorage.setText(Messages.linkLblAcc);
+		linkStorage.setVisible(false);
 		
 		Label note = new Label(container, SWT.LEFT);
 		note.setText(Messages.customNote);
