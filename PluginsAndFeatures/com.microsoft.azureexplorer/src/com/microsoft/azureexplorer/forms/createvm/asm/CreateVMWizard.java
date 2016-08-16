@@ -17,35 +17,27 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoft.azureexplorer.forms.createvm;
+package com.microsoft.azureexplorer.forms.createvm.asm;
 
 import com.microsoft.azureexplorer.Activator;
+import com.microsoft.azureexplorer.forms.createvm.MachineSettingsStep;
+import com.microsoft.azureexplorer.forms.createvm.SubscriptionStep;
+import com.microsoft.azureexplorer.forms.createvm.VMWizard;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
-import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.List;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
-public class CreateVMWizard extends Wizard {
+public class CreateVMWizard extends VMWizard {
     private static final String BASE_HTML_VM_IMAGE = "<html>\n" +
             "<body style=\"padding: 5px; width: 250px\">\n" +
             "    <p style=\"font-family: 'Segoe UI';font-size: 12pt;font-weight: bold;\">#TITLE#</p>\n" +
@@ -77,19 +69,9 @@ public class CreateVMWizard extends Wizard {
 
     private VMServiceModule node;
 
-    private Subscription subscription;
-    private VirtualMachineImage virtualMachineImage;
-    private String name;
-    private VirtualMachineSize size;
-    private String userName;
-    private String password;
-    private String certificate;
     private CloudService cloudService;
     private boolean filterByCloudService;
-    private StorageAccount storageAccount;
     private VirtualNetwork virtualNetwork;
-    private String subnet;
-    private String availabilitySet;
     private java.util.List<Endpoint> endpoints;
 
     private EndpointStep endpointStep;
@@ -192,56 +174,6 @@ public class CreateVMWizard extends Wizard {
         return getContainer().getCurrentPage() instanceof EndpointStep;
     }
 
-    public List configStepList(Composite parent, final int step) {
-        GridData gridData = new GridData();
-        gridData.widthHint = 100;
-//
-        gridData.verticalAlignment = GridData.BEGINNING;
-        gridData.grabExcessVerticalSpace = true;
-        List createVmStepsList = new List(parent, SWT.BORDER);
-        createVmStepsList.setItems(getStepTitleList());
-        createVmStepsList.setSelection(step);
-        createVmStepsList.setLayoutData(gridData);
-        createVmStepsList.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                List l = (List) e.widget;
-                l.setSelection(step);
-            }
-        });
-//        createVmStepsList.setEnabled(false);
-
-
-//        jList.setBorder(new EmptyBorder(10, 0, 10, 0));
-
-//        jList.setCellRenderer(new DefaultListCellRenderer() {
-//            @Override
-//            public Component getListCellRendererComponent(JList jList, Object o, int i, boolean b, boolean b1) {
-//                return super.getListCellRendererComponent(jList, "  " + o.toString(), i, b, b1);
-//            }
-//        });
-//
-//        for (MouseListener mouseListener : jList.getMouseListeners()) {
-//            jList.removeMouseListener(mouseListener);
-//        }
-//
-//        for (MouseMotionListener mouseMotionListener : jList.getMouseMotionListeners()) {
-//            jList.removeMouseMotionListener(mouseMotionListener);
-//        }
-        return createVmStepsList;
-    }
-
-    public Browser createImageDescriptor(Composite container) {
-        GridData gridData = new GridData();
-        gridData.horizontalAlignment = SWT.FILL;
-        gridData.verticalAlignment = SWT.FILL;
-        gridData.grabExcessVerticalSpace = true;
-        gridData.grabExcessHorizontalSpace = true;
-        Browser imageDescription = new Browser(container, SWT.NONE);
-        imageDescription.setLayoutData(gridData);
-        return imageDescription;
-    }
-
     public String[] getStepTitleList() {
         return new String[]{
                 "Subscription",
@@ -273,62 +205,6 @@ public class CreateVMWizard extends Wizard {
         return html;
     }
 
-    public Subscription getSubscription() {
-        return subscription;
-    }
-
-    public void setSubscription(Subscription subscription) {
-        this.subscription = subscription;
-    }
-
-    public VirtualMachineImage getVirtualMachineImage() {
-        return virtualMachineImage;
-    }
-
-    public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
-        this.virtualMachineImage = virtualMachineImage;
-    }
-
-    public VirtualMachineSize getSize() {
-        return size;
-    }
-
-    public void setSize(VirtualMachineSize size) {
-        this.size = size;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getCertificate() {
-        return certificate;
-    }
-
-    public void setCertificate(String certificate) {
-        this.certificate = certificate;
-    }
-
     public CloudService getCloudService() {
         return cloudService;
     }
@@ -345,36 +221,12 @@ public class CreateVMWizard extends Wizard {
         this.filterByCloudService = filterByCloudService;
     }
 
-    public StorageAccount getStorageAccount() {
-        return storageAccount;
-    }
-
-    public void setStorageAccount(StorageAccount storageAccount) {
-        this.storageAccount = storageAccount;
-    }
-
     public VirtualNetwork getVirtualNetwork() {
         return virtualNetwork;
     }
 
     public void setVirtualNetwork(VirtualNetwork virtualNetwork) {
         this.virtualNetwork = virtualNetwork;
-    }
-
-    public String getSubnet() {
-        return subnet;
-    }
-
-    public void setSubnet(String subnet) {
-        this.subnet = subnet;
-    }
-
-    public String getAvailabilitySet() {
-        return availabilitySet;
-    }
-
-    public void setAvailabilitySet(String availabilitySet) {
-        this.availabilitySet = availabilitySet;
     }
 
     public java.util.List<Endpoint> getEndpoints() {

@@ -19,6 +19,7 @@
  */
 package com.microsoft.azureexplorer.forms.createvm;
 
+import com.microsoft.azureexplorer.forms.createvm.asm.CreateVMWizard;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -61,11 +62,11 @@ public class MachineSettingsStep extends WizardPage {
 //    private JPanel certificatePanel;
 //    private JPanel passwordPanel;
     private Browser imageDescription;
-    private CreateVMWizard wizard;
+    private VMWizard wizard;
 
     private boolean inSetPageComplete = false;
 
-    public MachineSettingsStep(CreateVMWizard wizard) {
+    public MachineSettingsStep(VMWizard wizard) {
         super("Create new Virtual Machine", "Virtual Machine Basic Settings", null);
         this.wizard = wizard;
     }
@@ -219,7 +220,7 @@ public class MachineSettingsStep extends WizardPage {
 
         validateEmptyFields();
 
-        imageDescription.setText(wizard.getHtmlFromVMImage(virtualMachineImage));
+//        imageDescription.setText(wizard.getHtmlFromVMImage(virtualMachineImage));
 
         if (vmSizeComboBox.getItemCount() == 0) {
             vmSizeComboBox.setItems(new String[]{"<Loading...>"});

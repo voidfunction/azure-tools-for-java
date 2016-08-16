@@ -288,12 +288,6 @@ public class CreateArmStorageAccountForm extends Dialog {
 		super.okPressed();
     }
 
-    @Override
-    protected void cancelPressed() {
-
-        super.cancelPressed();
-    }
-
     public void fillFields() {
 
         if (subscription == null) {
@@ -337,7 +331,7 @@ public class CreateArmStorageAccountForm extends Dialog {
         this.onCreate = onCreate;
     }
 
-    public StorageAccount getStorageAccount() {
+    public ArmStorageAccount getStorageAccount() {
         return storageAccount;
     }
 

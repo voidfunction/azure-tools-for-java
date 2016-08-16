@@ -17,7 +17,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoft.azureexplorer.forms.createvm;
+package com.microsoft.azureexplorer.forms.createvm.asm;
 
 import java.util.Collection;
 import java.util.List;
@@ -102,35 +102,6 @@ public class CloudServiceStep extends WizardPage {
         createCloudServiceSettings(container);
 
         imageDescription = wizard.createImageDescriptor(container);
-//        cloudServiceComboBox.setRenderer(new ListCellRendererWrapper<Object>() {
-//            @Override
-//            public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
-//                if (o instanceof CloudService) {
-//                    CloudService cs = (CloudService) o;
-//
-//                    if (cs.getProductionDeployment().getVirtualNetwork().isEmpty()) {
-//                        setText(String.format("%s (%s)", cs.getName(),
-//                                !cs.getLocation().isEmpty() ? cs.getLocation() : cs.getAffinityGroup()));
-//                    } else {
-//                        setText(String.format("%s (%s - %s)", cs.getName(),
-//                                cs.getProductionDeployment().getVirtualNetwork(),
-//                                !cs.getLocation().isEmpty() ? cs.getLocation() : cs.getAffinityGroup()));
-//                    }
-//                }
-//            }
-//        });
-//
-//        storageComboBox.setRenderer(new ListCellRendererWrapper<Object>() {
-//            @Override
-//            public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
-//                if (o instanceof StorageAccount) {
-//                    StorageAccount sa = (StorageAccount) o;
-//                    setText(String.format("%s (%s)", sa.getName(),
-//                            !sa.getLocation().isEmpty() ? sa.getLocation() : sa.getAffinityGroup()));
-//                }
-//            }
-//        });
-
 
         storageComboBox.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -138,16 +109,6 @@ public class CloudServiceStep extends WizardPage {
                 validateNext();
             }
         });
-
-//        networkComboBox.setRenderer(new ListCellRendererWrapper<Object>() {
-//            @Override
-//            public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
-//                if (o instanceof VirtualNetwork) {
-//                    VirtualNetwork vn = (VirtualNetwork) o;
-//                    setText(String.format("%s (%s)", vn.getName(), vn.getLocation()));
-//                }
-//            }
-//        });
 
         subnetComboBox.addSelectionListener(new SelectionAdapter() {
             @Override
