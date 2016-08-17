@@ -84,7 +84,7 @@
                   <forms/>
                 </constraints>
                 <properties>
-                  <text value="Image Label"/>
+                  <text value="Image Label:"/>
                 </properties>
               </component>
               <scrollpane id="7abd">
@@ -114,7 +114,7 @@
                 </constraints>
                 <properties>
                   <labelFor value="4a690"/>
-                  <text value="Publisher"/>
+                  <text value="Publisher:"/>
                 </properties>
               </component>
               <component id="a2ac1" class="javax.swing.JLabel">
@@ -123,7 +123,7 @@
                   <forms/>
                 </constraints>
                 <properties>
-                  <text value="Location"/>
+                  <text value="Location:"/>
                 </properties>
               </component>
               <component id="eded7" class="javax.swing.JComboBox" binding="regionComboBox">
@@ -139,7 +139,7 @@
                   <forms/>
                 </constraints>
                 <properties>
-                  <text value="Offer"/>
+                  <text value="Offer:"/>
                 </properties>
               </component>
               <component id="acd91" class="javax.swing.JComboBox" binding="offerComboBox">
@@ -157,7 +157,7 @@
                   <forms/>
                 </constraints>
                 <properties>
-                  <text value="Sku"/>
+                  <text value="Sku:"/>
                 </properties>
               </component>
               <component id="c19a3" class="javax.swing.JComboBox" binding="skuComboBox">

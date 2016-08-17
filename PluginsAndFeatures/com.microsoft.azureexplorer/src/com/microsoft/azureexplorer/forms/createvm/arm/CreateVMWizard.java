@@ -25,7 +25,6 @@ import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azureexplorer.forms.createvm.MachineSettingsStep;
 import com.microsoft.azureexplorer.forms.createvm.SubscriptionStep;
 import com.microsoft.azureexplorer.forms.createvm.VMWizard;
-import com.microsoft.azureexplorer.forms.createvm.asm.SelectImageStep;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -58,7 +57,7 @@ public class CreateVMWizard extends VMWizard {
     @Override
     public void addPages() {
         addPage(new SubscriptionStep(this));
-//        addPage(new SelectImageStep(this));
+        addPage(new SelectImageStep(this));
         addPage(new MachineSettingsStep(this));
         addPage(new SettingsStep(this));
     }
@@ -149,7 +148,7 @@ public class CreateVMWizard extends VMWizard {
     public String[] getStepTitleList() {
         return new String[]{
                 "Subscription",
-//                "Select Image",
+                "Select Image",
                 "Machine Settings",
                 "Associated resources"
         };
