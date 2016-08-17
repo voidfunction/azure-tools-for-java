@@ -161,7 +161,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
 
                 if (o instanceof VirtualMachineImage) {
                     VirtualMachineImage virtualMachineImage = (VirtualMachineImage) o;
-                    cellValue = virtualMachineImage.sku();
+                    cellValue = virtualMachineImage.version();
                 }
 
                 this.setToolTipText(cellValue);

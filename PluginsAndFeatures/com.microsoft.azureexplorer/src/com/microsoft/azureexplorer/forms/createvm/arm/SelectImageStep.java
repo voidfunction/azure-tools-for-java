@@ -55,7 +55,6 @@ import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class SelectImageStep extends WizardPage {
-
 	private CreateVMWizard wizard;
 //	private JList createVmStepsList;
 
@@ -179,37 +178,11 @@ public class SelectImageStep extends WizardPage {
             	regionComboBox.setData(region.toString(), region);
             }
             regionComboBox.select(0);
-            imageLabelList.setItems(new String[]{"loading..."});
+            selectRegion();
             imageLabelList.setEnabled(false);
         }
         return super.getTitle();
     }
-
-//	@Override
-//	public JComponent prepare(WizardNavigationState wizardNavigationState) {
-//		rootPanel.revalidate();
-//
-//		regionComboBox.addItemListener(new ItemListener() {
-//			@Override
-//			public void itemStateChanged(ItemEvent e) {
-//				if (e.getStateChange() == ItemEvent.SELECTED) {
-//					selectRegion();
-//				}
-//			}
-//		});
-//
-//		regionComboBox.setModel(new DefaultComboBoxModel(Region.values()));
-//		selectRegion();
-//
-//		if (virtualMachineImages == null) {
-//			model.getCurrentNavigationState().NEXT.setEnabled(false);
-//
-//			imageLabelList.setListData(new String[] { "loading..." });
-//			imageLabelList.setEnabled(false);
-//		}
-//
-//		return rootPanel;
-//	}
 
 	private void selectRegion() {
 		fillPublishers();
@@ -219,7 +192,8 @@ public class SelectImageStep extends WizardPage {
 	private void fillPublishers() {
 		setPageComplete(false);
 		Region region = (Region) regionComboBox.getData(regionComboBox.getText());
-		
+		publisherComboBox.removeAll();
+		offerComboBox.setEnabled(false);
         DefaultLoader.getIdeHelper().runInBackground(null, "Loading image publishers...", false, true, "", new Runnable() {
 			@Override
             public void run() {
@@ -232,6 +206,9 @@ public class SelectImageStep extends WizardPage {
                         	for (VirtualMachinePublisher publisher : publishers) {
                         		publisherComboBox.add(publisher.name());
                         		publisherComboBox.setData(publisher.name(), publisher);
+                        	}
+                        	if (publishers.size() > 0) {
+                        		publisherComboBox.select(0);
                         	}
 							fillOffers();
 						}
@@ -246,20 +223,25 @@ public class SelectImageStep extends WizardPage {
 
 	private void fillOffers() {
 		setPageComplete(false);
-
-		skuComboBox.setEnabled(true);
-
+		offerComboBox.removeAll();
+		skuComboBox.setEnabled(false);
+		VirtualMachinePublisher publisher = (VirtualMachinePublisher) publisherComboBox.getData(publisherComboBox.getText());
+		
 		DefaultLoader.getIdeHelper().runInBackground(null, "Loading image offers...", false, true, "", new Runnable() {
 			@Override
             public void run() {
 				try {
-					final java.util.List<VirtualMachineOffer> offers = ((VirtualMachinePublisher) publisherComboBox.getData(publisherComboBox.getText())).offers().list();
+					final java.util.List<VirtualMachineOffer> offers = publisher.offers().list();
 					DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                         @Override
                         public void run() {
                         	for (VirtualMachineOffer offer : offers) {
                         		offerComboBox.add(offer.name());
                         		offerComboBox.setData(offer.name(), offer);
+                        	}
+                        	offerComboBox.setEnabled(true);
+                        	if (offers.size() > 0) {
+                        		offerComboBox.select(0);
                         	}
 							fillSkus();
 						}
@@ -274,19 +256,25 @@ public class SelectImageStep extends WizardPage {
 
 	private void fillSkus() {
 		setPageComplete(false);
-
+		imageLabelList.setEnabled(false);
+		skuComboBox.removeAll();
+		VirtualMachineOffer offer = (VirtualMachineOffer) offerComboBox.getData(offerComboBox.getText());
 		if (offerComboBox.getItemCount() > 0) {
 			DefaultLoader.getIdeHelper().runInBackground(null, "Loading skus...", false, true, "", new Runnable() {
 				@Override
 	            public void run() {
 					try {
-						final java.util.List<VirtualMachineSku> skus = ((VirtualMachineOffer) offerComboBox.getData(offerComboBox.getText())).skus().list();
+						final java.util.List<VirtualMachineSku> skus = offer.skus().list();
 						DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 	                        @Override
 	                        public void run() {
 	                        	for (VirtualMachineSku sku : skus) {
 	                        		skuComboBox.add(sku.name());
 	                        		skuComboBox.setData(sku.name(), sku);
+	                        	}
+	                        	skuComboBox.setEnabled(true);
+	                        	if (skus.size() > 0) {
+	                        		skuComboBox.select(0);
 	                        	}
 								fillImages();
 							}
@@ -305,21 +293,22 @@ public class SelectImageStep extends WizardPage {
 	private void fillImages() {
 		setPageComplete(false);
 		imageLabelList.removeAll();
+		VirtualMachineSku sku = (VirtualMachineSku) skuComboBox.getData(skuComboBox.getText());
 		DefaultLoader.getIdeHelper().runInBackground(null, "Loading images...", false, true, "", new Runnable() {
 			@Override
             public void run() {
 				final java.util.List<VirtualMachineImage> images = new ArrayList<VirtualMachineImage>();
 				try {
-					VirtualMachineSku sku = (VirtualMachineSku) skuComboBox.getData(skuComboBox.getText());
 					java.util.List<VirtualMachineImage> skuImages = sku.images().list();
 					images.addAll(skuImages);
 					DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                         @Override
                         public void run() {
                         	for (VirtualMachineImage image : images) {
-                        		imageLabelList.add(image.toString());
-                        		imageLabelList.setData(image.toString(), image);
+                        		imageLabelList.add(image.version());
+                        		imageLabelList.setData(image.version(), image);
                         	}
+                        	imageLabelList.setEnabled(true);
 						}
 					});
 				} catch (Exception e) {
