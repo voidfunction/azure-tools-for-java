@@ -25,6 +25,7 @@ import com.microsoft.azure.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
@@ -46,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 public class AzureArmManagerImpl extends AzureManagerBaseImpl {
     private static Map<Object, AzureArmManagerImpl> instances = new HashMap<>();
@@ -210,11 +212,11 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
                                                @NotNull VirtualMachineImage vmImage,
                                                @NotNull ArmStorageAccount storageAccount,
                                                @NotNull Network network, @NotNull String subnet,
-                                               @Nullable PublicIpAddress pip,
+                                               @Nullable PublicIpAddress pip, boolean withNewPip,
                                                @NotNull String username, @NotNull String password, @NotNull byte[] certificate)
             throws AzureCmdException {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.createVirtualMachine(virtualMachine,
-                vmImage, storageAccount, network, subnet, pip, username, password, certificate));
+                vmImage, storageAccount, network, subnet, pip, withNewPip, username, password, certificate));
     }
 
     @NotNull
@@ -224,6 +226,14 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
 
     public List<VirtualMachinePublisher> getVirtualMachinePublishers(@NotNull String subscriptionId, @NotNull Region region) throws AzureCmdException {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getVirtualMachinePublishers(region));
+    }
+
+    public List<com.microsoft.tooling.msservices.model.vm.VirtualMachineSize> getVirtualMachineSizes(@NotNull String subscriptionId, @NotNull Region region)
+            throws AzureCmdException{
+        List<VirtualMachineSize> sizes = requestAzureSDK(subscriptionId, AzureArmSDKHelper.getVirtualMachineSizes(region));
+        return sizes.stream()
+                .map(p1 -> new com.microsoft.tooling.msservices.model.vm.VirtualMachineSize(p1.name(), p1.name(), p1.numberOfCores(), p1.memoryInMB()))
+                .collect(Collectors.toList());
     }
 
     public Network createVirtualNetwork(@NotNull String subscriptionId, @NotNull String networkName, @NotNull Region region,  String addressSpace,

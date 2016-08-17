@@ -28,6 +28,7 @@ import com.microsoft.azure.management.compute.OperatingSystemTypes;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.compute.VirtualMachineSizeTypes;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
@@ -119,7 +120,7 @@ public class AzureArmSDKHelper {
     @NotNull
     public static AzureRequestCallback<VirtualMachine> createVirtualMachine(@NotNull final com.microsoft.tooling.msservices.model.vm.VirtualMachine vm, @NotNull final VirtualMachineImage vmImage,
                                                                             @NotNull final ArmStorageAccount storageAccount, @NotNull final Network network,
-                                                                            @NotNull String subnet, @Nullable PublicIpAddress pip,
+                                                                            @NotNull String subnet, @Nullable PublicIpAddress pip, boolean withNewPip,
                                                                             @NotNull final String username, @NotNull final String password, @NotNull final byte[] certificate) {
         return new AzureRequestCallback<VirtualMachine>() {
             @NotNull
@@ -132,9 +133,16 @@ public class AzureArmSDKHelper {
                         .withExistingPrimaryNetwork(network)
                         .withSubnet(subnet)
                         .withPrimaryPrivateIpAddressDynamic();
-
-                VirtualMachine.DefinitionStages.WithOS withOS = pip == null ?
-                        withPublicIpAddress.withoutPrimaryPublicIpAddress() : withPublicIpAddress.withExistingPrimaryPublicIpAddress(pip);
+                VirtualMachine.DefinitionStages.WithOS withOS;
+                if (pip == null) {
+                    if (withNewPip) {
+                        withOS = withPublicIpAddress.withNewPrimaryPublicIpAddress(vm.getName() + "pip");
+                    } else {
+                        withOS = withPublicIpAddress.withoutPrimaryPublicIpAddress();
+                    }
+                } else {
+                    withOS = withPublicIpAddress.withExistingPrimaryPublicIpAddress(pip);
+                }
                 if (isWindows) {
                     return withOS.withSpecificWindowsImageVersion(vmImage.imageReference())
                             .withAdminUserName(username)
@@ -172,6 +180,17 @@ public class AzureArmSDKHelper {
             @Override
             public List<VirtualMachinePublisher> execute(@NotNull Azure azure) throws Throwable {
                 return azure.virtualMachineImages().publishers().listByRegion(region);
+            }
+        };
+    }
+
+    @NotNull
+    public static AzureRequestCallback<List<VirtualMachineSize>> getVirtualMachineSizes(@NotNull Region region) {
+        return new AzureRequestCallback<List<VirtualMachineSize>>() {
+            @NotNull
+            @Override
+            public List<VirtualMachineSize> execute(@NotNull Azure azure) throws Throwable {
+                return azure.virtualMachines().sizes().listByRegion(region);
             }
         };
     }

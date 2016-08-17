@@ -31,7 +31,6 @@ import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.intellij.wizards.createvm.MachineSettingsStep;
 import com.microsoft.intellij.wizards.createvm.SubscriptionStep;
 import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
-import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
 
 public class CreateVMWizardModel extends VMWizardModel {
@@ -43,6 +42,7 @@ public class CreateVMWizardModel extends VMWizardModel {
 //    private String subnet;
 //    private String availabilitySet;
     private PublicIpAddress publicIpAddress;
+    private boolean withNewPip;
     private NetworkSecurityGroup networkSecurityGroup;
 
     public CreateVMWizardModel(VMArmServiceModule node) {
@@ -52,7 +52,7 @@ public class CreateVMWizardModel extends VMWizardModel {
 
         add(new SubscriptionStep(this, project));
         add(new SelectImageStep(this, project));
-        add(new MachineSettingsStep(this, project, true));
+        add(new MachineSettingsStep(this, project));
         add(new SettingsStep(this, project, node));
     }
 
@@ -111,6 +111,14 @@ public class CreateVMWizardModel extends VMWizardModel {
 
     public void setPublicIpAddress(PublicIpAddress publicIpAddress) {
         this.publicIpAddress = publicIpAddress;
+    }
+
+    public boolean isWithNewPip() {
+        return withNewPip;
+    }
+
+    public void setWithNewPip(boolean withNewPip) {
+        this.withNewPip = withNewPip;
     }
 
     public NetworkSecurityGroup getNetworkSecurityGroup() {

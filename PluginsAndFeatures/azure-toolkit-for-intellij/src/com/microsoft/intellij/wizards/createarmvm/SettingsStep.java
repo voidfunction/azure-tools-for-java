@@ -476,9 +476,11 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         public void setSelectedItem(Object o) {
                             super.setSelectedItem(o);
                             if (CREATE_NEW.equals(o)) {
+                                model.setWithNewPip(true);
 //                    showNewPipForm();
                             } else if (NONE.equals(o)) {
                                 model.setPublicIpAddress(null);
+                                model.setWithNewPip(false);
                             } else {
 //                                model.setVirtualNetwork((Network) o);
                             }
@@ -498,12 +500,14 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                 super.setSelectedItem(o);
                 if (NONE.equals(o)) {
                     model.setPublicIpAddress(null);
+                    model.setWithNewPip(false);
                 } else if (CREATE_NEW.equals(o)) {
+                    model.setWithNewPip(true);
+                    model.setPublicIpAddress(null);
 //                    showNewPipForm();
                 } else if (o instanceof PublicIpAddress) {
                     model.setPublicIpAddress((PublicIpAddress) o);
-                } else {
-                    model.setPublicIpAddress(null);
+                    model.setWithNewPip(false);
                 }
             }
         };
@@ -718,6 +722,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                                     model.getVirtualNetwork(),
                                     model.getSubnet(),
                                     model.getPublicIpAddress(),
+                                    model.isWithNewPip(),
                                     model.getUserName(),
                                     model.getPassword(),
                                     certData);
