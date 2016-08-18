@@ -33,6 +33,8 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -54,6 +56,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
+import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
@@ -64,6 +67,7 @@ import com.microsoft.azureexplorer.forms.CreateArmStorageAccountForm;
 
 public class SettingsStep extends WizardPage {
     private static final String CREATE_NEW = "<< Create new >>";
+    private static final String LOADING = "<Loading...>";
 
     private final String NONE = "(None)";
 
@@ -99,21 +103,6 @@ public class SettingsStep extends WizardPage {
     public SettingsStep(CreateVMWizard wizard) {
         super("Create new Virtual Machine", "Associated resources", null);
         this.wizard = wizard;
-
-        // model.configStepList(createVmStepsList, 3);
-
-        // final ButtonGroup resourceGroup = new ButtonGroup();
-        // resourceGroup.add(createNewRadioButton);
-        // resourceGroup.add(useExistingRadioButton);
-        // final ItemListener updateListener = new ItemListener() {
-        // public void itemStateChanged(final ItemEvent e) {
-        // final boolean isNewGroup = createNewRadioButton.isSelected();
-        // resourceGrpField.setVisible(isNewGroup);
-        // resourceGrpCombo.setVisible(!isNewGroup);
-        // }
-        // };
-        // createNewRadioButton.addItemListener(updateListener);
-        // createNewRadioButton.addItemListener(updateListener);
     }
 
     @Override
@@ -130,6 +119,17 @@ public class SettingsStep extends WizardPage {
         createSettingsPanel(container);
         //
         // imageDescription = wizard.createImageDescriptor(container);
+        resourceGrpField.addFocusListener(new FocusAdapter() {
+        	public void focusLost(FocusEvent e) {
+        		wizard.setResourceGroupName(resourceGrpField.getText());
+        	}
+		});
+        resourceGrpCombo.addSelectionListener(new SelectionAdapter() {
+        	@Override
+            public void widgetSelected(SelectionEvent event) {
+        		wizard.setResourceGroupName(resourceGrpCombo.getText());
+        	}
+		});
         storageComboBox.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -170,14 +170,13 @@ public class SettingsStep extends WizardPage {
         SelectionListener updateListener = new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent arg0) {
-                final boolean isNewGroup = createNewRadioButton.getSelection();
-                resourceGrpField.setVisible(isNewGroup);
-                resourceGrpCombo.setVisible(!isNewGroup);
+            	handleResourceGroup();
             }
         };
         createNewRadioButton.addSelectionListener(updateListener);
         useExistingRadioButton.addSelectionListener(updateListener);
-
+        createNewRadioButton.setSelection(true);
+        
         resourceGrpField = new Text(composite, SWT.LEFT | SWT.BORDER);
         gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         resourceGrpField.setLayoutData(gridData);
@@ -187,6 +186,8 @@ public class SettingsStep extends WizardPage {
         resourceGrpCombo.setLayoutData(gridData);
         resourceGroupViewer = new ComboViewer(resourceGrpCombo);
         resourceGroupViewer.setContentProvider(ArrayContentProvider.getInstance());
+        
+        handleResourceGroup();
 
         storageAccountLabel = new Label(composite, SWT.LEFT);
         storageAccountLabel.setText("Storage account:");
@@ -213,7 +214,7 @@ public class SettingsStep extends WizardPage {
         pipCombo.setLayoutData(gridData);
         
         nsgLabel = new Label(composite, SWT.LEFT);
-        nsgLabel.setText("Network security gtroup (firewall):");
+        nsgLabel.setText("Network security group (firewall):");
         nsgCombo = new Combo(composite, SWT.READ_ONLY);
         gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         nsgCombo.setLayoutData(gridData);
@@ -225,6 +226,13 @@ public class SettingsStep extends WizardPage {
         availabilityCombo.setLayoutData(gridData);
 
     }
+    
+	private void handleResourceGroup() {
+		final boolean isNewGroup = createNewRadioButton.getSelection();
+		resourceGrpField.setVisible(isNewGroup);
+		resourceGrpCombo.setVisible(!isNewGroup);
+		wizard.setNewResourceGroup(isNewGroup);
+	}
 
     @Override
     public String getTitle() {
@@ -256,9 +264,9 @@ public class SettingsStep extends WizardPage {
                             final Vector<Object> vector = new Vector<Object>();
                             vector.addAll(resourceGroups);
                             resourceGroupViewer.setInput(vector);
-                            if (resourceGroups.size() > 0) {
-                                resourceGrpCombo.select(1);
-                            }
+//                            if (resourceGroups.size() > 0) {
+//                                resourceGrpCombo.select(0);
+//                            }
                         }
                     });
                 } catch (AzureCmdException e) {
@@ -269,73 +277,73 @@ public class SettingsStep extends WizardPage {
         });
     }
 
-    private void retrieveVirtualNetworks() {
-        DefaultLoader.getIdeHelper().runInBackground(null, "Loading virtual networks...", false, true, "Loading virtual networks...", new Runnable() {
-            @Override
-            public void run() {
-                if (virtualNetworks == null) {
-                    try {
-                        virtualNetworks = AzureArmManagerImpl.getManager(null)
-                                .getVirtualNetworks(wizard.getSubscription().getId());
-                    } catch (AzureCmdException e) {
-                        virtualNetworks = null;
-                        String msg = "An error occurred while attempting to retrieve the virtual networks list." + "\n" + e.getMessage();
-                        PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
-                    }
-                }
-                DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        networkComboBox.removeAll();
-                        networkComboBox.add(CREATE_NEW);
-                        for (Network network : filterVN()) {
-                            networkComboBox.add(network.name());
-                            networkComboBox.setData(network.name(), network);
-                        }
-                        networkComboBox.addSelectionListener(new SelectionAdapter() {
-                            @Override
-                            public void widgetSelected(SelectionEvent e) {
-                                if (CREATE_NEW.equals(networkComboBox.getText())) {
-//				                        showNewVirtualNetworkForm();
-                                } else if ((Network) networkComboBox.getData(networkComboBox.getText()) != null) {
-                                    Network network = (Network) networkComboBox.getData(networkComboBox.getText());
-                                    wizard.setVirtualNetwork(network);
+	private void retrieveVirtualNetworks() {
+		DefaultLoader.getIdeHelper().runInBackground(null, "Loading virtual networks...", false, true,
+				"Loading virtual networks...", new Runnable() {
+					@Override
+					public void run() {
+						if (virtualNetworks == null) {
+							try {
+								virtualNetworks = AzureArmManagerImpl.getManager(null).getVirtualNetworks(wizard.getSubscription().getId());
+							} catch (AzureCmdException e) {
+								virtualNetworks = null;
+								String msg = "An error occurred while attempting to retrieve the virtual networks list." + "\n" + e.getMessage();
+								PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
+							}
+						}
+						DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								networkComboBox.removeAll();
+								networkComboBox.add(CREATE_NEW);
+								for (Network network : filterVN()) {
+									networkComboBox.add(network.name());
+									networkComboBox.setData(network.name(), network);
+								}
+								networkComboBox.addSelectionListener(new SelectionAdapter() {
+									@Override
+									public void widgetSelected(SelectionEvent e) {
+										if (CREATE_NEW.equals(networkComboBox.getText())) {
+											// showNewVirtualNetworkForm();
+										} else if ((Network) networkComboBox.getData(networkComboBox.getText()) != null) {
+											Network network = (Network) networkComboBox.getData(networkComboBox.getText());
+											wizard.setVirtualNetwork(network);
+											subnetComboBox.removeAll();
 
-
-                                    subnetComboBox.removeAll();
-
-                                    for (String subnet : network.subnets().keySet()) {
-                                        subnetComboBox.add(subnet);
-                                    }
-
-                                }
-
-
-                            }
-                        });
-                        if (virtualNetworks == null) {
-                            DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
-                                @Override
-                                public void run() {
-                                    networkComboBox.setItems(new String[]{CREATE_NEW, "<Loading...>"});
-                                    subnetComboBox.removeAll();
-                                    subnetComboBox.setEnabled(false);
-                                }
-                            });
-                            networkComboBox.addSelectionListener(new SelectionAdapter() {
-                                @Override
-                                public void widgetSelected(SelectionEvent e) {
-                                    if (CREATE_NEW.equals(networkComboBox.getText())) {
-//                        showNewVirtualNetworkForm();
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
-            }
-        });
-    }
+											for (String subnet : network.subnets().keySet()) {
+												subnetComboBox.add(subnet);
+											}
+											subnetComboBox.setEnabled(true);
+											if (network.subnets().size() > 0) {
+												subnetComboBox.select(0);
+												wizard.setSubnet(subnetComboBox.getText());
+											}
+										}
+									}
+								});
+							}
+						});
+					}
+				});
+		if (virtualNetworks == null) {
+			DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
+				@Override
+				public void run() {
+					networkComboBox.setItems(new String[] { CREATE_NEW, LOADING });
+					subnetComboBox.removeAll();
+					subnetComboBox.setEnabled(false);
+				}
+			});
+			networkComboBox.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (CREATE_NEW.equals(networkComboBox.getText())) {
+						// showNewVirtualNetworkForm();
+					}
+				}
+			});
+		}
+	}
 
     private List<Network> filterVN() {
         List<Network> filteredNetworks = new ArrayList<>();
@@ -349,102 +357,71 @@ public class SettingsStep extends WizardPage {
     }
 
     private void retrieveStorageAccounts() {
-//    ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading storage accounts...", false) {
-//        @Override
-//        public void run(@NotNull ProgressIndicator progressIndicator) {
-//            progressIndicator.setIndeterminate(true);
-//            if (storageAccounts == null) {
-//                try {
-//                    java.util.List<ArmStorageAccount> accounts = AzureArmManagerImpl.getManager(project).getStorageAccounts(model.getSubscription().getId());
-//                    storageAccounts = new TreeMap<String, ArmStorageAccount>();
-//
-//                    for (ArmStorageAccount storageAccount : accounts) {
-//                        storageAccounts.put(storageAccount.getName(), storageAccount);
-//                    }
-//                } catch (AzureCmdException e) {
-//                    storageAccounts = null;
-//                    String msg = "An error occurred while attempting to retrieve the storage accounts list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-//                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
-//                }
-//            }
-//            refreshStorageAccounts(null);
-//        }
-//    });
-//
-//    if (storageAccounts == null) {
-//        final DefaultComboBoxModel loadingSAModel = new DefaultComboBoxModel(new String[]{CREATE_NEW, "<Loading...>"}) {
-//            @Override
-//            public void setSelectedItem(Object o) {
-//                if (CREATE_NEW.equals(o)) {
-//                    showNewStorageForm();
-//                } else {
-//                    super.setSelectedItem(o);
-//                }
-//            }
-//        };
-//
-//        loadingSAModel.setSelectedItem(null);
-//
-//        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
-//            @Override
-//            public void run() {
-//                storageComboBox.setModel(loadingSAModel);
-//            }
-//        }, ModalityState.any());
-//    }
+		DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+				if (storageAccounts == null) {
+					try {
+						java.util.List<ArmStorageAccount> accounts = AzureArmManagerImpl.getManager(null).getStorageAccounts(wizard.getSubscription().getId());
+						storageAccounts = new TreeMap<String, ArmStorageAccount>();
+
+						for (ArmStorageAccount storageAccount : accounts) {
+							storageAccounts.put(storageAccount.getName(), storageAccount);
+						}
+					} catch (AzureCmdException e) {
+						storageAccounts = null;
+						String msg = "An error occurred while attempting to retrieve the storage accounts list." + "\n" + e.getMessage();
+						PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
+					}
+				}
+				fillStorage();
+			}
+		});
+		if (storageAccounts == null) {
+            DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    storageComboBox.setItems(new String[]{CREATE_NEW, LOADING});
+                }
+            });
+            storageComboBox.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    if (CREATE_NEW.equals(storageComboBox.getText())) {
+                        showNewStorageForm();
+                    }
+                }
+            });
+        }
     }
+
 
     private void fillStorage() {
-//    ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
-//        @Override
-//        public void run() {
-//            ArmStorageAccount selectedSA = model.getStorageAccount();
-//            if (selectedSA != null && !storageAccounts.containsKey(selectedSA.getName())) {
-//                storageAccounts.put(selectedSA.getName(), selectedSA);
-//            }
-//            refreshStorageAccounts(selectedSA);
-//        }
-//    });
-    }
+    	DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				storageComboBox.removeAll();
+				storageComboBox.add(CREATE_NEW);
+				for (ArmStorageAccount storageAccount : filterSA()) {
+					storageComboBox.add(storageAccount.getName());
+					storageComboBox.setData(storageAccount.getName(), storageAccount);
+				}
+				storageComboBox.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						if (CREATE_NEW.equals(storageComboBox.getText())) {
+							 showNewStorageForm();
+						} else if (storageComboBox.getData(storageComboBox.getText()) != null) {
+							ArmStorageAccount storageAccount = (ArmStorageAccount) storageComboBox.getData(storageComboBox.getText());
+							wizard.setStorageAccount(storageAccount);
+						}
 
-    private void refreshStorageAccounts(final ArmStorageAccount selectedSA) {
-//    final DefaultComboBoxModel refreshedSAModel = getStorageAccountModel(selectedSA);
-//
-//    ApplicationManager.getApplication().invokeAndWait(new Runnable() {
-//        @Override
-//        public void run() {
-//            storageComboBox.setModel(refreshedSAModel);
-//            model.getCurrentNavigationState().NEXT.setEnabled(selectedSA != null);
-//        }
-//    }, ModalityState.any());
+					}
+				});
+			}
+		});
     }
-
-//    private DefaultComboBoxModel getStorageAccountModel(ArmStorageAccount selectedSA) {
-//    Vector<ArmStorageAccount> accounts = filterSA();
-//
-//    final DefaultComboBoxModel refreshedSAModel = new DefaultComboBoxModel(accounts) {
-//        @Override
-//        public void setSelectedItem(Object o) {
-//            if (CREATE_NEW.equals(o)) {
-//                showNewStorageForm();
-//            } else {
-//                super.setSelectedItem(o);
-//                model.setStorageAccount((ArmStorageAccount) o);
-//            }
-//        }
-//    };
-//
-//    refreshedSAModel.insertElementAt(CREATE_NEW, 0);
-//
-//    if (accounts.contains(selectedSA)) {
-//        refreshedSAModel.setSelectedItem(selectedSA);
-//    } else {
-//        refreshedSAModel.setSelectedItem(null);
-//        model.setStorageAccount(null);
-//    }
-//
-//    return refreshedSAModel;
-//    }
 
     private Vector<ArmStorageAccount> filterSA() {
         Vector<ArmStorageAccount> filteredStorageAccounts = new Vector<>();
@@ -459,80 +436,70 @@ public class SettingsStep extends WizardPage {
     }
 
     private void retrievePublicIpAddresses() {
-//    ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading public ip addresses...", false) {
-//        @Override
-//        public void run(@NotNull ProgressIndicator progressIndicator) {
-//            progressIndicator.setIndeterminate(true);
-//            if (publicIpAddresses == null) {
-//                try {
-//                    publicIpAddresses = AzureArmManagerImpl.getManager(project).getPublicIpAddresses(model.getSubscription().getId());
-//                } catch (AzureCmdException e) {
-//                    publicIpAddresses = null;
-//                    String msg = "An error occurred while attempting to retrieve public ip addresses list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-//                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
-//                }
-//            }
-//            ApplicationManager.getApplication().invokeLater(new Runnable() {
-//                @Override
-//                public void run() {
-//                    pipCombo.setModel(getPipAddressModel(model.getPublicIpAddress()));
-//                }
-//            });
-//        }
-//    });
-//
-//    if (publicIpAddresses == null) {
-//        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
-//            @Override
-//            public void run() {
-//                final DefaultComboBoxModel loadingPipModel = new DefaultComboBoxModel(new String[]{NONE, CREATE_NEW, "<Loading...>"}) {
-//                    @Override
-//                    public void setSelectedItem(Object o) {
-//                        super.setSelectedItem(o);
-//                        if (CREATE_NEW.equals(o)) {
-////                showNewPipForm();
-//                        } else if (NONE.equals(o)) {
-//                            model.setPublicIpAddress(null);
-//                        } else {
-////                            model.setVirtualNetwork((Network) o);
-//                        }
-//                    }
-//                };
-//                loadingPipModel.setSelectedItem(null);
-//                pipCombo.setModel(loadingPipModel);
-//            }
-//        }, ModalityState.any());
-//    }
+    	DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+			@Override
+			public void run() {
+                if (publicIpAddresses == null) {
+                    try {
+                        publicIpAddresses = AzureArmManagerImpl.getManager(null).getPublicIpAddresses(wizard.getSubscription().getId());
+                    } catch (AzureCmdException e) {
+                        publicIpAddresses = null;
+                        String msg = "An error occurred while attempting to retrieve public ip addresses list." + "\n" + e.getMessage();
+                        PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
+                    }
+                }
+                DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						pipCombo.removeAll();
+						pipCombo.add(NONE);
+						pipCombo.add(CREATE_NEW);
+						for (PublicIpAddress pip : filterPip()) {
+							pipCombo.add(pip.name());
+							pipCombo.setData(pip.name(), pip);
+						}
+						pipCombo.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								if (NONE.equals(pipCombo.getText())) {
+				                    wizard.setPublicIpAddress(null);
+				                    wizard.setWithNewPip(false);
+				                } else if (CREATE_NEW.equals(pipCombo.getText())) {
+				                    wizard.setWithNewPip(true);
+				                    wizard.setPublicIpAddress(null);
+//				                    showNewPipForm();
+				                } else if (pipCombo.getData(pipCombo.getText()) instanceof PublicIpAddress) {
+				                    wizard.setPublicIpAddress((PublicIpAddress) pipCombo.getData(pipCombo.getText()));
+				                    wizard.setWithNewPip(false);
+				                }
+							}
+						});
+					}
+				});
+            }
+        });
+    	
+        if (publicIpAddresses == null) {
+        	DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    pipCombo.setItems(new String[]{NONE, CREATE_NEW, LOADING});
+                }
+            });
+        	pipCombo.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    if (CREATE_NEW.equals(pipCombo.getText())) {
+                    	wizard.setWithNewPip(true);
+                    	wizard.setPublicIpAddress(null);
+                    } else if (NONE.equals(pipCombo.getText())) {
+                        wizard.setPublicIpAddress(null);
+                        wizard.setWithNewPip(false);
+                    }
+                }
+            });
+        }
     }
-
-//    private DefaultComboBoxModel getPipAddressModel(PublicIpAddress selectedPip) {
-//    DefaultComboBoxModel refreshedPipModel = new DefaultComboBoxModel(filterPip().toArray()) {
-//        @Override
-//        public void setSelectedItem(final Object o) {
-//            super.setSelectedItem(o);
-//            if (NONE.equals(o)) {
-//                model.setPublicIpAddress(null);
-//            } else if (CREATE_NEW.equals(o)) {
-////                showNewPipForm();
-//            } else if (o instanceof PublicIpAddress) {
-//                model.setPublicIpAddress((PublicIpAddress) o);
-//            } else {
-//                model.setPublicIpAddress(null);
-//            }
-//        }
-//    };
-//    refreshedPipModel.insertElementAt(NONE, 0);
-//    refreshedPipModel.insertElementAt(CREATE_NEW, 1);
-//
-//    if (selectedPip != null && publicIpAddresses.contains(selectedPip)) {
-//        refreshedPipModel.setSelectedItem(selectedPip);
-//    } else {
-//        model.setPublicIpAddress(null);
-//        refreshedPipModel.setSelectedItem(NONE);
-//    }
-//
-//    return refreshedPipModel;
-//    }
 
     private Vector<PublicIpAddress> filterPip() {
         Vector<PublicIpAddress> filteredPips = new Vector<>();
@@ -646,6 +613,7 @@ public class SettingsStep extends WizardPage {
 				ArmStorageAccount newStorageAccount = form.getStorageAccount();
 				if (newStorageAccount != null) {
 					wizard.setStorageAccount(newStorageAccount);
+					storageAccounts.put(newStorageAccount.getName(), newStorageAccount);
 					fillStorage();
 				}
 			}

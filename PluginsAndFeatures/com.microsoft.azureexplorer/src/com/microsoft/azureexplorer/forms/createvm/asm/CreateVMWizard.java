@@ -26,6 +26,8 @@ import com.microsoft.azureexplorer.forms.createvm.VMWizard;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
+import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
@@ -72,6 +74,8 @@ public class CreateVMWizard extends VMWizard {
     private CloudService cloudService;
     private boolean filterByCloudService;
     private VirtualNetwork virtualNetwork;
+	private VirtualMachineImage virtualMachineImage;
+	private StorageAccount storageAccount;
     private java.util.List<Endpoint> endpoints;
 
     private EndpointStep endpointStep;
@@ -205,7 +209,15 @@ public class CreateVMWizard extends VMWizard {
         return html;
     }
 
-    public CloudService getCloudService() {
+    public VirtualMachineImage getVirtualMachineImage() {
+		return virtualMachineImage;
+	}
+
+	public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
+		this.virtualMachineImage = virtualMachineImage;
+	}
+
+	public CloudService getCloudService() {
         return cloudService;
     }
 
@@ -221,7 +233,15 @@ public class CreateVMWizard extends VMWizard {
         this.filterByCloudService = filterByCloudService;
     }
 
-    public VirtualNetwork getVirtualNetwork() {
+    public StorageAccount getStorageAccount() {
+		return storageAccount;
+	}
+
+	public void setStorageAccount(StorageAccount storageAccount) {
+		this.storageAccount = storageAccount;
+	}
+
+	public VirtualNetwork getVirtualNetwork() {
         return virtualNetwork;
     }
 

@@ -321,7 +321,7 @@ public class SelectImageStep extends WizardPage {
 	
     private void imageLabelSelected() {
         VirtualMachineImage virtualMachineImage = (VirtualMachineImage) imageLabelList.getData(imageLabelList.getItem(imageLabelList.getSelectionIndex()));
-//        wizard.setVirtualMachineImage(virtualMachineImage);
+        wizard.setVirtualMachineImage(virtualMachineImage);
 
         if (virtualMachineImage != null) {
 //            imageDescription.setText(wizard.getHtmlFromVMImage(virtualMachineImage));

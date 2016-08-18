@@ -19,18 +19,22 @@
  */
 package com.microsoft.azureexplorer.forms.createvm.arm;
 
+import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.network.Network;
+import com.microsoft.azure.management.network.NetworkSecurityGroup;
+import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azureexplorer.forms.createvm.MachineSettingsStep;
 import com.microsoft.azureexplorer.forms.createvm.SubscriptionStep;
 import com.microsoft.azureexplorer.forms.createvm.VMWizard;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.vm.*;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMNode;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
+import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
+import com.microsoft.tooling.msservices.model.vm.Endpoint;
+import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
@@ -48,6 +52,11 @@ public class CreateVMWizard extends VMWizard {
     private java.util.List<Endpoint> endpoints;
     private String resourceGroupName;
     private boolean isNewResourceGroup;
+	private VirtualMachineImage virtualMachineImage;
+	private ArmStorageAccount storageAccount;
+    private PublicIpAddress publicIpAddress;
+    private boolean withNewPip;
+    private NetworkSecurityGroup networkSecurityGroup;
 
     public CreateVMWizard(VMArmServiceModule node) {
         this.node = node;
@@ -106,21 +115,26 @@ public class CreateVMWizard extends VMWizard {
                             }
                         }
                     }
+                    
+                    final com.microsoft.azure.management.compute.VirtualMachine vm = AzureArmManagerImpl.getManager(null)
+                            .createVirtualMachine(subscription.getId(),
+                                    virtualMachine,
+                                    virtualMachineImage,
+                                    storageAccount,
+                                    virtualNetwork,
+                                    subnet,
+                                    publicIpAddress,
+                                    withNewPip,
+                                    userName,
+                                    password,
+                                    certData);
 
-                    AzureManagerImpl.getManager().createVirtualMachine(virtualMachine,
-                            virtualMachineImage,
-                            storageAccount,
-                            virtualNetwork != null ? virtualNetwork.name() : "",
-                            userName,
-                            password,
-                            certData);
 //                    virtualMachine = AzureManagerImpl.getManager().refreshVirtualMachineInformation(virtualMachine);
-                    final VirtualMachine vm = virtualMachine;
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                node.addChildNode(new VMNode(node, vm));
+                                node.addChildNode(new VMNode(node, subscription.getId(), vm));
                             } catch (AzureCmdException e) {
                             	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
                             			"An error occurred while refreshing the list of virtual machines.", e);
@@ -192,5 +206,45 @@ public class CreateVMWizard extends VMWizard {
 
 	public void setNewResourceGroup(boolean isNewResourceGroup) {
 		this.isNewResourceGroup = isNewResourceGroup;
+	}
+	
+	public VirtualMachineImage getVirtualMachineImage() {
+	    return virtualMachineImage;
+	}
+
+	public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
+	    this.virtualMachineImage = virtualMachineImage;
+	}
+
+	public ArmStorageAccount getStorageAccount() {
+		return storageAccount;
+	}
+
+	public void setStorageAccount(ArmStorageAccount storageAccount) {
+		this.storageAccount = storageAccount;
+	}
+
+	public PublicIpAddress getPublicIpAddress() {
+		return publicIpAddress;
+	}
+
+	public void setPublicIpAddress(PublicIpAddress publicIpAddress) {
+		this.publicIpAddress = publicIpAddress;
+	}
+
+	public boolean isWithNewPip() {
+		return withNewPip;
+	}
+
+	public void setWithNewPip(boolean withNewPip) {
+		this.withNewPip = withNewPip;
+	}
+
+	public NetworkSecurityGroup getNetworkSecurityGroup() {
+		return networkSecurityGroup;
+	}
+
+	public void setNetworkSecurityGroup(NetworkSecurityGroup networkSecurityGroup) {
+		this.networkSecurityGroup = networkSecurityGroup;
 	}
 }

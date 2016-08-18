@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.List;
 
 import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineSize;
@@ -21,10 +22,8 @@ public abstract class VMWizard extends Wizard {
 	protected String userName;
 	protected String password;
 	protected String certificate;
-	protected StorageAccount storageAccount;
 	protected String subnet;
 	protected String availabilitySet;
-	protected VirtualMachineImage virtualMachineImage;
 	protected VirtualMachineSize size;
 
 	public Subscription getSubscription() {
@@ -65,14 +64,6 @@ public abstract class VMWizard extends Wizard {
 
 	public void setCertificate(String certificate) {
 	    this.certificate = certificate;
-	}
-
-	public StorageAccount getStorageAccount() {
-	    return storageAccount;
-	}
-
-	public void setStorageAccount(StorageAccount storageAccount) {
-	    this.storageAccount = storageAccount;
 	}
 
 	public String getSubnet() {
@@ -145,14 +136,6 @@ public abstract class VMWizard extends Wizard {
 	}
 
 	public abstract String[] getStepTitleList();
-
-	public VirtualMachineImage getVirtualMachineImage() {
-	    return virtualMachineImage;
-	}
-
-	public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
-	    this.virtualMachineImage = virtualMachineImage;
-	}
 
 	public VirtualMachineSize getSize() {
 	    return size;
