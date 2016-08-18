@@ -22,6 +22,7 @@
 package com.microsoft.tooling.msservices.helpers.azure;
 
 import com.microsoft.azure.Azure;
+import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
@@ -270,5 +271,10 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
     @NotNull
     public List<NetworkSecurityGroup> getNetworkSecurityGroups(@NotNull String subscriptionId) throws AzureCmdException {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getNetworkSecurityGroups());
+    }
+
+    @NotNull
+    public List<AvailabilitySet> getAvailabilitySets(@NotNull String subscriptionId) throws AzureCmdException {
+        return requestAzureSDK(subscriptionId, AzureArmSDKHelper.getAvailabilitySets());
     }
 }

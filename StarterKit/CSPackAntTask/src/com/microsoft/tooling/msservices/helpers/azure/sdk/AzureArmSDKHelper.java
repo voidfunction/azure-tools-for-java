@@ -23,6 +23,7 @@ package com.microsoft.tooling.msservices.helpers.azure.sdk;
 
 import com.google.common.base.Strings;
 import com.microsoft.azure.Azure;
+import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.KnownWindowsVirtualMachineImage;
 import com.microsoft.azure.management.compute.OperatingSystemTypes;
 import com.microsoft.azure.management.compute.VirtualMachine;
@@ -328,6 +329,17 @@ public class AzureArmSDKHelper {
             @Override
             public List<NetworkSecurityGroup> execute(@NotNull Azure azure) throws Throwable {
                 return azure.networkSecurityGroups().list();
+            }
+        };
+    }
+
+    @NotNull
+    public static AzureRequestCallback<List<AvailabilitySet>> getAvailabilitySets() {
+        return new AzureRequestCallback<List<AvailabilitySet>>() {
+            @NotNull
+            @Override
+            public List<AvailabilitySet> execute(@NotNull Azure azure) throws Throwable {
+                return azure.availabilitySets().list();
             }
         };
     }

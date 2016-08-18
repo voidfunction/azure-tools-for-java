@@ -30,6 +30,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
+import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
@@ -83,6 +84,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
     private Map<String, ArmStorageAccount> storageAccounts;
     private List<PublicIpAddress> publicIpAddresses;
     private List<NetworkSecurityGroup> networkSecurityGroups;
+    private List<AvailabilitySet> availabilitySets;
 
     public SettingsStep(final CreateVMWizardModel model, Project project, Node parent) {
         super("Settings", null, null);
@@ -180,6 +182,8 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         retrieveStorageAccounts();
         retrieveVirtualNetworks();
         retrievePublicIpAddresses();
+        retrieveNetworkSecurityGroups();
+        retrieveAvailabilitySets();
 
         return rootPanel;
     }
@@ -196,6 +200,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         virtualNetworks = null;
                         String msg = "An error occurred while attempting to retrieve the virtual networks list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                         PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                        return;
                     }
                 }
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -231,30 +236,6 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                                   }, ModalityState.any());
         }
     }
-
-//    private void fillVirtualNetworks(final boolean cascade) {
-//        ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                VirtualNetwork selectedVN = model.getVirtualNetwork();
-//                String selectedSN = model.getSubnet();
-//
-//                vnLock.lock();
-//
-//                try {
-//                    while (virtualNetworks == null) {
-//                        vnInitialized.await();
-//                    }
-//                } catch (InterruptedException e) {
-//                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting load the virtual networks list.", e);
-//                } finally {
-//                    vnLock.unlock();
-//                }
-//
-//                refreshVirtualNetworks(selectedVN, selectedSN, cascade);
-//            }
-//        });
-//    }
 
     private DefaultComboBoxModel getVirtualNetworkModel(Network selectedVN, final String selectedSN) {
         DefaultComboBoxModel refreshedVNModel = new DefaultComboBoxModel(filterVN().toArray()) {
@@ -456,6 +437,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         publicIpAddresses = null;
                         String msg = "An error occurred while attempting to retrieve public ip addresses list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                         PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                        return;
                     }
                 }
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -548,6 +530,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         networkSecurityGroups = null;
                         String msg = "An error occurred while attempting to retrieve network security groups list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                         PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                        return;
                     }
                 }
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -618,18 +601,89 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         return filteredNsgs;
     }
 
-    private void fillAvailabilitySets() {
-        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+    private void retrieveAvailabilitySets() {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading availability sets...", false) {
             @Override
-            public void run() {
-                availabilityComboBox.setModel(new DefaultComboBoxModel(new String[]{}));
+            public void run(@NotNull ProgressIndicator progressIndicator) {
+                progressIndicator.setIndeterminate(true);
+                if (availabilitySets == null) {
+                    try {
+                        availabilitySets = AzureArmManagerImpl.getManager(project).getAvailabilitySets(model.getSubscription().getId());
+                    } catch (AzureCmdException e) {
+                        availabilitySets = null;
+                        String msg = "An error occurred while attempting to retrieve availability sets list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                        PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                        return;
+                    }
+                }
+                ApplicationManager.getApplication().invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        availabilityComboBox.setModel(getAvailabilitySetsModel(model.getAvailabilitySet()));
+                    }
+                });
             }
-        }, ModalityState.any());
+        });
+
+        if (availabilitySets == null) {
+            ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    final DefaultComboBoxModel loadingPipModel = new DefaultComboBoxModel(new String[]{NONE, CREATE_NEW, "<Loading...>"}) {
+                        @Override
+                        public void setSelectedItem(Object o) {
+                            super.setSelectedItem(o);
+                            if (CREATE_NEW.equals(o)) {
+                                model.setWithNewAvailabilitySet(true);
+                                model.setAvailabilitySet(null);
+                            } else if (NONE.equals(o)) {
+                                model.setAvailabilitySet(null);
+                                model.setWithNewAvailabilitySet(false);
+                            } else {
+//                                model.setVirtualNetwork((Network) o);
+                            }
+                        }
+                    };
+                    loadingPipModel.setSelectedItem(null);
+                    pipCombo.setModel(loadingPipModel);
+                }
+            }, ModalityState.any());
+        }
+    }
+
+    private DefaultComboBoxModel getAvailabilitySetsModel(String selectedAvailabilitySet) {
+        DefaultComboBoxModel refreshedAvailabilitySetModel = new DefaultComboBoxModel(availabilitySets.toArray()) {
+            @Override
+            public void setSelectedItem(final Object o) {
+                super.setSelectedItem(o);
+                if (NONE.equals(o)) {
+                    model.setAvailabilitySet(null);
+                    model.setWithNewAvailabilitySet(false);
+                } else if (CREATE_NEW.equals(o)) {
+                    model.setWithNewAvailabilitySet(true);
+                    model.setAvailabilitySet(null);
+                } else if (o instanceof AvailabilitySet) {
+                    model.setAvailabilitySet(((AvailabilitySet) o).name());
+                    model.setWithNewAvailabilitySet(false);
+                }
+            }
+        };
+        refreshedAvailabilitySetModel.insertElementAt(NONE, 0);
+        refreshedAvailabilitySetModel.insertElementAt(CREATE_NEW, 1);
+
+        if (selectedAvailabilitySet != null && availabilitySets.contains(selectedAvailabilitySet)) {
+            refreshedAvailabilitySetModel.setSelectedItem(selectedAvailabilitySet);
+        } else {
+            model.setPublicIpAddress(null);
+            refreshedAvailabilitySetModel.setSelectedItem(NONE);
+        }
+
+        return refreshedAvailabilitySetModel;
     }
 
     private void showNewStorageForm() {
         final CreateArmStorageAccountForm form = new CreateArmStorageAccountForm(project);
-        form.fillFields(model.getSubscription());
+        form.fillFields(model.getSubscription(), model.getRegion());
 
         form.setOnCreate(new Runnable() {
             @Override

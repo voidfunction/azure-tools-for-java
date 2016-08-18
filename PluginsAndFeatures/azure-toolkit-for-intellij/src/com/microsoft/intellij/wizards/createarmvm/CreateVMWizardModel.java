@@ -36,14 +36,13 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmService
 public class CreateVMWizardModel extends VMWizardModel {
     private Region region;
     private VirtualMachineImage virtualMachineImage;
-//    private VirtualMachineSize size;
     private Network virtualNetwork;
     private ArmStorageAccount storageAccount;
-//    private String subnet;
 //    private String availabilitySet;
     private PublicIpAddress publicIpAddress;
     private boolean withNewPip;
     private NetworkSecurityGroup networkSecurityGroup;
+    private boolean withNewAvailabilitySet;
 
     public CreateVMWizardModel(VMArmServiceModule node) {
         super();
@@ -127,6 +126,14 @@ public class CreateVMWizardModel extends VMWizardModel {
 
     public void setNetworkSecurityGroup(NetworkSecurityGroup networkSecurityGroup) {
         this.networkSecurityGroup = networkSecurityGroup;
+    }
+
+    public boolean isWithNewAvailabilitySet() {
+        return withNewAvailabilitySet;
+    }
+
+    public void setWithNewAvailabilitySet(boolean withNewAvailabilitySet) {
+        this.withNewAvailabilitySet = withNewAvailabilitySet;
     }
 
     //    public String getAvailabilitySet() {

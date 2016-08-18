@@ -64,7 +64,7 @@ public class CreateStorageAccountAction extends NodeActionListener {
             return;
         }
         CreateArmStorageAccountForm createStorageAccountForm = new CreateArmStorageAccountForm((Project) storageModule.getProject());
-        createStorageAccountForm.fillFields(null);
+        createStorageAccountForm.fillFields(null, null);
 
         createStorageAccountForm.setOnCreate(new Runnable() {
             @Override

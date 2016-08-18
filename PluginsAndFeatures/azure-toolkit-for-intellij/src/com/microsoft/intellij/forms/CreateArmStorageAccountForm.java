@@ -29,6 +29,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.ListCellRendererWrapper;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.intellij.helpers.LinkListener;
 import com.microsoft.intellij.util.PluginUtil;
@@ -238,9 +239,10 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     }
 
 
-    public void fillFields(final Subscription subscription) {
+    public void fillFields(final Subscription subscription, Region region) {
         final CreateArmStorageAccountForm createStorageAccountForm = this;
         if (subscription == null) {
+            loadRegions();
             try {
                 subscriptionComboBox.setEnabled(true);
 
@@ -250,14 +252,14 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                     @Override
                     public void itemStateChanged(ItemEvent itemEvent) {
                         createStorageAccountForm.subscription = (Subscription) itemEvent.getItem();
-                        loadRegions();
+//                        loadRegions();
                         loadGroups();
                     }
                 });
 
                 if (fullSubscriptionList.size() > 0) {
                     createStorageAccountForm.subscription = fullSubscriptionList.get(0);
-                    loadRegions();
+//                    loadRegions();
                     loadGroups();
                 }
             } catch (AzureCmdException e) {
@@ -267,8 +269,9 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         } else {
             this.subscription = subscription;
             subscriptionComboBox.addItem(subscription.getName());
-
-            loadRegions();
+            regionComboBox.addItem(region);
+            regionComboBox.setEnabled(false);
+            loadGroups();
         }
     }
 
@@ -281,46 +284,47 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     }
 
     public void loadRegions() {
-        isLoading = true;
-
-        regionComboBox.addItem("<Loading...>");
-
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading regions...", false) {
-            @Override
-            public void run(@NotNull ProgressIndicator progressIndicator) {
-                progressIndicator.setIndeterminate(true);
-
-                try {
-                    java.util.List<Location> locations = AzureManagerImpl.getManager(project).getLocations(subscription.getId().toString());
-
-                    final Vector<Object> vector = new Vector<Object>();
-                    vector.add("Regions");
-                    vector.addAll(locations);
-                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            isLoading = false;
-
-                            validateEmptyFields();
-
-                            regionComboBox.removeAllItems();
-                            regionComboBox.setModel(new DefaultComboBoxModel(vector) {
-                                public void setSelectedItem(Object o) {
-                                    if (!(o instanceof String)) {
-                                        super.setSelectedItem(o);
-                                    }
-                                }
-                            });
-
-                            regionComboBox.setSelectedIndex(1);
-                        }
-                    });
-                } catch (AzureCmdException e) {
-                    String msg = "An error occurred while attempting to load the regions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
-                }
-            }
-        });
+        // todo: load regions from subscription
+        regionComboBox.setModel(new DefaultComboBoxModel(Region.values()));
+//        isLoading = true;
+//
+//        regionComboBox.addItem("<Loading...>");
+//
+//        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading regions...", false) {
+//            @Override
+//            public void run(@NotNull ProgressIndicator progressIndicator) {
+//                progressIndicator.setIndeterminate(true);
+//
+//                try {
+//                    java.util.List<Location> locations = AzureArmManagerImpl.getManager(project).getLocations(subscription.getId().toString());
+//
+//                    final Vector<Object> vector = new Vector<Object>();
+//                    vector.addAll(locations);
+//                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            isLoading = false;
+//
+//                            validateEmptyFields();
+//
+//                            regionComboBox.removeAllItems();
+//                            regionComboBox.setModel(new DefaultComboBoxModel(vector) {
+//                                public void setSelectedItem(Object o) {
+//                                    if (!(o instanceof String)) {
+//                                        super.setSelectedItem(o);
+//                                    }
+//                                }
+//                            });
+//
+//                            regionComboBox.setSelectedIndex(1);
+//                        }
+//                    });
+//                } catch (AzureCmdException e) {
+//                    String msg = "An error occurred while attempting to load the regions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+//                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+//                }
+//            }
+//        });
     }
 
     public void loadGroups() {
@@ -360,7 +364,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                     });
                 } catch (AzureCmdException e) {
                     String msg = "An error occurred while attempting to load resource groups list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
+                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
                 }
             }
         });
