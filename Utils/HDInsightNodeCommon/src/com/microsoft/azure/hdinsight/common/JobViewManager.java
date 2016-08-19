@@ -21,28 +21,23 @@
  */
 package com.microsoft.azure.hdinsight.common;
 
-import com.microsoft.azure.hdinsight.jobs.framework.JobViewPanel;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
-import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class JobViewManager {
-    private static Map<String, Pair<IClusterDetail, JobViewPanel>> jobViewPanelMap = new HashMap<String, Pair<IClusterDetail, JobViewPanel>>();
+    private static Map<String, IClusterDetail> jobViewPanelMap = new HashMap<String, IClusterDetail>();
 
     public synchronized static void registerJovViewNode(@NotNull String uuid, @NotNull IClusterDetail clusterDetail) {
-        jobViewPanelMap.put(uuid, new Pair<IClusterDetail, JobViewPanel>(clusterDetail,null));
+        jobViewPanelMap.put(uuid, clusterDetail);
     }
 
     @Nullable
     public static IClusterDetail getCluster(@NotNull String uuid) {
-        if(!jobViewPanelMap.containsKey(uuid)) {
-            return null;
-        }
-        return jobViewPanelMap.get(uuid).getKey();
+        return jobViewPanelMap.get(uuid);
     }
 
     public synchronized static void unRegisterJobView(@NotNull String uuid) {

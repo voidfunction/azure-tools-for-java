@@ -38,6 +38,7 @@ public final class Messages extends NLS {
 	public static String lnkOpenErrMsg;
 	public static String hdinsgihtPrefTil;
 	public static String hdinsightPerenceQueMsg;
+	public static String hdinsightJavaFxTipsMsg;
 	public static String encFileName;
 	public static String encFileEntry;
 	public static String version;
