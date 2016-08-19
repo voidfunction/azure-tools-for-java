@@ -198,7 +198,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         virtualNetworks = AzureArmManagerImpl.getManager(project).getVirtualNetworks(model.getSubscription().getId());
                     } catch (AzureCmdException e) {
                         virtualNetworks = null;
-                        String msg = "An error occurred while attempting to retrieve the virtual networks list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+                        String msg = "An error occurred while attempting to retrieve the virtual networks list." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
                         PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
                         return;
                     }
@@ -330,8 +330,10 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         }
                     } catch (AzureCmdException e) {
                         storageAccounts = null;
-                        String msg = "An error occurred while attempting to retrieve the storage accounts list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                        PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                        String msg = "An error occurred while attempting to retrieve the storage accounts list for subscription " +
+                                model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                        DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                        return;
                     }
                 }
                 refreshStorageAccounts(null);
@@ -435,8 +437,9 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         publicIpAddresses = AzureArmManagerImpl.getManager(project).getPublicIpAddresses(model.getSubscription().getId());
                     } catch (AzureCmdException e) {
                         publicIpAddresses = null;
-                        String msg = "An error occurred while attempting to retrieve public ip addresses list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                        PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                        String msg = "An error occurred while attempting to retrieve public ip addresses list for subscription " +
+                                model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                        DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
                         return;
                     }
                 }
@@ -528,8 +531,9 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         networkSecurityGroups = AzureArmManagerImpl.getManager(project).getNetworkSecurityGroups(model.getSubscription().getId());
                     } catch (AzureCmdException e) {
                         networkSecurityGroups = null;
-                        String msg = "An error occurred while attempting to retrieve network security groups list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                        PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                        String msg = "An error occurred while attempting to retrieve network security groups list for subscription " +
+                                model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                        DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
                         return;
                     }
                 }
@@ -611,8 +615,9 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         availabilitySets = AzureArmManagerImpl.getManager(project).getAvailabilitySets(model.getSubscription().getId());
                     } catch (AzureCmdException e) {
                         availabilitySets = null;
-                        String msg = "An error occurred while attempting to retrieve availability sets list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                        PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                        String msg = "An error occurred while attempting to retrieve availability sets list for subscription " +
+                                model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                        DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
                         return;
                     }
                 }
@@ -800,8 +805,8 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         }
                     });
                 } catch (Exception e) {
-                    String msg = "An error occurred while attempting to create the specified virtual machine." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                    String msg = "An error occurred while attempting to create the specified virtual machine." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                    DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
                 }
             }
         });

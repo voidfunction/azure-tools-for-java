@@ -229,8 +229,9 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                     });
                 } catch (AzureCmdException e) {
                     storageAccount = null;
-                    String msg = "An error occurred while attempting to create the specified storage account." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                    String msg = "An error occurred while attempting to create the specified storage account in subscription " + subscription.getId() +  ".<br>"
+                            + String.format(message("webappExpMsg"), e.getMessage());
+                    DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
                 }
             }
         });
@@ -263,8 +264,8 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                     loadGroups();
                 }
             } catch (AzureCmdException e) {
-                String msg = "An error occurred while attempting to get subscriptions." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
+                String msg = "An error occurred while attempting to get subscriptions." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
             }
         } else {
             this.subscription = subscription;
@@ -363,8 +364,8 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                         }
                     });
                 } catch (AzureCmdException e) {
-                    String msg = "An error occurred while attempting to load resource groups list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                    String msg = "An error occurred while attempting to load resource groups list." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                    DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
                 }
             }
         });
