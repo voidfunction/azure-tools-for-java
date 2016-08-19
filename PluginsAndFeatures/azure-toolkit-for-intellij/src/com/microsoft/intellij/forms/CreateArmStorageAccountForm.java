@@ -156,8 +156,6 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                 setText(kind == Kind.STORAGE ? "General purpose" : "Blob storage");
             }
         });
-
-        replicationComboBox.setModel(new DefaultComboBoxModel(ReplicationTypes.values()));
         replicationComboBox.setRenderer(new ListCellRendererWrapper<ReplicationTypes>() {
             @Override
             public void customize(JList jList, ReplicationTypes replicationTypes, int i, boolean b, boolean b1) {
@@ -246,6 +244,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         final CreateArmStorageAccountForm createStorageAccountForm = this;
         if (subscription == null) {
             loadRegions();
+            replicationComboBox.setModel(new DefaultComboBoxModel(ReplicationTypes.values()));
             try {
                 subscriptionComboBox.setEnabled(true);
 
@@ -275,6 +274,8 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             subscriptionComboBox.addItem(subscription.getName());
             regionComboBox.addItem(region);
             regionComboBox.setEnabled(false);
+            replicationComboBox.setModel(new DefaultComboBoxModel(
+                    new ReplicationTypes[] {ReplicationTypes.Standard_LRS, ReplicationTypes.Standard_GRS, ReplicationTypes.Standard_RAGRS}));
             loadGroups();
         }
     }

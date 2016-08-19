@@ -35,6 +35,7 @@ import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.storage.Kind;
+import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
 import com.microsoft.intellij.util.PluginUtil;
@@ -421,8 +422,12 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         Vector<ArmStorageAccount> filteredStorageAccounts = new Vector<>();
 
         for (ArmStorageAccount storageAccount : storageAccounts.values()) {
-            // VM and storage account need to be in the same region; only general purpose accounts support page blobs, so only they can be used to create vm
-            if (storageAccount.getLocation().equals(model.getRegion().toString()) && storageAccount.getStorageAccount().kind() == Kind.STORAGE) {
+            // VM and storage account need to be in the same region;
+            // only general purpose accounts support page blobs, so only they can be used to create vm;
+            // zone-redundant acounts not supported for vm
+            if (storageAccount.getLocation().equals(model.getRegion().toString())
+                    && storageAccount.getStorageAccount().kind() == Kind.STORAGE
+                    && storageAccount.getStorageAccount().sku().name() != SkuName.STANDARD_ZRS) {
                 filteredStorageAccounts.add(storageAccount);
             }
         }
