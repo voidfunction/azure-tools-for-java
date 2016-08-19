@@ -31,6 +31,7 @@ import com.intellij.ui.ListCellRendererWrapper;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.Kind;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.helpers.LinkListener;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -232,6 +233,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                     String msg = "An error occurred while attempting to create the specified storage account in subscription " + subscription.getId() +  ".<br>"
                             + String.format(message("webappExpMsg"), e.getMessage());
                     DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                    AzurePlugin.log(msg, e);
                 }
             }
         });
@@ -266,6 +268,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             } catch (AzureCmdException e) {
                 String msg = "An error occurred while attempting to get subscriptions." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
                 DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                AzurePlugin.log(msg, e);
             }
         } else {
             this.subscription = subscription;
@@ -366,6 +369,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                 } catch (AzureCmdException e) {
                     String msg = "An error occurred while attempting to load resource groups list." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
                     DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                    AzurePlugin.log(msg, e);
                 }
             }
         });

@@ -35,6 +35,7 @@ import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.storage.Kind;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -333,6 +334,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         String msg = "An error occurred while attempting to retrieve the storage accounts list for subscription " +
                                 model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
                         DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                        AzurePlugin.log(msg, e);
                         return;
                     }
                 }
@@ -440,6 +442,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         String msg = "An error occurred while attempting to retrieve public ip addresses list for subscription " +
                                 model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
                         DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                        AzurePlugin.log(msg, e);
                         return;
                     }
                 }
@@ -534,6 +537,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         String msg = "An error occurred while attempting to retrieve network security groups list for subscription " +
                                 model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
                         DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                        AzurePlugin.log(msg, e);
                         return;
                     }
                 }
@@ -618,6 +622,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         String msg = "An error occurred while attempting to retrieve availability sets list for subscription " +
                                 model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
                         DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                        AzurePlugin.log(msg, e);
                         return;
                     }
                 }
@@ -796,17 +801,20 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                             try {
                                 parent.addChildNode(new com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMNode(parent, model.getSubscription().getId(), vm));
                             } catch (AzureCmdException e) {
-                                DefaultLoader.getUIHelper().showException("An error occurred while attempting to refresh the list of virtual machines.",
+                                String msg = "An error occurred while attempting to refresh the list of virtual machines.";
+                                DefaultLoader.getUIHelper().showException(msg,
                                         e,
                                         "Azure Services Explorer - Error Refreshing VM List",
                                         false,
                                         true);
+                                AzurePlugin.log(msg, e);
                             }
                         }
                     });
                 } catch (Exception e) {
                     String msg = "An error occurred while attempting to create the specified virtual machine." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
                     DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                    AzurePlugin.log(msg, e);
                 }
             }
         });
