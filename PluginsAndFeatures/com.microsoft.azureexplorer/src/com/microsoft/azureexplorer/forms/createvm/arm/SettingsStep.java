@@ -47,6 +47,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+
+import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
@@ -99,6 +101,7 @@ public class SettingsStep extends WizardPage {
     private Map<String, ArmStorageAccount> storageAccounts;
     private List<PublicIpAddress> publicIpAddresses;
     private List<NetworkSecurityGroup> networkSecurityGroups;
+    private List<AvailabilitySet> availabilitySets;
 
     public SettingsStep(CreateVMWizard wizard) {
         super("Create new Virtual Machine", "Associated resources", null);
@@ -245,6 +248,8 @@ public class SettingsStep extends WizardPage {
         retrieveStorageAccounts();
         retrieveVirtualNetworks();
         retrievePublicIpAddresses();
+        retrieveNetworkSecurityGroups();
+        retrieveAvailabilitySets();
 
         return super.getTitle();
     }
@@ -289,6 +294,7 @@ public class SettingsStep extends WizardPage {
 								virtualNetworks = null;
 								String msg = "An error occurred while attempting to retrieve the virtual networks list." + "\n" + e.getMessage();
 								PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
+								return;
 							}
 						}
 						DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
@@ -373,6 +379,7 @@ public class SettingsStep extends WizardPage {
 						storageAccounts = null;
 						String msg = "An error occurred while attempting to retrieve the storage accounts list." + "\n" + e.getMessage();
 						PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
+						return;
 					}
 				}
 				fillStorage();
@@ -446,6 +453,7 @@ public class SettingsStep extends WizardPage {
                         publicIpAddresses = null;
                         String msg = "An error occurred while attempting to retrieve public ip addresses list." + "\n" + e.getMessage();
                         PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
+                        return;
                     }
                 }
                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
@@ -514,74 +522,127 @@ public class SettingsStep extends WizardPage {
     }
 
     private void retrieveNetworkSecurityGroups() {
-//    ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading network security groups...", false) {
-//        @Override
-//        public void run(@NotNull ProgressIndicator progressIndicator) {
-//            progressIndicator.setIndeterminate(true);
-//            if (networkSecurityGroups == null) {
-//                try {
-//                    networkSecurityGroups = AzureArmManagerImpl.getManager(project).getNetworkSecurityGroups(model.getSubscription().getId());
-//                } catch (AzureCmdException e) {
-//                    networkSecurityGroups = null;
-//                    String msg = "An error occurred while attempting to retrieve network security groups list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-//                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
-//                }
-//            }
-//            ApplicationManager.getApplication().invokeLater(new Runnable() {
-//                @Override
-//                public void run() {
-//                    nsgCombo.setModel(getNsgModel(model.getNetworkSecurityGroup()));
-//                }
-//            });
-//        }
-//    });
-//
-//    if (networkSecurityGroups == null) {
-//        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
-//            @Override
-//            public void run() {
-//                final DefaultComboBoxModel loadingNsgModel = new DefaultComboBoxModel(new String[]{NONE, "<Loading...>"}) {
-//                    @Override
-//                    public void setSelectedItem(Object o) {
-//                        super.setSelectedItem(o);
-//                        if (NONE.equals(o)) {
-//                            model.setNetworkSecurityGroup(null);
-//                        } else {
-////                            model.setVirtualNetwork((Network) o);
-//                        }
-//                    }
-//                };
-//                loadingNsgModel.setSelectedItem(null);
-//                nsgCombo.setModel(loadingNsgModel);
-//            }
-//        }, ModalityState.any());
-//    }
+    	DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+			@Override
+			public void run() {
+                if (networkSecurityGroups == null) {
+                    try {
+                    	networkSecurityGroups = AzureArmManagerImpl.getManager(null).getNetworkSecurityGroups(wizard.getSubscription().getId());
+                    } catch (AzureCmdException e) {
+                    	networkSecurityGroups = null;
+                        String msg = "An error occurred while attempting to retrieve network security groups list." + "\n" + e.getMessage();
+                        PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
+                        return;
+                    }
+                }
+                DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						nsgCombo.removeAll();
+						nsgCombo.add(NONE);
+						for (NetworkSecurityGroup nsg : networkSecurityGroups) {
+							nsgCombo.add(nsg.name());
+							nsgCombo.setData(nsg.name(), nsg);
+						}
+						nsgCombo.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								if (NONE.equals(nsgCombo.getText())) {
+				                    wizard.setNetworkSecurityGroup(null);
+				                } else if (nsgCombo.getData(nsgCombo.getText()) instanceof NetworkSecurityGroup) {
+				                    wizard.setNetworkSecurityGroup((NetworkSecurityGroup) nsgCombo.getData(nsgCombo.getText()));
+				                }
+							}
+						});
+					}
+				});
+            }
+        });
+    	
+        if (networkSecurityGroups == null) {
+        	DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    nsgCombo.setItems(new String[]{NONE, LOADING});
+                }
+            });
+        	nsgCombo.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                	if (NONE.equals(nsgCombo.getText())) {
+	                    wizard.setNetworkSecurityGroup(null);
+	                }
+                }
+            });
+        }
+    }
+    
+    private void retrieveAvailabilitySets() {
+    	DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+			@Override
+			public void run() {
+                if (availabilitySets == null) {
+                    try {
+                        availabilitySets = AzureArmManagerImpl.getManager(null).getAvailabilitySets(wizard.getSubscription().getId());
+                    } catch (AzureCmdException e) {
+                        availabilitySets = null;
+                        String msg = "An error occurred while attempting to retrieve availablity sets list." + "\n" + e.getMessage();
+                        PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
+                        return;
+                    }
+                }
+                DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						availabilityCombo.removeAll();
+						availabilityCombo.add(NONE);
+						availabilityCombo.add(CREATE_NEW);
+						for (AvailabilitySet availabilitySet : availabilitySets) {
+							availabilityCombo.add(availabilitySet.name());
+							availabilityCombo.setData(availabilitySet.name(), availabilitySet);
+						}
+						availabilityCombo.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								if (NONE.equals(availabilityCombo.getText())) {
+				                    wizard.setAvailabilitySet(null);
+				                    wizard.setWithNewAvailabilitySet(false);
+				                } else if (CREATE_NEW.equals(pipCombo.getText())) {
+				                    wizard.setWithNewAvailabilitySet(true);
+				                    wizard.setAvailabilitySet(null);
+				                } else if (availabilityCombo.getData(availabilityCombo.getText()) instanceof AvailabilitySet) {
+				                    wizard.setAvailabilitySet((AvailabilitySet) availabilityCombo.getData(availabilityCombo.getText()));
+				                    wizard.setWithNewAvailabilitySet(false);
+				                }
+							}
+						});
+					}
+				});
+            }
+        });
+    	
+        if (availabilitySets == null) {
+        	DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    availabilityCombo.setItems(new String[]{NONE, CREATE_NEW, LOADING});
+                }
+            });
+        	availabilityCombo.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                	if (NONE.equals(availabilityCombo.getText())) {
+	                    wizard.setAvailabilitySet(null);
+	                    wizard.setWithNewAvailabilitySet(false);
+	                } else if (CREATE_NEW.equals(availabilityCombo.getText())) {
+	                    wizard.setWithNewAvailabilitySet(true);
+	                    wizard.setAvailabilitySet(null);
+	                }
+                }
+            });
+        }
     }
 
-//    private DefaultComboBoxModel getNsgModel(NetworkSecurityGroup selectedNsg) {
-//    DefaultComboBoxModel refreshedNsgModel = new DefaultComboBoxModel(filterNsg().toArray()) {
-//        @Override
-//        public void setSelectedItem(final Object o) {
-//            super.setSelectedItem(o);
-//            if (NONE.equals(o)) {
-//                model.setNetworkSecurityGroup(null);
-//            } else if (o instanceof NetworkSecurityGroup) {
-//                model.setNetworkSecurityGroup((NetworkSecurityGroup) o);
-//            } else {
-//                model.setNetworkSecurityGroup(null);
-//            }
-//        }
-//    };
-//    refreshedNsgModel.insertElementAt(NONE, 0);
-//
-//    if (selectedNsg != null && networkSecurityGroups.contains(selectedNsg)) {
-//        refreshedNsgModel.setSelectedItem(selectedNsg);
-//    } else {
-//        model.setNetworkSecurityGroup(null);
-//        refreshedNsgModel.setSelectedItem(NONE);
-//    }
-//    return refreshedNsgModel;
-//    }
 
     private Vector<NetworkSecurityGroup> filterNsg() {
         Vector<NetworkSecurityGroup> filteredNsgs = new Vector<>();

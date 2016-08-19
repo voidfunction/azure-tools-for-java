@@ -122,6 +122,7 @@ public class AzureArmSDKHelper {
     public static AzureRequestCallback<VirtualMachine> createVirtualMachine(@NotNull final com.microsoft.tooling.msservices.model.vm.VirtualMachine vm, @NotNull final VirtualMachineImage vmImage,
                                                                             @NotNull final ArmStorageAccount storageAccount, @NotNull final Network network,
                                                                             @NotNull String subnet, @Nullable PublicIpAddress pip, boolean withNewPip,
+                                                                            @Nullable AvailabilitySet availabilitySet, boolean withNewAvailabilitySet,
                                                                             @NotNull final String username, @NotNull final String password, @NotNull final byte[] certificate) {
         return new AzureRequestCallback<VirtualMachine>() {
             @NotNull
@@ -144,21 +145,24 @@ public class AzureArmSDKHelper {
                 } else {
                     withOS = withPublicIpAddress.withExistingPrimaryPublicIpAddress(pip);
                 }
+                VirtualMachine.DefinitionStages.WithCreate withCreate;
                 if (isWindows) {
-                    return withOS.withSpecificWindowsImageVersion(vmImage.imageReference())
+                    withCreate = withOS.withSpecificWindowsImageVersion(vmImage.imageReference())
                             .withAdminUserName(username)
-                            .withPassword(password)
-                            .withSize(vm.getSize())
-                            .withExistingStorageAccount(storageAccount.getStorageAccount())
-                            .create();
+                            .withPassword(password);
                 } else {
-                    return withOS.withSpecificLinuxImageVersion(vmImage.imageReference())
+                    withCreate = withOS.withSpecificLinuxImageVersion(vmImage.imageReference())
                             .withRootUserName(username)
-                            .withPassword(password)
-                            .withSize(vm.getSize())
-                            .withExistingStorageAccount(storageAccount.getStorageAccount())
-                            .create();
+                            .withPassword(password);
                 }
+                withCreate = withCreate.withSize(vm.getSize())
+                        .withExistingStorageAccount(storageAccount.getStorageAccount());
+                if (withNewAvailabilitySet) {
+                    withCreate = withCreate.withNewAvailabilitySet(vm.getName() + "as");
+                } else if (availabilitySet != null) {
+                    withCreate = withCreate.withExistingAvailabilitySet(availabilitySet);
+                }
+                return withCreate.create();
             }
         };
     }

@@ -19,6 +19,7 @@
  */
 package com.microsoft.azureexplorer.forms.createvm.arm;
 
+import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
@@ -56,6 +57,8 @@ public class CreateVMWizard extends VMWizard {
 	private ArmStorageAccount storageAccount;
     private PublicIpAddress publicIpAddress;
     private boolean withNewPip;
+    private AvailabilitySet availabilitySet;
+    private boolean withNewAvailabilitySet;
     private NetworkSecurityGroup networkSecurityGroup;
 
     public CreateVMWizard(VMArmServiceModule node) {
@@ -80,7 +83,7 @@ public class CreateVMWizard extends VMWizard {
                     VirtualMachine virtualMachine = new VirtualMachine(
 							name, 
 							resourceGroupName,
-                            availabilitySet,
+                            null,
                             subnet,
                             size.getName(),
                             VirtualMachine.Status.Unknown,
@@ -125,6 +128,8 @@ public class CreateVMWizard extends VMWizard {
                                     subnet,
                                     publicIpAddress,
                                     withNewPip,
+                                    availabilitySet,
+                                    withNewAvailabilitySet,
                                     userName,
                                     password,
                                     certData);
@@ -247,4 +252,22 @@ public class CreateVMWizard extends VMWizard {
 	public void setNetworkSecurityGroup(NetworkSecurityGroup networkSecurityGroup) {
 		this.networkSecurityGroup = networkSecurityGroup;
 	}
+
+	public AvailabilitySet getAvailabilitySet() {
+		return availabilitySet;
+	}
+
+	public void setAvailabilitySet(AvailabilitySet availabilitySet) {
+		this.availabilitySet = availabilitySet;
+	}
+
+	public boolean isWithNewAvailabilitySet() {
+		return withNewAvailabilitySet;
+	}
+
+	public void setWithNewAvailabilitySet(boolean withNewAvailabilitySet) {
+		this.withNewAvailabilitySet = withNewAvailabilitySet;
+	}
+	
+	
 }

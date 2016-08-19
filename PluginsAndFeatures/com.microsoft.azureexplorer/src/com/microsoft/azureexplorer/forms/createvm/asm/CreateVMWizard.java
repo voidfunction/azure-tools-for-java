@@ -76,6 +76,7 @@ public class CreateVMWizard extends VMWizard {
     private VirtualNetwork virtualNetwork;
 	private VirtualMachineImage virtualMachineImage;
 	private StorageAccount storageAccount;
+	protected String availabilitySet;
     private java.util.List<Endpoint> endpoints;
 
     private EndpointStep endpointStep;
@@ -249,7 +250,15 @@ public class CreateVMWizard extends VMWizard {
         this.virtualNetwork = virtualNetwork;
     }
 
-    public java.util.List<Endpoint> getEndpoints() {
+    public String getAvailabilitySet() {
+		return availabilitySet;
+	}
+
+	public void setAvailabilitySet(String availabilitySet) {
+		this.availabilitySet = availabilitySet;
+	}
+
+	public java.util.List<Endpoint> getEndpoints() {
         return endpoints;
     }
 

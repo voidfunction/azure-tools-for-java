@@ -67,7 +67,6 @@ public abstract class VMWizardModel extends WizardModel {
             "</html>";
 
     private Subscription subscription;
-    private String availabilitySet;
     private String name;
     private VirtualMachineSize size;
     private String userName;
@@ -138,14 +137,6 @@ public abstract class VMWizardModel extends WizardModel {
 
     public void setSubnet(String subnet) {
         this.subnet = subnet;
-    }
-
-    public String getAvailabilitySet() {
-        return availabilitySet;
-    }
-
-    public void setAvailabilitySet(String availabilitySet) {
-        this.availabilitySet = availabilitySet;
     }
 
     public String getName() {

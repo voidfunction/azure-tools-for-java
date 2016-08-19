@@ -651,7 +651,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         }
     }
 
-    private DefaultComboBoxModel getAvailabilitySetsModel(String selectedAvailabilitySet) {
+    private DefaultComboBoxModel getAvailabilitySetsModel(AvailabilitySet selectedAvailabilitySet) {
         DefaultComboBoxModel refreshedAvailabilitySetModel = new DefaultComboBoxModel(availabilitySets.toArray()) {
             @Override
             public void setSelectedItem(final Object o) {
@@ -663,7 +663,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                     model.setWithNewAvailabilitySet(true);
                     model.setAvailabilitySet(null);
                 } else if (o instanceof AvailabilitySet) {
-                    model.setAvailabilitySet(((AvailabilitySet) o).name());
+                    model.setAvailabilitySet(((AvailabilitySet) o));
                     model.setWithNewAvailabilitySet(false);
                 }
             }
@@ -725,7 +725,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                     VirtualMachine virtualMachine = new VirtualMachine(
                             model.getName(),
                             resourceGroupName,
-                            model.getAvailabilitySet(),
+                            null, // field not used for ARM vm anyway
                             model.getSubnet(),
                             model.getSize().getName(),
                             VirtualMachine.Status.Unknown,
@@ -777,6 +777,8 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                                     model.getSubnet(),
                                     model.getPublicIpAddress(),
                                     model.isWithNewPip(),
+                                    model.getAvailabilitySet(),
+                                    model.isWithNewAvailabilitySet(),
                                     model.getUserName(),
                                     model.getPassword(),
                                     certData);

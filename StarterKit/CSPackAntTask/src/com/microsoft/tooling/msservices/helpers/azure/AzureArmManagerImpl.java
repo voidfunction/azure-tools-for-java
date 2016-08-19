@@ -214,10 +214,11 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
                                                @NotNull ArmStorageAccount storageAccount,
                                                @NotNull Network network, @NotNull String subnet,
                                                @Nullable PublicIpAddress pip, boolean withNewPip,
+                                               @Nullable AvailabilitySet availabilitySet, boolean withNewAvailabilitySet,
                                                @NotNull String username, @NotNull String password, @NotNull byte[] certificate)
             throws AzureCmdException {
         return requestAzureSDK(subscriptionId, AzureArmSDKHelper.createVirtualMachine(virtualMachine,
-                vmImage, storageAccount, network, subnet, pip, withNewPip, username, password, certificate));
+                vmImage, storageAccount, network, subnet, pip, withNewPip, availabilitySet, withNewAvailabilitySet, username, password, certificate));
     }
 
     @NotNull

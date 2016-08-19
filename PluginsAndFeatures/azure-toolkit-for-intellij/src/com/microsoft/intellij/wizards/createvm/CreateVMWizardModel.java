@@ -36,6 +36,7 @@ public class CreateVMWizardModel extends VMWizardModel {
     private Endpoint[] endpoints;
     private VirtualNetwork virtualNetwork;
     private StorageAccount storageAccount;
+    private String availabilitySet;
 
     public CreateVMWizardModel(VMServiceModule node) {
         super();
@@ -107,5 +108,13 @@ public class CreateVMWizardModel extends VMWizardModel {
 
     public void setStorageAccount(StorageAccount storageAccount) {
         this.storageAccount = storageAccount;
+    }
+
+    public String getAvailabilitySet() {
+        return availabilitySet;
+    }
+
+    public void setAvailabilitySet(String availabilitySet) {
+        this.availabilitySet = availabilitySet;
     }
 }

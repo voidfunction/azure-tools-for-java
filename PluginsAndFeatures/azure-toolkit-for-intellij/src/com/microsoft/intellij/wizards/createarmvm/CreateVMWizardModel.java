@@ -22,6 +22,7 @@
 package com.microsoft.intellij.wizards.createarmvm;
 
 import com.intellij.openapi.project.Project;
+import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
@@ -42,6 +43,7 @@ public class CreateVMWizardModel extends VMWizardModel {
     private PublicIpAddress publicIpAddress;
     private boolean withNewPip;
     private NetworkSecurityGroup networkSecurityGroup;
+    private AvailabilitySet availabilitySet;
     private boolean withNewAvailabilitySet;
 
     public CreateVMWizardModel(VMArmServiceModule node) {
@@ -126,6 +128,14 @@ public class CreateVMWizardModel extends VMWizardModel {
 
     public void setNetworkSecurityGroup(NetworkSecurityGroup networkSecurityGroup) {
         this.networkSecurityGroup = networkSecurityGroup;
+    }
+
+    public AvailabilitySet getAvailabilitySet() {
+        return availabilitySet;
+    }
+
+    public void setAvailabilitySet(AvailabilitySet availabilitySet) {
+        this.availabilitySet = availabilitySet;
     }
 
     public boolean isWithNewAvailabilitySet() {
