@@ -791,7 +791,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                                     model.isWithNewAvailabilitySet(),
                                     model.getUserName(),
                                     model.getPassword(),
-                                    certData);
+                                    new String(certData));
 
 //                    virtualMachine = AzureManagerImpl.getManager(project).refreshVirtualMachineInformation(virtualMachine);
 

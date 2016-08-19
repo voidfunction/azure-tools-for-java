@@ -160,7 +160,7 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
                     @Override
                     public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
                         try {
-                            return file.isDirectory() || (file.getExtension() != null && file.getExtension().equals("cer"));
+                            return file.isDirectory() || (file.getExtension() != null && file.getExtension().equalsIgnoreCase("pub"));
                         } catch (Throwable t) {
                             return super.isFileVisible(file, showHiddenFiles);
                         }
@@ -168,7 +168,7 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
 
                     @Override
                     public boolean isFileSelectable(VirtualFile file) {
-                        return (file.getExtension() != null && file.getExtension().equals("cer"));
+                        return (file.getExtension() != null && file.getExtension().equalsIgnoreCase("pub"));
                     }
                 };
 
@@ -200,8 +200,8 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
         if (isLinux) {
             certificateCheckBox.setEnabled(true);
             passwordCheckBox.setEnabled(true);
-            certificateCheckBox.setSelected(true);
-            passwordCheckBox.setSelected(false);
+            certificateCheckBox.setSelected(false);
+            passwordCheckBox.setSelected(true);
         } else {
             certificateCheckBox.setSelected(false);
             passwordCheckBox.setSelected(true);

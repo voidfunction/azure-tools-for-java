@@ -123,7 +123,7 @@ public class AzureArmSDKHelper {
                                                                             @NotNull final ArmStorageAccount storageAccount, @NotNull final Network network,
                                                                             @NotNull String subnet, @Nullable PublicIpAddress pip, boolean withNewPip,
                                                                             @Nullable AvailabilitySet availabilitySet, boolean withNewAvailabilitySet,
-                                                                            @NotNull final String username, @NotNull final String password, @NotNull final byte[] certificate) {
+                                                                            @NotNull final String username, @Nullable final String password, @Nullable String publicKey) {
         return new AzureRequestCallback<VirtualMachine>() {
             @NotNull
             @Override
@@ -151,9 +151,12 @@ public class AzureArmSDKHelper {
                             .withAdminUserName(username)
                             .withPassword(password);
                 } else {
-                    withCreate = withOS.withSpecificLinuxImageVersion(vmImage.imageReference())
-                            .withRootUserName(username)
-                            .withPassword(password);
+                    VirtualMachine.DefinitionStages.WithLinuxCreate withLinuxCreate = withOS.withSpecificLinuxImageVersion(vmImage.imageReference())
+                            .withRootUserName(username);
+                    if (publicKey != null) {
+                        withLinuxCreate = withLinuxCreate.withSsh(publicKey);
+                    }
+                    withCreate = password == null ? withLinuxCreate : withLinuxCreate.withPassword(password);
                 }
                 withCreate = withCreate.withSize(vm.getSize())
                         .withExistingStorageAccount(storageAccount.getStorageAccount());
