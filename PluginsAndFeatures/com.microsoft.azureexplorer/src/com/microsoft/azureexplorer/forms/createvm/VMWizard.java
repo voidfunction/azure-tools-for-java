@@ -23,7 +23,6 @@ public abstract class VMWizard extends Wizard {
 	protected String password;
 	protected String certificate;
 	protected String subnet;
-	protected String availabilitySet;
 	protected VirtualMachineSize size;
 
 	public Subscription getSubscription() {
@@ -72,14 +71,6 @@ public abstract class VMWizard extends Wizard {
 
 	public void setSubnet(String subnet) {
 	    this.subnet = subnet;
-	}
-
-	public String getAvailabilitySet() {
-	    return availabilitySet;
-	}
-
-	public void setAvailabilitySet(String availabilitySet) {
-	    this.availabilitySet = availabilitySet;
 	}
 
 	public Browser createImageDescriptor(Composite container) {

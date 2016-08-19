@@ -118,8 +118,8 @@ public class SubscriptionStep extends WizardPage {
         subscriptionComboBox.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (e.text != null && e.text.length() > 0) {
-                    wizard.setSubscription((Subscription) subscriptionComboBox.getData(e.text));
+                if (subscriptionComboBox.getText() != null && !(subscriptionComboBox.getText().length() == 0)) {
+                    wizard.setSubscription((Subscription) subscriptionComboBox.getData(subscriptionComboBox.getText()));
                 }
             }
         });
