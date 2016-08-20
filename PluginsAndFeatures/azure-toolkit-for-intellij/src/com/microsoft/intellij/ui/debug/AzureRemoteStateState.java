@@ -22,7 +22,6 @@
 package com.microsoft.intellij.ui.debug;
 
 import com.intellij.debugger.engine.RemoteDebugProcessHandler;
-import com.intellij.debugger.engine.RemoteStateState;
 import com.intellij.execution.DefaultExecutionResult;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ExecutionResult;
@@ -60,7 +59,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 import java.net.URI;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
@@ -332,10 +330,35 @@ public class AzureRemoteStateState implements RemoteState {
                         }
                     }
                     if (msDeployProfile != null) {
-                        String command = String.format(message("debugCmd"), socketPort, webSiteName,
-                                msDeployProfile.getUserName(), msDeployProfile.getPassword());
-                        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", command);
-                        pb.directory(new File(WAHelper.getTemplateFile("remotedebug")));
+                        ProcessBuilder pb = null;
+                        String os = System.getProperty("os.name").toLowerCase();
+                        String webAppDirPath = WAHelper.getTemplateFile("remotedebug");
+
+                        if(os.indexOf("win") >= 0) {
+                            String command = String.format(message("debugCmd"), socketPort, webSiteName,
+                                    msDeployProfile.getUserName(), msDeployProfile.getPassword());
+                            pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", command);
+                        } else if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("aix") > 0) {
+                            // escape $ for linux
+                            String userName = "\\" + msDeployProfile.getUserName();
+                            String command = String.format(message("commandSh"), socketPort, webSiteName,
+                                    userName, msDeployProfile.getPassword());
+                            pb = new ProcessBuilder("/bin/bash", "-c", command);
+                        } else {
+                            // escape $ for mac
+                            String userName = "'" + msDeployProfile.getUserName() + "'";
+                            // On mac, you need to specify exact path of JAR
+                            String command = String.format(message("commandMac"), webAppDirPath + "/", socketPort, webSiteName,
+                                    userName, msDeployProfile.getPassword());
+
+                            String commandNext = "tell application \"Terminal\" to do script \"" + command + "\"";
+                            pb = new ProcessBuilder("osascript", "-e", commandNext);
+
+                            System.out.println("osascript -e " + commandNext);
+                        }
+
+                        pb.directory(new File(webAppDirPath));
+
                         try {
                             pb.start();
                             Thread.sleep(30000);
