@@ -215,8 +215,8 @@ public class MachineSettingsStep extends WizardPage {
         if (isLinux) {
             certificateCheckBox.setEnabled(true);
             passwordCheckBox.setEnabled(true);
-            certificateCheckBoxSelected(true);
-            passwordCheckBox.setSelection(false);
+            certificateCheckBoxSelected(false);
+            passwordCheckBox.setSelection(true);
         } else {
             certificateCheckBoxSelected(false);
             passwordCheckBox.setSelection(true);

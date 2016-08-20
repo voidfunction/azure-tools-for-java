@@ -42,7 +42,7 @@ public class CreateArmStorageAccountAction extends NodeActionListener {
             return;
         }
 
-        CreateArmStorageAccountForm createStorageAccountForm = new CreateArmStorageAccountForm(PluginUtil.getParentShell(), null);
+        CreateArmStorageAccountForm createStorageAccountForm = new CreateArmStorageAccountForm(PluginUtil.getParentShell(), null, null);
 
         createStorageAccountForm.setOnCreate(new Runnable() {
             @Override

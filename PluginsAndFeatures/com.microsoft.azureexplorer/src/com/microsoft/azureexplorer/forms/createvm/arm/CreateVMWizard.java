@@ -132,7 +132,7 @@ public class CreateVMWizard extends VMWizard {
                                     withNewAvailabilitySet,
                                     userName,
                                     password,
-                                    certData);
+                                    certData.length > 0 ? new String(certData) : null);
 
 //                    virtualMachine = AzureManagerImpl.getManager().refreshVirtualMachineInformation(virtualMachine);
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
