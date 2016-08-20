@@ -156,7 +156,7 @@ public class AzureArmSDKHelper {
                     if (publicKey != null) {
                         withLinuxCreate = withLinuxCreate.withSsh(publicKey);
                     }
-                    withCreate = password == null ? withLinuxCreate : withLinuxCreate.withPassword(password);
+                    withCreate = password == null || password.isEmpty() ? withLinuxCreate : withLinuxCreate.withPassword(password);
                 }
                 withCreate = withCreate.withSize(vm.getSize())
                         .withExistingStorageAccount(storageAccount.getStorageAccount());

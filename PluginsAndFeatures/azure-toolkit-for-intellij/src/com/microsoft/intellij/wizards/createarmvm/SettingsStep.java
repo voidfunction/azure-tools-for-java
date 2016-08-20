@@ -123,7 +123,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         storageComboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
-                validateNext();
+                validateFinish();
             }
         });
 
@@ -141,7 +141,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
                 model.setSubnet((String) subnetComboBox.getSelectedItem());
-                validateNext();
+                validateFinish();
             }
         });
 
@@ -720,8 +720,8 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         form.show();
     }
 
-    private void validateNext() {
-        model.getCurrentNavigationState().NEXT.setEnabled(storageComboBox.getSelectedItem() instanceof StorageAccount &&
+    private void validateFinish() {
+        model.getCurrentNavigationState().FINISH.setEnabled(storageComboBox.getSelectedItem() instanceof StorageAccount &&
                 (!subnetComboBox.isEnabled() || subnetComboBox.getSelectedItem() instanceof String));
     }
 
@@ -730,7 +730,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         final boolean isNewResourceGroup = createNewRadioButton.isSelected();
         final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
 
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Creating virtual machine...", false) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Creating virtual machine " + model.getName() + "...", false) {
 
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
@@ -796,7 +796,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                                     model.isWithNewAvailabilitySet(),
                                     model.getUserName(),
                                     model.getPassword(),
-                                    new String(certData));
+                                    certData.length > 0 ? new String(certData) : null);
 
 //                    virtualMachine = AzureManagerImpl.getManager(project).refreshVirtualMachineInformation(virtualMachine);
 

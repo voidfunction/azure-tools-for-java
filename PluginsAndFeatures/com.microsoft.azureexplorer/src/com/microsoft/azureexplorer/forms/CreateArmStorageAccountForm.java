@@ -44,6 +44,7 @@ import com.microsoft.tooling.msservices.model.ReplicationTypes;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.Kind;
 
 public class CreateArmStorageAccountForm extends Dialog {
@@ -75,16 +76,17 @@ public class CreateArmStorageAccountForm extends Dialog {
     private Link pricingLabel;
     private Label userInfoLabel;
 
-    private ComboViewer regionViewer;
     private ComboViewer resourceGroupViewer;
 
     private Runnable onCreate;
     private Subscription subscription;
+    private Region region;
     private ArmStorageAccount storageAccount;
 
-    public CreateArmStorageAccountForm(Shell parentShell, Subscription subscription) {
+    public CreateArmStorageAccountForm(Shell parentShell, Subscription subscription, Region region) {
         super(parentShell);
         this.subscription = subscription;
+        this.region = region;
     }
 
     @Override
@@ -166,8 +168,8 @@ public class CreateArmStorageAccountForm extends Dialog {
         regionComboBox = new Combo(container, SWT.READ_ONLY);
         gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         regionComboBox.setLayoutData(gridData);
-        regionViewer = new ComboViewer(regionComboBox);
-        regionViewer.setContentProvider(ArrayContentProvider.getInstance());
+//        regionViewer = new ComboViewer(regionComboBox);
+//        regionViewer.setContentProvider(ArrayContentProvider.getInstance());
         
         kindLabel = new Label(container, SWT.LEFT);
         kindLabel.setText("Account kind:");
@@ -222,11 +224,6 @@ public class CreateArmStorageAccountForm extends Dialog {
         } else {
             userInfoLabel.setText("");
         }
-        for (ReplicationTypes replicationType : ReplicationTypes.values()) {
-            replicationComboBox.add(replicationType.getDescription());
-            replicationComboBox.setData(replicationType.getDescription(), replicationType);
-        }
-        replicationComboBox.select(0);
         fillFields();
 
         return super.createContents(parent);
@@ -251,7 +248,7 @@ public class CreateArmStorageAccountForm extends Dialog {
 		}
 		String name = nameTextField.getText();
 
-		String region = ((IStructuredSelection) regionViewer.getSelection()).getFirstElement().toString();
+		String region = regionComboBox.getText();//((IStructuredSelection) regionViewer.getSelection()).getFirstElement().toString();
 		String replication = replicationComboBox.getData(replicationComboBox.getText()).toString();
 		final boolean isNewResourceGroup = createNewRadioButton.getSelection();
 		final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getText();
@@ -291,6 +288,11 @@ public class CreateArmStorageAccountForm extends Dialog {
     public void fillFields() {
 
         if (subscription == null) {
+        	loadRegions();
+            for (ReplicationTypes replicationType : ReplicationTypes.values()) {
+                replicationComboBox.add(replicationType.getDescription());
+                replicationComboBox.setData(replicationType.getDescription(), replicationType);
+            }
             try {
                 subscriptionComboBox.setEnabled(true);
 
@@ -321,10 +323,17 @@ public class CreateArmStorageAccountForm extends Dialog {
             subscriptionComboBox.setEnabled(false);
             subscriptionComboBox.add(subscription.getName());
             subscriptionComboBox.select(0);
-
+            regionComboBox.add(region.toString());
+            regionComboBox.setEnabled(false);
+            regionComboBox.select(0);
+            for (ReplicationTypes replicationType : new ReplicationTypes[] {ReplicationTypes.Standard_LRS, ReplicationTypes.Standard_GRS, ReplicationTypes.Standard_RAGRS}) {
+                replicationComboBox.add(replicationType.getDescription());
+                replicationComboBox.setData(replicationType.getDescription(), replicationType);
+            }
             loadGroups();
             loadRegions();
         }
+        replicationComboBox.select(0);
     }
 
     public void setOnCreate(Runnable onCreate) {
@@ -336,29 +345,32 @@ public class CreateArmStorageAccountForm extends Dialog {
     }
 
     public void loadRegions() {
-        regionComboBox.add("<Loading...>");
-
-        DefaultLoader.getIdeHelper().runInBackground(null, "Loading regions...", false, true, "Loading regions...", new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final java.util.List<Location> locations = AzureManagerImpl.getManager().getLocations(subscription.getId().toString());
-
-                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            final Vector<Object> vector = new Vector<Object>();
-                            vector.addAll(locations);
-                            regionViewer.setInput(vector);
-                            regionComboBox.select(1);
-                        }
-                    });
-                } catch (AzureCmdException e) {
-                	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
-                			"An error occurred while loading the regions list.", e);
-                }
-            }
-        });
+    	for (Region region : region.values()) {
+    		regionComboBox.add(region.toString());
+    	}
+//        regionComboBox.add("<Loading...>");
+//
+//        DefaultLoader.getIdeHelper().runInBackground(null, "Loading regions...", false, true, "Loading regions...", new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    final java.util.List<Location> locations = AzureManagerImpl.getManager().getLocations(subscription.getId().toString());
+//
+//                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            final Vector<Object> vector = new Vector<Object>();
+//                            vector.addAll(locations);
+//                            regionViewer.setInput(vector);
+//                            regionComboBox.select(1);
+//                        }
+//                    });
+//                } catch (AzureCmdException e) {
+//                	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+//                			"An error occurred while loading the regions list.", e);
+//                }
+//            }
+//        });
     }
     
     public void loadGroups() {
