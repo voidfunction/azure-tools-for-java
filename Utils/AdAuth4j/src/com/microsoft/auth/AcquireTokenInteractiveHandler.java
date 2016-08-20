@@ -88,7 +88,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
         if (!userId.isAnyUser()
             && (userId.type == UserIdentifierType.OptionalDisplayableId
                 || userId.type == UserIdentifierType.RequiredDisplayableId)) {
-            loginHint = userId.id;
+            loginHint = userId.displayableId();
         }
         Map<String, String> requestParameters = this.createAuthorizationRequest(loginHint, includeFormsAuthParam);
         return new URI(this.authenticator.authorizationUri + "?" + UriUtils.toQueryString(requestParameters));
