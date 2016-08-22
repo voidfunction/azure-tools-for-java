@@ -149,7 +149,6 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             userInfoLabel.setText("");
         }
 
-        accoountKindCombo.setModel(new DefaultComboBoxModel(Kind.values()));
         accoountKindCombo.setRenderer(new ListCellRendererWrapper<Kind>() {
             @Override
             public void customize(JList jList, Kind kind, int i, boolean b, boolean b1) {
@@ -203,48 +202,62 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         final String replication = replicationComboBox.getSelectedItem().toString();
         final boolean isNewResourceGroup = createNewRadioButton.isSelected();
         final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
-
-        DefaultLoader.getIdeHelper().runInBackground(project, "Creating storage account", false, true, "Creating storage account...", new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    storageAccount = new ArmStorageAccount(name, subscription.getId(), null);
-                    storageAccount.setType(replication);
-                    storageAccount.setLocation(region);
-                    storageAccount.setNewResourceGroup(isNewResourceGroup);
-                    storageAccount.setResourceGroupName(resourceGroupName);
-                    storageAccount.setKind((Kind) accoountKindCombo.getSelectedItem());
-
-                    storageAccount = AzureArmManagerImpl.getManager(project).createStorageAccount(storageAccount);
-//                    AzureManagerImpl.getManager(project).refreshStorageAccountInformation(storageAccount);
-
-                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (onCreate != null) {
-                                onCreate.run();
-                            }
-                        }
-                    });
-                } catch (AzureCmdException e) {
-                    storageAccount = null;
-                    String msg = "An error occurred while attempting to create the specified storage account in subscription " + subscription.getId() +  ".<br>"
-                            + String.format(message("webappExpMsg"), e.getMessage());
-                    DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
-                    AzurePlugin.log(msg, e);
+        storageAccount = new ArmStorageAccount(name, subscription.getId(), null);
+        storageAccount.setType(replication);
+        storageAccount.setLocation(region);
+        storageAccount.setNewResourceGroup(isNewResourceGroup);
+        storageAccount.setResourceGroupName(resourceGroupName);
+        storageAccount.setKind((Kind) accoountKindCombo.getSelectedItem());
+//        This means we are creating storage account not from 'Create VM' wizard and therefore don't need to block UI until finished
+        if (regionComboBox.isEnabled()) {
+            DefaultLoader.getIdeHelper().runInBackground(project, "Creating storage account", false, true, "Creating storage account...", new Runnable() {
+                @Override
+                public void run() {
+                    createStorageAccount();
                 }
-            }
-        });
-
+            });
+        } else {
+            ProgressManager.getInstance().run(
+                    new Task.Modal(project, "Creating storage account", true) {
+                        @Override
+                        public void run(@com.microsoft.tooling.msservices.helpers.NotNull ProgressIndicator indicator) {
+                            indicator.setIndeterminate(true);
+                            createStorageAccount();
+                        }
+                    }
+            );
+        }
         close(DialogWrapper.OK_EXIT_CODE, true);
     }
 
+    private void createStorageAccount() {
+        try {
+            storageAccount = AzureArmManagerImpl.getManager(project).createStorageAccount(storageAccount);
+//                    AzureManagerImpl.getManager(project).refreshStorageAccountInformation(storageAccount);
+
+            DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (onCreate != null) {
+                        onCreate.run();
+                    }
+                }
+            });
+        } catch (AzureCmdException e) {
+            storageAccount = null;
+            String msg = "An error occurred while attempting to create the specified storage account in subscription " + subscription.getId() + ".<br>"
+                    + String.format(message("webappExpMsg"), e.getMessage());
+            DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+            AzurePlugin.log(msg, e);
+        }
+    }
 
     public void fillFields(final Subscription subscription, Region region) {
         final CreateArmStorageAccountForm createStorageAccountForm = this;
         if (subscription == null) {
             loadRegions();
             replicationComboBox.setModel(new DefaultComboBoxModel(ReplicationTypes.values()));
+            accoountKindCombo.setModel(new DefaultComboBoxModel(Kind.values()));
             try {
                 subscriptionComboBox.setEnabled(true);
 
@@ -272,6 +285,8 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         } else {
             this.subscription = subscription;
             subscriptionComboBox.addItem(subscription.getName());
+            accoountKindCombo.addItem(Kind.STORAGE); // only General purpose accounts supported for VMs
+            accoountKindCombo.setEnabled(false);
             regionComboBox.addItem(region);
             regionComboBox.setEnabled(false);
             replicationComboBox.setModel(new DefaultComboBoxModel(
