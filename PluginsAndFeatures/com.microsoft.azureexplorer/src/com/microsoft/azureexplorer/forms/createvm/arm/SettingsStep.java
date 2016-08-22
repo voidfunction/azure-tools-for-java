@@ -375,7 +375,7 @@ public class SettingsStep extends WizardPage {
 						return;
 					}
 				}
-				fillStorage();
+				fillStorage(null);
 			}
 		});
 		storageComboBox.addSelectionListener(new SelectionAdapter() {
@@ -401,7 +401,7 @@ public class SettingsStep extends WizardPage {
     }
 
 
-    private void fillStorage() {
+    private void fillStorage(String selectedSA) {
     	DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -410,6 +410,9 @@ public class SettingsStep extends WizardPage {
 				for (ArmStorageAccount storageAccount : filterSA()) {
 					storageComboBox.add(storageAccount.getName());
 					storageComboBox.setData(storageAccount.getName(), storageAccount);
+				}
+				if (selectedSA != null) {
+					storageComboBox.setText(selectedSA);
 				}
 			}
 		});
@@ -621,7 +624,7 @@ public class SettingsStep extends WizardPage {
 				if (newStorageAccount != null) {
 					wizard.setStorageAccount(newStorageAccount);
 					storageAccounts.put(newStorageAccount.getName(), newStorageAccount);
-					fillStorage();
+					fillStorage(newStorageAccount.getName());
 				}
 			}
 		});
