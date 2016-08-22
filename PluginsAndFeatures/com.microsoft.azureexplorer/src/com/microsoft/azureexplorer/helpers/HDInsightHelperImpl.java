@@ -20,7 +20,6 @@
 package com.microsoft.azureexplorer.helpers;
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
@@ -35,18 +34,12 @@ import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azureexplorer.editors.JobViewInput;
-import com.microsoft.azureexplorer.hdinsight.JavaFxCheckDlg;
 
 public class HDInsightHelperImpl implements HDInsightHelper {
-	
 	private static final String HDINSIHGT_BUNDLE_ID = "com.microsoft.hdinsights";
-	private static final String FX_BUNDLE_ID = "org.eclipse.fx.ide.jdt.core";
 	
     public void openJobViewEditor(Object projectObject, String uuid) {
     	try {
-    		if(!checkJavaFxPlugin()) {
-    			return;
-    		}
         	loadHDInsightPlugin();
 		} catch (BundleException bundleException) {
 			Activator.getDefault().log("Error loading plugin com.microsoft.hdinsights", bundleException);
@@ -61,17 +54,6 @@ public class HDInsightHelperImpl implements HDInsightHelper {
         } catch (PartInitException e2) {
             Activator.getDefault().log("Error opening " + clusterDetail.getName(), e2);
         }
-    }
-    
-    private static boolean checkJavaFxPlugin() {
-    	Bundle bundle = Platform.getBundle(FX_BUNDLE_ID);
-    	if(bundle != null) {
-    		Shell parent = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-    		JavaFxCheckDlg dlg = new JavaFxCheckDlg(parent);
-    		dlg.open();
-    		return false;
-    	}
-    	return true;
     }
     
     private void loadHDInsightPlugin() throws BundleException{
