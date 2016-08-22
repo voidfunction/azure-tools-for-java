@@ -72,7 +72,7 @@ public class VMNode extends AzureRefreshableNode {
         @Override
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
                 throws AzureCmdException {
-            AzureManagerImpl.getManager().deleteVirtualMachine(virtualMachine, false);
+            AzureManagerImpl.getManager(getProject()).deleteVirtualMachine(virtualMachine, false);
             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                 @Override
                 public void run() {
@@ -109,7 +109,7 @@ public class VMNode extends AzureRefreshableNode {
             try {
                 if (rdpFile.exists() || rdpFile.createNewFile()) {
                     FileOutputStream fileOutputStream = new FileOutputStream(rdpFile);
-                    fileOutputStream.write(AzureManagerImpl.getManager().downloadRDP(virtualMachine));
+                    fileOutputStream.write(AzureManagerImpl.getManager(getProject()).downloadRDP(virtualMachine));
                     fileOutputStream.flush();
                     fileOutputStream.close();
                 }
@@ -136,7 +136,7 @@ public class VMNode extends AzureRefreshableNode {
         @Override
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
                 throws AzureCmdException {
-            AzureManagerImpl.getManager().shutdownVirtualMachine(virtualMachine, true);
+            AzureManagerImpl.getManager(getProject()).shutdownVirtualMachine(virtualMachine, true);
         }
     }
 
@@ -150,7 +150,7 @@ public class VMNode extends AzureRefreshableNode {
         @Override
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
                 throws AzureCmdException {
-            AzureManagerImpl.getManager().startVirtualMachine(virtualMachine);
+            AzureManagerImpl.getManager(getProject()).startVirtualMachine(virtualMachine);
         }
     }
 
@@ -164,7 +164,7 @@ public class VMNode extends AzureRefreshableNode {
         @Override
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
                 throws AzureCmdException {
-            AzureManagerImpl.getManager().restartVirtualMachine(virtualMachine);
+            AzureManagerImpl.getManager(getProject()).restartVirtualMachine(virtualMachine);
         }
     }
 
