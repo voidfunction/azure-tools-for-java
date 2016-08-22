@@ -1,13 +1,17 @@
 package com.microsoft.azureexplorer.forms;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -139,15 +143,14 @@ public class CreateArmStorageAccountForm extends Dialog {
         group.setLayout(new RowLayout(SWT.HORIZONTAL));
         createNewRadioButton = new Button(group, SWT.RADIO);
         createNewRadioButton.setText("Create new");
+        createNewRadioButton.setSelection(true);
         useExistingRadioButton = new Button(group, SWT.RADIO);
         useExistingRadioButton.setText("Use existing");
         
         SelectionListener updateListener = new SelectionAdapter() {
         	@Override
 			public void widgetSelected(SelectionEvent arg0) {
-        		 final boolean isNewGroup = createNewRadioButton.getSelection();
-                 resourceGrpField.setVisible(isNewGroup);
-                 resourceGrpCombo.setVisible(!isNewGroup);
+        		 updateResourceGroup();
 			}
 		};
         createNewRadioButton.addSelectionListener(updateListener);
@@ -163,6 +166,8 @@ public class CreateArmStorageAccountForm extends Dialog {
         resourceGroupViewer = new ComboViewer(resourceGrpCombo);
         resourceGroupViewer.setContentProvider(ArrayContentProvider.getInstance());
         
+        updateResourceGroup();
+        
         regionLabel = new Label(container, SWT.LEFT);
         regionLabel.setText("Region:");
         regionComboBox = new Combo(container, SWT.READ_ONLY);
@@ -176,10 +181,6 @@ public class CreateArmStorageAccountForm extends Dialog {
         kindCombo = new Combo(container, SWT.READ_ONLY);
         gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         kindCombo.setLayoutData(gridData);
-        for (Map.Entry<String, Kind> entry : ACCOUNT_KIND.entrySet()) {
-        	kindCombo.add(entry.getKey());
-        	kindCombo.setData(entry.getKey(), entry.getValue());
-        }
 
         replicationLabel = new Label(container, SWT.LEFT);
         replicationLabel.setText("Replication");
@@ -217,6 +218,19 @@ public class CreateArmStorageAccountForm extends Dialog {
                 validateEmptyFields();
             }
         });
+        
+        resourceGrpField.addModifyListener(new ModifyListener() {
+            @Override
+            public void modifyText(ModifyEvent modifyEvent) {
+                validateEmptyFields();
+            }
+        });
+        
+        resourceGrpCombo.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                validateEmptyFields();
+            }
+        });
 
         if (AzureManagerImpl.getManager().authenticated()) {
             String upn = AzureManagerImpl.getManager().getUserInfo().getUniqueName();
@@ -228,6 +242,12 @@ public class CreateArmStorageAccountForm extends Dialog {
 
         return super.createContents(parent);
     }
+    
+    private void updateResourceGroup() {
+		final boolean isNewGroup = createNewRadioButton.getSelection();
+         resourceGrpField.setVisible(isNewGroup);
+         resourceGrpCombo.setVisible(!isNewGroup);
+	}
 
     private void validateEmptyFields() {
         boolean allFieldsCompleted = !(nameTextField.getText().isEmpty() || regionComboBox.getText().isEmpty()
@@ -259,36 +279,65 @@ public class CreateArmStorageAccountForm extends Dialog {
 		storageAccount.setNewResourceGroup(isNewResourceGroup);
 		storageAccount.setResourceGroupName(resourceGroupName);
 		storageAccount.setKind((Kind) kindCombo.getData(kindCombo.getText())); 
-
+		if (regionComboBox.isEnabled()) {
 		DefaultLoader.getIdeHelper().runInBackground(null, "Creating storage account...", false, true,
 				"Creating storage account...", new Runnable() {
 					@Override
 					public void run() {
-						try {
-							storageAccount = AzureArmManagerImpl.getManager(null).createStorageAccount(storageAccount);
-							// AzureManagerImpl.getManager().refreshStorageAccountInformation(storageAccount);
-							if (onCreate != null) {
-								onCreate.run();
-							}
-						} catch (AzureCmdException e) {
-							storageAccount = null;
-							DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-								@Override
-								public void run() {
-									PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
-											"An error occurred while creating the storage account.", e);
-								}
-							});
-						}
+						createStorageAccount();
+					}
+
+					
+				});
+		} else {
+			ProgressMonitorDialog dialog = new ProgressMonitorDialog(PluginUtil.getParentShell());
+			try {
+				dialog.run(true, false, new IRunnableWithProgress() {
+					
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						monitor.beginTask("Creating storage account...", 100);
+						createStorageAccount();
+						monitor.worked(100);
+						monitor.done();
 					}
 				});
+			} catch (InvocationTargetException | InterruptedException e) {
+				PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+						"An error occurred while creating the storage account.", e);
+			}
+		}
 		super.okPressed();
     }
+    
+    private void createStorageAccount() {
+		try {
+			storageAccount = AzureArmManagerImpl.getManager(null).createStorageAccount(storageAccount);
+			// AzureManagerImpl.getManager().refreshStorageAccountInformation(storageAccount);
+			if (onCreate != null) {
+				onCreate.run();
+			}
+		} catch (AzureCmdException e) {
+			storageAccount = null;
+			DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+							"An error occurred while creating the storage account.", e);
+				}
+			});
+		}
+	}
 
     public void fillFields() {
 
         if (subscription == null) {
         	loadRegions();
+        	for (Map.Entry<String, Kind> entry : ACCOUNT_KIND.entrySet()) {
+            	kindCombo.add(entry.getKey());
+            	kindCombo.setData(entry.getKey(), entry.getValue());
+            }
+        	kindCombo.select(0);
             for (ReplicationTypes replicationType : ReplicationTypes.values()) {
                 replicationComboBox.add(replicationType.getDescription());
                 replicationComboBox.setData(replicationType.getDescription(), replicationType);
@@ -323,6 +372,10 @@ public class CreateArmStorageAccountForm extends Dialog {
             subscriptionComboBox.setEnabled(false);
             subscriptionComboBox.add(subscription.getName());
             subscriptionComboBox.select(0);
+            kindCombo.add("General purpose"); // only General purpose accounts supported for VMs
+            kindCombo.setData(Kind.STORAGE);
+            kindCombo.setEnabled(false);
+            kindCombo.select(0);
             regionComboBox.add(region.toString());
             regionComboBox.setEnabled(false);
             regionComboBox.select(0);
