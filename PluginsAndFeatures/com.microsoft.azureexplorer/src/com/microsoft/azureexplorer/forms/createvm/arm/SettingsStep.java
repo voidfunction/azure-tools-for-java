@@ -307,31 +307,31 @@ public class SettingsStep extends WizardPage {
 									networkComboBox.add(network.name());
 									networkComboBox.setData(network.name(), network);
 								}
-								networkComboBox.addSelectionListener(new SelectionAdapter() {
-									@Override
-									public void widgetSelected(SelectionEvent e) {
-										if (CREATE_NEW.equals(networkComboBox.getText())) {
-											// showNewVirtualNetworkForm();
-										} else if ((Network) networkComboBox.getData(networkComboBox.getText()) != null) {
-											Network network = (Network) networkComboBox.getData(networkComboBox.getText());
-											wizard.setVirtualNetwork(network);
-											subnetComboBox.removeAll();
-
-											for (String subnet : network.subnets().keySet()) {
-												subnetComboBox.add(subnet);
-											}
-											subnetComboBox.setEnabled(true);
-											if (network.subnets().size() > 0) {
-												subnetComboBox.select(0);
-												wizard.setSubnet(subnetComboBox.getText());
-											}
-										}
-									}
-								});
 							}
 						});
 					}
 				});
+		networkComboBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (CREATE_NEW.equals(networkComboBox.getText())) {
+					// showNewVirtualNetworkForm();
+				} else if ((Network) networkComboBox.getData(networkComboBox.getText()) != null) {
+					Network network = (Network) networkComboBox.getData(networkComboBox.getText());
+					wizard.setVirtualNetwork(network);
+					subnetComboBox.removeAll();
+
+					for (String subnet : network.subnets().keySet()) {
+						subnetComboBox.add(subnet);
+					}
+					subnetComboBox.setEnabled(true);
+					if (network.subnets().size() > 0) {
+						subnetComboBox.select(0);
+						wizard.setSubnet(subnetComboBox.getText());
+					}
+				}
+			}
+		});
 		if (virtualNetworks == null) {
 			DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
 				@Override
@@ -339,14 +339,6 @@ public class SettingsStep extends WizardPage {
 					networkComboBox.setItems(new String[] { CREATE_NEW, LOADING });
 					subnetComboBox.removeAll();
 					subnetComboBox.setEnabled(false);
-				}
-			});
-			networkComboBox.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					if (CREATE_NEW.equals(networkComboBox.getText())) {
-						// showNewVirtualNetworkForm();
-					}
 				}
 			});
 		}
@@ -386,21 +378,25 @@ public class SettingsStep extends WizardPage {
 				fillStorage();
 			}
 		});
+		storageComboBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (CREATE_NEW.equals(storageComboBox.getText())) {
+					 showNewStorageForm();
+				} else if (storageComboBox.getData(storageComboBox.getText()) != null) {
+					ArmStorageAccount storageAccount = (ArmStorageAccount) storageComboBox.getData(storageComboBox.getText());
+					wizard.setStorageAccount(storageAccount);
+				}
+
+			}
+		});
 		if (storageAccounts == null) {
             DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
                 @Override
                 public void run() {
                     storageComboBox.setItems(new String[]{CREATE_NEW, LOADING});
                 }
-            });
-            storageComboBox.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    if (CREATE_NEW.equals(storageComboBox.getText())) {
-                        showNewStorageForm();
-                    }
-                }
-            });
+            });            
         }
     }
 
@@ -415,18 +411,6 @@ public class SettingsStep extends WizardPage {
 					storageComboBox.add(storageAccount.getName());
 					storageComboBox.setData(storageAccount.getName(), storageAccount);
 				}
-				storageComboBox.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						if (CREATE_NEW.equals(storageComboBox.getText())) {
-							 showNewStorageForm();
-						} else if (storageComboBox.getData(storageComboBox.getText()) != null) {
-							ArmStorageAccount storageAccount = (ArmStorageAccount) storageComboBox.getData(storageComboBox.getText());
-							wizard.setStorageAccount(storageAccount);
-						}
-
-					}
-				});
 			}
 		});
     }
@@ -469,44 +453,34 @@ public class SettingsStep extends WizardPage {
 							pipCombo.add(pip.name());
 							pipCombo.setData(pip.name(), pip);
 						}
-						pipCombo.addSelectionListener(new SelectionAdapter() {
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								if (NONE.equals(pipCombo.getText())) {
-				                    wizard.setPublicIpAddress(null);
-				                    wizard.setWithNewPip(false);
-				                } else if (CREATE_NEW.equals(pipCombo.getText())) {
-				                    wizard.setWithNewPip(true);
-				                    wizard.setPublicIpAddress(null);
-//				                    showNewPipForm();
-				                } else if (pipCombo.getData(pipCombo.getText()) instanceof PublicIpAddress) {
-				                    wizard.setPublicIpAddress((PublicIpAddress) pipCombo.getData(pipCombo.getText()));
-				                    wizard.setWithNewPip(false);
-				                }
-							}
-						});
 					}
 				});
             }
         });
-    	
+    	pipCombo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (NONE.equals(pipCombo.getText())) {
+                    wizard.setPublicIpAddress(null);
+                    wizard.setWithNewPip(false);
+                } else if (CREATE_NEW.equals(pipCombo.getText())) {
+                    wizard.setWithNewPip(true);
+                    wizard.setPublicIpAddress(null);
+//                    showNewPipForm();
+                } else if (pipCombo.getData(pipCombo.getText()) instanceof PublicIpAddress) {
+                    wizard.setPublicIpAddress((PublicIpAddress) pipCombo.getData(pipCombo.getText()));
+                    wizard.setWithNewPip(false);
+                }
+			}
+		});
         if (publicIpAddresses == null) {
         	DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
                 @Override
                 public void run() {
                     pipCombo.setItems(new String[]{NONE, CREATE_NEW, LOADING});
-                }
-            });
-        	pipCombo.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    if (CREATE_NEW.equals(pipCombo.getText())) {
-                    	wizard.setWithNewPip(true);
-                    	wizard.setPublicIpAddress(null);
-                    } else if (NONE.equals(pipCombo.getText())) {
-                        wizard.setPublicIpAddress(null);
-                        wizard.setWithNewPip(false);
-                    }
+                    pipCombo.select(0);
+                    wizard.setPublicIpAddress(null);
+                    wizard.setWithNewPip(false);
                 }
             });
         }
@@ -547,34 +521,25 @@ public class SettingsStep extends WizardPage {
 							nsgCombo.add(nsg.name());
 							nsgCombo.setData(nsg.name(), nsg);
 						}
-						nsgCombo.addSelectionListener(new SelectionAdapter() {
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								if (NONE.equals(nsgCombo.getText())) {
-				                    wizard.setNetworkSecurityGroup(null);
-				                } else if (nsgCombo.getData(nsgCombo.getText()) instanceof NetworkSecurityGroup) {
-				                    wizard.setNetworkSecurityGroup((NetworkSecurityGroup) nsgCombo.getData(nsgCombo.getText()));
-				                }
-							}
-						});
 					}
 				});
             }
         });
-    	
+    	nsgCombo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (NONE.equals(nsgCombo.getText())) {
+                    wizard.setNetworkSecurityGroup(null);
+                } else if (nsgCombo.getData(nsgCombo.getText()) instanceof NetworkSecurityGroup) {
+                    wizard.setNetworkSecurityGroup((NetworkSecurityGroup) nsgCombo.getData(nsgCombo.getText()));
+                }
+			}
+		});
         if (networkSecurityGroups == null) {
         	DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
                 @Override
                 public void run() {
                     nsgCombo.setItems(new String[]{NONE, LOADING});
-                }
-            });
-        	nsgCombo.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                	if (NONE.equals(nsgCombo.getText())) {
-	                    wizard.setNetworkSecurityGroup(null);
-	                }
                 }
             });
         }
@@ -604,43 +569,30 @@ public class SettingsStep extends WizardPage {
 							availabilityCombo.add(availabilitySet.name());
 							availabilityCombo.setData(availabilitySet.name(), availabilitySet);
 						}
-						availabilityCombo.addSelectionListener(new SelectionAdapter() {
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								if (NONE.equals(availabilityCombo.getText())) {
-				                    wizard.setAvailabilitySet(null);
-				                    wizard.setWithNewAvailabilitySet(false);
-				                } else if (CREATE_NEW.equals(pipCombo.getText())) {
-				                    wizard.setWithNewAvailabilitySet(true);
-				                    wizard.setAvailabilitySet(null);
-				                } else if (availabilityCombo.getData(availabilityCombo.getText()) instanceof AvailabilitySet) {
-				                    wizard.setAvailabilitySet((AvailabilitySet) availabilityCombo.getData(availabilityCombo.getText()));
-				                    wizard.setWithNewAvailabilitySet(false);
-				                }
-							}
-						});
 					}
 				});
             }
         });
-    	
+    	availabilityCombo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (NONE.equals(availabilityCombo.getText())) {
+                    wizard.setAvailabilitySet(null);
+                    wizard.setWithNewAvailabilitySet(false);
+                } else if (CREATE_NEW.equals(pipCombo.getText())) {
+                    wizard.setWithNewAvailabilitySet(true);
+                    wizard.setAvailabilitySet(null);
+                } else if (availabilityCombo.getData(availabilityCombo.getText()) instanceof AvailabilitySet) {
+                    wizard.setAvailabilitySet((AvailabilitySet) availabilityCombo.getData(availabilityCombo.getText()));
+                    wizard.setWithNewAvailabilitySet(false);
+                }
+			}
+		});
         if (availabilitySets == null) {
         	DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
                 @Override
                 public void run() {
                     availabilityCombo.setItems(new String[]{NONE, CREATE_NEW, LOADING});
-                }
-            });
-        	availabilityCombo.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                	if (NONE.equals(availabilityCombo.getText())) {
-	                    wizard.setAvailabilitySet(null);
-	                    wizard.setWithNewAvailabilitySet(false);
-	                } else if (CREATE_NEW.equals(availabilityCombo.getText())) {
-	                    wizard.setWithNewAvailabilitySet(true);
-	                    wizard.setAvailabilitySet(null);
-	                }
                 }
             });
         }
@@ -657,15 +609,6 @@ public class SettingsStep extends WizardPage {
             }
         }
         return filteredNsgs;
-    }
-
-    private void fillAvailabilitySets() {
-//    ApplicationManager.getApplication().invokeAndWait(new Runnable() {
-//        @Override
-//        public void run() {
-//            availabilityComboBox.setModel(new DefaultComboBoxModel(new String[]{}));
-//        }
-//    }, ModalityState.any());
     }
 
     private void showNewStorageForm() {
