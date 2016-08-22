@@ -76,7 +76,7 @@ public class CreateVMWizard extends VMWizard {
 
     @Override
     public boolean performFinish() {
-    	DefaultLoader.getIdeHelper().runInBackground(null, "Creating virtual machine...", false, true, "Creating virtual machine...", new Runnable() {
+    	DefaultLoader.getIdeHelper().runInBackground(null, "Creating virtual machine " + name + "...", false, true, "Creating virtual machine " + name + "...", new Runnable() {
             @Override
             public void run() {
                 try {

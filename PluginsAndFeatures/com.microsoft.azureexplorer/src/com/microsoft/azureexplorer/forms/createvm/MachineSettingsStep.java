@@ -41,6 +41,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import java.io.File;
 import java.util.*;
 
 
@@ -201,6 +202,18 @@ public class MachineSettingsStep extends WizardPage {
         certificateField.setLayoutData(gridData);
         certificateButton = new Button(panel, SWT.PUSH);
         certificateButton.setText("...");
+        certificateButton.addSelectionListener(new SelectionAdapter() {
+        	@Override
+			public void widgetSelected(SelectionEvent arg0) {
+        		FileDialog dialog = new FileDialog(PluginUtil.getParentShell());
+        		String [] extensions = {"*.pub", "*.PUB"};
+        		dialog.setFilterExtensions(extensions);
+        		String certPath = dialog.open();
+        		if (certPath != null) {
+        			certificateField.setText(certPath);
+        		}
+			}
+		});
     }
 
     @Override
