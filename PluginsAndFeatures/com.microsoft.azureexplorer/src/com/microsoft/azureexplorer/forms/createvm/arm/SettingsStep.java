@@ -356,7 +356,8 @@ public class SettingsStep extends WizardPage {
     }
 
     private void retrieveStorageAccounts() {
-		DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+		DefaultLoader.getIdeHelper().runInBackground(null, "Loading storage accounts...", false, true,
+				"Loading storage accounts...", new Runnable() {
 			@Override
 			public void run() {
 
@@ -433,7 +434,8 @@ public class SettingsStep extends WizardPage {
     }
 
     private void retrievePublicIpAddresses() {
-    	DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+    	DefaultLoader.getIdeHelper().runInBackground(null, "Loading public ip addresses...", false, true,
+				"Loading public ip addresses...", new Runnable() {
 			@Override
 			public void run() {
                 if (publicIpAddresses == null) {
@@ -502,7 +504,8 @@ public class SettingsStep extends WizardPage {
     }
 
     private void retrieveNetworkSecurityGroups() {
-    	DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+    	DefaultLoader.getIdeHelper().runInBackground(null, "Loading network security groups...", false, true,
+				"Loading network security groups...", new Runnable() {
 			@Override
 			public void run() {
                 if (networkSecurityGroups == null) {
@@ -549,7 +552,8 @@ public class SettingsStep extends WizardPage {
     }
     
     private void retrieveAvailabilitySets() {
-    	DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+    	DefaultLoader.getIdeHelper().runInBackground(null, "Loading availability sets...", false, true,
+				"Loading availability sets...", new Runnable() {
 			@Override
 			public void run() {
                 if (availabilitySets == null) {
@@ -582,7 +586,7 @@ public class SettingsStep extends WizardPage {
 				if (NONE.equals(availabilityCombo.getText())) {
                     wizard.setAvailabilitySet(null);
                     wizard.setWithNewAvailabilitySet(false);
-                } else if (CREATE_NEW.equals(pipCombo.getText())) {
+                } else if (CREATE_NEW.equals(availabilityCombo.getText())) {
                     wizard.setWithNewAvailabilitySet(true);
                     wizard.setAvailabilitySet(null);
                 } else if (availabilityCombo.getData(availabilityCombo.getText()) instanceof AvailabilitySet) {
