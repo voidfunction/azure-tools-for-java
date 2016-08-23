@@ -31,9 +31,9 @@ import com.intellij.ui.ListCellRendererWrapper;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.Kind;
+import com.microsoft.azure.management.storage.SkuTier;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.helpers.LinkListener;
-import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -42,7 +42,6 @@ import com.microsoft.tooling.msservices.model.ReplicationTypes;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
-import com.microsoft.tooling.msservices.model.vm.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -69,6 +68,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     private JTextField resourceGrpField;
     private JComboBox resourceGrpCombo;
     private JComboBox accoountKindCombo;
+    private JComboBox performanceComboBox;
 
     private Runnable onCreate;
     private Subscription subscription;
@@ -155,13 +155,6 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                 setText(kind == Kind.STORAGE ? "General purpose" : "Blob storage");
             }
         });
-        replicationComboBox.setRenderer(new ListCellRendererWrapper<ReplicationTypes>() {
-            @Override
-            public void customize(JList jList, ReplicationTypes replicationTypes, int i, boolean b, boolean b1) {
-                setText(replicationTypes.getDescription());
-            }
-        });
-
         init();
     }
 
@@ -256,7 +249,6 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         final CreateArmStorageAccountForm createStorageAccountForm = this;
         if (subscription == null) {
             loadRegions();
-            replicationComboBox.setModel(new DefaultComboBoxModel(ReplicationTypes.values()));
             accoountKindCombo.setModel(new DefaultComboBoxModel(Kind.values()));
             try {
                 subscriptionComboBox.setEnabled(true);
@@ -289,9 +281,41 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             accoountKindCombo.setEnabled(false);
             regionComboBox.addItem(region);
             regionComboBox.setEnabled(false);
-            replicationComboBox.setModel(new DefaultComboBoxModel(
-                    new ReplicationTypes[] {ReplicationTypes.Standard_LRS, ReplicationTypes.Standard_GRS, ReplicationTypes.Standard_RAGRS}));
             loadGroups();
+        }
+        performanceComboBox.setModel(new DefaultComboBoxModel(SkuTier.values()));
+        performanceComboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    fillReplicationTypes();
+                }
+            }
+        });
+        replicationComboBox.setRenderer(new ListCellRendererWrapper<ReplicationTypes>() {
+            @Override
+            public void customize(JList jList, ReplicationTypes replicationTypes, int i, boolean b, boolean b1) {
+                if (replicationTypes != null) {
+                    setText(replicationTypes.getDescription());
+                }
+            }
+        });
+        fillReplicationTypes();
+    }
+
+    private void fillReplicationTypes() {
+        if (performanceComboBox.getSelectedItem().equals(SkuTier.STANDARD)) {
+            // Create storage account from Azure Explorer
+            if (regionComboBox.isEnabled()) {
+                replicationComboBox.setModel(
+                        new DefaultComboBoxModel(new ReplicationTypes[] {ReplicationTypes.Standard_ZRS, ReplicationTypes.Standard_LRS, ReplicationTypes.Standard_GRS, ReplicationTypes.Standard_RAGRS}));
+            } else {
+                // Create storage account from VM creation
+                replicationComboBox.setModel(
+                        new DefaultComboBoxModel(new ReplicationTypes[] {ReplicationTypes.Standard_LRS, ReplicationTypes.Standard_GRS, ReplicationTypes.Standard_RAGRS}));
+            }
+        } else {
+            replicationComboBox.setModel(new DefaultComboBoxModel(new ReplicationTypes[] {ReplicationTypes.Premium_LRS}));
         }
     }
 

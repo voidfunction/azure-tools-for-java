@@ -50,6 +50,7 @@ import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.Kind;
+import com.microsoft.azure.management.storage.SkuTier;
 
 public class CreateArmStorageAccountForm extends Dialog {
     private static final String PRICING_LINK = "<a href=\"http://go.microsoft.com/fwlink/?LinkID=400838\">Read more about replication services and pricing details</a>";
@@ -75,6 +76,8 @@ public class CreateArmStorageAccountForm extends Dialog {
     private Combo regionComboBox;
     private Label kindLabel;
     private Combo kindCombo;
+    private Label performanceLabel;
+    private Combo performanceCombo;
     private Label replicationLabel;
     private Combo replicationComboBox;
     private Link pricingLabel;
@@ -182,6 +185,12 @@ public class CreateArmStorageAccountForm extends Dialog {
         gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         kindCombo.setLayoutData(gridData);
 
+        performanceLabel = new Label(container, SWT.LEFT);
+        performanceLabel.setText("Performance:");
+        performanceCombo = new Combo(container, SWT.READ_ONLY);
+        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+        performanceCombo.setLayoutData(gridData);
+        
         replicationLabel = new Label(container, SWT.LEFT);
         replicationLabel.setText("Replication");
         replicationComboBox = new Combo(container, SWT.READ_ONLY);
@@ -278,7 +287,7 @@ public class CreateArmStorageAccountForm extends Dialog {
 		storageAccount.setLocation(region);
 		storageAccount.setNewResourceGroup(isNewResourceGroup);
 		storageAccount.setResourceGroupName(resourceGroupName);
-		storageAccount.setKind((Kind) kindCombo.getData(kindCombo.getText())); 
+		storageAccount.setKind((Kind) kindCombo.getData(kindCombo.getText()));
 		if (regionComboBox.isEnabled()) {
 		DefaultLoader.getIdeHelper().runInBackground(null, "Creating storage account...", false, true,
 				"Creating storage account...", new Runnable() {
@@ -330,7 +339,6 @@ public class CreateArmStorageAccountForm extends Dialog {
 	}
 
     public void fillFields() {
-
         if (subscription == null) {
         	loadRegions();
         	for (Map.Entry<String, Kind> entry : ACCOUNT_KIND.entrySet()) {
@@ -338,10 +346,6 @@ public class CreateArmStorageAccountForm extends Dialog {
             	kindCombo.setData(entry.getKey(), entry.getValue());
             }
         	kindCombo.select(0);
-            for (ReplicationTypes replicationType : ReplicationTypes.values()) {
-                replicationComboBox.add(replicationType.getDescription());
-                replicationComboBox.setData(replicationType.getDescription(), replicationType);
-            }
             try {
                 subscriptionComboBox.setEnabled(true);
 
@@ -379,13 +383,41 @@ public class CreateArmStorageAccountForm extends Dialog {
             regionComboBox.add(region.toString());
             regionComboBox.setEnabled(false);
             regionComboBox.select(0);
-            for (ReplicationTypes replicationType : new ReplicationTypes[] {ReplicationTypes.Standard_LRS, ReplicationTypes.Standard_GRS, ReplicationTypes.Standard_RAGRS}) {
-                replicationComboBox.add(replicationType.getDescription());
-                replicationComboBox.setData(replicationType.getDescription(), replicationType);
-            }
             loadGroups();
             loadRegions();
         }
+        for (SkuTier skuTier : SkuTier.values()) {
+    		performanceCombo.add(skuTier.toString());
+    	}
+    	performanceCombo.select(0);
+    	performanceCombo.addSelectionListener(new SelectionAdapter() {
+    		public void widgetSelected(SelectionEvent e) {
+    			fillReplicationTypes();
+            }
+		});
+    	fillReplicationTypes();
+    }
+    
+    private void fillReplicationTypes() {
+    	replicationComboBox.removeAll();
+    	if (performanceCombo.getText().equals(SkuTier.STANDARD.toString())) {
+    		// Create storage account from Azure Explorer
+    		if (regionComboBox.getEnabled()) {
+    			for (ReplicationTypes replicationType : new ReplicationTypes[] {ReplicationTypes.Standard_ZRS, ReplicationTypes.Standard_LRS, ReplicationTypes.Standard_GRS, ReplicationTypes.Standard_RAGRS}) {
+                    replicationComboBox.add(replicationType.getDescription());
+                    replicationComboBox.setData(replicationType.getDescription(), replicationType);
+                }
+    		} else {
+        		// Create storage account from VM creation
+    			for (ReplicationTypes replicationType : new ReplicationTypes[] {ReplicationTypes.Standard_LRS, ReplicationTypes.Standard_GRS, ReplicationTypes.Standard_RAGRS}) {
+                    replicationComboBox.add(replicationType.getDescription());
+                    replicationComboBox.setData(replicationType.getDescription(), replicationType);
+                }
+    		}
+    	} else {    		
+    		replicationComboBox.add(ReplicationTypes.Premium_LRS.getDescription());
+            replicationComboBox.setData(ReplicationTypes.Premium_LRS.getDescription(), ReplicationTypes.Premium_LRS);
+    	}
         replicationComboBox.select(0);
     }
 
