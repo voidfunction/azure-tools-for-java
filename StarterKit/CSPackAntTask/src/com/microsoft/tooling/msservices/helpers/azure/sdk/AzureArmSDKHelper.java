@@ -57,7 +57,7 @@ public class AzureArmSDKHelper {
     public static Azure getAzure(@NotNull String subscriptionId, @NotNull String accessToken)
             throws IOException, URISyntaxException, AzureCmdException {
         TokenCredentials credentials = new TokenCredentials(null, accessToken);
-        return Azure.configure().authenticate(credentials).withSubscription(subscriptionId);
+        return Azure.configure().withUserAgent(AzureToolkitFilter.USER_AGENT).authenticate(credentials).withSubscription(subscriptionId);
     }
 
     @NotNull
