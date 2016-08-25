@@ -1,7 +1,4 @@
-# azure-tools-for-java-private
+# azure-tools-for-java-private [![Build Status](http://13.88.12.33:8080/buildStatus/icon?job=AzureToolkitManager)](http://13.88.12.33:8080/job/AzureToolkitManager/)
 Private repo for the azure-tools-for-java project
 
-**eclipse** | **idea**
---- | ---
-[![Build Status](http://13.88.12.33:8080/buildStatus/icon?job=eclipse-plugin)](http://13.88.12.33:8080/job/eclipse-plugin) | [![Build Status](http://13.88.12.33:8080/buildStatus/icon?job=idea-plugin)](http://13.88.12.33:8080/job/idea-plugin/)
 
