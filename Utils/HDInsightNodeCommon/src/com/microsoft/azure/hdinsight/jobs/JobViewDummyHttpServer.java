@@ -29,7 +29,6 @@ import com.microsoft.azure.hdinsight.common.task.TaskExecutor;
 import com.microsoft.azure.hdinsight.common.task.YarnHistoryTask;
 import com.microsoft.azure.hdinsight.jobs.framework.RequestDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
@@ -262,7 +261,6 @@ public class JobViewDummyHttpServer {
             isEnabled = true;
         } catch (IOException e) {
             LOGGER.error("Get job history error", e);
-            DefaultLoader.getUIHelper().showError(e.getClass().getName(), e.getMessage());
         }
     }
 }
