@@ -74,7 +74,7 @@ import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 public class AzurePlugin extends AbstractProjectComponent {
     private static final Logger LOG = Logger.getInstance("#com.microsoft.intellij.AzurePlugin");
     public static final String COMPONENTSETS_VERSION = "2.9.2"; // todo: temporary fix!
-    public static final String PLUGIN_VERSION = "1.5";
+    public static final String PLUGIN_VERSION = "1.6";
     private static final String PREFERENCESETS_VERSION = "2.9.2";
     public static final String AZURE_LIBRARIES_VERSION = "0.9.2";
     public static final String QPID_LIBRARIES_VERSION = "0.19.0";

@@ -2,7 +2,7 @@
 <feature
       id="com.microsoftopentechnologies.wacommon.feature"
       label="Azure Common Plugin"
-      version="2.9.5.qualifier"
+      version="2.9.6.qualifier"
       provider-name="Microsoft Corp.">
 
    <description>

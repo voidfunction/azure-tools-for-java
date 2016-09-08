@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources;bundle-version="3.9.0",
  com.microsoftopentechnologies.windowsazure.tools.sdk;bundle-version="0.9.2",
  com.microsoftopentechnologies.windowsazure.tools.wasdkjava.ui;bundle-version="0.9.2",
- com.microsoftopentechnologies.wacommon;bundle-version="2.9.5"
+ com.microsoftopentechnologies.wacommon;bundle-version="2.9.6"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin

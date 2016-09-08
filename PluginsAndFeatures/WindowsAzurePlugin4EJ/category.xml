@@ -21,10 +21,10 @@
    <feature url="features/com.microsoft.hdinsights.feature_1.0.0.qualifier.jar" id="com.microsoft.hdinsights.feature" version="1.0.0.qualifier">
       <category name="com.persistent.winazure.eclipseplugin.category"/>
    </feature>
-   <feature url="features/com.microsoftopentechnologies.wacommon.feature_2.9.5.qualifier.jar" id="com.microsoftopentechnologies.wacommon.feature" version="2.9.5.qualifier">
+   <feature url="features/com.microsoftopentechnologies.wacommon.feature_2.9.6.qualifier.jar" id="com.microsoftopentechnologies.wacommon.feature" version="2.9.6.qualifier">
       <category name="com.persistent.winazure.eclipseplugin.category"/>
    </feature>
-   <feature url="features/com.persistent.winazure.eclipseplugin.feature_2.9.5.qualifier.jar" id="com.persistent.winazure.eclipseplugin.feature" version="2.9.5.qualifier">
+   <feature url="features/com.persistent.winazure.eclipseplugin.feature_2.9.6.qualifier.jar" id="com.persistent.winazure.eclipseplugin.feature" version="2.9.6.qualifier">
       <category name="com.persistent.winazure.eclipseplugin.category"/>
    </feature>
    <feature url="features/com.microsoft.sqljdbc4.feature_6.0.7507.100.jar" id="com.microsoft.sqljdbc4.feature" version="6.0.7507.100">
