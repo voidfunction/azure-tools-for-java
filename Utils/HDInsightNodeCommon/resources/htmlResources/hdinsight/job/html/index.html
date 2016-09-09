@@ -3,14 +3,15 @@
 
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="static/jquery-2.2.3.min.js"></script>
     <script src="sparkjobview.js"></script>
     <script src="common.js"></script>
     <script src="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.11.4/jquery-ui.js"></script>
-    <link rel="stylesheet" href="static/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="static/vis.min.css" type="text/css" />
-    <link rel="stylesheet" href="static/webui.css" type="text/css" />
-    <link rel="stylesheet" href="static/timeline-view.css" type="text/css" />
+    <link rel="stylesheet" href="static/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="static/vis.min.css" type="text/css"/>
+    <link rel="stylesheet" href="static/webui.css" type="text/css"/>
+    <link rel="stylesheet" href="static/timeline-view.css" type="text/css"/>
     <link rel="stylesheet" type="text/css" href="indexpage.css">
     <script src="static/sorttable.js"></script>
     <script src="static/vis.min.js"></script>
@@ -19,88 +20,228 @@
     <script src="static/table.js"></script>
     <script src="static/additional-metrics.js"></script>
     <script src="static/timeline-view.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>
+    <script src="jobViewDetails.js"></script>
+    <script src="static/tipsy.js"></script>
+    <link rel="stylesheet" href="static/tipsy.css"/>
+    <!--<script src="static/jobview/d3/d3.min.js"></script>-->
+    <script>
+        $(function () {
+
+        });
+
+    </script>
 </head>
 
 <body>
-    <div id="bodydiv">
-        <div id="leftDiv" class="ui-widget-content">
-            <p id="htitle"><strong>Spark Job History</strong></p>
-            <div id="tableDIv" class="ui-widget-content">
-                <table id="myTable" class="table table-bordered table-condensed table-striped sortable ui-widget-content">
+<p id="resultTest"></p>
+<div id="bodydiv" height="100%" width="100%">
+    <div class="row">
+        <p id="htitle"><strong>Spark Job History</strong></p>
+    </div>
+    <div class="row" style="margin-left: 0;">
+        <div id="leftDiv" class="ui-widget-content col-xs-4 col-lg-4">
+            <div id="tableDIv" class="ui-widget-content col-xs-12 col-lg-12">
+                <table id="myTable" class="table table-bordered table-condensed table-striped sortable ui-widget-content col-xs-12 col-lg-12">
                     <thead class="ui-widget-content">
-                        <tr align="center" class="ui-widget-content">
-                            <th class="ui-widget-content">State</th>
-                            <th class="ui-widget-content">Job Name</th>
-                            <th class="ui-widget-content">Application ID</th>
-                        </tr>
+                    <tr align="center" class="ui-widget-content">
+                        <th class="ui-widget-content">State</th>
+                        <th class="ui-widget-content">Application ID</th>
+                        <th class="ui-widget-content">Job Name</th>
+                        <th class="ui-widget-content">Start Time</th>
+                        <th class="ui-widget-content">Attempt Times</th>
+                        <th class="ui-widget-content">Spark User</th>
+                    </tr>
                     </thead>
                     <tbody id="JobHistoryTbody" class="ui-widget-content">
-                        <tr class="ui-widget-content"></tr>
+                    <tr class="ui-widget-content"></tr>
                     </tbody>
+                    <tfoot>
+                        <p>Queue Name: default Running: X Queue: Y</p>
+                    </tfoot>
                 </table>
-            </div>
 
+            </div>
         </div>
-        <div id="rightDiv">
-            <div id="rightButtonPanel">
-                <button id="refreshButtion">Refresh</button>
-                <button id="openSparkUIButton">Open Spark History UI</button>
-                <button id="openYarnUIButton">Open Yarn UI</button>
-            </div>
-            <hr class="rightPanelhr">
-            <div id="basicInformationDIv" class="well">
-                <table id="basicInformationTable">
-                    <thead>
-                        <tr>
-                            <td colspan="2">Basic Job Information</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <p style="margin-left:20px;">Job Started Time:</p>
-                            </td>
-                            <td id="startTime"></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <p style="margin-left:20px;">Job Ended Time:</p>
-                            </td>
-                            <td id="endTime"></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <p style="margin-left:20px;margin-bottom:0px;">AM Container Number:</p>
-                            </td>
-                            <td id="containerNumber"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div id="jobDetailDiv">
-                <div id="errorMessageDiv" class="well">
-                    <h2 style="margin:5px 0 5px;">Error Message</h2>
-                    <textarea id="errorMessage" rows="5" readonly="readonly" class="resultTextArea"></textarea>
+        <div id="rightDiv" class="col-xs-8 col-lg-8" style="margin-left: 0;">
+            <div class="row">
+                <div class="col-xs-4">
+                    <p id="jobName" style="margin-top: 5px">Job Name: Test</p>
                 </div>
-                <div id="JobOutputDiv" class="well">
-                    <h2 style="margin:10px 0 0 0;">Job Output</h2>
-                    <textarea id="jobOutput" rows="10" readonly="readonly" class="resultTextArea"></textarea>
-                </div>
-                <div id="LibyJobLogsDiv" class="well">
-                    <h2 style="margin:10px 0 0 0;">Livy Job Logs</h2>
-                    <textarea id="livyJobLog" rows="10" readonly="readonly" class="resultTextArea">	
-					</textarea>
-                </div>
-                <div id="SparkDriverLogDiv" class="well">
-                    <h2 style="margin:10px 0 0 0;;">Spark Driver Logs</h2>
-                    <textarea id="sparkDriverLog" rows="10" readonly="readonly" class="resultTextArea">	
-					</textarea>
+                <div id="rightButtonPanel" class="col-xs-8">
+                    <button id="refreshButtion">Refresh</button>
+                    <button id="openSparkUIButton">Open Spark History UI</button>
+                    <button id="openYarnUIButton">Open Yarn UI</button>
                 </div>
             </div>
+            <hr class="rightPanelhr row"/>
+            <div id="jobViewPanel" class="row">
+                <div id="jobSummary" class="col-md-4 lead">
+                    <p>details</p>
+                    <div id="job-timeline-div"  style="background: greenyellow; max-height: 100px;">
+                        <svg id="job-timeline" style="background: turquoise">
+                            <g/>
+                        </svg>
+                    </div>
+                    <div id="job-details_by_jobs" style="margin: 0px;background: red">
+                        <div class="dropdown">
+                            <button type="button" class="btn dropdown-toggle btn-default btn-xs" id="dropdownMenu1"
+                                    data-toggle="dropdown">Job Details
+                                <span class="caret"></span>
+                            </button>
+                            <ul id="job-details-by-job" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                            </ul>
+                        </div>
+                        <div>
+                            <table id="job-details-info-table"></table>
+                        </div>
+                    </div>
+                    <div id="stored_rdds" style="margin: 0px;background: green">
+                        <div class="dropdown">
+                            <button type="button" class="btn dropdown-toggle btn-default btn-xs" id="dropdownMenu2"
+                                    data-toggle="dropdown">
+                                Stored RDD
+                                <span class="caret"></span>
+                            </button>
+                            <ul id="stored_rdd_details" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+                                <!--<li role="presentation">-->
+                                <!--<a role="menuitem" tabindex="-1" href="#job_1">Job 1</a>-->
+                                <!--</li>-->
+                                <!--<li role="presentation">-->
+                                <!--<a role="menuitem" tabindex="-1" href="#job_2">Job 2</a>-->
+                                <!--</li>-->
+                            </ul>
+                        </div>
+                        <div>
+                            <table id="stored_rdd_info"></table>
+                        </div>
+                    </div>
+                    <div id="task_details">
+                        <div class="dropdown">
+                            <button type="button" class="btn dropdown-toggle btn-default btn-xs" id="dropdownMenu3"
+                                    data-toggle="dropdown">
+                                Task Details
+                                <span class="caret"></span>
+                            </button>
+                            <ul id="task_detail" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu3">
+                                <li role="presentation">
+                                    <a role="menuitem" tabindex="-1" href="#job_1">Job 1</a>
+                                </li>
+                                <li role="presentation">
+                                    <a role="menuitem" tabindex="-1" href="#job_2">Job 2</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <p>Task Detail</p>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-default btn-xs"><a>Livy Log</a></a></button>
+                        <button type="button" class="btn btn-default btn-xs"><a>Spark Event Log</a></button>
+                    </div>
+                </div>
+                <div id="jobDetailDiv" class="col-md-8">
+                    <div id="basicInformationDIv" class="well">
+                        <table id="basicInformationTable">
+                            <thead>
+                            <tr>
+                                <td colspan="2">Basic Job Information</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <p style="margin-left:20px;">Job Started Time:</p>
+                                </td>
+                                <td id="startTime"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p style="margin-left:20px;">Job Ended Time:</p>
+                                </td>
+                                <td id="endTime"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p style="margin-left:20px;margin-bottom:0px;">AM Container Number:</p>
+                                </td>
+                                <td id="containerNumber"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <ul id="myTab" class="nav nav-tabs">
+                        <li class="active"><a href="#error" data-toggle="tab">Error</a></li>
+                        <li><a href="#driverLog" data-toggle="tab">Driver Log</a></li>
+                        <li><a id="jobGraphLink" href="#jobGraphDiv" data-toggle="tab">Job Graph</a></li>
+                        <li><a href="#taskSummary" data-toggle="tab">Task Summary</a></li>
+                        <li><a href="#output" data-toggle="tab">OutPut</a></li>
+                        <li><a href="#storedRDD" data-toggle="tab">Stored RDD</a></li>
+                    </ul>
 
+                    <div id="myTabContent" class="tab-content">
+                        <div class="tab-pane fade in active" id="error">
+                            <textarea id="errorMessage" rows="10" readonly="readonly" class="resultTextArea"></textarea>
+                        </div>
+                        <div class="tab-pane fade" id="driverLog">
+                <textarea id="sparkDriverLog" rows="10" readonly="readonly" class="resultTextArea">
+                </textarea>
+                        </div>
+                        <div id="jobGraphDiv">
+                            <svg id="jobGraphSvg" viewPoint="0 0 1000 1000"></svg>
+                        </div>
+                        <div class="tab-pane fade" id="taskSummary">
+                            <table id="taskSummaryTable" class="table table-bordered table-condensed table-striped sortable ui-widget-content">
+                                <thead class="ui-widget-content">
+                                <tr align="center" class="ui-widget-content">
+                                    <th class="ui-widget-content">Index</th>
+                                    <th class="ui-widget-content">ID</th>
+                                    <th class="ui-widget-content">Attempt</th>
+                                    <th class="ui-widget-content">Locality Level</th>
+                                    <th class="ui-widget-content">Executor ID/Host</th>
+                                    <th class="ui-widget-content">LaunchTime</th>
+                                </tr>
+                                </thead>
+                                <tbody id="taskSummaryTbody" class="ui-widget-content">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="output">
+                            <p>Output Test</p>
+                        </div>
+                        <div class="tab-pane fade" id="storedRDD">
+                            <p>Stored RDD Test</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
+</div>
 
+
+<!--<div id="jobDetailDiv">-->
+<!--<div id="errorMessageDiv" class="well">-->
+
+<!--</div>-->
+<!--<div id="JobOutputDiv" class="well">-->
+<!--<h2 style="margin:10px 0 0 0;">Job Output</h2>-->
+<!--<textarea id="jobOutput" rows="10" readonly="readonly" class="resultTextArea"></textarea>-->
+<!--</div>-->
+<!--<div id="LibyJobLogsDiv" class="well">-->
+<!--<h2 style="margin:10px 0 0 0;">Livy Job Logs</h2>-->
+<!--<textarea id="livyJobLog" rows="10" readonly="readonly" class="resultTextArea">	-->
+<!--</textarea>-->
+<!--</div>-->
+<!--<div id="SparkDriverLogDiv" class="well">-->
+
+<!--</div>-->
 </body>
 
 </html>

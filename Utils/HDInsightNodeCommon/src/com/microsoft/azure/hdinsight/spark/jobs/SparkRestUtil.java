@@ -25,14 +25,11 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.microsoft.azure.hdinsight.common.CommonConst;
 import com.microsoft.azure.hdinsight.sdk.cluster.ClusterDetail;
-import com.microsoft.azure.hdinsight.sdk.common.CommonConstant;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
-import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
 import com.microsoft.azure.hdinsight.spark.jobs.structure.Application;
 import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+import com.microsoft.tooling.msservices.helpers.Nullable;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -46,9 +43,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SparkRestUtil {
     private static String defaultYarnUIHistoryFormat = "https://%s.azurehdinsight.net/yarnui/hn/cluster";
@@ -60,25 +55,18 @@ public class SparkRestUtil {
     private static JsonFactory jsonFactory = new JsonFactory();
     private static ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
 
-    public static List<Application> getApplications(@NotNull ClusterDetail clusterDetail, @NotNull String restUrl, JavaType javaType) throws HDIException, IOException {
+    @Nullable
+    public static List<Application> getApplications(@NotNull ClusterDetail clusterDetail) throws HDIException, IOException {
         HttpEntity entity = getEntity(clusterDetail, "applications");
         String entityType = entity.getContentType().getValue();
         if( entityType.equals("application/json")){
             String json = EntityUtils.toString(entity);
             List<Application> apps = objectMapper.readValue(json, TypeFactory.defaultInstance().constructType(List.class, Application.class));
+            return apps;
         }
         return null;
     }
 
-    public static <T> T getApplications(@NotNull ClusterDetail clusterDetail, @NotNull String restUrl, Class<T> classType) throws HDIException, IOException {
-        HttpEntity entity = getEntity(clusterDetail, "applications");
-        String entityType = entity.getContentType().getValue();
-        if( entityType.equals("application/json")){
-            String json = EntityUtils.toString(entity);
-            T apps = objectMapper.readValue(json, classType);
-        }
-        return null;
-    }
     private static HttpEntity getEntity(@NotNull ClusterDetail clusterDetail, @NotNull String restUrl) throws HDIException, IOException {
         provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(clusterDetail.getHttpUserName(),clusterDetail.getHttpPassword()));
         HttpClient client = HttpClients.custom().setDefaultCredentialsProvider(provider).build();

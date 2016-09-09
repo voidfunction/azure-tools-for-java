@@ -22,7 +22,6 @@
 package com.microsoft.azure.hdinsight.common.task;
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
@@ -31,10 +30,9 @@ public class SparkRestTask extends Task<String> {
 
     public SparkRestTask(@NotNull RequestDetail requestDetail, @Nullable FutureCallback<String> callback) {
         super(callback);
-        requestDetail.getRestUrl()
     }
     @Override
-    public Object call() throws Exception {
+    public String call() throws Exception {
         return null;
     }
 }

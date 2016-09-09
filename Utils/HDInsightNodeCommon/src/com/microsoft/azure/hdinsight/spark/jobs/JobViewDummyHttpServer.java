@@ -21,7 +21,7 @@
  */
 package com.microsoft.azure.hdinsight.spark.jobs;
 
-import com.google.common.util.concurrent.FutureCallback;
+import com.microsoft.azure.hdinsight.common.HttpFutureCallback;
 import com.microsoft.azure.hdinsight.common.task.LivyTask;
 import com.microsoft.azure.hdinsight.common.task.RestTask;
 import com.microsoft.azure.hdinsight.common.task.TaskExecutor;
@@ -30,11 +30,9 @@ import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -42,28 +40,19 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class JobViewDummyHttpServer {
 
-    private static final String sparkPreRestUrl = "https://%s.azurehdinsight.net/sparkhistory/api/v1";
-    private static final String yarnPreRestUrl = "https://%s.azurehdinsight.net/yarnui/ws/v1";
-    private static final String yarnHistoryUrl = "https://%s.azurehdinsight.net/yarnui";
-    private static final String LivyBatchesRestUrl = "https://%s.azurehdinsight.net/livy/batches";
-
-    private static Logger LOGGER = Logger.getLogger(JobViewDummyHttpServer.class);
-    private static Pattern clusterPattern = Pattern.compile("^/clusters/([^/]*)(/.*)");
+//    private static Logger LOGGER = LogManager.getLogger(JobViewDummyHttpServer.class);
 
     private static RequestDetail requestDetail;
-    public  static final int PORT = 39128;
+    public static final int PORT = 39128;
     private static HttpServer server;
     private static final int NO_OF_THREADS = 10;
-    private static  ExecutorService executorService;
+    private static ExecutorService executorService;
     private static boolean isEnabled = false;
 
     public static RequestDetail getCurrentRequestDetail() {
@@ -78,73 +67,37 @@ public class JobViewDummyHttpServer {
         if (server != null) {
             server.stop(0);
         }
-        if(executorService != null) {
+        if (executorService != null) {
             executorService.shutdown();
             try {
                 executorService.awaitTermination(2, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                // do nothing
+//                LOGGER.warn(e.getMessage());
             }
         }
         isEnabled = false;
     }
 
-    @Nullable
-    private static RequestDetail getRequestDetail(@NotNull URI myUrl) {
-        String[] queries = myUrl.getQuery() == null ? null : myUrl.getQuery().split("&");
-        String path = myUrl.getPath();
-        Matcher matcher = clusterPattern.matcher(path);
-        if (matcher.find()) {
-            requestDetail = new RequestDetail(matcher.group(1), matcher.group(2), queries);
-            return requestDetail;
-        }
-        return null;
-    }
-
     public synchronized static void initlize() {
-        if(isEnabled) {
+//        LOGGER.info("job view server start!");
+        if (isEnabled) {
             return;
         }
         try {
             server = HttpServer.create(new InetSocketAddress(PORT), 10);
+
             server.createContext("/clusters/", new HttpHandler() {
                 @Override
                 public void handle(final HttpExchange httpExchange) throws IOException {
-                    final RequestDetail requestDetail = getRequestDetail(httpExchange.getRequestURI());
-
+                    requestDetail = RequestDetail.getRequestDetail(httpExchange.getRequestURI());
                     if (requestDetail == null) {
                         return;
                     }
 
                     IClusterDetail clusterDetail = requestDetail.getClusterDetail();
-
-                    if (clusterDetail == null) {
-                        return;
-                    }
-
-                    String preUrl = "";
-                    switch (requestDetail.getApiType()) {
-                        case YarnHistory:
-                            preUrl = yarnHistoryUrl;
-                            break;
-                        case YarnRest:
-                            preUrl = yarnPreRestUrl;
-                            break;
-                        case LivyBatchesRest:
-                            preUrl = LivyBatchesRestUrl;
-                            break;
-                        default:
-                            preUrl = sparkPreRestUrl;
-                    }
-
-                    String queryUrl = String.format(preUrl, clusterDetail.getName()) + requestDetail.getRestUrl();
-
+                    final String queryUrl = requestDetail.getQueryUrl();
                     if (requestDetail.getApiType() == RequestDetail.APIType.YarnHistory) {
-                        if(queryUrl.endsWith("stderr")) {
-                            queryUrl = queryUrl + "?start=0";
-                        }
-
-                        TaskExecutor.submit(new YarnHistoryTask(clusterDetail, queryUrl, new FutureCallback<String>() {
+                        TaskExecutor.submit(new YarnHistoryTask(clusterDetail, queryUrl, new HttpFutureCallback(httpExchange) {
                             @Override
                             public void onSuccess(String str) {
                                 httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
@@ -165,33 +118,20 @@ public class JobViewDummyHttpServer {
                                     stream.write(str.getBytes());
                                     stream.close();
                                 } catch (IOException e) {
-                                    LOGGER.error("Get job history error", e);
+//                                    LOGGER.error("Get job history error", e);
                                 }
                             }
 
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                                httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-                                try {
-                                    String str = throwable.getMessage();
-                                    httpExchange.sendResponseHeaders(200, str.length());
-                                    OutputStream stream = httpExchange.getResponseBody();
-                                    stream.write(str.getBytes());
-                                    stream.close();
-                                }catch (Exception e) {
-                                    LOGGER.error("Get job history error", e);
-                                }
-                            }
                         }));
-                    } else if(requestDetail.getApiType() == RequestDetail.APIType.LivyBatchesRest) {
-                        TaskExecutor.submit(new LivyTask(clusterDetail, queryUrl, new FutureCallback<String>() {
+                    } else if (requestDetail.getApiType() == RequestDetail.APIType.LivyBatchesRest) {
+                        TaskExecutor.submit(new LivyTask(clusterDetail, queryUrl, new HttpFutureCallback(httpExchange) {
                             @Override
                             public void onSuccess(String str) {
                                 httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
                                 try {
                                     String applicationId = requestDetail.getProperty("applicationId");
-                                    if(applicationId != null) {
-                                       str = JobUtils.getJobInformation(str, applicationId);
+                                    if (applicationId != null) {
+                                        str = JobUtils.getJobInformation(str, applicationId);
                                     }
 
                                     httpExchange.sendResponseHeaders(200, str.length());
@@ -199,29 +139,14 @@ public class JobViewDummyHttpServer {
                                     stream.write(str.getBytes());
                                     stream.close();
                                 } catch (IOException e) {
-                                    LOGGER.error("Get job history error", e);
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                                httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-                                try {
-                                    String str = throwable.getMessage();
-                                    httpExchange.sendResponseHeaders(200, str.length());
-                                    OutputStream stream = httpExchange.getResponseBody();
-                                    stream.write(str.getBytes());
-                                    stream.close();
-                                }catch (Exception e) {
-                                    LOGGER.error("Get job history error", e);
+//                                    LOGGER.error("Get job history error", e);
                                 }
                             }
                         }));
-
-                    }  else {
-                        TaskExecutor.submit(new RestTask(clusterDetail, queryUrl, new FutureCallback<String>() {
+                    } else {
+                        TaskExecutor.submit(new RestTask(clusterDetail, queryUrl, new HttpFutureCallback(httpExchange) {
                             @Override
-                            public void onSuccess(String str) {
+                            public void onSuccess(@NotNull String str) {
                                 httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
                                 try {
                                     httpExchange.sendResponseHeaders(200, str.length());
@@ -229,36 +154,21 @@ public class JobViewDummyHttpServer {
                                     stream.write(str.getBytes());
                                     stream.close();
                                 } catch (IOException e) {
-                                    LOGGER.error("Get job history error", e);
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                                httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-                                try {
-                                    String str = throwable.getMessage();
-                                    httpExchange.sendResponseHeaders(200, str.length());
-                                    OutputStream stream = httpExchange.getResponseBody();
-                                    stream.write(str.getBytes());
-                                    stream.close();
-                                }catch (Exception e) {
-                                    LOGGER.error("Get job history error", e);
+//                                    LOGGER.error("Get job history error", e);
                                 }
                             }
                         }));
                     }
-
                 }
             });
-
             executorService = Executors.newFixedThreadPool(NO_OF_THREADS);
             server.setExecutor(executorService);
             server.start();
             isEnabled = true;
         } catch (IOException e) {
-            LOGGER.error("Get job history error", e);
+//            LOGGER.error("Get job history error", e);
             DefaultLoader.getUIHelper().showError(e.getClass().getName(), e.getMessage());
         }
     }
+
 }

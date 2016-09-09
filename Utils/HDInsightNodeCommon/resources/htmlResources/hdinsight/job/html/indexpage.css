@@ -13,7 +13,7 @@ body {
     display: inline-block;
 }
 
-#tableDIv {
+#tableDIv,#taskSummary {
     overflow-y: auto;
     overflow-x: auto;
     font-size: 12px;
@@ -23,16 +23,19 @@ body {
     height: 880px;
 }
 
-#myTable > thead > tr > th {
+#myTable,#taskSummaryTable,#job-details-info-table > thead > tr > th {
     text-align: center;
     font-size: 13px;
 }
 
-#myTable > tbody > tr > td {
+#myTable,#taskSummaryTable > tbody > tr > td {
     text-align: center;
     font-size: 11px;
 }
-
+#job-details-info-table tr td {
+    text-align: center;
+    font-size: 13px;
+}
 #rightButtonPanel button {
     margin: 5px;
     font-size: 11px;
@@ -136,4 +139,46 @@ body {
 .vsplitbar {
     width: 5px;
     background: #cab;
+}
+
+/* job summary */
+g.type-TK > rect {
+    fill: #00ffd0;
+}
+
+text {
+    font-weight: 300;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
+    font-size: 14px;
+}
+
+.node rect {
+    stroke: #999;
+    fill: #fff;
+    stroke-width: 1.5px;
+}
+
+.edgePath path {
+    stroke: #333;
+    stroke-width: 1.5px;
+}
+/* end job details*/
+ul li {
+    font-size: 10px;
+}
+
+#jobDetailsInfo {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#jobDetailsInfo td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+#jobDetailsInfo tr:nth-child(even) {
+    background-color: #dddddd;
 }

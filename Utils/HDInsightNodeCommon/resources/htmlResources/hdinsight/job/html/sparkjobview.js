@@ -1,5 +1,78 @@
 var localhost = "http://localhost:39128/clusters/";
 
+$(function () {
+    $('#jobGraphDiv').hide();
+    $('#myTab li:eq(0)').hide();
+    $('#myTab li:eq(4) a').tab('show');
+    $('#jobGraphLink').on('shown.bs.tab', function() {
+        $('#jobGraphDiv').show();
+        renderJobGraph();
+    });
+    $('#jobGraphLink').on('hidden.bs.tab', function() {
+        $('#jobGraphDiv').hide();
+    });
+
+    // renderJobSummary(["1","2","3","4"],"#job-timeline g");
+    //
+    //
+    // renderTaskSummary(testData);
+    getProjectId();
+    $("#leftDiv").scrollTop($("#leftDiv")[0].scrollHeight);
+    $("#JobHistoryTbody").on('click', 'tr', function () {
+        $("#errorMessage").text("");
+        $("#jobOutput").text("");
+        $("#livyJobLog").text("");
+        $("#sparkDriverLog").text("");
+        var rows = $("#JobHistoryTbody tr");
+        rows.removeClass('selected-hight');
+        $(this).addClass('selected-hight');
+
+        appId = $(this).find('td:eq(1)').text();
+
+        localStorage.setItem("selectedAppID", appId);
+
+        if (appId == null) {
+            return;
+        }
+
+        setBasicInformation();
+        setAMcontainer();
+        setDiagnosticsLog();
+        setLivyLog();
+        setJobTimeLine();
+        setJobDetail();
+
+        //renderJobDetails();
+    });
+
+    $("#openSparkUIButton").click(function () {
+        var id = typeof appId == 'undefined' ? "" : appId.toString();
+        if (id != "") {
+            var application = $.grep(applicationList, function (e) {
+                return e.id == id;
+            });
+            if (application != null && application.length == 1) {
+                var currentAttemptId = application[0].attempts[0].attemptId;
+                if (currentAttemptId != null) {
+                    id = id + "/" + currentAttemptId;
+                }
+            }
+        }
+        JobUtils.openSparkUIHistory(id);
+    });
+
+    $("#openYarnUIButton").click(function () {
+        JobUtils.openYarnUIHistory(typeof appId == 'undefined' ? "" : appId.toString());
+    });
+
+    $("#refreshButtion").click(function () {
+        location.reload();
+        refreshGetSelectedApplication();
+    });
+
+    getJobHistory();
+});
+
 function reloadTableStyle() {
     $("table tbody tr:nth-child(odd)").addClass("odd-row");
     /* For cell text alignment */
@@ -23,10 +96,6 @@ function getProjectId() {
     projectId = queriresMap["projectid"];
 
     var webType = queriresMap["engintype"];
-    if (webType !== "javafx") {
-        JobUtils = localStorage;
-    }
-
     console.log('Project id:' + projectId);
 }
 
@@ -63,7 +132,7 @@ function getMessageAsync(url, callback) {
 }
 
 function refreshGetSelectedApplication() {
-    var selectedAppid = JobUtils.getItem("selectedAppID");
+    var selectedAppid = localStorage.getItem("selectedAppID");
     if (selectedAppid == null) {
         return;
     }
@@ -109,9 +178,38 @@ function setMessageForLable(str) {
 function writeToTable(message) {
     applicationList = JSON.parse(message);
     $('#myTable tbody').html("");
-    for (var i = 0; i < applicationList.length; ++i) {
-        $('#myTable tbody').append('<tr align=\"center\" class=\"ui-widget-content\"><td id=\"first\" class=\"ui-widget-content\">' + getTheJobStatusImgLabel(applicationList[i].attempts[0].completed) + '</td><td id=\"second\" class=\"ui-widget-content\">' + applicationList[i].name + '</td><td id=\"second\" class=\"ui-widget-content\">' + applicationList[i].id + '</td></tr>');
-    }
+    d3.select("#myTable tbody")
+        .selectAll('tr')
+        .data(applicationList)
+        .enter()
+        .append('tr')
+        .attr("align","center")
+        .attr("class","ui-widget-content")
+        .selectAll('td')
+        .data(function(d) {
+            return appInformationList(d);
+        })
+        .enter()
+        .append('td')
+        .attr('class',"ui-widget-content")
+        .attr('id',function(d,i) {
+            return i;
+        })
+        .html(function(d, i) {
+            return d;
+        });
+}
+
+function appInformationList(app) {
+    var lists = [];
+    var status = app.attempts[app.attempts.length - 1].completed;
+    lists.push(getTheJobStatusImgLabel(status));
+    lists.push(app.id);
+    lists.push(app.name);
+    lists.push(app.attempts[0].startTime);
+    lists.push(app.attempts.length);
+    lists.push(app.attempts[0].sparkUser);
+    return lists;
 }
 
 function getTheJobStatusImgLabel(str) {
@@ -197,7 +295,6 @@ function getJobResult() {
     });
 }
 
-//        $("#jobOutput").html(s);
 function getResultFromSparkHistory(url, callback) {
     getMessageAsync(url, function (s) {
         callback(s);
@@ -217,60 +314,55 @@ function setLivyLog() {
         $("#livyJobLog").text(s);
     });
 }
-
-$(function () {
-    getProjectId();
-    $("#leftDiv").scrollTop($("#leftDiv")[0].scrollHeight);
-    $("#JobHistoryTbody").on('click', 'tr', function () {
-        $("#errorMessage").text("");
-        $("#jobOutput").text("");
-        $("#livyJobLog").text("");
-        $("#sparkDriverLog").text("");
-        var rows = $("#JobHistoryTbody tr");
-        rows.removeClass('selected-hight');
-        $(this).addClass('selected-hight');
-
-        appId = $(this).find('td:eq(2)').text();
-
-        // localStorage is not supported in WebEngin. we have to do by using JobUtils when start from javaFx
-        // It won't work in web browser only.
-        // localStorage.setItem("selectedAppID", appId);
-        JobUtils.setItem("selectedAppID", appId);
-
-        if (appId == null) {
-            return;
-        }
-
-        setBasicInformation();
-        setAMcontainer();
-        setDiagnosticsLog();
-        setLivyLog();
+function setJobDetail() {
+    var selectedApp = applicationList.find(function(d) {
+        return d.id == appId;
     });
+    var maxAttempt = selectedApp.attempts.length;
+    if(selectedApp.attempts[maxAttempt - 1].sparkUser == 'hive') {
+        return;
+    }
+    var url = localhost + projectId + "/applications/" + appId + "/" +　maxAttempt ;
+    getMessageAsync(url + "/jobs", function (s) {
+        var jobs = JSON.parse(s);
 
-    $("#openSparkUIButton").click(function () {
-        var id = typeof appId == 'undefined' ? "" : appId.toString();
-        if (id != "") {
-            var application = $.grep(applicationList, function (e) {
-                return e.id == id;
+        renderJobDetails(jobs);
+    });
+}
+function stagesInfo(jobs, url) {
+        getMessageAsync(url + "/stages", function (s) {
+            var data = new Object();
+            var stages = JSON.parse(s);
+            data.jobs = jobs;
+            data.stages = stages;
+            data.stageDetails = [];
+            jobs.stageIds.forEach(function(stageNumber) {
+                getMessageAsync(url + "/stages" + "/" + stageNumber, function(s) {
+                    var detail = JSON.parse(s);
+                    data.stageDetails.push(detail);
+                });
             });
-            if (application != null && application.length == 1) {
-                var currentAttemptId = application[0].attempts[0].attemptId;
-                if (currentAttemptId != null) {
-                    id = id + "/" + currentAttemptId;
-                }
-            }
+        });
+}
+
+function setJobTimeLine() {
+    var url = localhost + projectId + "/cluster/apps/" + appId + "?restType=yarn";
+    getMessageAsync(url, function(s) {
+        var t = s;
+    });
+}
+
+function setJobGraph() {
+    getMessageAsync(localhost + projectId + "/applications/" + appId + "jobs", function (s) {
+        var application = JSON.parse(s);
+        jobBasicInformation = application;
+        attemptId = jobBasicInformation.attempts[0].attemptId;
+        $("#startTime").text(application.attempts[0].startTime);
+        $("#endTime").text(application.attempts[0].endTime);
+
+        if (appId.substr(0, 5) != "local") {
+            getJobResult();
+            getSparkDriverLog();
         }
-        JobUtils.openSparkUIHistory(id);
     });
-
-    $("#openYarnUIButton").click(function () {
-        JobUtils.openYarnUIHistory(typeof appId == 'undefined' ? "" : appId.toString());
-    });
-
-    $("#refreshButtion").click(function () {
-        location.reload();
-        refreshGetSelectedApplication();
-    });
-
-    getJobHistory();
-});
+}
