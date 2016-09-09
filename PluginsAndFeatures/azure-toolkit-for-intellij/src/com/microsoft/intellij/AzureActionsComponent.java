@@ -76,7 +76,7 @@ public class AzureActionsComponent implements ApplicationComponent, PluginCompon
         if (!AzurePlugin.IS_ANDROID_STUDIO) {
             ActionManager am = ActionManager.getInstance();
             DefaultActionGroup toolbarGroup = (DefaultActionGroup) am.getAction(IdeActions.GROUP_MAIN_TOOLBAR);
-            toolbarGroup.addAll((DefaultActionGroup) am.getAction(""));
+            toolbarGroup.addAll((DefaultActionGroup) am.getAction("AzureToolbarGroup"));
             DefaultActionGroup popupGroup = (DefaultActionGroup) am.getAction(IdeActions.GROUP_PROJECT_VIEW_POPUP);
             popupGroup.add(am.getAction("AzurePopupGroup"));
             if (PlatformUtils.isIdeaUltimate()) {
