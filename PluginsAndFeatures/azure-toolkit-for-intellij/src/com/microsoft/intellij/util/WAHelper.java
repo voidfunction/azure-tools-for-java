@@ -176,12 +176,33 @@ public class WAHelper {
     }
 
     // HTTP GET request
-    public static void sendGet(String sitePath) throws Exception {
+    public static int sendGet(String sitePath) throws Exception {
         URL url = new URL(sitePath);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setRequestProperty("User-Agent", "AzureToolkit for Intellij");
-        int responseCode = con.getResponseCode();
+        return con.getResponseCode();
+    }
+
+    public static void checkSiteIsUp(String siteUrl) throws Exception {
+        for (int i=0; i<5; ++i) {
+            //System.out.println("==> Sending get to " + siteUrl + "...");
+            int statusCode = WAHelper.sendGet(siteUrl);
+            System.out.println("\t status code is " + statusCode);
+            if (statusCode < 400) break;
+            //System.out.println("\t Sleeping 5 sec...");
+            Thread.sleep(5000);
+        }
+    }
+    public static void checkSiteIsDown(String siteUrl) throws Exception {
+        for (int i=0; i<5; ++i) {
+            System.out.println("==> Sending get to " + siteUrl + "...");
+            int statusCode = WAHelper.sendGet(siteUrl);
+            System.out.println("\t status code is " + statusCode);
+            if (statusCode >= 400) break;
+            //System.out.println("\t Sleeping 5 sec...");
+            Thread.sleep(5000);
+        }
     }
 
     public static boolean isFilePresentOnFTPServer(FTPClient ftp, String fileName) throws IOException {
@@ -194,6 +215,26 @@ public class WAHelper {
             }
         }
         return filePresent;
+    }
+
+    public static boolean isRemoteFileExist(FTPClient ftp, String fileName) throws IOException {
+        FTPFile[] files = ftp.listFiles("/site/wwwroot");
+        for (FTPFile file : files) {
+            if (file.isFile() && file.getName().equalsIgnoreCase(fileName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isRemoteDirExist(FTPClient ftp, String fileName) throws IOException {
+        FTPFile[] files = ftp.listFiles("/site/wwwroot");
+        for (FTPFile file : files) {
+            if (file.isDirectory() && file.getName().equalsIgnoreCase(fileName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean checkFileCountOnFTPServer(FTPClient ftp, String path, int fileCount) throws IOException {

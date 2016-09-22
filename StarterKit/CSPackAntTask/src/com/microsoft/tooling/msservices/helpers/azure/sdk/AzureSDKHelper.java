@@ -21,28 +21,6 @@
  */
 package com.microsoft.tooling.msservices.helpers.azure.sdk;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
-import java.security.KeyStoreException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
-import javax.security.cert.X509Certificate;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.xml.sax.SAXException;
-
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -59,26 +37,9 @@ import com.microsoft.azure.management.websites.WebHostingPlanOperations;
 import com.microsoft.azure.management.websites.WebSiteManagementClient;
 import com.microsoft.azure.management.websites.WebSiteManagementService;
 import com.microsoft.azure.management.websites.WebSiteOperations;
-import com.microsoft.azure.management.websites.models.ConnectionStringInfo;
-import com.microsoft.azure.management.websites.models.WebHostingPlan;
-import com.microsoft.azure.management.websites.models.WebHostingPlanCreateOrUpdateParameters;
-import com.microsoft.azure.management.websites.models.WebHostingPlanListResponse;
-import com.microsoft.azure.management.websites.models.WebHostingPlanProperties;
-import com.microsoft.azure.management.websites.models.WebSiteBase;
-import com.microsoft.azure.management.websites.models.WebSiteBaseProperties;
-import com.microsoft.azure.management.websites.models.WebSiteCreateOrUpdateParameters;
-import com.microsoft.azure.management.websites.models.WebSiteDeleteParameters;
-import com.microsoft.azure.management.websites.models.WebSiteGetConfigurationResult;
-import com.microsoft.azure.management.websites.models.WebSiteGetParameters;
-import com.microsoft.azure.management.websites.models.WebSiteGetPublishProfileResponse;
-import com.microsoft.azure.management.websites.models.WebSiteListParameters;
-import com.microsoft.azure.management.websites.models.WebSiteListResponse;
-import com.microsoft.azure.management.websites.models.WebSiteUpdateConfigurationDetails;
-import com.microsoft.azure.management.websites.models.WebSiteUpdateConfigurationParameters;
-import com.microsoft.azure.management.websites.models.WebSiteState;
+import com.microsoft.azure.management.websites.models.*;
 import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import com.microsoft.azure.storage.blob.*;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
@@ -86,14 +47,7 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
-import com.microsoft.tooling.msservices.model.vm.AffinityGroup;
-import com.microsoft.tooling.msservices.model.vm.CloudService;
-import com.microsoft.tooling.msservices.model.vm.Endpoint;
-import com.microsoft.tooling.msservices.model.vm.Location;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachineSize;
-import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
+import com.microsoft.tooling.msservices.model.vm.*;
 import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
 import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
@@ -110,46 +64,9 @@ import com.microsoft.windowsazure.core.pipeline.apache.ApacheConfigurationProper
 import com.microsoft.windowsazure.core.utils.KeyStoreType;
 import com.microsoft.windowsazure.exception.CloudError;
 import com.microsoft.windowsazure.exception.ServiceException;
-import com.microsoft.windowsazure.management.AffinityGroupOperations;
-import com.microsoft.windowsazure.management.LocationOperations;
-import com.microsoft.windowsazure.management.ManagementClient;
-import com.microsoft.windowsazure.management.ManagementService;
-import com.microsoft.windowsazure.management.RoleSizeOperations;
-import com.microsoft.windowsazure.management.compute.ComputeManagementClient;
-import com.microsoft.windowsazure.management.compute.ComputeManagementService;
-import com.microsoft.windowsazure.management.compute.DeploymentOperations;
-import com.microsoft.windowsazure.management.compute.HostedServiceOperations;
-import com.microsoft.windowsazure.management.compute.ServiceCertificateOperations;
-import com.microsoft.windowsazure.management.compute.VirtualMachineOSImageOperations;
-import com.microsoft.windowsazure.management.compute.VirtualMachineOperations;
-import com.microsoft.windowsazure.management.compute.VirtualMachineVMImageOperations;
-import com.microsoft.windowsazure.management.compute.models.CertificateFormat;
-import com.microsoft.windowsazure.management.compute.models.ConfigurationSet;
-import com.microsoft.windowsazure.management.compute.models.DeploymentCreateParameters;
-import com.microsoft.windowsazure.management.compute.models.DeploymentGetResponse;
-import com.microsoft.windowsazure.management.compute.models.DeploymentSlot;
-import com.microsoft.windowsazure.management.compute.models.DeploymentUpgradeMode;
-import com.microsoft.windowsazure.management.compute.models.DeploymentUpgradeParameters;
-import com.microsoft.windowsazure.management.compute.models.HostedServiceCheckNameAvailabilityResponse;
-import com.microsoft.windowsazure.management.compute.models.HostedServiceCreateParameters;
-import com.microsoft.windowsazure.management.compute.models.HostedServiceGetDetailedResponse;
-import com.microsoft.windowsazure.management.compute.models.HostedServiceListResponse;
-import com.microsoft.windowsazure.management.compute.models.HostedServiceProperties;
-import com.microsoft.windowsazure.management.compute.models.InputEndpoint;
-import com.microsoft.windowsazure.management.compute.models.OSVirtualHardDisk;
-import com.microsoft.windowsazure.management.compute.models.PostShutdownAction;
-import com.microsoft.windowsazure.management.compute.models.Role;
-import com.microsoft.windowsazure.management.compute.models.RoleInstance;
-import com.microsoft.windowsazure.management.compute.models.ServiceCertificateCreateParameters;
-import com.microsoft.windowsazure.management.compute.models.ServiceCertificateListResponse;
-import com.microsoft.windowsazure.management.compute.models.SshSettingPublicKey;
-import com.microsoft.windowsazure.management.compute.models.SshSettings;
-import com.microsoft.windowsazure.management.compute.models.VirtualMachineCreateDeploymentParameters;
-import com.microsoft.windowsazure.management.compute.models.VirtualMachineCreateParameters;
-import com.microsoft.windowsazure.management.compute.models.VirtualMachineGetRemoteDesktopFileResponse;
-import com.microsoft.windowsazure.management.compute.models.VirtualMachineOSImageListResponse;
-import com.microsoft.windowsazure.management.compute.models.VirtualMachineShutdownParameters;
-import com.microsoft.windowsazure.management.compute.models.VirtualMachineVMImageListResponse;
+import com.microsoft.windowsazure.management.*;
+import com.microsoft.windowsazure.management.compute.*;
+import com.microsoft.windowsazure.management.compute.models.*;
 import com.microsoft.windowsazure.management.configuration.ManagementConfiguration;
 import com.microsoft.windowsazure.management.configuration.PublishSettingsLoader;
 import com.microsoft.windowsazure.management.models.AffinityGroupListResponse;
@@ -163,12 +80,24 @@ import com.microsoft.windowsazure.management.network.models.NetworkListResponse;
 import com.microsoft.windowsazure.management.storage.StorageAccountOperations;
 import com.microsoft.windowsazure.management.storage.StorageManagementClient;
 import com.microsoft.windowsazure.management.storage.StorageManagementService;
-import com.microsoft.windowsazure.management.storage.models.CheckNameAvailabilityResponse;
-import com.microsoft.windowsazure.management.storage.models.StorageAccountCreateParameters;
-import com.microsoft.windowsazure.management.storage.models.StorageAccountGetKeysResponse;
-import com.microsoft.windowsazure.management.storage.models.StorageAccountGetResponse;
-import com.microsoft.windowsazure.management.storage.models.StorageAccountListResponse;
-import com.microsoft.windowsazure.management.storage.models.StorageAccountProperties;
+import com.microsoft.windowsazure.management.storage.models.*;
+import org.xml.sax.SAXException;
+
+import javax.security.cert.X509Certificate;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class AzureSDKHelper {
     private static class StatusLiterals {
@@ -201,6 +130,60 @@ public class AzureSDKHelper {
     private static final String WINDOWS_PROVISIONING_CONFIGURATION = "WindowsProvisioningConfiguration";
     private static final String LINUX_PROVISIONING_CONFIGURATION = "LinuxProvisioningConfiguration";
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
+    private static CloudStorageAccount getCloudStorageAccount(String blobLink, String saKey) throws Exception {
+        if (blobLink == null || blobLink.isEmpty()) {
+            throw new IllegalArgumentException("Invalid blob link, it's null or empty: " + blobLink);
+        }
+        if (saKey == null || saKey.isEmpty()) {
+            throw new IllegalArgumentException("Invalid storage account key, it's null or empty: " + saKey);
+        }
+        // check the link is valic
+        URI blobUri = new URL(blobLink).toURI();
+        String host =  blobUri.getHost();
+        if (host == null) {
+            throw new IllegalArgumentException("Invalid blobLink, can't find host: " + blobLink);
+        }
+        String storageAccountName = host.substring(0, host.indexOf("."));
+        String storageConnectionString = String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", storageAccountName, saKey);
+        CloudStorageAccount cloudStorageAccount = CloudStorageAccount.parse(storageConnectionString);
+        return cloudStorageAccount;
+    }
+
+    public static String  getBlobSasUri(String blobLink, String saKey) throws Exception {
+        CloudStorageAccount cloudStorageAccount = getCloudStorageAccount(blobLink, saKey);
+        // Create the blob client.
+        CloudBlobClient blobClient = cloudStorageAccount.createCloudBlobClient();
+        // Get container and blob name from the link
+        String path = new URI(blobLink).getPath();
+        if (path == null) {
+            throw new IllegalArgumentException("Invalid blobLink: " + blobLink);
+        }
+        int containerNameEndIndex = path.indexOf("/", 1);
+        String containerName = path.substring(1, containerNameEndIndex);
+        if (containerName == null || containerName.isEmpty()) {
+            throw new IllegalArgumentException("Invalid blobLink, can't find container name: " + blobLink);
+        }
+        String blobName = path.substring(path.indexOf("/", containerNameEndIndex)+1);
+        if (blobName == null || blobName.isEmpty()) {
+            throw new IllegalArgumentException("Invalid blobLink, can't find blob name: " + blobLink);
+        }
+        // Retrieve reference to a previously created container.
+        CloudBlobContainer container = blobClient.getContainerReference(containerName);
+
+        CloudBlockBlob blob = container.getBlockBlobReference(blobName);
+        SharedAccessBlobPolicy sharedAccessBlobPolicy = new SharedAccessBlobPolicy();
+        GregorianCalendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(new Date());
+        sharedAccessBlobPolicy.setSharedAccessStartTime(calendar.getTime());
+        calendar.add(Calendar.HOUR, 23);
+        sharedAccessBlobPolicy.setSharedAccessExpiryTime(calendar.getTime());
+        sharedAccessBlobPolicy.setPermissions(EnumSet.of(SharedAccessBlobPermissions.READ));
+        BlobContainerPermissions containerPermissions = new BlobContainerPermissions();
+        container.uploadPermissions(containerPermissions);
+        String signature = container.generateSharedAccessSignature(sharedAccessBlobPolicy, null);
+        return blobLink + "?" + signature;
+    }
 
     @NotNull
     public static SDKRequestCallback<List<CloudService>, ComputeManagementClient> getCloudServices(@NotNull final String subscriptionId) {
