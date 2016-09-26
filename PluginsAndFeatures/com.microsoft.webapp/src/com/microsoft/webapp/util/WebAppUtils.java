@@ -61,24 +61,30 @@ public class WebAppUtils {
     }
 
     public static void checkSiteIsUp(String siteUrl) throws Exception {
-        for (int i=0; i<5; ++i) {
+        final int REP_COUNT = 10;
+        final int SLEEP_SEC = 5;
+    	for (int i=0; i<REP_COUNT; ++i) {
             //System.out.println("==> Sending get to " + siteUrl + "...");
             int statusCode = sendGet(siteUrl);
-            System.out.println("\t status code is " + statusCode);
-            if (statusCode < 400) break;
+            //System.out.println("\t status code is " + statusCode);
+            if (statusCode < 400) return;
             //System.out.println("\t Sleeping 5 sec...");
-            Thread.sleep(5000);
+            Thread.sleep(SLEEP_SEC * 1000);
         }
+        throw new Exception("Can't start the site");
     }
     public static void checkSiteIsDown(String siteUrl) throws Exception {
-        for (int i=0; i<5; ++i) {
-            System.out.println("==> Sending get to " + siteUrl + "...");
+        final int REP_COUNT = 10;
+        final int SLEEP_SEC = 5;
+    	for (int i=0; i<REP_COUNT; ++i) {
+            //System.out.println("==> Sending get to " + siteUrl + "...");
             int statusCode = sendGet(siteUrl);
-            System.out.println("\t status code is " + statusCode);
-            if (statusCode >= 400) break;
+            //System.out.println("\t status code is " + statusCode);
+            if (statusCode >= 400) return;
             //System.out.println("\t Sleeping 5 sec...");
-            Thread.sleep(5000);
+            Thread.sleep(SLEEP_SEC * 1000);
         }
+        throw new Exception("Can't stop the site");
     }
 
     public static boolean isRemoteFileExist(FTPClient ftp, String fileName) throws IOException {

@@ -755,30 +755,9 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         }
                         ftp.deleteFile(ftpPath + com.microsoft.webapp.util.Messages.configName);
                         
-//                        String tmpPath = String.format("%s%s%s", System.getProperty("java.io.tmpdir"), File.separator, com.microsoft.webapp.util.Messages.configName);
-//                        File file = new File(tmpPath);
-//                        if (file.exists()) {
-//                            file.delete();
-//                        }
-//                        String pluginInstLoc = String.format("%s%s%s", PluginUtil.pluginFolder, File.separator, com.microsoft.webapp.util.Messages.webAppPluginID);
-//                        String configFile = String.format("%s%s%s", pluginInstLoc, File.separator, com.microsoft.webapp.util.Messages.configName);
-//                        WAEclipseHelperMethods.copyFile(configFile, tmpPath);
-//                        String jdkFolderName = "";
-//                        if (dialog.getFinalJDK().isEmpty()) {
-//                            String url = dialog.getFinalURL();
-//                            jdkFolderName = url.substring(url.lastIndexOf("/") + 1, url.length());
-//                            jdkFolderName = jdkFolderName.substring(0, jdkFolderName.indexOf(".zip"));
-//                        } else {
-//                            String cloudVal = WindowsAzureProjectManager.getCloudValue(dialog.getFinalJDK(), cmpntFile);
-//                            jdkFolderName =  cloudVal.substring(cloudVal.indexOf("\\") + 1, cloudVal.length());
-//                        }
                         String jdkPath = "%HOME%\\site\\wwwroot\\jdk\\" + customJdkFolderName;
                         String serverPath = "%programfiles(x86)%\\" +
                                 WebAppUtils.generateServerFolderName(config.getJavaContainer(), config.getJavaContainerVersion());
-                        
-//                        WebAppConfigOperations.prepareWebConfigForCustomJDKServer(tmpPath, jdkPath, serverPath);
-//                        InputStream input = new FileInputStream(tmpPath);
-//                        ftp.storeFile(ftpPath + com.microsoft.webapp.util.Messages.configName, input);
                         byte[] webXmlData = WebAppConfigOperations.prepareWebConfigForCustomJDKServer(jdkPath, serverPath);
                         ftp.storeFile(ftpPath + com.microsoft.webapp.util.Messages.configName,  new ByteArrayInputStream(webXmlData));
                         ftp.logout();
