@@ -663,6 +663,7 @@ public class CreateWebSiteForm extends DialogWrapper {
                         ftp.logout();
                         ftp.disconnect();
                     } catch (IOException ignored) {
+                        // go nothing
                     }
                 }
             }
@@ -725,14 +726,14 @@ public class CreateWebSiteForm extends DialogWrapper {
             byte[] aspxPageData = WebAppConfigOperations.generateAspxScriptForCustomJdk(downloadUrl);
             ftp.storeFile(ftpPath + aspxPageName, new ByteArrayInputStream(aspxPageData));
 
-            byte[] webXml = WebAppConfigOperations.generateWebXmlForCustomJdk(aspxPageName, null);
-            ftp.storeFile(ftpPath + "web.config", new ByteArrayInputStream(webXml));
+            byte[] webXmlData = WebAppConfigOperations.generateWebXmlForCustomJdk(aspxPageName, null);
+            ftp.storeFile(ftpPath + "web.config", new ByteArrayInputStream(webXmlData));
         }
     }
 
     private void copyWebConfigForCustom(WebSiteConfiguration config, String jdkFolderName) throws AzureCmdException {
-        if  (jdkFolderName == null) {
-            throw new NullArgumentException("jdkFolderName is null");
+        if  (jdkFolderName == null || jdkFolderName.isEmpty()) {
+            throw new NullArgumentException("jdkFolderName is null or empty");
         }
         if (config != null) {
             AzureManager manager = AzureManagerImpl.getManager(project);
@@ -765,19 +766,12 @@ public class CreateWebSiteForm extends DialogWrapper {
                         ftp.enterLocalPassiveMode();
                     }
                     ftp.deleteFile(ftpPath + message("configName"));
-                    String tmpPath = String.format("%s%s%s", System.getProperty("java.io.tmpdir"), File.separator, message("configName"));
-                    File file = new File(tmpPath);
-                    if (file.exists()) {
-                        file.delete();
-                    }
 
-                    WAEclipseHelperMethods.copyFile(WAHelper.getCustomJdkFile(message("configName")), tmpPath);
                     String jdkPath = "%HOME%\\site\\wwwroot\\jdk\\" + jdkFolderName;
                     String serverPath = "%programfiles(x86)%\\" +
                             WAHelper.generateServerFolderName(config.getJavaContainer(), config.getJavaContainerVersion());
-                    WebAppConfigOperations.prepareWebConfigForCustomJDKServer(tmpPath, jdkPath, serverPath);
-                    InputStream input = new FileInputStream(tmpPath);
-                    ftp.storeFile(ftpPath + message("configName"), input);
+                    byte[] webXmlData = WebAppConfigOperations.prepareWebConfigForCustomJDKServer(jdkPath, serverPath);
+                    ftp.storeFile(ftpPath + message("configName"),  new ByteArrayInputStream(webXmlData));
                     ftp.logout();
                 } catch (Exception e) {
                     AzurePlugin.log(e.getMessage(), e);
@@ -786,6 +780,7 @@ public class CreateWebSiteForm extends DialogWrapper {
                         try {
                             ftp.disconnect();
                         } catch (IOException ignored) {
+                            // do nothing
                         }
                     }
                 }
