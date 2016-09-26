@@ -36,6 +36,10 @@ import com.microsoft.tooling.msservices.helpers.Nullable;
 import javax.swing.*;
 
 public class HDInsightHelperImpl implements HDInsightHelper {
+    @Override
+    public void closeJobViewEditor(@NotNull Object projectObject, @NotNull String uuid) {
+
+    }
 
     public void openJobViewEditor(Object projectObject, String uuid) {
         IClusterDetail clusterDetail = JobViewManager.getCluster(uuid);

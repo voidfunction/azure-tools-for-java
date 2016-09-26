@@ -167,7 +167,7 @@ public class JobViewDummyHttpServer {
             isEnabled = true;
         } catch (IOException e) {
 //            LOGGER.error("Get job history error", e);
-            DefaultLoader.getUIHelper().showError(e.getClass().getName(), e.getMessage());
+//            DefaultLoader.getUIHelper().showError(e.getClass().getName(), e.getMessage());
         }
     }
 

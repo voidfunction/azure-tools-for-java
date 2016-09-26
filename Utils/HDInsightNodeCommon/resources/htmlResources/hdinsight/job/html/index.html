@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <script src="static/jquery-2.2.3.min.js"></script>
-    <script src="sparkjobview.js"></script>
-    <script src="common.js"></script>
-    <script src="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.11.4/jquery-ui.js"></script>
-    <link rel="stylesheet" href="static/bootstrap.min.css" type="text/css"/>
-    <link rel="stylesheet" href="static/vis.min.css" type="text/css"/>
-    <link rel="stylesheet" href="static/webui.css" type="text/css"/>
-    <link rel="stylesheet" href="static/timeline-view.css" type="text/css"/>
-    <link rel="stylesheet" type="text/css" href="indexpage.css">
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"
+            integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="
+            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+            integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>
+
     <script src="static/sorttable.js"></script>
     <script src="static/vis.min.js"></script>
     <script src="static/bootstrap-tooltip.js"></script>
@@ -20,33 +21,42 @@
     <script src="static/table.js"></script>
     <script src="static/additional-metrics.js"></script>
     <script src="static/timeline-view.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-            crossorigin="anonymous"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script src="http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>
     <script src="jobViewDetails.js"></script>
     <script src="static/tipsy.js"></script>
     <link rel="stylesheet" href="static/tipsy.css"/>
-    <!--<script src="static/jobview/d3/d3.min.js"></script>-->
+    <link rel="stylesheet" href="static/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="static/vis.min.css" type="text/css"/>
+    <link rel="stylesheet" href="static/webui.css" type="text/css"/>
+    <link rel="stylesheet" href="static/timeline-view.css" type="text/css"/>
+    <link rel="stylesheet" href="indexpage.css" type="text/css" />
+
+    <script src="sparkjobview.js"></script>
+    <script src="common.js"></script>
+
     <script>
         $(function () {
-
+            height = window.innerHeight;
+            width = window.innerHeight;
+            $(window).resize(function() {
+                height = window.innerHeight;
+                width = window.innerHeight;
+                $('#bodydiv').height(height);
+                $('#bodydiv').width(width);
+            });
         });
-
     </script>
 </head>
 
 <body>
-<p id="resultTest"></p>
-<div id="bodydiv" height="100%" width="100%">
+<div id="bodydiv" class="container">
     <div class="row">
+        <p id="debuginfo">Start ....</p>
         <p id="htitle"><strong>Spark Job History</strong></p>
     </div>
-    <div class="row" style="margin-left: 0;">
-        <div id="leftDiv" class="ui-widget-content col-xs-4 col-lg-4">
-            <div id="tableDIv" class="ui-widget-content col-xs-12 col-lg-12">
-                <table id="myTable" class="table table-bordered table-condensed table-striped sortable ui-widget-content col-xs-12 col-lg-12">
+    <div class="row myrow" style="margin-left: 0;">
+        <div id="leftDiv" class="ui-widget-content col mycol">
+            <div id="tableDIv" class="ui-widget-content">
+                <table id="myTable" class="table table-bordered table-condensed table-striped sortable ui-widget-content">
                     <thead class="ui-widget-content">
                     <tr align="center" class="ui-widget-content">
                         <th class="ui-widget-content">State</th>
@@ -60,14 +70,10 @@
                     <tbody id="JobHistoryTbody" class="ui-widget-content">
                     <tr class="ui-widget-content"></tr>
                     </tbody>
-                    <tfoot>
-                        <p>Queue Name: default Running: X Queue: Y</p>
-                    </tfoot>
                 </table>
-
             </div>
         </div>
-        <div id="rightDiv" class="col-xs-8 col-lg-8" style="margin-left: 0;">
+        <div id="rightDiv" class="i mycol" style="margin-left: 0;">
             <div class="row">
                 <div class="col-xs-4">
                     <p id="jobName" style="margin-top: 5px">Job Name: Test</p>
@@ -82,12 +88,12 @@
             <div id="jobViewPanel" class="row">
                 <div id="jobSummary" class="col-md-4 lead">
                     <p>details</p>
-                    <div id="job-timeline-div"  style="background: greenyellow; max-height: 100px;">
-                        <svg id="job-timeline" style="background: turquoise">
+                    <div id="job-timeline-div" class="col-md-12 row" style="height: 0;">
+                        <svg id="job-timeline" class="col-md-12" style="margin: 0">
                             <g/>
                         </svg>
                     </div>
-                    <div id="job-details_by_jobs" style="margin: 0px;background: red">
+                    <div id="job-details_by_jobs" style="margin: 0px">
                         <div class="dropdown">
                             <button type="button" class="btn dropdown-toggle btn-default btn-xs" id="dropdownMenu1"
                                     data-toggle="dropdown">Job Details
@@ -100,7 +106,7 @@
                             <table id="job-details-info-table"></table>
                         </div>
                     </div>
-                    <div id="stored_rdds" style="margin: 0px;background: green">
+                    <div id="stored_rdds" style="margin: 0px">
                         <div class="dropdown">
                             <button type="button" class="btn dropdown-toggle btn-default btn-xs" id="dropdownMenu2"
                                     data-toggle="dropdown">
@@ -108,36 +114,30 @@
                                 <span class="caret"></span>
                             </button>
                             <ul id="stored_rdd_details" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
-                                <!--<li role="presentation">-->
-                                <!--<a role="menuitem" tabindex="-1" href="#job_1">Job 1</a>-->
-                                <!--</li>-->
-                                <!--<li role="presentation">-->
-                                <!--<a role="menuitem" tabindex="-1" href="#job_2">Job 2</a>-->
-                                <!--</li>-->
                             </ul>
                         </div>
-                        <div>
-                            <table id="stored_rdd_info"></table>
+                        <div id="stored_rdd_details_div" style="font-size: 13px; text-align: center">
+                            <p id="stored_rdd_details_div_message"></p>
+                            <table id="stored_rdd_info">
+                                <tr></tr>
+                            </table>
                         </div>
                     </div>
-                    <div id="task_details">
+                    <div id="stages_details">
                         <div class="dropdown">
                             <button type="button" class="btn dropdown-toggle btn-default btn-xs" id="dropdownMenu3"
                                     data-toggle="dropdown">
-                                Task Details
+                                 Stage Details
                                 <span class="caret"></span>
                             </button>
-                            <ul id="task_detail" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu3">
-                                <li role="presentation">
-                                    <a role="menuitem" tabindex="-1" href="#job_1">Job 1</a>
-                                </li>
-                                <li role="presentation">
-                                    <a role="menuitem" tabindex="-1" href="#job_2">Job 2</a>
-                                </li>
+                            <ul id="stages_detail" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu3">
                             </ul>
                         </div>
-                        <div>
-                            <p>Task Detail</p>
+                        <div style="font-size: 13px; text-align: center">
+                            <p id="stage_detail_info_message"></p>
+                            <table id="stage_detail_info">
+                                <tr></tr>
+                            </table>
                         </div>
                     </div>
                     <div>
@@ -182,66 +182,54 @@
                         <li><a href="#taskSummary" data-toggle="tab">Task Summary</a></li>
                         <li><a href="#output" data-toggle="tab">OutPut</a></li>
                         <li><a href="#storedRDD" data-toggle="tab">Stored RDD</a></li>
+                        <li><a href="#livyLogs" data-toggle="tab">Livy Log</a></li>
                     </ul>
 
-                    <div id="myTabContent" class="tab-content">
+                    <div id="myTabContent" class="tab-content row col-md-12">
                         <div class="tab-pane fade in active" id="error">
                             <textarea id="errorMessage" rows="10" readonly="readonly" class="resultTextArea"></textarea>
                         </div>
                         <div class="tab-pane fade" id="driverLog">
-                <textarea id="sparkDriverLog" rows="10" readonly="readonly" class="resultTextArea">
-                </textarea>
+                            <textarea id="sparkDriverLog" rows="50" readonly="readonly" class="resultTextArea">
+                            </textarea>
                         </div>
                         <div id="jobGraphDiv">
                             <svg id="jobGraphSvg" viewPoint="0 0 1000 1000"></svg>
                         </div>
                         <div class="tab-pane fade" id="taskSummary">
-                            <table id="taskSummaryTable" class="table table-bordered table-condensed table-striped sortable ui-widget-content">
+                            <table id="taskSummaryTable" class="table table-bordered table-condensed table-striped sortable ui-widget-content col-md-12">
                                 <thead class="ui-widget-content">
                                 <tr align="center" class="ui-widget-content">
-                                    <th class="ui-widget-content">Index</th>
-                                    <th class="ui-widget-content">ID</th>
-                                    <th class="ui-widget-content">Attempt</th>
-                                    <th class="ui-widget-content">Locality Level</th>
-                                    <th class="ui-widget-content">Executor ID/Host</th>
-                                    <th class="ui-widget-content">LaunchTime</th>
+                                    <th class="ui-widget-content">taskId</th>
+                                    <th class="ui-widget-content">index</th>
+                                    <th class="ui-widget-content">attempt</th>
+                                    <th class="ui-widget-content">launch Time</th>
+                                    <th class="ui-widget-content">Executor ID</th>
+                                    <th class="ui-widget-content">host</th>
+                                    <th class="ui-widget-content">taskLocality</th>
+                                    <th class="ui-widget-content">speculative</th>
                                 </tr>
                                 </thead>
                                 <tbody id="taskSummaryTbody" class="ui-widget-content">
                                 </tbody>
                             </table>
                         </div>
-                        <div class="tab-pane fade" id="output">
-                            <p>Output Test</p>
+                        <div class="tab-pane fade" id="jobOutput">
+
                         </div>
-                        <div class="tab-pane fade" id="storedRDD">
-                            <p>Stored RDD Test</p>
+                            <div class="tab-pane fade" id="storedRDD">
+                        </div>
+                        <div>
+                            <div  class="tab-pane fade" id="livyLogs">
+                                <textarea id="livyJobLog" rows="50" readonly="readonly" class="resultTextArea"></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
-
-
-<!--<div id="jobDetailDiv">-->
-<!--<div id="errorMessageDiv" class="well">-->
-
-<!--</div>-->
-<!--<div id="JobOutputDiv" class="well">-->
-<!--<h2 style="margin:10px 0 0 0;">Job Output</h2>-->
-<!--<textarea id="jobOutput" rows="10" readonly="readonly" class="resultTextArea"></textarea>-->
-<!--</div>-->
-<!--<div id="LibyJobLogsDiv" class="well">-->
-<!--<h2 style="margin:10px 0 0 0;">Livy Job Logs</h2>-->
-<!--<textarea id="livyJobLog" rows="10" readonly="readonly" class="resultTextArea">	-->
-<!--</textarea>-->
-<!--</div>-->
-<!--<div id="SparkDriverLogDiv" class="well">-->
-
-<!--</div>-->
 </body>
 
 </html>

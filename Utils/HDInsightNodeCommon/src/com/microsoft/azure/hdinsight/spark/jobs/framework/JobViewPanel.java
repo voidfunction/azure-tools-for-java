@@ -55,7 +55,7 @@ public final class JobViewPanel extends JFXPanel {
         String value = System.getProperty("my.debug");
         String url = rootPath + "/hdinsight/job/html/index.html";
         if(!StringHelper.isNullOrWhiteSpace(value)) {
-            url = "C:/Users/ltian/project/toolkit-branch2/Utils/HDInsightNodeCommon/resources/htmlResources/hdinsight/job/html/index.html";
+            url = "C:/Users/ltian/project/my-azure/Utils/HDInsightNodeCommon/resources/htmlResources/hdinsight/job/html/index.html";
         }
         url = url.replace("\\", "/");
         final String queryString = "?projectid=" + id + "&engintype=javafx";
@@ -80,7 +80,7 @@ public final class JobViewPanel extends JFXPanel {
                                                     Worker.State oldState, Worker.State newState) {
                                     if (newState == Worker.State.SUCCEEDED) {
                                         JSObject win = (JSObject) webEngine.executeScript("window");
-                                        win.setMember("JobUtils", jobUtil);
+                                        //win.setMember("JobUtils", jobUtil);
                                     }
                                 }
                             }

@@ -2,11 +2,13 @@
     font-size: 14px;
     margin: 2px;
 }
-
-body {
+div {
+    resize: horizontal;
     overflow: auto;
 }
-
+#bodydiv {
+    margin-left: 30px;
+}
 #leftDIv {
     width: 40%;
     overflow: scroll;
@@ -181,4 +183,15 @@ ul li {
 
 #jobDetailsInfo tr:nth-child(even) {
     background-color: #dddddd;
+}
+
+.myrow {
+    display: flex; /* equal height of the children */
+}
+
+.mycol {
+    flex: 1; /* additionally, equal width */
+
+    padding: 1em;
+    border: solid;
 }

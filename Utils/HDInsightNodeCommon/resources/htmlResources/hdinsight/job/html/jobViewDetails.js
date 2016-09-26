@@ -1,8 +1,3 @@
-
-function jobsummary() {
-
-}
-
 function renderJobSummary(times, svg_g_id) {
     var graph = new dagreD3.graphlib.Graph()
         .setGraph({
@@ -46,7 +41,7 @@ function renderJobSummary(times, svg_g_id) {
      */
     svg.attr("viewBox","0 0 405 64");
     render(svg,graph);
-    renderStoredRDD(["a","b"])
+    renderStoredRDD(["a","b"]);
 }
 
 var jobDetailsColumn= ["Job Id", "Name", "Submission Time", "Job Status", "Task(s)", "Failed Task(s)", "Failed Stage(s)"];
@@ -121,7 +116,11 @@ function getJobSummaryValue(jobs) {
 }
 var storedRDDDetailsColumn = ["Partition Number", "Size", "Type", "Location"];
 function renderStoredRDD(myData) {
+
     var counter = 0;
+    if(typeof myData == 'string' || myData.length == 0) {
+        d3.select("#stored_rdd_details_div_message").text("No stored RDD");
+    }
     d3.select("#stored_rdd_details").selectAll("li")
         .data(myData)
         .enter()
@@ -145,6 +144,55 @@ function renderStoredRDD(myData) {
     });
 }
 
+var stagesDetailsColumn = ["status","stageId","executorRunTime","inputBytes","outputBytes","shuffleReadBytes","shuffleWriteBytes"];
+var summaryStagesColumn = ["executorRunTime","inputBytes","outputBytes","shuffleReadBytes","shuffleWriteBytes"];
+function renderStagesDetails(myData) {
+    d3.select("#stages_detail").selectAll("li")
+        .data(myData)
+        .enter()
+        .append("li")
+        .attr("role","presentation")
+        .append("a")
+        .attr("role","menuitem")
+        .attr("tabindex", -1)
+        .text(function(d) {
+            return "Stage " + d.stageId;
+        }).on("click", function(stage,i) {
+            d3.selectAll("#stage_detail_info tr").remove();
+            d3.select("#stage_detail_info")
+                .selectAll("tr")
+                .data(stagesDetailsColumn)
+                .enter()
+                .append("tr")
+                .html(function(d) {
+                    return "<td>" + d + "</td> <td>" + stage[d] + "</td>";
+                });
+    });
+    d3.select("#stage_detail_info")
+        .selectAll("tr")
+        .data(summaryStagesColumn)
+        .enter()
+        .append("tr")
+        .html(function(d) {
+            return "<td>" + d + "</td> <td>" + getAllStageInfo(myData, d) + "</td>";
+        });
+}
+function getAllStageInfo(stages, item) {
+    var total = 0;
+    stages.forEach(function (i) {
+        total += i[item];
+    })
+    return total;
+}
+function findStageItemById(myData, stageId) {
+    myData.forEach(function (d) {
+        if(d.stageId == stageId){
+            return d;
+        }
+    });
+    return '';
+}
+
 function renderJobGraph(myData) {
     var g = new dagreD3.graphlib.Graph()
         .setGraph({})
@@ -152,20 +200,20 @@ function renderJobGraph(myData) {
     // Here we"re setting nodeclass, which is used by our custom drawNodes function
 // below.
     g.setNode(0,  { label: "Driver",       class: "type-TOP" });
-    g.setNode(1,  { label: "S",         class: "type-S" });
-    g.setNode(2,  { label: "NP",        class: "type-NP" });
-    g.setNode(3,  { label: "DT",        class: "type-DT" });
-    g.setNode(4,  { label: "This",      class: "type-TK" });
-    g.setNode(5,  { label: "VP",        class: "type-VP" });
-    g.setNode(6,  { label: "VBZ",       class: "type-VBZ" });
-    g.setNode(7,  { label: "is",        class: "type-TK" });
-    g.setNode(8,  { label: "NP",        class: "type-NP" });
-    g.setNode(9,  { label: "DT",        class: "type-DT" });
-    g.setNode(10, { label: "an",        class: "type-TK" });
-    g.setNode(11, { label: "NN",        class: "type-NN" });
-    g.setNode(12, { label: "example",   class: "type-TK" });
+    g.setNode(1,  { label: "Job 1",         class: "type-S" });
+    g.setNode(2,  { label: "Job 2",        class: "type-NP" });
+    g.setNode(3,  { label: "Stage",        class: "type-DT" });
+    g.setNode(4,  { label: "End",      class: "type-TK" });
+    g.setNode(5,  { label: "Stage",        class: "type-VP" });
+    g.setNode(6,  { label: "Stage",       class: "type-VBZ" });
+    g.setNode(7,  { label: "End",        class: "type-TK" });
+    g.setNode(8,  { label: "Stage",        class: "type-NP" });
+    g.setNode(9,  { label: "Stage",        class: "type-DT" });
+    g.setNode(10, { label: "End",        class: "type-TK" });
+    g.setNode(11, { label: "Stage",        class: "type-NN" });
+    g.setNode(12, { label: "End",   class: "type-TK" });
     g.setNode(13, { label: ".",         class: "type-." });
-    g.setNode(14, { label: "sentence",  class: "type-TK" });
+    g.setNode(14, { label: "End",  class: "type-TK" });
 
     g.nodes().forEach(function(v) {
         var node = g.node(v);
@@ -235,36 +283,55 @@ function renderJobGraph(myData) {
 }
 
 var taskSummaryColumn= ["Index", "ID", "Attempt", "Status", "Locality Level", "Executor ID/Host", "Launch Time"];
-
+var taskSummaryColumn2 = ['taskId','index','attempt','launchTime','executorId','host','taskLocality','speculative'];
 function renderTaskSummary(myData) {
-    applicationList = JSON.parse(myData);
-    var counter = 0;
-    d3.select("#taskSummaryTbody")
-        .selectAll("tr")
-        .data(applicationList)
+    // d3.select("#taskSummaryTbody")
+    //     .selectAll("tr")
+    //     .data(taskSummaryColumn2)
+    //     .enter()
+    //     .append('tr')
+    //     .attr('align', 'center')
+    //     .attr('class','ui-widget-content')
+    //     .selectAll('td')
+    //     .data(function(d) {
+    //         return taskSummaryObjToList(d);
+    //     })
+    //     .enter()
+    //     .append('td')
+    //     .attr('class','ui-widget-content')
+    //     .text(function(d) {
+    //         return d;
+    //     });
+    d3.select('#taskSummaryTbody')
+        .selectAll('tr')
+        .data(myData)
         .enter()
         .append('tr')
         .attr('align', 'center')
         .attr('class','ui-widget-content')
-        .selectAll('td')
-        .data(function(d) {
-            return taskSummaryObjToList(d);
-        })
-        .enter()
-        .append('td')
-        .attr('class','ui-widget-content')
-        .text(function(d) {
-            return d;
-        });
+        .attr('mytest','acd')
+        .html(function(d) {
+            return generateTaskSummaryLine(d);
+    });
 }
 var testData = '[{"id": "id1","attempt": "a2","status": "ss","localityLevel": "ll","executorId": "id","launchTime": "11"}, {"id": "id221","attempt": "a233","status": "ss2","localityLevel": "ll2","executorId": "id2","launchTime": "22"}]';
 function taskSummaryObjToList(myTaskSummary) {
     var lists = [];
-    lists.push(myTaskSummary.id);
+    lists.push(myTaskSummary.taskId);
+    lists.push(myTaskSummary.index);
     lists.push(myTaskSummary.attempt);
-    lists.push(myTaskSummary.status);
-    lists.push(myTaskSummary.localityLevel);
-    lists.push(myTaskSummary.executorId);
     lists.push(myTaskSummary.launchTime);
+    lists.push(myTaskSummary.executorId);
+    lists.push(myTaskSummary.host);
+    lists.push(myTaskSummary.taskLocality);
+    list.push(myTaskSummary.speculative);
     return lists;
+}
+// taskSummaryColumn2
+function generateTaskSummaryLine(task) {
+    var html = '';
+    taskSummaryColumn2.forEach(function(d) {
+        html += '<td>'+ task[d] + '</td>';
+    });
+    return html;
 }

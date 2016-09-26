@@ -2,7 +2,9 @@ var localhost = "http://localhost:39128/clusters/";
 
 $(function () {
     $('#jobGraphDiv').hide();
-    $('#myTab li:eq(0)').hide();
+    // hide the error messagae tab first
+    // $('#myTab li:eq(0)').hide();
+    // show the job output tab
     $('#myTab li:eq(4) a').tab('show');
     $('#jobGraphLink').on('shown.bs.tab', function() {
         $('#jobGraphDiv').show();
@@ -12,10 +14,6 @@ $(function () {
         $('#jobGraphDiv').hide();
     });
 
-    // renderJobSummary(["1","2","3","4"],"#job-timeline g");
-    //
-    //
-    // renderTaskSummary(testData);
     getProjectId();
     $("#leftDiv").scrollTop($("#leftDiv")[0].scrollHeight);
     $("#JobHistoryTbody").on('click', 'tr', function () {
@@ -27,22 +25,26 @@ $(function () {
         rows.removeClass('selected-hight');
         $(this).addClass('selected-hight');
 
+        //get Application Id
         appId = $(this).find('td:eq(1)').text();
-
-        localStorage.setItem("selectedAppID", appId);
+        // get last attempt
+        attemptId = $(this).find('td:eq(4)').text();
+        applicationName = $(this).find('td:eq(2)').text();
+        $("#jobName").text("Job Name: " + applicationName);
 
         if (appId == null) {
             return;
         }
-
+        // save current Application ID to LocalStorage
+        localStorage.setItem("selectedAppID", appId);
         setBasicInformation();
         setAMcontainer();
         setDiagnosticsLog();
         setLivyLog();
-        setJobTimeLine();
+        setDebugInfo("end livy log");
         setJobDetail();
-
-        //renderJobDetails();
+        setStoredRDD();
+        setStageDetails();
     });
 
     $("#openSparkUIButton").click(function () {
@@ -73,13 +75,14 @@ $(function () {
     getJobHistory();
 });
 
-function reloadTableStyle() {
-    $("table tbody tr:nth-child(odd)").addClass("odd-row");
-    /* For cell text alignment */
-    $("table tbody td:first-child, table th:first-child").addClass("first");
-    /* For removing the last border */
-    $("table tbody td:last-child, table th:last-child").addClass("last");
+function getJobHistory() {
+    getMessageAsync(localhost + projectId + "/applications/", function (s) {
+        writeToTable(s);
+        refreshGetSelectedApplication();
+        $("#JobHistoryTbody tr:eq(0)").click();
+    });
 }
+
 
 function getProjectId() {
     queriresMap = {};
@@ -96,39 +99,6 @@ function getProjectId() {
     projectId = queriresMap["projectid"];
 
     var webType = queriresMap["engintype"];
-    console.log('Project id:' + projectId);
-}
-
-var asyncMessageCounter = 0;
-
-function getMessageAsync(url, callback) {
-    ++asyncMessageCounter;
-    console.log("http request for " + url);
-    $('body').css("cursor", "progress");
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.timeout = 60 * 1000;
-    xmlHttp.ontimeout = function () {
-        if (--asyncMessageCounter == 0) {
-            $('body').css("cursor", "default");
-        }
-    };
-
-    xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState == 4) {
-            if (xmlHttp.status == 200 || xmlHttp.status == 201) {
-                var s = xmlHttp.responseText;
-                if (s == "") {
-                    return;
-                }
-                callback(s);
-                if (--asyncMessageCounter == 0) {
-                    $('body').css("cursor", "default");
-                }
-            }
-        }
-    };
-    xmlHttp.open("GET", url, true);
-    xmlHttp.send(null);
 }
 
 function refreshGetSelectedApplication() {
@@ -138,32 +108,33 @@ function refreshGetSelectedApplication() {
     }
 
     var tableRow = $("#myTable tbody tr").filter(function () {
-        return $(this).children("td:eq(2)").text() == selectedAppid;
+        return $(this).children('td:eq(1)').text() == selectedAppid;
     }).closest("tr");
 
-    if (tableRow.size() != 0) {
-        tableRow.click();
-    }
+    // if (tableRow.size() != 0) {
+    //     tableRow.click();
+    // }
 }
 
-function getJobHistory() {
-    console.log('get all spark history from cluster');
-    getMessageAsync(localhost + projectId + "/applications/", function (s) {
-        writeToTable(s);
-        refreshGetSelectedApplication();
+
+function getFirstAttempt(attempts) {
+    return findElement(attempts, function (a) {
+        return typeof a.attemptId == 'undefined' || a.attemptId == 1;
+    });
+}
+function getLastAttempt(attempts) {
+    return findElement(attempts, function (a) {
+        return typeof a.attemptId == 'undefined' || a.attemptId == attemptId;
     });
 }
 
 function setBasicInformation() {
-    console.log("set Basic Information");
     getMessageAsync(localhost + projectId + "/applications/" + appId, function (s) {
         var application = JSON.parse(s);
-        jobBasicInformation = application;
-        attemptId = jobBasicInformation.attempts[0].attemptId;
-        $("#startTime").text(application.attempts[0].startTime);
-        $("#endTime").text(application.attempts[0].endTime);
+        $("#startTime").text(getFirstAttempt(application.attempts).startTime);
+        $("#endTime").text(getLastAttempt(application.attempts).endTime);
 
-        if (appId.substr(0, 5) != "local") {
+        if (appId.substr(0, 5) != "local" && attemptId != 0) {
             getJobResult();
             getSparkDriverLog();
         }
@@ -207,7 +178,11 @@ function appInformationList(app) {
     lists.push(app.id);
     lists.push(app.name);
     lists.push(app.attempts[0].startTime);
-    lists.push(app.attempts.length);
+    if(app.attempts.length == 1 && typeof app.attempts[0].attemptId == 'undefined') {
+        lists.push(0);
+    } else {
+        lists.push(app.attempts.length);
+    }
     lists.push(app.attempts[0].sparkUser);
     return lists;
 }
@@ -221,8 +196,6 @@ function getTheJobStatusImgLabel(str) {
 }
 
 function setAMcontainer() {
-    console.log("set AM Container for Application:" + appId);
-
     if (appId.substr(0, 5) == "local") {
         $("#containerNumber").text("Local Task");
     } else {
@@ -230,13 +203,7 @@ function setAMcontainer() {
             var object = JSON.parse(str);
             containerId = object.appAttempts.appAttempt[0].containerId;
             nodeId = object.appAttempts.appAttempt[0].nodeId;
-            console.log("current job Container ID:" + containerId);
             $("#containerNumber").text(containerId);
-
-            if (appId.substr(0, 5) != "local") {
-                getJobResult();
-                getSparkDriverLog();
-            }
         });
     }
 }
@@ -260,14 +227,13 @@ function setDiagnosticsLog() {
 // /logs/10.0.0.10/port/30050/container_e01_1462807780116_0004_01_000001/container_e01_1462807780116_0004_01_000001/spark/stdout/?start=0
 
 function getSparkDriverLog() {
-    if (typeof attemptId == 'undefined' || typeof containerId == 'undefined') {
+    if (attemptId == 0 || typeof containerId == 'undefined') {
         return;
     }
     getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/executors", function (s) {
         executorsObject = JSON.parse(s);
         var hostPort = getDriverPortFromExecutor(executorsObject);
         ipAddress = hostPort.split(":")[0];
-        console.log(appId + " job driver inner ip address : " + ipAddress);
         var url = localhost + projectId + "/jobhistory/logs/" + ipAddress + "/port/30050/" + containerId + "/" + containerId + "/spark/stderr?restType=yarnhistory";
         getResultFromSparkHistory(url, function (s) {
             $("#sparkDriverLog").text(s);
@@ -276,7 +242,7 @@ function getSparkDriverLog() {
 }
 
 function getJobResult() {
-    if (typeof attemptId == 'undefined' || typeof containerId == 'undefined') {
+    if (attemptId == 0 || typeof containerId == 'undefined') {
         return;
     }
 
@@ -284,7 +250,6 @@ function getJobResult() {
         executorsObject = JSON.parse(s);
         var hostPort = getDriverPortFromExecutor(executorsObject);
         ipAddress = hostPort.split(":")[0];
-        console.log(appId + " job driver inner ip address : " + ipAddress);
         var url = localhost + projectId + "/jobhistory/logs/" + ipAddress + "/port/30050/" + containerId + "/" + containerId + "/spark/stdout?restType=yarnhistory";
         getResultFromSparkHistory(url, function (s) {
             if (s == "") {
@@ -315,17 +280,19 @@ function setLivyLog() {
     });
 }
 function setJobDetail() {
-    var selectedApp = applicationList.find(function(d) {
-        return d.id == appId;
+    var selectedApp = findElement(applicationList, function (d) {
+       return d.id == appId;
     });
-    var maxAttempt = selectedApp.attempts.length;
-    if(selectedApp.attempts[maxAttempt - 1].sparkUser == 'hive') {
+    if(typeof selectedApp == 'undefined') {
         return;
     }
-    var url = localhost + projectId + "/applications/" + appId + "/" +　maxAttempt ;
+    setDebugInfo("selectApp " + appId);
+    if(selectedApp.attempts[0].sparkUser == 'hive') {
+        return;
+    }
+    var url = localhost + projectId + "/applications/" + appId + "/" +　attemptId ;
     getMessageAsync(url + "/jobs", function (s) {
         var jobs = JSON.parse(s);
-
         renderJobDetails(jobs);
     });
 }
@@ -339,7 +306,6 @@ function stagesInfo(jobs, url) {
             jobs.stageIds.forEach(function(stageNumber) {
                 getMessageAsync(url + "/stages" + "/" + stageNumber, function(s) {
                     var detail = JSON.parse(s);
-                    data.stageDetails.push(detail);
                 });
             });
         });
@@ -352,17 +318,41 @@ function setJobTimeLine() {
     });
 }
 
-function setJobGraph() {
-    getMessageAsync(localhost + projectId + "/applications/" + appId + "jobs", function (s) {
-        var application = JSON.parse(s);
-        jobBasicInformation = application;
-        attemptId = jobBasicInformation.attempts[0].attemptId;
-        $("#startTime").text(application.attempts[0].startTime);
-        $("#endTime").text(application.attempts[0].endTime);
-
-        if (appId.substr(0, 5) != "local") {
-            getJobResult();
-            getSparkDriverLog();
-        }
+///applications/[app-id]/storage/rdd
+function setStoredRDD() {
+    if(attemptId == 0) {
+        renderStoredRDD('');
+        return;
+    }
+    getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/storage/rdd",function(s) {
+        var rdds = JSON.parse(s);
+        renderStoredRDD(rdds);
     });
+}
+
+function setStageDetails() {
+    if(attemptId == 0) {
+        $("#stage_detail_info_message").text("No Stage Info");
+        return;
+    }
+    $("#stage_detail_info_message").text('');
+    getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/stages", function (s) {
+        var stages = JSON.parse(s);
+        renderStagesDetails(stages);
+        stages.forEach(function(stage) {
+            id = stage.stageId;
+            setTaskDetails(id);
+        });
+    });
+}
+
+function setTaskDetails(stageId) {
+    getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/" + "stages/" + stageId + "/0/taskList",function(s){
+        var tasks = JSON.parse(s);
+        renderTaskSummary(tasks);
+    });
+}
+
+function setDebugInfo(s) {
+    $("#debuginfo").text(s);
 }
