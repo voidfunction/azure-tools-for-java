@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.microsoft.azure.hdinsight.sdk.cluster.ClusterDetail;
+import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.spark.jobs.structure.Application;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -50,7 +51,7 @@ public class SparkRestUtil {
     private static String yarnUIHisotryFormat = "https://%s.azurehdinsight.net/yarnui/hn/cluster/app/%s";
 
     private static String sparkUIHistoryFormat = "https://%s.azurehdinsight.net/sparkhistory/history/%s/jobs";
-    private static final String  SPARK_REST_API_ENDPOINT = "https://%s.azurehdinsight.net/sparkhistory/api/vi/%s";
+    public static final String  SPARK_REST_API_ENDPOINT = "https://%s.azurehdinsight.net/sparkhistory/api/v1/%s";
     private static CredentialsProvider provider = new BasicCredentialsProvider();
     private static JsonFactory jsonFactory = new JsonFactory();
     private static ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
@@ -67,7 +68,7 @@ public class SparkRestUtil {
         return null;
     }
 
-    private static HttpEntity getEntity(@NotNull ClusterDetail clusterDetail, @NotNull String restUrl) throws HDIException, IOException {
+    public static HttpEntity getEntity(@NotNull IClusterDetail clusterDetail, @NotNull String restUrl) throws HDIException, IOException {
         provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(clusterDetail.getHttpUserName(),clusterDetail.getHttpPassword()));
         HttpClient client = HttpClients.custom().setDefaultCredentialsProvider(provider).build();
         String url = String.format(SPARK_REST_API_ENDPOINT, clusterDetail.getName(), restUrl);

@@ -5,20 +5,35 @@ $(function () {
     // hide the error messagae tab first
     // $('#myTab li:eq(0)').hide();
     // show the job output tab
+    $('#myTable').colResizable({liveDrag:true});
+    $('#myTable').dragtable();
+    $('#leftDiv').resizable();
     $('#myTab li:eq(4) a').tab('show');
     $('#jobGraphLink').on('shown.bs.tab', function() {
         $('#jobGraphDiv').show();
-        renderJobGraph();
     });
+
     $('#jobGraphLink').on('hidden.bs.tab', function() {
         $('#jobGraphDiv').hide();
     });
 
+    $("#tableDIv").resizable();
+    $('#tableDIv').resize(function(){
+        $('#rightDiv').width($("#parent").width()-$("#tableDIv").width());
+    });
+
+
     getProjectId();
-    $("#leftDiv").scrollTop($("#leftDiv")[0].scrollHeight);
     $("#JobHistoryTbody").on('click', 'tr', function () {
+        isJobGraphGenerated = false;
+        currentSelectedJobs = null;
+        currentSelectedStages = null;
+        appId = null;
+        attemptId = null;
+        applicationName = null;
+
         $("#errorMessage").text("");
-        $("#jobOutput").text("");
+        $("#jobOutputTextarea").text("");
         $("#livyJobLog").text("");
         $("#sparkDriverLog").text("");
         var rows = $("#JobHistoryTbody tr");
@@ -44,7 +59,16 @@ $(function () {
         setDebugInfo("end livy log");
         setJobDetail();
         setStoredRDD();
-        setStageDetails();
+        setStageDetailsWithTaskDetails();
+        setExecutorsDetails();
+    });
+
+    $("#sparkEventButton").click(function () {
+        JobUtils.openSparkEventLog(projectId, typeof appId == 'undefined' ? "" : appId.toString());
+    });
+
+    $("#livyLogButton").click(function() {
+        JobUtils.openLivyLog(typeof appId == 'undefined' ? "" : appId.toString());
     });
 
     $("#openSparkUIButton").click(function () {
@@ -110,10 +134,6 @@ function refreshGetSelectedApplication() {
     var tableRow = $("#myTable tbody tr").filter(function () {
         return $(this).children('td:eq(1)').text() == selectedAppid;
     }).closest("tr");
-
-    // if (tableRow.size() != 0) {
-    //     tableRow.click();
-    // }
 }
 
 
@@ -122,6 +142,7 @@ function getFirstAttempt(attempts) {
         return typeof a.attemptId == 'undefined' || a.attemptId == 1;
     });
 }
+
 function getLastAttempt(attempts) {
     return findElement(attempts, function (a) {
         return typeof a.attemptId == 'undefined' || a.attemptId == attemptId;
@@ -133,11 +154,6 @@ function setBasicInformation() {
         var application = JSON.parse(s);
         $("#startTime").text(getFirstAttempt(application.attempts).startTime);
         $("#endTime").text(getLastAttempt(application.attempts).endTime);
-
-        if (appId.substr(0, 5) != "local" && attemptId != 0) {
-            getJobResult();
-            getSparkDriverLog();
-        }
     });
 }
 
@@ -204,6 +220,10 @@ function setAMcontainer() {
             containerId = object.appAttempts.appAttempt[0].containerId;
             nodeId = object.appAttempts.appAttempt[0].nodeId;
             $("#containerNumber").text(containerId);
+            if (appId.substr(0, 5) != "local" && attemptId != 0) {
+                getJobResult();
+                getSparkDriverLog();
+            }
         });
     }
 }
@@ -223,9 +243,6 @@ function setDiagnosticsLog() {
     }
 }
 
-// stdout : https://spark-linux.azurehdinsight.net/yarnui/jobhistory
-// /logs/10.0.0.10/port/30050/container_e01_1462807780116_0004_01_000001/container_e01_1462807780116_0004_01_000001/spark/stdout/?start=0
-
 function getSparkDriverLog() {
     if (attemptId == 0 || typeof containerId == 'undefined') {
         return;
@@ -235,8 +252,8 @@ function getSparkDriverLog() {
         var hostPort = getDriverPortFromExecutor(executorsObject);
         ipAddress = hostPort.split(":")[0];
         var url = localhost + projectId + "/jobhistory/logs/" + ipAddress + "/port/30050/" + containerId + "/" + containerId + "/spark/stderr?restType=yarnhistory";
-        getResultFromSparkHistory(url, function (s) {
-            $("#sparkDriverLog").text(s);
+        getResultFromSparkHistory(url, function (result) {
+            $("#sparkDriverLog").text(result);
         });
     });
 }
@@ -251,11 +268,11 @@ function getJobResult() {
         var hostPort = getDriverPortFromExecutor(executorsObject);
         ipAddress = hostPort.split(":")[0];
         var url = localhost + projectId + "/jobhistory/logs/" + ipAddress + "/port/30050/" + containerId + "/" + containerId + "/spark/stdout?restType=yarnhistory";
-        getResultFromSparkHistory(url, function (s) {
-            if (s == "") {
-                s = "No out put";
+        getResultFromSparkHistory(url, function (result) {
+            if (result == "") {
+                result = "No out put";
             }
-            $("#jobOutput").text(s);
+            $("#jobOutputTextarea").text(result);
         });
     });
 }
@@ -279,6 +296,7 @@ function setLivyLog() {
         $("#livyJobLog").text(s);
     });
 }
+
 function setJobDetail() {
     var selectedApp = findElement(applicationList, function (d) {
        return d.id == appId;
@@ -292,10 +310,66 @@ function setJobDetail() {
     }
     var url = localhost + projectId + "/applications/" + appId + "/" +　attemptId ;
     getMessageAsync(url + "/jobs", function (s) {
-        var jobs = JSON.parse(s);
-        renderJobDetails(jobs);
+        currentSelectedJobs = JSON.parse(s);
+        renderJobDetails(currentSelectedJobs);
+        if(currentSelectedStages != null && !isJobGraphGenerated) {
+            setJobGraph(currentSelectedJobs);
+        }
     });
 }
+// d3.select("#stored_rdd_details").selectAll("li")
+//     .data(myData)
+//     .enter()
+//     .append("li")
+//     .attr("role","presentation")
+//     .append("a")
+//     .attr("role","menuitem")
+//     .attr("tabindex", -1)
+//     .text(function(d) {
+//         ++counter;
+//         return "RDD " + d.id;
+//     }).on("click", function(d,i) {
+//     d3.select("#stored_rdd_info")
+//         .selectAll("tr")
+//         .remove();
+//     d3.select("#stored_rdd_info")
+//         .selectAll("tr")
+//         .data(storedRDDDetailsColumn)
+//         .enter()
+//         .append("tr")
+//         .html(function(inner) {
+//             return "<td>"+ inner + "</td><td>" + d[inner] + "</td>";
+//         });
+// });
+function setJobGraph(jobs) {
+    isJobGraphGenerated = true;
+    d3.select("#job-graph-menu")
+        .selectAll('li')
+        .data(jobs)
+        .enter()
+        .append('li')
+        .attr("role","presentation")
+        .append("a")
+        .attr("role","menuitem")
+        .attr("tabindex", -1)
+        .text(function(job) {
+            return "Job " + job['jobId'];
+        }).on('click', function(job, i) {
+        setJobGraphForOneJob(job);
+    });
+}
+function setJobGraphForOneJob(job) {
+    var stageIds = job['stageIds'];
+    var selectedStages = [];
+    stageIds.forEach(function(stageId) {
+       selectedStages.push(currentSelectedStages.find(function(d) {
+           return d['stageId'] == stageId;
+       }));
+    });
+    renderJobGraph(selectedStages);
+
+}
+
 function stagesInfo(jobs, url) {
         getMessageAsync(url + "/stages", function (s) {
             var data = new Object();
@@ -330,29 +404,55 @@ function setStoredRDD() {
     });
 }
 
-function setStageDetails() {
+function setStageDetailsWithTaskDetails() {
     if(attemptId == 0) {
         $("#stage_detail_info_message").text("No Stage Info");
         return;
     }
     $("#stage_detail_info_message").text('');
     getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/stages", function (s) {
-        var stages = JSON.parse(s);
-        renderStagesDetails(stages);
-        stages.forEach(function(stage) {
-            id = stage.stageId;
-            setTaskDetails(id);
-        });
+        currentSelectedStages = JSON.parse(s);
+        renderStagesDetails(currentSelectedStages);
+        setTaskDetails();
+        if(!isJobGraphGenerated && currentSelectedJobs != null) {
+            setJobGraph(currentSelectedJobs);
+        }
     });
 }
 
-function setTaskDetails(stageId) {
-    getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/" + "stages/" + stageId + "/0/taskList",function(s){
+function setTaskDetails() {
+    var httpQuery = localhost + projectId + "/applications" + "?applicationId="+appId + "&attemptId=" + attemptId + "&multi-stages=" + currentSelectedStages.length;
+    getMessageAsync(httpQuery, function(s){
         var tasks = JSON.parse(s);
         renderTaskSummary(tasks);
     });
 }
 
+function setExecutorsDetails() {
+    var httpQuery = localhost + projectId + "/applications/" + appId + "/" + attemptId + "/executors";
+    getMessageAsync(httpQuery, function (s) {
+        var executors = JSON.parse(s);
+        renderExecutors(executors);
+    })
+}
 function setDebugInfo(s) {
     $("#debuginfo").text(s);
+}
+
+function filterTaskSummaryTable() {
+    var input, filter, table, tr, td, i;
+    filter = $("#filterTableInput").val().toLowerCase();
+    tr = $("#taskSummaryTable tbody tr");
+    tr.each(function () {
+        text = $(this).html().toLowerCase();
+        if(text.indexOf(filter) > -1) {
+            $(this).css("display","");
+        } else {
+            $(this).css("display","none");
+        }
+    });
+}
+
+function openLivyLog() {
+
 }

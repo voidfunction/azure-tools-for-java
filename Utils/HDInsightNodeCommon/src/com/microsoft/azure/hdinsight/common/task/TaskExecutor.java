@@ -27,6 +27,8 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 public class TaskExecutor {

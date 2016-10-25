@@ -27,7 +27,9 @@ import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,7 +54,8 @@ public class RequestDetail {
         SparkRest,
         YarnRest,
         YarnHistory,
-        LivyBatchesRest
+        LivyBatchesRest,
+        MultiTask
     }
 
     @Nullable
@@ -65,6 +68,7 @@ public class RequestDetail {
         }
         return null;
     }
+
     public RequestDetail(@NotNull String clusterFormatId, @NotNull String restUrl, @Nullable String[] queries) {
         this.clusterFormatId = clusterFormatId;
         clusterDetail = JobViewManager.getCluster(clusterFormatId);
@@ -90,6 +94,8 @@ public class RequestDetail {
             } else {
                 apiType = APIType.SparkRest;
             }
+        } else if(isMultiQuery()) {
+            apiType = APIType.MultiTask;
         } else {
             apiType = APIType.SparkRest;
         }
@@ -127,6 +133,35 @@ public class RequestDetail {
             }
         }
         return queryUrl;
+    }
+
+    private static final String MULTI_STAGE_TAG = "multi-stages";
+
+    public boolean isMultiQuery() {
+        return queriesMap.containsKey(MULTI_STAGE_TAG);
+    }
+
+    private int getQueryNumber() {
+        return Integer.valueOf(queriesMap.get(MULTI_STAGE_TAG));
+    }
+
+    private static final String TASK_QUERY_URL = sparkPreRestUrl + "/applications/%s/%s/stages/%s";
+
+    public List<String> getQueryUrls() {
+        if(isMultiQuery()) {
+            String applicationId = queriesMap.get("applicationId");
+            String attemptdId = queriesMap.get("attemptId");
+
+            List<String> querys = new ArrayList<>();
+            for(int i = 0; i < getQueryNumber(); ++i) {
+                String query = String.format(TASK_QUERY_URL, clusterDetail.getName(), applicationId, attemptdId, String.valueOf(i));
+                querys.add(query);
+            }
+            return querys;
+        } else {
+            return null;
+        }
+
     }
     public String getClusterFormatId() {
         return clusterFormatId;

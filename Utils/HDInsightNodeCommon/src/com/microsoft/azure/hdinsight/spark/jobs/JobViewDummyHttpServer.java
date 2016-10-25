@@ -21,14 +21,12 @@
  */
 package com.microsoft.azure.hdinsight.spark.jobs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.hdinsight.common.HttpFutureCallback;
-import com.microsoft.azure.hdinsight.common.task.LivyTask;
-import com.microsoft.azure.hdinsight.common.task.RestTask;
-import com.microsoft.azure.hdinsight.common.task.TaskExecutor;
-import com.microsoft.azure.hdinsight.common.task.YarnHistoryTask;
+import com.microsoft.azure.hdinsight.common.MultiHttpFutureCallback;
+import com.microsoft.azure.hdinsight.common.task.*;
 import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -37,17 +35,16 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class JobViewDummyHttpServer {
-
-//    private static Logger LOGGER = LogManager.getLogger(JobViewDummyHttpServer.class);
-
     private static RequestDetail requestDetail;
     public static final int PORT = 39128;
     private static HttpServer server;
@@ -72,14 +69,13 @@ public class JobViewDummyHttpServer {
             try {
                 executorService.awaitTermination(2, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-//                LOGGER.warn(e.getMessage());
             }
         }
         isEnabled = false;
     }
 
+
     public synchronized static void initlize() {
-//        LOGGER.info("job view server start!");
         if (isEnabled) {
             return;
         }
@@ -118,6 +114,7 @@ public class JobViewDummyHttpServer {
                                     stream.write(str.getBytes());
                                     stream.close();
                                 } catch (IOException e) {
+                                    int a = 1;
 //                                    LOGGER.error("Get job history error", e);
                                 }
                             }
@@ -134,6 +131,21 @@ public class JobViewDummyHttpServer {
                                         str = JobUtils.getJobInformation(str, applicationId);
                                     }
 
+                                    httpExchange.sendResponseHeaders(200, str.length());
+                                    OutputStream stream = httpExchange.getResponseBody();
+                                    stream.write(str.getBytes());
+                                    stream.close();
+                                } catch (IOException e) {
+//                                    LOGGER.error("Get job history error", e);
+                                }
+                            }
+                        }));
+                    } else if(requestDetail.getApiType() == RequestDetail.APIType.MultiTask){
+                        TaskExecutor.submit(new MultiRestTask(clusterDetail, requestDetail.getQueryUrls(), new MultiHttpFutureCallback(httpExchange){
+                            public void onSuccess(List<String> strs) {
+                                httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                                try {
+                                    String str = tasksDetailsConvert(strs);
                                     httpExchange.sendResponseHeaders(200, str.length());
                                     OutputStream stream = httpExchange.getResponseBody();
                                     stream.write(str.getBytes());
@@ -170,5 +182,35 @@ public class JobViewDummyHttpServer {
 //            DefaultLoader.getUIHelper().showError(e.getClass().getName(), e.getMessage());
         }
     }
+    private static ObjectMapper mapper = new ObjectMapper();
 
+    private static String tasksDetailsConvert(List<String> strs) throws IOException {
+        List results = new ArrayList();
+        for(String str : strs) {
+            List taskList = taskConvert(str);
+            if(taskList != null) {
+                results.addAll(taskList);
+            }
+        }
+        return mapper.writeValueAsString(results);
+    }
+
+    private static List taskConvert(String json) throws IOException {
+        List names = mapper.readValue(json, List.class);
+        LinkedHashMap map = (LinkedHashMap) names.get(0);
+        if(map == null) {
+            return null;
+        }
+
+        LinkedHashMap tasks = (LinkedHashMap) map.get("tasks");
+        if(tasks == null) {
+            return null;
+        }
+
+        Object[] objs = tasks.entrySet().toArray();
+        if(objs == null) {
+            return null;
+        }
+        return Arrays.asList(objs);
+    }
 }

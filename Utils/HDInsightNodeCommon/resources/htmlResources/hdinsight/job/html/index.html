@@ -2,8 +2,9 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <script src="https://code.jquery.com/jquery-3.1.0.min.js"
-            integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"
+            integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
             crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
@@ -13,7 +14,6 @@
             crossorigin="anonymous"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>
-
     <script src="static/sorttable.js"></script>
     <script src="static/vis.min.js"></script>
     <script src="static/bootstrap-tooltip.js"></script>
@@ -21,41 +21,29 @@
     <script src="static/table.js"></script>
     <script src="static/additional-metrics.js"></script>
     <script src="static/timeline-view.js"></script>
-    <script src="jobViewDetails.js"></script>
     <script src="static/tipsy.js"></script>
+    <script src="static/colResizable-1.6.min.js"></script>
+    <script src="static/jquery.dragtable.js"></script>
+
+    <script src="common.js"></script>
+    <script src="sparkjobview.js"></script>
+    <script src="jobViewDetails.js"></script>
+
     <link rel="stylesheet" href="static/tipsy.css"/>
     <link rel="stylesheet" href="static/bootstrap.min.css" type="text/css"/>
     <link rel="stylesheet" href="static/vis.min.css" type="text/css"/>
     <link rel="stylesheet" href="static/webui.css" type="text/css"/>
     <link rel="stylesheet" href="static/timeline-view.css" type="text/css"/>
+    <link rel="stylesheet" href="static/jquery-ui.css" />
+    <link rel="stylesheet" href="static/dragtable.css" />
     <link rel="stylesheet" href="indexpage.css" type="text/css" />
 
-    <script src="sparkjobview.js"></script>
-    <script src="common.js"></script>
-
-    <script>
-        $(function () {
-            height = window.innerHeight;
-            width = window.innerHeight;
-            $(window).resize(function() {
-                height = window.innerHeight;
-                width = window.innerHeight;
-                $('#bodydiv').height(height);
-                $('#bodydiv').width(width);
-            });
-        });
-    </script>
 </head>
 
 <body>
-<div id="bodydiv" class="container">
-    <div class="row">
-        <p id="debuginfo">Start ....</p>
-        <p id="htitle"><strong>Spark Job History</strong></p>
-    </div>
-    <div class="row myrow" style="margin-left: 0;">
-        <div id="leftDiv" class="ui-widget-content col mycol">
-            <div id="tableDIv" class="ui-widget-content">
+    <div id="parent">
+        <div id="leftDiv">
+            <div></div>
                 <table id="myTable" class="table table-bordered table-condensed table-striped sortable ui-widget-content">
                     <thead class="ui-widget-content">
                     <tr align="center" class="ui-widget-content">
@@ -72,13 +60,10 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-        <div id="rightDiv" class="i mycol" style="margin-left: 0;">
+        <div id="rightDiv" class="container">
             <div class="row">
-                <div class="col-xs-4">
-                    <p id="jobName" style="margin-top: 5px">Job Name: Test</p>
-                </div>
-                <div id="rightButtonPanel" class="col-xs-8">
+                <p id="jobName">Job Name: </p>
+                <div id="rightButtonPanel">
                     <button id="refreshButtion">Refresh</button>
                     <button id="openSparkUIButton">Open Spark History UI</button>
                     <button id="openYarnUIButton">Open Yarn UI</button>
@@ -87,39 +72,89 @@
             <hr class="rightPanelhr row"/>
             <div id="jobViewPanel" class="row">
                 <div id="jobSummary" class="col-md-4 lead">
-                    <p>details</p>
+                    <p>Application details</p>
                     <div id="job-timeline-div" class="col-md-12 row" style="height: 0;">
                         <svg id="job-timeline" class="col-md-12" style="margin: 0">
                             <g/>
                         </svg>
                     </div>
-                    <div id="job-details_by_jobs" style="margin: 0px">
+                    <div id="job-details_by_jobs" style="margin: 0px;">
                         <div class="dropdown">
-                            <button type="button" class="btn dropdown-toggle btn-default btn-xs" id="dropdownMenu1"
-                                    data-toggle="dropdown">Job Details
-                                <span class="caret"></span>
+                            <button type="button"
+                                    class="btn dropdown-toggle btn-default btn-xs"
+                                    id="dropdownMenu1"
+                                    data-toggle="dropdown">Job Summary<span class="caret"></span>
                             </button>
-                            <ul id="job-details-by-job" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                            <ul id="job-details-by-job"
+                                class="dropdown-menu"
+                                role="menu"
+                                aria-labelledby="dropdownMenu1">
                             </ul>
                         </div>
                         <div>
-                            <table id="job-details-info-table"></table>
+                            <table id="job-details-info-table">
+                                <tr>
+                                    <td>numberTasks</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>numCompletedTasks</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>numFailedTasks</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>numSkippedTasks</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                </tr>
+                                <tr>
+                                    <td>numStages</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>numCompletedStages</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>numFailedStages</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>numSkippedStages</td>
+                                    <td></td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
-                    <div id="stored_rdds" style="margin: 0px">
+                    <div id="stored_rdds" style="margin-top: 10px;">
                         <div class="dropdown">
                             <button type="button" class="btn dropdown-toggle btn-default btn-xs" id="dropdownMenu2"
                                     data-toggle="dropdown">
-                                Stored RDD
+                                Stored RDD Summary
                                 <span class="caret"></span>
                             </button>
                             <ul id="stored_rdd_details" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
                             </ul>
                         </div>
-                        <div id="stored_rdd_details_div" style="font-size: 13px; text-align: center">
+                        <div id="stored_rdd_details_div" style="font-size: 13px; text-align: center;margin-top: 10px;">
                             <p id="stored_rdd_details_div_message"></p>
                             <table id="stored_rdd_info">
-                                <tr></tr>
+                                <tr>
+                                    <td>RDD Number</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>diskUsed</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>memoryUsed</td>
+                                    <td></td>
+                                </tr>
                             </table>
                         </div>
                     </div>
@@ -127,7 +162,7 @@
                         <div class="dropdown">
                             <button type="button" class="btn dropdown-toggle btn-default btn-xs" id="dropdownMenu3"
                                     data-toggle="dropdown">
-                                 Stage Details
+                                Stage Summary
                                 <span class="caret"></span>
                             </button>
                             <ul id="stages_detail" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu3">
@@ -136,13 +171,28 @@
                         <div style="font-size: 13px; text-align: center">
                             <p id="stage_detail_info_message"></p>
                             <table id="stage_detail_info">
-                                <tr></tr>
+                                <tr>
+                                    <td>inputBytes</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>outputBytes</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>shuffleReadBytes</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>shuffleWriteBytes</td>
+                                    <td></td>
+                                </tr>
                             </table>
                         </div>
                     </div>
                     <div>
-                        <button type="button" class="btn btn-default btn-xs"><a>Livy Log</a></a></button>
-                        <button type="button" class="btn btn-default btn-xs"><a>Spark Event Log</a></button>
+                        <button id="livyLogButton" class="btn btn-default btn-xs"><a>Livy Log</a></a></button>
+                        <button id="sparkEventButton" class="btn btn-default btn-xs"><a>Spark Event Log</a></button>
                     </div>
                 </div>
                 <div id="jobDetailDiv" class="col-md-8">
@@ -180,8 +230,8 @@
                         <li><a href="#driverLog" data-toggle="tab">Driver Log</a></li>
                         <li><a id="jobGraphLink" href="#jobGraphDiv" data-toggle="tab">Job Graph</a></li>
                         <li><a href="#taskSummary" data-toggle="tab">Task Summary</a></li>
-                        <li><a href="#output" data-toggle="tab">OutPut</a></li>
-                        <li><a href="#storedRDD" data-toggle="tab">Stored RDD</a></li>
+                        <li><a href="#jobOutput" data-toggle="tab">OutPut</a></li>
+                        <li><a href="#executorDetailsDiv" data-toggle="tab">Executors</a></li>
                         <li><a href="#livyLogs" data-toggle="tab">Livy Log</a></li>
                     </ul>
 
@@ -190,46 +240,75 @@
                             <textarea id="errorMessage" rows="10" readonly="readonly" class="resultTextArea"></textarea>
                         </div>
                         <div class="tab-pane fade" id="driverLog">
-                            <textarea id="sparkDriverLog" rows="50" readonly="readonly" class="resultTextArea">
-                            </textarea>
+                                <textarea id="sparkDriverLog" rows="50" readonly="readonly" class="resultTextArea">
+                                </textarea>
                         </div>
                         <div id="jobGraphDiv">
-                            <svg id="jobGraphSvg" viewPoint="0 0 1000 1000"></svg>
+                            <div class="dropdown" style="margin-left: 20px;float:left;">
+                                <button type="button"
+                                        class="btn dropdown-toggle btn-default btn-xs"
+                                        id="jobGraph-dropdownMenu"
+                                        data-toggle="dropdown">Job Select...<span class="caret"></span>
+                                </button>
+                                <ul id="job-graph-menu"
+                                    class="dropdown-menu"
+                                    role="menu"
+                                    aria-labelledby="dropdownMenu1">
+                                </ul>
+                            </div>
+                            <svg id="jobGraphSvg" ></svg>
                         </div>
-                        <div class="tab-pane fade" id="taskSummary">
-                            <table id="taskSummaryTable" class="table table-bordered table-condensed table-striped sortable ui-widget-content col-md-12">
+                        <div class="tab-pane fade" id="taskSummary" style="overflow: scroll;">
+                            <input id="filterTableInput" type="text" name="search" placeholder="Search.." style="margin-bottom: 5px;" onkeyup="filterTaskSummaryTable()">
+                            <table id="taskSummaryTable" class="table table-bordered table-condensed table-striped sortable ui-widget-content">
                                 <thead class="ui-widget-content">
-                                <tr align="center" class="ui-widget-content">
-                                    <th class="ui-widget-content">taskId</th>
-                                    <th class="ui-widget-content">index</th>
-                                    <th class="ui-widget-content">attempt</th>
-                                    <th class="ui-widget-content">launch Time</th>
-                                    <th class="ui-widget-content">Executor ID</th>
-                                    <th class="ui-widget-content">host</th>
-                                    <th class="ui-widget-content">taskLocality</th>
-                                    <th class="ui-widget-content">speculative</th>
-                                </tr>
+                                    <tr align="center" class="ui-widget-content">
+                                        <th class="ui-widget-content">taskId</th>
+                                        <th class="ui-widget-content">index</th>
+                                        <th class="ui-widget-content">attempt</th>
+                                        <th class="ui-widget-content">launch Time</th>
+                                        <th class="ui-widget-content">Executor ID</th>
+                                        <th class="ui-widget-content">host</th>
+                                        <th class="ui-widget-content">taskLocality</th>
+                                        <th class="ui-widget-content">speculative</th>
+                                    </tr>
                                 </thead>
                                 <tbody id="taskSummaryTbody" class="ui-widget-content">
                                 </tbody>
                             </table>
                         </div>
                         <div class="tab-pane fade" id="jobOutput">
-
+                            <textarea id="jobOutputTextarea" rows="50" readonly="readonly" class="resultTextArea">Test</textarea>
                         </div>
-                            <div class="tab-pane fade" id="storedRDD">
+                        <div class="tab-pane fade" id="executorDetailsDiv" style="overflow: scroll; width: 600px;">
+                            <table id="executorDetailsTable" class="table table-bordered table-condensed table-striped sortable ui-widget-content">
+                                <thead class="ui-widget-content">
+                                <tr align="center" class="ui-widget-content">
+                                    <th class="ui-widget-content">id</th>
+                                    <th class="ui-widget-content">hostPort</th>
+                                    <th class="ui-widget-content">rddBlocks</th>
+                                    <th class="ui-widget-content">memoryUsed</th>
+                                    <th class="ui-widget-content">diskUsed</th>
+                                    <th class="ui-widget-content">totalDuration</th>
+                                    <th class="ui-widget-content">totalInputBytes</th>
+                                    <th class="ui-widget-content">totalShuffleRead</th>
+                                    <th class="ui-widget-content">totalShuffleWrite</th>
+                                    <th class="ui-widget-content">maxMemory</th>
+                                </tr>
+                                </thead>
+                                <tbody id="executorDetailsBody" class="ui-widget-content">
+                                </tbody>
+                            </table>
                         </div>
-                        <div>
-                            <div  class="tab-pane fade" id="livyLogs">
-                                <textarea id="livyJobLog" rows="50" readonly="readonly" class="resultTextArea"></textarea>
-                            </div>
+                        <div  class="tab-pane fade" id="livyLogs">
+                            <textarea id="livyJobLog" rows="50" readonly="readonly" class="resultTextArea"></textarea>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div id="empty"></div>
     </div>
-</div>
 </body>
 
 </html>

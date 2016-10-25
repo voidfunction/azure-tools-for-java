@@ -46,7 +46,7 @@ function renderJobSummary(times, svg_g_id) {
 
 var jobDetailsColumn= ["Job Id", "Name", "Submission Time", "Job Status", "Task(s)", "Failed Task(s)", "Failed Stage(s)"];
 
-var jobSummaryColumn = ["Job Numbers", "Task Numbers", "Failed Task", "Failed Stage"]
+var jobSummaryColumn = ['numTasks', 'numCompletedTasks', 'numFailedTasks', 'numSkippedTasks', 'numStages', 'numCompletedStages', 'numFailedStages', 'numSkippedStages' ];
 function renderJobDetails(myData) {
     var counter = 0;
     d3.select("#job-details-by-job").html("");
@@ -104,44 +104,77 @@ function getJobDetailsValue(job, i) {
             return "Unknown";
     }
 }
+
 function getJobSummaryValue(jobs) {
-    var details = [0, 0, 0, 0];
+    var details = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     details[0] = jobs.length;
     jobs.forEach(function (j) {
         details[1] += j.numTasks;
-        details[2] += j.numFailedTasks;
-        details[3] += j.numFailedStages;
+        details[2] += j.numCompletedTasks;
+        details[3] += j.numFailedTasks;
+        details[4] += j.numSkippedTasks;
+
+        details[5] += j.stageIds.length;
+        details[6] += j.numCompletedStages;
+        details[7] += j.numFailedStages;
+        details[8] += j.numSkippedStages;
     });
     return details;
 }
-var storedRDDDetailsColumn = ["Partition Number", "Size", "Type", "Location"];
-function renderStoredRDD(myData) {
 
+ var storedRDDSummaryColumn = ["RDD Number", "diskUsed", "memoryUsed"];
+var storedRDDDetailsColumn = ["name", "numPartitions", "numCachedPartitions","memoryUsed","diskUsed"];
+function renderStoredRDD(myData) {
     var counter = 0;
     if(typeof myData == 'string' || myData.length == 0) {
         d3.select("#stored_rdd_details_div_message").text("No stored RDD");
-    }
-    d3.select("#stored_rdd_details").selectAll("li")
-        .data(myData)
-        .enter()
-        .append("li")
-        .attr("role","presentation")
-        .append("a")
-        .attr("role","menuitem")
-        .attr("tabindex", -1)
-        .text(function(d) {
-            ++counter;
-            return "RDD " + counter;
-        }).on("click", function(d,i) {
+        d3.select("#stored_rdd_info")
+            .selectAll("tr").remove();
+    } else {
+        d3.select("#stored_rdd_details_div_message").text("");
+        d3.select("#stored_rdd_info")
+            .selectAll("tr").remove();
+        d3.select("#stored_rdd_info")
+            .selectAll("tr")
+            .data(storedRDDSummaryColumn)
+            .enter()
+            .append("tr")
+            .html(function(d, i) {
+                if(i == 0) {
+                    return "<td>"+ d + "</td><td>" + myData.length + "</td>";
+                } else {
+                    var sum = 0;
+                    var v =  myData.forEach(function(data){
+                        sum += data[d];
+                    });
+                    return "<td>"+ d + "</td><td>" + sum + "</td>";
+                }
+            });
+        d3.select("#stored_rdd_details").selectAll("li")
+            .data(myData)
+            .enter()
+            .append("li")
+            .attr("role","presentation")
+            .append("a")
+            .attr("role","menuitem")
+            .attr("tabindex", -1)
+            .text(function(d) {
+                ++counter;
+                return "RDD " + d.id;
+            }).on("click", function(d,i) {
+                d3.select("#stored_rdd_info")
+                    .selectAll("tr")
+                    .remove();
             d3.select("#stored_rdd_info")
                 .selectAll("tr")
                 .data(storedRDDDetailsColumn)
                 .enter()
                 .append("tr")
-                .html(function(d) {
-                    return "<td>" + d + "</td> <td>" + counter + "</td>";
+                .html(function(inner) {
+                    return "<td>"+ inner + "</td><td>" + d[inner] + "</td>";
                 });
-    });
+        });
+    }
 }
 
 var stagesDetailsColumn = ["status","stageId","executorRunTime","inputBytes","outputBytes","shuffleReadBytes","shuffleWriteBytes"];
@@ -170,6 +203,9 @@ function renderStagesDetails(myData) {
     });
     d3.select("#stage_detail_info")
         .selectAll("tr")
+        .remove();
+    d3.select("#stage_detail_info")
+        .selectAll("tr")
         .data(summaryStagesColumn)
         .enter()
         .append("tr")
@@ -184,6 +220,7 @@ function getAllStageInfo(stages, item) {
     })
     return total;
 }
+
 function findStageItemById(myData, stageId) {
     myData.forEach(function (d) {
         if(d.stageId == stageId){
@@ -285,23 +322,6 @@ function renderJobGraph(myData) {
 var taskSummaryColumn= ["Index", "ID", "Attempt", "Status", "Locality Level", "Executor ID/Host", "Launch Time"];
 var taskSummaryColumn2 = ['taskId','index','attempt','launchTime','executorId','host','taskLocality','speculative'];
 function renderTaskSummary(myData) {
-    // d3.select("#taskSummaryTbody")
-    //     .selectAll("tr")
-    //     .data(taskSummaryColumn2)
-    //     .enter()
-    //     .append('tr')
-    //     .attr('align', 'center')
-    //     .attr('class','ui-widget-content')
-    //     .selectAll('td')
-    //     .data(function(d) {
-    //         return taskSummaryObjToList(d);
-    //     })
-    //     .enter()
-    //     .append('td')
-    //     .attr('class','ui-widget-content')
-    //     .text(function(d) {
-    //         return d;
-    //     });
     d3.select('#taskSummaryTbody')
         .selectAll('tr')
         .data(myData)
@@ -309,12 +329,12 @@ function renderTaskSummary(myData) {
         .append('tr')
         .attr('align', 'center')
         .attr('class','ui-widget-content')
-        .attr('mytest','acd')
         .html(function(d) {
-            return generateTaskSummaryLine(d);
+            var key = Object.keys(d)[0];
+            return generateTaskSummaryLine(d[key]);
     });
+
 }
-var testData = '[{"id": "id1","attempt": "a2","status": "ss","localityLevel": "ll","executorId": "id","launchTime": "11"}, {"id": "id221","attempt": "a233","status": "ss2","localityLevel": "ll2","executorId": "id2","launchTime": "22"}]';
 function taskSummaryObjToList(myTaskSummary) {
     var lists = [];
     lists.push(myTaskSummary.taskId);
@@ -327,11 +347,32 @@ function taskSummaryObjToList(myTaskSummary) {
     list.push(myTaskSummary.speculative);
     return lists;
 }
-// taskSummaryColumn2
+
 function generateTaskSummaryLine(task) {
     var html = '';
     taskSummaryColumn2.forEach(function(d) {
         html += '<td>'+ task[d] + '</td>';
+    });
+    return html;
+}
+var executorSummaryColumn = ["id","hostPort", "rddBlocks", "memoryUsed","diskUsed","totalDuration", "totalInputBytes", "totalShuffleRead", "totalShuffleWrite","maxMemory"]
+function renderExecutors(myData) {
+    d3.select("#executorDetailsBody")
+        .selectAll('tr')
+        .data(myData)
+        .enter()
+        .append('tr')
+        .attr('align', 'center')
+        .attr('class','ui-widget-content')
+        .html(function(d){
+            return generateExecutorDetailsLine(d);
+        });
+}
+
+function generateExecutorDetailsLine(data) {
+    var html = '';
+    executorSummaryColumn.forEach(function(d) {
+        html += '<td>' + data[d] + '</td>';
     });
     return html;
 }

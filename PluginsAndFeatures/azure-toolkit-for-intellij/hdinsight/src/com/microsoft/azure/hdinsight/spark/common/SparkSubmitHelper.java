@@ -34,12 +34,12 @@ import com.microsoft.intellij.hdinsight.messages.HDInsightBundle;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.CallableSingleArg;
+import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.List;
@@ -67,7 +67,6 @@ public class SparkSubmitHelper {
     }
 
     private String JobLogFolderName = "SparkJobLog";
-
     public String writeLogToLocalFile(@NotNull Project project) throws IOException{
         if (sparkJobLog == null) {
             return null;

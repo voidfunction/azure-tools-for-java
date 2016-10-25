@@ -1,42 +1,94 @@
+
+body {
+    margin: 2px;
+    visibility: visible;
+    height:100%;
+    width:100%;
+    float: left;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-align-content: center;
+    align-content: center;
+}
+
 #htitle {
     font-size: 14px;
     margin: 2px;
 }
-div {
-    resize: horizontal;
+
+#leftDiv {
+    float: left;
     overflow: auto;
-}
-#bodydiv {
-    margin-left: 30px;
-}
-#leftDIv {
-    width: 40%;
-    overflow: scroll;
-    display: inline-block;
+    max-width: 40vw;
+    max-height: 99vh;
+    min-height: 99vh;
+    border-right: 2px solid #185598;
+    margin-top: 8px;
 }
 
-#tableDIv,#taskSummary {
-    overflow-y: auto;
-    overflow-x: auto;
+#rightDiv {
+    float: left;
+    margin-left: 10px;
+    max-width: 60vw;
+    height:100vh;
+}
+
+#jobName {
+    border: none;
+    margin-top: 9px;
+    margin-left:12px;
+    float: left;
+}
+
+#rightButtonPanel{
+    float: right;
+    margin-right: 10px;
+}
+
+#myTable, #taskSummary {
     font-size: 12px;
     padding: 8px;
     margin: 0px 20px 0 0;
-    float: left;
     height: 880px;
 }
+#taskSummaryTable {
+    width:150px;
+    height:150px;
+    overflow:scroll;
+}
+#job-details-info-table > tr {
+    font-size: 6px;
+    text-align: left;
 
-#myTable,#taskSummaryTable,#job-details-info-table > thead > tr > th {
-    text-align: center;
-    font-size: 13px;
 }
 
-#myTable,#taskSummaryTable > tbody > tr > td {
+#myTable,
+#taskSummaryTable > tbody > tr > td,
+#taskSummaryTable,#job-details-info-table > thead > tr > th {
     text-align: center;
     font-size: 11px;
+    align-content: center;
 }
-#job-details-info-table tr td {
-    text-align: center;
+#stored_rdd_info,
+#stage_detail_info,
+#job-details-info-table {
+    margin-left: 10px;
+}
+#stored_rdd_info tr td,
+#stage_detail_info tr td,
+#job-details-info-table tr td
+{
+    text-align: left;
     font-size: 13px;
+    padding-bottom: 3px;
+}
+#stored_rdd_info tr td:first-child,
+#stage_detail_info tr td:first-child,
+#job-details-info-table tr td:first-child {
+    width: 150px;
+    margin-left: 10px;
 }
 #rightButtonPanel button {
     margin: 5px;
@@ -121,21 +173,11 @@ div {
     text-align: center;
 }
 
-#rightDiv {
-    height: 80%;
-    width: 50%;
-    overflow: auto;
-    background-color: #f5f5f5;
-    padding: 8px;
-    display: inline-block;
-}
-
 .rightPanelhr {
     height: 2px;
     border: none;
     border-top: 2px solid #185598;
-    margin-top: 2px;
-    margin-bottom: 0px;
+    margin: 0px;
 }
 
 .vsplitbar {
@@ -185,13 +227,22 @@ ul li {
     background-color: #dddddd;
 }
 
-.myrow {
-    display: flex; /* equal height of the children */
+input[type=text] {
+    width: 130px;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 12px;
+    background-color: white;
+    background-image: url('resources/icons/searchicon.png');
+    background-position: 10px 10px;
+    background-repeat: no-repeat;
+    padding: 12px 20px 12px 40px;
+    -webkit-transition: width 0.4s ease-in-out;
+    transition: width 0.4s ease-in-out;
 }
 
-.mycol {
-    flex: 1; /* additionally, equal width */
-
-    padding: 1em;
-    border: solid;
+input[type=text]:focus {
+    width: 100%;
 }
+
