@@ -59,12 +59,11 @@ public class WebUi implements IWebUi {
                         hostReadySocket.accept();
                         hostReadySocket.close();
                         javafxAppStarted = true;
+                        if(useCookie) {
+                            java.net.CookieManager cm = new java.net.CookieManager();
+                            java.net.CookieHandler.setDefault(cm);
+                        }
                     }
-                }
-
-                if(useCookie) {
-                    java.net.CookieManager cm = new java.net.CookieManager();
-                    java.net.CookieHandler.setDefault(cm);
                 }
 
                 log.log(Level.FINEST, String.format("JavaFx Client: connecting to JavaFx host port %d...", communicationPort));

@@ -9,8 +9,7 @@ import java.util.logging.Logger;
 
 public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     final static Logger log = Logger.getLogger(AcquireTokenInteractiveHandler.class.getName());
-    private static AuthorizationResult authorizationResult;
-    private static long authorizationResultTimestamp = -1;
+    private AuthorizationResult authorizationResult;
     private URI redirectUri;
     private String redirectUriRequestParameter;
     private PromptBehavior promptBehavior;
@@ -60,14 +59,6 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     
     private void acquireAuthorization() throws Exception {
         log.log(Level.FINEST, "acquireAuthorization...");
-        long allowedInterval = 300000; // authorization code ttl
-        if(authorizationResult != null
-            && !authenticator.getIsTenantless()
-            && System.currentTimeMillis() - authorizationResultTimestamp < allowedInterval) {
-            // use existing authorization code
-            log.log(Level.FINEST, "using existing authorization code");
-            return;
-        }
 
         URI authorizationUri = this.createAuthorizationUri(false);
         log.log(Level.FINEST, "Starting web ui...");
@@ -79,8 +70,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
         }
         authorizationResult = ResponseUtils.parseAuthorizeResponse(resultUri, this.callState);
         log.log(Level.FINEST, "==> authorization code: " + authorizationResult.code);
-        authorizationResultTimestamp = System.currentTimeMillis();
-        verifyAuthorizationResult();    
+        verifyAuthorizationResult();
    }
     
     private URI createAuthorizationUri(boolean includeFormsAuthParam) throws Exception {

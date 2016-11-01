@@ -108,8 +108,8 @@ public class AuthDialog extends Application {
     
     public void buildWindow(final Stage stage, final Params params, final Socket socket) {
 
-        log.log(Level.FINEST, "redirectUri: " + params.redirectUri);
-        log.log(Level.FINEST, "requestUri: " + params.requestUri);
+        //log.info("redirectUri: " + params.redirectUri);
+        log.info("requestUri: " + params.requestUri);
 
         stage.setWidth(500);
         stage.setHeight(700);
