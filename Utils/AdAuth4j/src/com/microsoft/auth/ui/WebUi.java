@@ -1,5 +1,8 @@
 package com.microsoft.auth.ui;
 
+import com.microsoft.auth.IWebUi;
+import javafx.application.Application;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
@@ -9,10 +12,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import com.microsoft.auth.IWebUi;
-
-import javafx.application.Application;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class WebUi implements IWebUi {
@@ -47,7 +47,7 @@ public class WebUi implements IWebUi {
                         communicationPort = communicationSocket.getLocalPort();
                         communicationSocket.close();
 
-                        log.info(String.format("Starting JavaFx host on port: %d...", communicationPort));
+                        log.log(Level.FINEST, String.format("Starting JavaFx host on port: %d...", communicationPort));
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -55,7 +55,7 @@ public class WebUi implements IWebUi {
                                         String.format("--communicationPort=%d", communicationPort), String.format("--hostReadyPort=%d", hostReadyPort));
                             }}).start();
 
-                        log.info(String.format("JavaFx Client: Waiting on port %d for the JavaFx host to start up ...", hostReadyPort));
+                        log.log(Level.FINEST, String.format("JavaFx Client: Waiting on port %d for the JavaFx host to start up ...", hostReadyPort));
                         hostReadySocket.accept();
                         hostReadySocket.close();
                         javafxAppStarted = true;
@@ -67,7 +67,7 @@ public class WebUi implements IWebUi {
                     java.net.CookieHandler.setDefault(cm);
                 }
 
-                log.info(String.format("JavaFx Client: connecting to JavaFx host port %d...", communicationPort));
+                log.log(Level.FINEST, String.format("JavaFx Client: connecting to JavaFx host port %d...", communicationPort));
                 String serverAddress = "127.0.0.1";
                 Socket socket = new Socket(serverAddress, communicationPort);
                 Response response = null;
@@ -79,18 +79,18 @@ public class WebUi implements IWebUi {
                     ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                     response = (Response) in.readObject();
                 } catch(Exception e) {
-                    log.info("WebUi: " + e.getMessage());
+                    log.log(Level.FINEST, "WebUi: " + e.getMessage());
                 } finally {
                     socket.close();
                 }
                 
                 if(response != null) {
                     if(response.status == Response.Status.Canceled) {
-                        log.info("Auth canceled by user");
+                        log.log(Level.FINEST, "Auth canceled by user");
                     } else if (response.status == Response.Status.Failed) {
-                        log.info("Auth failed");
+                        log.log(Level.FINEST, "Auth failed");
                     } else {
-                        log.info("Auth succeeded");
+                        log.log(Level.FINEST, "Auth succeeded");
                     }
                 }
                 return (response == null) 

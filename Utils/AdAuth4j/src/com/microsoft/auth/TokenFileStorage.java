@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -29,7 +30,7 @@ public class TokenFileStorage {
             Files.createDirectory(dirPath);
         }
         filePath = Paths.get(baseDir, CacheDir, CacheFileName);
-        log.info("filePath = '" + filePath + "'");
+        log.log(Level.FINEST, "filePath = '" + filePath + "'");
         
         if (!Files.exists(filePath)) {
             Files.createFile(filePath);

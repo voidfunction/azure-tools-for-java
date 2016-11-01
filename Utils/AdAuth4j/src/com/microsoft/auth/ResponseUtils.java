@@ -1,12 +1,11 @@
 package com.microsoft.auth;
 
+import org.apache.commons.codec.binary.Base64;
+
 import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.codec.binary.Base64;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,13 +107,13 @@ public class ResponseUtils {
      private static IdToken parseIdToken(String idToken) throws Exception {
          IdToken idTokenBody = null;
          if (!StringUtils.isNullOrWhiteSpace(idToken)) {
-             log.info("idToken: " + idToken);
+             log.log(Level.FINEST, "idToken: " + idToken);
              String[] idTokenSegments = idToken.split("\\.");
 
              // If Id token format is invalid, we silently ignore the id token
              if (idTokenSegments.length == 2) {
                  byte[] decoded = Base64.decodeBase64(idTokenSegments[1]);
-                 log.info("==> decoded idToken: " + new String(decoded));
+                 log.log(Level.FINEST, "==> decoded idToken: " + new String(decoded));
                  idTokenBody = JsonHelper.deserialize(IdToken.class, new String(decoded));
              }
          }

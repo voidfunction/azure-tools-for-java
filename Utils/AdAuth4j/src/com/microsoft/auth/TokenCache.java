@@ -77,7 +77,7 @@ public class TokenCache {
     /// <returns>Current state of the cache as a blob</returns>
     public byte[] serialize() throws Exception {
        synchronized (lock) {
-          log.info("Serializing...");
+          log.log(Level.FINEST, "Serializing...");
           // memory stream
           ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
           
@@ -96,7 +96,7 @@ public class TokenCache {
                    key.tokenSubjectType));
              writer.writeUTF(res.serialize());
           }
-          log.info(String.format("Serialized %d items to the output stream.", tokenCacheDictionary.size()));
+          log.log(Level.FINEST, String.format("Serialized %d items to the output stream.", tokenCacheDictionary.size()));
           return outputStream.toByteArray();     
        }
     }
@@ -107,7 +107,7 @@ public class TokenCache {
     /// <param name="state">State of the cache as a blob</param>
     public void deserialize(byte[] state) throws Exception {
        synchronized(lock) {
-          log.info("Deserializing...");
+          log.log(Level.FINEST, "Deserializing...");
             if (state.length == 0) {
                 this.tokenCacheDictionary.clear();
                 return;
@@ -131,10 +131,10 @@ public class TokenCache {
                 TokenCacheKey key = new TokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2],
                     TokenSubjectType.valueOf(TokenSubjectType.class,kvpElements[3]), result.userInfo);
                 
-                log.info(String.format("Putting key into the dictionary [hash: '%x']", key.hashCode()));
+                log.log(Level.FINEST, String.format("Putting key into the dictionary [hash: '%x']", key.hashCode()));
                 tokenCacheDictionary.put(key, result);
             }
-            log.info(String.format("Deserialized %d items to token cache.", count));
+            log.log(Level.FINEST, String.format("Deserialized %d items to token cache.", count));
         }
     }
 /*
@@ -175,9 +175,9 @@ public class TokenCache {
             }
             if (toRemoveKey != null) {
                 this.tokenCacheDictionary.remove(toRemoveKey);
-                log.info("One item removed successfully");
+                log.log(Level.FINEST, "One item removed successfully");
             } else {
-                log.info("Item not Present in the Cache");
+                log.log(Level.FINEST, "Item not Present in the Cache");
             }
             this.setHasStateChanged(true);
         }
@@ -190,9 +190,9 @@ public class TokenCache {
     public void clear() throws Exception {
        synchronized(lock) {
             onBeforeAccess();
-            log.info(String.format("Clearing Cache :- %d items to be removed", tokenCacheDictionary.size()));
+            log.log(Level.FINEST, String.format("Clearing Cache :- %d items to be removed", tokenCacheDictionary.size()));
             this.tokenCacheDictionary.clear();
-            log.info("Successfully Cleared Cache");
+            log.log(Level.FINEST, "Successfully Cleared Cache");
             this.setHasStateChanged(true);
             onAfterAccess();
         }
@@ -222,7 +222,7 @@ public class TokenCache {
 
     AuthenticationResult loadFromCache(String authority, String resource, String clientId, TokenSubjectType subjectType, String uniqueId, String displayableId) throws Exception {
        synchronized(lock) {
-            log.info("Looking up cache for a token...");
+            log.log(Level.FINEST, "Looking up cache for a token...");
             AuthenticationResult result = null;
             Map.Entry<TokenCacheKey, AuthenticationResult> kvp = loadSingleItemFromCache(authority,
                 resource, clientId, subjectType, uniqueId, displayableId);
@@ -240,9 +240,9 @@ public class TokenCache {
 
                 if (tokenNearExpiry) {
                     result.accessToken = null;
-                    log.info("An expired or near expiry token was found in the cache");
+                    log.log(Level.FINEST, "An expired or near expiry token was found in the cache");
                 } else if (!cacheKey.resource.equals(resource)) {
-                    log.info(String.format(
+                    log.log(Level.FINEST, String.format(
                             "Multi resource refresh token for resource '%s' will be used to acquire token for '%s'",
                             cacheKey.resource, resource));
                     AuthenticationResult newResult = new AuthenticationResult(null, null, result.refreshToken, 0);
@@ -250,20 +250,20 @@ public class TokenCache {
                     result = newResult;
                 } else {
                    long nowSec = System.currentTimeMillis()/1000;
-                    log.info(
+                    log.log(Level.FINEST,
                         String.format("%d minutes left until token in cache expires", TimeUnit.SECONDS.toMinutes(result.expiresOn - nowSec)));
                 }
                 if (result.accessToken == null && result.refreshToken == null) {
                     this.tokenCacheDictionary.remove(cacheKey);
-                    log.info( "An old item was removed from the cache");
+                    log.log(Level.FINEST,  "An old item was removed from the cache");
                     this.setHasStateChanged(true);
                     result = null;
                 }
                 if (result != null) {
-                    log.info(String.format("A matching item (access token or refresh token or both) was found in the cache [hashCode: '%x']", cacheKey.hashCode() ));
+                    log.log(Level.FINEST, String.format("A matching item (access token or refresh token or both) was found in the cache [hashCode: '%x']", cacheKey.hashCode() ));
                 }
             } else {
-                log.info( "No matching token was found in the cache");
+                log.log(Level.FINEST,  "No matching token was found in the cache");
             }
             return result;
         }
@@ -271,9 +271,9 @@ public class TokenCache {
 
     void storeToCache(AuthenticationResult result, String authority, String resource, String clientId, TokenSubjectType subjectType) {
         synchronized(lock) {
-            log.info("Storing token in the cache...");
+            log.log(Level.FINEST, "Storing token in the cache...");
             TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, subjectType, result.userInfo);
-            log.info(String.format("\n==> tokenCacheKey:\n \t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n", 
+            log.log(Level.FINEST, String.format("\n==> tokenCacheKey:\n \t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n",
                   authority
                   , resource.toLowerCase()
                   , clientId.toLowerCase()
@@ -281,9 +281,9 @@ public class TokenCache {
                   , result.userInfo.displayableId
                   , subjectType));
             tokenCacheDictionary.put(tokenCacheKey, result);
-            log.info(String.format("==> hashCode: '%x'", tokenCacheKey.hashCode()));
+            log.log(Level.FINEST, String.format("==> hashCode: '%x'", tokenCacheKey.hashCode()));
             
-            log.info("An item was stored in the cache");
+            log.log(Level.FINEST, "An item was stored in the cache");
             updateCachedMrrtRefreshTokens(result, authority, clientId, subjectType);
 
             this.setHasStateChanged(true);
@@ -336,7 +336,7 @@ public class TokenCache {
             int resourceValuesCount = resourceSpecificItems.size();
             Map.Entry<TokenCacheKey, AuthenticationResult> returnValue = null;
             if (resourceValuesCount == 1) {
-                log.info( "An item matching the requested resource was found in the cache");
+                log.log(Level.FINEST,  "An item matching the requested resource was found in the cache");
                 returnValue = resourceSpecificItems.get(0);
             } else if (resourceValuesCount == 0) {
                 // There are no resource specific tokens.  Choose any of the MRRT tokens if there are any.
@@ -350,7 +350,7 @@ public class TokenCache {
 
                 if (!mrrtItems.isEmpty()) {
                     returnValue = mrrtItems.get(0);
-                    log.info("A Multi Resource Refresh Token for a different resource was found which can be used");
+                    log.log(Level.FINEST, "A Multi Resource Refresh Token for a different resource was found which can be used");
                 }
             } else {
                 String message = AuthError.MultipleTokensMatched;

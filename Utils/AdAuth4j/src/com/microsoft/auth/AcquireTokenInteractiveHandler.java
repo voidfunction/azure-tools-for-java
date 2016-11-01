@@ -41,7 +41,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
                 && this.promptBehavior != PromptBehavior.Always 
                 && this.promptBehavior != PromptBehavior.RefreshSession);
         this.supportADFS = true;
-        log.info(String.format(
+        log.log(Level.FINEST, String.format(
                 "\n=== AcquireTokenInteractiveHandler params:\n\tpromptBehavior: %s\n\twebUi: %s\n\tuniqueId: %s\n\tdisplayableId: %s"
                 , promptBehavior.toString()
                 , webUi.getClass().getName()
@@ -59,18 +59,18 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     }
     
     private void acquireAuthorization() throws Exception {
-        log.info("acquireAuthorization...");
+        log.log(Level.FINEST, "acquireAuthorization...");
         long allowedInterval = 300000; // authorization code ttl
         if(authorizationResult != null
             && !authenticator.getIsTenantless()
             && System.currentTimeMillis() - authorizationResultTimestamp < allowedInterval) {
             // use existing authorization code
-            log.info("using existing authorization code");
+            log.log(Level.FINEST, "using existing authorization code");
             return;
         }
 
         URI authorizationUri = this.createAuthorizationUri(false);
-        log.info("Starting web ui...");
+        log.log(Level.FINEST, "Starting web ui...");
         String resultUri = this.webUi.authenticateAsync(authorizationUri, this.redirectUri).get();
         if(resultUri == null) {
             String message = "Authorization failed";
@@ -78,7 +78,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
             throw new AuthException(message);
         }
         authorizationResult = ResponseUtils.parseAuthorizeResponse(resultUri, this.callState);
-        log.info("==> authorization code: " + authorizationResult.code);
+        log.log(Level.FINEST, "==> authorization code: " + authorizationResult.code);
         authorizationResultTimestamp = System.currentTimeMillis();
         verifyAuthorizationResult();    
    }
