@@ -36,10 +36,7 @@ import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
-import com.microsoft.azure.management.storage.Kind;
-import com.microsoft.azure.management.storage.SkuName;
-import com.microsoft.azure.management.storage.StorageAccount;
-import com.microsoft.azure.management.storage.StorageAccountKey;
+import com.microsoft.azure.management.storage.*;
 import com.microsoft.rest.credentials.TokenCredentials;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
@@ -293,10 +290,15 @@ public class AzureArmSDKHelper {
                     newStorageAccountWithGroup = newStorageAccountBlank.withExistingResourceGroup(storageAccount.getResourceGroupName());
                 }
                 if (storageAccount.getKind() == Kind.BLOB_STORAGE) {
-                    newStorageAccountWithGroup.withBlobStorageAccountKind();
+                    newStorageAccountWithGroup = newStorageAccountWithGroup.withBlobStorageAccountKind().withAccessTier(storageAccount.getAccessTier());
                 } else {
-                    newStorageAccountWithGroup.withGeneralPurposeAccountKind();
+                    newStorageAccountWithGroup = newStorageAccountWithGroup.withGeneralPurposeAccountKind();
                 }
+
+                if (storageAccount.isEnableEncription()) {
+                    newStorageAccountWithGroup = newStorageAccountWithGroup.withEncryption(new Encryption());
+                }
+
                 return newStorageAccountWithGroup.withSku(SkuName.fromString(storageAccount.getType())).create();
             }
         };

@@ -21,12 +21,32 @@
  */
 package com.microsoft.tooling.msservices.model.storage;
 
+import com.microsoft.azure.management.storage.AccessTier;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 
 public class ArmStorageAccount extends StorageAccount{
     private com.microsoft.azure.management.storage.StorageAccount inner;
     private Kind kind;
+
+    public AccessTier getAccessTier() {
+        return accessTier;
+    }
+
+    public void setAccessTier(AccessTier accessTier) {
+        this.accessTier = accessTier;
+    }
+
+    public boolean isEnableEncription() {
+        return enableEncription;
+    }
+
+    public void setEnableEncription(boolean enableEncription) {
+        this.enableEncription = enableEncription;
+    }
+
+    private AccessTier accessTier;
+    private boolean enableEncription;
 
     public ArmStorageAccount(@NotNull String name,
                           @NotNull String subscriptionId, com.microsoft.azure.management.storage.StorageAccount inner) {
@@ -49,4 +69,7 @@ public class ArmStorageAccount extends StorageAccount{
     public void setKind(Kind kind) {
         this.kind = kind;
     }
+
+
 }
+
