@@ -245,7 +245,9 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
         final String managementUri = settings.getAzureServiceManagementUri();
 
         // FIXME.shch: need to extend interface?
-        com.microsoft.auth.AuthenticationResult res = ((AADManagerImpl)aadManager).auth(null, com.microsoft.auth.PromptBehavior.Always);
+        com.microsoft.auth.AuthenticationResult res = ((AADManagerImpl)aadManager).auth(null, com.microsoft.auth.PromptBehavior.Always, null);
+        com.microsoft.auth.UserInfo uInfo = res.getUserInfo();
+        String user = (uInfo == null) ? null : uInfo.getDisplayableId();
 
         try {
             List<Tenant> tenants = TenantsClient.getByToken(res.getAccessToken());
@@ -255,13 +257,13 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
                 // FIXME.shch: fast fix to ignore self-made AAD tenants
                 res = null;
                 try {
-                    res = ((AADManagerImpl)aadManager).auth(tid, com.microsoft.auth.PromptBehavior.Auto);
+                    res = ((AADManagerImpl)aadManager).auth(tid, com.microsoft.auth.PromptBehavior.Auto, user);
                 } catch (Exception e) {
                     logger.warning(String.format("TenantId '%s' auth error: %s", t, e.getMessage()));
                 }
                 if(res == null) continue;;
 
-                UserInfo userInfo = new UserInfo(tid, res.getUserInfo().getUniqueId());
+                UserInfo userInfo = new UserInfo(tid, user);
 
                 List<Subscription> legacySubscriptions = getLegacySubscriptions(managementUri, userInfo);
 

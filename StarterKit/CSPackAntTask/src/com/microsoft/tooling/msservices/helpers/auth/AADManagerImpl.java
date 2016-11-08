@@ -26,6 +26,8 @@ import com.microsoft.auth.AuthenticationResult;
 import com.microsoft.auth.TokenCache;
 import com.microsoft.auth.IWebUi;
 import com.microsoft.auth.TokenFileStorage;
+import com.microsoft.auth.UserIdentifier;
+import com.microsoft.auth.UserIdentifierType;
 import com.microsoft.auth.AuthenticationResult;
 import com.microsoft.auth.PromptBehavior;
 
@@ -106,7 +108,7 @@ public class AADManagerImpl implements AADManager {
                          @NotNull RequestCallback<T> requestCallback)
             throws AzureCmdException {
 
-        AuthenticationResult res = auth(userInfo.getTenantId(), PromptBehavior.Auto);
+        AuthenticationResult res = auth(userInfo.getTenantId(), PromptBehavior.Auto, null);
         try {
             return requestCallback.execute(res.getAccessToken());
         } catch (Throwable throwable) {
@@ -115,13 +117,14 @@ public class AADManagerImpl implements AADManager {
         }
     }
 
-    public AuthenticationResult auth(String tenantName, PromptBehavior pb) throws AzureCmdException {
+    public AuthenticationResult auth(String tenantName, PromptBehavior pb, String user) throws AzureCmdException {
         if (tenantName == null) {
             tenantName = COMMON_TENANT;
         }
         try {
             AuthContext authContext = new AuthContext(String.format("%s/%s", AUTHORITY, tenantName), tokenCache);
-            AuthenticationResult result = authContext.acquireToken(RESOURCE, CLIENT_ID, REDIRECT_URI, pb, null);
+            UserIdentifier userIdentifier = (user == null) ? null : new UserIdentifier(user, UserIdentifierType.RequiredDisplayableId); 
+            AuthenticationResult result = authContext.acquireToken(RESOURCE, CLIENT_ID, REDIRECT_URI, pb, userIdentifier);
             return result;
         } catch (Throwable throwable) {
             logger.warning(throwable.getMessage());
