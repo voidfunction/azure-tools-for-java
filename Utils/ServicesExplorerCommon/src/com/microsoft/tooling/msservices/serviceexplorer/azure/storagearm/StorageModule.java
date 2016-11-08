@@ -70,15 +70,7 @@ public class StorageModule extends AzureRefreshableNode {
                 }
 
                 for (StorageAccount sm : storageAccounts) {
-                    String type = sm.getType();
-
-                    if (type.equals(StorageAccountTypes.STANDARD_GRS)
-                            || type.equals(StorageAccountTypes.STANDARD_LRS)
-                            || type.equals(StorageAccountTypes.STANDARD_RAGRS)
-                            || type.equals(StorageAccountTypes.STANDARD_ZRS)) {
-
-                        addChildNode(new StorageNode(this, subscription.getId(), sm));
-                    }
+                    addChildNode(new StorageNode(this, subscription.getId(), sm));
                 }
             } catch (Exception ex) {
                 failedSubscriptions.add(new ImmutablePair<>(subscription.getName(), ex.getMessage()));
