@@ -123,4 +123,9 @@ public class EmulatorClusterDetail implements IClusterDetail {
 		public void getConfigurationInfo(Object project) throws IOException, HDIException, AzureCmdException {
 
 		}
+
+	@Override
+	public String getSparkVersion() {
+		return "1.6.0";
+	}
 }

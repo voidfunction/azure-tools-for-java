@@ -94,6 +94,11 @@ public class HDInsightAdditionalClusterDetail implements IClusterDetail {
     }
 
     @Override
+    public String getSparkVersion() {
+        return null;
+    }
+
+    @Override
     public Subscription getSubscription() {
         return null;
     }

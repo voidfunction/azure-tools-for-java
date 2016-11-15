@@ -67,4 +67,6 @@ public interface IClusterDetail {
     List<HDStorageAccount> getAdditionalStorageAccounts();
 
     void getConfigurationInfo(Object project) throws IOException, HDIException, AzureCmdException;
+
+    String getSparkVersion();
 }

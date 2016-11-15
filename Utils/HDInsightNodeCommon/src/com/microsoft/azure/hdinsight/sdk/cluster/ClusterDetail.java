@@ -71,6 +71,25 @@ public class ClusterDetail implements IClusterDetail {
         return this.clusterRawInfo.getName();
     }
 
+    @Override
+    public String getSparkVersion() {
+        ClusterProperties clusterProperties = clusterRawInfo.getProperties();
+        if(clusterProperties == null) {
+            return null;
+        }
+
+        String clusterVersion = clusterProperties.getClusterVersion();
+        if(clusterVersion.startsWith("3.3")){
+            return "1.5.2";
+        } else if(clusterVersion.startsWith("3.4")) {
+            return "1.6.2";
+        } else if(clusterVersion.startsWith("3.5")){
+            ComponentVersion componentVersion = clusterProperties.getClusterDefinition().getComponentVersion();
+            return componentVersion == null ? "1.6.2" : componentVersion.getSpark();
+        }
+        return null;
+    }
+
     public String getState(){
         ClusterProperties clusterProperties = this.clusterRawInfo.getProperties();
         return clusterProperties == null ? null : clusterProperties.getClusterState();
@@ -90,7 +109,12 @@ public class ClusterDetail implements IClusterDetail {
     }
 
     public ClusterType getType(){
-        ClusterType type =  ClusterType.valueOf(this.clusterRawInfo.getProperties().getClusterDefinition().getKind().toLowerCase());
+        ClusterType type =  null;
+        try {
+            type = ClusterType.valueOf(this.clusterRawInfo.getProperties().getClusterDefinition().getKind().toLowerCase());
+        } catch (IllegalArgumentException e) {
+            type = ClusterType.unkown;
+        }
         return type == null ? ClusterType.unkown : type;
     }
 

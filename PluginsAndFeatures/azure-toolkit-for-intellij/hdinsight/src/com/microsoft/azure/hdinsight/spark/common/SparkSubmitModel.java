@@ -35,6 +35,7 @@ import com.intellij.packaging.impl.compiler.ArtifactsWorkspaceSettings;
 import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
 import com.microsoft.azure.hdinsight.common.HDInsightUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.EmulatorClusterDetail;
+import com.microsoft.azure.hdinsight.sdk.cluster.ClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.AuthenticationException;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
@@ -84,9 +85,13 @@ public class SparkSubmitModel {
         this.submissionParameter = submissionParameterMap.get(project);
 
         setClusterComboBoxModel(cachedClusterDetails);
-        int index = submissionParameter != null ? clusterComboBoxModel.getIndexOf(submissionParameter.getClusterName()) : -1;
-        if (index != -1) {
-            clusterComboBoxModel.setSelectedItem(submissionParameter.getClusterName());
+        int index = -1;
+        if(submissionParameter != null) {
+            String title = getCluserTitle(submissionParameter.getClusterName());
+            index = clusterComboBoxModel.getIndexOf(title);
+            if (index != -1) {
+                clusterComboBoxModel.setSelectedItem(getCluserTitle(submissionParameter.getClusterName()));
+            }
         }
 
         final List<Artifact> artifacts = ArtifactUtil.getArtifactWithOutputPaths(project);
@@ -141,13 +146,16 @@ public class SparkSubmitModel {
         mapClusterNameToClusterDetail.clear();
 
         for (IClusterDetail clusterDetail : cachedClusterDetails) {
-            mapClusterNameToClusterDetail.put(clusterDetail.getName(), clusterDetail);
-            clusterComboBoxModel.addElement(clusterDetail.getName());
+
+            String title = getCluserTitle(clusterDetail);
+            mapClusterNameToClusterDetail.put(title, clusterDetail);
+            clusterComboBoxModel.addElement(title);
             if (clusterComboBoxModel.getSize() == 0) {
-                clusterComboBoxModel.setSelectedItem(clusterDetail.getName());
+                clusterComboBoxModel.setSelectedItem(title);
             }
         }
     }
+
     public void action(@NotNull SparkSubmissionParameter submissionParameter) {
         HDInsightUtil.getJobStatusManager(project).setJobRunningState(true);
         this.submissionParameter = submissionParameter;
@@ -187,6 +195,18 @@ public class SparkSubmitModel {
         }
     }
 
+    private String getCluserTitle(@NotNull IClusterDetail clusterDetail) {
+        String sparkVersion = clusterDetail.getSparkVersion();
+        return sparkVersion == null ? clusterDetail.getName() : StringHelper.concat(clusterDetail.getName(), "(Spark: ", sparkVersion, ")");
+    }
+    private String getCluserTitle(@NotNull String clusterName) {
+        for(IClusterDetail clusterDetail : cachedClusterDetails) {
+            if(clusterDetail.getName().equals(clusterName)) {
+                return getCluserTitle(clusterDetail);
+            }
+        }
+        return "unknow";
+    }
 
     private void uploadFileToCluster(@NotNull final IClusterDetail selectedClusterDetail, @NotNull final String selectedArtifactName) throws Exception{
         String buildJarPath = submissionParameter.isLocalArtifact() ?
