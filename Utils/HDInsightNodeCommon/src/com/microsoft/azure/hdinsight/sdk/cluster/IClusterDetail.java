@@ -32,6 +32,8 @@ import java.util.List;
 
 public interface IClusterDetail {
 
+    boolean isEmulator();
+
     boolean isConfigInfoAvailable();
 
     String getName();

@@ -61,6 +61,8 @@ public class ClusterDetail implements IClusterDetail {
         ExtractInfoFromComputeProfile();
     }
 
+    public boolean isEmulator () { return false; }
+
     public boolean isConfigInfoAvailable(){
         return isConfigInfoAvailable;
     }

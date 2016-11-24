@@ -34,6 +34,7 @@ import com.intellij.packaging.impl.compiler.ArtifactCompileScope;
 import com.intellij.packaging.impl.compiler.ArtifactsWorkspaceSettings;
 import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
 import com.microsoft.azure.hdinsight.common.HDInsightUtil;
+import com.microsoft.azure.hdinsight.sdk.cluster.EmulatorClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.AuthenticationException;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
@@ -186,29 +187,34 @@ public class SparkSubmitModel {
         }
     }
 
-    private void uploadFileToAzureBlob(@NotNull final IClusterDetail selectedClusterDetail, @NotNull final String selectedArtifactName) throws Exception{
+
+    private void uploadFileToCluster(@NotNull final IClusterDetail selectedClusterDetail, @NotNull final String selectedArtifactName) throws Exception{
         String buildJarPath = submissionParameter.isLocalArtifact() ?
                 submissionParameter.getLocalArtifactPath() : ((artifactHashMap.get(selectedArtifactName).getOutputFilePath()));
 
-        String fileOnBlobPath = SparkSubmitHelper.uploadFileToAzureBlob(project, selectedClusterDetail, buildJarPath);
-        submissionParameter.setFilePath(fileOnBlobPath);
+        String filePath = selectedClusterDetail.isEmulator() ?
+                SparkSubmitHelper.uploadFileToEmulator(project, selectedClusterDetail, buildJarPath) :
+                SparkSubmitHelper.uploadFileToAzureBlob(project, selectedClusterDetail, buildJarPath);
+        submissionParameter.setFilePath(filePath);
     }
 
     private void tryToCreateBatchSparkJob(@NotNull final IClusterDetail selectedClusterDetail) throws HDIException,IOException {
         SparkBatchSubmission.getInstance().setCredentialsProvider(selectedClusterDetail.getHttpUserName(), selectedClusterDetail.getHttpPassword());
-        HttpResponse response = SparkBatchSubmission.getInstance().createBatchSparkJob(selectedClusterDetail.getConnectionUrl() + "/livy/batches", submissionParameter);
+        HttpResponse response = SparkBatchSubmission.getInstance().createBatchSparkJob(SparkSubmitHelper.getLivyConnectionURL(selectedClusterDetail), submissionParameter);
 
         if (response.getCode() == 201 || response.getCode() == 200) {
             HDInsightUtil.showInfoOnSubmissionMessageWindow(project, "Info : Submit to spark cluster successfully.");
             postEventProperty.put("IsSubmitSucceed", "true");
 
-            String jobLink = String.format("%s/sparkhistory", selectedClusterDetail.getConnectionUrl());
+            String jobLink = selectedClusterDetail.isEmulator() ?
+                    ((EmulatorClusterDetail)selectedClusterDetail).getSparkHistoryEndpoint() :
+                    String.format("%s/sparkhistory", selectedClusterDetail.getConnectionUrl());
             HDInsightUtil.getSparkSubmissionToolWindowManager(project).setHyperLinkWithText("See spark job view from ", jobLink, jobLink);
             SparkSubmitResponse sparkSubmitResponse = new Gson().fromJson(response.getMessage(), new TypeToken<SparkSubmitResponse>() {
             }.getType());
 
             // Set submitted spark application id and http request info for stopping running application
-            HDInsightUtil.getSparkSubmissionToolWindowManager(project).setSparkApplicationStopInfo(selectedClusterDetail.getConnectionUrl(), sparkSubmitResponse.getId());
+            HDInsightUtil.getSparkSubmissionToolWindowManager(project).setSparkApplicationStopInfo(selectedClusterDetail, sparkSubmitResponse.getId());
             HDInsightUtil.getSparkSubmissionToolWindowManager(project).setStopButtonState(true);
             HDInsightUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().resetJobStateManager();
             SparkSubmitHelper.getInstance().printRunningLogStreamingly(project, sparkSubmitResponse.getId(), selectedClusterDetail, postEventProperty);
@@ -286,7 +292,7 @@ public class SparkSubmitModel {
                 }
 
                 try {
-                    uploadFileToAzureBlob(selectedClusterDetail, selectedArtifactName);
+                    uploadFileToCluster(selectedClusterDetail, selectedArtifactName);
                     tryToCreateBatchSparkJob(selectedClusterDetail);
                 } catch (Exception exception) {
                     showFailedSubmitErrorMessage(exception);
