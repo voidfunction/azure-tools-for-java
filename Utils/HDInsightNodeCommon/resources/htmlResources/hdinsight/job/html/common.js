@@ -63,3 +63,10 @@ function reloadTableStyle() {
     /* For removing the last border */
     $("table tbody td:last-child, table th:last-child").addClass("last");
 }
+
+function formatServerTime(gmtTime) {
+    var strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LGMT");
+    var formatTime = d3.timeFormat("%b %d, %Y %H:%M:%S");
+    var ptime = strictIsoParse(gmtTime);
+    return formatTime(ptime);
+}

@@ -62,6 +62,8 @@ function renderJobDetails(myData) {
         .text(function(d) {
             return "Job ID " + d.jobId;
         }).on('click',function(job,i) {
+            d3.select("#summaryTitle").html("Job details");
+            d3.select("#basicInformationTitle").html("Basic Job Information");
             d3.select("#job-details-info-table").html("");
             d3.select("#job-details-info-table")
                     .selectAll("tr")
@@ -71,6 +73,7 @@ function renderJobDetails(myData) {
                     .html(function(data, i) {
                         return "<td>" + data + "</td> <td>" + getJobDetailsValue(job, i)  + "</td>";
                     });
+            filterStageTaskTableWithStageIds(job.stageIds);
         });
         var details = getJobSummaryValue(myData);
         d3.select("#job-details-info-table")
@@ -179,6 +182,27 @@ function renderStoredRDD(myData) {
 
 var stagesDetailsColumn = ["status","stageId","executorRunTime","inputBytes","outputBytes","shuffleReadBytes","shuffleWriteBytes"];
 var summaryStagesColumn = ["executorRunTime","inputBytes","outputBytes","shuffleReadBytes","shuffleWriteBytes"];
+function renderStageSummary(myData) {
+    d3.select('#stageSummaryTbody')
+        .selectAll('tr')
+        .data(myData)
+        .enter()
+        .append('tr')
+        .attr('align', 'center')
+        .attr('class','ui-widget-content')
+        .html(function(d) {
+            return generateStageSummaryLine(d);
+        });
+
+}
+
+function generateStageSummaryLine(task) {
+    var html = '';
+    stagesDetailsColumn.forEach(function(d) {
+        html += '<td>'+ task[d] + '</td>';
+    });
+    return html;
+}
 function renderStagesDetails(myData) {
     d3.select("#stages_detail").selectAll("li")
         .data(myData)

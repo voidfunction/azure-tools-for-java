@@ -32,6 +32,10 @@ $(function () {
         attemptId = null;
         applicationName = null;
 
+        $("#summaryTitle").html("Application details");
+        $("#basicInformationTitle").html("Basic Application Information");
+        d3.selectAll("#stageSummaryTbody tr").remove();
+        d3.selectAll("#taskSummaryTbody tr").remove();
         $("#errorMessage").text("");
         $("#jobOutputTextarea").text("");
         $("#livyJobLog").text("");
@@ -45,7 +49,7 @@ $(function () {
         // get last attempt
         attemptId = $(this).find('td:eq(4)').text();
         applicationName = $(this).find('td:eq(2)').text();
-        $("#jobName").text("Job Name: " + applicationName);
+        $("#jobName").text("Application: " + applicationName);
 
         if (appId == null) {
             return;
@@ -152,8 +156,8 @@ function getLastAttempt(attempts) {
 function setBasicInformation() {
     getMessageAsync(localhost + projectId + "/applications/" + appId, function (s) {
         var application = JSON.parse(s);
-        $("#startTime").text(getFirstAttempt(application.attempts).startTime);
-        $("#endTime").text(getLastAttempt(application.attempts).endTime);
+        $("#startTime").text(formatServerTime(getFirstAttempt(application.attempts).startTime));
+        $("#endTime").text(formatServerTime(getLastAttempt(application.attempts).endTime));
     });
 }
 
@@ -193,7 +197,7 @@ function appInformationList(app) {
     lists.push(getTheJobStatusImgLabel(status));
     lists.push(app.id);
     lists.push(app.name);
-    lists.push(app.attempts[0].startTime);
+    lists.push(formatServerTime(app.attempts[0].startTime));
     if(app.attempts.length == 1 && typeof app.attempts[0].attemptId == 'undefined') {
         lists.push(0);
     } else {
@@ -412,7 +416,7 @@ function setStageDetailsWithTaskDetails() {
     $("#stage_detail_info_message").text('');
     getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/stages", function (s) {
         currentSelectedStages = JSON.parse(s);
-        renderStagesDetails(currentSelectedStages);
+        renderStageSummary(currentSelectedStages);
         setTaskDetails();
         if(!isJobGraphGenerated && currentSelectedJobs != null) {
             setJobGraph(currentSelectedJobs);
@@ -453,6 +457,47 @@ function filterTaskSummaryTable() {
     });
 }
 
+function filterStageTaskTableWithStageIds(stageIds) {
+    var tr = $("#stageSummaryTable tbody tr");
+    tr.each(function (i) {
+        var id = $("#stageSummaryTbody>tr>td:nth-child(2)")[i].innerHTML;
+        if( $.inArray( parseInt(id), stageIds) > -1 ) {
+            $(this).css("display","");
+            filterTaskTableWithStageId(id);
+        } else {
+            $(this).css("display","none");
+        }
+    });
+}
+
+function filterTaskTableWithStageId(stageId) {
+    var httpQuery = localhost + projectId + "/applications/" + appId + "/" + attemptId + "/stages/" + stageId;
+    getMessageAsync(httpQuery, function (s) {
+        var stageDetails = JSON.parse(s);
+        if(getJsonLength(stageDetails)) {
+            var filteredTaskIds = Object.keys(stageDetails[0].tasks);
+            filterTaskTableWithTaskIds(filteredTaskIds);
+        }
+    })
+}
+function filterTaskTableWithTaskIds(taskIds) {
+    var tr = $("#taskSummaryTable tbody tr");
+    tr.each(function (i) {
+        var id = $("#taskSummaryTbody>tr>td:nth-child(1)")[i].innerHTML;
+        if( $.inArray( id, taskIds) > -1 ) {
+            $(this).css("display","");
+        } else {
+            $(this).css("display","none");
+        }
+    });
+}
+function getJsonLength(jsonObject) {
+    var length = 0;
+    for(item in jsonObject) {
+        length++;
+    }
+    return length;
+}
 function openLivyLog() {
 
 }
