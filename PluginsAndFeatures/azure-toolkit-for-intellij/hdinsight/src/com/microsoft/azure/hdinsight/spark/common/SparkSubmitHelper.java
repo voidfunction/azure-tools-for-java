@@ -25,7 +25,9 @@ import com.google.common.base.Joiner;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.intellij.openapi.project.Project;
+import com.jcraft.jsch.*;
 import com.microsoft.azure.hdinsight.common.HDInsightUtil;
+import com.microsoft.azure.hdinsight.sdk.cluster.EmulatorClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
@@ -42,6 +44,7 @@ import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -124,7 +127,7 @@ public class SparkSubmitHelper {
                 }
 
                 from_index = printoutJobLog(project, id, from_index, clusterDetail);
-                HttpResponse statusHttpResponse = SparkBatchSubmission.getInstance().getBatchSparkJobStatus(clusterDetail.getConnectionUrl() + "/livy/batches", id);
+                HttpResponse statusHttpResponse = SparkBatchSubmission.getInstance().getBatchSparkJobStatus(getLivyConnectionURL(clusterDetail), id);
 
                 SparkSubmitResponse status = new Gson().fromJson(statusHttpResponse.getMessage(), new TypeToken<SparkSubmitResponse>() {
                 }.getType());
@@ -177,6 +180,48 @@ public class SparkSubmitHelper {
         }
     }
 
+    public String sftpFileToEmulator(Project project, String localFile, String folderPath, IClusterDetail clusterDetail) throws  IOException,HDIException, JSchException, SftpException {
+        EmulatorClusterDetail emulatorClusterDetail = (EmulatorClusterDetail) clusterDetail;
+        final File file = new File(localFile);
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            try (BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream)) {
+                String sshEndpoint = emulatorClusterDetail.getSSHEndpoint();
+                URL url = new URL(sshEndpoint);
+                String host = url.getHost();
+                int port = url.getPort();
+
+                JSch jsch = new JSch();
+                Session session = jsch.getSession(emulatorClusterDetail.getHttpUserName(), host, port);
+                session.setPassword(emulatorClusterDetail.getHttpPassword());
+
+                java.util.Properties config = new java.util.Properties();
+                config.put("StrictHostKeyChecking", "no");
+                session.setConfig(config);
+
+                session.connect();
+                ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
+                channel.connect();
+
+                String[] folders = folderPath.split( "/" );
+                for ( String folder : folders ) {
+                    if (folder.length() > 0) {
+                        try {
+                            channel.cd(folder);
+                        } catch (SftpException e) {
+                            channel.mkdir(folder);
+                            channel.cd(folder);
+                        }
+                    }
+                }
+
+                channel.put(bufferedInputStream, file.getName());
+                channel.disconnect();
+                session.disconnect();
+                return file.getName();
+            }
+        }
+    }
+
     public String uploadFileToAzureBlob(Project project, String localFile, HDStorageAccount storageAccount, String defaultContainerName, String uniqueFolderId)
             throws AzureCmdException, IOException, HDIException {
         final File file = new File(localFile);
@@ -213,7 +258,7 @@ public class SparkSubmitHelper {
     }
 
     private int printoutJobLog(Project project, int id, int from_index, IClusterDetail clusterDetail) throws IOException {
-        HttpResponse httpResponse = SparkBatchSubmission.getInstance().getBatchJobFullLog(clusterDetail.getConnectionUrl() + "/livy/batches", id);
+        HttpResponse httpResponse = SparkBatchSubmission.getInstance().getBatchJobFullLog( getLivyConnectionURL(clusterDetail), id);
         sparkJobLog = new Gson().fromJson(httpResponse.getMessage(), new TypeToken<SparkJobLog>() {
         }.getType());
 
@@ -267,6 +312,13 @@ public class SparkSubmitHelper {
         return null;
     }
 
+    public static String uploadFileToEmulator(@NotNull Project project, @NotNull IClusterDetail selectedClusterDetail, @NotNull String buildJarPath) throws Exception {
+        HDInsightUtil.showInfoOnSubmissionMessageWindow(project, String.format("Info : Get target jar from %s.", buildJarPath));
+        String uniqueFolderId = UUID.randomUUID().toString();
+        String folderPath = String.format("../opt/livy/SparkSubmission/%s", uniqueFolderId);
+        return String.format("/opt/livy/SparkSubmission/%s/%s", uniqueFolderId, SparkSubmitHelper.getInstance().sftpFileToEmulator(project, buildJarPath, folderPath, selectedClusterDetail));
+    }
+
     public static String uploadFileToAzureBlob(@NotNull Project project, @NotNull IClusterDetail selectedClusterDetail, @NotNull String buildJarPath) throws Exception {
 
         HDInsightUtil.showInfoOnSubmissionMessageWindow(project, String.format("Info : Get target jar from %s.", buildJarPath));
@@ -287,6 +339,14 @@ public class SparkSubmitHelper {
 
         return path.endsWith(".jar");
 
+    }
+
+    public static String getLivyConnectionURL(IClusterDetail clusterDetail) {
+        if(clusterDetail.isEmulator()){
+            return clusterDetail.getConnectionUrl() + "/batches";
+        }
+
+        return clusterDetail.getConnectionUrl() + "/livy/batches";
     }
 
     public static final String HELP_LINK = "http://go.microsoft.com/fwlink/?LinkID=722349&clcid=0x409";

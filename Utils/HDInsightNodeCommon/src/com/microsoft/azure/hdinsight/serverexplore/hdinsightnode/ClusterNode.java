@@ -25,12 +25,14 @@ import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
 import com.microsoft.azure.hdinsight.common.CommonConst;
 import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.ClusterDetail;
+import com.microsoft.azure.hdinsight.sdk.cluster.EmulatorClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.HDInsightAdditionalClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.CommonConstant;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
 
@@ -58,7 +60,9 @@ public class ClusterNode extends AzureRefreshableNode {
         addAction("Open Spark History UI", new NodeActionListener() {
             @Override
             protected void actionPerformed(NodeActionEvent e) {
-                String sparkHistoryUrl = String.format("https://%s.azurehdinsight.net/sparkhistory", clusterDetail.getName());
+                String sparkHistoryUrl = clusterDetail.isEmulator() ?
+                        ((EmulatorClusterDetail)clusterDetail).getSparkHistoryEndpoint() :
+                        String.format("https://%s.azurehdinsight.net/sparkhistory", clusterDetail.getName());
                 openUrlLink(sparkHistoryUrl);
             }
         });
@@ -66,7 +70,9 @@ public class ClusterNode extends AzureRefreshableNode {
         addAction("Open Cluster Management Portal(Ambari)", new NodeActionListener() {
             @Override
             protected void actionPerformed(NodeActionEvent e) {
-                String ambariUrl = String.format(CommonConstant.DEFAULT_CLUSTER_ENDPOINT, clusterDetail.getName());
+                String ambariUrl = clusterDetail.isEmulator() ?
+                        ((EmulatorClusterDetail)clusterDetail).getAmbariEndpoint() :
+                        String.format(CommonConstant.DEFAULT_CLUSTER_ENDPOINT, clusterDetail.getName());
                 openUrlLink(ambariUrl);
             }
         });
@@ -110,20 +116,35 @@ public class ClusterNode extends AzureRefreshableNode {
                 }
             });
         }
+
+        if(clusterDetail instanceof EmulatorClusterDetail) {
+            addAction("Unlink", new NodeActionListener() {
+                @Override
+                protected void actionPerformed(NodeActionEvent e) {
+                    boolean choice = DefaultLoader.getUIHelper().showConfirmation("Do you really want to unlink the Emulator cluster?",
+                            "Unlink HDInsight Cluster", new String[]{"Yes", "No"}, null);
+                    if(choice) {
+                        ClusterManagerEx.getInstance().removeEmulatorCluster((EmulatorClusterDetail) clusterDetail);
+                        ((HDInsightRootModule) getParent()).refreshWithoutAsync();
+                    }
+                }
+            });
+        }
     }
 
     @Override
     protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
             {
         removeAllChildNodes();
+        if(!clusterDetail.isEmulator()) {
+            final String uuid = UUID.randomUUID().toString();
+            JobViewManager.registerJovViewNode(uuid, clusterDetail);
+            JobViewNode jobViewNode = new JobViewNode(this, uuid);
+            addChildNode(jobViewNode);
 
-        final String uuid = UUID.randomUUID().toString();
-        JobViewManager.registerJovViewNode(uuid, clusterDetail);
-        JobViewNode jobViewNode = new JobViewNode(this, uuid);
-        addChildNode(jobViewNode);
-
-        RefreshableNode storageAccountNode = new StorageAccountFolderNode(this, clusterDetail);
-        addChildNode(storageAccountNode);
+            RefreshableNode storageAccountNode = new StorageAccountFolderNode(this, clusterDetail);
+            addChildNode(storageAccountNode);
+        }
     }
 
     private static String getClusterNameWitStatus(IClusterDetail clusterDetail) {

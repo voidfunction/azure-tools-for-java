@@ -46,6 +46,9 @@ public class HDInsightAdditionalClusterDetail implements IClusterDetail {
     }
 
     @Override
+    public boolean isEmulator() { return false; }
+
+    @Override
     public boolean isConfigInfoAvailable() {
         return false;
     }
