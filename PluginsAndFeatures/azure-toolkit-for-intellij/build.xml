@@ -106,7 +106,7 @@
     <include name="lib/jps-launcher.jar"/>
     <include name="lib/jps-model.jar"/>
     <include name="lib/jps-server.jar"/>
-    <include name="lib/jsch-0.1.51.jar"/>
+    <include name="lib/jsch-0.1.52.jar"/>
     <include name="lib/jsch.agentproxy.connector-factory.jar"/>
     <include name="lib/jsch.agentproxy.core.jar"/>
     <include name="lib/jsch.agentproxy.pageant.jar"/>
