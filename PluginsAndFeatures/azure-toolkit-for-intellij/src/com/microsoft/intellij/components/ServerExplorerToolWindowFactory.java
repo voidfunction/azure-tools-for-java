@@ -63,7 +63,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ServerExplorerToolWindowFactory implements ToolWindowFactory, PropertyChangeListener {
-    public static final String EXPLORER_WINDOW = "Service Explorer";
+    public static final String EXPLORER_WINDOW = "Azure Explorer";
 
     private Map<Project, DefaultTreeModel> treeModelMap = new HashMap<>();
 

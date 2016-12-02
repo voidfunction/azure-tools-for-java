@@ -154,7 +154,7 @@ class LoginDialog extends Dialog {
                 	Display.getDefault().asyncExec(new Runnable() {
 						@Override
 						public void run() {
-							Browser.clearSessions();
+							//Browser.clearSessions();
 		                	close();
 						}
                 	});
@@ -162,10 +162,10 @@ class LoginDialog extends Dialog {
             }
         });
 
-        String[] headers = new String[] {
-        		"User-Agent: SwtBrowser"
-        };
-        
-        browser.setUrl(requestUriStr, null, headers);
+//        String[] headers = new String[] {
+//        		"User-Agent: SwtBrowser"
+//        };
+//        browser.setUrl(requestUriStr, null, headers);
+        browser.setUrl(requestUriStr);
 	}
 }

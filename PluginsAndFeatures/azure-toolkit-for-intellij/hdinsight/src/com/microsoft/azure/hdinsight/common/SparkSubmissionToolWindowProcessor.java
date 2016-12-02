@@ -26,8 +26,11 @@ import com.intellij.ide.ui.UISettingsListener;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.components.JBScrollPane;
+import com.microsoft.azure.hdinsight.sdk.cluster.EmulatorClusterDetail;
+import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import com.microsoft.azure.hdinsight.spark.common.SparkBatchSubmission;
+import com.microsoft.azure.hdinsight.spark.common.SparkSubmitHelper;
 import com.microsoft.intellij.IToolWindowProcessor;
 import com.microsoft.intellij.hdinsight.messages.HDInsightBundle;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
@@ -48,12 +51,14 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SparkSubmissionToolWindowProcessor implements IToolWindowProcessor {
 
     private static final String yarnRunningUIUrlFormat = "%s/yarnui/hn/proxy/%s/";
+    private static final String yarnRunningUIEmulatorUrlFormat = "%s/api/v1/applications/%s/";
 
     private final JEditorPane jEditorPanel = new JEditorPane();
     private JButton stopButton;
@@ -66,7 +71,7 @@ public class SparkSubmissionToolWindowProcessor implements IToolWindowProcessor 
     private PropertyChangeSupport changeSupport;
     private ToolWindow toolWindow;
 
-    private String connectionUrl;
+    private IClusterDetail clusterDetail;
     private int batchId;
 
     public SparkSubmissionToolWindowProcessor(ToolWindow toolWindow) {
@@ -106,10 +111,10 @@ public class SparkSubmissionToolWindowProcessor implements IToolWindowProcessor 
                 DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (!StringHelper.isNullOrWhiteSpace(connectionUrl)) {
+                        if (clusterDetail != null) {
                             AppInsightsCustomEvent.create(HDInsightBundle.message("SparkSubmissionStopButtionClickEvent"), null);
                             try {
-                                HttpResponse deleteResponse = SparkBatchSubmission.getInstance().killBatchJob(connectionUrl + "/livy/batches", batchId);
+                                HttpResponse deleteResponse = SparkBatchSubmission.getInstance().killBatchJob(SparkSubmitHelper.getLivyConnectionURL(clusterDetail), batchId);
                                 if (deleteResponse.getCode() == 201 || deleteResponse.getCode() == 200) {
                                     jobStatusManager.setJobKilled();
                                     setInfo("========================Stop application successfully=======================");
@@ -135,10 +140,13 @@ public class SparkSubmissionToolWindowProcessor implements IToolWindowProcessor 
             public void actionPerformed(ActionEvent e) {
                 if (Desktop.isDesktopSupported()) {
                     try {
-                            if(jobStatusManager.isApplicationGenerated()){
-                                String sparkApplicationUrl = String.format(yarnRunningUIUrlFormat, connectionUrl, jobStatusManager.getApplicationId());
-                                Desktop.getDesktop().browse(new URI(sparkApplicationUrl));
-                            }
+                        if(jobStatusManager.isApplicationGenerated()){
+                            String connectionURL = clusterDetail.getConnectionUrl();
+                            String sparkApplicationUrl = clusterDetail.isEmulator() ?
+                                    String.format(yarnRunningUIEmulatorUrlFormat, ((EmulatorClusterDetail)clusterDetail).getSparkHistoryEndpoint(), jobStatusManager.getApplicationId()):
+                                    String.format(yarnRunningUIUrlFormat, connectionURL, jobStatusManager.getApplicationId());
+                            Desktop.getDesktop().browse(new URI(sparkApplicationUrl));
+                        }
 
                     } catch (Exception browseException) {
                         DefaultLoader.getUIHelper().showError("Failed to browse spark application yarn url", "Spark Submission");
@@ -256,8 +264,8 @@ public class SparkSubmissionToolWindowProcessor implements IToolWindowProcessor 
         return jobStatusManager;
     }
 
-    public synchronized void setSparkApplicationStopInfo(String connectUrl, int batchId) {
-        this.connectionUrl = connectUrl;
+    public synchronized void setSparkApplicationStopInfo(IClusterDetail clusterDetail, int batchId) {
+        this.clusterDetail = clusterDetail;
         this.batchId = batchId;
     }
 

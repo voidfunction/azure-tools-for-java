@@ -51,7 +51,7 @@ public class StorageAccountFolderNode extends AzureRefreshableNode {
     protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
             throws AzureCmdException {
         removeAllChildNodes();
-        if (clusterDetail != null) {
+        if (clusterDetail != null && !clusterDetail.isEmulator()) {
             try {
                 clusterDetail.getConfigurationInfo(getProject());
                 addChildNode(new StorageAccountNode(this, clusterDetail.getStorageAccount(), true));

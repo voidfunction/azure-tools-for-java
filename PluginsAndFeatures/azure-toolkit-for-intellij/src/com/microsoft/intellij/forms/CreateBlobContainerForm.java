@@ -97,7 +97,7 @@ public class CreateBlobContainerForm extends DialogWrapper {
                             ApplicationManager.getApplication().invokeLater(new Runnable() {
                                 @Override
                                 public void run() {
-                                    JOptionPane.showMessageDialog(null, "A blob container with the specified name already exists.", "Service Explorer", JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(null, "A blob container with the specified name already exists.", "Azure Explorer", JOptionPane.ERROR_MESSAGE);
                                 }
                             });
 

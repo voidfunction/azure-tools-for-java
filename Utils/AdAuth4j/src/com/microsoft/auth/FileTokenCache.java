@@ -58,15 +58,15 @@ public class FileTokenCache extends TokenCache {
             // in case of multiprocess file access
             FileLock lock = acquireLock(in);
             if(lock != null) {
-                log.info("Locking file cache for reading...");
+                log.log(Level.FINEST, "Locking file cache for reading...");
                 try {
                     int length = (int)new File(filePath.toString()).length();
                     byte[] data = new byte[length];
-                    log.info("Reading data...");
+                    log.log(Level.FINEST, "Reading data...");
                     in.read(data);
                     deserialize(data);
                 } finally {
-                    log.info("Unocking file cache");
+                    log.log(Level.FINEST, "Unocking file cache");
                     lock.release();
                 }
             } else {
@@ -83,13 +83,13 @@ public class FileTokenCache extends TokenCache {
             // in case of multiprocess file access
             FileLock lock = acquireLock(out);
             if(lock != null) {
-                log.info("Locking file cache for writing");
+                log.log(Level.FINEST, "Locking file cache for writing");
                 try {
                     byte[] data = serialize();
-                    log.info("Writing file...");
+                    log.log(Level.FINEST, "Writing file...");
                     out.write(data);
                 } finally {
-                    log.info("Unocking file cache");
+                    log.log(Level.FINEST, "Unocking file cache");
                     lock.release();
                 }
             } else {

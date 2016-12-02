@@ -30,14 +30,19 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
-import com.microsoft.azure.management.compute.VirtualMachineImage;
+import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.network.Network;
+import com.microsoft.azure.management.network.NetworkSecurityGroup;
+import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.storage.Kind;
+import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.intellij.AzurePlugin;
-import com.microsoft.intellij.forms.CreateStorageAccountForm;
+import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
 import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
@@ -45,22 +50,19 @@ import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.List;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class SettingsStep extends WizardStep<CreateVMWizardModel> {
-    private static final String PRODUCTION = "Production";
+    private static final String CREATE_NEW = "<< Create new >>";
+    private final String NONE = "(None)";
 
     private final Node parent;
     private Project project;
@@ -69,7 +71,6 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
     private JList createVmStepsList;
     private JEditorPane imageDescriptionTextPane;
     private JComboBox storageComboBox;
-    private JCheckBox availabilitySetCheckBox;
     private JComboBox availabilityComboBox;
     private JComboBox networkComboBox;
     private JComboBox subnetComboBox;
@@ -77,14 +78,15 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
     private JRadioButton useExistingRadioButton;
     private JTextField resourceGrpField;
     private JComboBox resourceGrpCombo;
+    private JComboBox pipCombo;
+    private JComboBox nsgCombo;
 
-    private Map<String, VirtualNetwork> virtualNetworks;
-    private final Lock vnLock = new ReentrantLock();
-    private final Condition vnInitialized = vnLock.newCondition();
+    private List<Network> virtualNetworks;
 
-    private Map<String, StorageAccount> storageAccounts;
-    private final Lock saLock = new ReentrantLock();
-    private final Condition saInitialized = saLock.newCondition();
+    private Map<String, ArmStorageAccount> storageAccounts;
+    private List<PublicIpAddress> publicIpAddresses;
+    private List<NetworkSecurityGroup> networkSecurityGroups;
+    private List<AvailabilitySet> availabilitySets;
 
     public SettingsStep(final CreateVMWizardModel model, Project project, Node parent) {
         super("Settings", null, null);
@@ -113,8 +115,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
                 if (o instanceof StorageAccount) {
                     StorageAccount sa = (StorageAccount) o;
-                    setText(String.format("%s (%s)", sa.getName(),
-                            !sa.getLocation().isEmpty() ? sa.getLocation() : sa.getAffinityGroup()));
+                    setText(String.format("%s (%s)", sa.getName(), sa.getLocation()));
                 }
             }
         });
@@ -122,7 +123,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         storageComboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
-                validateNext();
+                validateFinish();
             }
         });
 
@@ -140,31 +141,37 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
                 model.setSubnet((String) subnetComboBox.getSelectedItem());
-                validateNext();
+                validateFinish();
             }
         });
 
-        availabilitySetCheckBox.addItemListener(new ItemListener() {
+        pipCombo.setRenderer(new ListCellRendererWrapper<Object>() {
             @Override
-            public void itemStateChanged(ItemEvent itemEvent) {
-                availabilityComboBox.setEnabled(availabilitySetCheckBox.isSelected());
-            }
-        });
-
-        imageDescriptionTextPane.addHyperlinkListener(new HyperlinkListener() {
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent hyperlinkEvent) {
-                if (hyperlinkEvent.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                    if (Desktop.isDesktopSupported()) {
-                        try {
-                            Desktop.getDesktop().browse(hyperlinkEvent.getURL().toURI());
-                        } catch (Exception e) {
-                            AzurePlugin.log(e.getStackTrace().toString());
-                        }
-                    }
+            public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
+                if (o instanceof PublicIpAddress) {
+                    PublicIpAddress pip = (PublicIpAddress) o;
+                    setText(String.format("%s (%s)", pip.name(), pip.region()));
                 }
             }
         });
+
+        nsgCombo.setRenderer(new ListCellRendererWrapper<Object>() {
+            @Override
+            public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
+                if (o instanceof NetworkSecurityGroup) {
+                    setText(((NetworkSecurityGroup) o).name());
+                }
+            }
+        });
+    }
+
+    private void fillResourceGroups() {
+        try {
+            resourceGrpCombo.setModel(
+                    new DefaultComboBoxModel(AzureArmManagerImpl.getManager(project).getResourceGroups(model.getSubscription().getId()).toArray()));
+        } catch (AzureCmdException ex) {
+            PluginUtil.displayErrorDialogAndLog(message("errTtl"), "Error loading resource groups", ex);
+        }
     }
 
     @Override
@@ -173,161 +180,80 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
 
         model.getCurrentNavigationState().NEXT.setEnabled(false);
 
-        final VirtualMachineImage virtualMachineImage = model.getVirtualMachineImage();
-//        imageDescriptionTextPane.setText(model.getHtmlFromVMImage(virtualMachineImage));
-        imageDescriptionTextPane.setCaretPosition(0);
-
-//        retrieveCloudServices(model.getVirtualNetwork(), model.isFilterByCloudService());
+        fillResourceGroups();
+        retrieveStorageAccounts();
         retrieveVirtualNetworks();
-        retrieveStorageAccounts(/*model.getCloudService()*/);
-
-//        if (model.isFilterByCloudService()) {
-//            fillCloudServices(null, true);
-//        } else {
-        fillVirtualNetworks(true);
-//        }
+        retrievePublicIpAddresses();
+        retrieveNetworkSecurityGroups();
+        retrieveAvailabilitySets();
 
         return rootPanel;
     }
-
-//    @Override
-//    public WizardStep onPrevious(CreateVMWizardModel model) {
-//        Vector<Endpoint> endpointData = ((EndpointTableModel) endpointsTable.getModel()).getData();
-////        model.setEndpoints(endpointData.toArray(new Endpoint[endpointData.size()]));
-//
-//        return super.onPrevious(model);
-//    }
-
-//    private Collection<CloudService> filterCS(VirtualNetwork selectedVN) {
-//        Collection<CloudService> services = /*selectedVN == null ? cloudServices.values() :*/ new Vector<CloudService>();
-//
-//        if (selectedVN != null) {
-////            for (CloudService cloudService : cloudServices.values()) {
-////                if ((isDeploymentEmpty(cloudService, PRODUCTION) && areSameRegion(cloudService, selectedVN)) ||
-////                        areSameNetwork(cloudService, selectedVN)) {
-////                    services.add(cloudService);
-////                }
-////            }
-//        }
-//
-//        return services;
-//    }
 
     private void retrieveVirtualNetworks() {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading virtual networks...", false) {
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
-
-                vnLock.lock();
-
-                try {
-                    if (virtualNetworks == null) {
-                        try {
-                            java.util.List<Network> networks = AzureArmManagerImpl.getManager(project)
-                                    .getVirtualNetworks(model.getSubscription().getId());
-                            virtualNetworks = new TreeMap<String, VirtualNetwork>();
-
-//                            for (Network virtualNetwork : networks) {
-//                                virtualNetworks.put(virtualNetwork.name(), virtualNetwork);
-//                            }
-
-                            vnInitialized.signalAll();
-                        } catch (AzureCmdException e) {
-                            virtualNetworks = null;
-                            String msg = "An error occurred while attempting to retrieve the virtual networks list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
-                        }
+                if (virtualNetworks == null) {
+                    try {
+                        virtualNetworks = AzureArmManagerImpl.getManager(project).getVirtualNetworks(model.getSubscription().getId());
+                    } catch (AzureCmdException e) {
+                        virtualNetworks = null;
+                        String msg = "An error occurred while attempting to retrieve the virtual networks list." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                        PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                        return;
                     }
-                } finally {
-                    vnLock.unlock();
                 }
+                ApplicationManager.getApplication().invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        networkComboBox.setModel(getVirtualNetworkModel(model.getVirtualNetwork(), model.getSubnet()));
+                    }
+                });
             }
         });
 
         if (virtualNetworks == null) {
-            final DefaultComboBoxModel loadingVNModel = new DefaultComboBoxModel(
-                    new String[]{"<Loading...>"});
-
-            loadingVNModel.setSelectedItem(null);
-
             ApplicationManager.getApplication().invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    networkComboBox.setModel(loadingVNModel);
+                                      @Override
+                                      public void run() {
+                                          final DefaultComboBoxModel loadingVNModel = new DefaultComboBoxModel(new String[]{CREATE_NEW, "<Loading...>"}) {
+                                              @Override
+                                              public void setSelectedItem(Object o) {
+                                                  if (CREATE_NEW.equals(o)) {
+//                    showNewVirtualNetworkForm();
+                                                  } else {
+                                                      super.setSelectedItem(o);
+                                                      model.setVirtualNetwork((Network) o);
+                                                  }
+                                              }
+                                          };
+                                          loadingVNModel.setSelectedItem(null);
+                                          networkComboBox.setModel(loadingVNModel);
 
-                    subnetComboBox.removeAllItems();
-                    subnetComboBox.setEnabled(false);
-                }
-            }, ModalityState.any());
+                                          subnetComboBox.removeAllItems();
+                                          subnetComboBox.setEnabled(false);
+                                      }
+                                  }, ModalityState.any());
         }
     }
 
-    private void fillVirtualNetworks(final boolean cascade) {
-        ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
-            @Override
-            public void run() {
-                VirtualNetwork selectedVN = model.getVirtualNetwork();
-                String selectedSN = model.getSubnet();
-
-                vnLock.lock();
-
-                try {
-                    while (virtualNetworks == null) {
-                        vnInitialized.await();
-                    }
-                } catch (InterruptedException e) {
-                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting load the virtual networks list.", e);
-                } finally {
-                    vnLock.unlock();
-                }
-
-                refreshVirtualNetworks(selectedVN, selectedSN, cascade);
-            }
-        });
-    }
-
-    private void refreshVirtualNetworks(VirtualNetwork selectedVN,
-                                        String selectedSN,
-                                        boolean cascade) {
-        final DefaultComboBoxModel refreshedVNModel = getVirtualNetworkModel(/*selectedCS, */selectedVN, selectedSN);
-
-        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
-            @Override
-            public void run() {
-                networkComboBox.setModel(refreshedVNModel);
-//                networkComboBox.setEnabled(selectedCS == null || isDeploymentEmpty(selectedCS, PRODUCTION));
-            }
-        }, ModalityState.any());
-    }
-
-    private DefaultComboBoxModel getVirtualNetworkModel(/*final CloudService selectedCS,*/
-                                                        VirtualNetwork selectedVN,
-                                                        final String selectedSN/*,
-                                                        final boolean cascade*/) {
-        Vector<VirtualNetwork> networks = new Vector<VirtualNetwork>(virtualNetworks.values()); //filterVN(selectedCS);
-
-//        if (selectedCS != null && !selectedCS.getProductionDeployment().getVirtualNetwork().isEmpty()) {
-//            selectedVN = networks.size() == 1 ? networks.get(0) : null;
-//        }
-
-        DefaultComboBoxModel refreshedVNModel = new DefaultComboBoxModel(networks) {
-            private final String none = "(None)";
-//            private boolean doCascade = cascade;
-
+    private DefaultComboBoxModel getVirtualNetworkModel(Network selectedVN, final String selectedSN) {
+        DefaultComboBoxModel refreshedVNModel = new DefaultComboBoxModel(filterVN().toArray()) {
             @Override
             public void setSelectedItem(final Object o) {
-                if (none.equals(o)) {
+                if (NONE.equals(o)) {
                     removeElement(o);
                     setSelectedItem(null);
                 } else {
                     super.setSelectedItem(o);
 
-                    if (o instanceof VirtualNetwork) {
-                        model.setVirtualNetwork((VirtualNetwork) o);
+                    if (o instanceof Network) {
+                        model.setVirtualNetwork((Network) o);
 
-                        if (getIndexOf(none) == -1) {
-                            insertElementAt(none, 0);
+                        if (getIndexOf(NONE) == -1) {
+                            insertElementAt(NONE, 0);
                         }
 
                         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
@@ -337,7 +263,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
 
                                 subnetComboBox.removeAllItems();
 
-                                for (String subnet : ((VirtualNetwork) o).getSubnets()) {
+                                for (String subnet : ((Network) o).subnets().keySet()) {
                                     subnetComboBox.addItem(subnet);
 
                                     if (subnet.equals(selectedSN)) {
@@ -370,7 +296,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             }
         };
 
-        if (selectedVN != null && networks.contains(selectedVN)/* && (cascade || selectedCS != null)*/) {
+        if (selectedVN != null && virtualNetworks.contains(selectedVN)/* && (cascade || selectedCS != null)*/) {
             refreshedVNModel.setSelectedItem(selectedVN);
         } else {
             model.setVirtualNetwork(null);
@@ -380,29 +306,15 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         return refreshedVNModel;
     }
 
-    private Vector<VirtualNetwork> filterVN() {
-        Vector<VirtualNetwork> networks = /*selectedCS == null ?*/
-                new Vector<VirtualNetwork>(virtualNetworks.values()) /*:
-                new Vector<VirtualNetwork>()*/;
+    private List<Network> filterVN() {
+        List<Network> filteredNetworks = new ArrayList<>();
 
-//        if (selectedCS != null) {
-//            if (isDeploymentEmpty(selectedCS, PRODUCTION)) {
-//                for (VirtualNetwork virtualNetwork : virtualNetworks.values()) {
-//                    if (areSameRegion(selectedCS, virtualNetwork)) {
-//                        networks.add(virtualNetwork);
-//                    }
-//                }
-//            } else if (!selectedCS.getProductionDeployment().getVirtualNetwork().isEmpty()) {
-//                for (VirtualNetwork virtualNetwork : virtualNetworks.values()) {
-//                    if (areSameNetwork(selectedCS, virtualNetwork)) {
-//                        networks.add(virtualNetwork);
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-
-        return networks;
+        for (Network network : virtualNetworks) {
+            if (network.region().equals(model.getRegion())) {
+                filteredNetworks.add(network);
+            }
+        }
+        return filteredNetworks;
     }
 
     private void retrieveStorageAccounts() {
@@ -410,40 +322,32 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
+                if (storageAccounts == null) {
+                    try {
+                        java.util.List<ArmStorageAccount> accounts = AzureArmManagerImpl.getManager(project).getStorageAccounts(model.getSubscription().getId());
+                        storageAccounts = new TreeMap<String, ArmStorageAccount>();
 
-                saLock.lock();
-
-                try {
-                    if (storageAccounts == null) {
-                        try {
-                            java.util.List<StorageAccount> accounts = AzureArmManagerImpl.getManager(project).getStorageAccounts(model.getSubscription().getId());
-                            storageAccounts = new TreeMap<String, StorageAccount>();
-
-                            for (StorageAccount storageAccount : accounts) {
-                                storageAccounts.put(storageAccount.getName(), storageAccount);
-                            }
-
-                            saInitialized.signalAll();
-                        } catch (AzureCmdException e) {
-                            storageAccounts = null;
-                            String msg = "An error occurred while attempting to retrieve the storage accounts list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
+                        for (ArmStorageAccount storageAccount : accounts) {
+                            storageAccounts.put(storageAccount.getName(), storageAccount);
                         }
+                    } catch (AzureCmdException e) {
+                        storageAccounts = null;
+                        String msg = "An error occurred while attempting to retrieve the storage accounts list for subscription " +
+                                model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                        DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                        AzurePlugin.log(msg, e);
+                        return;
                     }
-                } finally {
-                    saLock.unlock();
                 }
+                refreshStorageAccounts(null);
             }
         });
 
         if (storageAccounts == null) {
-            final String createSA = "<< Create new storage account >>";
-
-            final DefaultComboBoxModel loadingSAModel = new DefaultComboBoxModel(
-                    new String[]{createSA, "<Loading...>"}) {
+            final DefaultComboBoxModel loadingSAModel = new DefaultComboBoxModel(new String[]{CREATE_NEW, "<Loading...>"}) {
                 @Override
                 public void setSelectedItem(Object o) {
-                    if (createSA.equals(o)) {
+                    if (CREATE_NEW.equals(o)) {
                         showNewStorageForm();
                     } else {
                         super.setSelectedItem(o);
@@ -466,61 +370,43 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
-                StorageAccount selectedSA = model.getStorageAccount();
-
-                saLock.lock();
-
-                try {
-                    while (storageAccounts == null) {
-                        saInitialized.await();
-                    }
-
-                    if (selectedSA != null && !storageAccounts.containsKey(selectedSA.getName())) {
-                        storageAccounts.put(selectedSA.getName(), selectedSA);
-                    }
-                } catch (InterruptedException e) {
-                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), "An error occurred while attempting to load the storage accounts list.", e);
-                } finally {
-                    saLock.unlock();
+                ArmStorageAccount selectedSA = model.getStorageAccount();
+                if (selectedSA != null && !storageAccounts.containsKey(selectedSA.getName())) {
+                    storageAccounts.put(selectedSA.getName(), selectedSA);
                 }
-
-                refreshStorageAccounts(/*selectedCS, */selectedSA);
+                refreshStorageAccounts(selectedSA);
             }
         });
     }
 
-    private void refreshStorageAccounts(final StorageAccount selectedSA) {
-        final DefaultComboBoxModel refreshedSAModel = getStorageAccountModel(/*selectedCS, */selectedSA);
+    private void refreshStorageAccounts(final ArmStorageAccount selectedSA) {
+        final DefaultComboBoxModel refreshedSAModel = getStorageAccountModel(selectedSA);
 
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
             public void run() {
                 storageComboBox.setModel(refreshedSAModel);
-                model.getCurrentNavigationState().NEXT.setEnabled(/*selectedCS != null &&*/
-                        selectedSA != null/* &&
-                        selectedSA.getLocation().equals(selectedCS.getLocation())*/);
+                model.getCurrentNavigationState().NEXT.setEnabled(selectedSA != null);
             }
         }, ModalityState.any());
     }
 
-    private DefaultComboBoxModel getStorageAccountModel(/*final CloudService selectedCS, */StorageAccount selectedSA) {
-        Vector<StorageAccount> accounts = filterSA(/*selectedCS*/);
-
-        final String createSA = "<< Create new storage account >>";
+    private DefaultComboBoxModel getStorageAccountModel(ArmStorageAccount selectedSA) {
+        Vector<ArmStorageAccount> accounts = filterSA();
 
         final DefaultComboBoxModel refreshedSAModel = new DefaultComboBoxModel(accounts) {
             @Override
             public void setSelectedItem(Object o) {
-                if (createSA.equals(o)) {
-                    showNewStorageForm(/*selectedCS*/);
+                if (CREATE_NEW.equals(o)) {
+                    showNewStorageForm();
                 } else {
                     super.setSelectedItem(o);
-                    model.setStorageAccount((StorageAccount) o);
+                    model.setStorageAccount((ArmStorageAccount) o);
                 }
             }
         };
 
-        refreshedSAModel.insertElementAt(createSA, 0);
+        refreshedSAModel.insertElementAt(CREATE_NEW, 0);
 
         if (accounts.contains(selectedSA)) {
             refreshedSAModel.setSelectedItem(selectedSA);
@@ -532,35 +418,287 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         return refreshedSAModel;
     }
 
-    private Vector<StorageAccount> filterSA(/*CloudService selectedCS*/) {
-        Vector<StorageAccount> accounts = new Vector<StorageAccount>();
+    private Vector<ArmStorageAccount> filterSA() {
+        Vector<ArmStorageAccount> filteredStorageAccounts = new Vector<>();
 
-//        if (selectedCS != null) {
-//            for (StorageAccount storageAccount : storageAccounts.values()) {
-//                if ((!storageAccount.getLocation().isEmpty() &&
-//                        storageAccount.getLocation().equals(selectedCS.getLocation())) ||
-//                        (!storageAccount.getAffinityGroup().isEmpty() &&
-//                                storageAccount.getAffinityGroup().equals(selectedCS.getAffinityGroup()))) {
-//                    accounts.add(storageAccount);
-//                }
-//            }
-//        }
-
-        return accounts;
+        for (ArmStorageAccount storageAccount : storageAccounts.values()) {
+            // VM and storage account need to be in the same region;
+            // only general purpose accounts support page blobs, so only they can be used to create vm;
+            // zone-redundant acounts not supported for vm
+            if (storageAccount.getLocation().equals(model.getRegion().toString())
+                    && storageAccount.getStorageAccount().kind() == Kind.STORAGE
+                    && storageAccount.getStorageAccount().sku().name() != SkuName.STANDARD_ZRS) {
+                filteredStorageAccounts.add(storageAccount);
+            }
+        }
+        return filteredStorageAccounts;
     }
 
-    private void fillAvailabilitySets() {
-        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+    private void retrievePublicIpAddresses() {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading public ip addresses...", false) {
             @Override
-            public void run() {
-                availabilityComboBox.setModel(new DefaultComboBoxModel(new String[]{}));
+            public void run(@NotNull ProgressIndicator progressIndicator) {
+                progressIndicator.setIndeterminate(true);
+                if (publicIpAddresses == null) {
+                    try {
+                        publicIpAddresses = AzureArmManagerImpl.getManager(project).getPublicIpAddresses(model.getSubscription().getId());
+                    } catch (AzureCmdException e) {
+                        publicIpAddresses = null;
+                        String msg = "An error occurred while attempting to retrieve public ip addresses list for subscription " +
+                                model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                        DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                        AzurePlugin.log(msg, e);
+                        return;
+                    }
+                }
+                ApplicationManager.getApplication().invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        pipCombo.setModel(getPipAddressModel(model.getPublicIpAddress()));
+                    }
+                });
             }
-        }, ModalityState.any());
+        });
+
+        if (publicIpAddresses == null) {
+            ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    final DefaultComboBoxModel loadingPipModel = new DefaultComboBoxModel(new String[]{NONE, CREATE_NEW, "<Loading...>"}) {
+                        @Override
+                        public void setSelectedItem(Object o) {
+                            super.setSelectedItem(o);
+                            if (CREATE_NEW.equals(o)) {
+                                model.setWithNewPip(true);
+//                    showNewPipForm();
+                            } else if (NONE.equals(o)) {
+                                model.setPublicIpAddress(null);
+                                model.setWithNewPip(false);
+                            } else {
+//                                model.setVirtualNetwork((Network) o);
+                            }
+                        }
+                    };
+                    loadingPipModel.setSelectedItem(null);
+                    pipCombo.setModel(loadingPipModel);
+                }
+            }, ModalityState.any());
+        }
+    }
+
+    private DefaultComboBoxModel getPipAddressModel(PublicIpAddress selectedPip) {
+        DefaultComboBoxModel refreshedPipModel = new DefaultComboBoxModel(filterPip().toArray()) {
+            @Override
+            public void setSelectedItem(final Object o) {
+                super.setSelectedItem(o);
+                if (NONE.equals(o)) {
+                    model.setPublicIpAddress(null);
+                    model.setWithNewPip(false);
+                } else if (CREATE_NEW.equals(o)) {
+                    model.setWithNewPip(true);
+                    model.setPublicIpAddress(null);
+//                    showNewPipForm();
+                } else if (o instanceof PublicIpAddress) {
+                    model.setPublicIpAddress((PublicIpAddress) o);
+                    model.setWithNewPip(false);
+                }
+            }
+        };
+        refreshedPipModel.insertElementAt(NONE, 0);
+        refreshedPipModel.insertElementAt(CREATE_NEW, 1);
+
+        if (selectedPip != null && publicIpAddresses.contains(selectedPip)) {
+            refreshedPipModel.setSelectedItem(selectedPip);
+        } else {
+            model.setPublicIpAddress(null);
+            refreshedPipModel.setSelectedItem(NONE);
+        }
+
+        return refreshedPipModel;
+    }
+
+    private Vector<PublicIpAddress> filterPip() {
+        Vector<PublicIpAddress> filteredPips = new Vector<>();
+
+        for (PublicIpAddress publicIpAddress : publicIpAddresses) {
+            // VM and public ip address need to be in the same region
+            if (publicIpAddress.region().equals(model.getRegion())) {
+                filteredPips.add(publicIpAddress);
+            }
+        }
+        return filteredPips;
+    }
+
+    private void retrieveNetworkSecurityGroups() {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading network security groups...", false) {
+            @Override
+            public void run(@NotNull ProgressIndicator progressIndicator) {
+                progressIndicator.setIndeterminate(true);
+                if (networkSecurityGroups == null) {
+                    try {
+                        networkSecurityGroups = AzureArmManagerImpl.getManager(project).getNetworkSecurityGroups(model.getSubscription().getId());
+                    } catch (AzureCmdException e) {
+                        networkSecurityGroups = null;
+                        String msg = "An error occurred while attempting to retrieve network security groups list for subscription " +
+                                model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                        DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                        AzurePlugin.log(msg, e);
+                        return;
+                    }
+                }
+                ApplicationManager.getApplication().invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        nsgCombo.setModel(getNsgModel(model.getNetworkSecurityGroup()));
+                    }
+                });
+            }
+        });
+
+        if (networkSecurityGroups == null) {
+            ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    final DefaultComboBoxModel loadingNsgModel = new DefaultComboBoxModel(new String[]{NONE, "<Loading...>"}) {
+                        @Override
+                        public void setSelectedItem(Object o) {
+                            super.setSelectedItem(o);
+                            if (NONE.equals(o)) {
+                                model.setNetworkSecurityGroup(null);
+                            } else {
+//                                model.setVirtualNetwork((Network) o);
+                            }
+                        }
+                    };
+                    loadingNsgModel.setSelectedItem(null);
+                    nsgCombo.setModel(loadingNsgModel);
+                }
+            }, ModalityState.any());
+        }
+    }
+
+    private DefaultComboBoxModel getNsgModel(NetworkSecurityGroup selectedNsg) {
+        DefaultComboBoxModel refreshedNsgModel = new DefaultComboBoxModel(filterNsg().toArray()) {
+            @Override
+            public void setSelectedItem(final Object o) {
+                super.setSelectedItem(o);
+                if (NONE.equals(o)) {
+                    model.setNetworkSecurityGroup(null);
+                } else if (o instanceof NetworkSecurityGroup) {
+                    model.setNetworkSecurityGroup((NetworkSecurityGroup) o);
+                } else {
+                    model.setNetworkSecurityGroup(null);
+                }
+            }
+        };
+        refreshedNsgModel.insertElementAt(NONE, 0);
+
+        if (selectedNsg != null && networkSecurityGroups.contains(selectedNsg)) {
+            refreshedNsgModel.setSelectedItem(selectedNsg);
+        } else {
+            model.setNetworkSecurityGroup(null);
+            refreshedNsgModel.setSelectedItem(NONE);
+        }
+        return refreshedNsgModel;
+    }
+
+    private Vector<NetworkSecurityGroup> filterNsg() {
+        Vector<NetworkSecurityGroup> filteredNsgs = new Vector<>();
+
+        for (NetworkSecurityGroup nsg : networkSecurityGroups) {
+            // VM and network security group
+            if (nsg.region().equals(model.getRegion())) {
+                filteredNsgs.add(nsg);
+            }
+        }
+        return filteredNsgs;
+    }
+
+    private void retrieveAvailabilitySets() {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading availability sets...", false) {
+            @Override
+            public void run(@NotNull ProgressIndicator progressIndicator) {
+                progressIndicator.setIndeterminate(true);
+                if (availabilitySets == null) {
+                    try {
+                        availabilitySets = AzureArmManagerImpl.getManager(project).getAvailabilitySets(model.getSubscription().getId());
+                    } catch (AzureCmdException e) {
+                        availabilitySets = null;
+                        String msg = "An error occurred while attempting to retrieve availability sets list for subscription " +
+                                model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                        DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                        AzurePlugin.log(msg, e);
+                        return;
+                    }
+                }
+                ApplicationManager.getApplication().invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        availabilityComboBox.setModel(getAvailabilitySetsModel(model.getAvailabilitySet()));
+                    }
+                });
+            }
+        });
+
+        if (availabilitySets == null) {
+            ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    final DefaultComboBoxModel loadingPipModel = new DefaultComboBoxModel(new String[]{NONE, CREATE_NEW, "<Loading...>"}) {
+                        @Override
+                        public void setSelectedItem(Object o) {
+                            super.setSelectedItem(o);
+                            if (CREATE_NEW.equals(o)) {
+                                model.setWithNewAvailabilitySet(true);
+                                model.setAvailabilitySet(null);
+                            } else if (NONE.equals(o)) {
+                                model.setAvailabilitySet(null);
+                                model.setWithNewAvailabilitySet(false);
+                            } else {
+//                                model.setVirtualNetwork((Network) o);
+                            }
+                        }
+                    };
+                    loadingPipModel.setSelectedItem(null);
+                    pipCombo.setModel(loadingPipModel);
+                }
+            }, ModalityState.any());
+        }
+    }
+
+    private DefaultComboBoxModel getAvailabilitySetsModel(AvailabilitySet selectedAvailabilitySet) {
+        DefaultComboBoxModel refreshedAvailabilitySetModel = new DefaultComboBoxModel(availabilitySets.toArray()) {
+            @Override
+            public void setSelectedItem(final Object o) {
+                super.setSelectedItem(o);
+                if (NONE.equals(o)) {
+                    model.setAvailabilitySet(null);
+                    model.setWithNewAvailabilitySet(false);
+                } else if (CREATE_NEW.equals(o)) {
+                    model.setWithNewAvailabilitySet(true);
+                    model.setAvailabilitySet(null);
+                } else if (o instanceof AvailabilitySet) {
+                    model.setAvailabilitySet(((AvailabilitySet) o));
+                    model.setWithNewAvailabilitySet(false);
+                }
+            }
+        };
+        refreshedAvailabilitySetModel.insertElementAt(NONE, 0);
+        refreshedAvailabilitySetModel.insertElementAt(CREATE_NEW, 1);
+
+        if (selectedAvailabilitySet != null && availabilitySets.contains(selectedAvailabilitySet)) {
+            refreshedAvailabilitySetModel.setSelectedItem(selectedAvailabilitySet);
+        } else {
+            model.setPublicIpAddress(null);
+            refreshedAvailabilitySetModel.setSelectedItem(NONE);
+        }
+
+        return refreshedAvailabilitySetModel;
     }
 
     private void showNewStorageForm() {
-        final CreateStorageAccountForm form = new CreateStorageAccountForm(project);
-        form.fillFields(model.getSubscription());
+        final CreateArmStorageAccountForm form = new CreateArmStorageAccountForm(project);
+        form.fillFields(model.getSubscription(), model.getRegion());
 
         form.setOnCreate(new Runnable() {
             @Override
@@ -568,11 +706,11 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        StorageAccount newStorageAccount = form.getStorageAccount();
+                        ArmStorageAccount newStorageAccount = form.getStorageAccount();
 
                         if (newStorageAccount != null) {
                             model.setStorageAccount(newStorageAccount);
-                            fillStorage(/*selectedCS*/);
+                            fillStorage();
                         }
                     }
                 });
@@ -582,19 +720,8 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         form.show();
     }
 
-//    private static boolean areSameRegion(CloudService cloudService, VirtualNetwork virtualNetwork) {
-//        return (!virtualNetwork.getLocation().isEmpty() &&
-//                virtualNetwork.getLocation().equals(cloudService.getLocation())) ||
-//                (!virtualNetwork.getAffinityGroup().isEmpty() &&
-//                        virtualNetwork.getAffinityGroup().equals(cloudService.getAffinityGroup()));
-//    }
-
-//    private static boolean areSameNetwork(CloudService cloudService, VirtualNetwork virtualNetwork) {
-//        return virtualNetwork.getName().equals(cloudService.getProductionDeployment().getVirtualNetwork());
-//    }
-
-    private void validateNext() {
-        model.getCurrentNavigationState().NEXT.setEnabled(storageComboBox.getSelectedItem() instanceof StorageAccount &&
+    private void validateFinish() {
+        model.getCurrentNavigationState().FINISH.setEnabled(storageComboBox.getSelectedItem() instanceof StorageAccount &&
                 (!subnetComboBox.isEnabled() || subnetComboBox.getSelectedItem() instanceof String));
     }
 
@@ -603,7 +730,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         final boolean isNewResourceGroup = createNewRadioButton.isSelected();
         final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
 
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Creating virtual machine...", false) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Creating virtual machine " + model.getName() + "...", false) {
 
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
@@ -613,7 +740,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                     VirtualMachine virtualMachine = new VirtualMachine(
                             model.getName(),
                             resourceGroupName,
-                            model.getAvailabilitySet(),
+                            null, // field not used for ARM vm anyway
                             model.getSubnet(),
                             model.getSize().getName(),
                             VirtualMachine.Status.Unknown,
@@ -647,7 +774,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         }
                     }
 
-                    StorageAccount storageAccount = model.getStorageAccount();
+                    ArmStorageAccount storageAccount = model.getStorageAccount();
 
 //                    for (StorageAccount account : AzureManagerImpl.getManager(project).getStorageAccounts(
 //                            model.getSubscription().getId(), true)) {
@@ -656,20 +783,22 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
 //                            break;
 //                        }
 //                    }
-
                     final com.microsoft.azure.management.compute.VirtualMachine vm = AzureArmManagerImpl.getManager(project)
                             .createVirtualMachine(model.getSubscription().getId(),
                                     virtualMachine,
                                     model.getVirtualMachineImage(),
                                     storageAccount,
-                                    model.getVirtualNetwork() != null ? model.getVirtualNetwork().getName() : "",
+                                    model.getVirtualNetwork(),
+                                    model.getSubnet(),
+                                    model.getPublicIpAddress(),
+                                    model.isWithNewPip(),
+                                    model.getAvailabilitySet(),
+                                    model.isWithNewAvailabilitySet(),
                                     model.getUserName(),
                                     model.getPassword(),
-                                    certData);
+                                    certData.length > 0 ? new String(certData) : null);
 
 //                    virtualMachine = AzureManagerImpl.getManager(project).refreshVirtualMachineInformation(virtualMachine);
-
-//                    final VirtualMachine vm = virtualMachine;
 
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
                         @Override
@@ -677,17 +806,20 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                             try {
                                 parent.addChildNode(new com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMNode(parent, model.getSubscription().getId(), vm));
                             } catch (AzureCmdException e) {
-                                DefaultLoader.getUIHelper().showException("An error occurred while attempting to refresh the list of virtual machines.",
+                                String msg = "An error occurred while attempting to refresh the list of virtual machines.";
+                                DefaultLoader.getUIHelper().showException(msg,
                                         e,
                                         "Azure Services Explorer - Error Refreshing VM List",
                                         false,
                                         true);
+                                AzurePlugin.log(msg, e);
                             }
                         }
                     });
                 } catch (Exception e) {
-                    String msg = "An error occurred while attempting to create the specified virtual machine." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+                    String msg = "An error occurred while attempting to create the specified virtual machine." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                    DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                    AzurePlugin.log(msg, e);
                 }
             }
         });

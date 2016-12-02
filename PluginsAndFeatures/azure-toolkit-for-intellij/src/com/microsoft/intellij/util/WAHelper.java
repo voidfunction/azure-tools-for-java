@@ -21,11 +21,13 @@
  */
 package com.microsoft.intellij.util;
 
-import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.module.Module;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureRole;
 import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.tooling.msservices.model.ws.WebAppsContainers;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -45,6 +47,10 @@ public class WAHelper {
 
     public static String getDebugFile(String fileName) {
         return String.format("%s%s%s%s%s", PluginUtil.getPluginRootDirectory(), File.separator, "remotedebug", File.separator, fileName);
+    }
+
+    public static String getCustomJdkFile(String fileName) {
+        return String.format("%s%s%s%s%s", PluginUtil.getPluginRootDirectory(), File.separator, "customConfiguration", File.separator, fileName);
     }
 
     /**
@@ -170,11 +176,99 @@ public class WAHelper {
     }
 
     // HTTP GET request
-    public static void sendGet(String sitePath) throws Exception {
+    public static int sendGet(String sitePath) throws Exception {
         URL url = new URL(sitePath);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setRequestProperty("User-Agent", "AzureToolkit for Intellij");
-        int responseCode = con.getResponseCode();
+        return con.getResponseCode();
+    }
+
+    public static void checkSiteIsUp(String siteUrl) throws Exception {
+        final int REP_COUNT = 10;
+        final int SLEEP_SEC = 5;
+        for (int i=0; i<REP_COUNT; ++i) {
+            //System.out.println("==> Sending get to " + siteUrl + "...");
+            int statusCode = sendGet(siteUrl);
+            //System.out.println("\t status code is " + statusCode);
+            if (statusCode < 400) return;
+            //System.out.println("\t Sleeping 5 sec...");
+            Thread.sleep(SLEEP_SEC * 1000);
+        }
+        throw new Exception("Can't start the site");
+    }
+    public static void checkSiteIsDown(String siteUrl) throws Exception {
+        final int REP_COUNT = 10;
+        final int SLEEP_SEC = 5;
+        for (int i=0; i<REP_COUNT; ++i) {
+            //System.out.println("==> Sending get to " + siteUrl + "...");
+            int statusCode = sendGet(siteUrl);
+            //System.out.println("\t status code is " + statusCode);
+            if (statusCode >= 400) return;
+            //System.out.println("\t Sleeping 5 sec...");
+            Thread.sleep(SLEEP_SEC * 1000);
+        }
+        throw new Exception("Can't stop the site");
+    }
+
+    public static boolean isFilePresentOnFTPServer(FTPClient ftp, String fileName) throws IOException {
+        boolean filePresent = false;
+        FTPFile[] files = ftp.listFiles("/site/wwwroot");
+        for (FTPFile file : files) {
+            if (file.getName().equalsIgnoreCase(fileName)) {
+                filePresent = true;
+                break;
+            }
+        }
+        return filePresent;
+    }
+
+    public static boolean isRemoteFileExist(FTPClient ftp, String fileName) throws IOException {
+        FTPFile[] files = ftp.listFiles("/site/wwwroot");
+        for (FTPFile file : files) {
+            if (file.isFile() && file.getName().equalsIgnoreCase(fileName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isRemoteDirExist(FTPClient ftp, String fileName) throws IOException {
+        FTPFile[] files = ftp.listFiles("/site/wwwroot");
+        for (FTPFile file : files) {
+            if (file.isDirectory() && file.getName().equalsIgnoreCase(fileName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean checkFileCountOnFTPServer(FTPClient ftp, String path, int fileCount) throws IOException {
+        boolean fileExtracted = false;
+        FTPFile[] files = ftp.listFiles(path);
+        if (files.length >= fileCount) {
+            fileExtracted = true;
+        }
+        return fileExtracted;
+    }
+
+    public static String generateServerFolderName(String server, String version) {
+        String serverFolder = "";
+        if (server.equalsIgnoreCase("TOMCAT")) {
+            if (version.equalsIgnoreCase(WebAppsContainers.TOMCAT_8.getValue())) {
+                version = WebAppsContainers.TOMCAT_8.getCurrentVersion();
+            } else if (version.equalsIgnoreCase(WebAppsContainers.TOMCAT_7.getValue())) {
+                version = WebAppsContainers.TOMCAT_7.getCurrentVersion();
+            }
+            serverFolder = String.format("%s%s%s", "apache-tomcat", "-", version);
+        } else {
+            if (version.equalsIgnoreCase(WebAppsContainers.JETTY_9.getValue())) {
+                version = WebAppsContainers.JETTY_9.getCurrentVersion();
+            }
+            String version1 = version.substring(0, version.lastIndexOf('.') + 1);
+            String version2 = version.substring(version.lastIndexOf('.') + 1, version.length());
+            serverFolder = String.format("%s%s%s%s%s", "jetty-distribution", "-", version1, "v", version2);
+        }
+        return serverFolder;
     }
 }

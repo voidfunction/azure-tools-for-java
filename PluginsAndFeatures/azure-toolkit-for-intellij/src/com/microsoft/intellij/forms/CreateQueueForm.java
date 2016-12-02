@@ -124,7 +124,7 @@ public class CreateQueueForm extends DialogWrapper {
                             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                                 @Override
                                 public void run() {
-                                    JOptionPane.showMessageDialog(null, "A queue with the specified name already exists.", "Service Explorer", JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(null, "A queue with the specified name already exists.", "Azure Explorer", JOptionPane.ERROR_MESSAGE);
                                 }
                             });
 

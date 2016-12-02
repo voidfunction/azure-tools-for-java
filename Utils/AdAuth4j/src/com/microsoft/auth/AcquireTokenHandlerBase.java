@@ -4,7 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
-
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class AcquireTokenHandlerBase {
@@ -50,7 +50,7 @@ public abstract class AcquireTokenHandlerBase {
                 if (loadFromCache) {
                     notifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
-                    log.info(String.format("\n=== Token Acquisition started:\n\tAuthority: %s\n\tResource: %s\n\tClientId: %s\n\tCacheType: %s\n\tAuthentication Target: %s\n\tthread name: %s\n\t",
+                    log.log(Level.FINEST, String.format("\n=== Token Acquisition started:\n\tAuthority: %s\n\tResource: %s\n\tClientId: %s\n\tCacheType: %s\n\tAuthentication Target: %s\n\tthread name: %s\n\t",
                             authenticator.getAuthority(), resource, clientKey.clientId,
                             (tokenCache != null) ? tokenCache.getClass().getName() + String.format(" (%d items)", tokenCache.getCount()) : "null", tokenSubjectType, Thread.currentThread().getName() ));
                     result = tokenCache.loadFromCache(authenticator.getAuthority(), resource,
@@ -78,11 +78,10 @@ public abstract class AcquireTokenHandlerBase {
                 }
                 postRunAsync(result);
                 long end = System.currentTimeMillis();
-                log.info(String.format("====> %s: %d ms to get access token =========", Thread.currentThread().getName(), end-start));
+                log.log(Level.FINEST, String.format("====> %s: %d ms to get access token =========", Thread.currentThread().getName(), end-start));
                 return result;
             }
-        }
-        finally {
+        } finally {
             if (notifiedBeforeAccessCache) {
                 notifyAfterAccessCache();
             }
@@ -148,12 +147,12 @@ public abstract class AcquireTokenHandlerBase {
             public AuthenticationResult call() throws Exception {
                 AuthenticationResult newResult = null;
                 if (resource != null) {
-                    log.info("Refreshing access token...");
+                    log.log(Level.FINEST, "Refreshing access token...");
                     try {
                         newResult = sendTokenRequestByRefreshToken(result.refreshToken);
                        
                     } catch (AuthException e) {
-                        log.info("Error getting token - need to re-login.");
+                        log.log(Level.FINEST, "Error getting token - need to re-login.");
                         return null;
                     }
                     authenticator.updateTenantId(result.tenantId);
@@ -182,7 +181,7 @@ public abstract class AcquireTokenHandlerBase {
         AuthenticationResult result = ResponseUtils.parseTokenResponse(tokenResponse);
         if (result.refreshToken == null && requestParameters.containsKey(OAuthParameter.RefreshToken)) {
             result.refreshToken = requestParameters.get(OAuthParameter.RefreshToken);
-            log.info("Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+            log.log(Level.FINEST, "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
         }
         result.isMultipleResourceRefreshToken = (!StringUtils.isNullOrWhiteSpace(result.refreshToken) && !StringUtils.isNullOrWhiteSpace(tokenResponse.resource));
         return result;
@@ -201,7 +200,7 @@ public abstract class AcquireTokenHandlerBase {
             Calendar exp = new GregorianCalendar();
             exp.setTimeInMillis(TimeUnit.SECONDS.toMillis(result.expiresOn));
             DateFormat df = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
-            log.info("=== Token Acquisition finished successfully. An access token was retuned:\n\tExpiration Time: " + df.format(exp.getTime()));
+            log.log(Level.FINEST, "=== Token Acquisition finished successfully. An access token was retuned:\n\tExpiration Time: " + df.format(exp.getTime()));
         }
     }
 

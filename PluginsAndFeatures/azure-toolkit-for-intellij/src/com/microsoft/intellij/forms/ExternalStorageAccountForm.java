@@ -155,7 +155,7 @@ public class ExternalStorageAccountForm extends DialogWrapper {
 
         } catch (AzureCmdException e) {
             JOptionPane.showMessageDialog(contentPane,
-                    "The storage account contains invalid values. More information:\n" + e.getCause().getMessage(), "Service Explorer", JOptionPane.ERROR_MESSAGE);
+                    "The storage account contains invalid values. More information:\n" + e.getCause().getMessage(), "Azure Explorer", JOptionPane.ERROR_MESSAGE);
             return;
         }
 

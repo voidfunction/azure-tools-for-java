@@ -25,6 +25,8 @@ package com.microsoft.intellij.serviceexplorer;
 import com.google.common.collect.ImmutableList;
 import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
 import com.microsoft.azure.hdinsight.serverexplore.action.AddNewClusterAction;
+import com.microsoft.azure.hdinsight.serverexplore.action.AddNewEmulatorAction;
+import com.microsoft.azure.hdinsight.serverexplore.ui.AddNewEmulatorForm;
 import com.microsoft.intellij.serviceexplorer.azure.ManageSubscriptionsAction;
 import com.microsoft.intellij.serviceexplorer.azure.storage.*;
 import com.microsoft.intellij.serviceexplorer.azure.vm.CreateVMAction;
@@ -56,6 +58,6 @@ public class NodeActionsMap {
         node2Actions.put(com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageNode.class, new ImmutableList.Builder().add(CreateBlobContainer.class).build());
         node2Actions.put(ExternalStorageNode.class, new ImmutableList.Builder().add(ConfirmDialogAction.class, ModifyExternalStorageAccountAction.class).build());
         node2Actions.put(WebappNode.class, new ImmutableList.Builder().add(OpenWebappAction.class).build());
-        node2Actions.put(HDInsightRootModuleImpl.class, new ImmutableList.Builder().add(AddNewClusterAction.class).build());
+        node2Actions.put(HDInsightRootModuleImpl.class, new ImmutableList.Builder().add(AddNewClusterAction.class, AddNewEmulatorAction.class).build());
     }
 }

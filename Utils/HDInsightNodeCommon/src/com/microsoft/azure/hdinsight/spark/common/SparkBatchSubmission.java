@@ -22,6 +22,7 @@
 package com.microsoft.azure.hdinsight.spark.common;
 
 import com.microsoft.azure.hdinsight.common.StreamUtil;
+import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -71,13 +72,7 @@ public class SparkBatchSubmission {
         credentialsProvider.setCredentials(new AuthScope(AuthScope.ANY), new UsernamePasswordCredentials(username, password));
     }
 
-    /**
-     * get all batches spark jobs
-     * @param connectUrl : eg http://localhost:8998/batches
-     * @return response result
-     * @throws IOException
-     */
-    public HttpResponse getAllBatchesSparkJobs(String connectUrl)throws IOException{
+    public HttpResponse getHttpResponseViaGet(String connectUrl) throws IOException {
         CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).build();
 
         HttpGet httpGet = new HttpGet(connectUrl);
@@ -87,8 +82,19 @@ public class SparkBatchSubmission {
         }
     }
 
+
     /**
-     * create batch sp  ark job
+     * get all batches spark jobs
+     * @param connectUrl : eg http://localhost:8998/batches
+     * @return response result
+     * @throws IOException
+     */
+    public HttpResponse getAllBatchesSparkJobs(String connectUrl)throws IOException{
+        return getHttpResponseViaGet(connectUrl);
+    }
+
+    /**
+     * create batch spark job
      * @param connectUrl : eg http://localhost:8998/batches
      * @param submissionParameter : spark submission parameter
      * @return response result
@@ -113,13 +119,7 @@ public class SparkBatchSubmission {
      * @throws IOException
      */
     public HttpResponse getBatchSparkJobStatus(String connectUrl, int batchId)throws IOException{
-        CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).build();
-        HttpGet httpGet = new HttpGet(connectUrl + "/" + batchId);
-        httpGet.addHeader("Content-Type", "application/json");
-        httpGet.addHeader("User-Agent", UserAgentName);
-        try(CloseableHttpResponse response = httpclient.execute(httpGet)) {
-            return StreamUtil.getResultFromHttpResponse(response);
-        }
+        return getHttpResponseViaGet(connectUrl + "/" + batchId);
     }
 
     /**
@@ -147,13 +147,7 @@ public class SparkBatchSubmission {
      * @return response result
      * @throws IOException
      */
-    public HttpResponse getBatchJobFullLog(String connectUrl, int batchId)throws IOException{
-        CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).build();
-        HttpGet httpGet = new HttpGet(String.format("%s/%d/log?from=%d&size=%d", connectUrl,batchId,0,Integer.MAX_VALUE));
-        httpGet.addHeader("Content-Type", "application/json");
-        httpGet.addHeader("User-Agent", UserAgentName);
-        try(CloseableHttpResponse response = httpclient.execute(httpGet)) {
-            return StreamUtil.getResultFromHttpResponse(response);
-        }
+    public HttpResponse getBatchJobFullLog(String connectUrl, int batchId)throws IOException {
+        return getHttpResponseViaGet(String.format("%s/%d/log?from=%d&size=%d", connectUrl, batchId, 0, Integer.MAX_VALUE));
     }
 }

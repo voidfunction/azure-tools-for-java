@@ -4,7 +4,7 @@ import com.microsoft.windowsazure.core.pipeline.filter.ServiceRequestContext;
 import com.microsoft.windowsazure.core.pipeline.filter.ServiceRequestFilter;
 
 public class AzureToolkitFilter implements ServiceRequestFilter {
-    private static String USER_AGENT = "Azure Toolkit";
+    public static String USER_AGENT = "Azure Toolkit";
 
     /**
      * Need this as a static method when we call this class directly from Eclipse or IntelliJ plugin to know plugin version

@@ -1,14 +1,5 @@
 package com.microsoft.auth.ui;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import com.microsoft.auth.AuthException;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -21,6 +12,17 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class Params implements java.io.Serializable {
@@ -73,9 +75,9 @@ public class AuthDialog extends Application {
 
                 try {
                     while (true) {
-                        log.info(String.format("JavaFx host: listening port %d...", communicationPort));
+                        log.log(Level.FINEST, String.format("JavaFx host: listening port %d...", communicationPort));
                         final Socket socket = listener.accept();
-                        log.info(String.format("JavaFx host: connecton accepted %d", count++));
+                        log.log(Level.FINEST, String.format("JavaFx host: connecton accepted %d", count++));
                         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                         final Params params = (Params) in.readObject();
                         
@@ -83,7 +85,7 @@ public class AuthDialog extends Application {
                             break;
                         }
                         
-                        log.info("JavaFx host: Staring a new window");
+                        log.log(Level.FINEST, "JavaFx host: Staring a new window");
                         
                         Platform.runLater(new Runnable() {
                             @Override
@@ -101,12 +103,12 @@ public class AuthDialog extends Application {
         
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(worker);
-        log.info("==> JavaFx host is up and running!");
+        log.log(Level.FINEST, "==> JavaFx host is up and running!");
     }
     
     public void buildWindow(final Stage stage, final Params params, final Socket socket) {
 
-        log.info("redirectUri: " + params.redirectUri);
+        //log.info("redirectUri: " + params.redirectUri);
         log.info("requestUri: " + params.requestUri);
 
         stage.setWidth(500);
@@ -127,7 +129,7 @@ public class AuthDialog extends Application {
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
-                log.info("setOnCloseRequest");
+                log.log(Level.FINEST, "setOnCloseRequest");
                 sendResponse(new Response(Response.Status.Canceled, null), socket);
             }
         }); 
@@ -154,7 +156,7 @@ public class AuthDialog extends Application {
     }
 
     public static void buildStage(final Stage stage, String address) {
-        log.info("Inside dialog");
+        log.log(Level.FINEST, "Inside dialog");
         stage.setTitle(address);
         javafx.scene.layout.StackPane root = new javafx.scene.layout.StackPane();
     
@@ -180,7 +182,7 @@ public class AuthDialog extends Application {
     
     @Override
     public void stop() throws AuthException{
-        log.info("Stage is closing");
+        log.log(Level.FINEST, "Stage is closing");
 //        Platform.exit();
     }
     

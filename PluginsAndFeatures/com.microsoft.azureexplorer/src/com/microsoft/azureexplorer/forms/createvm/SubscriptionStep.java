@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.microsoft.azureexplorer.Activator;
+import com.microsoft.azureexplorer.forms.createvm.asm.CreateVMWizard;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -49,9 +50,9 @@ public class SubscriptionStep extends WizardPage {
     private Label subscriptionLabel;
     private Combo subscriptionComboBox;
 
-    private CreateVMWizard wizard;
+    private VMWizard wizard;
 
-    protected SubscriptionStep(CreateVMWizard wizard) {
+    public SubscriptionStep(VMWizard wizard) {
         super("Create new Virtual Machine", "Choose a Subscription", null);
         this.wizard = wizard;
     }
@@ -117,8 +118,8 @@ public class SubscriptionStep extends WizardPage {
         subscriptionComboBox.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (e.text != null && e.text.length() > 0) {
-                    wizard.setSubscription((Subscription) subscriptionComboBox.getData(e.text));
+                if (subscriptionComboBox.getText() != null && !(subscriptionComboBox.getText().length() == 0)) {
+                    wizard.setSubscription((Subscription) subscriptionComboBox.getData(subscriptionComboBox.getText()));
                 }
             }
         });

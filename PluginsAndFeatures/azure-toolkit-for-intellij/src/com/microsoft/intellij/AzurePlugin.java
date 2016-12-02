@@ -23,7 +23,6 @@ package com.microsoft.intellij;
 import com.intellij.ide.plugins.cl.PluginClassLoader;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.components.AbstractProjectComponent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
@@ -46,12 +45,13 @@ import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.util.WAHelper;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureToolkitFilter;
-import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
-import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
+import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.FileUtil;
+import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
 import com.microsoftopentechnologies.windowsazure.tools.cspack.Utils;
+import org.w3c.dom.Document;
 
 import javax.swing.event.EventListenerList;
 import java.io.File;
@@ -66,18 +66,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.w3c.dom.Document;
-
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 
 public class AzurePlugin extends AbstractProjectComponent {
     private static final Logger LOG = Logger.getInstance("#com.microsoft.intellij.AzurePlugin");
     public static final String COMPONENTSETS_VERSION = "2.9.2"; // todo: temporary fix!
-    public static final String PLUGIN_VERSION = "1.5";
+    public static final String PLUGIN_VERSION = "1.6";
     private static final String PREFERENCESETS_VERSION = "2.9.2";
     public static final String AZURE_LIBRARIES_VERSION = "0.9.2";
     public static final String QPID_LIBRARIES_VERSION = "0.19.0";
+    public static final String JDBC_LIBRARIES_VERSION = "6.0.7507.100";
     public final static int REST_SERVICE_MAX_RETRY_COUNT = 7;
 
     // User-agent header for Azure SDK calls
@@ -205,6 +204,11 @@ public class AzurePlugin extends AbstractProjectComponent {
             @Override
             public void run() {
                 boolean accepted = Messages.showYesNoDialog(message("preferenceQueMsg"), message("preferenceQueTtl"), null) == Messages.YES;
+                if(accepted) {
+                    AppInsightsCustomEvent.create(message("telemetryAcceptAction"),"");
+                } else {
+                    AppInsightsCustomEvent.create(message("telemetryDenyAction"),"");
+                }
                 DataOperations.updatePropertyValue(doc, message("prefVal"), String.valueOf(accepted));
 
                 DataOperations.updatePropertyValue(doc, message("pluginVersion"), PLUGIN_VERSION);

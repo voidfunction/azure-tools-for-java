@@ -82,7 +82,8 @@ public class AzureActionsComponent implements ApplicationComponent, PluginCompon
             if (PlatformUtils.isIdeaUltimate()) {
                 ActionManager actionManager = ActionManager.getInstance();
                 DefaultActionGroup actionGroup = (DefaultActionGroup) actionManager.getAction("PublishGroup");
-                actionGroup.addAll((ActionGroup) actionManager.getAction("AzureWebDeployGroup"));
+                if (actionGroup != null)
+                    actionGroup.addAll((ActionGroup) actionManager.getAction("AzureWebDeployGroup"));
             }
         }
     }

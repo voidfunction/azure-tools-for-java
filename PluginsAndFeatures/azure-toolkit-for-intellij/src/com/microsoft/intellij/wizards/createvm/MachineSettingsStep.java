@@ -33,9 +33,13 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.intellij.util.Consumer;
+import com.microsoft.azure.management.compute.OperatingSystemTypes;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.VMWizardModel;
+import com.microsoft.intellij.wizards.createarmvm.*;
+import com.microsoft.intellij.wizards.createarmvm.CreateVMWizardModel;
+import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
@@ -156,7 +160,7 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
                     @Override
                     public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
                         try {
-                            return file.isDirectory() || (file.getExtension() != null && file.getExtension().equals("cer"));
+                            return file.isDirectory() || (file.getExtension() != null && file.getExtension().equalsIgnoreCase("pub"));
                         } catch (Throwable t) {
                             return super.isFileVisible(file, showHiddenFiles);
                         }
@@ -164,7 +168,7 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
 
                     @Override
                     public boolean isFileSelectable(VirtualFile file) {
-                        return (file.getExtension() != null && file.getExtension().equals("cer"));
+                        return (file.getExtension() != null && file.getExtension().equalsIgnoreCase("pub"));
                     }
                 };
 
@@ -186,19 +190,24 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
     public JComponent prepare(WizardNavigationState wizardNavigationState) {
         rootPanel.revalidate();
 
-//        final VirtualMachineImage virtualMachineImage = model.getVirtualMachineImage();
-//
-//        if (virtualMachineImage.getOperatingSystemType().equals("Linux")) {
-//            certificateCheckBox.setEnabled(true);
-//            passwordCheckBox.setEnabled(true);
-//            certificateCheckBox.setSelected(true);
-//            passwordCheckBox.setSelected(false);
-//        } else {
-//            certificateCheckBox.setSelected(false);
-//            passwordCheckBox.setSelected(true);
-//            certificateCheckBox.setEnabled(false);
-//            passwordCheckBox.setEnabled(false);
-//        }
+        boolean isLinux;
+        if (model instanceof com.microsoft.intellij.wizards.createvm.CreateVMWizardModel) {
+            VirtualMachineImage virtualMachineImage = ((com.microsoft.intellij.wizards.createvm.CreateVMWizardModel) model).getVirtualMachineImage();
+            isLinux = virtualMachineImage.getOperatingSystemType().equals("Linux");
+        } else {
+            isLinux = ((CreateVMWizardModel) model).getVirtualMachineImage().osDiskImage().operatingSystem().equals(OperatingSystemTypes.LINUX);
+        }
+        if (isLinux) {
+            certificateCheckBox.setEnabled(true);
+            passwordCheckBox.setEnabled(true);
+            certificateCheckBox.setSelected(false);
+            passwordCheckBox.setSelected(true);
+        } else {
+            certificateCheckBox.setSelected(false);
+            passwordCheckBox.setSelected(true);
+            certificateCheckBox.setEnabled(false);
+            passwordCheckBox.setEnabled(false);
+        }
 
         validateEmptyFields();
 
@@ -214,8 +223,12 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
                     progressIndicator.setIndeterminate(true);
 
                     try {
-                        final List<VirtualMachineSize> virtualMachineSizes = AzureManagerImpl.getManager(project).getVirtualMachineSizes(model.getSubscription().getId().toString());
-
+                        final List<VirtualMachineSize> virtualMachineSizes;
+                        if (model instanceof com.microsoft.intellij.wizards.createarmvm.CreateVMWizardModel) {
+                            virtualMachineSizes = AzureArmManagerImpl.getManager(project).getVirtualMachineSizes(model.getSubscription().getId(), ((CreateVMWizardModel) model).getRegion());
+                        } else {
+                            virtualMachineSizes = AzureManagerImpl.getManager(project).getVirtualMachineSizes(model.getSubscription().getId().toString());
+                        }
                         Collections.sort(virtualMachineSizes, new Comparator<VirtualMachineSize>() {
                             @Override
                             public int compare(VirtualMachineSize t0, VirtualMachineSize t1) {
@@ -296,7 +309,7 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
         String certificate = certificateCheckBox.isSelected() ? certificateField.getText() : "";
 
         model.setName(name);
-        model.setSize((VirtualMachineSize) vmSizeComboBox.getSelectedItem());
+        model.setSize(((VirtualMachineSize) vmSizeComboBox.getSelectedItem()));
         model.setUserName(vmUserTextField.getText());
         model.setPassword(password);
         model.setCertificate(certificate);

@@ -36,9 +36,7 @@ import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azureexplorer.editors.JobViewInput;
 
 public class HDInsightHelperImpl implements HDInsightHelper {
-	
 	private static final String HDINSIHGT_BUNDLE_ID = "com.microsoft.hdinsights";
-	private static boolean isHDInsightLoaded = false;
 	
     public void openJobViewEditor(Object projectObject, String uuid) {
     	try {
@@ -57,7 +55,7 @@ public class HDInsightHelperImpl implements HDInsightHelper {
             Activator.getDefault().log("Error opening " + clusterDetail.getName(), e2);
         }
     }
-        
+    
     private void loadHDInsightPlugin() throws BundleException{
 		Bundle bundle = Platform.getBundle(HDINSIHGT_BUNDLE_ID);
 		if(bundle == null || bundle.getState() == Bundle.ACTIVE) {

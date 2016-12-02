@@ -24,6 +24,7 @@ package com.microsoft.intellij.wizards.createvm;
 
 import com.intellij.openapi.project.Project;
 import com.microsoft.intellij.wizards.VMWizardModel;
+import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
 
@@ -33,6 +34,9 @@ public class CreateVMWizardModel extends VMWizardModel {
     private CloudService cloudService;
     private boolean filterByCloudService;
     private Endpoint[] endpoints;
+    private VirtualNetwork virtualNetwork;
+    private StorageAccount storageAccount;
+    private String availabilitySet;
 
     public CreateVMWizardModel(VMServiceModule node) {
         super();
@@ -88,5 +92,29 @@ public class CreateVMWizardModel extends VMWizardModel {
 
     public void setEndpoints(Endpoint[] endpoints) {
         this.endpoints = endpoints;
+    }
+
+    public VirtualNetwork getVirtualNetwork() {
+        return virtualNetwork;
+    }
+
+    public void setVirtualNetwork(VirtualNetwork virtualNetwork) {
+        this.virtualNetwork = virtualNetwork;
+    }
+
+    public StorageAccount getStorageAccount() {
+        return storageAccount;
+    }
+
+    public void setStorageAccount(StorageAccount storageAccount) {
+        this.storageAccount = storageAccount;
+    }
+
+    public String getAvailabilitySet() {
+        return availabilitySet;
+    }
+
+    public void setAvailabilitySet(String availabilitySet) {
+        this.availabilitySet = availabilitySet;
     }
 }

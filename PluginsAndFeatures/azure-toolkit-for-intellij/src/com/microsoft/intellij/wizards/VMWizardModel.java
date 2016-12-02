@@ -65,18 +65,14 @@ public abstract class VMWizardModel extends WizardModel {
             "    #LICENCE#\n" +
             "</body>\n" +
             "</html>";
-    protected String subnet;
-
 
     private Subscription subscription;
-    private StorageAccount storageAccount;
-    private String availabilitySet;
-    private VirtualNetwork virtualNetwork;
     private String name;
     private VirtualMachineSize size;
     private String userName;
     private String password;
     private String certificate;
+    private String subnet;
 
     public VMWizardModel() {
         super(ApplicationNamesInfo.getInstance().getFullProductName() + " - Create new Virtual Machine");
@@ -135,36 +131,12 @@ public abstract class VMWizardModel extends WizardModel {
         return html;
     }
 
-    public StorageAccount getStorageAccount() {
-        return storageAccount;
-    }
-
-    public void setStorageAccount(StorageAccount storageAccount) {
-        this.storageAccount = storageAccount;
-    }
-
     public String getSubnet() {
         return subnet;
     }
 
     public void setSubnet(String subnet) {
         this.subnet = subnet;
-    }
-
-    public String getAvailabilitySet() {
-        return availabilitySet;
-    }
-
-    public void setAvailabilitySet(String availabilitySet) {
-        this.availabilitySet = availabilitySet;
-    }
-
-    public VirtualNetwork getVirtualNetwork() {
-        return virtualNetwork;
-    }
-
-    public void setVirtualNetwork(VirtualNetwork virtualNetwork) {
-        this.virtualNetwork = virtualNetwork;
     }
 
     public String getName() {

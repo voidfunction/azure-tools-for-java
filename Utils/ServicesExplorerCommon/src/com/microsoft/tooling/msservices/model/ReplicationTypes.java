@@ -25,7 +25,8 @@ public enum ReplicationTypes {
     Standard_ZRS,
     Standard_LRS,
     Standard_GRS,
-    Standard_RAGRS;
+    Standard_RAGRS,
+    Premium_LRS;
 
     public String getDescription() {
         switch (this) {
@@ -37,6 +38,8 @@ public enum ReplicationTypes {
                 return "Locally Redundant";
             case Standard_RAGRS:
                 return "Read Access Geo-Redundant";
+            case Premium_LRS:
+                return "Locally Redundant";
         }
 
         return super.toString();

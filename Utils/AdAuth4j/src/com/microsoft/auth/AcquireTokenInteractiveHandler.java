@@ -9,8 +9,7 @@ import java.util.logging.Logger;
 
 public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     final static Logger log = Logger.getLogger(AcquireTokenInteractiveHandler.class.getName());
-    private static AuthorizationResult authorizationResult;
-    private static long authorizationResultTimestamp = -1;
+    private AuthorizationResult authorizationResult;
     private URI redirectUri;
     private String redirectUriRequestParameter;
     private PromptBehavior promptBehavior;
@@ -41,7 +40,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
                 && this.promptBehavior != PromptBehavior.Always 
                 && this.promptBehavior != PromptBehavior.RefreshSession);
         this.supportADFS = true;
-        log.info(String.format(
+        log.log(Level.FINEST, String.format(
                 "\n=== AcquireTokenInteractiveHandler params:\n\tpromptBehavior: %s\n\twebUi: %s\n\tuniqueId: %s\n\tdisplayableId: %s"
                 , promptBehavior.toString()
                 , webUi.getClass().getName()
@@ -59,18 +58,10 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     }
     
     private void acquireAuthorization() throws Exception {
-        log.info("acquireAuthorization...");
-        long allowedInterval = 300000; // authorization code ttl
-        if(authorizationResult != null
-            && !authenticator.getIsTenantless()
-            && System.currentTimeMillis() - authorizationResultTimestamp < allowedInterval) {
-            // use existing authorization code
-            log.info("using existing authorization code");
-            return;
-        }
+        log.log(Level.FINEST, "acquireAuthorization...");
 
         URI authorizationUri = this.createAuthorizationUri(false);
-        log.info("Starting web ui...");
+        log.log(Level.FINEST, "Starting web ui...");
         String resultUri = this.webUi.authenticateAsync(authorizationUri, this.redirectUri).get();
         if(resultUri == null) {
             String message = "Authorization failed";
@@ -78,9 +69,8 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
             throw new AuthException(message);
         }
         authorizationResult = ResponseUtils.parseAuthorizeResponse(resultUri, this.callState);
-        log.info("==> authorization code: " + authorizationResult.code);
-        authorizationResultTimestamp = System.currentTimeMillis();
-        verifyAuthorizationResult();    
+        log.log(Level.FINEST, "==> authorization code: " + authorizationResult.code);
+        verifyAuthorizationResult();
    }
     
     private URI createAuthorizationUri(boolean includeFormsAuthParam) throws Exception {
@@ -88,7 +78,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
         if (!userId.isAnyUser()
             && (userId.type == UserIdentifierType.OptionalDisplayableId
                 || userId.type == UserIdentifierType.RequiredDisplayableId)) {
-            loginHint = userId.id;
+            loginHint = userId.displayableId();
         }
         Map<String, String> requestParameters = this.createAuthorizationRequest(loginHint, includeFormsAuthParam);
         return new URI(this.authenticator.authorizationUri + "?" + UriUtils.toQueryString(requestParameters));

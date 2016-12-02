@@ -1,4 +1,4 @@
-<project name="SampleJUnitTests" default="dist" basedir=".">
+<project name="Project Manager" default="dist" basedir=".">
     <description>
         Project Management JUnit Tests
     </description>

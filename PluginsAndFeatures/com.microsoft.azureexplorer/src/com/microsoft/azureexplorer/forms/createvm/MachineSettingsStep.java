@@ -19,6 +19,8 @@
  */
 package com.microsoft.azureexplorer.forms.createvm;
 
+import com.microsoft.azure.management.compute.OperatingSystemTypes;
+import com.microsoft.azureexplorer.forms.createvm.asm.CreateVMWizard;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -39,6 +41,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
+import java.io.File;
 import java.util.*;
 
 
@@ -61,11 +64,11 @@ public class MachineSettingsStep extends WizardPage {
 //    private JPanel certificatePanel;
 //    private JPanel passwordPanel;
     private Browser imageDescription;
-    private CreateVMWizard wizard;
+    private VMWizard wizard;
 
     private boolean inSetPageComplete = false;
 
-    public MachineSettingsStep(CreateVMWizard wizard) {
+    public MachineSettingsStep(VMWizard wizard) {
         super("Create new Virtual Machine", "Virtual Machine Basic Settings", null);
         this.wizard = wizard;
     }
@@ -199,17 +202,34 @@ public class MachineSettingsStep extends WizardPage {
         certificateField.setLayoutData(gridData);
         certificateButton = new Button(panel, SWT.PUSH);
         certificateButton.setText("...");
+        certificateButton.addSelectionListener(new SelectionAdapter() {
+        	@Override
+			public void widgetSelected(SelectionEvent arg0) {
+        		FileDialog dialog = new FileDialog(PluginUtil.getParentShell());
+        		String [] extensions = {"*.pub", "*.PUB"};
+        		dialog.setFilterExtensions(extensions);
+        		String certPath = dialog.open();
+        		if (certPath != null) {
+        			certificateField.setText(certPath);
+        		}
+			}
+		});
     }
 
     @Override
     public String getTitle() {
-        final VirtualMachineImage virtualMachineImage = wizard.getVirtualMachineImage();
-
-        if (virtualMachineImage.getOperatingSystemType().equals("Linux")) {
+    	boolean isLinux;
+    	if (wizard instanceof CreateVMWizard) {
+    		VirtualMachineImage virtualMachineImage = ((CreateVMWizard) wizard).getVirtualMachineImage();
+    		isLinux = virtualMachineImage.getOperatingSystemType().equals("Linux");
+    	} else {
+    		isLinux = ((com.microsoft.azureexplorer.forms.createvm.arm.CreateVMWizard) wizard).getVirtualMachineImage().osDiskImage().operatingSystem().equals(OperatingSystemTypes.LINUX);
+    	}
+        if (isLinux) {
             certificateCheckBox.setEnabled(true);
             passwordCheckBox.setEnabled(true);
-            certificateCheckBoxSelected(true);
-            passwordCheckBox.setSelection(false);
+            certificateCheckBoxSelected(false);
+            passwordCheckBox.setSelection(true);
         } else {
             certificateCheckBoxSelected(false);
             passwordCheckBox.setSelection(true);
@@ -219,11 +239,10 @@ public class MachineSettingsStep extends WizardPage {
 
         validateEmptyFields();
 
-        imageDescription.setText(wizard.getHtmlFromVMImage(virtualMachineImage));
+//        imageDescription.setText(wizard.getHtmlFromVMImage(virtualMachineImage));
 
         if (vmSizeComboBox.getItemCount() == 0) {
-            vmSizeComboBox.setItems(new String[]{"<Loading...>"});
-
+            vmSizeComboBox.setItems(new String[]{"<Loading...>"});            
             DefaultLoader.getIdeHelper().runInBackground(null, "Loading VM sizes...", false, true, "", new Runnable() {
                 @Override
                 public void run() {
@@ -319,12 +338,13 @@ public class MachineSettingsStep extends WizardPage {
     }
 
     private void selectDefaultSize() {
+    	if (wizard instanceof CreateVMWizard) {
         DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                String recommendedVMSize = wizard.getVirtualMachineImage().getRecommendedVMSize().isEmpty()
+                String recommendedVMSize = ((CreateVMWizard) wizard).getVirtualMachineImage().getRecommendedVMSize().isEmpty()
                         ? "Small"
-                        : wizard.getVirtualMachineImage().getRecommendedVMSize();
+                        : ((CreateVMWizard) wizard).getVirtualMachineImage().getRecommendedVMSize();
                 for (String sizeLabel : vmSizeComboBox.getItems()) {
                     VirtualMachineSize size = (VirtualMachineSize) vmSizeComboBox.getData(sizeLabel);
                     if (size != null && size.getName().equals(recommendedVMSize)) {
@@ -333,6 +353,7 @@ public class MachineSettingsStep extends WizardPage {
                 }
             }
         });
+    	}
     }
 
     private void validateEmptyFields() {

@@ -21,6 +21,7 @@ package com.microsoft.azureexplorer.hdinsight;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -28,10 +29,36 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.microsoft.azure.hdinsight.jobs.JobUtils;
 import com.microsoft.azureexplorer.Activator;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class FxClassLoader {
 
-	private static URLClassLoader createSWTFXClassLoader(ClassLoader parent, String jobViewUrl) throws Exception {
+	private static final String JOB_VIEW_FX_UTILS_NAME = "com.microsoft.hdinsight.jobs.JobViewFxUtil";
+	private static final String JOB_VIEW_FX_JAR_PATH = PluginUtil.pluginFolder + "/com.microsoft.azure.hdinsight" + "/hdinsight-job-view.jar";
+	
+	private static boolean isJavaFxLoaded = false;
+	
+	private static ClassLoader myClassLoader = null;
+	private static Class jobViewFxUtilslCLass = null;
+	private static Method method = null;
+	
+	public static void loadJavaFxForJobView(Composite composite, String url) {
+		if(!isJavaFxLoaded) {
+			tryLoadJavaFx();
+		}
+		
+		if(isJavaFxLoaded) {
+			try {
+				method.invoke(null, composite, url, new JobUtils());
+			} catch (Exception e) {
+				Activator.getDefault().log("HDInsight: load JavaFx error", e);
+			}
+		}
+	}
+	
+	private static URLClassLoader createSWTFXClassLoader() throws Exception {
+		ClassLoader parent = FxClassLoader.class.getClassLoader();
 		File javaHome = null;
 		try {
 			javaHome = new File(System.getProperty("java.home")).getCanonicalFile();
@@ -42,25 +69,30 @@ public class FxClassLoader {
 			throw new IllegalStateException("Java home \"" + javaHome.getAbsolutePath() + "\" doesn't exits");
 		}
 
-		File swtFxFile = new File(new File(javaHome.getAbsolutePath(), "lib"), "jfxswt.jar");
-		File jobViewFile = new File(jobViewUrl);
-		if (swtFxFile.exists() && jobViewFile.exists()) {
+		File swtFxFile = new File(javaHome.getAbsolutePath() + "/lib/jfxswt.jar");
+		File swtFxRtFile = new File(javaHome.getAbsolutePath() + "/lib/ext/jfxrt.jar");
+		File jobViewFile = new File(JOB_VIEW_FX_JAR_PATH);
+		if (swtFxFile.exists() && jobViewFile.exists() && swtFxRtFile.exists()) {
 			return new URLClassLoader(new URL[] { swtFxFile.getCanonicalFile().toURI().toURL(),
-					jobViewFile.getCanonicalFile().toURI().toURL() }, parent);
+					jobViewFile.getCanonicalFile().toURI().toURL(), swtFxRtFile.getCanonicalFile().toURI().toURL() }, parent);
 		}
 		return null;
 	}
 
-	private static String JOB_VIEW_FX_UTILS_NAME = "com.microsoft.hdinsight.jobs.JobViewFxUtil";
 
-	public static void loadJavaFxForJobView(Composite composite, String url, String jobViewUrl) {
+	
+	private static void tryLoadJavaFx() {
 		try {
-			ClassLoader myClassLoader = createSWTFXClassLoader(FxClassLoader.class.getClassLoader(), jobViewUrl);
-			Class jobViewFxUtilslCLass = Class.forName(JOB_VIEW_FX_UTILS_NAME, true, myClassLoader);
-			Method method = jobViewFxUtilslCLass.getMethod("startFx", Object.class, String.class, Object.class);
-			Object object = method.invoke(null, composite, url, new JobUtils());
-		} catch (Exception e) {
+			loadJavaFxCompont();
+			isJavaFxLoaded = true;
+		}catch(Exception e) {
 			Activator.getDefault().log("HDInsight: load JavaFx error", e);
 		}
+	}
+	
+	private static void loadJavaFxCompont() throws Exception {
+		myClassLoader = createSWTFXClassLoader();
+		jobViewFxUtilslCLass = Class.forName(JOB_VIEW_FX_UTILS_NAME, true, myClassLoader);
+		method = jobViewFxUtilslCLass.getMethod("startFx", Object.class, String.class, Object.class);
 	}
 }

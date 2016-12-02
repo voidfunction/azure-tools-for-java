@@ -45,6 +45,33 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNo
 
 public class VMNode extends AzureRefreshableNode {
     private static String RUNNING_STATUS = "PowerState/running";
+
+    public class DeleteVMAction extends AzureNodeActionPromptListener {
+        public DeleteVMAction() {
+            super(VMNode.this,
+                    String.format("This operation will delete virtual machine %s. The associated disks will not be deleted " +
+                            "from your storage account. Are you sure you want to continue?", virtualMachine.name()),
+                    "Deleting VM");
+        }
+
+        @Override
+        protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
+                throws AzureCmdException {
+            AzureArmManagerImpl.getManager(getProject()).deleteVirtualMachine(subscriptionId, virtualMachine);
+            DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    // instruct parent node to remove this node
+                    getParent().removeDirectChildNode(VMNode.this);
+                }
+            });
+        }
+
+        @Override
+        protected void onSubscriptionsChanged(NodeActionEvent e) throws AzureCmdException {
+        }
+    }
+
     public class RestartVMAction extends AzureNodeActionPromptListener {
         public RestartVMAction() {
             super(VMNode.this,
@@ -169,7 +196,7 @@ public class VMNode extends AzureRefreshableNode {
         Map<String, Class<? extends NodeActionListener>> actionMap =
                 new HashMap<String, Class<? extends NodeActionListener>>();
 
-//        actionMap.put(ACTION_DELETE, DeleteVMAction.class);
+        actionMap.put(ACTION_DELETE, DeleteVMAction.class);
 //        actionMap.put(ACTION_DOWNLOAD_RDP_FILE, DownloadRDPAction.class);
         actionMap.put(ACTION_SHUTDOWN, ShutdownVMAction.class);
 //        actionMap.put(ACTION_START, StartVMAction.class);

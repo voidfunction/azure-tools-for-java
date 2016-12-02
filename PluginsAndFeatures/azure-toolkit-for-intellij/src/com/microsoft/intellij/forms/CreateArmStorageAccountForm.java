@@ -21,6 +21,8 @@
  */
 package com.microsoft.intellij.forms;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -29,15 +31,19 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.ListCellRendererWrapper;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azure.management.storage.AccessTier;
+import com.microsoft.azure.management.storage.Kind;
+import com.microsoft.azure.management.storage.SkuTier;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.helpers.LinkListener;
-import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.ReplicationTypes;
 import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.vm.Location;
+import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,11 +68,18 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     private JRadioButton createNewRadioButton;
     private JRadioButton useExistingRadioButton;
     private JTextField resourceGrpField;
+    //private JComboBox resourceGrpCombo;
+    private JComboBox accoountKindCombo;
+    private JComboBox performanceComboBox;
+    private JComboBox accessTeirComboBox;
+    private JLabel accessTierLabel;
+    private JComboBox encriptonComboBox;
     private JComboBox resourceGrpCombo;
+    private JLabel encriptonLabel;
 
     private Runnable onCreate;
     private Subscription subscription;
-    private com.microsoft.tooling.msservices.model.storage.StorageAccount storageAccount;
+    private ArmStorageAccount storageAccount;
     private Project project;
 
     private boolean isLoading = true;
@@ -81,6 +94,10 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         setModal(true);
         setTitle("Create Storage Account");
 
+        // this opton is not supported by SDK yet
+        encriptonComboBox.setVisible(false);
+        encriptonLabel.setVisible(false);
+
         final ButtonGroup resourceGroup = new ButtonGroup();
         resourceGroup.add(createNewRadioButton);
         resourceGroup.add(useExistingRadioButton);
@@ -92,7 +109,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             }
         };
         createNewRadioButton.addItemListener(updateListener);
-        createNewRadioButton.addItemListener(updateListener);
+        resourceGrpCombo.setVisible(false);
 
         pricingLabel.addMouseListener(new LinkListener(PRICING_LINK));
 
@@ -143,13 +160,21 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             userInfoLabel.setText("");
         }
 
-        replicationComboBox.setModel(new DefaultComboBoxModel(ReplicationTypes.values()));
-        replicationComboBox.setRenderer(new ListCellRendererWrapper<ReplicationTypes>() {
+        accoountKindCombo.setRenderer(new ListCellRendererWrapper<Kind>() {
             @Override
-            public void customize(JList jList, ReplicationTypes replicationTypes, int i, boolean b, boolean b1) {
-                setText(replicationTypes.getDescription());
+            public void customize(JList jList, Kind kind, int i, boolean b, boolean b1) {
+                setText(kind == Kind.STORAGE ? "General purpose" : "Blob storage");
             }
         });
+
+        encriptonComboBox.setModel(new DefaultComboBoxModel(new Boolean[] {true, false}));
+        encriptonComboBox.setRenderer(new ListCellRendererWrapper<Boolean>() {
+            @Override
+            public void customize(JList jList, Boolean aBoolean, int i, boolean b, boolean b1) {
+                setText(aBoolean ? "Enabled" : "Disables");
+            }
+        });
+        encriptonComboBox.setSelectedItem(Boolean.FALSE);
 
         init();
     }
@@ -191,64 +216,169 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         final String replication = replicationComboBox.getSelectedItem().toString();
         final boolean isNewResourceGroup = createNewRadioButton.isSelected();
         final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
+        storageAccount = new ArmStorageAccount(name, subscription.getId(), null);
+        storageAccount.setType(replication);
+        storageAccount.setLocation(region);
+        storageAccount.setNewResourceGroup(isNewResourceGroup);
+        storageAccount.setResourceGroupName(resourceGroupName);
+        storageAccount.setKind((Kind) accoountKindCombo.getSelectedItem());
+        storageAccount.setAccessTier((AccessTier)accessTeirComboBox.getSelectedItem());
+        storageAccount.setEnableEncription((Boolean)encriptonComboBox.getSelectedItem());
 
-        DefaultLoader.getIdeHelper().runInBackground(project, "Creating storage account", false, true, "Creating storage account...", new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    storageAccount = new com.microsoft.tooling.msservices.model.storage.StorageAccount(name, subscription.getId());
-                    storageAccount.setType(replication);
-                    storageAccount.setLocation(region);
-                    storageAccount.setNewResourceGroup(isNewResourceGroup);
-                    storageAccount.setResourceGroupName(resourceGroupName);
+        ProgressManager.getInstance().run(
+            new Task.Modal(project, "Creating storage account", true) {
+                @Override
+                public void run(@com.microsoft.tooling.msservices.helpers.NotNull ProgressIndicator indicator) {
+                    indicator.setIndeterminate(true);
+                    boolean success = createStorageAccount();
+                    if (success) {
+                        ApplicationManager.getApplication().invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                close(DialogWrapper.OK_EXIT_CODE, true);
+                            }
+                        }, ModalityState.any());
 
-                    AzureArmManagerImpl.getManager(project).createStorageAccount(storageAccount);
+                    }
+                }
+            }
+        );
+    }
+
+    private boolean createStorageAccount() {
+        try {
+            storageAccount = AzureArmManagerImpl.getManager(project).createStorageAccount(storageAccount);
 //                    AzureManagerImpl.getManager(project).refreshStorageAccountInformation(storageAccount);
 
-                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (onCreate != null) {
-                                onCreate.run();
-                            }
-                        }
-                    });
-                } catch (AzureCmdException e) {
-                    storageAccount = null;
-                    String msg = "An error occurred while attempting to create the specified storage account." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+            DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    if (onCreate != null) {
+                        onCreate.run();
+                    }
+                }
+            });
+            return true;
+
+        } catch (AzureCmdException e) {
+            storageAccount = null;
+            String msg = "An error occurred while attempting to create the specified storage account in subscription " + subscription.getId() + ".<br>"
+                    + String.format(message("webappExpMsg"), e.getCause());
+            DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+            AzurePlugin.log(msg, e);
+        }
+        return false;
+    }
+
+    public void fillFields(final Subscription subscription, Region region) {
+        final CreateArmStorageAccountForm createStorageAccountForm = this;
+        if (subscription == null) {
+            loadRegions();
+            accoountKindCombo.setModel(new DefaultComboBoxModel(Kind.values()));
+            accoountKindCombo.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    if (e.getStateChange() == ItemEvent.SELECTED) {
+                        fillPerformanceComboBox();
+                        fillReplicationTypes();
+                        boolean isBlobKind = e.getItem().equals(Kind.BLOB_STORAGE);
+                        accessTeirComboBox.setEnabled(isBlobKind);
+                        accessTierLabel.setEnabled(isBlobKind);
+                    }
+                }
+            });
+            accessTeirComboBox.setModel(new DefaultComboBoxModel(AccessTier.values()));
+
+            try {
+                subscriptionComboBox.setEnabled(true);
+
+                java.util.List<Subscription> fullSubscriptionList = AzureManagerImpl.getManager(project).getFullSubscriptionList();
+                subscriptionComboBox.setModel(new DefaultComboBoxModel(new Vector<Subscription>(fullSubscriptionList)));
+                subscriptionComboBox.addItemListener(new ItemListener() {
+                    @Override
+                    public void itemStateChanged(ItemEvent itemEvent) {
+                        createStorageAccountForm.subscription = (Subscription) itemEvent.getItem();
+//                        loadRegions();
+                        loadGroups();
+                    }
+                });
+
+                if (fullSubscriptionList.size() > 0) {
+                    createStorageAccountForm.subscription = fullSubscriptionList.get(0);
+//                    loadRegions();
+                    loadGroups();
+                }
+            } catch (AzureCmdException e) {
+                String msg = "An error occurred while attempting to get subscriptions." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                AzurePlugin.log(msg, e);
+            }
+        } else { // if you create SA while creating VM
+            this.subscription = subscription;
+            subscriptionComboBox.addItem(subscription.getName());
+            accoountKindCombo.addItem(Kind.STORAGE); // only General purpose accounts supported for VMs
+            accoountKindCombo.setEnabled(false);
+            regionComboBox.addItem(region);
+            regionComboBox.setEnabled(false);
+            loadGroups();
+        }
+        //performanceComboBox.setModel(new DefaultComboBoxModel(SkuTier.values()));
+        fillPerformanceComboBox();
+        performanceComboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    fillReplicationTypes();
                 }
             }
         });
 
-        close(DialogWrapper.OK_EXIT_CODE, true);
+        replicationComboBox.setRenderer(new ListCellRendererWrapper<ReplicationTypes>() {
+            @Override
+            public void customize(JList jList, ReplicationTypes replicationTypes, int i, boolean b, boolean b1) {
+                if (replicationTypes != null) {
+                    setText(replicationTypes.getDescription());
+                }
+            }
+        });
+        fillReplicationTypes();
     }
 
+    private void fillPerformanceComboBox() {
+        if (accoountKindCombo.getSelectedItem().equals(Kind.BLOB_STORAGE)) {
+            performanceComboBox.setModel(new DefaultComboBoxModel(new SkuTier[] {SkuTier.STANDARD}));
+        } else {
+            performanceComboBox.setModel(new DefaultComboBoxModel(SkuTier.values()));
+        }
+    }
 
-    public void fillFields() {
-        final CreateArmStorageAccountForm createStorageAccountForm = this;
-        try {
-            subscriptionComboBox.setEnabled(true);
+    private void fillReplicationTypes() {
+        if (performanceComboBox.getSelectedItem().equals(SkuTier.STANDARD)) {
+            // Create storage account from Azure Explorer
+            if (regionComboBox.isEnabled()) {
+                if (accoountKindCombo.getSelectedItem().equals(Kind.BLOB_STORAGE)) {
+                    replicationComboBox.setModel(
+                            new DefaultComboBoxModel(new ReplicationTypes[] {
+                                    ReplicationTypes.Standard_LRS,
+                                    ReplicationTypes.Standard_GRS,
+                                    ReplicationTypes.Standard_RAGRS}));
 
-            java.util.List<Subscription> fullSubscriptionList = AzureManagerImpl.getManager(project).getFullSubscriptionList();
-            subscriptionComboBox.setModel(new DefaultComboBoxModel(new Vector<Subscription>(fullSubscriptionList)));
-            subscriptionComboBox.addItemListener(new ItemListener() {
-                @Override
-                public void itemStateChanged(ItemEvent itemEvent) {
-                    createStorageAccountForm.subscription = (Subscription) itemEvent.getItem();
-                    loadRegions();
-                    loadGroups();
+                } else {
+                    replicationComboBox.setModel(
+                            new DefaultComboBoxModel(new ReplicationTypes[] {
+                                    ReplicationTypes.Standard_ZRS,
+                                    ReplicationTypes.Standard_LRS,
+                                    ReplicationTypes.Standard_GRS,
+                                    ReplicationTypes.Standard_RAGRS}));
                 }
-            });
 
-            if (fullSubscriptionList.size() > 0) {
-                createStorageAccountForm.subscription = fullSubscriptionList.get(0);
-                loadRegions();
-                loadGroups();
+            } else {
+                // Create storage account from VM creation
+                replicationComboBox.setModel(
+                        new DefaultComboBoxModel(new ReplicationTypes[] {ReplicationTypes.Standard_LRS, ReplicationTypes.Standard_GRS, ReplicationTypes.Standard_RAGRS}));
             }
-        } catch (AzureCmdException e) {
-            String msg = "An error occurred while attempting to get subscriptions." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
+        } else {
+            replicationComboBox.setModel(new DefaultComboBoxModel(new ReplicationTypes[] {ReplicationTypes.Premium_LRS}));
         }
     }
 
@@ -256,51 +386,52 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         this.onCreate = onCreate;
     }
 
-//    public StorageAccount getStorageAccount() {
-//        return storageAccount;
-//    }
+    public ArmStorageAccount getStorageAccount() {
+        return storageAccount;
+    }
 
     public void loadRegions() {
-        isLoading = true;
-
-        regionComboBox.addItem("<Loading...>");
-
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading regions...", false) {
-            @Override
-            public void run(@NotNull ProgressIndicator progressIndicator) {
-                progressIndicator.setIndeterminate(true);
-
-                try {
-                    java.util.List<Location> locations = AzureManagerImpl.getManager(project).getLocations(subscription.getId().toString());
-
-                    final Vector<Object> vector = new Vector<Object>();
-                    vector.add("Regions");
-                    vector.addAll(locations);
-                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            isLoading = false;
-
-                            validateEmptyFields();
-
-                            regionComboBox.removeAllItems();
-                            regionComboBox.setModel(new DefaultComboBoxModel(vector) {
-                                public void setSelectedItem(Object o) {
-                                    if (!(o instanceof String)) {
-                                        super.setSelectedItem(o);
-                                    }
-                                }
-                            });
-
-                            regionComboBox.setSelectedIndex(1);
-                        }
-                    });
-                } catch (AzureCmdException e) {
-                    String msg = "An error occurred while attempting to load the regions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
-                }
-            }
-        });
+        // todo: load regions from subscription
+        regionComboBox.setModel(new DefaultComboBoxModel(Region.values()));
+//        isLoading = true;
+//
+//        regionComboBox.addItem("<Loading...>");
+//
+//        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading regions...", false) {
+//            @Override
+//            public void run(@NotNull ProgressIndicator progressIndicator) {
+//                progressIndicator.setIndeterminate(true);
+//
+//                try {
+//                    java.util.List<Location> locations = AzureArmManagerImpl.getManager(project).getLocations(subscription.getId().toString());
+//
+//                    final Vector<Object> vector = new Vector<Object>();
+//                    vector.addAll(locations);
+//                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            isLoading = false;
+//
+//                            validateEmptyFields();
+//
+//                            regionComboBox.removeAllItems();
+//                            regionComboBox.setModel(new DefaultComboBoxModel(vector) {
+//                                public void setSelectedItem(Object o) {
+//                                    if (!(o instanceof String)) {
+//                                        super.setSelectedItem(o);
+//                                    }
+//                                }
+//                            });
+//
+//                            regionComboBox.setSelectedIndex(1);
+//                        }
+//                    });
+//                } catch (AzureCmdException e) {
+//                    String msg = "An error occurred while attempting to load the regions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
+//                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
+//                }
+//            }
+//        });
     }
 
     public void loadGroups() {
@@ -339,8 +470,9 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                         }
                     });
                 } catch (AzureCmdException e) {
-                    String msg = "An error occurred while attempting to load resource groups list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                    PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
+                    String msg = "An error occurred while attempting to load resource groups list." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                    DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+                    AzurePlugin.log(msg, e);
                 }
             }
         });
