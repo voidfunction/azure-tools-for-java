@@ -55,7 +55,15 @@ public class HDInsightHelperImpl implements HDInsightHelper {
             Activator.getDefault().log("Error opening " + clusterDetail.getName(), e2);
         }
     }
-    
+
+    public void closeJobViewEditor(Object projectObject, String uuid) {
+
+    }
+
+    public String getPluginRootPath() {
+        return null;
+    }
+
     private void loadHDInsightPlugin() throws BundleException{
 		Bundle bundle = Platform.getBundle(HDINSIHGT_BUNDLE_ID);
 		if(bundle == null || bundle.getState() == Bundle.ACTIVE) {

@@ -27,7 +27,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import org.eclipse.swt.widgets.Composite;
 
-import com.microsoft.azure.hdinsight.jobs.JobUtils;
+import com.microsoft.azure.hdinsight.spark.jobs.JobUtils;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;

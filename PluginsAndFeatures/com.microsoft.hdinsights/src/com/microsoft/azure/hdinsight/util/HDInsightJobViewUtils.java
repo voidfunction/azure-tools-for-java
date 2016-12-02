@@ -29,7 +29,7 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
 
-import com.microsoft.azure.hdinsight.jobs.JobViewDummyHttpServer;
+import com.microsoft.azure.hdinsight.spark.jobs.JobViewDummyHttpServer;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
