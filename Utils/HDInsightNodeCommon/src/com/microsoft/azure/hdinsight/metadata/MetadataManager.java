@@ -19,33 +19,21 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.common.task;
+package com.microsoft.azure.hdinsight.metadata;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.microsoft.tooling.msservices.helpers.Nullable;
+import com.microsoft.tooling.msservices.helpers.NotNull;
 
-import java.util.concurrent.Callable;
-import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.Map;
 
-public abstract class Task<V> implements Callable<V> {
+public class MetadataManager {
+    private static Map<Class<? extends MetaDataService>, MetaDataService> serviceMap = new HashMap<>();
 
-    protected static Logger logger = Logger.getLogger(Task.class.getName());
-
-    protected FutureCallback<V> callback;
-
-    public Task(@Nullable FutureCallback<V> callback) {
-            this.callback = callback;
+    public static <T> T getService(@NotNull Class<T> serviceClass) {
+        return (T) serviceMap.get(serviceClass);
     }
 
-    public static final FutureCallback<Object> EMPTY_CALLBACK = new FutureCallback<Object>() {
-        @Override
-        public void onSuccess(Object o) {
-            logger.info("task success");
-        }
-
-        @Override
-        public void onFailure(Throwable throwable) {
-            logger.info("task failed");
-        }
-    };
+    public static void register( MetaDataService service) {
+        serviceMap.put(service.getClass(), service);
+    }
 }

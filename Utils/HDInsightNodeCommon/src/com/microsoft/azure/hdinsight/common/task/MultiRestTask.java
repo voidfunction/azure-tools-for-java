@@ -22,13 +22,10 @@
 package com.microsoft.azure.hdinsight.common.task;
 
 import com.google.common.util.concurrent.FutureCallback;
+import com.microsoft.azure.hdinsight.common.HttpResponseWithoutHeader;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
-import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
-import com.microsoft.azure.hdinsight.common.HttpResponseWithoutHeader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.Nullable;
-import org.apache.http.HttpEntity;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -37,22 +34,20 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
-public class RestTask extends Task<String> {
-
+public class MultiRestTask extends Task<List<String>> {
     protected final IClusterDetail clusterDetail;
-    protected final String path;
+    protected final List<String> paths;
     private final CredentialsProvider credentialsProvider =  new BasicCredentialsProvider();
 
-    public RestTask(@NotNull IClusterDetail clusterDetail, @NotNull String path, @NotNull FutureCallback<String> callback) {
+    public MultiRestTask(@NotNull IClusterDetail clusterDetail, @NotNull List<String> paths, @NotNull FutureCallback<List<String>> callback) {
         super(callback);
         this.clusterDetail = clusterDetail;
-        this.path = path;
+        this.paths = paths;
         try {
             credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(clusterDetail.getHttpUserName(), clusterDetail.getHttpPassword()));
         } catch (HDIException e) {
@@ -61,40 +56,21 @@ public class RestTask extends Task<String> {
     }
 
     @Override
-    public String call() throws Exception {
+    public List<String> call() throws Exception {
         CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).build();
-        HttpGet httpGet = new HttpGet(path);
-        httpGet.addHeader("Content-Type", "application/json");
-
-        CloseableHttpResponse response = httpclient.execute(httpGet);
-        HttpResponseWithoutHeader header = getResultFromHttpResponse(response);
-        if(header.getStatusCode() == 200 || header.getStatusCode() == 201) {
-            return header.getMessage();
-        } else {
-            throw new HDIException(header.getReason(), header.getStatusCode());
-        }
-    }
-
-    private static HttpResponseWithoutHeader getResultFromHttpResponse(@NotNull CloseableHttpResponse response) throws IOException {
-        int code = response.getStatusLine().getStatusCode();
-        String reason = response.getStatusLine().getReasonPhrase();
-        HttpEntity entity = response.getEntity();
-        try (InputStream inputStream = entity.getContent()) {
-            String response_content = getResultFromInputStream(inputStream);
-            return new HttpResponseWithoutHeader(code, response_content, reason);
-        }
-    }
-
-    private static String getResultFromInputStream(@NotNull InputStream inputStream) throws IOException {
-//      change string buffer to string builder for thread-safe
-        StringBuilder result = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                result.append(line);
+        List<String> results = new ArrayList<>();
+        for(String path: paths) {
+            HttpGet httpGet = new HttpGet(path);
+            httpGet.addHeader("Content-Type", "application/json");
+            CloseableHttpResponse response = httpclient.execute(httpGet);
+            int code = response.getStatusLine().getStatusCode();
+            if(code == 200 || code == 201) {
+                results.add(EntityUtils.toString(response.getEntity()));
+            } else {
+                throw new HDIException(response.getStatusLine().getReasonPhrase(), code);
             }
         }
 
-        return result.toString();
+        return results;
     }
 }

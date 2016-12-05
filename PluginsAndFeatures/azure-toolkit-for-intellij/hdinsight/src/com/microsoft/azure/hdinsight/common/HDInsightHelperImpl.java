@@ -30,12 +30,22 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.microsoft.azure.hdinsight.jobs.framework.JobViewEditorProvider;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 
 import javax.swing.*;
 
 public class HDInsightHelperImpl implements HDInsightHelper {
+    @Override
+    public void closeJobViewEditor(@NotNull Object projectObject, @NotNull String uuid) {
+
+    }
+
+    @Override
+    public String getPluginRootPath() {
+        return PluginUtil.getPluginRootDirectory();
+    }
 
     public void openJobViewEditor(Object projectObject, String uuid) {
         IClusterDetail clusterDetail = JobViewManager.getCluster(uuid);
@@ -78,7 +88,7 @@ public class HDInsightHelperImpl implements HDInsightHelper {
     }
 
     private void openItem(@NotNull final Project project, @NotNull IClusterDetail myClusterDetail,@NotNull String uuid, @Nullable VirtualFile closeableFile) {
-        final LightVirtualFile virtualFile = new LightVirtualFile("Spark JobView");
+        final LightVirtualFile virtualFile = new LightVirtualFile(myClusterDetail.getName() + ": Job View");
         virtualFile.putUserData(JobViewEditorProvider.JOB_VIEW_KEY, myClusterDetail);
         virtualFile.setFileType(new FileType() {
             @NotNull

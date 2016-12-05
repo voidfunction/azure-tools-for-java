@@ -19,25 +19,14 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.jobs.livy;
+package com.microsoft.azure.hdinsight.spark.jobs;
 
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.Nullable;
+import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 
-import java.util.List;
 
-public class LivyBatchesInformation {
-    private int from;
-    private int total;
-    private List<LivySession> sessions;
+public class HDINetException extends HDIException {
 
-    @Nullable
-    public LivySession getSession(@NotNull String applicationId) {
-        for(LivySession session : sessions) {
-            if(session.getApplicationId().equals(applicationId)) {
-                return session;
-            }
-        }
-        return null;
+    public HDINetException(int code, String message, Throwable throwable ) {
+        super(message, throwable);
     }
 }

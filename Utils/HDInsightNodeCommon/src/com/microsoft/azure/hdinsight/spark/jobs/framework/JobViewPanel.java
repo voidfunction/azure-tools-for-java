@@ -20,10 +20,11 @@
  * SOFTWARE.
  */
 
-package com.microsoft.azure.hdinsight.jobs.framework;
+package com.microsoft.azure.hdinsight.spark.jobs.framework;
 
-import com.microsoft.azure.hdinsight.jobs.JobUtils;
+import com.microsoft.azure.hdinsight.spark.jobs.JobUtils;
 import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.StringHelper;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -51,7 +52,11 @@ public final class JobViewPanel extends JFXPanel {
     }
 
     private void init(final JFXPanel panel) {
+        String value = System.getProperty("my.debug");
         String url = rootPath + "/hdinsight/job/html/index.html";
+        if(!StringHelper.isNullOrWhiteSpace(value)) {
+            url = "C:/Users/ltian/project/toolkit-branch2/Utils/HDInsightNodeCommon/resources/htmlResources/hdinsight/job/html/index.html";
+        }
         url = url.replace("\\", "/");
         final String queryString = "?projectid=" + id + "&engintype=javafx";
         final String weburl = "file:///" + url + queryString;

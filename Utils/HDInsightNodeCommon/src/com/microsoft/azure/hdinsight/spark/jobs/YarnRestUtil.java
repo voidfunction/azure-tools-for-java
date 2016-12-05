@@ -19,34 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.jobs.livy;
+package com.microsoft.azure.hdinsight.spark.jobs;
 
-import com.microsoft.tooling.msservices.helpers.NotNull;
-
-import java.util.List;
-
-public class LivySession {
-    private int id;
-    private String state;
-    private String appId;
-    private List<String> log;
-
-    @NotNull
-    public String getApplicationId() {
-        return appId;
-    }
-
-    @NotNull
-    public List<String> getLog() {
-        return log;
-    }
-
-    public String getFormatLog() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for(String str : log) {
-            stringBuilder.append(str + "\n");
-        }
-        return stringBuilder.toString();
-    }
+public class YarnRestUtil {
 }

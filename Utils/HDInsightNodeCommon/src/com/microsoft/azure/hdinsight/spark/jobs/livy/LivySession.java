@@ -19,33 +19,34 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.common.task;
+package com.microsoft.azure.hdinsight.spark.jobs.livy;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.microsoft.tooling.msservices.helpers.Nullable;
+import com.microsoft.tooling.msservices.helpers.NotNull;
 
-import java.util.concurrent.Callable;
-import java.util.logging.Logger;
+import java.util.List;
 
-public abstract class Task<V> implements Callable<V> {
+public class LivySession {
+    private int id;
+    private String state;
+    private String appId;
+    private List<String> log;
 
-    protected static Logger logger = Logger.getLogger(Task.class.getName());
-
-    protected FutureCallback<V> callback;
-
-    public Task(@Nullable FutureCallback<V> callback) {
-            this.callback = callback;
+    @NotNull
+    public String getApplicationId() {
+        return appId;
     }
 
-    public static final FutureCallback<Object> EMPTY_CALLBACK = new FutureCallback<Object>() {
-        @Override
-        public void onSuccess(Object o) {
-            logger.info("task success");
-        }
+    @NotNull
+    public List<String> getLog() {
+        return log;
+    }
 
-        @Override
-        public void onFailure(Throwable throwable) {
-            logger.info("task failed");
+    public String getFormatLog() {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for(String str : log) {
+            stringBuilder.append(str + "\n");
         }
-    };
+        return stringBuilder.toString();
+    }
 }

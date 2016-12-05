@@ -21,27 +21,49 @@
  */
 package com.microsoft.azure.hdinsight.common;
 
+import com.microsoft.azure.hdinsight.spark.jobs.SparkJobInfo;
+import com.microsoft.azure.hdinsight.spark.jobs.framework.JobViewPanel;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
+import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class JobViewManager {
-    private static Map<String, IClusterDetail> jobViewPanelMap = new HashMap<String, IClusterDetail>();
+    private static Map<String, Pair<IClusterDetail, JobViewPanel>> jobViewPanelMap = new HashMap<String, Pair<IClusterDetail, JobViewPanel>>();
+    private static Map<String, SparkJobInfo> jobInfoMap = new HashMap<String, SparkJobInfo>();
 
-    public synchronized static void registerJovViewNode(@NotNull String uuid, @NotNull IClusterDetail clusterDetail) {
-        jobViewPanelMap.put(uuid, clusterDetail);
+    public static void registerJobViewInfo(@NotNull String clusterName, @NotNull SparkJobInfo info) {
+        synchronized (jobInfoMap) {
+            jobInfoMap.put(clusterName, info);
+        }
+    }
+
+    @Nullable
+    public static SparkJobInfo getJobViewInfo(@NotNull String clusterName) {
+        return jobInfoMap.get(clusterName);
+    }
+
+    public static void registerJovViewNode(@NotNull String uuid, @NotNull IClusterDetail clusterDetail) {
+        synchronized(jobViewPanelMap) {
+            jobViewPanelMap.put(uuid, new Pair<IClusterDetail, JobViewPanel>(clusterDetail,null));
+        }
     }
 
     @Nullable
     public static IClusterDetail getCluster(@NotNull String uuid) {
-        return jobViewPanelMap.get(uuid);
+        if(!jobViewPanelMap.containsKey(uuid)) {
+            return null;
+        }
+        return jobViewPanelMap.get(uuid).getKey();
     }
 
-    public synchronized static void unRegisterJobView(@NotNull String uuid) {
-        jobViewPanelMap.remove(uuid);
+    public static void unRegisterJobView(@NotNull String uuid) {
+        synchronized(jobViewPanelMap) {
+            jobViewPanelMap.remove(uuid);
+        }
     }
 
 }

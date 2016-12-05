@@ -19,33 +19,38 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.common.task;
+package com.microsoft.azure.hdinsight.common;
+
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.microsoft.tooling.msservices.helpers.Nullable;
+import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.sun.net.httpserver.HttpExchange;
 
-import java.util.concurrent.Callable;
-import java.util.logging.Logger;
+import javax.annotation.Nullable;
+import java.io.OutputStream;
 
-public abstract class Task<V> implements Callable<V> {
+public abstract class  HttpFutureCallback implements FutureCallback<String> {
+    private final HttpExchange httpExchange;
 
-    protected static Logger logger = Logger.getLogger(Task.class.getName());
-
-    protected FutureCallback<V> callback;
-
-    public Task(@Nullable FutureCallback<V> callback) {
-            this.callback = callback;
+    public HttpFutureCallback(@NotNull HttpExchange httpExchange) {
+        this.httpExchange = httpExchange;
     }
 
-    public static final FutureCallback<Object> EMPTY_CALLBACK = new FutureCallback<Object>() {
-        @Override
-        public void onSuccess(Object o) {
-            logger.info("task success");
-        }
+    @Override
+    public void onFailure(Throwable t) {
+        dealWithFailure(t,httpExchange);
+    }
 
-        @Override
-        public void onFailure(Throwable throwable) {
-            logger.info("task failed");
+    private static void dealWithFailure(@NotNull Throwable throwable,@NotNull final HttpExchange httpExchange) {
+        httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        try {
+            String str = throwable.getMessage();
+            httpExchange.sendResponseHeaders(200, str.length());
+            OutputStream stream = httpExchange.getResponseBody();
+            stream.write(str.getBytes());
+            stream.close();
+        }catch (Exception e) {
+            //LOGGER.error("Get job history error", e);
         }
-    };
+    }
 }

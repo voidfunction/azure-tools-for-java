@@ -29,11 +29,12 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.microsoft.azure.hdinsight.jobs.framework.JobViewEditorProvider;
-import com.microsoft.azure.hdinsight.jobs.framework.JobViewPanel;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
+import com.microsoft.azure.hdinsight.spark.jobs.framework.JobViewPanel;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
+import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
@@ -58,6 +59,7 @@ public class JobViewEditor implements FileEditor {
         myVirtualFile = file;
         uuid = file.getUserData(JobViewEditorProvider.JOB_VIEW_UUID);
         myComponent = new JobViewPanel(PluginUtil.getPluginRootDirectory(), uuid);
+
     }
 
     @NotNull

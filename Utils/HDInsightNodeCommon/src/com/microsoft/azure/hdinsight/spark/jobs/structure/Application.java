@@ -1,51 +1,54 @@
 /**
  * Copyright (c) Microsoft Corporation
- * <p/>
+ * <p>
  * All rights reserved.
- * <p/>
+ * <p>
  * MIT License
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
  * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
  * the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
  * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.common.task;
+package com.microsoft.azure.hdinsight.spark.jobs.structure;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.microsoft.tooling.msservices.helpers.Nullable;
+import java.util.List;
 
-import java.util.concurrent.Callable;
-import java.util.logging.Logger;
+public class Application {
+    private String id;
+    private String name;
+    private List<Attempt> attempts;
 
-public abstract class Task<V> implements Callable<V> {
-
-    protected static Logger logger = Logger.getLogger(Task.class.getName());
-
-    protected FutureCallback<V> callback;
-
-    public Task(@Nullable FutureCallback<V> callback) {
-            this.callback = callback;
+    public String getId() {
+        return id;
     }
 
-    public static final FutureCallback<Object> EMPTY_CALLBACK = new FutureCallback<Object>() {
-        @Override
-        public void onSuccess(Object o) {
-            logger.info("task success");
-        }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-        @Override
-        public void onFailure(Throwable throwable) {
-            logger.info("task failed");
-        }
-    };
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Attempt> getAttempts() {
+        return attempts;
+    }
+
+    public void setAttempts(List<Attempt> attempts) {
+        this.attempts = attempts;
+    }
 }

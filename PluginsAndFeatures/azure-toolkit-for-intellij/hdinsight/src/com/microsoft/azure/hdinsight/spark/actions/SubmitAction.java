@@ -45,6 +45,7 @@ public class SubmitAction extends AnAction {
     public void actionPerformed(final AnActionEvent anActionEvent) {
         synchronized (SubmitAction.class) {
             final Project project = anActionEvent.getProject();
+//            RemoteDebug.myDebug(project);
             if(isActionPerformedSet.contains(project)) {
                 return;
             }
