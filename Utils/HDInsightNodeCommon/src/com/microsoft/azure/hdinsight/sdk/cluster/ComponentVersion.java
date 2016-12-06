@@ -21,12 +21,10 @@
  */
 package com.microsoft.azure.hdinsight.sdk.cluster;
 
-public enum ClusterType {
-    unkown,
-    hadoop,
-    hbase,
-    storm,
-    kafka,
-    interactivehive,
-    spark
-};
+public class ComponentVersion {
+    private String spark;
+
+    public String getSpark() {
+        return spark;
+    }
+}

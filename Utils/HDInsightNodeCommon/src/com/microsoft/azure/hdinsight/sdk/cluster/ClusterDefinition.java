@@ -23,8 +23,13 @@ package com.microsoft.azure.hdinsight.sdk.cluster;
 
 public class ClusterDefinition {
     private String kind;
+    private ComponentVersion componentVersion;
 
     public String getKind(){
         return kind;
+    }
+
+    public ComponentVersion getComponentVersion() {
+        return componentVersion;
     }
 }
