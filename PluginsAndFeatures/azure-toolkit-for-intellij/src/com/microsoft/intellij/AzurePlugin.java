@@ -72,7 +72,7 @@ import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 public class AzurePlugin extends AbstractProjectComponent {
     private static final Logger LOG = Logger.getInstance("#com.microsoft.intellij.AzurePlugin");
     public static final String COMPONENTSETS_VERSION = "2.9.2"; // todo: temporary fix!
-    public static final String PLUGIN_VERSION = "1.6";
+    public static final String PLUGIN_VERSION = CommonConst.PLUGIN_VERISON;
     private static final String PREFERENCESETS_VERSION = "2.9.2";
     public static final String AZURE_LIBRARIES_VERSION = "0.9.2";
     public static final String QPID_LIBRARIES_VERSION = "0.19.0";
@@ -207,7 +207,7 @@ public class AzurePlugin extends AbstractProjectComponent {
                 if(accepted) {
                     AppInsightsCustomEvent.create(message("telemetryAcceptAction"),"");
                 } else {
-                    AppInsightsCustomEvent.create(message("telemetryDenyAction"),"");
+                    AppInsightsCustomEvent.createTelemetryDenyEvent();
                 }
                 DataOperations.updatePropertyValue(doc, message("prefVal"), String.valueOf(accepted));
 

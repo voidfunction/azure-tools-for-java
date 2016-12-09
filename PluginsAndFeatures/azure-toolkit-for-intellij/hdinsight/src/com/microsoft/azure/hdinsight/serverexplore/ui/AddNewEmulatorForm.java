@@ -117,7 +117,7 @@ public class AddNewEmulatorForm extends DialogWrapper {
 
                                     channel = (ChannelExec) session.openChannel("exec");
                                     BufferedReader in = new BufferedReader(new InputStreamReader(channel.getInputStream()));
-                                    channel.setCommand("chmod +x setup.sh;./setup.sh");
+                                    channel.setCommand("perl -pi -e 's/\\r\\n/\\n/' setup.sh;chmod +x setup.sh;./setup.sh");
                                     channel.connect();
                                     String result = null;
                                     while ((result = in.readLine()) != null) {
