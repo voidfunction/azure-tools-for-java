@@ -39,4 +39,5 @@
     <orderEntry type="library" name="services-explorer-common" level="project" />
     <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="project" />
   </component>
+  <component name="POM File Configuration" pomFile="" />
 </module>

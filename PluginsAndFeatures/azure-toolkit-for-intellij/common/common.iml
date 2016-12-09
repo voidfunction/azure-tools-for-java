@@ -13,4 +13,5 @@
     <orderEntry type="library" name="azure-sdk" level="project" />
     <orderEntry type="library" name="AzureCommons" level="project" />
   </component>
+  <component name="POM File Configuration" pomFile="" />
 </module>

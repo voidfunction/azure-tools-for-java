@@ -33,6 +33,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.DefaultJDOMExternalizer;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
+import com.intellij.psi.search.GlobalSearchScope;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,6 +41,11 @@ import java.util.Collection;
 
 public class AzureRemoteConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule>
         implements RunConfigurationWithSuppressedDefaultRunAction, RemoteRunProfile {
+
+    @Override
+    public GlobalSearchScope getSearchScope() {
+        return null;
+    }
 
     @Override
     public void writeExternal(final Element element) throws WriteExternalException {
