@@ -146,6 +146,11 @@
     <action id="Actions.SubmitSparkApplicationAction"
             class="com.microsoft.azure.hdinsight.spark.actions.SubmitAction" text="Submit Spark Application to HDInsight"
             description="Submit Spark Application to HDInsight" icon="/icons/Spark.png"/>
+
+    <action id="AzureToolkit.AzureSignIn" class="com.microsoft.azuretools.ijidea.actions.AzureSignInAction" text="Azure Sign In..." />
+    <action id="AzureToolkit.SelectSubscriptions" class="com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction" text="Select Subscriptions..."
+            description="ShowSubscriptionsAction" />
+
     <group id="AzurePopupGroup" text="Azure" description="Azure" icon="/icons/azure.png" popup="true"
            class="com.microsoft.intellij.actions.AzurePopupGroup">
       <reference ref="Actions.AzureWebDeploy"/>
@@ -179,6 +184,18 @@
            popup="false">
         <separator/>
         <reference ref="Actions.AzureWebDeploy"/>
+    </group>
+
+    <group id="AzureToolkit.AzureActionGroup"
+           class="com.intellij.openapi.actionSystem.DefaultActionGroup"
+           text="Azure"
+           description="Contains Azure tools plugin actions"
+           icon="icons/testgroup.png"
+           popup="true">
+      <add-to-group group-id="ToolsMenu" anchor="first"/>
+      <reference ref="AzureToolkit.SelectSubscriptions"/>
+      <separator/>
+      <reference ref="AzureToolkit.AzureSignIn"/>
     </group>
 
   </actions>

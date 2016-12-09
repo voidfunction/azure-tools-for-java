@@ -37,6 +37,8 @@ import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
+import com.microsoft.azuretools.authmanage.CommonSettings;
+import com.microsoft.azuretools.ijidea.ui.UIFactory;
 import com.microsoft.intellij.common.CommonConst;
 import com.microsoft.intellij.ui.libraries.AILibraryHandler;
 import com.microsoft.intellij.ui.libraries.AzureLibrary;
@@ -59,6 +61,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -120,6 +125,7 @@ public class AzurePlugin extends AbstractProjectComponent {
         if (!IS_ANDROID_STUDIO) {
             LOG.info("Starting Azure Plugin");
             try {
+                initAuthManage();
                 azureSettings.loadStorage();
                 //this code is for copying componentset.xml in plugins folder
                 copyPluginComponents();
@@ -132,6 +138,18 @@ public class AzurePlugin extends AbstractProjectComponent {
                 LOG.error(AzureBundle.message("expErlStrtUp"), e);
             }
         }
+    }
+
+    private void initAuthManage() throws IOException {
+        if (CommonSettings.uiFactory == null) {
+            CommonSettings.uiFactory = new UIFactory();
+        }
+        String wd = "AzureToolsForIntelliJ";
+        Path dirPath = Paths.get(System.getProperty("user.home"), wd);
+        if (!Files.exists(dirPath)) {
+            Files.createDirectory(dirPath);
+        }
+        CommonSettings.settingsBaseDir = dirPath.toString();
     }
 
     private void initializeTelemetry() throws Exception {
