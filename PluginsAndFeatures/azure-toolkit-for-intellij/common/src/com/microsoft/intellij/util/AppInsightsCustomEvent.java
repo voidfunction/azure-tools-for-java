@@ -7,10 +7,13 @@ import java.util.Map;
 import com.intellij.openapi.application.PathManager;
 import com.microsoft.applicationinsights.TelemetryClient;
 
+import com.microsoft.intellij.common.CommonConst;
 import com.microsoft.intellij.ui.messages.AzureBundle;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 
 public class AppInsightsCustomEvent {
@@ -22,6 +25,15 @@ public class AppInsightsCustomEvent {
      */
     private static String getTemplateFile(String fileName) {
         return String.format("%s%s%s", PluginUtil.getPluginRootDirectory(), File.separator, fileName);
+    }
+    
+    public static void createTelemetryDenyEvent() {
+        TelemetryClient telemetry = new TelemetryClient();
+        telemetry.getContext().setInstrumentationKey(key);
+        Map<String, String> properties = new HashMap<>();
+        properties.put("Plugin Version", CommonConst.PLUGIN_VERISON);
+        telemetry.trackEvent(message("telemetryDenyAction"), properties, null);
+        telemetry.flush();
     }
 
     public static void create(String eventName, String version,@Nullable Map<String, String> myProperties) {
