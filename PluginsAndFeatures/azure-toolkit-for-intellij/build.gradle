@@ -20,7 +20,7 @@ plugins {
 }
 
 group 'com.microsoft.azuretools'
-version '1.6'
+//version '1.6'
 
 compileJava {
     sourceCompatibility = 1.8
@@ -32,7 +32,7 @@ tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
 apply plugin: 'org.jetbrains.intellij'
 
 intellij {
-    pluginName 'azure-tools-for-intellij'
+    pluginName 'azure-toolkit-for-intellij'
     version 'IU-2016.3'
     plugins 'org.intellij.scala:2016.3.5', 'ant'
 }
