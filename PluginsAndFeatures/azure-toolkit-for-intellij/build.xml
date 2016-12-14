@@ -402,7 +402,7 @@
     <mkdir dir="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/help"/>
     <jar destfile="${tmp.dir.azure-toolkit-for-intellij}/azure-toolkit-for-intellij/lib/azure-toolkit-for-intellij.jar" duplicate="preserve">
       <zipfileset dir="${module.azure-toolkit-for-intellij.basedir}/out/production/azure-toolkit-for-intellij"/>
-      <zipfileset file="${module.azure-toolkit-for-intellij.basedir}/META-INF/plugin.xml" prefix="META-INF"/>
+      <zipfileset file="/META-INF/plugin.xml" prefix="META-INF"/>
       <manifest>
         <attribute name="Created-By" value="IntelliJ IDEA"/>
         <attribute name="Manifest-Version" value="1.0"/>
