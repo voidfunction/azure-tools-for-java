@@ -22,10 +22,6 @@
   <!-- uncomment to enable plugin in all products
   <depends>com.intellij.modules.lang</depends>
   -->
-  <depends optional="true">AntSupport</depends>
-  <depends>com.intellij.modules.java</depends>
-  <depends>com.intellij.modules.lang</depends>
-  <depends optional="true">org.intellij.scala</depends>
 
   <extensions defaultExtensionNs="com.intellij">
     <toolWindow
@@ -190,7 +186,7 @@
            class="com.intellij.openapi.actionSystem.DefaultActionGroup"
            text="Azure"
            description="Contains Azure tools plugin actions"
-           icon="icons/testgroup.png"
+           icon="/icons/azure.png"
            popup="true">
       <add-to-group group-id="ToolsMenu" anchor="first"/>
       <reference ref="AzureToolkit.SelectSubscriptions"/>
