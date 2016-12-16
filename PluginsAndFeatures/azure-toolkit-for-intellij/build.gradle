@@ -49,6 +49,10 @@ repositories {
     mavenLocal()
 }
 
+configurations {
+    compile.exclude module:'slf4j-api'
+}
+
 dependencies {
     compile 'com.microsoft.azuretools:auth-manage:0.0.1-SNAPSHOT'
     compile 'com.microsoft.azuretools:ad-auth:0.0.1-SNAPSHOT'
