@@ -38,6 +38,7 @@ import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
+import com.microsoft.intellij.forms.CreateVirtualNetworkForm;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
@@ -222,7 +223,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                                               @Override
                                               public void setSelectedItem(Object o) {
                                                   if (CREATE_NEW.equals(o)) {
-//                    showNewVirtualNetworkForm();
+                                                      showNewVirtualNetworkForm();
                                                   } else {
                                                       super.setSelectedItem(o);
                                                       model.setVirtualNetwork((Network) o);
@@ -243,41 +244,30 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         DefaultComboBoxModel refreshedVNModel = new DefaultComboBoxModel(filterVN().toArray()) {
             @Override
             public void setSelectedItem(final Object o) {
-                if (NONE.equals(o)) {
-                    removeElement(o);
-                    setSelectedItem(null);
+                if (CREATE_NEW.equals(o)) {
+                    showNewVirtualNetworkForm();
                 } else {
                     super.setSelectedItem(o);
-
                     if (o instanceof Network) {
                         model.setVirtualNetwork((Network) o);
-
-                        if (getIndexOf(NONE) == -1) {
-                            insertElementAt(NONE, 0);
-                        }
-
                         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
                             @Override
                             public void run() {
+                                subnetComboBox.setEnabled(false);
                                 boolean validSubnet = false;
-
                                 subnetComboBox.removeAllItems();
-
                                 for (String subnet : ((Network) o).subnets().keySet()) {
                                     subnetComboBox.addItem(subnet);
-
                                     if (subnet.equals(selectedSN)) {
                                         validSubnet = true;
                                     }
                                 }
-
                                 if (validSubnet) {
                                     subnetComboBox.setSelectedItem(selectedSN);
                                 } else {
                                     model.setSubnet(null);
                                     subnetComboBox.setSelectedItem(null);
                                 }
-
                                 subnetComboBox.setEnabled(true);
                             }
                         }, ModalityState.any());
@@ -296,7 +286,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             }
         };
 
-        if (selectedVN != null && virtualNetworks.contains(selectedVN)/* && (cascade || selectedCS != null)*/) {
+        if (selectedVN != null && virtualNetworks.contains(selectedVN)) {
             refreshedVNModel.setSelectedItem(selectedVN);
         } else {
             model.setVirtualNetwork(null);
@@ -694,6 +684,27 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         }
 
         return refreshedAvailabilitySetModel;
+    }
+
+    private void showNewVirtualNetworkForm() {
+        final CreateVirtualNetworkForm form = new CreateVirtualNetworkForm(project, model.getSubscription().getId(), model.getRegion());
+        form.setOnCreate(new Runnable() {
+            @Override
+            public void run() {
+                ApplicationManager.getApplication().invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Network newVirtualNetwork = form.getNetwork();
+
+                        if (newVirtualNetwork != null) {
+                            model.setVirtualNetwork(newVirtualNetwork);
+                            fillStorage();
+                        }
+                    }
+                });
+            }
+        });
+        form.show();
     }
 
     private void showNewStorageForm() {
