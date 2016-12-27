@@ -90,7 +90,7 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
         subnetNameField.getDocument().addDocumentListener(docListener);
         subnetAddressRangeField.getDocument().addDocumentListener(docListener);
 
-        regionField.setText(region.name());
+        regionField.setText(region.toString());
 
         if (AzureManagerImpl.getManager(project).authenticated()) {
             String upn = AzureManagerImpl.getManager(project).getUserInfo().getUniqueName();
@@ -98,6 +98,7 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
         } else {
             userInfoLabel.setText("");
         }
+        validateFields();
         init();
     }
 
