@@ -1,6 +1,7 @@
 package com.microsoft.azuretools.sdkmanage;
 
-import com.microsoft.azure.Azure;
+import com.microsoft.azure.credentials.AzureTokenCredentials;
+import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
@@ -92,13 +93,13 @@ public class AccessTokenAzureManager implements AzureManager {
         return tl;
     }
 
-    public static Azure.Authenticated auth(String accessToken) throws Exception {
-        return Azure.configure().authenticate(getTokenCredentials(accessToken));
-    }
+//    public static Azure.Authenticated auth(String accessToken) throws Exception {
+//        return Azure.configure().authenticate(getTokenCredentials(accessToken));
+//    }
 
-    private static TokenCredentials getTokenCredentials(String token) throws Exception {
-        return new TokenCredentials("Bearer", token);
-    }
+//    private static TokenCredentials getTokenCredentials(String token) throws Exception {
+//        return null;
+//    }
 
     private static Azure.Authenticated authTid(String tid) throws Exception {
 //        String token = AdAuthManager.getInstance().getAccessToken(tid);

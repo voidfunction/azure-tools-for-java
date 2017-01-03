@@ -1,5 +1,6 @@
 package com.microsoft.azuretools.authmanage;
 
+import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azuretools.adauth.*;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
@@ -57,13 +58,16 @@ public class AdAuthManager {
         UserIdentifier uid = new UserIdentifier(displayableId, UserIdentifierType.RequiredDisplayableId);
 
         Map<String, List<String>> tidToSidsMap = new HashMap<>();
-        List<Tenant> tenants = AccessTokenAzureManager.auth(result.getAccessToken()).tenants().list();
+//        List<Tenant> tenants = AccessTokenAzureManager.authTid(commonTid).tenants().list();
+        List<Tenant> tenants = AccessTokenAzureManager.getTenants(commonTid);
         for (Tenant t : tenants) {
             String tid = t.tenantId();
             try {
                 AuthContext ac1 = new AuthContext(String.format("%s/%s", Constants.authority, tid), cache);
-                ac1.acquireToken(Constants.resourceARM, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
-                ac1.acquireToken(Constants.resourceGraph, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
+//                ac1.acquireToken(Constants.resourceARM, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
+                ac1.acquireToken(AzureEnvironment.AZURE.getResourceManagerEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
+//                ac1.acquireToken(Constants.resourceGraph, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
+                ac1.acquireToken(AzureEnvironment.AZURE.getGraphEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
                 List<String> sids = new LinkedList<>();
                 for (Subscription s : AccessTokenAzureManager.getSubscriptions(tid)) {
                     sids.add(s.subscriptionId());

@@ -1,7 +1,7 @@
 package com.microsoft.azuretools;
 
+import com.microsoft.azure.management.Azure;
 import com.microsoft.azuretools.adauth.IWebUi;
-import com.microsoft.azure.Azure;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.ResourceGroups;
 import com.microsoft.azure.management.resources.Subscription;
