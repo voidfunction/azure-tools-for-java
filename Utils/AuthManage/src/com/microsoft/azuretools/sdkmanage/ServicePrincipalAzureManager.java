@@ -1,7 +1,7 @@
 package com.microsoft.azuretools.sdkmanage;
 
-import com.microsoft.azure.Azure;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
+import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
