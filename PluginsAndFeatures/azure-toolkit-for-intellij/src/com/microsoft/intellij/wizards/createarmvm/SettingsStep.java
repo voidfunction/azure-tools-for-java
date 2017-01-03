@@ -286,6 +286,8 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             }
         };
 
+        refreshedVNModel.insertElementAt(CREATE_NEW, 0);
+
         if (selectedVN != null && virtualNetworks.contains(selectedVN)) {
             refreshedVNModel.setSelectedItem(selectedVN);
         } else {
@@ -300,7 +302,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         List<Network> filteredNetworks = new ArrayList<>();
 
         for (Network network : virtualNetworks) {
-            if (network.region().equals(model.getRegion())) {
+            if (network.region() != null && network.region().equals(model.getRegion())) {
                 filteredNetworks.add(network);
             }
         }
