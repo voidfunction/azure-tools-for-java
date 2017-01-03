@@ -258,7 +258,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
                             fillSkus();
                         }
                     });
-                } catch (CloudException | IOException e) {
+                } catch (CloudException e) {
                     String msg = "An error occurred while attempting to retrieve offers list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                     PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
                 }
@@ -284,7 +284,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
                                 fillImages();
                             }
                         });
-                    } catch (CloudException | IOException e) {
+                    } catch (CloudException e) {
                         String msg = "An error occurred while attempting to retrieve skus list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                         PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
                     }
@@ -314,7 +314,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
                             imageLabelList.setEnabled(true);
                         }
                     });
-                } catch (CloudException | IOException e) {
+                } catch (CloudException e) {
                     String msg = "An error occurred while attempting to retrieve images list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                     PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
                 }

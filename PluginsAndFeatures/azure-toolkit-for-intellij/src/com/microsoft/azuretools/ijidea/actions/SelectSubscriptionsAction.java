@@ -1,7 +1,10 @@
 package com.microsoft.azuretools.ijidea.actions;
 
+import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -24,12 +27,13 @@ public class SelectSubscriptionsAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-        onShowSubscriptions();
+        onShowSubscriptions(e);
     }
 
-    public static void onShowSubscriptions() {
+    public static void onShowSubscriptions(AnActionEvent e) {
         try {
-            Project project = ProjectManager.getInstance().getDefaultProject();
+            //Project project = ProjectManager.getInstance().getDefaultProject();();
+            Project project = DataKeys.PROJECT.getData(e.getDataContext());
             JFrame frame = WindowManager.getInstance().getFrame(project);
 
             AzureManager manager = AuthMethodManager.getInstance().getAzureManager();

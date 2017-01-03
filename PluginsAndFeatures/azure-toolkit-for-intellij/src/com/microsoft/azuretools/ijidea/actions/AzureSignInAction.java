@@ -2,6 +2,7 @@ package com.microsoft.azuretools.ijidea.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
@@ -21,7 +22,7 @@ public class AzureSignInAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-        onAzureSignIn();
+        onAzureSignIn(e);
     }
 
     @Override
@@ -38,9 +39,10 @@ public class AzureSignInAction extends AnAction {
         }
     }
 
-    public static void onAzureSignIn() {
+    public static void onAzureSignIn(AnActionEvent e) {
         try {
-            Project project = ProjectManager.getInstance().getDefaultProject();
+            //Project project = ProjectManager.getInstance().getDefaultProject();
+            Project project = DataKeys.PROJECT.getData(e.getDataContext());
             JFrame frame = WindowManager.getInstance().getFrame(project);
             AuthMethodManager authMethodManager = AuthMethodManager.getInstance();
             boolean isSignIn = authMethodManager.isSignedIn();
@@ -65,11 +67,11 @@ public class AzureSignInAction extends AnAction {
                 if (w.getResult() == JOptionPane.OK_OPTION) {
                     AuthMethodDetails authMethodDetailsUpdated = w.getAuthMethodDetails();
                     authMethodManager.setAuthMethodDetails(authMethodDetailsUpdated);
-                    SelectSubscriptionsAction.onShowSubscriptions();
+                    SelectSubscriptionsAction.onShowSubscriptions(e);
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 }

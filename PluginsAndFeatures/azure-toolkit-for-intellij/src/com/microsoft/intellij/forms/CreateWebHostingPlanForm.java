@@ -24,9 +24,9 @@ package com.microsoft.intellij.forms;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
-import com.microsoft.azure.management.websites.models.SkuOptions;
-import com.microsoft.azure.management.websites.models.WebHostingPlan;
-import com.microsoft.azure.management.websites.models.WorkerSizeOptions;
+//import com.microsoft.azure.management.websites.models.SkuOptions;
+//import com.microsoft.azure.management.websites.models.WebHostingPlan;
+//import com.microsoft.azure.management.websites.models.WorkerSizeOptions;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.util.PluginUtil;
@@ -35,7 +35,8 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.Location;
-import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
+//import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -81,14 +82,14 @@ public class CreateWebHostingPlanForm extends DialogWrapper {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
                 if (itemEvent.getItem() instanceof String) {
-                    fillWorkerSize((String) pricingComboBox.getSelectedItem());
+//                    fillWorkerSize((String) pricingComboBox.getSelectedItem());
                 }
             }
         });
 
         init();
         fillGeoRegions();
-        fillPricingComboBox();
+//        fillPricingComboBox();
     }
 
     @org.jetbrains.annotations.Nullable
@@ -128,12 +129,13 @@ public class CreateWebHostingPlanForm extends DialogWrapper {
             if (subscriptionId == null || subscriptionId.isEmpty()) {
                 PluginUtil.displayErrorDialog(message("errTtl"), message("appPlanMsg") + " " + message("subscriptionIdIsNull"));
             } else {
-                WebHostingPlanCache plan = new WebHostingPlanCache(nameTextField.getText().trim(), resourceGroup,
-                        subscriptionId, (String) geoRegionComboBox.getSelectedItem(),
-                        SkuOptions.valueOf((String) pricingComboBox.getSelectedItem()),
-                        WorkerSizeOptions.valueOf((String) workerSizeComboBox.getSelectedItem()));
-                manager.createWebHostingPlan(subscriptionId, plan);
-                webHostingPlan = plan.getName();
+                throw new NotImplementedException();
+//                WebHostingPlanCache plan = new WebHostingPlanCache(nameTextField.getText().trim(), resourceGroup,
+//                        subscriptionId, (String) geoRegionComboBox.getSelectedItem(),
+//                        SkuOptions.valueOf((String) pricingComboBox.getSelectedItem()),
+//                        WorkerSizeOptions.valueOf((String) workerSizeComboBox.getSelectedItem()));
+//                manager.createWebHostingPlan(subscriptionId, plan);
+//                webHostingPlan = plan.getName();
             }
         } catch (Exception e) {
             isOK = false;
@@ -184,6 +186,7 @@ public class CreateWebHostingPlanForm extends DialogWrapper {
     }
 
     private void fillPricingComboBox() {
+/*
         List<String> skuOptions = new ArrayList<String>();
         for (SkuOptions sku : SkuOptions.values()) {
             skuOptions.add(sku.toString());
@@ -196,9 +199,11 @@ public class CreateWebHostingPlanForm extends DialogWrapper {
             pricingComboBox.setSelectedIndex(0);
             fillWorkerSize((String) pricingComboBox.getSelectedItem());
         }
+*/
     }
 
     private void fillWorkerSize(String price) {
+/*
         List<String> sizeList = new ArrayList<String>();
         if (price.equalsIgnoreCase(SkuOptions.Free.name()) || price.equalsIgnoreCase(SkuOptions.Shared.name())) {
             sizeList.add(WorkerSizeOptions.Small.name());
@@ -214,6 +219,7 @@ public class CreateWebHostingPlanForm extends DialogWrapper {
         if (!sizeList.isEmpty()) {
             workerSizeComboBox.setSelectedIndex(0);
         }
+*/
     }
 
     public static String getWebHostingPlan() {

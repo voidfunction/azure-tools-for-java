@@ -10,7 +10,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="library" name="AzureCommons" level="project" />
     <orderEntry type="library" name="azure-sdk" level="project" />
-    <orderEntry type="library" name="azure-arm-sdk" level="project" />
     <orderEntry type="library" name=".cspack" level="project" />
     <orderEntry type="library" name="antIntegration" level="project" />
     <orderEntry type="library" name="ProjectManagerLibrary" level="project" />

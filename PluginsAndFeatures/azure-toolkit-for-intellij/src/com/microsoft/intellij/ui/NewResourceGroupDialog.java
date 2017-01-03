@@ -23,13 +23,14 @@ package com.microsoft.intellij.ui;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TitlePanel;
-import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
+//import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.vm.Location;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
 
@@ -46,7 +47,7 @@ public class NewResourceGroupDialog extends DialogWrapper {
     private JComboBox comboReg;
     String subscription;
     Map<String, String> subMap = new HashMap<String, String>();
-    static ResourceGroupExtended group;
+//    static ResourceGroupExtended group;
     AzureManager manager;
 
     public NewResourceGroupDialog(String subscription) {
@@ -150,6 +151,8 @@ public class NewResourceGroupDialog extends DialogWrapper {
                 PluginUtil.displayErrorDialog(message("err"), message("nameEmptyMsg"));
             }
         } else {
+            throw new NotImplementedException();
+/*
             try {
                 String subId = findKeyAsPerValue((String) comboSub.getSelectedItem());
                 group = manager.createResourceGroup(subId,
@@ -158,13 +161,15 @@ public class NewResourceGroupDialog extends DialogWrapper {
             } catch (Exception ex) {
                 PluginUtil.displayErrorDialogAndLog(message("newResGrpTtl"), message("newResErrMsg"), ex);
             }
+*/
         }
         if (isValid) {
             super.doOKAction();
         }
     }
-
+/*
     public static ResourceGroupExtended getResourceGroup() {
         return group;
     }
+    */
 }

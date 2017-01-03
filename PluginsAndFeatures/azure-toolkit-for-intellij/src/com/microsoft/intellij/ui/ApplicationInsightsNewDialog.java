@@ -26,12 +26,13 @@ import com.intellij.openapi.ui.TitlePanel;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.management.rest.model.ResourceGroup;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
-import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
+//import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
 
@@ -97,10 +98,13 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
                 newResourceGroupDialog.show();
                 // populate data in storage registry dialog
                 if (newResourceGroupDialog.isOK()) {
+                    throw new NotImplementedException();
+/*
                     ResourceGroupExtended group = NewResourceGroupDialog.getResourceGroup();
                     if (group != null) {
                         populateResourceGroupValues(findKeyAsPerValue(subTxt), group.getName());
                     }
+*/
                 }
             }
         };

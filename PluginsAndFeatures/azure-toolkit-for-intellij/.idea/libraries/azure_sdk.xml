@@ -34,8 +34,6 @@
       <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-svc-mgmt-storage-0.9.2.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-svc-mgmt-websites-0.9.2.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-tracing-util-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/arm/azure-mgmt-resources-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/arm/azure-mgmt-websites-0.9.2.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/azure-sdk/applicationinsights-management-1.0.3.jar!/" />
     </CLASSES>
     <JAVADOC />

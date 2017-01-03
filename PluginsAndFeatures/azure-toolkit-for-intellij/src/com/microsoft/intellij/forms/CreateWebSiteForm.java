@@ -29,7 +29,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
-import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
+//import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.ui.NewResourceGroupDialog;
@@ -55,6 +55,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.jdesktop.swingx.JXHyperlink;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -149,7 +150,7 @@ public class CreateWebSiteForm extends DialogWrapper {
                         showCreateWebHostingPlanForm();
                     } else {
                         WebHostingPlanCache plan = hostingPlanMap.get(selectedItem);
-                        pupulateServicePlanDetails(plan);
+//                        pupulateServicePlanDetails(plan);
                     }
                 }
             }
@@ -475,13 +476,13 @@ public class CreateWebSiteForm extends DialogWrapper {
                     }
 
                     // populate hosting service plan details
-                    pupulateServicePlanDetails(hostingPlanMap.get((String) webHostingPlanComboBox.getSelectedItem()));
+//                    pupulateServicePlanDetails(hostingPlanMap.get((String) webHostingPlanComboBox.getSelectedItem()));
                 }
                 else {
                     // clear selected item if any
                     webHostingPlanComboBox.setSelectedItem(null);
                     // clean hosting service plan details
-                    pupulateServicePlanDetails(null);
+//                    pupulateServicePlanDetails(null);
                 }
 
                 webHostingPlanComboBox.addItemListener(webHostingPlanComboBoxItemListner);
@@ -491,14 +492,14 @@ public class CreateWebSiteForm extends DialogWrapper {
             PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
         }
     }
-
+/*
     private void pupulateServicePlanDetails(WebHostingPlanCache plan){
         webHostingPlan = plan;
         servicePlanDetailsLocationLbl.setText(plan == null ? "-" : plan.getLocation());
         servicePlanDetailsPricingTierLbl.setText(plan == null ? "-" : plan.getSku().name());
         servicePlanDetailsInstanceSizeLbl.setText(plan == null ? "-" : plan.getWorkerSize().name());
     }
-
+*/
     private void showCreateWebHostingPlanForm() {
         final CreateWebHostingPlanForm form = new CreateWebHostingPlanForm(project, subscription.getId(), resourceGroup, plansAcrossSub);
         form.show();
@@ -518,6 +519,8 @@ public class CreateWebSiteForm extends DialogWrapper {
         NewResourceGroupDialog newResourceGroupDialog = new NewResourceGroupDialog(subscription.getName());
         newResourceGroupDialog.show();
         if (newResourceGroupDialog.isOK()) {
+            throw new NotImplementedException();
+/*
             final ResourceGroupExtended group = newResourceGroupDialog.getResourceGroup();
             if (group != null) {
                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
@@ -527,6 +530,7 @@ public class CreateWebSiteForm extends DialogWrapper {
                     }
                 });
             }
+*/
         } else {
             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                 @Override
