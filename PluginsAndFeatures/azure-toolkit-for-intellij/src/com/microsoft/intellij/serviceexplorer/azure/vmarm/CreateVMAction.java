@@ -25,19 +25,19 @@ import com.microsoft.intellij.wizards.createarmvm.CreateVMWizard;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 
 @Name("Create VM")
 public class CreateVMAction extends NodeActionListener {
-    private VMArmServiceModule vmServiceModule;
+    private VMArmModule vmServiceModule;
 
-    public CreateVMAction(VMArmServiceModule vmServiceModule) {
+    public CreateVMAction(VMArmModule vmServiceModule) {
         this.vmServiceModule = vmServiceModule;
     }
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        CreateVMWizard createVMWizard = new CreateVMWizard((VMArmServiceModule) e.getAction().getNode());
+        CreateVMWizard createVMWizard = new CreateVMWizard((VMArmModule) e.getAction().getNode());
         createVMWizard.show();
     }
 }

@@ -34,12 +34,12 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNo
 
 import java.util.List;
 
-public class VMArmServiceModule extends AzureRefreshableNode {
-    private static final String VM_SERVICE_MODULE_ID = com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule.class.getName();
+public class VMArmModule extends AzureRefreshableNode {
+    private static final String VM_SERVICE_MODULE_ID = com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule.class.getName();
     private static final String ICON_PATH = "virtualmachines.png";
     private static final String BASE_MODULE_NAME = "Virtual Machines";
 
-    public VMArmServiceModule(Node parent) {
+    public VMArmModule(Node parent) {
         super(VM_SERVICE_MODULE_ID, BASE_MODULE_NAME, parent, ICON_PATH);
     }
 
@@ -48,6 +48,7 @@ public class VMArmServiceModule extends AzureRefreshableNode {
             throws AzureCmdException {
         // remove all child nodes
         removeAllChildNodes();
+
 
         AzureManager azureManager = AzureManagerImpl.getManager(getProject());
         // load all VMs

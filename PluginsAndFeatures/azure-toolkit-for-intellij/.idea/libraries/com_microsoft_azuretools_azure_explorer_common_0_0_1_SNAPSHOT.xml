@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="com.microsoft.azuretools:azure-explorer-common:0.0.1-SNAPSHOT" type="repository">
+    <properties maven-id="com.microsoft.azuretools:azure-explorer-common:0.0.1-SNAPSHOT" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/microsoft/azuretools/azure-explorer-common/0.0.1-SNAPSHOT/azure-explorer-common-0.0.1-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

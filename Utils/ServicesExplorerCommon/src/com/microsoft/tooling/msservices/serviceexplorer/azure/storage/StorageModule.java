@@ -21,6 +21,7 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
+import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.ExternalStorageHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -34,7 +35,6 @@ import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
-import com.microsoft.windowsazure.management.storage.models.StorageAccountTypes;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -70,10 +70,11 @@ public class StorageModule extends AzureRefreshableNode {
                 for (StorageAccount sm : storageAccounts) {
                     String type = sm.getType();
 
-                    if (type.equals(StorageAccountTypes.STANDARD_GRS)
-                            || type.equals(StorageAccountTypes.STANDARD_LRS)
-                            || type.equals(StorageAccountTypes.STANDARD_RAGRS)
-                            || type.equals(StorageAccountTypes.STANDARD_ZRS)) {
+                    // todo:
+                    if (type.equals(SkuName.STANDARD_GRS)
+                            || type.equals(SkuName.STANDARD_LRS)
+                            || type.equals(SkuName.STANDARD_RAGRS)
+                            || type.equals(SkuName.STANDARD_ZRS)) {
 
                         addChildNode(new StorageNode(this, sm, false));
                     }

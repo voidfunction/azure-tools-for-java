@@ -159,7 +159,7 @@ public class VMNode extends AzureRefreshableNode {
                     return STOP_ICON_PATH;
                 }
             }
-        } catch (CloudException | IOException e) {
+        } catch (CloudException e) {
             DefaultLoader.getUIHelper().logError(e.getMessage(), e);
         }
         return WAIT_ICON_PATH;

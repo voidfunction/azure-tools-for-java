@@ -32,7 +32,7 @@ import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.intellij.wizards.createvm.MachineSettingsStep;
 import com.microsoft.intellij.wizards.createvm.SubscriptionStep;
 import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 
 public class CreateVMWizardModel extends VMWizardModel {
     private Region region;
@@ -46,7 +46,7 @@ public class CreateVMWizardModel extends VMWizardModel {
     private AvailabilitySet availabilitySet;
     private boolean withNewAvailabilitySet;
 
-    public CreateVMWizardModel(VMArmServiceModule node) {
+    public CreateVMWizardModel(VMArmModule node) {
         super();
 
         Project project = (Project) node.getProject();

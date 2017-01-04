@@ -38,7 +38,6 @@ import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import com.microsoft.windowsazure.management.storage.models.StorageAccountTypes;
 
 import java.util.ArrayList;
 import java.util.List;

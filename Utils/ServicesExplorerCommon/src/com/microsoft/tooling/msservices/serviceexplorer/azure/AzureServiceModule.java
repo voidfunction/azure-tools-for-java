@@ -34,7 +34,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappsModule;
 
 import java.util.List;
@@ -47,7 +47,7 @@ public class AzureServiceModule extends RefreshableNode {
 
     private Object project;
     private VMServiceModule vmServiceModule;
-    private VMArmServiceModule vmArmServiceModule;
+    private VMArmModule vmArmServiceModule;
     private StorageModule storageServiceModule;
     private com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageModule storageModule;
     private WebappsModule webappsModule;
@@ -70,7 +70,7 @@ public class AzureServiceModule extends RefreshableNode {
         if (!storageModuleOnly) {
             vmServiceModule = new VMServiceModule(this);
         }
-        vmArmServiceModule = new VMArmServiceModule(this);
+        vmArmServiceModule = new VMArmModule(this);
     }
 
     public AzureServiceModule(Node parent, String iconPath, Object data) {
@@ -182,7 +182,7 @@ public class AzureServiceModule extends RefreshableNode {
                                         if (!storageModuleOnly) {
                                             vmServiceModule = new VMServiceModule(AzureServiceModule.this);
                                         }
-                                        vmArmServiceModule = new VMArmServiceModule(AzureServiceModule.this);
+                                        vmArmServiceModule = new VMArmModule(AzureServiceModule.this);
                                         storageServiceModule = new StorageModule(AzureServiceModule.this);
                                         hdInsightModule = hdInsightModule.getNewNode(AzureServiceModule.this);
 
