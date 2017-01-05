@@ -21,18 +21,17 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm;
 
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.storage.StorageAccount;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.SubscriptionManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.ExternalStorageHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
@@ -41,6 +40,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class StorageModule extends AzureRefreshableNode {
     private static final String STORAGE_MODULE_ID = com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule.class.getName();
@@ -55,27 +55,77 @@ public class StorageModule extends AzureRefreshableNode {
     protected void refresh(@NotNull EventStateHandle eventState)
             throws AzureCmdException {
         removeAllChildNodes();
-
-        AzureManager azureManager = AzureManagerImpl.getManager(getProject());
-        // load all Storage Accounts
-        List<Subscription> subscriptionList = azureManager.getSubscriptionList();
         List<Pair<String, String>> failedSubscriptions = new ArrayList<>();
-        for (Subscription subscription : subscriptionList) {
-            try {
-                List<ArmStorageAccount> storageAccounts = AzureArmManagerImpl.getManager(getProject()).getStorageAccounts(subscription.getId());
 
-                if (eventState.isEventTriggered()) {
-                    return;
-                }
-
-                for (StorageAccount sm : storageAccounts) {
-                    addChildNode(new StorageNode(this, subscription.getId(), sm));
-                }
-            } catch (Exception ex) {
-                failedSubscriptions.add(new ImmutablePair<>(subscription.getName(), ex.getMessage()));
-                continue;
+        try {
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null) {
+                return;
             }
+
+            SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
+            System.out.println("getting sid list...");
+            Set<String> sidList = subscriptionManager.getAccountSidList();
+            for (String sid : sidList) {
+                System.out.println("sid : " + sid);
+                try {
+                    Azure azure = azureManager.getAzure(sid);
+                    List<com.microsoft.azure.management.storage.StorageAccount> storageAccounts = azure.storageAccounts().list();
+                    if (eventState.isEventTriggered()) {
+                        return;
+                    }
+
+                    for (StorageAccount sm : storageAccounts) {
+                        addChildNode(new StorageNode(this, sid, sm));
+                    }
+
+                } catch (Exception ex) {
+                    failedSubscriptions.add(new ImmutablePair<>(sid, ex.getMessage()));
+                    continue;
+                }
+            }
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().logError("An error occurred when trying to load Storage Accounts\n\n" + ex.getMessage(), ex);
         }
+
+//            public List<ArmStorageAccount> execute(@NotNull Azure azure) throws Throwable {
+//                List<ArmStorageAccount> storageAccounts = new ArrayList<>();
+//                for (StorageAccount storageAccount : azure.storageAccounts().list()){
+//                    ArmStorageAccount sa = new ArmStorageAccount(storageAccount.name(), subscriptionId, storageAccount);
+//
+//                    sa.setProtocol("https");
+//                    sa.setType(storageAccount.sku().name().toString());
+//                    sa.setLocation(Strings.nullToEmpty(storageAccount.regionName()));
+//                    List<StorageAccountKey> keys = storageAccount.keys();
+//                    if (!(keys == null || keys.isEmpty())) {
+//                        sa.setPrimaryKey(keys.get(0).value());
+//                        if (keys.size() > 1) {
+//                            sa.setSecondaryKey(keys.get(1).value());
+//                        }
+//                    }
+//                    sa.setResourceGroupName(storageAccount.resourceGroupName());
+//                    storageAccounts.add(sa);
+//                }
+//                return storageAccounts;
+//            }
+
+
+//            try {
+//
+//                List<ArmStorageAccount> storageAccounts = AzureArmManagerImpl.getManager(getProject()).getStorageAccounts(subscription.getId());
+//
+//                if (eventState.isEventTriggered()) {
+//                    return;
+//                }
+//
+//                for (StorageAccount sm : storageAccounts) {
+//                    addChildNode(new StorageNode(this, subscription.getId(), sm));
+//                }
+//            } catch (Exception ex) {
+//                failedSubscriptions.add(new ImmutablePair<>(subscription.getName(), ex.getMessage()));
+//                continue;
+//            }
 
         // load External Accounts
         for (ClientStorageAccount clientStorageAccount : ExternalStorageHelper.getList(getProject())) {

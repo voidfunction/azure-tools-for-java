@@ -22,12 +22,12 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
 import com.google.common.collect.ImmutableMap;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
-import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
@@ -40,7 +40,7 @@ public class ContainerNode extends Node {
     public class RefreshAction extends NodeActionListener {
         @Override
         public void actionPerformed(NodeActionEvent e) {
-            DefaultLoader.getUIHelper().refreshBlobs(getProject(), storageAccount, blobContainer);
+//            DefaultLoader.getUIHelper().refreshBlobs(getProject(), storageAccount, blobContainer);
         }
     }
 
@@ -61,21 +61,21 @@ public class ContainerNode extends Node {
         @Override
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
                 throws AzureCmdException {
-            Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount, blobContainer);
+//            Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount, blobContainer);
 
-            if (openedFile != null) {
-                DefaultLoader.getIdeHelper().closeFile(getProject(), openedFile);
-            }
-
-            try {
-                StorageClientSDKManagerImpl.getManager().deleteBlobContainer(storageAccount, blobContainer);
-
-                parent.removeAllChildNodes();
-                ((BlobModule) parent).load();
-            } catch (AzureCmdException ex) {
-                DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete blob storage", ex,
-                        "MS Services - Error Deleting Blob Storage", false, true);
-            }
+//            if (openedFile != null) {
+//                DefaultLoader.getIdeHelper().closeFile(getProject(), openedFile);
+//            }
+//
+//            try {
+//                StorageClientSDKManagerImpl.getManager().deleteBlobContainer(storageAccount, blobContainer);
+//
+//                parent.removeAllChildNodes();
+//                ((BlobModule) parent).load();
+//            } catch (AzureCmdException ex) {
+//                DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete blob storage", ex,
+//                        "MS Services - Error Deleting Blob Storage", false, true);
+//            }
         }
 
         @Override
@@ -87,9 +87,9 @@ public class ContainerNode extends Node {
     private static final String CONTAINER_MODULE_ID = ContainerNode.class.getName();
     private static final String ICON_PATH = "container.png";
     private final BlobContainer blobContainer;
-    private final ClientStorageAccount storageAccount;
+    private final StorageAccount storageAccount;
 
-    public ContainerNode(final Node parent, ClientStorageAccount sa, BlobContainer bc) {
+    public ContainerNode(final Node parent, StorageAccount sa, BlobContainer bc) {
         super(CONTAINER_MODULE_ID, bc.getName(), parent, ICON_PATH, true);
 
         blobContainer = bc;
@@ -100,13 +100,13 @@ public class ContainerNode extends Node {
 
     @Override
     protected void onNodeClick(NodeActionEvent e) {
-        final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount, blobContainer);
-
-        if (openedFile == null) {
-            DefaultLoader.getUIHelper().openItem(getProject(), storageAccount, blobContainer, " [Container]", "BlobContainer", "container.png");
-        } else {
-            DefaultLoader.getUIHelper().openItem(getProject(), openedFile);
-        }
+//        final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount, blobContainer);
+//
+//        if (openedFile == null) {
+//            DefaultLoader.getUIHelper().openItem(getProject(), storageAccount, blobContainer, " [Container]", "BlobContainer", "container.png");
+//        } else {
+//            DefaultLoader.getUIHelper().openItem(getProject(), openedFile);
+//        }
     }
 
     @Override

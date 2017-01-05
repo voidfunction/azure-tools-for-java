@@ -53,7 +53,7 @@ public class BlobModule extends AzureRefreshableNode {
         }
 
         for (BlobContainer blobContainer : blobContainers) {
-            addChildNode(new ContainerNode(this, storageAccount, blobContainer));
+//            addChildNode(new ContainerNode(this, storageAccount, blobContainer)); todo:
         }
     }
 

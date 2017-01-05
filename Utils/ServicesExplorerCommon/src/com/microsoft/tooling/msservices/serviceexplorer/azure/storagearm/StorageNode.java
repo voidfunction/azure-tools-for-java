@@ -21,13 +21,15 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm;
 
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.storage.StorageAccount;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
-import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
@@ -46,7 +48,7 @@ public class StorageNode extends AzureRefreshableNode {
     private String subscriptionId;
 
     public StorageNode(Node parent, String subscriptionId, StorageAccount storageAccount) {
-        super(storageAccount.getName(), storageAccount.getName(), parent, STORAGE_ACCOUNT_ICON_PATH,  true);
+        super(storageAccount.name(), storageAccount.name(), parent, STORAGE_ACCOUNT_ICON_PATH,  true);
 
         this.subscriptionId = subscriptionId;
         this.storageAccount = storageAccount;
@@ -57,7 +59,7 @@ public class StorageNode extends AzureRefreshableNode {
     public class DeleteStorageAccountAction extends AzureNodeActionPromptListener {
         public DeleteStorageAccountAction() {
             super(StorageNode.this,
-                    String.format("This operation will delete storage account %s.\nAre you sure you want to continue?", storageAccount.getName()),
+                    String.format("This operation will delete storage account %s.\nAre you sure you want to continue?", storageAccount.name()),
                     "Deleting Storage Account");
         }
 
@@ -65,7 +67,13 @@ public class StorageNode extends AzureRefreshableNode {
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventHelper.EventStateHandle stateHandle)
                 throws AzureCmdException {
             try {
-                AzureArmManagerImpl.getManager(getProject()).deleteStorageAccount(subscriptionId, storageAccount);
+                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                // not signed in
+                if (azureManager == null) {
+                    return;
+                }
+                Azure azure = azureManager.getAzure(subscriptionId);
+                azure.storageAccounts().deleteByGroup(storageAccount.resourceGroupName(), storageAccount.name());
                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                     @Override
                     public void run() {
@@ -73,7 +81,7 @@ public class StorageNode extends AzureRefreshableNode {
                         getParent().removeDirectChildNode(StorageNode.this);
                     }
                 });
-            } catch (AzureCmdException ex) {
+            } catch (Exception ex) {
                 DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete storage account.", ex,
                         "MS Services - Error Deleting Storage Account", false, true);
             }
@@ -90,7 +98,7 @@ public class StorageNode extends AzureRefreshableNode {
         removeAllChildNodes();
 
         try {
-            List<BlobContainer> containerList = StorageClientSDKManagerImpl.getManager().getBlobContainers(storageAccount);
+            List<BlobContainer> containerList = StorageClientSDKManagerImpl.getManager().getBlobContainers(/*storageAccount*/null); //todo:
             for (BlobContainer blobContainer : containerList) {
                 addChildNode(new ContainerNode(this, storageAccount, blobContainer));
             }

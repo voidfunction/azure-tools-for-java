@@ -41,5 +41,10 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/.cspack.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azuretools</groupId>
+            <artifactId>auth-manage</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>
