@@ -30,7 +30,7 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.ExternalStorageHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
@@ -129,7 +129,7 @@ public class StorageModule extends AzureRefreshableNode {
 
         // load External Accounts
         for (ClientStorageAccount clientStorageAccount : ExternalStorageHelper.getList(getProject())) {
-            ClientStorageAccount storageAccount = StorageClientSDKManagerImpl.getManager().getStorageAccount(clientStorageAccount.getConnectionString());
+            ClientStorageAccount storageAccount = StorageClientSDKManager.getManager().getStorageAccount(clientStorageAccount.getConnectionString());
 
             if (eventState.isEventTriggered()) {
                 return;

@@ -24,6 +24,7 @@ package com.microsoft.intellij.serviceexplorer.azure.storage;
 import com.intellij.openapi.project.Project;
 import com.microsoft.intellij.forms.CreateBlobContainerForm;
 import com.microsoft.tooling.msservices.helpers.Name;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
@@ -46,10 +47,9 @@ public class CreateBlobContainer extends NodeActionListener {
     public void actionPerformed(NodeActionEvent e) {
         CreateBlobContainerForm form = new CreateBlobContainerForm((Project) parent.getProject());
         if (parent instanceof BlobModule) {
-            // todo:
-//            form.setStorageAccount(((BlobModule) parent).getStorageAccount());
+            form.setConnectionString((((BlobModule) parent).getStorageAccount()).getConnectionString());
         } else if (parent instanceof StorageNode) {
-            form.setStorageAccount(((StorageNode) parent).getStorageAccount());
+            form.setConnectionString(StorageClientSDKManager.getConnectionString(((StorageNode) parent).getStorageAccount()));
         }
         form.setOnCreate(new Runnable() {
             @Override

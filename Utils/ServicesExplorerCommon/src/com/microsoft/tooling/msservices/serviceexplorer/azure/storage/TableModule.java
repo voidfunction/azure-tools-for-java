@@ -23,7 +23,7 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Table;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
@@ -47,7 +47,7 @@ public class TableModule extends AzureRefreshableNode {
             throws AzureCmdException {
         removeAllChildNodes();
 
-        final List<Table> tables = StorageClientSDKManagerImpl.getManager().getTables(storageAccount);
+        final List<Table> tables = StorageClientSDKManager.getManager().getTables(storageAccount);
 
         if (eventState.isEventTriggered()) {
             return;

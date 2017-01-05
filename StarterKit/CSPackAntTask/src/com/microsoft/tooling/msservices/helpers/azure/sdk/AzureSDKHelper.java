@@ -1481,15 +1481,15 @@ public class AzureSDKHelper {
     }
 
     @NotNull
-    public static CloudStorageAccount getCloudStorageAccount(@NotNull ClientStorageAccount storageAccount)
+    public static CloudStorageAccount getCloudStorageAccount(@NotNull String connectionString)
             throws URISyntaxException, InvalidKeyException {
-        return CloudStorageAccount.parse(storageAccount.getConnectionString());
+        return CloudStorageAccount.parse(connectionString);
     }
 
     @NotNull
     private static CloudBlobClient getCloudBlobClient(@NotNull ClientStorageAccount storageAccount)
             throws Exception {
-        CloudStorageAccount csa = getCloudStorageAccount(storageAccount);
+        CloudStorageAccount csa = getCloudStorageAccount(storageAccount.getConnectionString());
 
         return csa.createCloudBlobClient();
     }

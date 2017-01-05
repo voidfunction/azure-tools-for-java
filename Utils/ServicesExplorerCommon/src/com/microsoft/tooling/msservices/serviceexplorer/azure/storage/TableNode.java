@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Table;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
@@ -60,14 +60,14 @@ public class TableNode extends Node {
 
         @Override
         public void actionPerformed(final NodeActionEvent e) {
-            Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount, table);
+            Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.getName(), table);
 
             if (openedFile != null) {
                 DefaultLoader.getIdeHelper().closeFile(getProject(), openedFile);
             }
 
             try {
-                StorageClientSDKManagerImpl.getManager().deleteTable(storageAccount, table);
+                StorageClientSDKManager.getManager().deleteTable(storageAccount, table);
 
                 parent.removeAllChildNodes();
                 ((TableModule) parent).load();
@@ -104,7 +104,7 @@ public class TableNode extends Node {
 
     @Override
     protected void onNodeClick(NodeActionEvent ex) {
-        final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount, table);
+        final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.getName(), table);
 
         if (openedFile == null) {
             DefaultLoader.getUIHelper().openItem(getProject(), storageAccount, table, " [Table]", "Table", "container.png");

@@ -23,7 +23,7 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
@@ -46,7 +46,7 @@ public class BlobModule extends AzureRefreshableNode {
             throws AzureCmdException {
         removeAllChildNodes();
 
-        final List<BlobContainer> blobContainers = StorageClientSDKManagerImpl.getManager().getBlobContainers(storageAccount);
+        final List<BlobContainer> blobContainers = StorageClientSDKManager.getManager().getBlobContainers(storageAccount.getConnectionString());
 
         if (eventState.isEventTriggered()) {
             return;

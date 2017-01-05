@@ -28,7 +28,7 @@ import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
@@ -98,7 +98,8 @@ public class StorageNode extends AzureRefreshableNode {
         removeAllChildNodes();
 
         try {
-            List<BlobContainer> containerList = StorageClientSDKManagerImpl.getManager().getBlobContainers(/*storageAccount*/null); //todo:
+            List<BlobContainer> containerList = StorageClientSDKManager.getManager()
+                    .getBlobContainers(StorageClientSDKManager.getConnectionString(storageAccount));
             for (BlobContainer blobContainer : containerList) {
                 addChildNode(new ContainerNode(this, storageAccount, blobContainer));
             }

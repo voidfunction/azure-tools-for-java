@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
@@ -61,14 +61,14 @@ public class QueueNode extends Node {
         @Override
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
                 throws AzureCmdException {
-            Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount, queue);
+            Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.getName(), queue);
 
             if (openedFile != null) {
                 DefaultLoader.getIdeHelper().closeFile(getProject(), openedFile);
             }
 
             try {
-                StorageClientSDKManagerImpl.getManager().deleteQueue(storageAccount, queue);
+                StorageClientSDKManager.getManager().deleteQueue(storageAccount, queue);
 
                 parent.removeAllChildNodes();
                 ((QueueModule) parent).load();
@@ -95,7 +95,7 @@ public class QueueNode extends Node {
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
                 throws AzureCmdException {
             try {
-                StorageClientSDKManagerImpl.getManager().clearQueue(storageAccount, queue);
+                StorageClientSDKManager.getManager().clearQueue(storageAccount, queue);
 
                 DefaultLoader.getUIHelper().refreshQueue(getProject(), storageAccount, queue);
             } catch (AzureCmdException ex) {
@@ -126,7 +126,7 @@ public class QueueNode extends Node {
 
     @Override
     protected void onNodeClick(NodeActionEvent ex) {
-        final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount, queue);
+        final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.getName(), queue);
 
         if (openedFile == null) {
             DefaultLoader.getUIHelper().openItem(getProject(), storageAccount, queue, " [Queue]", "Queue", "container.png");

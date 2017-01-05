@@ -33,7 +33,7 @@ import com.microsoft.intellij.helpers.LinkListener;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,7 +49,7 @@ public class CreateBlobContainerForm extends DialogWrapper {
     private JLabel namingGuidelinesLink;
 
     private Project project;
-    private StorageAccount storageAccount;
+    private String connectionString;
     private Runnable onCreate;
 
     private static final String NAME_REGEX = "^[a-z0-9](?!.*--)[a-z0-9-]+[a-z0-9]$";
@@ -89,11 +89,10 @@ public class CreateBlobContainerForm extends DialogWrapper {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Creating blob container...", false) {
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
-                // todo:
-                /*try {
+                try {
                     progressIndicator.setIndeterminate(true);
 
-                    for (BlobContainer blobContainer : StorageClientSDKManagerImpl.getManager().getBlobContainers(storageAccount)) {
+                    for (BlobContainer blobContainer : StorageClientSDKManager.getManager().getBlobContainers(connectionString)) {
                         if (blobContainer.getName().equals(name)) {
                             ApplicationManager.getApplication().invokeLater(new Runnable() {
                                 @Override
@@ -106,8 +105,8 @@ public class CreateBlobContainerForm extends DialogWrapper {
                         }
                     }
 
-                    BlobContainer blobContainer = new BlobContainer(name, storageAccount.getBlobsUri() + name, "", Calendar.getInstance(), "");
-                    StorageClientSDKManagerImpl.getManager().createBlobContainer(storageAccount, blobContainer);
+                    BlobContainer blobContainer = new BlobContainer(name, ""/*storageAccount.getBlobsUri() + name*/, "", Calendar.getInstance(), "");
+                    StorageClientSDKManager.getManager().createBlobContainer(connectionString, blobContainer);
 
                     if (onCreate != null) {
                         ApplicationManager.getApplication().invokeLater(onCreate);
@@ -115,7 +114,7 @@ public class CreateBlobContainerForm extends DialogWrapper {
                 } catch (AzureCmdException e) {
                     String msg = "An error occurred while attempting to create blob container." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                     PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
-                }*/
+                }
             }
         });
 
@@ -128,8 +127,8 @@ public class CreateBlobContainerForm extends DialogWrapper {
         return contentPane;
     }
 
-    public void setStorageAccount(StorageAccount storageAccount) {
-        this.storageAccount = storageAccount;
+    public void setConnectionString(String connectionString) {
+        this.connectionString = connectionString;
     }
 
     public void setOnCreate(Runnable onCreate) {

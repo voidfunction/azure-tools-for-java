@@ -49,7 +49,7 @@ public interface UIHelper {
 
     void refreshQueue(@NotNull Object projectObject, @NotNull ClientStorageAccount storageAccount, @NotNull Queue queue);
 
-    void refreshBlobs(@NotNull Object projectObject, @NotNull ClientStorageAccount storageAccount, @NotNull BlobContainer container);
+    void refreshBlobs(@NotNull Object projectObject, @NotNull String accountName, @NotNull BlobContainer container);
 
     void refreshTable(@NotNull Object projectObject, @NotNull ClientStorageAccount storageAccount, @NotNull Table table);
 
@@ -57,7 +57,7 @@ public interface UIHelper {
 
     @Nullable
     <T extends StorageServiceTreeItem> Object getOpenedFile(@NotNull Object projectObject,
-                                                            @NotNull ClientStorageAccount storageAccount,
+                                                            @NotNull String accountName,
                                                             @NotNull T item);
 
     void saveWebAppPreferences(@NotNull Object projectObject, Map<WebSite, WebSiteConfiguration> map);

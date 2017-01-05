@@ -190,7 +190,7 @@ public class UIHelperImpl implements UIHelper {
         ApplicationManager.getApplication().runReadAction(new Runnable() {
             @Override
             public void run() {
-                VirtualFile file = (VirtualFile) getOpenedFile(projectObject, storageAccount, queue);
+                VirtualFile file = (VirtualFile) getOpenedFile(projectObject, storageAccount.getName(), queue);
                 if (file != null) {
                     final QueueFileEditor queueFileEditor = (QueueFileEditor) FileEditorManager.getInstance((Project) projectObject).getEditors(file)[0];
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -206,12 +206,11 @@ public class UIHelperImpl implements UIHelper {
 
 
     @Override
-    public void refreshBlobs(@NotNull final Object projectObject, @NotNull final ClientStorageAccount storageAccount,
-                             @NotNull final BlobContainer container) {
+    public void refreshBlobs(@NotNull final Object projectObject, @NotNull final String accountName, @NotNull final BlobContainer container) {
         ApplicationManager.getApplication().runReadAction(new Runnable() {
             @Override
             public void run() {
-                VirtualFile file = (VirtualFile) getOpenedFile(projectObject, storageAccount, container);
+                VirtualFile file = (VirtualFile) getOpenedFile(projectObject, accountName, container);
                 if (file != null) {
                     final BlobExplorerFileEditor containerFileEditor = (BlobExplorerFileEditor) FileEditorManager.getInstance((Project) projectObject).getEditors(file)[0];
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -231,7 +230,7 @@ public class UIHelperImpl implements UIHelper {
         ApplicationManager.getApplication().runReadAction(new Runnable() {
             @Override
             public void run() {
-                VirtualFile file = (VirtualFile) getOpenedFile(projectObject, storageAccount, table);
+                VirtualFile file = (VirtualFile) getOpenedFile(projectObject, storageAccount.getName(), table);
                 if (file != null) {
                     final TableFileEditor tableFileEditor = (TableFileEditor) FileEditorManager.getInstance((Project) projectObject).getEditors(file)[0];
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -258,7 +257,7 @@ public class UIHelperImpl implements UIHelper {
     @Nullable
     @Override
     public <T extends StorageServiceTreeItem> Object getOpenedFile(@NotNull Object projectObject,
-                                                                   @NotNull ClientStorageAccount storageAccount,
+                                                                   @NotNull String accountName,
                                                                    @NotNull T item) {
         FileEditorManager fileEditorManager = FileEditorManager.getInstance((Project) projectObject);
 
@@ -268,7 +267,7 @@ public class UIHelperImpl implements UIHelper {
 
             if (editedStorageAccount != null
                     && editedItem != null
-                    && editedStorageAccount.getName().equals(storageAccount.getName())
+                    && editedStorageAccount.getName().equals(accountName)
                     && editedItem.getName().equals(item.getName())) {
                 return editedFile;
             }
