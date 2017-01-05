@@ -28,13 +28,13 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.intellij.helpers.LinkListener;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
-import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,7 +49,7 @@ public class CreateBlobContainerForm extends DialogWrapper {
     private JLabel namingGuidelinesLink;
 
     private Project project;
-    private ClientStorageAccount storageAccount;
+    private StorageAccount storageAccount;
     private Runnable onCreate;
 
     private static final String NAME_REGEX = "^[a-z0-9](?!.*--)[a-z0-9-]+[a-z0-9]$";
@@ -89,7 +89,8 @@ public class CreateBlobContainerForm extends DialogWrapper {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Creating blob container...", false) {
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
-                try {
+                // todo:
+                /*try {
                     progressIndicator.setIndeterminate(true);
 
                     for (BlobContainer blobContainer : StorageClientSDKManagerImpl.getManager().getBlobContainers(storageAccount)) {
@@ -114,7 +115,7 @@ public class CreateBlobContainerForm extends DialogWrapper {
                 } catch (AzureCmdException e) {
                     String msg = "An error occurred while attempting to create blob container." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                     PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
-                }
+                }*/
             }
         });
 
@@ -127,7 +128,7 @@ public class CreateBlobContainerForm extends DialogWrapper {
         return contentPane;
     }
 
-    public void setStorageAccount(ClientStorageAccount storageAccount) {
+    public void setStorageAccount(StorageAccount storageAccount) {
         this.storageAccount = storageAccount;
     }
 
