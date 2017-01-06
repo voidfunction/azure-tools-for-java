@@ -53,7 +53,7 @@ public class BlobContainerNode extends Node {
     public class RefreshAction extends NodeActionListener {
         @Override
         public void actionPerformed(NodeActionEvent e) {
-            DefaultLoader.getUIHelper().refreshBlobs(getProject(), storageAccount, blobContainer);
+            DefaultLoader.getUIHelper().refreshBlobs(getProject(), storageAccount.getName(), blobContainer);
         }
     }
 
@@ -67,7 +67,7 @@ public class BlobContainerNode extends Node {
     @Override
     protected void onNodeClick(NodeActionEvent e) {
 //        TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerContainerOpen, null, null);
-        final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount, blobContainer);
+        final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.getName(), blobContainer);
         if (openedFile == null) {
             DefaultLoader.getUIHelper().openItem(getProject(), storageAccount, blobContainer, " [Container]", "BlobContainer", CommonConst.BlobContainerIConPath);
         } else {
