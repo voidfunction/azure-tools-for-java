@@ -23,7 +23,7 @@ package com.microsoft.intellij.serviceexplorer.azure.storage;
 
 import com.intellij.openapi.project.Project;
 import com.microsoft.intellij.forms.ExternalStorageAccountForm;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
@@ -42,7 +42,7 @@ public class ConfirmDialogAction extends NodeActionListener {
             @Override
             public void run() {
                 node.getClientStorageAccount().setPrimaryKey(form.getPrimaryKey());
-                ClientStorageAccount clientStorageAccount = StorageClientSDKManagerImpl.getManager().getStorageAccount(node.getClientStorageAccount().getConnectionString());
+                ClientStorageAccount clientStorageAccount = StorageClientSDKManager.getManager().getStorageAccount(node.getClientStorageAccount().getConnectionString());
 
                 node.getClientStorageAccount().setPrimaryKey(clientStorageAccount.getPrimaryKey());
                 node.getClientStorageAccount().setBlobsUri(clientStorageAccount.getBlobsUri());

@@ -39,7 +39,7 @@ import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Table;
 import com.microsoft.tooling.msservices.model.storage.TableEntity;
@@ -253,7 +253,7 @@ public class TableFileEditor implements FileEditor {
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
                 try {
-                    tableEntities = StorageClientSDKManagerImpl.getManager().getTableEntities(storageAccount, table, queryText);
+                    tableEntities = StorageClientSDKManager.getManager().getTableEntities(storageAccount, table, queryText);
                     refreshGrid();
                 } catch (AzureCmdException e) {
                     String msg = "An error occurred while attempting to query entities." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
@@ -328,7 +328,7 @@ public class TableFileEditor implements FileEditor {
                         for (int i = 0; i < selectedEntities.length; i++) {
                             progressIndicator.setFraction((double) i / selectedEntities.length);
 
-                            StorageClientSDKManagerImpl.getManager().deleteTableEntity(storageAccount, selectedEntities[i]);
+                            StorageClientSDKManager.getManager().deleteTableEntity(storageAccount, selectedEntities[i]);
                         }
 
                         ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -524,7 +524,7 @@ public class TableFileEditor implements FileEditor {
                             @Override
                             public void run() {
                                 if (registeredSubscriptionsChanged) {
-                                    Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(project, storageAccount, table);
+                                    Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(project, storageAccount.getName(), table);
 
                                     if (openedFile != null) {
                                         DefaultLoader.getIdeHelper().closeFile(project, openedFile);

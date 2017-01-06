@@ -40,7 +40,7 @@ import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import com.microsoft.tooling.msservices.model.storage.QueueMessage;
@@ -209,7 +209,7 @@ public class QueueFileEditor implements FileEditor {
                         public void run(@NotNull ProgressIndicator progressIndicator) {
                             try {
 
-                                StorageClientSDKManagerImpl.getManager().clearQueue(storageAccount, queue);
+                                StorageClientSDKManager.getManager().clearQueue(storageAccount, queue);
 
                                 ApplicationManager.getApplication().invokeLater(new Runnable() {
                                     @Override
@@ -238,7 +238,7 @@ public class QueueFileEditor implements FileEditor {
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 try {
-                    queueMessages = StorageClientSDKManagerImpl.getManager().getQueueMessages(storageAccount, queue);
+                    queueMessages = StorageClientSDKManager.getManager().getQueueMessages(storageAccount, queue);
 
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
                         @Override
@@ -311,7 +311,7 @@ public class QueueFileEditor implements FileEditor {
                 @Override
                 public void run(@NotNull ProgressIndicator progressIndicator) {
                     try {
-                        StorageClientSDKManagerImpl.getManager().dequeueFirstQueueMessage(storageAccount, queue);
+                        StorageClientSDKManager.getManager().dequeueFirstQueueMessage(storageAccount, queue);
 
                         ApplicationManager.getApplication().invokeLater(new Runnable() {
                             @Override
@@ -454,7 +454,7 @@ public class QueueFileEditor implements FileEditor {
                             @Override
                             public void run() {
                                 if (registeredSubscriptionsChanged) {
-                                    Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(project, storageAccount, queue);
+                                    Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(project, storageAccount.getName(), queue);
 
                                     if (openedFile != null) {
                                         DefaultLoader.getIdeHelper().closeFile(project, openedFile);

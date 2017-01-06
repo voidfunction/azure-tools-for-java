@@ -26,7 +26,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.intellij.helpers.LinkListener;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -149,8 +149,7 @@ public class ExternalStorageAccountForm extends DialogWrapper {
 
         try {
             //Validate querystring by making a request
-            StorageClientSDKManagerImpl.getManager().getTables(
-                    StorageClientSDKManagerImpl.getManager().getStorageAccount(
+            StorageClientSDKManager.getManager().getTables(StorageClientSDKManager.getManager().getStorageAccount(
                             getFullStorageAccount().getConnectionString()));
 
         } catch (AzureCmdException e) {

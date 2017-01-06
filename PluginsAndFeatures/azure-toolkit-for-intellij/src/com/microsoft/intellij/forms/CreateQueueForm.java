@@ -31,7 +31,7 @@ import com.microsoft.intellij.helpers.LinkListener;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import org.jetbrains.annotations.NotNull;
@@ -119,7 +119,7 @@ public class CreateQueueForm extends DialogWrapper {
                 try {
                     progressIndicator.setIndeterminate(true);
 
-                    for (Queue queue : StorageClientSDKManagerImpl.getManager().getQueues(storageAccount)) {
+                    for (Queue queue : StorageClientSDKManager.getManager().getQueues(storageAccount)) {
                         if (queue.getName().equals(name)) {
                             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                                 @Override
@@ -133,7 +133,7 @@ public class CreateQueueForm extends DialogWrapper {
                     }
 
                     Queue queue = new Queue(name, "", 0);
-                    StorageClientSDKManagerImpl.getManager().createQueue(storageAccount, queue);
+                    StorageClientSDKManager.getManager().createQueue(storageAccount, queue);
 
                     if (onCreate != null) {
                         DefaultLoader.getIdeHelper().invokeLater(onCreate);

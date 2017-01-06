@@ -109,24 +109,6 @@ public class StorageModule extends AzureRefreshableNode {
 //                }
 //                return storageAccounts;
 //            }
-
-
-//            try {
-//
-//                List<ArmStorageAccount> storageAccounts = AzureArmManagerImpl.getManager(getProject()).getStorageAccounts(subscription.getId());
-//
-//                if (eventState.isEventTriggered()) {
-//                    return;
-//                }
-//
-//                for (StorageAccount sm : storageAccounts) {
-//                    addChildNode(new StorageNode(this, subscription.getId(), sm));
-//                }
-//            } catch (Exception ex) {
-//                failedSubscriptions.add(new ImmutablePair<>(subscription.getName(), ex.getMessage()));
-//                continue;
-//            }
-
         // load External Accounts
         for (ClientStorageAccount clientStorageAccount : ExternalStorageHelper.getList(getProject())) {
             ClientStorageAccount storageAccount = StorageClientSDKManager.getManager().getStorageAccount(clientStorageAccount.getConnectionString());

@@ -31,7 +31,7 @@ import com.microsoft.intellij.helpers.LinkListener;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Table;
 import org.jetbrains.annotations.NotNull;
@@ -106,7 +106,7 @@ public class CreateTableForm extends DialogWrapper {
                 try {
                     progressIndicator.setIndeterminate(true);
 
-                    for (Table table : StorageClientSDKManagerImpl.getManager().getTables(storageAccount)) {
+                    for (Table table : StorageClientSDKManager.getManager().getTables(storageAccount)) {
                         if (table.getName().equals(name)) {
                             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                                 @Override
@@ -120,7 +120,7 @@ public class CreateTableForm extends DialogWrapper {
                     }
 
                     Table table = new Table(name, "");
-                    StorageClientSDKManagerImpl.getManager().createTable(storageAccount, table);
+                    StorageClientSDKManager.getManager().createTable(storageAccount, table);
 
                     if (onCreate != null) {
                         DefaultLoader.getIdeHelper().invokeLater(onCreate);

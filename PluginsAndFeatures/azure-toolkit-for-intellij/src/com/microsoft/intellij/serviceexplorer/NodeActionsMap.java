@@ -56,6 +56,7 @@ public class NodeActionsMap {
         node2Actions.put(StorageModule.class, new ImmutableList.Builder().add(CreateStorageAccountAction.class, AttachExternalStorageAccountAction.class).build());
         node2Actions.put(com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageModule.class, new ImmutableList.Builder().add(com.microsoft.intellij.serviceexplorer.azure.storagearm.CreateStorageAccountAction.class).build());
         node2Actions.put(com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageNode.class, new ImmutableList.Builder().add(CreateBlobContainer.class).build());
+        // todo: what is ConfirmDialogAction?
         node2Actions.put(ExternalStorageNode.class, new ImmutableList.Builder().add(ConfirmDialogAction.class, ModifyExternalStorageAccountAction.class).build());
         node2Actions.put(WebappNode.class, new ImmutableList.Builder().add(OpenWebappAction.class).build());
         node2Actions.put(HDInsightRootModuleImpl.class, new ImmutableList.Builder().add(AddNewClusterAction.class, AddNewEmulatorAction.class).build());

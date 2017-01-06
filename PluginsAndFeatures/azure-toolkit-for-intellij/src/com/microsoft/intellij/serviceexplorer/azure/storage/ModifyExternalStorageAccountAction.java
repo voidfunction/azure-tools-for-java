@@ -25,7 +25,7 @@ import com.intellij.openapi.project.Project;
 import com.microsoft.intellij.forms.ExternalStorageAccountForm;
 import com.microsoft.tooling.msservices.helpers.ExternalStorageHelper;
 import com.microsoft.tooling.msservices.helpers.Name;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
@@ -56,7 +56,7 @@ public class ModifyExternalStorageAccountAction extends NodeActionListener {
             @Override
             public void run() {
                 ClientStorageAccount oldStorageAccount = storageNode.getClientStorageAccount();
-                ClientStorageAccount storageAccount = StorageClientSDKManagerImpl.getManager().getStorageAccount(
+                ClientStorageAccount storageAccount = StorageClientSDKManager.getManager().getStorageAccount(
                         form.getStorageAccount().getConnectionString());
                 ClientStorageAccount fullStorageAccount = form.getFullStorageAccount();
 
