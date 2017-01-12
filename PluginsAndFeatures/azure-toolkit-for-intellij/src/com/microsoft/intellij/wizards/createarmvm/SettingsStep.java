@@ -169,7 +169,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
     private void fillResourceGroups() {
         try {
             resourceGrpCombo.setModel(
-                    new DefaultComboBoxModel(AzureArmManagerImpl.getManager(project).getResourceGroups(model.getSubscription().getId()).toArray()));
+                    new DefaultComboBoxModel(AzureArmManagerImpl.getManager(project).getResourceGroups(model.getSubscription().getSubscriptionId()).toArray()));
         } catch (AzureCmdException ex) {
             PluginUtil.displayErrorDialogAndLog(message("errTtl"), "Error loading resource groups", ex);
         }
@@ -198,7 +198,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                 progressIndicator.setIndeterminate(true);
                 if (virtualNetworks == null) {
                     try {
-                        virtualNetworks = AzureArmManagerImpl.getManager(project).getVirtualNetworks(model.getSubscription().getId());
+                        virtualNetworks = AzureArmManagerImpl.getManager(project).getVirtualNetworks(model.getSubscription().getSubscriptionId());
                     } catch (AzureCmdException e) {
                         virtualNetworks = null;
                         String msg = "An error occurred while attempting to retrieve the virtual networks list." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
@@ -316,7 +316,8 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                 progressIndicator.setIndeterminate(true);
                 if (storageAccounts == null) {
                     try {
-                        java.util.List<ArmStorageAccount> accounts = AzureArmManagerImpl.getManager(project).getStorageAccounts(model.getSubscription().getId());
+
+                        java.util.List<ArmStorageAccount> accounts = AzureArmManagerImpl.getManager(project).getStorageAccounts(model.getSubscription().getSubscriptionId());
                         storageAccounts = new TreeMap<String, ArmStorageAccount>();
 
                         for (ArmStorageAccount storageAccount : accounts) {
@@ -325,7 +326,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                     } catch (AzureCmdException e) {
                         storageAccounts = null;
                         String msg = "An error occurred while attempting to retrieve the storage accounts list for subscription " +
-                                model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                                model.getSubscription().getSubscriptionId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
                         DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
                         AzurePlugin.log(msg, e);
                         return;
@@ -433,11 +434,11 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                 progressIndicator.setIndeterminate(true);
                 if (publicIpAddresses == null) {
                     try {
-                        publicIpAddresses = AzureArmManagerImpl.getManager(project).getPublicIpAddresses(model.getSubscription().getId());
+                        publicIpAddresses = AzureArmManagerImpl.getManager(project).getPublicIpAddresses(model.getSubscription().getSubscriptionId());
                     } catch (AzureCmdException e) {
                         publicIpAddresses = null;
                         String msg = "An error occurred while attempting to retrieve public ip addresses list for subscription " +
-                                model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                                model.getSubscription().getSubscriptionId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
                         DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
                         AzurePlugin.log(msg, e);
                         return;
@@ -528,11 +529,11 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                 progressIndicator.setIndeterminate(true);
                 if (networkSecurityGroups == null) {
                     try {
-                        networkSecurityGroups = AzureArmManagerImpl.getManager(project).getNetworkSecurityGroups(model.getSubscription().getId());
+                        networkSecurityGroups = AzureArmManagerImpl.getManager(project).getNetworkSecurityGroups(model.getSubscription().getSubscriptionId());
                     } catch (AzureCmdException e) {
                         networkSecurityGroups = null;
                         String msg = "An error occurred while attempting to retrieve network security groups list for subscription " +
-                                model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                                model.getSubscription().getSubscriptionId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
                         DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
                         AzurePlugin.log(msg, e);
                         return;
@@ -613,11 +614,11 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                 progressIndicator.setIndeterminate(true);
                 if (availabilitySets == null) {
                     try {
-                        availabilitySets = AzureArmManagerImpl.getManager(project).getAvailabilitySets(model.getSubscription().getId());
+                        availabilitySets = AzureArmManagerImpl.getManager(project).getAvailabilitySets(model.getSubscription().getSubscriptionId());
                     } catch (AzureCmdException e) {
                         availabilitySets = null;
                         String msg = "An error occurred while attempting to retrieve availability sets list for subscription " +
-                                model.getSubscription().getId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
+                                model.getSubscription().getSubscriptionId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
                         DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
                         AzurePlugin.log(msg, e);
                         return;
@@ -689,7 +690,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
     }
 
     private void showNewVirtualNetworkForm() {
-        final CreateVirtualNetworkForm form = new CreateVirtualNetworkForm(project, model.getSubscription().getId(), model.getRegion());
+        final CreateVirtualNetworkForm form = new CreateVirtualNetworkForm(project, model.getSubscription().getSubscriptionId(), model.getRegion());
         form.setOnCreate(new Runnable() {
             @Override
             public void run() {
@@ -757,7 +758,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                             model.getSubnet(),
                             model.getSize().getName(),
                             VirtualMachine.Status.Unknown,
-                            model.getSubscription().getId()
+                            model.getSubscription().getSubscriptionId()
                     );
 
                     String certificate = model.getCertificate();
@@ -797,7 +798,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
 //                        }
 //                    }
                     final com.microsoft.azure.management.compute.VirtualMachine vm = AzureArmManagerImpl.getManager(project)
-                            .createVirtualMachine(model.getSubscription().getId(),
+                            .createVirtualMachine(model.getSubscription().getSubscriptionId(),
                                     virtualMachine,
                                     model.getVirtualMachineImage(),
                                     storageAccount,
@@ -817,7 +818,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         @Override
                         public void run() {
                             try {
-                                parent.addChildNode(new com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMNode(parent, model.getSubscription().getId(), vm));
+                                parent.addChildNode(new com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMNode(parent, model.getSubscription().getSubscriptionId(), vm));
                             } catch (AzureCmdException e) {
                                 String msg = "An error occurred while attempting to refresh the list of virtual machines.";
                                 DefaultLoader.getUIHelper().showException(msg,

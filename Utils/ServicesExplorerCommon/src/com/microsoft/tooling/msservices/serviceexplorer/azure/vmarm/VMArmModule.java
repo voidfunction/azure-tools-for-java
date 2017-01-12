@@ -21,18 +21,23 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm;
 
+import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.SubscriptionManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class VMArmModule extends AzureRefreshableNode {
     private static final String VM_SERVICE_MODULE_ID = com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule.class.getName();
@@ -48,22 +53,42 @@ public class VMArmModule extends AzureRefreshableNode {
             throws AzureCmdException {
         // remove all child nodes
         removeAllChildNodes();
-
-
-        AzureManager azureManager = AzureManagerImpl.getManager(getProject());
-        // load all VMs
-        List<Subscription> subscriptionList = azureManager.getSubscriptionList();
-
-        for (Subscription subscription : subscriptionList) {
-            List<VirtualMachine> virtualMachines = AzureArmManagerImpl.getManager(getProject()).getVirtualMachines(subscription.getId());
-
-            if (eventState.isEventTriggered()) {
+        List<Pair<String, String>> failedSubscriptions = new ArrayList<>();
+        try {
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null) {
                 return;
             }
 
-            for (VirtualMachine vm : virtualMachines) {
-                addChildNode(new VMNode(this, subscription.getId(), vm));
+            SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
+            Set<String> sidList = subscriptionManager.getAccountSidList();
+            for (String sid : sidList) {
+                try {
+                    Azure azure = azureManager.getAzure(sid);
+                    List<VirtualMachine> virtualMachines = azure.virtualMachines().list();
+                    if (eventState.isEventTriggered()) {
+                        return;
+                    }
+
+                    for (VirtualMachine vm : virtualMachines) {
+                        addChildNode(new VMNode(this, sid, vm));
+                    }
+
+                } catch (Exception ex) {
+                    failedSubscriptions.add(new ImmutablePair<>(sid, ex.getMessage()));
+                    continue;
+                }
             }
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().logError("An error occurred when trying to load Virtual Machines\n\n" + ex.getMessage(), ex);
+        }
+        if (!failedSubscriptions.isEmpty()) {
+            StringBuilder errorMessage = new StringBuilder("An error occurred when trying to load Storage Accounts for the subscriptions:\n\n");
+            for (Pair error : failedSubscriptions) {
+                errorMessage.append(error.getKey()).append(": ").append(error.getValue()).append("\n");
+            }
+            DefaultLoader.getUIHelper().logError("An error occurred when trying to load Storage Accounts\n\n" + errorMessage.toString(), null);
         }
     }
 }

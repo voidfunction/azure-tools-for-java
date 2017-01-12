@@ -60,7 +60,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     private JEditorPane imageDescriptionTextPane;
     private JPanel imageInfoPanel;
 
-    VMWizardModel model;
+    CreateVMWizardModel model;
 
     private void createUIComponents() {
         imageInfoPanel = new JPanel() {

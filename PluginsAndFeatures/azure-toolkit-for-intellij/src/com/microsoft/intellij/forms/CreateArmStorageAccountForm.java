@@ -35,6 +35,10 @@ import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.AccessTier;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuTier;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.SubscriptionManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.helpers.LinkListener;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -78,7 +82,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     private JLabel encriptonLabel;
 
     private Runnable onCreate;
-    private Subscription subscription;
+    private SubscriptionDetail subscription;
     private ArmStorageAccount storageAccount;
     private Project project;
 
@@ -216,7 +220,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         final String replication = replicationComboBox.getSelectedItem().toString();
         final boolean isNewResourceGroup = createNewRadioButton.isSelected();
         final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
-        storageAccount = new ArmStorageAccount(name, subscription.getId(), null);
+        storageAccount = new ArmStorageAccount(name, subscription.getSubscriptionId(), null);
         storageAccount.setType(replication);
         storageAccount.setLocation(region);
         storageAccount.setNewResourceGroup(isNewResourceGroup);
@@ -262,7 +266,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
         } catch (AzureCmdException e) {
             storageAccount = null;
-            String msg = "An error occurred while attempting to create the specified storage account in subscription " + subscription.getId() + ".<br>"
+            String msg = "An error occurred while attempting to create the specified storage account in subscription " + subscription.getSubscriptionId() + ".<br>"
                     + String.format(message("webappExpMsg"), e.getCause());
             DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
             AzurePlugin.log(msg, e);
@@ -270,7 +274,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         return false;
     }
 
-    public void fillFields(final Subscription subscription, Region region) {
+    public void fillFields(final SubscriptionDetail subscription, Region region) {
         final CreateArmStorageAccountForm createStorageAccountForm = this;
         if (subscription == null) {
             loadRegions();
@@ -289,33 +293,38 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             });
             accessTeirComboBox.setModel(new DefaultComboBoxModel(AccessTier.values()));
 
+            subscriptionComboBox.setEnabled(true);
+
             try {
-                subscriptionComboBox.setEnabled(true);
-
-                java.util.List<Subscription> fullSubscriptionList = AzureManagerImpl.getManager(project).getFullSubscriptionList();
-                subscriptionComboBox.setModel(new DefaultComboBoxModel(new Vector<Subscription>(fullSubscriptionList)));
-                subscriptionComboBox.addItemListener(new ItemListener() {
-                    @Override
-                    public void itemStateChanged(ItemEvent itemEvent) {
-                        createStorageAccountForm.subscription = (Subscription) itemEvent.getItem();
-//                        loadRegions();
-                        loadGroups();
-                    }
-                });
-
-                if (fullSubscriptionList.size() > 0) {
-                    createStorageAccountForm.subscription = fullSubscriptionList.get(0);
+                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                // not signed in
+                if (azureManager == null) {
+                    return;
+                }
+                SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
+                List<SubscriptionDetail> subscriptionDetails = subscriptionManager.getSubscriptionDetails();
+                final Vector<SubscriptionDetail> subscriptions = new Vector<SubscriptionDetail>(subscriptionDetails);
+                subscriptionComboBox.setModel(new DefaultComboBoxModel(subscriptions));
+                if (!subscriptions.isEmpty()) {
+                    createStorageAccountForm.subscription = subscriptions.get(0);
 //                    loadRegions();
                     loadGroups();
                 }
-            } catch (AzureCmdException e) {
-                String msg = "An error occurred while attempting to get subscriptions." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
-                DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
-                AzurePlugin.log(msg, e);
+            } catch (Exception ex) {
+                DefaultLoader.getUIHelper().logError("An error occurred when trying to load Subscriptions\n\n" + ex.getMessage(), ex);
             }
+
+            subscriptionComboBox.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent itemEvent) {
+                    createStorageAccountForm.subscription = (SubscriptionDetail) itemEvent.getItem();
+//                        loadRegions();
+                    loadGroups();
+                }
+            });
         } else { // if you create SA while creating VM
             this.subscription = subscription;
-            subscriptionComboBox.addItem(subscription.getName());
+            subscriptionComboBox.addItem(subscription.getSubscriptionName());
             accoountKindCombo.addItem(Kind.STORAGE); // only General purpose accounts supported for VMs
             accoountKindCombo.setEnabled(false);
             regionComboBox.addItem(region);
@@ -445,7 +454,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                 progressIndicator.setIndeterminate(true);
 
                 try {
-                    List<ResourceGroup> resourceGroups = AzureArmManagerImpl.getManager(project).getResourceGroups(subscription.getId());
+                    List<ResourceGroup> resourceGroups = AzureArmManagerImpl.getManager(project).getResourceGroups(subscription.getSubscriptionId());
 
                     final Vector<Object> vector = new Vector<Object>();
                     vector.addAll(resourceGroups);

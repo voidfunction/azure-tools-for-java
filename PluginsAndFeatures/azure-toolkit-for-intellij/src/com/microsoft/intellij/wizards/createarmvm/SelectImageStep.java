@@ -30,14 +30,16 @@ import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.microsoft.azure.CloudException;
+import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachineOffer;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.compute.VirtualMachineSku;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -64,6 +66,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     private JPanel imageInfoPanel;
 
     private CreateVMWizardModel model;
+    private Azure azure;
 
     private void createUIComponents() {
         imageInfoPanel = new JPanel() {
@@ -185,7 +188,12 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     @Override
     public JComponent prepare(WizardNavigationState wizardNavigationState) {
         rootPanel.revalidate();
-
+        try {
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            azure = azureManager.getAzure(model.getSubscription().getSubscriptionId());
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().logError("An error occurred when trying to authenticate\n\n" + ex.getMessage(), ex);
+        }
         regionComboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -221,20 +229,15 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
             public void run(@org.jetbrains.annotations.NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
 
-                try {
-                    final List<VirtualMachinePublisher> publishers = AzureArmManagerImpl.getManager(project)
-                            .getVirtualMachinePublishers(model.getSubscription().getId(), (Region) regionComboBox.getSelectedItem());
-                    ApplicationManager.getApplication().invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            publisherComboBox.setModel(new DefaultComboBoxModel(publishers.toArray()));
-                            fillOffers();
-                        }
-                    });
-                } catch (AzureCmdException e) {
-                    String msg = "An error occurred while attempting to retrieve images list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
-                }
+                final List<VirtualMachinePublisher> publishers = azure.virtualMachineImages().publishers().listByRegion((Region) regionComboBox.getSelectedItem());
+
+                ApplicationManager.getApplication().invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        publisherComboBox.setModel(new DefaultComboBoxModel(publishers.toArray()));
+                        fillOffers();
+                    }
+                });
             }
         });
     }

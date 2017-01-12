@@ -33,13 +33,16 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.intellij.util.Consumer;
+import com.microsoft.azure.PagedList;
+import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.OperatingSystemTypes;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.VMWizardModel;
-import com.microsoft.intellij.wizards.createarmvm.*;
 import com.microsoft.intellij.wizards.createarmvm.CreateVMWizardModel;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
@@ -59,6 +62,7 @@ import java.awt.event.ItemListener;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
@@ -80,6 +84,8 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
 
     Project project;
     VMWizardModel model;
+
+    private Azure azure;
 
     public MachineSettingsStep(VMWizardModel mModel, Project project) {
         super("Virtual Machine Basic Settings", null, null);
@@ -195,6 +201,12 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
             VirtualMachineImage virtualMachineImage = ((com.microsoft.intellij.wizards.createvm.CreateVMWizardModel) model).getVirtualMachineImage();
             isLinux = virtualMachineImage.getOperatingSystemType().equals("Linux");
         } else {
+            try {
+                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                azure = azureManager.getAzure(((CreateVMWizardModel) model).getSubscription().getSubscriptionId());
+            } catch (Exception ex) {
+                DefaultLoader.getUIHelper().logError("An error occurred when trying to authenticate\n\n" + ex.getMessage(), ex);
+            }
             isLinux = ((CreateVMWizardModel) model).getVirtualMachineImage().osDiskImage().operatingSystem().equals(OperatingSystemTypes.LINUX);
         }
         if (isLinux) {
@@ -225,9 +237,12 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
                     try {
                         final List<VirtualMachineSize> virtualMachineSizes;
                         if (model instanceof com.microsoft.intellij.wizards.createarmvm.CreateVMWizardModel) {
-                            virtualMachineSizes = AzureArmManagerImpl.getManager(project).getVirtualMachineSizes(model.getSubscription().getId(), ((CreateVMWizardModel) model).getRegion());
+                            PagedList<com.microsoft.azure.management.compute.VirtualMachineSize> sizes = azure.virtualMachines().sizes().listByRegion(((CreateVMWizardModel) model).getRegion());
+                            virtualMachineSizes = sizes.stream()
+                                    .map(p1 -> new com.microsoft.tooling.msservices.model.vm.VirtualMachineSize(p1.name(), p1.name(), p1.numberOfCores(), p1.memoryInMB()))
+                                    .collect(Collectors.toList());
                         } else {
-                            virtualMachineSizes = AzureManagerImpl.getManager(project).getVirtualMachineSizes(model.getSubscription().getId().toString());
+                            virtualMachineSizes = AzureManagerImpl.getManager(project).getVirtualMachineSizes(((com.microsoft.intellij.wizards.createvm.CreateVMWizardModel)model).getSubscription().getId());
                         }
                         Collections.sort(virtualMachineSizes, new Comparator<VirtualMachineSize>() {
                             @Override
@@ -260,7 +275,7 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
                         }, ModalityState.any());
                     } catch (AzureCmdException e) {
                         String msg = "An error occurred while attempting to load the VM sizes list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                        PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
+                        PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
                     }
                 }
             });

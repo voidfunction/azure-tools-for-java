@@ -19,19 +19,18 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.intellij.wizards.createvm;
+package com.microsoft.intellij.wizards.createarmvm;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.SubscriptionManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.forms.ManageSubscriptionPanel;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
-import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,8 +41,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
 import java.util.Vector;
-
-import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
     CreateVMWizardModel model;
@@ -88,7 +85,7 @@ public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
                 if (itemEvent.getItem() instanceof Subscription) {
-                    model.setSubscription((Subscription) itemEvent.getItem());
+                    model.setSubscription((SubscriptionDetail) itemEvent.getItem());
                 }
             }
         });
@@ -104,24 +101,30 @@ public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
     }
 
     private void loadSubscriptions() {
-        AzureManager manager = AzureManagerImpl.getManager(project);
-
-        if (manager.authenticated()) {
-            String upn = manager.getUserInfo().getUniqueName();
-            userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
-        } else {
-            userInfoLabel.setText("");
+        try {
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null) {
+                return;
+            }
+            SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
+            List<SubscriptionDetail> subscriptionDetails = subscriptionManager.getSubscriptionDetails();
+            final Vector<SubscriptionDetail> subscriptions = new Vector<SubscriptionDetail>(subscriptionDetails);
+            subscriptionComboBox.setModel(new DefaultComboBoxModel(subscriptions));
+            if (!subscriptions.isEmpty()) {
+                model.setSubscription(subscriptions.get(0));
+            }
+            model.getCurrentNavigationState().NEXT.setEnabled(!subscriptions.isEmpty());
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().logError("An error occurred when trying to load Subscriptions\n\n" + ex.getMessage(), ex);
         }
 
-        List<Subscription> subscriptionList = manager.getSubscriptionList();
 
-        final Vector<Subscription> subscriptions = new Vector<Subscription>(subscriptionList);
-        subscriptionComboBox.setModel(new DefaultComboBoxModel(subscriptions));
-
-        if (!subscriptions.isEmpty()) {
-            model.setSubscription(subscriptions.get(0));
-        }
-
-        model.getCurrentNavigationState().NEXT.setEnabled(!subscriptions.isEmpty());
+//            if (manager.authenticated()) {
+//                String upn = manager.getUserInfo().getUniqueName();
+//                userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
+//            } else {
+//                userInfoLabel.setText("");
+//            }
     }
 }

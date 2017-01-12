@@ -28,9 +28,9 @@ import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.intellij.wizards.createvm.MachineSettingsStep;
-import com.microsoft.intellij.wizards.createvm.SubscriptionStep;
 import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 
@@ -45,6 +45,7 @@ public class CreateVMWizardModel extends VMWizardModel {
     private NetworkSecurityGroup networkSecurityGroup;
     private AvailabilitySet availabilitySet;
     private boolean withNewAvailabilitySet;
+    private SubscriptionDetail subscription;
 
     public CreateVMWizardModel(VMArmModule node) {
         super();
@@ -144,6 +145,14 @@ public class CreateVMWizardModel extends VMWizardModel {
 
     public void setWithNewAvailabilitySet(boolean withNewAvailabilitySet) {
         this.withNewAvailabilitySet = withNewAvailabilitySet;
+    }
+
+    public void setSubscription(SubscriptionDetail subscription) {
+        this.subscription = subscription;
+    }
+
+    public SubscriptionDetail getSubscription() {
+        return subscription;
     }
 
     //    public String getAvailabilitySet() {

@@ -204,9 +204,9 @@ public class SrvPriCreationStatusDialog extends JDialog {
                         }, ModalityState.any());
                         Date now = new Date();
                         String suffix = new SimpleDateFormat("yyyyMMddHHmmss").format(now);;
-                        //final String authFilepath = SrvPriManager.createSp(tid, sidList, suffix, this, destinationFolder);
-                        Thread.sleep(5000);
-                        final String authFilepath = suffix + new Date().toString();
+                        final String authFilepath = SrvPriManager.createSp(tid, sidList, suffix, this, destinationFolder);
+                        //Thread.sleep(5000);
+                        //final String authFilepath = suffix + new Date().toString();
                         if (authFilepath != null) {
                             ApplicationManager.getApplication().invokeLater(new Runnable() {
                                 @Override

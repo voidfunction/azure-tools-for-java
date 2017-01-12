@@ -66,7 +66,6 @@ public abstract class VMWizardModel extends WizardModel {
             "</body>\n" +
             "</html>";
 
-    private Subscription subscription;
     private String name;
     private VirtualMachineSize size;
     private String userName;
@@ -76,14 +75,6 @@ public abstract class VMWizardModel extends WizardModel {
 
     public VMWizardModel() {
         super(ApplicationNamesInfo.getInstance().getFullProductName() + " - Create new Virtual Machine");
-    }
-
-    public void setSubscription(Subscription subscription) {
-        this.subscription = subscription;
-    }
-
-    public Subscription getSubscription() {
-        return subscription;
     }
 
     public void configStepList(JList jList, int step) {
