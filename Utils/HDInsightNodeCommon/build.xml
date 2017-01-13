@@ -27,6 +27,7 @@
 		<fileset dir="${path.variable.maven_repository}/org/jsoup/jsoup/1.9.1/">
 			<include name="jsoup-1.9.1.jar" />
 		</fileset>
+		<pathelement location="${path.variable.maven_repository}/com/microsoft/azuretools/azure-explorer-common/0.0.1-SNAPSHOT/azure-explorer-common-0.0.1-SNAPSHOT.jar"/>
 	</path>
 
 	<!-- top level targets -->
