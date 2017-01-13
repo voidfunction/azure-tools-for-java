@@ -22,7 +22,7 @@ package com.microsoft.azureexplorer.forms;
 import com.microsoft.azureexplorer.editors.TableFileEditor;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.TableEntity;
 import org.eclipse.jface.dialogs.Dialog;

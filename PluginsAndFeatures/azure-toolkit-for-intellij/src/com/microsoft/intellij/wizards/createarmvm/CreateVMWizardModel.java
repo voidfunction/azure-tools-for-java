@@ -28,17 +28,17 @@ import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.intellij.wizards.createvm.MachineSettingsStep;
-import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 
 public class CreateVMWizardModel extends VMWizardModel {
     private Region region;
     private VirtualMachineImage virtualMachineImage;
     private Network virtualNetwork;
-    private ArmStorageAccount storageAccount;
+    private StorageAccount storageAccount;
 //    private String availabilitySet;
     private PublicIpAddress publicIpAddress;
     private boolean withNewPip;
@@ -99,11 +99,11 @@ public class CreateVMWizardModel extends VMWizardModel {
         this.virtualNetwork = virtualNetwork;
     }
 
-    public ArmStorageAccount getStorageAccount() {
+    public StorageAccount getStorageAccount() {
         return storageAccount;
     }
 
-    public void setStorageAccount(ArmStorageAccount storageAccount) {
+    public void setStorageAccount(StorageAccount storageAccount) {
         this.storageAccount = storageAccount;
     }
 

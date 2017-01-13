@@ -22,7 +22,7 @@ package com.microsoft.azureexplorer.forms;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.*;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -122,7 +122,7 @@ public class CreateTableForm extends Dialog {
         DefaultLoader.getIdeHelper().runInBackground(null, "Creating table...", false, true, "Creating table...", new Runnable() {
             public void run() {
                 try {
-                    for (com.microsoft.tooling.msservices.model.storage.Table table : StorageClientSDKManagerImpl.getManager().getTables(storageAccount)) {
+                    for (com.microsoft.tooling.msservices.model.storage.Table table : StorageClientSDKManager.getManager().getTables(storageAccount)) {
                         if (table.getName().equals(name)) {
                             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                                 @Override
@@ -136,7 +136,7 @@ public class CreateTableForm extends Dialog {
                     }
 
                     com.microsoft.tooling.msservices.model.storage.Table table = new com.microsoft.tooling.msservices.model.storage.Table(name, "");
-                    StorageClientSDKManagerImpl.getManager().createTable(storageAccount, table);
+                    StorageClientSDKManager.getManager().createTable(storageAccount, table);
 
                     if (onCreate != null) {
                         DefaultLoader.getIdeHelper().invokeLater(onCreate);

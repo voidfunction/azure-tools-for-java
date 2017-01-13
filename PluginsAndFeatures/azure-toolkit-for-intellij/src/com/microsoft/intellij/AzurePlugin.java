@@ -453,7 +453,6 @@ public class AzurePlugin extends AbstractProjectComponent {
 
     public static void log(String message, Throwable ex) {
         LOG.error(message, ex);
-        LOG.info(message);
     }
 
     public static void log(String message) {

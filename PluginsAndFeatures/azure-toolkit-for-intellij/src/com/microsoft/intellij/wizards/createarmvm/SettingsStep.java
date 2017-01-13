@@ -30,12 +30,16 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
+import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuName;
+import com.microsoft.azure.management.storage.StorageAccount;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
 import com.microsoft.intellij.forms.CreateVirtualNetworkForm;
@@ -44,14 +48,12 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
-import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
 import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
@@ -84,10 +86,12 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
 
     private List<Network> virtualNetworks;
 
-    private Map<String, ArmStorageAccount> storageAccounts;
+    private Map<String, StorageAccount> storageAccounts;
     private List<PublicIpAddress> publicIpAddresses;
     private List<NetworkSecurityGroup> networkSecurityGroups;
     private List<AvailabilitySet> availabilitySets;
+
+    private Azure azure;
 
     public SettingsStep(final CreateVMWizardModel model, Project project, Node parent) {
         super("Settings", null, null);
@@ -180,7 +184,12 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         rootPanel.revalidate();
 
         model.getCurrentNavigationState().NEXT.setEnabled(false);
-
+        try {
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            azure = azureManager.getAzure(model.getSubscription().getSubscriptionId());
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().logError("An error occurred when trying to authenticate\n\n" + ex.getMessage(), ex);
+        }
         fillResourceGroups();
         retrieveStorageAccounts();
         retrieveVirtualNetworks();
@@ -197,14 +206,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
                 if (virtualNetworks == null) {
-                    try {
-                        virtualNetworks = AzureArmManagerImpl.getManager(project).getVirtualNetworks(model.getSubscription().getSubscriptionId());
-                    } catch (AzureCmdException e) {
-                        virtualNetworks = null;
-                        String msg = "An error occurred while attempting to retrieve the virtual networks list." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
-                        PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
-                        return;
-                    }
+                    virtualNetworks = azure.networks().list();
                 }
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
                     @Override
@@ -315,21 +317,11 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
                 if (storageAccounts == null) {
-                    try {
+                    List<StorageAccount> accounts = azure.storageAccounts().list();
+                    storageAccounts = new TreeMap<String, StorageAccount>();
 
-                        java.util.List<ArmStorageAccount> accounts = AzureArmManagerImpl.getManager(project).getStorageAccounts(model.getSubscription().getSubscriptionId());
-                        storageAccounts = new TreeMap<String, ArmStorageAccount>();
-
-                        for (ArmStorageAccount storageAccount : accounts) {
-                            storageAccounts.put(storageAccount.getName(), storageAccount);
-                        }
-                    } catch (AzureCmdException e) {
-                        storageAccounts = null;
-                        String msg = "An error occurred while attempting to retrieve the storage accounts list for subscription " +
-                                model.getSubscription().getSubscriptionId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
-                        DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
-                        AzurePlugin.log(msg, e);
-                        return;
+                    for (StorageAccount storageAccount : accounts) {
+                        storageAccounts.put(storageAccount.name(), storageAccount);
                     }
                 }
                 refreshStorageAccounts(null);
@@ -363,16 +355,16 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
-                ArmStorageAccount selectedSA = model.getStorageAccount();
-                if (selectedSA != null && !storageAccounts.containsKey(selectedSA.getName())) {
-                    storageAccounts.put(selectedSA.getName(), selectedSA);
+                StorageAccount selectedSA = model.getStorageAccount();
+                if (selectedSA != null && !storageAccounts.containsKey(selectedSA.name())) {
+                    storageAccounts.put(selectedSA.name(), selectedSA);
                 }
                 refreshStorageAccounts(selectedSA);
             }
         });
     }
 
-    private void refreshStorageAccounts(final ArmStorageAccount selectedSA) {
+    private void refreshStorageAccounts(final StorageAccount selectedSA) {
         final DefaultComboBoxModel refreshedSAModel = getStorageAccountModel(selectedSA);
 
         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
@@ -384,8 +376,8 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         }, ModalityState.any());
     }
 
-    private DefaultComboBoxModel getStorageAccountModel(ArmStorageAccount selectedSA) {
-        Vector<ArmStorageAccount> accounts = filterSA();
+    private DefaultComboBoxModel getStorageAccountModel(StorageAccount selectedSA) {
+        Vector<StorageAccount> accounts = filterSA();
 
         final DefaultComboBoxModel refreshedSAModel = new DefaultComboBoxModel(accounts) {
             @Override
@@ -394,7 +386,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                     showNewStorageForm();
                 } else {
                     super.setSelectedItem(o);
-                    model.setStorageAccount((ArmStorageAccount) o);
+                    model.setStorageAccount((StorageAccount) o);
                 }
             }
         };
@@ -411,16 +403,16 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
         return refreshedSAModel;
     }
 
-    private Vector<ArmStorageAccount> filterSA() {
-        Vector<ArmStorageAccount> filteredStorageAccounts = new Vector<>();
+    private Vector<StorageAccount> filterSA() {
+        Vector<StorageAccount> filteredStorageAccounts = new Vector<>();
 
-        for (ArmStorageAccount storageAccount : storageAccounts.values()) {
+        for (StorageAccount storageAccount : storageAccounts.values()) {
             // VM and storage account need to be in the same region;
             // only general purpose accounts support page blobs, so only they can be used to create vm;
             // zone-redundant acounts not supported for vm
             if (storageAccount.getLocation().equals(model.getRegion().toString())
-                    && storageAccount.getStorageAccount().kind() == Kind.STORAGE
-                    && storageAccount.getStorageAccount().sku().name() != SkuName.STANDARD_ZRS) {
+                    && storageAccount.kind() == Kind.STORAGE
+                    && storageAccount.sku().name() != SkuName.STANDARD_ZRS) {
                 filteredStorageAccounts.add(storageAccount);
             }
         }
@@ -433,16 +425,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
                 if (publicIpAddresses == null) {
-                    try {
-                        publicIpAddresses = AzureArmManagerImpl.getManager(project).getPublicIpAddresses(model.getSubscription().getSubscriptionId());
-                    } catch (AzureCmdException e) {
-                        publicIpAddresses = null;
-                        String msg = "An error occurred while attempting to retrieve public ip addresses list for subscription " +
-                                model.getSubscription().getSubscriptionId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
-                        DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
-                        AzurePlugin.log(msg, e);
-                        return;
-                    }
+                    publicIpAddresses = azure.publicIpAddresses().list();
                 }
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
                     @Override
@@ -528,16 +511,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
                 if (networkSecurityGroups == null) {
-                    try {
-                        networkSecurityGroups = AzureArmManagerImpl.getManager(project).getNetworkSecurityGroups(model.getSubscription().getSubscriptionId());
-                    } catch (AzureCmdException e) {
-                        networkSecurityGroups = null;
-                        String msg = "An error occurred while attempting to retrieve network security groups list for subscription " +
-                                model.getSubscription().getSubscriptionId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
-                        DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
-                        AzurePlugin.log(msg, e);
-                        return;
-                    }
+                    networkSecurityGroups = azure.networkSecurityGroups().list();
                 }
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
                     @Override
@@ -613,16 +587,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
                 if (availabilitySets == null) {
-                    try {
-                        availabilitySets = AzureArmManagerImpl.getManager(project).getAvailabilitySets(model.getSubscription().getSubscriptionId());
-                    } catch (AzureCmdException e) {
-                        availabilitySets = null;
-                        String msg = "An error occurred while attempting to retrieve availability sets list for subscription " +
-                                model.getSubscription().getSubscriptionId() + ".<br>" + String.format(message("webappExpMsg"), e.getMessage());
-                        DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
-                        AzurePlugin.log(msg, e);
-                        return;
-                    }
+                    availabilitySets = azure.availabilitySets().list();
                 }
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
                     @Override
@@ -720,7 +685,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        ArmStorageAccount newStorageAccount = form.getStorageAccount();
+                        StorageAccount newStorageAccount = form.getStorageAccount();
 
                         if (newStorageAccount != null) {
                             model.setStorageAccount(newStorageAccount);

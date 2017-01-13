@@ -21,6 +21,7 @@
 		<fileset dir="lib">
 				<include name="*.jar"/>
 		</fileset>
+		<pathelement location="${path.variable.maven_repository}/com/microsoft/azuretools/auth-manage/0.0.1-SNAPSHOT/auth-manage-0.0.1-SNAPSHOT.jar"/>
 	</path>
 
 	<!-- top level targets -->

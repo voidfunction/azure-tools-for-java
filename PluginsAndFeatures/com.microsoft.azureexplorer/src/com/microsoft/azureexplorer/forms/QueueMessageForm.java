@@ -21,7 +21,7 @@ package com.microsoft.azureexplorer.forms;
 
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import com.microsoft.tooling.msservices.model.storage.QueueMessage;
@@ -121,7 +121,7 @@ public class QueueMessageForm extends Dialog {
                             new GregorianCalendar(),
                             0);
 
-                    StorageClientSDKManagerImpl.getManager().createQueueMessage(storageAccount, queueMessage, expireSeconds);
+                    StorageClientSDKManager.getManager().createQueueMessage(storageAccount, queueMessage, expireSeconds);
 
                     if (onAddedMessage != null) {
                         DefaultLoader.getIdeHelper().invokeLater(onAddedMessage);

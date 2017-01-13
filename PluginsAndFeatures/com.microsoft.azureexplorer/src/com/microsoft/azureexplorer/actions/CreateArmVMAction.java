@@ -26,18 +26,18 @@ import com.microsoft.azureexplorer.forms.createvm.arm.CreateVMWizard;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 @Name("Create VM")
 public class CreateArmVMAction extends NodeActionListener {
-    public CreateArmVMAction(VMArmServiceModule node) {
+    public CreateArmVMAction(VMArmModule node) {
         super(node);
     }
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        VMWizard createVMWizard = new CreateVMWizard((VMArmServiceModule) e.getAction().getNode());
+        VMWizard createVMWizard = new CreateVMWizard((VMArmModule) e.getAction().getNode());
         WizardDialog dialog = new WizardDialog(PluginUtil.getParentShell(), createVMWizard);
         dialog.setTitle("Create new Virtual Machine");
         dialog.setMinimumPageSize(450, 500);

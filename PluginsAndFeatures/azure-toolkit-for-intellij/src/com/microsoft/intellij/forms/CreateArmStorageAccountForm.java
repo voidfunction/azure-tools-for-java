@@ -46,7 +46,6 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.ReplicationTypes;
-import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -251,6 +250,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
     private boolean createStorageAccount() {
         try {
+            // todo
             storageAccount = AzureArmManagerImpl.getManager(project).createStorageAccount(storageAccount);
 //                    AzureManagerImpl.getManager(project).refreshStorageAccountInformation(storageAccount);
 

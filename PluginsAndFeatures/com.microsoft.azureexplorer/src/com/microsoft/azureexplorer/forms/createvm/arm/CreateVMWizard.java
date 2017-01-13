@@ -36,7 +36,7 @@ import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import com.microsoft.tooling.msservices.model.vm.Endpoint;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMNode;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
@@ -46,7 +46,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 public class CreateVMWizard extends VMWizard {
-    private VMArmServiceModule node;
+    private VMArmModule node;
 
     private Region region;
     private Network virtualNetwork;
@@ -61,7 +61,7 @@ public class CreateVMWizard extends VMWizard {
     private boolean withNewAvailabilitySet;
     private NetworkSecurityGroup networkSecurityGroup;
 
-    public CreateVMWizard(VMArmServiceModule node) {
+    public CreateVMWizard(VMArmModule node) {
         this.node = node;
         setWindowTitle("Create new Virtual Machine");
     }

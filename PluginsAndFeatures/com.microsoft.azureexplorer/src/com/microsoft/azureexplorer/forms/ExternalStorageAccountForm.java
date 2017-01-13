@@ -22,7 +22,7 @@ package com.microsoft.azureexplorer.forms;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
@@ -263,7 +263,7 @@ public class ExternalStorageAccountForm extends Dialog {
         populateFullStorageAccount();
         try {
             //Validate querystring by making a request
-            StorageClientSDKManagerImpl.getManager().getTables(StorageClientSDKManagerImpl.getManager().getStorageAccount(getFullStorageAccount().getConnectionString()));
+            StorageClientSDKManager.getManager().getTables(StorageClientSDKManager.getManager().getStorageAccount(getFullStorageAccount().getConnectionString()));
 
         } catch (AzureCmdException e) {
             DefaultLoader.getUIHelper().showError(

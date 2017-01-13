@@ -22,7 +22,7 @@ package com.microsoft.azureexplorer.forms;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import org.eclipse.jface.dialogs.Dialog;
@@ -48,16 +48,16 @@ public class CreateBlobContainerForm extends Dialog {
     private Link namingGuidelinesLink;
     private Button buttonOK;
 
-    private ClientStorageAccount storageAccount;
+    private String connectionString;
     private Runnable onCreate;
 
     private static final String NAME_REGEX = "^[a-z0-9](?!.*--)[a-z0-9-]+[a-z0-9]$";
     private static final int NAME_MAX = 63;
     private static final int NAME_MIN = 3;
 
-    public CreateBlobContainerForm(Shell parentShell, ClientStorageAccount storageAccount) {
+    public CreateBlobContainerForm(Shell parentShell, String connectionString) {
         super(parentShell);
-        this.storageAccount = storageAccount;
+        this.connectionString = connectionString;
     }
 
     @Override
@@ -141,7 +141,7 @@ public class CreateBlobContainerForm extends Dialog {
                     @Override
                     public void run() {
                         try {
-                            for (BlobContainer blobContainer : StorageClientSDKManagerImpl.getManager().getBlobContainers(storageAccount)) {
+                            for (BlobContainer blobContainer : StorageClientSDKManager.getManager().getBlobContainers(connectionString)) {
                                 if (blobContainer.getName().equals(name)) {
                                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                                         @Override
@@ -153,9 +153,9 @@ public class CreateBlobContainerForm extends Dialog {
                                     return;
                                 }
                             }
-
-                            BlobContainer blobContainer = new BlobContainer(name, storageAccount.getBlobsUri() + name, "", Calendar.getInstance(), "");
-                            StorageClientSDKManagerImpl.getManager().createBlobContainer(storageAccount, blobContainer);
+//TODO
+//                            BlobContainer blobContainer = new BlobContainer(name, storageAccount.getBlobsUri() + name, "", Calendar.getInstance(), "");
+//                            StorageClientSDKManager.getManager().createBlobContainer(storageAccount.getConnectionString(), blobContainer);
 
                             if (onCreate != null) {
                                 DefaultLoader.getIdeHelper().invokeLater(onCreate);

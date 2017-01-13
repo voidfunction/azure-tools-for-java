@@ -56,7 +56,7 @@ import com.microsoft.azureexplorer.forms.ViewMessageForm;
 import com.microsoft.azureexplorer.helpers.UIHelperImpl;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import com.microsoft.tooling.msservices.model.storage.QueueMessage;
@@ -190,7 +190,7 @@ public class QueueFileEditor extends EditorPart {
                         public void run() {
                             try {
 
-                                StorageClientSDKManagerImpl.getManager().clearQueue(storageAccount, queue);
+                                StorageClientSDKManager.getManager().clearQueue(storageAccount, queue);
 
                                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                                     @Override
@@ -282,7 +282,7 @@ public class QueueFileEditor extends EditorPart {
         DefaultLoader.getIdeHelper().runInBackground(null, "Loading queue messages", false, true, "Loading queue messages", new Runnable() {
             public void run() {
                 try {
-                    queueMessages = StorageClientSDKManagerImpl.getManager().getQueueMessages(storageAccount, queue);
+                    queueMessages = StorageClientSDKManager.getManager().getQueueMessages(storageAccount, queue);
 
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                         @Override
@@ -308,7 +308,7 @@ public class QueueFileEditor extends EditorPart {
             DefaultLoader.getIdeHelper().runInBackground(null, "Dequeuing message", false, true, "Dequeuing message", new Runnable() {
                 public void run() {
                     try {
-                        StorageClientSDKManagerImpl.getManager().dequeueFirstQueueMessage(storageAccount, queue);
+                        StorageClientSDKManager.getManager().dequeueFirstQueueMessage(storageAccount, queue);
 
                         DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                             @Override

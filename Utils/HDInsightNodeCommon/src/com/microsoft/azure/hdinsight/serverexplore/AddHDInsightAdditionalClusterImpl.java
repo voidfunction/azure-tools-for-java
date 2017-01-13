@@ -26,7 +26,7 @@ import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -77,7 +77,7 @@ public class AddHDInsightAdditionalClusterImpl {
 
         //getting container to check the storage key is correct or not
         try {
-            StorageClientSDKManagerImpl.getManager().getBlobContainers(account);
+            StorageClientSDKManager.getManager().getBlobContainers(account.getConnectionString());
         } catch (AzureCmdException e) {
             throw new AzureCmdException("Invalid Storage Key");
         }

@@ -22,7 +22,7 @@ package com.microsoft.azureexplorer.forms;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import org.eclipse.jface.dialogs.Dialog;
@@ -128,7 +128,7 @@ public class CreateQueueForm extends Dialog {
         DefaultLoader.getIdeHelper().runInBackground(null, "Creating queue...", false, true, "Creating queue...", new Runnable() {
             public void run() {
                 try {
-                    for (Queue queue : StorageClientSDKManagerImpl.getManager().getQueues(storageAccount)) {
+                    for (Queue queue : StorageClientSDKManager.getManager().getQueues(storageAccount)) {
                         if (queue.getName().equals(name)) {
                             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                                 @Override
@@ -142,7 +142,7 @@ public class CreateQueueForm extends Dialog {
                     }
 
                     Queue queue = new Queue(name, "", 0);
-                    StorageClientSDKManagerImpl.getManager().createQueue(storageAccount, queue);
+                    StorageClientSDKManager.getManager().createQueue(storageAccount, queue);
 
                     if (onCreate != null) {
                         DefaultLoader.getIdeHelper().invokeLater(onCreate);

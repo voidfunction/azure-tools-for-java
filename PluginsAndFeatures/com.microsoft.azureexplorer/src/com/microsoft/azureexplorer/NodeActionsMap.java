@@ -27,7 +27,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmServiceModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappNode;
 
 import java.util.HashMap;
@@ -39,7 +39,7 @@ public class NodeActionsMap {
     static {
         node2Actions.put(AzureServiceModule.class, new ImmutableList.Builder().add(ManageSubscriptionsAction.class).build());
         node2Actions.put(VMServiceModule.class, new ImmutableList.Builder().add(CreateVMAction.class).build());
-        node2Actions.put(VMArmServiceModule.class, new ImmutableList.Builder().add(CreateArmVMAction.class).build());
+        node2Actions.put(VMArmModule.class, new ImmutableList.Builder().add(CreateArmVMAction.class).build());
         node2Actions.put(TableModule.class, new ImmutableList.Builder().add(CreateTableAction.class).build());
         node2Actions.put(QueueModule.class, new ImmutableList.Builder().add(CreateQueueAction.class).build());
         node2Actions.put(BlobModule.class, new ImmutableList.Builder().add(CreateBlobContainer.class).build());

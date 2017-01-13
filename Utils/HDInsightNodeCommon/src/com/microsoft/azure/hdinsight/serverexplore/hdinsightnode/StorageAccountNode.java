@@ -26,7 +26,7 @@ import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
@@ -54,7 +54,7 @@ public class StorageAccountNode extends AzureRefreshableNode {
         //TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerStorageAccountExpand, null, null);
         try {
             String defaultContainer = storageAccount.getDefaultContainer();
-            List<BlobContainer> containerList = StorageClientSDKManagerImpl.getManager().getBlobContainers(storageAccount);
+            List<BlobContainer> containerList = StorageClientSDKManager.getManager().getBlobContainers(storageAccount.getConnectionString());
             for (BlobContainer blobContainer : containerList) {
                 addChildNode(new BlobContainerNode(this, storageAccount, blobContainer, !StringHelper.isNullOrWhiteSpace(defaultContainer) && defaultContainer.equals(blobContainer.getName())));
             }

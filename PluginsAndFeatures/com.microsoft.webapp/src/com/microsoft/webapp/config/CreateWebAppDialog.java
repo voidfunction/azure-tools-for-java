@@ -65,7 +65,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
-import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
+//import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;
@@ -348,12 +348,12 @@ public class CreateWebAppDialog extends TitleAreaDialog {
                 NewResourceGroupDialog dialog = new NewResourceGroupDialog(getShell(), subscriptionCombo.getText());
                 int result = dialog.open();
                 if (result == Window.OK) {
-                    ResourceGroupExtended group = NewResourceGroupDialog.getResourceGroup();
-                    if (group != null) {
-                        String subId = findKeyAsPerValue(subscriptionCombo.getText());
-                        populateResourceGroups(subId, group.getName());
-                        populateServicePlans(subId, group.getName(), null);
-                    }
+//                    ResourceGroupExtended group = NewResourceGroupDialog.getResourceGroup();
+//                    if (group != null) {
+//                        String subId = findKeyAsPerValue(subscriptionCombo.getText());
+//                        populateResourceGroups(subId, group.getName());
+//                        populateServicePlans(subId, group.getName(), null);
+//                    }
                 }
                 doValidate();
             }

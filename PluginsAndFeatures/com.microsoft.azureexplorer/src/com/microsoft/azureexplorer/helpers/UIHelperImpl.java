@@ -165,19 +165,20 @@ public class UIHelperImpl implements UIHelper {
     }
 
     @Override
-    public void refreshBlobs(Object projectObject, final ClientStorageAccount storageAccount, final BlobContainer container) {
+    public void refreshBlobs(Object projectObject, final String accountName, final BlobContainer container) {
         IWorkbench workbench=PlatformUI.getWorkbench();
         final IEditorDescriptor editorDescriptor=workbench.getEditorRegistry()
                 .findEditor("com.microsoft.azureexplorer.editors.BlobExplorerFileEditor");
         DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
             public void run() {
-                try {
-                    IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-                    BlobExplorerFileEditor newEditor = (BlobExplorerFileEditor) page.openEditor(new StorageEditorInput(storageAccount, container), editorDescriptor.getId());
-                    newEditor.fillGrid();
-                } catch (PartInitException e) {
-                    Activator.getDefault().log("Error opening container", e);
-                }
+            	//TODO
+//                try {
+//                    IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+//                    BlobExplorerFileEditor newEditor = (BlobExplorerFileEditor) page.openEditor(new StorageEditorInput(storageAccount, container), editorDescriptor.getId());
+//                    newEditor.fillGrid();
+//                } catch (PartInitException e) {
+//                    Activator.getDefault().log("Error opening container", e);
+//                }
             }
         });
     }
@@ -209,7 +210,7 @@ public class UIHelperImpl implements UIHelper {
     }
 
     @Override
-    public <T extends StorageServiceTreeItem> Object getOpenedFile(Object projectObject, ClientStorageAccount storageAccount, T blobContainer) {
+    public <T extends StorageServiceTreeItem> Object getOpenedFile(Object projectObject, String accountName, T blobContainer) {
         return null;
     }
 

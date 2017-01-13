@@ -57,7 +57,7 @@ import com.microsoft.azureexplorer.forms.TableEntityForm;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Table;
 import com.microsoft.tooling.msservices.model.storage.TableEntity;
@@ -232,7 +232,7 @@ public class TableFileEditor extends EditorPart {
         DefaultLoader.getIdeHelper().runInBackground(null, "Loading entities", false, true, "Loading entities", new Runnable() {
             public void run() {
                 try {
-                    tableEntities = StorageClientSDKManagerImpl.getManager().getTableEntities(storageAccount, table, queryText);
+                    tableEntities = StorageClientSDKManager.getManager().getTableEntities(storageAccount, table, queryText);
 
                     refreshGrid();
                 } catch (AzureCmdException e) {
@@ -308,7 +308,7 @@ public class TableFileEditor extends EditorPart {
                         for (int i = 0; i < selectedEntities.length; i++) {
                             monitor.worked(i * 100 / selectedEntities.length);
 
-                            StorageClientSDKManagerImpl.getManager().deleteTableEntity(storageAccount, selectedEntities[i]);
+                            StorageClientSDKManager.getManager().deleteTableEntity(storageAccount, selectedEntities[i]);
                         }
                         DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                             @Override

@@ -2,6 +2,7 @@ package com.microsoft.azureexplorer.actions;
 
 import com.microsoft.azureexplorer.forms.CreateBlobContainerForm;
 import com.microsoft.tooling.msservices.helpers.Name;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
@@ -25,8 +26,13 @@ public class CreateBlobContainer extends NodeActionListener {
     
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        ClientStorageAccount storageAccount = parent instanceof BlobModule ? ((BlobModule) parent).getStorageAccount() : ((StorageNode) parent).getStorageAccount();
-    	CreateBlobContainerForm form = new CreateBlobContainerForm(PluginUtil.getParentShell(), storageAccount);
+    	String connectionString;
+    	if (parent instanceof BlobModule) {
+    		connectionString = (((BlobModule) parent).getStorageAccount()).getConnectionString();
+    	} else {
+    		connectionString = StorageClientSDKManager.getConnectionString(((StorageNode) parent).getStorageAccount());
+    	}
+        CreateBlobContainerForm form = new CreateBlobContainerForm(PluginUtil.getParentShell(), connectionString);
 
         form.setOnCreate(new Runnable() {
             @Override
