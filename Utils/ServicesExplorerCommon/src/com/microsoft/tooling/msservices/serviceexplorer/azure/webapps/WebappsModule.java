@@ -21,6 +21,7 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.webapps;
 
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -59,44 +60,45 @@ public class WebappsModule extends AzureRefreshableNode {
 			return;
 		}
 		removeAllChildNodes();
-		AzureManager manager = AzureManagerImpl.getManager(getProject());
-		List<Subscription> subscriptionList = manager.getSubscriptionList();
-		for (Subscription subscription : subscriptionList) {
-			Map<WebSite, WebSiteConfiguration> webSiteConfigMapTemp = new HashMap<WebSite, WebSiteConfiguration>();
-			if (AzureServiceModule.webSiteConfigMap == null) {
-				// map null means load data and don't use cached data
-				for (final String webSpace : manager.getResourceGroupNames(subscription.getId())) {
-					List<WebSite> webapps = manager.getWebSites(subscription.getId(), webSpace);
-					for (WebSite webapp : webapps) {
-						WebSiteConfiguration webSiteConfiguration = manager.
-								getWebSiteConfiguration(webapp.getSubscriptionId(),
-										webapp.getWebSpaceName(), webapp.getName());
-						webSiteConfigMapTemp.put(webapp, webSiteConfiguration);
-					}
-				}
-				// save preferences
-				DefaultLoader.getUIHelper().saveWebAppPreferences(getProject(), webSiteConfigMapTemp);
-			} else {
-				webSiteConfigMapTemp = AzureServiceModule.webSiteConfigMap;
-			}
-
-			if (webSiteConfigMapTemp != null && !webSiteConfigMapTemp.isEmpty()) {
-				List<WebSite> webSiteList = new ArrayList<WebSite>(webSiteConfigMapTemp.keySet());
-				Collections.sort(webSiteList, new Comparator<WebSite>() {
-					@Override
-					public int compare(WebSite ws1, WebSite ws2) {
-						return ws1.getName().compareTo(ws2.getName());
-					}
-				});
-				for (WebSite webSite : webSiteList) {
-					if (webSite.getStatus().equalsIgnoreCase(runStatus)) {
-						addChildNode(new WebappNode(this, webSite, WEB_RUN_ICON));
-					} else {
-						addChildNode(new WebappNode(this, webSite, WEB_STOP_ICON));
-					}
-				}
-			}
-		}
-		AzureServiceModule.webSiteConfigMap = null;
+		//todo
+//		AzureManager manager = AzureManagerImpl.getManager(getProject());
+//		List<Subscription> subscriptionList = manager.getSubscriptionList();
+//		for (Subscription subscription : subscriptionList) {
+//			Map<WebSite, WebSiteConfiguration> webSiteConfigMapTemp = new HashMap<WebSite, WebSiteConfiguration>();
+//			if (AzureServiceModule.webSiteConfigMap == null) {
+//				// map null means load data and don't use cached data
+//				for (final String webSpace : manager.getResourceGroupNames(subscription.getId())) {
+//					List<WebSite> webapps = manager.getWebSites(subscription.getId(), webSpace);
+//					for (WebSite webapp : webapps) {
+//						WebSiteConfiguration webSiteConfiguration = manager.
+//								getWebSiteConfiguration(webapp.getSubscriptionId(),
+//										webapp.getWebSpaceName(), webapp.getName());
+//						webSiteConfigMapTemp.put(webapp, webSiteConfiguration);
+//					}
+//				}
+//				// save preferences
+//				DefaultLoader.getUIHelper().saveWebAppPreferences(getProject(), webSiteConfigMapTemp);
+//			} else {
+//				webSiteConfigMapTemp = AzureServiceModule.webSiteConfigMap;
+//			}
+//
+//			if (webSiteConfigMapTemp != null && !webSiteConfigMapTemp.isEmpty()) {
+//				List<WebSite> webSiteList = new ArrayList<WebSite>(webSiteConfigMapTemp.keySet());
+//				Collections.sort(webSiteList, new Comparator<WebSite>() {
+//					@Override
+//					public int compare(WebSite ws1, WebSite ws2) {
+//						return ws1.getName().compareTo(ws2.getName());
+//					}
+//				});
+//				for (WebSite webSite : webSiteList) {
+//					if (webSite.getStatus().equalsIgnoreCase(runStatus)) {
+//						addChildNode(new WebappNode(this, webSite, WEB_RUN_ICON));
+//					} else {
+//						addChildNode(new WebappNode(this, webSite, WEB_STOP_ICON));
+//					}
+//				}
+//			}
+//		}
+//		AzureServiceModule.webSiteConfigMap = null;
 	}
 }

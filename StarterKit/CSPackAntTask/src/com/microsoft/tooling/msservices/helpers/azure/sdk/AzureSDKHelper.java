@@ -28,11 +28,6 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.applicationinsights.management.rest.ApplicationInsightsManagementClient;
 import com.microsoft.applicationinsights.management.rest.client.RestOperationException;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
-import com.microsoft.azure.management.resources.ResourceManagementClient;
-import com.microsoft.azure.management.resources.ResourceManagementService;
-import com.microsoft.azure.management.resources.models.ResourceGroup;
-import com.microsoft.azure.management.resources.models.ResourceGroupCreateOrUpdateResult;
-import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.azure.management.websites.WebHostingPlanOperations;
 import com.microsoft.azure.management.websites.WebSiteManagementClient;
 import com.microsoft.azure.management.websites.WebSiteManagementService;
@@ -863,36 +858,6 @@ public class AzureSDKHelper {
             }
         };
     }
-    
-    @NotNull
-    public static SDKRequestCallback<ResourceGroupExtended, ResourceManagementClient>
-    createResourceGroup(@NotNull final String name, @NotNull final String location) {
-    	return new SDKRequestCallback<ResourceGroupExtended, ResourceManagementClient>() {
-    		@NotNull
-    		@Override
-    		public ResourceGroupExtended execute(@NotNull ResourceManagementClient client) throws Throwable {
-    			ResourceGroup group = new ResourceGroup(location);
-    			ResourceGroupCreateOrUpdateResult result = client.getResourceGroupsOperations().createOrUpdate(name, group);
-    			return result.getResourceGroup();
-    		}
-    	};
-    }
-    
-    @NotNull
-    public static SDKRequestCallback<List<String>, ResourceManagementClient> getResourceGroupNames() {
-    	return new SDKRequestCallback<List<String>, ResourceManagementClient>() {
-    		@NotNull
-    		@Override
-    		public List<String> execute(@NotNull ResourceManagementClient client) throws Throwable {
-    			List<ResourceGroupExtended> groups = client.getResourceGroupsOperations().list(null).getResourceGroups();
-    			List<String> names = new ArrayList<String>();
-    			for (ResourceGroupExtended group : groups) {
-    				names.add(group.getName());
-    			}
-    			return names;
-    		}
-    	};
-    }
 
     @NotNull
     public static SDKRequestCallback<List<WebSite>, WebSiteManagementClient> getWebSites(@NotNull final String webSpaceName) {
@@ -1368,44 +1333,6 @@ public class AzureSDKHelper {
     	}
         client.withRequestFilterFirst(new AzureToolkitFilter());
     	return client;
-    }
-
-    @NotNull
-    public static ResourceManagementClient getResourceManagementClient(@NotNull String subscriptionId,
-    		@NotNull String managementCertificate,
-    		@NotNull String serviceManagementUrl)
-    				throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-    				XPathExpressionException, ParserConfigurationException, SAXException, AzureCmdException {
-    	Configuration configuration = getConfigurationFromKeystore(subscriptionId, serviceManagementUrl);
-    	if (configuration == null) {
-    		throw new AzureCmdException("Unable to instantiate Configuration");
-    	}
-    	ResourceManagementClient client = ResourceManagementService.create(configuration);
-    	if (client == null) {
-    		throw new AzureCmdException("Unable to instantiate Resource Management client");
-    	}
-        client.withRequestFilterFirst(new AzureToolkitFilter());
-    	return client;
-    }
-
-
-    @NotNull
-    public static ResourceManagementClient getResourceManagementClient(@NotNull String subscriptionId,
-    		@NotNull String accessToken) throws IOException, URISyntaxException, AzureCmdException {
-    	Configuration configuration = getConfigurationForArm(subscriptionId, accessToken);
-
-    	if (configuration == null) {
-    		throw new AzureCmdException("Unable to instantiate Configuration");
-    	}
-    	ResourceManagementClient client = ResourceManagementService.create(configuration);
-    	if (client == null) {
-    		throw new AzureCmdException("Unable to instantiate Resource Management client");
-    	}
-        client.withRequestFilterFirst(new AzureToolkitFilter());
-    	// add a request filter for tacking on the A/D auth token if the current authentication
-    	// mode is active directory
-    	AuthTokenRequestFilter requestFilter = new AuthTokenRequestFilter(accessToken);
-    	return client.withRequestFilterFirst(requestFilter);
     }
 
     @NotNull

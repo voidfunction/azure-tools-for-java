@@ -31,9 +31,10 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.compute.InstanceViewStatus;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
@@ -57,7 +58,16 @@ public class VMNode extends AzureRefreshableNode {
         @Override
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
                 throws AzureCmdException {
-            AzureArmManagerImpl.getManager(getProject()).deleteVirtualMachine(subscriptionId, virtualMachine);
+            try {
+                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                // not signed in
+                if (azureManager == null) {
+                    return;
+                }
+                azureManager.getAzure(subscriptionId).virtualMachines().deleteByGroup(virtualMachine.resourceGroupName(), virtualMachine.name());
+            } catch (Exception ex) {
+
+            }
             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                 @Override
                 public void run() {
@@ -82,7 +92,7 @@ public class VMNode extends AzureRefreshableNode {
         @Override
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
                 throws AzureCmdException {
-            AzureArmManagerImpl.getManager(getProject()).restartVirtualMachine(subscriptionId, virtualMachine);
+            virtualMachine.restart();
 //            refreshItemsInternal();
         }
 
@@ -102,7 +112,7 @@ public class VMNode extends AzureRefreshableNode {
         @Override
         protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
                 throws AzureCmdException {
-            AzureArmManagerImpl.getManager(getProject()).shutdownVirtualMachine(subscriptionId, virtualMachine);
+            virtualMachine.powerOff();
             refreshItemsInternal();
         }
 
@@ -168,7 +178,7 @@ public class VMNode extends AzureRefreshableNode {
     @Override
     protected void refresh(@NotNull EventStateHandle eventState)
             throws AzureCmdException {
-//        virtualMachine = AzureManagerImpl.getManager().refreshVirtualMachineInformation(virtualMachine);
+        virtualMachine.refresh();
 
         if (eventState.isEventTriggered()) {
             return;

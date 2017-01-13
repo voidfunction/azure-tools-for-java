@@ -60,8 +60,6 @@ import com.microsoft.applicationinsights.management.rest.ApplicationInsightsMana
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.auth.tenants.Tenant;
 import com.microsoft.auth.tenants.TenantsClient;
-import com.microsoft.azure.management.resources.ResourceManagementClient;
-import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.azure.management.websites.WebSiteManagementClient;
 import com.microsoft.azure.management.websites.models.WebHostingPlan;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -682,17 +680,6 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
     public void deleteStorageAccount(@NotNull ClientStorageAccount storageAccount)
             throws AzureCmdException {
         requestStorageSDK(storageAccount.getSubscriptionId(), AzureSDKHelper.deleteStorageAccount(storageAccount));
-    }
-    
-    @Override
-    public ResourceGroupExtended createResourceGroup(@NotNull String subscriptionId, @NotNull String name, @NotNull String location)
-    		throws AzureCmdException {
-    	return requestResourceManagementSDK(subscriptionId, AzureSDKHelper.createResourceGroup(name, location));
-    }
-    
-    @Override
-    public List<String> getResourceGroupNames(@NotNull String subscriptionId) throws AzureCmdException {
-    	return requestResourceManagementSDK(subscriptionId, AzureSDKHelper.getResourceGroupNames());
     }
 
     @NotNull
@@ -1331,27 +1318,6 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
     	});
     }
     
-    @NotNull
-    private <T> T requestResourceManagementSDK(@NotNull final String subscriptionId,
-                                    @NotNull final SDKRequestCallback<T, ResourceManagementClient> requestCallback)
-            throws AzureCmdException {
-        return requestAzureSDK(subscriptionId, requestCallback, new AzureSDKClientProvider<ResourceManagementClient>() {
-            @NotNull
-            @Override
-            public ResourceManagementClient getAADClient(@NotNull String subscriptionId, @NotNull String accessToken)
-                    throws Throwable {
-                return AzureSDKHelper.getResourceManagementClient(subscriptionId, accessToken);
-            }
-
-			@Override
-			public ResourceManagementClient getSSLClient(Subscription subscription) throws Throwable {
-				return AzureSDKHelper.getResourceManagementClient(subscription.getId(),
-                        subscription.getManagementCertificate(), subscription.getServiceManagementUrl());
-			}
-        });
-    }
-    
-
     @NotNull
     private <T> T requestManagementSDK(@NotNull final String subscriptionId,
                                        @NotNull final SDKRequestCallback<T, ManagementClient> requestCallback)

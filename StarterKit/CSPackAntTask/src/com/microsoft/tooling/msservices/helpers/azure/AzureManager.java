@@ -24,7 +24,6 @@ package com.microsoft.tooling.msservices.helpers.azure;
 import java.util.List;
 
 import com.microsoft.applicationinsights.management.rest.model.Resource;
-import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.azure.management.websites.models.WebHostingPlan;
 import com.microsoft.tooling.msservices.helpers.IDEHelper.ArtifactDescriptor;
 import com.microsoft.tooling.msservices.helpers.IDEHelper.ProjectDescriptor;
@@ -255,10 +254,6 @@ public interface AzureManager {
 	void publishWebArchiveArtifact(@NotNull String subscriptionId, @NotNull String webSpaceName,
 			@NotNull String webSiteName, @NotNull String artifactPath,
 			@NotNull boolean isDeployRoot, @NotNull String artifactName) throws AzureCmdException;
-
-	List<String> getResourceGroupNames(@NotNull String subscriptionId) throws AzureCmdException;
-
-	ResourceGroupExtended createResourceGroup(@NotNull String subscriptionId, @NotNull String name, @NotNull String location) throws AzureCmdException;
 
 	List<Resource> getApplicationInsightsResources(@NotNull String subscriptionId) throws AzureCmdException;
 
