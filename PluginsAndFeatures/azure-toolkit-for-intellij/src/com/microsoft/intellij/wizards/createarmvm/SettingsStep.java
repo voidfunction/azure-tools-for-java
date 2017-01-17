@@ -45,8 +45,8 @@ import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
 import com.microsoft.intellij.forms.CreateVirtualNetworkForm;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
 import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
@@ -120,7 +120,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
                 if (o instanceof StorageAccount) {
                     StorageAccount sa = (StorageAccount) o;
-                    setText(String.format("%s (%s)", sa.getName(), sa.getLocation()));
+                    setText(String.format("%s (%s)", sa.name(), sa.region()));
                 }
             }
         });
@@ -171,12 +171,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
     }
 
     private void fillResourceGroups() {
-        try {
-            resourceGrpCombo.setModel(
-                    new DefaultComboBoxModel(AzureArmManagerImpl.getManager(project).getResourceGroups(model.getSubscription().getSubscriptionId()).toArray()));
-        } catch (AzureCmdException ex) {
-            PluginUtil.displayErrorDialogAndLog(message("errTtl"), "Error loading resource groups", ex);
-        }
+        resourceGrpCombo.setModel(new DefaultComboBoxModel(azure.resourceGroups().list().toArray()));
     }
 
     @Override
@@ -410,7 +405,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
             // VM and storage account need to be in the same region;
             // only general purpose accounts support page blobs, so only they can be used to create vm;
             // zone-redundant acounts not supported for vm
-            if (storageAccount.getLocation().equals(model.getRegion().toString())
+            if (storageAccount.region().equals(model.getRegion())
                     && storageAccount.kind() == Kind.STORAGE
                     && storageAccount.sku().name() != SkuName.STANDARD_ZRS) {
                 filteredStorageAccounts.add(storageAccount);
@@ -753,7 +748,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                         }
                     }
 
-                    ArmStorageAccount storageAccount = model.getStorageAccount();
+                    StorageAccount storageAccount = model.getStorageAccount();
 
 //                    for (StorageAccount account : AzureManagerImpl.getManager(project).getStorageAccounts(
 //                            model.getSubscription().getId(), true)) {
@@ -762,7 +757,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
 //                            break;
 //                        }
 //                    }
-                    final com.microsoft.azure.management.compute.VirtualMachine vm = AzureArmManagerImpl.getManager(project)
+                    final com.microsoft.azure.management.compute.VirtualMachine vm = AzureSDKManager
                             .createVirtualMachine(model.getSubscription().getSubscriptionId(),
                                     virtualMachine,
                                     model.getVirtualMachineImage(),

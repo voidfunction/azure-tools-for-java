@@ -32,6 +32,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.helpers.IDEHelperImpl;
@@ -66,6 +68,7 @@ import java.awt.event.ActionListener;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
@@ -302,7 +305,12 @@ public class WebSiteDeployForm extends DialogWrapper {
                             subscriptionFuture.set(null);
                         } else {
                             List<ListenableFuture<Void>> webSpaceFutures = new ArrayList<ListenableFuture<Void>>();
-                            for (final String webSpace : manager.getResourceGroupNames(subscription.getId())) {
+                            com.microsoft.azuretools.sdkmanage.AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                            Azure azure = azureManager.getAzure(subscription.getId());
+                            List<com.microsoft.azure.management.resources.ResourceGroup> groups = azure.resourceGroups().list();
+                            List<String> groupList = groups.stream().map(com.microsoft.azure.management.resources.ResourceGroup::name).collect(Collectors.toList());
+
+                            for (final String webSpace : groupList) {
                                 if (cancellationHandle.isCancelled()) {
                                     subscriptionFuture.set(null);
                                     return;
@@ -328,7 +336,7 @@ public class WebSiteDeployForm extends DialogWrapper {
                                 }
                             });
                         }
-                    } catch (AzureCmdException ex) {
+                    } catch (Exception ex) {
                         subscriptionFuture.setException(ex);
                     }
                 }

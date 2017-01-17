@@ -34,7 +34,6 @@ import com.microsoft.azure.hdinsight.spark.jobs.framework.JobViewPanel;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;

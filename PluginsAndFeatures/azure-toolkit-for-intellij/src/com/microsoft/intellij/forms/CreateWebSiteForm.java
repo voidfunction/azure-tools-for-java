@@ -29,7 +29,8 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
-//import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.ui.NewResourceGroupDialog;
@@ -69,6 +70,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.microsoft.intellij.AzurePlugin.log;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
@@ -392,7 +394,10 @@ public class CreateWebSiteForm extends DialogWrapper {
     private void fillResourceGroups(String valToSet) {
         try {
             if (subscription != null) {
-                final List<String> groupList = AzureManagerImpl.getManager(project).getResourceGroupNames(subscription.getId());
+                com.microsoft.azuretools.sdkmanage.AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                Azure azure = azureManager.getAzure(subscription.getId());
+                List<com.microsoft.azure.management.resources.ResourceGroup> groups = azure.resourceGroups().list();
+                List<String> groupList = groups.stream().map(com.microsoft.azure.management.resources.ResourceGroup::name).collect(Collectors.toList());
                 DefaultComboBoxModel model = new DefaultComboBoxModel(groupList.toArray());
                 model.insertElementAt(createResGrpLabel, 0);
                 model.setSelectedItem(null);
@@ -435,7 +440,7 @@ public class CreateWebSiteForm extends DialogWrapper {
                     });
                 }
             }
-        } catch (AzureCmdException e) {
+        } catch (Exception e) {
             String msg = "An error occurred while loading the resource groups." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
             PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
         }

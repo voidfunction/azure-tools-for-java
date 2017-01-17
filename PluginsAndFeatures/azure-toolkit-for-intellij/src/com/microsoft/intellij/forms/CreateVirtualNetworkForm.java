@@ -32,8 +32,6 @@ import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import org.jetbrains.annotations.Nullable;
 
@@ -131,9 +129,25 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
     }
 
     private boolean createVirtualNetwork() {
-        try {
-            network = AzureArmManagerImpl.getManager(project).createVirtualNetwork(subscriptionId, nameField.getText().trim(), region,
-                    addressSpaceField.getText().trim(), "", false); //todo:
+//        try {
+//            if (isNewGroup) {
+//                return azure.networks().define(name)
+//                        .withRegion(region)
+//                        .withNewResourceGroup(groupName)
+//                        .withAddressSpace(addressSpace)
+//                        .create();
+//            } else {
+//                return azure.networks().define(name)
+//                        .withRegion(region)
+//                        .withExistingResourceGroup(groupName)
+//                        .withAddressSpace(addressSpace)
+//                        .create();
+//            }
+
+
+
+//            network = AzureArmManagerImpl.getManager(project).createVirtualNetwork(subscriptionId, nameField.getText().trim(), region,
+//                    addressSpaceField.getText().trim(), "", false); //todo:
             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                 @Override
                 public void run() {
@@ -144,14 +158,14 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
             });
             return true;
 
-        } catch (AzureCmdException e) {
-            network = null;
-            String msg = "An error occurred while attempting to create the specified virtual network in subscription " + subscriptionId + ".<br>"
-                    + String.format(message("webappExpMsg"), e.getCause());
-            DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
-            AzurePlugin.log(msg, e);
-        }
-        return false;
+//        } catch (AzureCmdException e) {
+//            network = null;
+//            String msg = "An error occurred while attempting to create the specified virtual network in subscription " + subscriptionId + ".<br>"
+//                    + String.format(message("webappExpMsg"), e.getCause());
+//            DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+//            AzurePlugin.log(msg, e);
+//        }
+//        return false;
     }
 
     private void validateFields() {

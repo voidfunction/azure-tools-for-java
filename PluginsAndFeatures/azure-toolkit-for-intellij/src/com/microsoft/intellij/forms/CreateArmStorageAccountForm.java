@@ -30,11 +30,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.ListCellRendererWrapper;
+import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.AccessTier;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuTier;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
@@ -42,11 +44,10 @@ import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.helpers.LinkListener;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
 import com.microsoft.tooling.msservices.model.ReplicationTypes;
-import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,12 +83,12 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
     private Runnable onCreate;
     private SubscriptionDetail subscription;
-    private ArmStorageAccount storageAccount;
+    private StorageAccount storageAccount;
     private Project project;
 
     private boolean isLoading = true;
 
-    private final String PRICING_LINK = "http://go.microsoft.com/fwlink/?LinkID=400838";
+    private static final String PRICING_LINK = "http://go.microsoft.com/fwlink/?LinkID=400838";
 
     public CreateArmStorageAccountForm(Project project) {
         super(project, true);
@@ -214,19 +215,19 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     @Override
     protected void doOKAction() {
 
-        final String name = nameTextField.getText();
-        final String region = regionComboBox.getSelectedItem().toString();
-        final String replication = replicationComboBox.getSelectedItem().toString();
-        final boolean isNewResourceGroup = createNewRadioButton.isSelected();
-        final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
-        storageAccount = new ArmStorageAccount(name, subscription.getSubscriptionId(), null);
-        storageAccount.setType(replication);
-        storageAccount.setLocation(region);
-        storageAccount.setNewResourceGroup(isNewResourceGroup);
-        storageAccount.setResourceGroupName(resourceGroupName);
-        storageAccount.setKind((Kind) accoountKindCombo.getSelectedItem());
-        storageAccount.setAccessTier((AccessTier)accessTeirComboBox.getSelectedItem());
-        storageAccount.setEnableEncription((Boolean)encriptonComboBox.getSelectedItem());
+//        final String name = nameTextField.getText();
+//        final String region = regionComboBox.getSelectedItem().toString();
+//        final String replication = replicationComboBox.getSelectedItem().toString();
+//        final boolean isNewResourceGroup = createNewRadioButton.isSelected();
+//        final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
+//        storageAccount = new ArmStorageAccount(name, subscription.getSubscriptionId(), null);
+//        storageAccount.setType(replication);
+//        storageAccount.setLocation(region);
+//        storageAccount.setNewResourceGroup(isNewResourceGroup);
+//        storageAccount.setResourceGroupName(resourceGroupName);
+//        storageAccount.setKind((Kind) accoountKindCombo.getSelectedItem());
+//        storageAccount.setAccessTier((AccessTier)accessTeirComboBox.getSelectedItem());
+//        storageAccount.setEnableEncription((Boolean)encriptonComboBox.getSelectedItem());
 
         ProgressManager.getInstance().run(
             new Task.Modal(project, "Creating storage account", true) {
@@ -250,9 +251,11 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
     private boolean createStorageAccount() {
         try {
-            // todo
-            storageAccount = AzureArmManagerImpl.getManager(project).createStorageAccount(storageAccount);
-//                    AzureManagerImpl.getManager(project).refreshStorageAccountInformation(storageAccount);
+            boolean isNewResourceGroup = createNewRadioButton.isSelected();
+            final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
+            storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), nameTextField.getText(), (Region) regionComboBox.getSelectedItem(),
+                    isNewResourceGroup, resourceGroupName, (Kind) accoountKindCombo.getSelectedItem(), (AccessTier)accessTeirComboBox.getSelectedItem(),
+                    (Boolean)encriptonComboBox.getSelectedItem(), replicationComboBox.getSelectedItem().toString());
 
             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                 @Override
@@ -263,8 +266,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                 }
             });
             return true;
-
-        } catch (AzureCmdException e) {
+        } catch (Exception e) {
             storageAccount = null;
             String msg = "An error occurred while attempting to create the specified storage account in subscription " + subscription.getSubscriptionId() + ".<br>"
                     + String.format(message("webappExpMsg"), e.getCause());
@@ -395,7 +397,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         this.onCreate = onCreate;
     }
 
-    public ArmStorageAccount getStorageAccount() {
+    public StorageAccount getStorageAccount() {
         return storageAccount;
     }
 
@@ -454,7 +456,9 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                 progressIndicator.setIndeterminate(true);
 
                 try {
-                    List<ResourceGroup> resourceGroups = AzureArmManagerImpl.getManager(project).getResourceGroups(subscription.getSubscriptionId());
+                    AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                    Azure azure = azureManager.getAzure(subscription.getSubscriptionId());
+                    List<ResourceGroup> resourceGroups = azure.resourceGroups().list();
 
                     final Vector<Object> vector = new Vector<Object>();
                     vector.addAll(resourceGroups);
@@ -478,7 +482,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                             }
                         }
                     });
-                } catch (AzureCmdException e) {
+                } catch (Exception e) {
                     String msg = "An error occurred while attempting to load resource groups list." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
                     DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
                     AzurePlugin.log(msg, e);

@@ -150,8 +150,8 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                                                     try {
                                                         final Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
                                                         if (subscriptions.size() > 0) {
-                                                            ExecutorService executor = Executors.newFixedThreadPool(subscriptions.size());
-                                                            for (final Subscription subscription : subscriptions) {
+//                                                            ExecutorService executor = Executors.newFixedThreadPool(subscriptions.size());
+                                                            /*for (final Subscription subscription : subscriptions) {
                                                                 executor.execute(new Runnable() {
                                                                     @Override
                                                                     public void run() {
@@ -173,8 +173,8 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                                                                         }
                                                                     }
                                                                 });
-                                                            }
-                                                            executor.shutdown();
+                                                            }*/
+//                                                            executor.shutdown();
                                                             AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
                                                             AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
                                                             AppInsightsMngmtPanel.updateApplicationInsightsResourceRegistry(subscriptions, project);

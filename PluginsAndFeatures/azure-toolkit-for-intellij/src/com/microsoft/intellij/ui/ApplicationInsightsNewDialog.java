@@ -24,9 +24,9 @@ package com.microsoft.intellij.ui;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TitlePanel;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
-import com.microsoft.applicationinsights.management.rest.model.ResourceGroup;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
-//import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
@@ -41,6 +41,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
@@ -145,7 +146,10 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
 
     private void populateResourceGroupValues(String subId, String valtoSet) {
         try {
-            List<String> groupStringList = AzureManagerImpl.getManager().getResourceGroupNames(subId);
+            com.microsoft.azuretools.sdkmanage.AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            Azure azure = azureManager.getAzure(subId);
+            List<com.microsoft.azure.management.resources.ResourceGroup> groups = azure.resourceGroups().list();
+            List<String> groupStringList = groups.stream().map(com.microsoft.azure.management.resources.ResourceGroup::name).collect(Collectors.toList());
             if (groupStringList.size() > 0) {
                 String[] groupArray = groupStringList.toArray(new String[groupStringList.size()]);
                 comboGrp.removeAllItems();
