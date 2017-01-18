@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -48,7 +49,7 @@ import org.eclipse.swt.widgets.Text;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.util.AILibraryUtil;
-import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
+import com.microsoft.azure.management.Azure;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
@@ -149,8 +150,11 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 
 	private void populateResourceGroupValues(String subId, String valtoSet) {
 		try {
-			List<String> groupStringList = AzureManagerImpl.getManager().getResourceGroupNames(subId);
-			if (groupStringList.size() > 0) {
+			com.microsoft.azuretools.sdkmanage.AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            Azure azure = azureManager.getAzure(subId);
+            List<com.microsoft.azure.management.resources.ResourceGroup> groups = azure.resourceGroups().list();
+            List<String> groupStringList = groups.stream().map(com.microsoft.azure.management.resources.ResourceGroup::name).collect(Collectors.toList());
+            if (groupStringList.size() > 0) {
 				String[] groupArray = groupStringList.toArray(new String[groupStringList.size()]);
 				resourceGrp.removeAll();
 				resourceGrp.setItems(groupArray);
@@ -301,7 +305,7 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 
 	/**
 	 * Enable or disable OK button as per text selected in combo box or text box.
-	 * New… button to create resource group will be disabled
+	 * Newï¿½ button to create resource group will be disabled
 	 * if no subscription is selected/exists.
 	 */
 	private void enableOkBtn() {

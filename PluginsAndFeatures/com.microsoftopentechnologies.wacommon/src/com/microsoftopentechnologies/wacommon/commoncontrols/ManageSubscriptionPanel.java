@@ -137,23 +137,23 @@ public class ManageSubscriptionPanel extends Composite {
 											@Override
 											public void run() {
 												try {
-													Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
-													for (Subscription subscription : subscriptions) {
-														List<String> resList = apiManager.getResourceGroupNames(subscription.getId());
-														for (String res : resList) {
-															List<WebSite> webList = apiManager.getWebSites(subscription.getId(), res);
-															for (WebSite webSite : webList) {
-																WebSiteConfiguration webSiteConfiguration = apiManager.getWebSiteConfiguration(
-																				webSite.getSubscriptionId(),
-																				webSite.getWebSpaceName(),
-																				webSite.getName());
-																webSiteConfigMap.put(webSite, webSiteConfiguration);
-															}
-														}
-													}
+//													Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
+//													for (Subscription subscription : subscriptions) {
+//														List<String> resList = apiManager.getResourceGroupNames(subscription.getId());
+//														for (String res : resList) {
+//															List<WebSite> webList = apiManager.getWebSites(subscription.getId(), res);
+//															for (WebSite webSite : webList) {
+//																WebSiteConfiguration webSiteConfiguration = apiManager.getWebSiteConfiguration(
+//																				webSite.getSubscriptionId(),
+//																				webSite.getWebSpaceName(),
+//																				webSite.getName());
+//																webSiteConfigMap.put(webSite, webSiteConfiguration);
+//															}
+//														}
+//													}
 													ApplicationInsightsResourceRegistryEclipse.updateApplicationInsightsResourceRegistry(subscriptions);
-													PreferenceWebAppUtil.save(webSiteConfigMap);
-													PreferenceWebAppUtil.setLoaded(true);
+//													PreferenceWebAppUtil.save(webSiteConfigMap);
+//													PreferenceWebAppUtil.setLoaded(true);
 												} catch (Exception ex) {
 													PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.error, "Error caching webapps", ex);
 												}
