@@ -16,4 +16,6 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin
-Import-Package: org.eclipse.core.expressions
+Import-Package: com.microsoft.azuretools.authmanage,
+ com.microsoft.azuretools.sdkmanage,
+ org.eclipse.core.expressions

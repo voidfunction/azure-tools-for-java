@@ -671,7 +671,8 @@ public class CreateWebAppDialog extends TitleAreaDialog {
     }
 
     private void populateResourceGroups(String subId, String valToSet) {
-        try {
+        // TODO
+    	/*try {
             List<String> groupList = AzureManagerImpl.getManager().getResourceGroupNames(subId);
             if (groupList.size() > 0) {
                 String[] groupArray = groupList.toArray(new String[groupList.size()]);
@@ -693,7 +694,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
             job.schedule();
         } catch (AzureCmdException e) {
             Activator.getDefault().log(Messages.errTtl, e);
-        }
+        }*/
     }
 
     private class PrepareListJob extends Job {

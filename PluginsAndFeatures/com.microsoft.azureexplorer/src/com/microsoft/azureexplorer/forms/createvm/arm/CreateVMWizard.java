@@ -19,27 +19,32 @@
  */
 package com.microsoft.azureexplorer.forms.createvm.arm;
 
+import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
+import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azureexplorer.forms.createvm.MachineSettingsStep;
 import com.microsoft.azureexplorer.forms.createvm.SubscriptionStep;
 import com.microsoft.azureexplorer.forms.createvm.VMWizard;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
+import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
 import com.microsoft.tooling.msservices.model.vm.Endpoint;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
-
+import com.microsoft.tooling.msservices.model.Subscription;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,16 +55,17 @@ public class CreateVMWizard extends VMWizard {
 
     private Region region;
     private Network virtualNetwork;
-    private java.util.List<Endpoint> endpoints;
     private String resourceGroupName;
     private boolean isNewResourceGroup;
 	private VirtualMachineImage virtualMachineImage;
-	private ArmStorageAccount storageAccount;
+	private StorageAccount storageAccount;
     private PublicIpAddress publicIpAddress;
     private boolean withNewPip;
     private AvailabilitySet availabilitySet;
     private boolean withNewAvailabilitySet;
     private NetworkSecurityGroup networkSecurityGroup;
+    
+    private Azure azure;
 
     public CreateVMWizard(VMArmModule node) {
         this.node = node;
@@ -80,13 +86,13 @@ public class CreateVMWizard extends VMWizard {
             @Override
             public void run() {
                 try {
-                    VirtualMachine virtualMachine = new VirtualMachine(
+                	com.microsoft.tooling.msservices.model.vm.VirtualMachine virtualMachine = new com.microsoft.tooling.msservices.model.vm.VirtualMachine(
 							name, 
 							resourceGroupName,
                             null,
                             subnet,
                             size.getName(),
-                            VirtualMachine.Status.Unknown,
+                            com.microsoft.tooling.msservices.model.vm.VirtualMachine.Status.Unknown,
                             subscription.getId()
                     );
 
@@ -119,20 +125,19 @@ public class CreateVMWizard extends VMWizard {
                         }
                     }
                     
-                    final com.microsoft.azure.management.compute.VirtualMachine vm = AzureArmManagerImpl.getManager(null)
-                            .createVirtualMachine(subscription.getId(),
-                                    virtualMachine,
-                                    virtualMachineImage,
-                                    storageAccount,
-                                    virtualNetwork,
-                                    subnet,
-                                    publicIpAddress,
-                                    withNewPip,
-                                    availabilitySet,
-                                    withNewAvailabilitySet,
-                                    userName,
-                                    password,
-                                    certData.length > 0 ? new String(certData) : null);
+                    VirtualMachine vm = AzureSDKManager.createVirtualMachine(subscription.getId(),
+                            virtualMachine,
+                            virtualMachineImage,
+                            storageAccount,
+                            virtualNetwork,
+                            subnet,
+                            publicIpAddress,
+                            withNewPip,
+                            availabilitySet,
+                            withNewAvailabilitySet,
+                            userName,
+                            password,
+                            certData.length > 0 ? new String(certData) : null);
 
 //                    virtualMachine = AzureManagerImpl.getManager().refreshVirtualMachineInformation(virtualMachine);
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
@@ -173,6 +178,24 @@ public class CreateVMWizard extends VMWizard {
         };
     }
 
+    public Azure getAzure() {
+		return azure;
+	}
+
+	public void setAzure(Azure azure) {
+		this.azure = azure;
+	}
+
+	public void setSubscription(Subscription subscription) {
+    	try {
+    		super.setSubscription(subscription);
+    		AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+    		azure = azureManager.getAzure(subscription.getId());
+    	} catch (Exception ex) {
+			DefaultLoader.getUIHelper().showException(ex.getMessage(), ex, "Error selecting subscription", true, false);
+		}
+    }
+    
     public Region getRegion() {
 		return region;
 	}
@@ -187,14 +210,6 @@ public class CreateVMWizard extends VMWizard {
 
     public void setVirtualNetwork(Network virtualNetwork) {
         this.virtualNetwork = virtualNetwork;
-    }
-
-    public java.util.List<Endpoint> getEndpoints() {
-        return endpoints;
-    }
-
-    public void setEndpoints(java.util.List<Endpoint> endpoints) {
-        this.endpoints = endpoints;
     }
 
 	public String getResourceGroupName() {
@@ -221,11 +236,11 @@ public class CreateVMWizard extends VMWizard {
 	    this.virtualMachineImage = virtualMachineImage;
 	}
 
-	public ArmStorageAccount getStorageAccount() {
+	public StorageAccount getStorageAccount() {
 		return storageAccount;
 	}
 
-	public void setStorageAccount(ArmStorageAccount storageAccount) {
+	public void setStorageAccount(StorageAccount storageAccount) {
 		this.storageAccount = storageAccount;
 	}
 

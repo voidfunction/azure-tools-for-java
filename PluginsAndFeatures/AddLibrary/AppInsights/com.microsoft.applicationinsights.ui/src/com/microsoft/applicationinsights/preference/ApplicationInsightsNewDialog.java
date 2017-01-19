@@ -50,6 +50,8 @@ import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.util.AILibraryUtil;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
@@ -256,9 +258,9 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 				NewResourceGroupDialog dialog = new NewResourceGroupDialog(getShell(), subTxt);
 				int result = dialog.open();
 				if (result == Window.OK) {
-					ResourceGroupExtended group = NewResourceGroupDialog.getResourceGroup();
+					ResourceGroup group = dialog.getResourceGroup();
 					if (group != null) {
-						populateResourceGroupValues(findKeyAsPerValue(subTxt), group.getName());
+						populateResourceGroupValues(findKeyAsPerValue(subTxt), group.name());
 					}
 				}
 			}

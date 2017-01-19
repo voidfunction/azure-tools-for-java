@@ -16,7 +16,9 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  resources/hdinsight-node-common.jar
-Import-Package: org.eclipse.core.resources,
+Import-Package: com.microsoft.azuretools.authmanage,
+ com.microsoft.azuretools.sdkmanage,
+ org.eclipse.core.resources,
  org.eclipse.jface.text.revisions
 Export-Package: com.microsoft.azureexplorer,
  com.microsoft.azureexplorer.actions,

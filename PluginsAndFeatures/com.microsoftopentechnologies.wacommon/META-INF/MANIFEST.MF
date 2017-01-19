@@ -22,8 +22,8 @@ Bundle-ClassPath: .,
  resources/AzureCommons.jar,
  resources/ProjectManagerLibrary.jar,
  resources/.cspack.jar,
- resources/services-explorer-common.jar,
- resources/hdinsight-node-common.jar
+ resources/hdinsight-node-common.jar,
+ resources/azure-explorer-common.jar
 Export-Package: com.gigaspaces.azure.runnable,
  com.gigaspaces.azure.util,
  com.gigaspaces.azure.views,

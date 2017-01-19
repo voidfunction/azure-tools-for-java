@@ -392,7 +392,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         if (manager.authenticated()) {
                             // authenticated using AD. Proceed for Web Apps retrieval
                             for (Subscription sub : subList) {
-                                List<String> resList = manager.getResourceGroupNames(sub.getId());
+                                // TODO
+                            	/*List<String> resList = manager.getResourceGroupNames(sub.getId());
                                 for (String res : resList) {
                                     List<WebSite> webList = manager.getWebSites(sub.getId(), res);
                                     for (WebSite webSite : webList) {
@@ -401,7 +402,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                                                         webSite.getWebSpaceName(), webSite.getName());
                                         webSiteConfigMap.put(webSite, webSiteConfiguration);
                                     }
-                                }
+                                }*/
                             }
                             PreferenceWebAppUtil.save(webSiteConfigMap);
                             PreferenceWebAppUtil.setLoaded(true);

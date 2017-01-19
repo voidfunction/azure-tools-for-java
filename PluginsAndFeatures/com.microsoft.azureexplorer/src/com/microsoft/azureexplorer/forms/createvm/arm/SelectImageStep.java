@@ -22,25 +22,15 @@
 package com.microsoft.azureexplorer.forms.createvm.arm;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.List;
 
 import com.microsoft.azure.management.compute.VirtualMachineImage;
@@ -49,8 +39,6 @@ import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.compute.VirtualMachineSku;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
@@ -196,28 +184,23 @@ public class SelectImageStep extends WizardPage {
 		offerComboBox.setEnabled(false);
         DefaultLoader.getIdeHelper().runInBackground(null, "Loading image publishers...", false, true, "", new Runnable() {
 			@Override
-            public void run() {
-				try {
-					final java.util.List<VirtualMachinePublisher> publishers = AzureArmManagerImpl.getManager(null)
-							.getVirtualMachinePublishers(wizard.getSubscription().getId(), region);
-					DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                        	for (VirtualMachinePublisher publisher : publishers) {
-                        		publisherComboBox.add(publisher.name());
-                        		publisherComboBox.setData(publisher.name(), publisher);
-                        	}
-                        	if (publishers.size() > 0) {
-                        		publisherComboBox.select(0);
-                        	}
-							fillOffers();
-						}
-					});
-				} catch (AzureCmdException e) {
-					String msg = "An error occurred while attempting to retrieve images list." + "\n" + e.getMessage();
-					PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
-				}
-			}
+					public void run() {
+						final java.util.List<VirtualMachinePublisher> publishers = wizard.getAzure()
+								.virtualMachineImages().publishers().listByRegion(region);
+						DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								for (VirtualMachinePublisher publisher : publishers) {
+									publisherComboBox.add(publisher.name());
+									publisherComboBox.setData(publisher.name(), publisher);
+								}
+								if (publishers.size() > 0) {
+									publisherComboBox.select(0);
+								}
+								fillOffers();
+							}
+						});
+					}
 		});
 	}
 

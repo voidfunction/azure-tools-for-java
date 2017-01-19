@@ -10,9 +10,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.List;
 
 import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
-import com.microsoft.tooling.msservices.model.storage.StorageAccount;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineSize;
 
 public abstract class VMWizard extends Wizard {

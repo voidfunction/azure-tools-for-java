@@ -48,7 +48,7 @@ import com.microsoft.tooling.msservices.helpers.CallableSingleArg;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
@@ -203,8 +203,8 @@ public class SparkSubmitHelper {
 
                 HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Begin uploading file %s to Azure Blob Storage Account %s ...", localFile, uploadedPath));
 
-                StorageClientSDKManagerImpl.getManager().uploadBlobFileContent(
-                        storageAccount,
+                StorageClientSDKManager.getManager().uploadBlobFileContent(
+                        storageAccount.getConnectionString(),
                         defaultContainer,
                         path,
                         bufferedInputStream,
@@ -248,7 +248,7 @@ public class SparkSubmitHelper {
     }
 
     private BlobContainer getSparkClusterDefaultContainer(ClientStorageAccount storageAccount, String dealtContainerName) throws AzureCmdException {
-        List<BlobContainer> containerList = StorageClientSDKManagerImpl.getManager().getBlobContainers(storageAccount);
+        List<BlobContainer> containerList = StorageClientSDKManager.getManager().getBlobContainers(storageAccount.getConnectionString());
         for (BlobContainer container : containerList) {
             if (container.getName().toLowerCase().equals(dealtContainerName.toLowerCase())) {
                 return container;

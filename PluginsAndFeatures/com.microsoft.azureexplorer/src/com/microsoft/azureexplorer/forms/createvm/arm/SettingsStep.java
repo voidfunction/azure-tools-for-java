@@ -51,21 +51,18 @@ import org.eclipse.swt.widgets.Text;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureArmManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
-import com.microsoft.tooling.msservices.model.storage.ArmStorageAccount;
-import com.microsoft.tooling.msservices.model.storage.StorageAccount;
-import com.microsoft.tooling.msservices.model.vm.CloudService;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuName;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azureexplorer.forms.CreateArmStorageAccountForm;
 
 public class SettingsStep extends WizardPage {
@@ -99,7 +96,7 @@ public class SettingsStep extends WizardPage {
 
     private List<Network> virtualNetworks;
 
-    private Map<String, ArmStorageAccount> storageAccounts;
+    private Map<String, StorageAccount> storageAccounts;
     private List<PublicIpAddress> publicIpAddresses;
     private List<NetworkSecurityGroup> networkSecurityGroups;
     private List<AvailabilitySet> availabilitySets;
@@ -258,29 +255,24 @@ public class SettingsStep extends WizardPage {
     public void fillResourceGroups() {
         resourceGrpCombo.add("<Loading...>");
 
-        DefaultLoader.getIdeHelper().runInBackground(null, "Loading resource groups...", false, true, "Loading resource groups...", new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final List<ResourceGroup> resourceGroups = AzureArmManagerImpl.getManager(null).getResourceGroups(wizard.getSubscription().getId());
+		DefaultLoader.getIdeHelper().runInBackground(null, "Loading resource groups...", false, true, "Loading resource groups...", new Runnable() {
+					@Override
+					public void run() {
+						final List<ResourceGroup> resourceGroups = wizard.getAzure().resourceGroups().list();
+						DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								final Vector<Object> vector = new Vector<Object>();
+								vector.addAll(resourceGroups);
+								resourceGroupViewer.setInput(vector);
+								// if (resourceGroups.size() > 0) {
+								// resourceGrpCombo.select(0);
+								// }
+							}
+						});
 
-                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            final Vector<Object> vector = new Vector<Object>();
-                            vector.addAll(resourceGroups);
-                            resourceGroupViewer.setInput(vector);
-//                            if (resourceGroups.size() > 0) {
-//                                resourceGrpCombo.select(0);
-//                            }
-                        }
-                    });
-                } catch (AzureCmdException e) {
-                    PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
-                            "An error occurred while loading the resource groups list.", e);
-                }
-            }
-        });
+					}
+				});
     }
 
 	private void retrieveVirtualNetworks() {
@@ -289,14 +281,7 @@ public class SettingsStep extends WizardPage {
 					@Override
 					public void run() {
 						if (virtualNetworks == null) {
-							try {
-								virtualNetworks = AzureArmManagerImpl.getManager(null).getVirtualNetworks(wizard.getSubscription().getId());
-							} catch (AzureCmdException e) {
-								virtualNetworks = null;
-								String msg = "An error occurred while attempting to retrieve the virtual networks list." + "\n" + e.getMessage();
-								PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
-								return;
-							}
+							virtualNetworks = wizard.getAzure().networks().list();
 						}
 						DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 							@Override
@@ -360,21 +345,12 @@ public class SettingsStep extends WizardPage {
 				"Loading storage accounts...", new Runnable() {
 			@Override
 			public void run() {
-
 				if (storageAccounts == null) {
-					try {
-						java.util.List<ArmStorageAccount> accounts = AzureArmManagerImpl.getManager(null).getStorageAccounts(wizard.getSubscription().getId());
-						storageAccounts = new TreeMap<String, ArmStorageAccount>();
-
-						for (ArmStorageAccount storageAccount : accounts) {
-							storageAccounts.put(storageAccount.getName(), storageAccount);
-						}
-					} catch (AzureCmdException e) {
-						storageAccounts = null;
-						String msg = "An error occurred while attempting to retrieve the storage accounts list." + "\n" + e.getMessage();
-						PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
-						return;
-					}
+					java.util.List<StorageAccount> accounts = wizard.getAzure().storageAccounts().list();
+					storageAccounts = new TreeMap<String, StorageAccount>();
+					for (StorageAccount storageAccount : accounts) {
+						storageAccounts.put(storageAccount.name(), storageAccount);
+					}					
 				}
 				fillStorage(null);
 			}
@@ -385,7 +361,7 @@ public class SettingsStep extends WizardPage {
 				if (CREATE_NEW.equals(storageComboBox.getText())) {
 					 showNewStorageForm();
 				} else if (storageComboBox.getData(storageComboBox.getText()) != null) {
-					ArmStorageAccount storageAccount = (ArmStorageAccount) storageComboBox.getData(storageComboBox.getText());
+					StorageAccount storageAccount = (StorageAccount) storageComboBox.getData(storageComboBox.getText());
 					wizard.setStorageAccount(storageAccount);
 				}
 
@@ -401,16 +377,15 @@ public class SettingsStep extends WizardPage {
         }
     }
 
-
     private void fillStorage(String selectedSA) {
     	DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				storageComboBox.removeAll();
 				storageComboBox.add(CREATE_NEW);
-				for (ArmStorageAccount storageAccount : filterSA()) {
-					storageComboBox.add(storageAccount.getName());
-					storageComboBox.setData(storageAccount.getName(), storageAccount);
+				for (StorageAccount storageAccount : filterSA()) {
+					storageComboBox.add(storageAccount.name());
+					storageComboBox.setData(storageAccount.name(), storageAccount);
 				}
 				if (selectedSA != null) {
 					storageComboBox.setText(selectedSA);
@@ -419,14 +394,14 @@ public class SettingsStep extends WizardPage {
 		});
     }
 
-    private Vector<ArmStorageAccount> filterSA() {
-        Vector<ArmStorageAccount> filteredStorageAccounts = new Vector<>();
+    private Vector<StorageAccount> filterSA() {
+        Vector<StorageAccount> filteredStorageAccounts = new Vector<>();
 
-        for (ArmStorageAccount storageAccount : storageAccounts.values()) {
+        for (StorageAccount storageAccount : storageAccounts.values()) {
             // VM and storage account need to be in the same region; only general purpose accounts support page blobs, so only they can be used to create vm
-            if (storageAccount.getLocation().equals(wizard.getRegion().toString()) 
-            		&& storageAccount.getStorageAccount().kind() == Kind.STORAGE
-            		&& storageAccount.getStorageAccount().sku().name() != SkuName.STANDARD_ZRS) {
+            if (storageAccount.region().equals(wizard.getRegion()) 
+            		&& storageAccount.kind() == Kind.STORAGE
+                    && storageAccount.sku().name() != SkuName.STANDARD_ZRS) {
                 filteredStorageAccounts.add(storageAccount);
             }
         }
@@ -439,14 +414,7 @@ public class SettingsStep extends WizardPage {
 			@Override
 			public void run() {
                 if (publicIpAddresses == null) {
-                    try {
-                        publicIpAddresses = AzureArmManagerImpl.getManager(null).getPublicIpAddresses(wizard.getSubscription().getId());
-                    } catch (AzureCmdException e) {
-                        publicIpAddresses = null;
-                        String msg = "An error occurred while attempting to retrieve public ip addresses list." + "\n" + e.getMessage();
-                        PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
-                        return;
-                    }
+                    publicIpAddresses = wizard.getAzure().publicIpAddresses().list();
                 }
                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 					@Override
@@ -509,14 +477,7 @@ public class SettingsStep extends WizardPage {
 			@Override
 			public void run() {
                 if (networkSecurityGroups == null) {
-                    try {
-                    	networkSecurityGroups = AzureArmManagerImpl.getManager(null).getNetworkSecurityGroups(wizard.getSubscription().getId());
-                    } catch (AzureCmdException e) {
-                    	networkSecurityGroups = null;
-                        String msg = "An error occurred while attempting to retrieve network security groups list." + "\n" + e.getMessage();
-                        PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
-                        return;
-                    }
+                	networkSecurityGroups = wizard.getAzure().networkSecurityGroups().list();
                 }
                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 					@Override
@@ -557,14 +518,7 @@ public class SettingsStep extends WizardPage {
 			@Override
 			public void run() {
                 if (availabilitySets == null) {
-                    try {
-                        availabilitySets = AzureArmManagerImpl.getManager(null).getAvailabilitySets(wizard.getSubscription().getId());
-                    } catch (AzureCmdException e) {
-                        availabilitySets = null;
-                        String msg = "An error occurred while attempting to retrieve availablity sets list." + "\n" + e.getMessage();
-                        PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, msg, e);
-                        return;
-                    }
+                    availabilitySets = wizard.getAzure().availabilitySets().list();    
                 }
                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 					@Override
@@ -624,11 +578,11 @@ public class SettingsStep extends WizardPage {
 		form.setOnCreate(new Runnable() {
 			@Override
 			public void run() {
-				ArmStorageAccount newStorageAccount = form.getStorageAccount();
+				StorageAccount newStorageAccount = form.getStorageAccount();
 				if (newStorageAccount != null) {
 					wizard.setStorageAccount(newStorageAccount);
-					storageAccounts.put(newStorageAccount.getName(), newStorageAccount);
-					fillStorage(newStorageAccount.getName());
+					storageAccounts.put(newStorageAccount.name(), newStorageAccount);
+					fillStorage(newStorageAccount.name());
 				}
 			}
 		});
@@ -637,7 +591,7 @@ public class SettingsStep extends WizardPage {
     }
 
     private void validateNext() {
-    	setPageComplete(storageComboBox.getData(storageComboBox.getText()) instanceof ArmStorageAccount &&
+    	setPageComplete(storageComboBox.getData(storageComboBox.getText()) instanceof StorageAccount &&
                 (!subnetComboBox.isEnabled() || subnetComboBox.getText() != null));
     }
 }

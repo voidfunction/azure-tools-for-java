@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.microsoft.azure.management.resources.ResourceGroup;
 //import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
@@ -59,7 +60,7 @@ public class NewResourceGroupDialog extends TitleAreaDialog {
 	Combo subscriptionCombo;
 	Combo locationCombo;
 	Map<String, String> subMap = new HashMap<String, String>();
-//	static ResourceGroupExtended group;
+	private ResourceGroup group;
 	AzureManager manager;
 
 	public NewResourceGroupDialog(Shell parentShell, String subscription) {
@@ -272,6 +273,7 @@ public class NewResourceGroupDialog extends TitleAreaDialog {
 		try {
 			PluginUtil.showBusy(true, getShell());
 			String subId = findKeyAsPerValue(subscriptionCombo.getText());
+			// TODO
 //			group = manager.createResourceGroup(subId,
 //					txtName.getText().trim(), locationCombo.getText());
 			isValid = true;
@@ -286,7 +288,7 @@ public class NewResourceGroupDialog extends TitleAreaDialog {
 		}
 	}
 
-//	public static ResourceGroupExtended getResourceGroup() {
-//		return group;
-//	}
+	public ResourceGroup getResourceGroup() {
+		return group;
+	}
 }
