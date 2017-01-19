@@ -5,6 +5,7 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
+import com.microsoft.azuretools.authmanage.CommonSettings;
 import com.microsoft.azuretools.authmanage.RefreshableTokenCredentials;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.utils.Pair;
@@ -104,6 +105,6 @@ public class AccessTokenAzureManager implements AzureManager {
     private static Azure.Authenticated authTid(String tid) throws Exception {
 //        String token = AdAuthManager.getInstance().getAccessToken(tid);
 //        return auth(token);
-        return Azure.configure().authenticate(new RefreshableTokenCredentials(AdAuthManager.getInstance(), tid));
+        return Azure.configure().withUserAgent(CommonSettings.USER_AGENT).authenticate(new RefreshableTokenCredentials(AdAuthManager.getInstance(), tid));
     }
 }

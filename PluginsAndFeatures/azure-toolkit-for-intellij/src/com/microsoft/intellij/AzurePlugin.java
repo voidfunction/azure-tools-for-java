@@ -107,7 +107,7 @@ public class AzurePlugin extends AbstractProjectComponent {
     public AzurePlugin(Project project) {
         super(project);
         this.azureSettings = AzureSettings.getSafeInstance(project);
-        AzureToolkitFilter.setUserAgent(String.format(USER_AGENT, PLUGIN_VERSION));
+        CommonSettings.setUserAgent(String.format(USER_AGENT, PLUGIN_VERSION));
     }
 
     public void projectOpened() {

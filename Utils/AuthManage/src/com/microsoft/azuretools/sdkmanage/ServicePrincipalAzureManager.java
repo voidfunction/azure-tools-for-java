@@ -4,6 +4,7 @@ import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
+import com.microsoft.azuretools.authmanage.CommonSettings;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManagerPersist;
 import com.microsoft.azuretools.utils.Pair;
@@ -43,9 +44,10 @@ public class ServicePrincipalAzureManager implements AzureManager {
     }
 
     private Azure.Authenticated auth() throws IOException {
+        Azure.Configurable azureConfigurable = Azure.configure().withUserAgent(CommonSettings.USER_AGENT);
         return (atc == null)
-                ? Azure.configure().authenticate(credFile)
-                : Azure.configure().authenticate(atc);
+                ? azureConfigurable.authenticate(credFile)
+                : azureConfigurable.authenticate(atc);
     }
 
     public Azure getAzure(String sid) throws Exception {

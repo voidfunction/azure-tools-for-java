@@ -46,6 +46,7 @@ import org.osgi.framework.BundleContext;
 import com.gigaspaces.azure.views.Messages;
 import com.google.gson.Gson;
 import com.microsoft.azureexplorer.helpers.IDEHelperImpl;
+import com.microsoft.azuretools.authmanage.CommonSettings;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginComponent;
 import com.microsoft.tooling.msservices.components.PluginSettings;
@@ -98,7 +99,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
 		plugin = this;
 		DefaultLoader.setPluginComponent(this);
 		DefaultLoader.setIdeHelper(new IDEHelperImpl());
-		AzureToolkitFilter.setUserAgent(String.format(USER_AGENT, FrameworkUtil.getBundle(getClass()).getVersion()));
+		CommonSettings.setUserAgent(String.format(USER_AGENT, FrameworkUtil.getBundle(getClass()).getVersion()));
 		// load up the plugin settings
 		try {
 			loadPluginSettings();
