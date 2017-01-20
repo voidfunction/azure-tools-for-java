@@ -40,6 +40,11 @@ import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 
 public class AzureSDKManager {
+    public static Azure createAzure(String subscriptionId) throws Exception {
+        AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+        return azureManager.getAzure(subscriptionId);
+    }
+
     public static StorageAccount createStorageAccount(String subscriptionId, String name, Region region, boolean newResourceGroup, String resourceGroup,
                                                       Kind kind, AccessTier accessTier, boolean enableEncription, String skuName) throws Exception {
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();

@@ -27,8 +27,6 @@ import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
@@ -56,8 +54,6 @@ public class AzureServiceModule extends RefreshableNode {
     private EventWaitHandle subscriptionsChanged;
     private boolean registeredSubscriptionsChanged;
     private final Object subscriptionsChangedSync = new Object();
-    // by default its null which means load data and don't use cached data
-    public static Map<WebSite, WebSiteConfiguration> webSiteConfigMap = null;
 
     public AzureServiceModule(Object project, boolean storageModuleOnly) {
         this(null, ICON_PATH, null);
