@@ -36,7 +36,7 @@ import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
-import com.microsoft.intellij.forms.WebSiteDeployForm;
+//import com.microsoft.intellij.forms.WebSiteDeployForm;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tasks.WebSiteDeployTask;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;

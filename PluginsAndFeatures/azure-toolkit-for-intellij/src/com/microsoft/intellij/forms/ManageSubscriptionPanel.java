@@ -42,8 +42,6 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishProfile;
 import org.jetbrains.annotations.Nullable;
@@ -148,7 +146,7 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                                                 @Override
                                                 public void run() {
                                                     try {
-                                                        final Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
+//                                                        final Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
                                                         if (subscriptions.size() > 0) {
 //                                                            ExecutorService executor = Executors.newFixedThreadPool(subscriptions.size());
                                                             /*for (final Subscription subscription : subscriptions) {
@@ -175,8 +173,8 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                                                                 });
                                                             }*/
 //                                                            executor.shutdown();
-                                                            AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
-                                                            AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
+//                                                            AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
+//                                                            AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
                                                             AppInsightsMngmtPanel.updateApplicationInsightsResourceRegistry(subscriptions, project);
                                                         }
                                                     } catch (Exception ex) {
@@ -222,8 +220,8 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
                 isf.setOnSubscriptionLoaded(new Runnable() {
                     @Override
                     public void run() {
-                        AzureSettings.getSafeInstance(project).saveWebApps(new HashMap<WebSite, WebSiteConfiguration>());
-                        AzureSettings.getSafeInstance(project).setwebAppLoaded(false);
+//                        AzureSettings.getSafeInstance(project).saveWebApps(new HashMap<WebSite, WebSiteConfiguration>());
+//                        AzureSettings.getSafeInstance(project).setwebAppLoaded(false);
                         AppInsightsMngmtPanel.keeepManuallyAddedList(project);
                         loadList();
                     }
@@ -278,8 +276,8 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
             apiManager.clearImportedPublishSettingsFiles();
             WizardCacheManager.getPublishDatas().clear();
             AzureSettings.getSafeInstance(project).savePublishDatas();
-            AzureSettings.getSafeInstance(project).saveWebApps(new HashMap<WebSite, WebSiteConfiguration>());
-            AzureSettings.getSafeInstance(project).setwebAppLoaded(false);
+//            AzureSettings.getSafeInstance(project).saveWebApps(new HashMap<WebSite, WebSiteConfiguration>());
+//            AzureSettings.getSafeInstance(project).setwebAppLoaded(false);
             AppInsightsMngmtPanel.keeepManuallyAddedList(project);
             DefaultTableModel model = (DefaultTableModel) subscriptionTable.getModel();
             while (model.getRowCount() > 0) {

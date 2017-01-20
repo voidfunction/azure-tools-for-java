@@ -42,7 +42,6 @@ import java.util.Collection;
 public class AzureRemoteConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule>
         implements RunConfigurationWithSuppressedDefaultRunAction, RemoteRunProfile {
 
-    @Override
     public GlobalSearchScope getSearchScope() {
         return null;
     }

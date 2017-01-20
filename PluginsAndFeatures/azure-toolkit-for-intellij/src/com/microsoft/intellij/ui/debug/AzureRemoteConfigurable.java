@@ -35,12 +35,12 @@ import com.intellij.openapi.util.SystemInfo;
 import com.intellij.ui.DocumentAdapter;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
-import com.microsoft.intellij.forms.WebSiteDeployForm;
+//import com.microsoft.intellij.forms.WebSiteDeployForm;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tasks.WebSiteDeployTask;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
+//import com.microsoft.tooling.msservices.model.ws.WebSite;
+//import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.Utils;
 import org.jdesktop.swingx.JXHyperlink;
@@ -74,8 +74,8 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
     private JComboBox webAppCombo;
     private JPanel webAppPanel;
     private JXHyperlink link;
-    Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
-    List<WebSite> webSiteList = new ArrayList<WebSite>();
+//    Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
+//    List<WebSite> webSiteList = new ArrayList<WebSite>();
     Project project;
     Collection<Module> modules;
 
@@ -231,7 +231,7 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
 
     private List<String> loadWebApps() {
         List<String> listToDisplay = new ArrayList<>();
-        try {
+        /*try {
             webSiteConfigMap = AzureSettings.getSafeInstance(project).loadWebApps();
             if (webSiteConfigMap != null) {
                 // filter out Java Web Apps
@@ -262,7 +262,7 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
             }
         } catch (Exception e) {
             AzurePlugin.log(e.getMessage(), e);
-        }
+        }*/
         return listToDisplay;
     }
 
@@ -274,7 +274,7 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
                 Module module = PluginUtil.getSelectedModule();
                 if (module == null && !modules.isEmpty()) {
                     module = modules.iterator().next();
-                    WebSiteDeployForm form = new WebSiteDeployForm(module);
+                    /*WebSiteDeployForm form = new WebSiteDeployForm(module);
                     form.show();
                     if (form.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
                         try {
@@ -284,7 +284,7 @@ public class AzureRemoteConfigurable extends SettingsEditor<AzureRemoteConfigura
                         } catch (AzureCmdException ex) {
                             PluginUtil.displayErrorDialogAndLog(message("webAppDplyErr"), ex.getMessage(), ex);
                         }
-                    }
+                    }*/
                     List<String> listToDisplay = loadWebApps();
                     if (!listToDisplay.isEmpty()) {
                         if (!prevSelection.isEmpty() && listToDisplay.contains(prevSelection)) {

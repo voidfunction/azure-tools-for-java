@@ -111,9 +111,9 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         root.add(createTreeNode(azureServiceModule, project));
 
         // kick-off asynchronous load of child nodes on all the modules
-        if (AzureSettings.getSafeInstance(project).iswebAppLoaded()) {
-            AzureServiceModule.webSiteConfigMap = AzureSettings.getSafeInstance(project).loadWebApps();
-        }
+//        if (AzureSettings.getSafeInstance(project).iswebAppLoaded()) {
+//            AzureServiceModule.webSiteConfigMap = AzureSettings.getSafeInstance(project).loadWebApps();
+//        }
         azureServiceModule.load();
 
         return root;
@@ -333,7 +333,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                     new AnAction("Refresh", "Refresh Service List", UIHelperImpl.loadIcon("refresh.png")) {
                         @Override
                         public void actionPerformed(AnActionEvent event) {
-                            AzureServiceModule.webSiteConfigMap = null;
+//                            AzureServiceModule.webSiteConfigMap = null;
                             azureServiceModule.load();
                         }
                     },

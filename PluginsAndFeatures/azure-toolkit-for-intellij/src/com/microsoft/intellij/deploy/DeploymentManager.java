@@ -28,6 +28,7 @@ import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.interopbridges.tools.windowsazure.*;
+import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
@@ -36,7 +37,6 @@ import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.WizardCacheManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.wacommon.utils.WACommonException;
 import com.microsoft.windowsazure.core.OperationStatus;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
@@ -453,19 +453,19 @@ public final class DeploymentManager {
         }
     }
 
-    public void deployToWebApps(WebSite webSite, String url) {
+    public void deployToWebApps(WebApp webApp, String url) {
         Date startDate = new Date();
         try {
-            String msg = String.format(message("webAppDeployMsg"), webSite.getName());
-            notifyProgress(webSite.getName(), startDate, null, 20, OperationStatus.InProgress, msg);
+            String msg = String.format(message("webAppDeployMsg"), webApp.name());
+            notifyProgress(webApp.name(), startDate, null, 20, OperationStatus.InProgress, msg);
             Thread.sleep(2000);
-            notifyProgress(webSite.getName(), startDate, null, 20, OperationStatus.InProgress, msg);
-            notifyProgress(webSite.getName(), startDate, null, 20, OperationStatus.InProgress, msg);
-            notifyProgress(webSite.getName(), startDate, null, 20, OperationStatus.InProgress, msg);
+            notifyProgress(webApp.name(), startDate, null, 20, OperationStatus.InProgress, msg);
+            notifyProgress(webApp.name(), startDate, null, 20, OperationStatus.InProgress, msg);
+            notifyProgress(webApp.name(), startDate, null, 20, OperationStatus.InProgress, msg);
             Thread.sleep(2000);
-            notifyProgress(webSite.getName(), startDate, url, 20, OperationStatus.Succeeded, message("runStatus"), webSite.getName());
+            notifyProgress(webApp.name(), startDate, url, 20, OperationStatus.Succeeded, message("runStatus"), webApp.name());
         } catch (InterruptedException e) {
-            notifyProgress(webSite.getName(), startDate, url, 100, OperationStatus.Succeeded, message("runStatus"), webSite.getName());
+            notifyProgress(webApp.name(), startDate, url, 100, OperationStatus.Succeeded, message("runStatus"), webApp.name());
         }
     }
 }

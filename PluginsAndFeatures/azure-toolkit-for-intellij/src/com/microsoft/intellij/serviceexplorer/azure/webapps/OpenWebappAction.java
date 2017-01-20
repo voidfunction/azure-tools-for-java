@@ -4,8 +4,6 @@ package com.microsoft.intellij.serviceexplorer.azure.webapps;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappNode;
@@ -26,7 +24,7 @@ public class OpenWebappAction extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        WebSite webapp = webappNode.getWebSite();
+/*        WebSite webapp = webappNode.getWebSite();
         try {
             if (webapp.getWebSitePublishSettings() == null) {
                 webapp.setWebSitePublishSettings(AzureManagerImpl.getManager(webappNode.getProject()).
@@ -45,6 +43,6 @@ public class OpenWebappAction extends NodeActionListener {
             }
         } catch (Exception e1) {
             PluginUtil.displayErrorDialogAndLog(message("error"), message("error"), e1);
-        }
+        }*/
     }
 }

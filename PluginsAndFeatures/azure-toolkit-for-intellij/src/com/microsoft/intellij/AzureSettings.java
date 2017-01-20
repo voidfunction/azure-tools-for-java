@@ -27,8 +27,6 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.intellij.wizards.WizardCacheManager;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoftopentechnologies.azurecommons.deploy.tasks.LoadingAccoutListener;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
 import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
@@ -122,7 +120,7 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
         }
     }
 
-    public Map<WebSite, WebSiteConfiguration> loadWebApps() {
+    /*public Map<WebSite, WebSiteConfiguration> loadWebApps() {
         Map<WebSite, WebSiteConfiguration> map = null;
         try {
             if (myState.webApps != null) {
@@ -141,7 +139,7 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
             log(message("err"), e);
         }
         return map;
-    }
+    }*/
 
     public void loadPublishDatas(LoadingAccoutListener listener, Project project) {
         try {
@@ -222,7 +220,7 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
         }
     }
 
-    public void saveWebApps(Map<WebSite, WebSiteConfiguration> map) {
+    /*public void saveWebApps(Map<WebSite, WebSiteConfiguration> map) {
         try {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             ObjectOutput output = new ObjectOutputStream(buffer);
@@ -235,7 +233,7 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
         } catch (IOException e) {
             log(message("err"), e);
         }
-    }
+    }*/
 
     public void savePublishDatas() {
         try {

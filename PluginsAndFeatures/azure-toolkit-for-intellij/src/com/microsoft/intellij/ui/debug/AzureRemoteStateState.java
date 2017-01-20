@@ -43,10 +43,6 @@ import com.microsoft.intellij.util.WAHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.ws.WebAppsContainers;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
-import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.Utils;
 import com.microsoftopentechnologies.azurecommons.xmlhandling.WebAppConfigOperations;
@@ -82,7 +78,7 @@ public class AzureRemoteStateState implements RemoteState {
         try {
             // get web app name to which user want to debug his application
             String website = webAppName;
-            if (!website.isEmpty()) {
+          /*  if (!website.isEmpty()) {
                 website = website.substring(0, website.indexOf('(')).trim();
                 Map<WebSite, WebSiteConfiguration> webSiteConfigMap = AzureSettings.getSafeInstance(project).loadWebApps();
                 // retrieve web apps configurations
@@ -154,14 +150,14 @@ public class AzureRemoteStateState implements RemoteState {
                         break;
                     }
                 }
-            }
+            }*/
         } catch(Exception ex) {
             AzurePlugin.log(ex.getMessage(), ex);
         }
         return null;
     }
 
-    private class PrepareForDebug extends Task.Modal {
+    /*private class PrepareForDebug extends Task.Modal {
         WebSite webSite;
         WebSiteConfiguration webSiteConfiguration;
 
@@ -440,7 +436,7 @@ public class AzureRemoteStateState implements RemoteState {
                 AzurePlugin.log(ex.getMessage(), ex);
             }
         }
-    }
+    }*/
 
     public RemoteConnection getRemoteConnection() {
         return myConnection;

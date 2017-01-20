@@ -51,9 +51,6 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
 import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
-import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -71,6 +68,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
+/*
 
 public class WebSiteDeployForm extends DialogWrapper {
     private JPanel mainPanel;
@@ -571,4 +569,4 @@ public class WebSiteDeployForm extends DialogWrapper {
     public WebSite getSelectedWebSite() {
         return selectedWebSite;
     }
-}
+}*/

@@ -42,8 +42,6 @@ import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.UIHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.storage.*;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 
 import javax.swing.*;
 import java.io.File;
@@ -326,11 +324,5 @@ public class UIHelperImpl implements UIHelper {
         final String[] units = new String[]{"B", "kB", "MB", "GB", "TB"};
         int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
         return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
-    }
-
-    @Override
-    public void saveWebAppPreferences(@NotNull Object projectObject, Map<WebSite, WebSiteConfiguration> map) {
-        AzureSettings.getSafeInstance((Project) projectObject).saveWebApps(map);
-        AzureSettings.getSafeInstance((Project) projectObject).setwebAppLoaded(true);
     }
 }

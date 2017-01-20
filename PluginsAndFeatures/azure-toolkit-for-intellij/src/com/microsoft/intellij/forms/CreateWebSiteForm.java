@@ -45,7 +45,6 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.ws.*;
 import com.microsoftopentechnologies.azurecommons.exception.AzureCommonsException;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.azurecommons.xmlhandling.WebAppConfigOperations;
@@ -75,6 +74,7 @@ import java.util.stream.Collectors;
 import static com.microsoft.intellij.AzurePlugin.log;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
+/*
 public class CreateWebSiteForm extends DialogWrapper {
     private static final String createWebHostingPlanLabel = "<< Create new App Service Plan >>";
     private static final String createResGrpLabel = "<< Create new Resource Group >>";
@@ -497,6 +497,7 @@ public class CreateWebSiteForm extends DialogWrapper {
             PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
         }
     }
+*/
 /*
     private void pupulateServicePlanDetails(WebHostingPlanCache plan){
         webHostingPlan = plan;
@@ -504,7 +505,8 @@ public class CreateWebSiteForm extends DialogWrapper {
         servicePlanDetailsPricingTierLbl.setText(plan == null ? "-" : plan.getSku().name());
         servicePlanDetailsInstanceSizeLbl.setText(plan == null ? "-" : plan.getWorkerSize().name());
     }
-*/
+*//*
+
     private void showCreateWebHostingPlanForm() {
         final CreateWebHostingPlanForm form = new CreateWebHostingPlanForm(project, subscription.getId(), resourceGroup, plansAcrossSub);
         form.show();
@@ -525,6 +527,7 @@ public class CreateWebSiteForm extends DialogWrapper {
         newResourceGroupDialog.show();
         if (newResourceGroupDialog.isOK()) {
             throw new NotImplementedException();
+*/
 /*
             final ResourceGroupExtended group = newResourceGroupDialog.getResourceGroup();
             if (group != null) {
@@ -535,7 +538,8 @@ public class CreateWebSiteForm extends DialogWrapper {
                     }
                 });
             }
-*/
+*//*
+
         } else {
             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                 @Override
@@ -796,4 +800,4 @@ public class CreateWebSiteForm extends DialogWrapper {
             }
         }
     }
-}
+}*/

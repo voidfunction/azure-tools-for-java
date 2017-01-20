@@ -27,12 +27,12 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
 import com.microsoft.intellij.components.ServerExplorerToolWindowFactory;
 import com.microsoft.intellij.deploy.DeploymentManager;
 import com.microsoft.intellij.util.WAHelper;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
 import org.jetbrains.annotations.NotNull;
@@ -41,14 +41,14 @@ import org.jetbrains.annotations.NotNull;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class WebSiteDeployTask extends Task.Backgroundable {
-    WebSite webSite;
+    WebApp webApp;
     String url;
     Project project;
     static final Logger LOG = Logger.getInstance("#com.microsoft.intellij.AzurePlugin");
 
-    public WebSiteDeployTask(Project project, WebSite webSite, String url) {
+    public WebSiteDeployTask(Project project, WebApp webApp, String url) {
         super(project, message("deployingToAzure"), true, Backgroundable.DEAF);
-        this.webSite = webSite;
+        this.webApp = webApp;
         this.url = url;
         this.project = project;
     }
@@ -67,7 +67,7 @@ public class WebSiteDeployTask extends Task.Backgroundable {
         };
         AzurePlugin.addDeploymentEventListener(deployListnr);
         AzurePlugin.depEveList.add(deployListnr);
-        new DeploymentManager(project).deployToWebApps(webSite, url);
+        new DeploymentManager(project).deployToWebApps(webApp, url);
 
         new Thread("Warm up the target site") {
             public void run() {

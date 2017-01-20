@@ -25,7 +25,6 @@ import com.intellij.openapi.module.Module;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureRole;
 import com.microsoft.intellij.AzurePlugin;
-import com.microsoft.tooling.msservices.model.ws.WebAppsContainers;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
@@ -251,7 +250,8 @@ public class WAHelper {
         }
         return fileExtracted;
     }
-
+// TODO
+    /*
     public static String generateServerFolderName(String server, String version) {
         String serverFolder = "";
         if (server.equalsIgnoreCase("TOMCAT")) {
@@ -270,5 +270,5 @@ public class WAHelper {
             serverFolder = String.format("%s%s%s%s%s", "jetty-distribution", "-", version1, "v", version2);
         }
         return serverFolder;
-    }
+    }*/
 }
