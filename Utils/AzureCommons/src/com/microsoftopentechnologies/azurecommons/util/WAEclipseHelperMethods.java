@@ -44,8 +44,6 @@ import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperation
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureRole;
 import com.interopbridges.tools.windowsazure.WindowsAzureRoleComponent;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoftopentechnologies.azurecommons.messagehandler.PropUtil;
 
 public class WAEclipseHelperMethods {
@@ -668,7 +666,7 @@ public class WAEclipseHelperMethods {
 		}
 		return retVal;
 	}
-	
+	/*
 	public static List<String> prepareListToDisplay(Map<WebSite, WebSiteConfiguration> webSiteConfigMap, List<WebSite> webSiteList) {
 		// prepare list to display
 		List<String> listToDisplay = new ArrayList<String>();
@@ -697,5 +695,5 @@ public class WAEclipseHelperMethods {
 			listToDisplay.add(builder.toString());
 		}
 		return listToDisplay;
-	}
+	}*/
 }
