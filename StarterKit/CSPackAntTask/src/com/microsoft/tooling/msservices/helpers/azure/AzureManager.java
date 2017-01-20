@@ -24,7 +24,6 @@ package com.microsoft.tooling.msservices.helpers.azure;
 import java.util.List;
 
 import com.microsoft.applicationinsights.management.rest.model.Resource;
-import com.microsoft.azure.management.websites.models.WebHostingPlan;
 import com.microsoft.tooling.msservices.helpers.IDEHelper.ArtifactDescriptor;
 import com.microsoft.tooling.msservices.helpers.IDEHelper.ProjectDescriptor;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -40,10 +39,6 @@ import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
 import com.microsoft.tooling.msservices.model.vm.VirtualMachineSize;
 import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
-import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
-import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandle;
 import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
@@ -194,67 +189,6 @@ public interface AzureManager {
 	void deleteStorageAccount(@NotNull ClientStorageAccount storageAccount)
 			throws AzureCmdException;
 
-	@NotNull
-	List<WebSite> getWebSites(@NotNull String subscriptionId, @NotNull String webSpaceName)
-			throws AzureCmdException;
-
-	@NotNull
-	List<WebHostingPlanCache> getWebHostingPlans(@NotNull String subscriptionId, @NotNull String webSpaceName)
-			throws AzureCmdException;
-
-	@NotNull
-	WebSiteConfiguration getWebSiteConfiguration(@NotNull String subscriptionId, @NotNull String webSpaceName,
-			@NotNull String webSiteName)
-					throws AzureCmdException;
-
-	@NotNull
-	WebSitePublishSettings getWebSitePublishSettings(@NotNull String subscriptionId, @NotNull String webSpaceName,
-			@NotNull String webSiteName)
-					throws AzureCmdException;
-
-	void restartWebSite(@NotNull String subscriptionId, @NotNull String webSpaceName, @NotNull String webSiteName)
-			throws AzureCmdException;
-
-	void stopWebSite(@NotNull String subscriptionId, @NotNull String webSpaceName, @NotNull String webSiteName)
-			throws AzureCmdException;
-
-	void startWebSite(@NotNull String subscriptionId, @NotNull String webSpaceName, @NotNull String webSiteName)
-			throws AzureCmdException;
-
-	@NotNull
-	WebSite createWebSite(@NotNull String subscriptionId, @NotNull WebHostingPlanCache webHostingPlan, @NotNull String webSiteName)
-			throws AzureCmdException;
-
-	@NotNull
-	Void deleteWebSite(@NotNull String subscriptionId, @NotNull String webSpaceName, @NotNull String webSiteName) throws AzureCmdException;
-
-	WebSite getWebSite(@NotNull String subscriptionId, @NotNull final String webSpaceName, @NotNull String webSiteName)
-			throws AzureCmdException;
-
-	@NotNull
-	WebSiteConfiguration updateWebSiteConfiguration(@NotNull String subscriptionId,
-			@NotNull String webSpaceName,
-			@NotNull String webSiteName,
-			@NotNull String location,
-			@NotNull WebSiteConfiguration webSiteConfiguration) throws AzureCmdException;
-
-	@NotNull WebHostingPlan createWebHostingPlan(@NotNull String subscriptionId, @NotNull WebHostingPlanCache webHostingPlan)
-			throws AzureCmdException;
-
-	@Nullable
-	ArtifactDescriptor getWebArchiveArtifact(@NotNull ProjectDescriptor projectDescriptor)
-			throws AzureCmdException;
-
-	void deployWebArchiveArtifact(@NotNull ProjectDescriptor projectDescriptor,
-			@NotNull ArtifactDescriptor artifactDescriptor,
-			@NotNull WebSite webSite,
-			@NotNull boolean isDeployRoot,
-			AzureManager manager);
-
-	void publishWebArchiveArtifact(@NotNull String subscriptionId, @NotNull String webSpaceName,
-			@NotNull String webSiteName, @NotNull String artifactPath,
-			@NotNull boolean isDeployRoot, @NotNull String artifactName) throws AzureCmdException;
-
 	List<Resource> getApplicationInsightsResources(@NotNull String subscriptionId) throws AzureCmdException;
 
 	List<String> getLocationsForApplicationInsights(@NotNull String subscriptionId) throws AzureCmdException;
@@ -263,10 +197,4 @@ public interface AzureManager {
 			@NotNull String resourceGroupName,
 			@NotNull String resourceName,
 			@NotNull String location) throws AzureCmdException;
-
-	Void enableWebSockets(@NotNull String subscriptionId,
-			@NotNull String webSpaceName,
-			@NotNull String webSiteName,
-			@NotNull String location,
-			@NotNull boolean enableSocket) throws AzureCmdException;
 }

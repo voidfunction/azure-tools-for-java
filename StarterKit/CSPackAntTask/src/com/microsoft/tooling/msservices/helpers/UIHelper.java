@@ -22,11 +22,7 @@
 package com.microsoft.tooling.msservices.helpers;
 
 import com.microsoft.tooling.msservices.model.storage.*;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
-
 import java.io.File;
-import java.util.Map;
 
 public interface UIHelper {
     void showException(@NotNull String message,
@@ -59,6 +55,4 @@ public interface UIHelper {
     <T extends StorageServiceTreeItem> Object getOpenedFile(@NotNull Object projectObject,
                                                             @NotNull String accountName,
                                                             @NotNull T item);
-
-    void saveWebAppPreferences(@NotNull Object projectObject, Map<WebSite, WebSiteConfiguration> map);
 }

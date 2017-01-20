@@ -60,8 +60,6 @@ import com.microsoft.applicationinsights.management.rest.ApplicationInsightsMana
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.auth.tenants.Tenant;
 import com.microsoft.auth.tenants.TenantsClient;
-import com.microsoft.azure.management.websites.WebSiteManagementClient;
-import com.microsoft.azure.management.websites.models.WebHostingPlan;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginSettings;
 import com.microsoft.tooling.msservices.helpers.IDEHelper.ArtifactDescriptor;
@@ -81,12 +79,6 @@ import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.*;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
-import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings;
-import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings.FTPPublishProfile;
-import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings.PublishProfile;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandle;
 import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
@@ -682,227 +674,6 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
         requestStorageSDK(storageAccount.getSubscriptionId(), AzureSDKHelper.deleteStorageAccount(storageAccount));
     }
 
-    @NotNull
-    @Override
-    public List<WebSite> getWebSites(@NotNull String subscriptionId, @NotNull String webSpaceName)
-            throws AzureCmdException {
-        return requestWebSiteSDK(subscriptionId, AzureSDKHelper.getWebSites(webSpaceName));
-    }
-
-    @NotNull
-    @Override
-    public List<WebHostingPlanCache> getWebHostingPlans(@NotNull String subscriptionId, @NotNull String webSpaceName)
-            throws AzureCmdException {
-        return requestWebSiteSDK(subscriptionId, AzureSDKHelper.getWebHostingPlans(webSpaceName));
-    }
-
-    @NotNull
-    @Override
-    public WebSiteConfiguration getWebSiteConfiguration(@NotNull String subscriptionId, @NotNull String webSpaceName,
-                                                        @NotNull String webSiteName)
-            throws AzureCmdException {
-        return requestWebSiteSDK(subscriptionId, AzureSDKHelper.getWebSiteConfiguration(webSpaceName, webSiteName));
-    }
-
-    @NotNull
-    @Override
-    public WebSitePublishSettings getWebSitePublishSettings(@NotNull String subscriptionId, @NotNull String webSpaceName,
-                                                            @NotNull String webSiteName)
-            throws AzureCmdException {
-        return requestWebSiteSDK(subscriptionId, AzureSDKHelper.getWebSitePublishSettings(webSpaceName, webSiteName));
-    }
-
-    @Override
-    public void restartWebSite(@NotNull String subscriptionId, @NotNull String webSpaceName, @NotNull String webSiteName)
-            throws AzureCmdException {
-        requestWebSiteSDK(subscriptionId, AzureSDKHelper.restartWebSite(webSpaceName, webSiteName));
-    }
-
-    @Override
-    public void stopWebSite(@NotNull String subscriptionId, @NotNull String webSpaceName, @NotNull String webSiteName)
-            throws AzureCmdException {
-        requestWebSiteSDK(subscriptionId, AzureSDKHelper.stopWebSite(webSpaceName, webSiteName));
-    }
-
-    @Override
-    public void startWebSite(@NotNull String subscriptionId, @NotNull String webSpaceName, @NotNull String webSiteName)
-            throws AzureCmdException {
-        requestWebSiteSDK(subscriptionId, AzureSDKHelper.startWebSite(webSpaceName, webSiteName));
-    }
-
-    @NotNull
-    @Override
-    public WebSite createWebSite(@NotNull String subscriptionId, @NotNull WebHostingPlanCache webHostingPlan, @NotNull String webSiteName)
-    		throws AzureCmdException {
-    	return requestWebSiteSDK(subscriptionId, AzureSDKHelper.createWebSite(webHostingPlan, webSiteName));
-    }
-
-    @NotNull
-    @Override
-	public Void deleteWebSite(@NotNull String subscriptionId, @NotNull String webSpaceName, @NotNull String webSiteName) throws AzureCmdException {
-    	return requestWebSiteSDK(subscriptionId, AzureSDKHelper.deleteWebSite(webSpaceName, webSiteName));
-    }
-
-    @Override
-    public WebSite getWebSite(@NotNull String subscriptionId, @NotNull final String webSpaceName, @NotNull String webSiteName)
-            throws AzureCmdException {
-        return requestWebSiteSDK(subscriptionId, AzureSDKHelper.getWebSite(webSpaceName, webSiteName));
-    }
-
-    @NotNull
-    @Override
-    public WebSiteConfiguration updateWebSiteConfiguration(@NotNull String subscriptionId,
-    		@NotNull String webSpaceName,
-    		@NotNull String webSiteName,
-    		@NotNull String location,
-    		@NotNull WebSiteConfiguration webSiteConfiguration) throws AzureCmdException {
-    	return requestWebSiteSDK(subscriptionId, AzureSDKHelper.updateWebSiteConfiguration(webSpaceName, webSiteName, location, webSiteConfiguration));
-    }
-
-    @NotNull
-    @Override
-    public WebHostingPlan createWebHostingPlan(@NotNull String subscriptionId, @NotNull WebHostingPlanCache webHostingPlan)
-    		throws AzureCmdException {
-    	return requestWebSiteSDK(subscriptionId, AzureSDKHelper.createWebHostingPlan(webHostingPlan));
-    }
-
-    @Nullable
-    @Override
-    public ArtifactDescriptor getWebArchiveArtifact(@NotNull ProjectDescriptor projectDescriptor)
-            throws AzureCmdException {
-        ArtifactDescriptor artifactDescriptor = null;
-
-        for (ArtifactDescriptor descriptor : DefaultLoader.getIdeHelper().getArtifacts(projectDescriptor)) {
-            if ("war".equals(descriptor.getArtifactType())) {
-                artifactDescriptor = descriptor;
-                break;
-            }
-        }
-
-        return artifactDescriptor;
-    }
-
-    @Override
-    public void deployWebArchiveArtifact(@NotNull final ProjectDescriptor projectDescriptor,
-    		@NotNull final ArtifactDescriptor artifactDescriptor,
-    		@NotNull final WebSite webSite,
-    		@NotNull final boolean isDeployRoot,
-    		final AzureManager manager) {
-    	ListenableFuture<String> future = DefaultLoader.getIdeHelper().buildArtifact(projectDescriptor, artifactDescriptor);
-
-    	Futures.addCallback(future, new FutureCallback<String>() {
-    		@Override
-    		public void onSuccess(final String artifactPath) {
-    			try {
-    				DefaultLoader.getIdeHelper().runInBackground(projectDescriptor, "Deploying web app", "Deploying web app...", new CancellableTask() {
-    					@Override
-    					public void run(CancellationHandle cancellationHandle) throws Throwable {
-    						manager.publishWebArchiveArtifact(webSite.getSubscriptionId(), webSite.getWebSpaceName(), webSite.getName(),
-    								artifactPath, isDeployRoot, artifactDescriptor.getName());
-    					}
-
-    					@Override
-    					public void onCancel() {
-    					}
-
-    					@Override
-    					public void onSuccess() {
-    					}
-
-    					@Override
-    					public void onError(@NotNull Throwable throwable) {
-    						DefaultLoader.getUIHelper().showException("An error occurred while attempting to deploy web app.",
-    								throwable, "MS Services - Error Deploying Web App", false, true);
-    					}
-    				});
-    			} catch (AzureCmdException ex) {
-    				String msg = "An error occurred while attempting to deploy web app." + "\n" + "(Message from Azure:" + ex.getMessage() + ")";
-    				DefaultLoader.getUIHelper().showException(msg,
-    						ex, "MS Services - Error Deploying Web App", false, true);
-    			}
-    		}
-
-    		@Override
-    		public void onFailure(Throwable throwable) {
-    			DefaultLoader.getUIHelper().showException("An error occurred while attempting to build web archive artifact.", throwable,
-    					"MS Services - Error Building WAR Artifact", false, true);
-    		}
-    	});
-    }
-
-    @Override
-    public void publishWebArchiveArtifact(@NotNull String subscriptionId, @NotNull String webSpaceName,
-    		@NotNull String webSiteName, @NotNull String artifactPath,
-    		@NotNull boolean isDeployRoot, @NotNull String artifactName) throws AzureCmdException {
-    	WebSitePublishSettings webSitePublishSettings = getWebSitePublishSettings(subscriptionId, webSpaceName, webSiteName);
-    	WebSitePublishSettings.FTPPublishProfile publishProfile = null;
-    	for (PublishProfile pp : webSitePublishSettings.getPublishProfileList()) {
-    		if (pp instanceof FTPPublishProfile) {
-    			publishProfile = (FTPPublishProfile) pp;
-    			break;
-    		}
-    	}
-
-    	if (publishProfile == null) {
-    		throw new AzureCmdException("Unable to retrieve FTP credentials to publish web site");
-    	}
-
-    	URI uri;
-
-    	try {
-    		uri = new URI(publishProfile.getPublishUrl());
-    	} catch (URISyntaxException e) {
-    		throw new AzureCmdException("Unable to parse FTP Publish Url information", e);
-    	}
-
-    	final FTPClient ftp = new FTPClient();
-
-    	try {
-    		ftp.connect(uri.getHost());
-    		final int replyCode = ftp.getReplyCode();
-
-    		if (!FTPReply.isPositiveCompletion(replyCode)) {
-    			ftp.disconnect();
-    			throw new AzureCmdException("Unable to connect to FTP server");
-    		}
-
-    		if (!ftp.login(publishProfile.getUserName(), publishProfile.getPassword())) {
-    			ftp.logout();
-    			throw new AzureCmdException("Unable to login to FTP server");
-    		}
-
-    		ftp.setFileType(FTP.BINARY_FILE_TYPE);
-
-    		if (publishProfile.isFtpPassiveMode()) {
-    			ftp.enterLocalPassiveMode();
-    		}
-
-    		String targetDir = getAbsolutePath(uri.getPath());
-    		targetDir += "/webapps";
-
-    		InputStream input = new FileInputStream(artifactPath);
-    		if (isDeployRoot) {
-    			removeFtpDirectory(ftp, "/site/wwwroot/webapps/ROOT", "");
-    			ftp.storeFile(targetDir + "/ROOT.war", input);
-    		} else {
-    			artifactName = artifactName.replaceAll("[^a-zA-Z0-9_-]+","");
-    			removeFtpDirectory(ftp, "/site/wwwroot/webapps/" + artifactName, "");
-    			ftp.storeFile(targetDir + "/" + artifactName + ".war", input);
-    		}
-    		input.close();
-    		ftp.logout();
-    	} catch (IOException e) {
-    		throw new AzureCmdException("Unable to connect to the FTP server", e);
-    	} finally {
-    		if (ftp.isConnected()) {
-    			try {
-    				ftp.disconnect();
-    			} catch (IOException ignored) {
-    			}
-    		}
-    	}
-    }
-
     public static void removeFtpDirectory(FTPClient ftpClient, String parentDir,
     		String currentDir) throws IOException {
     	String dirToList = parentDir;
@@ -1294,29 +1065,6 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
     		}
     	});
     }
-
-    @NotNull
-    private <T> T requestWebSiteSDK(@NotNull final String subscriptionId,
-    		@NotNull final SDKRequestCallback<T, WebSiteManagementClient> requestCallback)
-    				throws AzureCmdException {
-    	return requestAzureSDK(subscriptionId, requestCallback, new AzureSDKClientProvider<WebSiteManagementClient>() {
-    		@NotNull
-    		@Override
-    		public WebSiteManagementClient getSSLClient(@NotNull Subscription subscription)
-    				throws Throwable {
-    			return AzureSDKHelper.getWebSiteManagementClient(subscription.getId(),
-    					subscription.getManagementCertificate(), subscription.getServiceManagementUrl());
-    		}
-
-    		@NotNull
-    		@Override
-    		public WebSiteManagementClient getAADClient(@NotNull String subscriptionId, @NotNull String accessToken)
-    				throws Throwable {
-    			return AzureSDKHelper.getWebSiteManagementClient(subscriptionId,
-    					accessToken);
-    		}
-    	});
-    }
     
     @NotNull
     private <T> T requestManagementSDK(@NotNull final String subscriptionId,
@@ -1511,15 +1259,5 @@ public class AzureManagerImpl extends AzureManagerBaseImpl implements AzureManag
     		@NotNull String location) throws AzureCmdException {
     	return requestApplicationInsightsSDK(subscriptionId, AzureSDKHelper.createApplicationInsightsResource(subscriptionId,
     			resourceGroupName, resourceName, location));
-    }
-    
-    @NotNull
-    @Override
-    public Void enableWebSockets(@NotNull String subscriptionId,
-    		@NotNull String webSpaceName,
-    		@NotNull String webSiteName,
-    		@NotNull String location,
-    		@NotNull boolean enableSocket) throws AzureCmdException {
-    	return requestWebSiteSDK(subscriptionId, AzureSDKHelper.enableWebSockets(webSpaceName, webSiteName, location, enableSocket));
     }
 }

@@ -491,7 +491,7 @@ public class CreateArmStorageAccountForm extends Dialog {
     }
 
     public void loadRegions() {
-    	for (Region region : region.values()) {
+    	for (Region region : Region.values()) {
     		regionComboBox.add(region.toString());
     		regionComboBox.setData(region.toString(), region);
     	}

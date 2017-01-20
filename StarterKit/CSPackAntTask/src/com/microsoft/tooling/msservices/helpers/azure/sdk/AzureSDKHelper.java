@@ -28,11 +28,6 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.applicationinsights.management.rest.ApplicationInsightsManagementClient;
 import com.microsoft.applicationinsights.management.rest.client.RestOperationException;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
-import com.microsoft.azure.management.websites.WebHostingPlanOperations;
-import com.microsoft.azure.management.websites.WebSiteManagementClient;
-import com.microsoft.azure.management.websites.WebSiteManagementService;
-import com.microsoft.azure.management.websites.WebSiteOperations;
-import com.microsoft.azure.management.websites.models.*;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.*;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -43,14 +38,6 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.*;
-import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration.ConnectionInfo;
-import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings;
-import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings.FTPPublishProfile;
-import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings.MSDeployPublishProfile;
-import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings.PublishProfile;
 import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.core.OperationResponse;
 import com.microsoft.windowsazure.core.OperationStatus;
@@ -860,24 +847,6 @@ public class AzureSDKHelper {
     }
 
     @NotNull
-    public static SDKRequestCallback<List<WebSite>, WebSiteManagementClient> getWebSites(@NotNull final String webSpaceName) {
-        return new SDKRequestCallback<List<WebSite>, WebSiteManagementClient>() {
-            @NotNull
-            @Override
-            public List<WebSite> execute(@NotNull WebSiteManagementClient client)
-                    throws Throwable {
-                List<WebSite> wsList = new ArrayList<WebSite>();
-                String subscriptionId = client.getCredentials().getSubscriptionId();
-                for (com.microsoft.azure.management.websites.models.WebSite webSite : getWebSites(client, webSpaceName).getWebSites()) {
-                    WebSite ws = loadWebSite(subscriptionId, webSpaceName, webSite);
-                    wsList.add(ws);
-                }
-                return wsList;
-            }
-        };
-    }
-
-    @NotNull
     public static SDKRequestCallback<List<Resource>, ApplicationInsightsManagementClient> getApplicationInsightsResources(
     		@NotNull final String subscriptionId) {
     	return new SDKRequestCallback<List<Resource>, ApplicationInsightsManagementClient>() {
@@ -919,255 +888,6 @@ public class AzureSDKHelper {
     }
 
     @NotNull
-    public static SDKRequestCallback<List<WebHostingPlanCache>, WebSiteManagementClient> getWebHostingPlans(@NotNull final String resourceGroup) {
-        return new SDKRequestCallback<List<WebHostingPlanCache>, WebSiteManagementClient>() {
-            @NotNull
-            @Override
-            public List<WebHostingPlanCache> execute(@NotNull WebSiteManagementClient client)
-                    throws Throwable {
-                List<WebHostingPlanCache> whpList = new ArrayList<WebHostingPlanCache>();
-                String subscriptionId = client.getCredentials().getSubscriptionId();
-                for (WebHostingPlan webHostingPlan : getWebHostingPlans(client, resourceGroup)) {
-                	WebHostingPlanCache ws = new WebHostingPlanCache(Strings.nullToEmpty(webHostingPlan.getName()), resourceGroup,
-                    		subscriptionId, webHostingPlan.getLocation(),
-                    		webHostingPlan.getProperties().getSku(), webHostingPlan.getProperties().getWorkerSize());
-                    whpList.add(ws);
-                }
-                return whpList;
-            }
-        };
-    }
-
-    @NotNull
-    public static SDKRequestCallback<WebSiteConfiguration, WebSiteManagementClient> getWebSiteConfiguration(@NotNull final String webSpaceName,
-    		@NotNull final String webSiteName) {
-    	return new SDKRequestCallback<WebSiteConfiguration, WebSiteManagementClient>() {
-    		@NotNull
-    		@Override
-    		public WebSiteConfiguration execute(@NotNull WebSiteManagementClient client)
-    				throws Throwable {
-    			String subscriptionId = client.getCredentials().getSubscriptionId();
-    			com.microsoft.azure.management.websites.models.WebSiteConfiguration webSiteConfiguration =
-    					getWebSiteConfiguration(client, webSpaceName, webSiteName);
-    			return loadWebSiteConfiguration(subscriptionId, webSpaceName, webSiteName, webSiteConfiguration);
-    		}
-    	};
-    }
-
-    @NotNull
-    public static SDKRequestCallback<WebSitePublishSettings, WebSiteManagementClient> getWebSitePublishSettings(@NotNull final String webSpaceName,
-                                                                                                                @NotNull final String webSiteName) {
-        return new SDKRequestCallback<WebSitePublishSettings, WebSiteManagementClient>() {
-            @NotNull
-            @Override
-            public WebSitePublishSettings execute(@NotNull WebSiteManagementClient client)
-                    throws Throwable {
-                String subscriptionId = client.getCredentials().getSubscriptionId();
-                WebSitePublishSettings wsps = new WebSitePublishSettings(webSpaceName, webSiteName, subscriptionId);
-
-                WebSiteGetPublishProfileResponse webSitePublishProfile = getWebSitePublishProfile(client, webSpaceName, webSiteName);
-
-                List<PublishProfile> publishProfileList = wsps.getPublishProfileList();
-
-                for (WebSiteGetPublishProfileResponse.PublishProfile publishProfile : webSitePublishProfile.getPublishProfiles()) {
-                    String name = Strings.nullToEmpty(publishProfile.getProfileName());
-                    final String publishMethod = Strings.nullToEmpty(publishProfile.getPublishMethod());
-
-                    PublishProfile pp;
-
-                    if ("MSDeploy".equals(publishMethod)) {
-                        pp = new MSDeployPublishProfile(name);
-                        ((MSDeployPublishProfile) pp).setMsdeploySite(Strings.nullToEmpty(publishProfile.getMSDeploySite()));
-                    } else if ("FTP".equals(publishMethod)) {
-                        pp = new FTPPublishProfile(name);
-                        ((FTPPublishProfile) pp).setFtpPassiveMode(publishProfile.isFtpPassiveMode());
-                    } else {
-                        pp = new PublishProfile(name) {
-                            @NotNull
-                            @Override
-                            public String getPublishMethod() {
-                                return publishMethod;
-                            }
-                        };
-                    }
-
-                    pp.setPublishUrl(Strings.nullToEmpty(publishProfile.getPublishUrl()));
-                    pp.setUserName(Strings.nullToEmpty(publishProfile.getUserName()));
-                    pp.setPassword(Strings.nullToEmpty(publishProfile.getUserPassword()));
-                    pp.setDestinationAppUrl(publishProfile.getDestinationAppUri() != null ?
-                            publishProfile.getDestinationAppUri().toString() : "");
-                    pp.setSqlServerDBConnectionString(Strings.nullToEmpty(publishProfile.getSqlServerConnectionString()));
-                    pp.setMySQLDBConnectionString(Strings.nullToEmpty(publishProfile.getMySqlConnectionString()));
-                    pp.setHostingProviderForumLink(publishProfile.getHostingProviderForumUri() != null ?
-                            publishProfile.getHostingProviderForumUri().toString() : "");
-                    pp.setControlPanelLink(publishProfile.getControlPanelUri() != null ?
-                            publishProfile.getControlPanelUri().toString() : "");
-
-                    publishProfileList.add(pp);
-                }
-
-                return wsps;
-            }
-        };
-    }
-
-    @NotNull
-    public static SDKRequestCallback<Void, WebSiteManagementClient> restartWebSite(@NotNull final String webSpaceName,
-                                                                                   @NotNull final String webSiteName) {
-        return new SDKRequestCallback<Void, WebSiteManagementClient>() {
-            @NotNull
-            @Override
-            public Void execute(@NotNull WebSiteManagementClient client)
-                    throws Throwable {
-                getWebSiteOperations(client).restart(webSpaceName, webSiteName, null);
-
-                return null;
-            }
-        };
-    }
-
-    @NotNull
-    public static SDKRequestCallback<Void, WebSiteManagementClient> stopWebSite(@NotNull final String webSpaceName,
-    		@NotNull final String webSiteName) {
-    	return new SDKRequestCallback<Void, WebSiteManagementClient>() {
-    		@NotNull
-    		@Override
-    		public Void execute(@NotNull WebSiteManagementClient client)
-    				throws Throwable {
-    			com.microsoft.azure.management.websites.models.WebSite website = getWebSite(client, webSpaceName, webSiteName);
-    			if (website.getProperties().getState().equals(WebSiteState.Running)) {
-    				getWebSiteOperations(client).stop(webSpaceName, webSiteName, null);
-    			}
-    			return null;
-    		}
-    	};
-    }
-
-    @NotNull
-    public static SDKRequestCallback<Void, WebSiteManagementClient> startWebSite(@NotNull final String webSpaceName,
-    		@NotNull final String webSiteName) {
-    	return new SDKRequestCallback<Void, WebSiteManagementClient>() {
-    		@NotNull
-    		@Override
-    		public Void execute(@NotNull WebSiteManagementClient client)
-    				throws Throwable {
-    			com.microsoft.azure.management.websites.models.WebSite website = getWebSite(client, webSpaceName, webSiteName);
-    			if (website.getProperties().getState().equals(WebSiteState.Stopped)) {
-    				getWebSiteOperations(client).start(webSpaceName, webSiteName, null);
-    			}
-    			return null;
-    		}
-    	};
-    }
-
-    @NotNull
-    public static SDKRequestCallback<WebSite, WebSiteManagementClient> createWebSite(@NotNull final WebHostingPlanCache webHostingPlan,
-                                                                                     @NotNull final String webSiteName) {
-        return new SDKRequestCallback<WebSite, WebSiteManagementClient>() {
-            @NotNull
-            @Override
-            public WebSite execute(@NotNull WebSiteManagementClient client)
-                    throws Throwable {
-                String subscriptionId = client.getCredentials().getSubscriptionId();
-                WebSiteBase base = new WebSiteBase(webHostingPlan.getLocation());
-                base.setProperties(new WebSiteBaseProperties(webHostingPlan.getName()));
-                WebSiteCreateOrUpdateParameters wsCreateParams = new WebSiteCreateOrUpdateParameters(base);
-                com.microsoft.azure.management.websites.models.WebSite webSite =
-                        getWebSiteOperations(client).createOrUpdate(webHostingPlan.getResGrpName(), webSiteName, null, wsCreateParams).getWebSite();
-                return loadWebSite(subscriptionId, webHostingPlan.getResGrpName(), webSite);
-            }
-        };
-    }
-
-    @NotNull
-    public static SDKRequestCallback<Void, WebSiteManagementClient> deleteWebSite(@NotNull final String webSpaceName,
-    		@NotNull final String webSiteName) {
-    	return new SDKRequestCallback<Void, WebSiteManagementClient>() {
-    		@NotNull
-    		@Override
-    		public Void execute(@NotNull WebSiteManagementClient client)
-    				throws Throwable {
-    			WebSiteDeleteParameters delParam = new WebSiteDeleteParameters(true, true, true);
-    			getWebSiteOperations(client).delete(webSpaceName, webSiteName, null, delParam);
-    			return null;
-    		}
-    	};
-    }
-
-    @NotNull
-    public static SDKRequestCallback<WebSite, WebSiteManagementClient> getWebSite(@NotNull final String webSpaceName,
-                                                                                     @NotNull final String webSiteName) {
-        return new SDKRequestCallback<WebSite, WebSiteManagementClient>() {
-            @NotNull
-            @Override
-            public WebSite execute(@NotNull WebSiteManagementClient client)
-                    throws Throwable {
-                String subscriptionId = client.getCredentials().getSubscriptionId();
-                WebSiteGetParameters webSiteGetParameters = new WebSiteGetParameters();
-                webSiteGetParameters.getPropertiesToInclude().add("Name");
-                webSiteGetParameters.getPropertiesToInclude().add("WebSpace");
-                webSiteGetParameters.getPropertiesToInclude().add("Status");
-                webSiteGetParameters.getPropertiesToInclude().add("Url");
-                com.microsoft.azure.management.websites.models.WebSite webSite =
-                        getWebSiteOperations(client).get(webSpaceName, webSiteName, null, webSiteGetParameters).getWebSite();
-                return loadWebSite(subscriptionId, webSpaceName, webSite);
-            }
-        };
-    }
-
-    @NotNull
-    private static com.microsoft.azure.management.websites.models.WebSite getWebSite(@NotNull WebSiteManagementClient client,
-    		@NotNull String webSpaceName, @NotNull String webSiteName) throws Exception {
-    	WebSiteGetParameters webSiteGetParameters = new WebSiteGetParameters();
-    	webSiteGetParameters.getPropertiesToInclude().add("Name");
-    	webSiteGetParameters.getPropertiesToInclude().add("WebSpace");
-    	webSiteGetParameters.getPropertiesToInclude().add("Status");
-    	webSiteGetParameters.getPropertiesToInclude().add("Url");
-    	return getWebSiteOperations(client).get(webSpaceName, webSiteName, null, webSiteGetParameters).getWebSite();
-    }
-
-    @NotNull
-    public static SDKRequestCallback<WebSiteConfiguration, WebSiteManagementClient> updateWebSiteConfiguration(
-    		@NotNull final String webSpaceName,
-    		@NotNull final String webSiteName,
-    		@NotNull final String location,
-    		@NotNull final WebSiteConfiguration webSiteConfiguration) {
-    	return new SDKRequestCallback<WebSiteConfiguration, WebSiteManagementClient>() {
-    		@NotNull
-    		@Override
-    		public WebSiteConfiguration execute(@NotNull WebSiteManagementClient client)
-    				throws Throwable {
-    			updateWebSiteConfiguration(client, webSpaceName, webSiteName, location, webSiteConfiguration);
-    			com.microsoft.azure.management.websites.models.WebSiteConfiguration wsgcr = getWebSiteConfiguration(client, webSpaceName, webSiteName);
-    			return loadWebSiteConfiguration(webSiteConfiguration, wsgcr);
-    		}
-    	};
-    }
-
-    @NotNull
-    public static SDKRequestCallback<WebHostingPlan, WebSiteManagementClient>
-    createWebHostingPlan(@NotNull final WebHostingPlanCache webHostingPlan) {
-    	return new SDKRequestCallback<WebHostingPlan, WebSiteManagementClient>() {
-    		@NotNull
-    		@Override
-    		public WebHostingPlan execute(@NotNull WebSiteManagementClient client)
-    				throws Throwable {
-    			WebHostingPlanProperties properties = new WebHostingPlanProperties();
-    			properties.setSku(webHostingPlan.getSku());
-    			properties.setWorkerSize(webHostingPlan.getWorkerSize());
-    			WebHostingPlan plan = new WebHostingPlan(webHostingPlan.getLocation());
-    			plan.setName(webHostingPlan.getName());
-    			plan.setProperties(properties);
-    			WebHostingPlanCreateOrUpdateParameters whpcp = new WebHostingPlanCreateOrUpdateParameters(plan);
-    			WebHostingPlanOperations whpo = getWebHostingPlanOperations(client);
-    			// SDK API creates App Service plan but return NULL. Handle in code
-    			plan = whpo.createOrUpdate(webHostingPlan.getResGrpName(), whpcp).getWebHostingPlan();
-    			return plan;
-    		}
-    	};
-    }
-
-    @NotNull
     public static ComputeManagementClient getComputeManagementClient(@NotNull String subscriptionId,
                                                                      @NotNull String accessToken)
             throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
@@ -1297,42 +1017,6 @@ public class AzureSDKHelper {
         }
         client.withRequestFilterFirst(new AzureToolkitFilter());
         return client;
-    }
-
-    @NotNull
-    public static WebSiteManagementClient getWebSiteManagementClient(@NotNull String subscriptionId,
-    		@NotNull String accessToken) throws IOException, URISyntaxException, AzureCmdException {
-    	Configuration configuration = getConfigurationForArm(subscriptionId, accessToken);
-    	if (configuration == null) {
-    		throw new AzureCmdException("Unable to instantiate Configuration");
-    	}
-    	WebSiteManagementClient client = WebSiteManagementService.create(configuration);
-    	if (client == null) {
-    		throw new AzureCmdException("Unable to instantiate Web Site Management client");
-    	}
-        client.withRequestFilterFirst(new AzureToolkitFilter());
-    	// add a request filter for tacking on the A/D auth token if the current authentication
-    	// mode is active directory
-    	AuthTokenRequestFilter requestFilter = new AuthTokenRequestFilter(accessToken);
-    	return client.withRequestFilterFirst(requestFilter);
-    }
-
-    @NotNull
-    public static WebSiteManagementClient getWebSiteManagementClient(@NotNull String subscriptionId,
-    		@NotNull String managementCertificate,
-    		@NotNull String serviceManagementUrl)
-    				throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-    				XPathExpressionException, ParserConfigurationException, SAXException, AzureCmdException {
-    	Configuration configuration = getConfigurationFromKeystore(subscriptionId, serviceManagementUrl);
-    	if (configuration == null) {
-    		throw new AzureCmdException("Unable to instantiate Configuration");
-    	}
-    	WebSiteManagementClient client = WebSiteManagementService.create(configuration);
-    	if (client == null) {
-    		throw new AzureCmdException("Unable to instantiate Web Site Management client");
-    	}
-        client.withRequestFilterFirst(new AzureToolkitFilter());
-    	return client;
     }
 
     @NotNull
@@ -1551,28 +1235,6 @@ public class AzureSDKHelper {
         }
 
         return sco;
-    }
-
-    @NotNull
-    private static WebHostingPlanOperations getWebHostingPlanOperations(@NotNull WebSiteManagementClient client)
-            throws Exception {
-        WebHostingPlanOperations whpo = client.getWebHostingPlansOperations();
-
-        if (whpo == null) {
-            throw new Exception("Unable to retrieve Web Hosting Plan information");
-        }
-
-        return whpo;
-    }
-
-    @NotNull
-    private static WebSiteOperations getWebSiteOperations(@NotNull final WebSiteManagementClient client)
-            throws Exception {
-        final WebSiteOperations wsoInternal = client.getWebSitesOperations();
-        if (wsoInternal == null) {
-            throw new Exception("Unable to retrieve Web Site information");
-        }
-        return wsoInternal;
     }
 
     @NotNull
@@ -1812,73 +1474,6 @@ public class AzureSDKHelper {
         if (osr.getError() != null) {
             throw new Exception(osr.getError().getMessage());
         }
-    }
-
-    @NotNull
-    private static WebSiteListResponse getWebSites(@NotNull WebSiteManagementClient client,
-    		@NotNull String webSpaceName) throws Exception {
-    	WebSiteListParameters webSiteListParameters = new WebSiteListParameters();
-    	webSiteListParameters.getPropertiesToInclude().add("Name");
-    	webSiteListParameters.getPropertiesToInclude().add("WebSpace");
-    	webSiteListParameters.getPropertiesToInclude().add("Status");
-    	webSiteListParameters.getPropertiesToInclude().add("Url");
-
-    	WebSiteListResponse wslwsr = getWebSiteOperations(client).list(webSpaceName, null, webSiteListParameters);
-
-    	if (wslwsr == null) {
-    		throw new Exception("Unable to retrieve Web Sites information");
-    	}
-
-    	return wslwsr;
-    }
-
-    @NotNull
-    private static WebHostingPlanListResponse getWebHostingPlans(@NotNull WebSiteManagementClient client,
-    		@NotNull String resourceGroup) throws Exception {
-    	WebHostingPlanListResponse whplr = getWebHostingPlanOperations(client).list(resourceGroup);
-    	if (whplr == null) {
-    		throw new Exception("Unable to retrieve Web Hosting Plans information");
-    	}
-    	return whplr;
-    }
-
-    @NotNull
-    private static com.microsoft.azure.management.websites.models.WebSiteConfiguration getWebSiteConfiguration(@NotNull WebSiteManagementClient client,
-                                                                           @NotNull String webSpaceName,
-                                                                           @NotNull String webSiteName)
-            throws Exception {
-        WebSiteGetConfigurationResult result = getWebSiteOperations(client).getConfiguration(webSpaceName, webSiteName, null, null);
-        com.microsoft.azure.management.websites.models.WebSiteConfiguration wsgcr = result.getResource().getProperties();
-
-        if (wsgcr == null) {
-            throw new Exception("Unable to retrieve Web Site Configuration information");
-        }
-
-        return wsgcr;
-    }
-
-    @NotNull
-    private static void updateWebSiteConfiguration(@NotNull WebSiteManagementClient client,
-    		@NotNull String webSpaceName,
-    		@NotNull String webSiteName,
-    		@NotNull String location,
-    		@NotNull WebSiteConfiguration webSiteConfiguration) throws Exception {
-    	WebSiteUpdateConfigurationParameters wsucp = loadWebSiteUpdateConfigurationParameters(webSiteConfiguration, location);
-    	OperationResponse or = getWebSiteOperations(client).updateConfiguration(webSpaceName, webSiteName, null, wsucp);
-    }
-
-    @NotNull
-    private static WebSiteGetPublishProfileResponse getWebSitePublishProfile(@NotNull WebSiteManagementClient client,
-                                                                             @NotNull String webSpaceName,
-                                                                             @NotNull String webSiteName)
-            throws Exception {
-        WebSiteGetPublishProfileResponse wsgppr = getWebSiteOperations(client).getPublishProfile(webSpaceName, webSiteName, null);
-
-        if (wsgppr == null) {
-            throw new Exception("Unable to retrieve Web Site Publish Profile information");
-        }
-
-        return wsgppr;
     }
 
     @Nullable
@@ -2304,81 +1899,6 @@ public class AzureSDKHelper {
         return affinityGroupList;
     }
 
-    @NotNull
-    private static WebSite loadWebSite(@NotNull String subscriptionId,
-    		@NotNull String webSpaceName,
-    		@NotNull com.microsoft.azure.management.websites.models.WebSite webSite) {
-    	WebSite ws = new WebSite(Strings.nullToEmpty(webSite.getName()), webSpaceName,
-    			subscriptionId, Strings.nullToEmpty(webSite.getLocation()));
-    	return loadWebSite(ws, webSite);
-    }
-
-    @NotNull
-    private static WebSite loadWebSite(@NotNull WebSite ws,
-    		@NotNull com.microsoft.azure.management.websites.models.WebSite webSite) {
-    	ws.setStatus(Strings.nullToEmpty(webSite.getProperties().getState().toString()));
-    	ws.setUrl(webSite.getProperties().getUri() != null ? webSite.getProperties().getUri().toString() : "");
-    	ws.setServerFarm(Strings.nullToEmpty(webSite.getProperties().getServerFarm()));
-    	return ws;
-    }
-
-    private static WebSiteConfiguration loadWebSiteConfiguration(@NotNull String subscriptionId,
-    		@NotNull String webSpaceName,
-    		@NotNull String webSiteName,
-    		@NotNull com.microsoft.azure.management.websites.models.WebSiteConfiguration webSiteConfiguration) {
-    	WebSiteConfiguration wsc = new WebSiteConfiguration(webSpaceName, webSiteName, subscriptionId);
-    	return loadWebSiteConfiguration(wsc, webSiteConfiguration);
-    }
-
-    private static WebSiteConfiguration loadWebSiteConfiguration(@NotNull WebSiteConfiguration wsc,
-                                                                 @NotNull com.microsoft.azure.management.websites.models.WebSiteConfiguration webSiteConfiguration) {
-        wsc.setNetFrameworkVersion(Strings.nullToEmpty(webSiteConfiguration.getNetFrameworkVersion()));
-        wsc.setJavaVersion(Strings.nullToEmpty(webSiteConfiguration.getJavaVersion()));
-        wsc.setJavaContainer(Strings.nullToEmpty(webSiteConfiguration.getJavaContainer()));
-        wsc.setJavaContainerVersion(Strings.nullToEmpty(webSiteConfiguration.getJavaContainerVersion()));
-        wsc.setPhpVersion(Strings.nullToEmpty(webSiteConfiguration.getPhpVersion()));
-        wsc.setHttpLoggingEnabled(webSiteConfiguration.isHttpLoggingEnabled() != null ?
-                webSiteConfiguration.isHttpLoggingEnabled() :
-                false);
-        wsc.setDetailedErrorLoggingEnabled(webSiteConfiguration.isDetailedErrorLoggingEnabled() != null ?
-                webSiteConfiguration.isDetailedErrorLoggingEnabled() :
-                false);
-        wsc.setRequestTracingEnabled(webSiteConfiguration.isRequestTracingEnabled() != null ?
-                webSiteConfiguration.isRequestTracingEnabled() :
-                false);
-        wsc.setRequestTracingExpirationTime(webSiteConfiguration.getRequestTracingExpirationTime() != null ?
-                webSiteConfiguration.getRequestTracingExpirationTime() :
-                new GregorianCalendar());
-        wsc.setRemoteDebuggingEnabled(webSiteConfiguration.isRemoteDebuggingEnabled() != null ?
-                webSiteConfiguration.isRemoteDebuggingEnabled() :
-                false);
-
-        List<ConnectionInfo> connectionInfoList = wsc.getConnectionInfoList();
-
-        for (ConnectionStringInfo connectionStringInfo : webSiteConfiguration.getConnectionStrings()) {
-            if (connectionStringInfo.getName() != null && connectionStringInfo.getType() != null &&
-                    connectionStringInfo.getConnectionString() != null) {
-                connectionInfoList.add(new ConnectionInfo(connectionStringInfo.getName(),
-                        connectionStringInfo.getType().toString(),
-                        connectionStringInfo.getConnectionString()));
-            }
-        }
-
-        return wsc;
-    }
-
-    @NotNull
-    private static WebSiteUpdateConfigurationParameters loadWebSiteUpdateConfigurationParameters(
-    		@NotNull WebSiteConfiguration webSiteConfiguration,
-    		@NotNull final String location) {
-    	WebSiteUpdateConfigurationDetails details = new WebSiteUpdateConfigurationDetails();
-    	details.setJavaVersion(webSiteConfiguration.getJavaVersion());
-    	details.setJavaContainer(webSiteConfiguration.getJavaContainer());
-    	details.setJavaContainerVersion(webSiteConfiguration.getJavaContainerVersion());
-    	WebSiteUpdateConfigurationParameters wsucp = new WebSiteUpdateConfigurationParameters(details, location);
-    	return wsucp;
-    }
-
     private static void createVM(@NotNull ComputeManagementClient client,
                                  @NotNull VirtualMachineOperations vmo,
                                  @NotNull VirtualMachine virtualMachine,
@@ -2798,30 +2318,6 @@ public class AzureSDKHelper {
             // Call Azure API and reset back the context loader
             Thread.currentThread().setContextClassLoader(contextLoader);
         }
-    }
-    
-    @NotNull
-    public static SDKRequestCallback<Void, WebSiteManagementClient> enableWebSockets(
-    		@NotNull final String webSpaceName,
-    		@NotNull final String webSiteName,
-    		@NotNull final String location,
-    		@NotNull final boolean enableSocket) {
-    	return new SDKRequestCallback<Void, WebSiteManagementClient>() {
-    		@NotNull
-    		@Override
-    		public Void execute(@NotNull WebSiteManagementClient client)
-    				throws Throwable {
-    			com.microsoft.azure.management.websites.models.WebSiteConfiguration webSiteConfiguration =
-    					getWebSiteConfiguration(client, webSpaceName, webSiteName);
-    			if (!webSiteConfiguration.isWebSocketsEnabled()) {
-    				WebSiteUpdateConfigurationDetails details = new WebSiteUpdateConfigurationDetails();
-    				details.setWebSocketsEnabled(enableSocket);
-    				WebSiteUpdateConfigurationParameters wsucp = new WebSiteUpdateConfigurationParameters(details, location);
-    				OperationResponse or = getWebSiteOperations(client).updateConfiguration(webSpaceName, webSiteName, null, wsucp);
-    			}
-    			return null;
-    		}
-    	};
     }
 
     private static boolean isIntelliJPlugin() {
