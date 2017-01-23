@@ -3491,14 +3491,6 @@ public class WindowsAzureProjectManager {
 		return Boolean.parseBoolean(getGlobalPropertyValue(WindowsAzureConstants.PROJ_GLOBAL_PROP_OVERWRITE_PREV_DEPLOYMENT_NAME));
 	}
 
-	public void setPublishAccessToken(String accessToken) throws WindowsAzureInvalidProjectOperationException {
-		updateGlobalPropertyValue(WindowsAzureConstants.PROJ_GLOBAL_PROP_ACCESS_TOKEN, accessToken);
-	}
-
-	public String getPublishAccessToken() throws WindowsAzureInvalidProjectOperationException {
-		return getGlobalPropertyValue(WindowsAzureConstants.PROJ_GLOBAL_PROP_ACCESS_TOKEN);
-	}
-
 	private void updateGlobalPropertyLocation(String propertyName, String value) throws WindowsAzureInvalidProjectOperationException {
 		try {
 			String nodeExpr = String.format(WindowsAzureConstants.PROJ_GLOBAL_PROPERTY, propertyName);
@@ -3587,11 +3579,6 @@ public class WindowsAzureProjectManager {
 				WindowsAzureConstants.PROJ_GLOBAL_PROP_PUBLISH_SETTINGS_PATH_NAME))) { 
 			setPublishSettingsPath("");
 		}
-
-		if (!ParserXMLUtility.doesNodeExists(packageFileDoc, String.format(WindowsAzureConstants.PROJ_GLOBAL_PROPERTY,
-				WindowsAzureConstants.PROJ_GLOBAL_PROP_ACCESS_TOKEN))) {
-			setPublishAccessToken("");
-		}
 	
 		HashMap<String, String> nodeAttribites = new HashMap<String, String>();
 		String nodeExpr = null;
@@ -3602,7 +3589,6 @@ public class WindowsAzureProjectManager {
 			// Add additional attributes for windowsazurepackage element
 			nodeAttribites.clear();
 			nodeAttribites.put("publishsettingspath", "${publishsettingspath}");
-			nodeAttribites.put("accesstoken", "${accesstoken}");
 			nodeAttribites.put("region", "${region}");
 			nodeAttribites.put("storageaccountname", "${storageaccountname}");
 			nodeAttribites.put("subscriptionid", "${subscriptionid}");
@@ -3626,7 +3612,6 @@ public class WindowsAzureProjectManager {
 			nodeAttribites.put("overwritepreviousdeployment", "${overwritepreviousdeployment}");
 			nodeAttribites.put("projectdir", "${basedir}");
 			nodeAttribites.put("publishsettingspath", "${publishsettingspath}");
-			nodeAttribites.put("accesstoken", "${accesstoken}");
 			nodeAttribites.put("region", "${region}");
 			nodeAttribites.put("storageaccountname", "${storageaccountname}");
 			nodeAttribites.put("subscriptionid", "${subscriptionid}");
@@ -3653,7 +3638,6 @@ public class WindowsAzureProjectManager {
 			nodeAttribites.put("cloudservicename", "${cloudservicename}");
 			nodeAttribites.put("deploymentslot", "${deploymentslot}");
 			nodeAttribites.put("publishsettingspath", "${publishsettingspath}");
-			nodeAttribites.put("accesstoken", "${accesstoken}");
 			nodeAttribites.put("subscriptionid", "${subscriptionid}");
 			ParserXMLUtility.updateOrCreateElement(packageFileDoc, null, nodeExpr, "azureunpublish", false, nodeAttribites);
 			
@@ -3681,7 +3665,6 @@ public class WindowsAzureProjectManager {
 			nodeAttribites.put("overwritepreviousdeployment", "${overwritepreviousdeployment}");
 			nodeAttribites.put("projectdir", "${basedir}");
 			nodeAttribites.put("publishsettingspath", "${publishsettingspath}");
-			nodeAttribites.put("accesstoken", "${accesstoken}");
 			nodeAttribites.put("region", "${region}");
 			nodeAttribites.put("storageaccountname", "${storageaccountname}");
 			nodeAttribites.put("subscriptionid", "${subscriptionid}");

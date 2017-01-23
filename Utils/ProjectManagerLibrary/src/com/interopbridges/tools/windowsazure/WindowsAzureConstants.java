@@ -516,5 +516,4 @@ public final class WindowsAzureConstants {
 	public static final String PROJ_GLOBAL_PROP_STORAGE_ACCOUNT_NAME = "storageaccountname";
 	public static final String PROJ_GLOBAL_PROP_DEPLOYMENT_SLOT_NAME = "deploymentslot";
 	public static final String PROJ_GLOBAL_PROP_OVERWRITE_PREV_DEPLOYMENT_NAME = "overwritepreviousdeployment";
-	public static final String PROJ_GLOBAL_PROP_ACCESS_TOKEN = "accesstoken";
 }
