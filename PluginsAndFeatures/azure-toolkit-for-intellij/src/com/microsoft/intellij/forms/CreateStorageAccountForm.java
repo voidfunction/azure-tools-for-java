@@ -112,12 +112,8 @@ public class CreateStorageAccountForm extends DialogWrapper {
             }
         });
 
-        if (AzureManagerImpl.getManager(project).authenticated()) {
-            String upn = AzureManagerImpl.getManager(project).getUserInfo().getUniqueName();
-            userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
-        } else {
-            userInfoLabel.setText("");
-        }
+       // TODO
+//            userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
 
         replicationComboBox.setModel(new DefaultComboBoxModel(ReplicationTypes.values()));
         replicationComboBox.setRenderer(new ListCellRendererWrapper<ReplicationTypes>() {

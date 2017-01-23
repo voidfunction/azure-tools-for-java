@@ -48,12 +48,6 @@ public class CreateStorageAccountAction extends NodeActionListener {
         // check if we have a valid subscription handy
         AzureManager azureManager = AzureManagerImpl.getManager(storageModule.getProject());
 
-        if (!azureManager.authenticated()) {
-            DefaultLoader.getUIHelper().showException("Please configure an Azure subscription by right-clicking on the \"Azure\" " +
-                            "node and selecting \"Manage subscriptions\".", null,
-                    "Azure Services Explorer - No Azure Subscription", false, false);
-            return;
-        }
         List<Subscription> subscriptions = azureManager.getSubscriptionList();
 
         if (subscriptions.isEmpty()) {

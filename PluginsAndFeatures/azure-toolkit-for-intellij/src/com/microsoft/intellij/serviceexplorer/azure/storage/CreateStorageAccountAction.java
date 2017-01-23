@@ -52,28 +52,21 @@ public class CreateStorageAccountAction extends NodeActionListener {
         // check if we have a valid subscription handy
         AzureManager apiManager = AzureManagerImpl.getManager(storageModule.getProject());
 
-        if (!apiManager.authenticated() && !apiManager.usingCertificate()) {
+        if (!apiManager.usingCertificate()) {
             DefaultLoader.getUIHelper().showException("Please configure an Azure subscription by right-clicking on the \"Azure\" " +
                             "node and selecting \"Manage subscriptions\".", null,
-                    "Azure Services Explorer - No Azure Subscription", false, false);
+                    "Azure Explorer - No Azure Subscription", false, false);
             return;
         }
+        List<Subscription> subscriptions = apiManager.getSubscriptionList();
 
-//        try {
-            List<Subscription> subscriptions = apiManager.getSubscriptionList();
-
-            if (subscriptions.isEmpty()) {
-                DefaultLoader.getUIHelper().showException("No active Azure subscription was found. Please enable one more Azure " +
-                                "subscriptions by right-clicking on the \"Azure\" " +
-                                "node and selecting \"Manage subscriptions\".", null,
-                        "Azure Services Explorer - No Active Azure Subscription", false, false);
-                return;
-            }
-//        } catch (AzureCmdException e1) {
-//            String msg = "An error occurred while attempting to create the storage account." + "\n" + String.format(message("webappExpMsg"), e1.getMessage());
-//            PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e1);
-//        }
-
+        if (subscriptions.isEmpty()) {
+            DefaultLoader.getUIHelper().showException("No active Azure subscription was found. Please enable one more Azure " +
+                            "subscriptions by right-clicking on the \"Azure\" " +
+                            "node and selecting \"Manage subscriptions\".", null,
+                    "Azure Services Explorer - No Active Azure Subscription", false, false);
+            return;
+        }
         CreateStorageAccountForm createStorageAccountForm = new CreateStorageAccountForm((Project) storageModule.getProject());
         createStorageAccountForm.fillFields(null);
 

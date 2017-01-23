@@ -155,14 +155,8 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
         regionComboBox.addItemListener(validateListener);
         resourceGrpCombo.addItemListener(validateListener);
-
-
-        if (AzureManagerImpl.getManager(project).authenticated()) {
-            String upn = AzureManagerImpl.getManager(project).getUserInfo().getUniqueName();
-            userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
-        } else {
-            userInfoLabel.setText("");
-        }
+        // TODO
+//        userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
 
         accoountKindCombo.setRenderer(new ListCellRendererWrapper<Kind>() {
             @Override

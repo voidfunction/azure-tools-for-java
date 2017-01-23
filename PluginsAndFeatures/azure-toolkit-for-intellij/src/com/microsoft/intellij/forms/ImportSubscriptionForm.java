@@ -142,11 +142,8 @@ public class ImportSubscriptionForm extends DialogWrapper {
             // Note: these 2 operations always go together, as apiManager imports .publishsettings for Azure Explorer
             // and handleFile() caches it for Azure Toolkit plugin
             AzureManager apiManager = AzureManagerImpl.getManager(myProject);
-            if (apiManager.authenticated()) {
-                apiManager.clearAuthentication();
-                WizardCacheManager.getPublishDatas().clear();
-            }
-            apiManager.clearAuthentication();
+            WizardCacheManager.getPublishDatas().clear();
+
             apiManager.importPublishSettingsFile(txtFile.getText());
 
             MethodUtils.handleFile(txtFile.getText(), myProject);

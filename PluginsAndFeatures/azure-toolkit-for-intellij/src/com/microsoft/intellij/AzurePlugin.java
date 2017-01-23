@@ -143,8 +143,8 @@ public class AzurePlugin extends AbstractProjectComponent {
     }
 
     private void initAuthManage() throws IOException {
-        if (CommonSettings.uiFactory == null) {
-            CommonSettings.uiFactory = new UIFactory();
+        if (CommonSettings.getUiFactory() == null) {
+            CommonSettings.setUiFactory(new UIFactory());
         }
         String wd = "AzureToolsForIntelliJ";
         Path dirPath = Paths.get(System.getProperty("user.home"), wd);

@@ -64,7 +64,6 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
     private static final String DISPLAY_NAME = "Manage Subscriptions";
     private JPanel mainPanel;
     private JTable subscriptionTable;
-    private JButton signInButton;
     private JButton removeButton;
     private JButton importSubscriptionButton;
     private JButton closeButton;
@@ -103,106 +102,6 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
         TableColumn column = subscriptionTable.getColumnModel().getColumn(0);
         column.setMinWidth(23);
         column.setMaxWidth(23);
-
-        signInButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    final AzureManager apiManager = AzureManagerImpl.getManager(project);
-                    if (apiManager.authenticated()) {
-                        clearSubscriptions(false);
-                    } else {
-                        myDialog.getWindow().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-                        apiManager.clearImportedPublishSettingsFiles();
-                        apiManager.authenticate();
-
-                        refreshSignInCaption();
-                        loadList();
-
-                        ApplicationManager.getApplication().invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                ProgressManager.getInstance().run(new Task.Modal((Project) project,
-                                        "Loading subscriptions information", true) {
-                                    @Override
-                                    public void run(@NotNull ProgressIndicator indicator) {
-                                        indicator.setIndeterminate(true);
-                                        try {
-                                            WizardCacheManager.getPublishDatas().clear();
-                                            final List<Subscription> subscriptions = apiManager.getSubscriptionList();
-                                            PublishData pd = new PublishData();
-                                            PublishProfile publishProfile = new PublishProfile();
-                                            pd.setPublishProfile(publishProfile);
-                                            for (Subscription subscription : subscriptions) {
-                                                com.microsoftopentechnologies.azuremanagementutil.model.Subscription profileSubscription =
-                                                        new com.microsoftopentechnologies.azuremanagementutil.model.Subscription();
-                                                profileSubscription.setSubscriptionID(subscription.getId());
-                                                profileSubscription.setSubscriptionName(subscription.getName());
-                                                publishProfile.getSubscriptions().add(profileSubscription);
-                                            }
-                                            // load websites information in background
-                                            DefaultLoader.getIdeHelper().runInBackground(project, "Caching webapps information", false, true, "Caching webapps information...", new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    try {
-//                                                        final Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
-                                                        if (subscriptions.size() > 0) {
-//                                                            ExecutorService executor = Executors.newFixedThreadPool(subscriptions.size());
-                                                            /*for (final Subscription subscription : subscriptions) {
-                                                                executor.execute(new Runnable() {
-                                                                    @Override
-                                                                    public void run() {
-                                                                        List<String> resList = null;
-                                                                        try {
-                                                                            resList = apiManager.getResourceGroupNames(subscription.getId());
-                                                                            for (String res : resList) {
-                                                                                List<WebSite> webList = null;
-                                                                                webList = apiManager.getWebSites(subscription.getId(), res);
-                                                                                for (WebSite webSite : webList) {
-                                                                                    WebSiteConfiguration webSiteConfiguration = apiManager.getWebSiteConfiguration(webSite.getSubscriptionId(),
-                                                                                            webSite.getWebSpaceName(), webSite.getName());
-
-                                                                                    webSiteConfigMap.put(webSite, webSiteConfiguration);
-                                                                                }
-                                                                            }
-                                                                        } catch (Exception ex) {
-                                                                            PluginUtil.displayErrorDialogInAWTAndLog("Error loading webapps", "Error loading webapps...", ex);
-                                                                        }
-                                                                    }
-                                                                });
-                                                            }*/
-//                                                            executor.shutdown();
-//                                                            AzureSettings.getSafeInstance(project).saveWebApps(webSiteConfigMap);
-//                                                            AzureSettings.getSafeInstance(project).setwebAppLoaded(true);
-                                                            AppInsightsMngmtPanel.updateApplicationInsightsResourceRegistry(subscriptions, project);
-                                                        }
-                                                    } catch (Exception ex) {
-                                                        PluginUtil.displayErrorDialogInAWTAndLog("Error caching webapps", "Error caching webapps", ex);
-                                                    }
-                                                }
-                                            });
-                                            if (publishProfile.getSubscriptions().size() > 0) {
-                                                pd.setCurrentSubscription(publishProfile.getSubscriptions().get(0));
-                                            }
-
-                                            WizardCacheManager.cachePublishData(null, pd, null, project);
-                                            AzureSettings.getSafeInstance(project).savePublishDatas();
-                                        } catch (Exception ex) {
-                                            PluginUtil.displayErrorDialogInAWTAndLog("Error", "Error when caching subscriptions", ex);
-                                        }
-                                    }
-                                });
-                            }
-                        }, ModalityState.any());
-                    }
-                } catch (Exception e1) {
-                    PluginUtil.displayErrorDialogAndLog(message("signInErr"), e1.getMessage(), e1);
-                } finally {
-                    myDialog.getWindow().setCursor(Cursor.getDefaultCursor());
-                }
-            }
-        });
 
         removeButton.addActionListener(new ActionListener() {
             @Override
@@ -254,12 +153,6 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
         return mainPanel;
     }
 
-    private void refreshSignInCaption() {
-        boolean isNotSigned = !AzureManagerImpl.getManager(project).authenticated();
-
-        signInButton.setText(isNotSigned ? "Sign In..." : "Sign Out");
-    }
-
     private void clearSubscriptions(boolean isSigningOut) {
         int res = JOptionPane.showConfirmDialog(mainPanel, (isSigningOut
                         ? "Are you sure you would like to clear all subscriptions?"
@@ -284,14 +177,11 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
             }
             ApplicationManager.getApplication().saveSettings();
             removeButton.setEnabled(false);
-            refreshSignInCaption();
         }
     }
 
     private void loadList() {
         final DefaultTableModel model = (DefaultTableModel) subscriptionTable.getModel();
-
-        refreshSignInCaption();
 
         while (model.getRowCount() > 0) {
             model.removeRow(0);
@@ -401,9 +291,5 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
     @Override
     public String getHelpTopic() {
         return null;
-    }
-
-    public JButton getSignInButton() {
-        return signInButton;
     }
 }

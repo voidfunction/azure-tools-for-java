@@ -197,7 +197,6 @@ public class DeployAction extends AnAction {
         waProjManager.setPublishStorageAccountName(WizardCacheManager.getCurrentStorageAcount().getName());
         waProjManager.setPublishDeploymentSlot(DeploymentSlot.valueOf(WizardCacheManager.getCurrentDeplyState()));
         waProjManager.setPublishOverwritePreviousDeployment(Boolean.parseBoolean(WizardCacheManager.getUnpublish()));
-        waProjManager.setPublishAccessToken(AzureManagerImpl.getManager(project).getAccessToken(currentSubscriptionID));
     }
 
     private class WindowsAzureBuildProjectTask extends Task.Backgroundable {

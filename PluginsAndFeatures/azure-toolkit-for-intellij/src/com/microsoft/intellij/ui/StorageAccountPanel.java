@@ -117,7 +117,7 @@ public class StorageAccountPanel implements AzureAbstractConfigurablePanel {
                     String fileName = importSubscriptionDialog.getPublishSettingsPath();
                     try {
                         AzureManager apiManager = AzureManagerImpl.getManager(myProject);
-                        apiManager.clearAuthentication();
+                        apiManager.clearImportedPublishSettingsFiles();
                         apiManager.importPublishSettingsFile(fileName);
                         MethodUtils.handleFile(fileName, myProject);
                     } catch (Exception ex) {

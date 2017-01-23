@@ -106,12 +106,9 @@ public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
     private void loadSubscriptions() {
         AzureManager manager = AzureManagerImpl.getManager(project);
 
-        if (manager.authenticated()) {
-            String upn = manager.getUserInfo().getUniqueName();
-            userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
-        } else {
-            userInfoLabel.setText("");
-        }
+// TODO
+//            userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
+
 
         List<Subscription> subscriptionList = manager.getSubscriptionList();
 

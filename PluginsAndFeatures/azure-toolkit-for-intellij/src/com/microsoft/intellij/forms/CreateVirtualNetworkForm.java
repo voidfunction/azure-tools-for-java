@@ -89,13 +89,9 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
         subnetAddressRangeField.getDocument().addDocumentListener(docListener);
 
         regionField.setText(region.toString());
+// TODO
+//            userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
 
-        if (AzureManagerImpl.getManager(project).authenticated()) {
-            String upn = AzureManagerImpl.getManager(project).getUserInfo().getUniqueName();
-            userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
-        } else {
-            userInfoLabel.setText("");
-        }
         validateFields();
         init();
     }

@@ -140,14 +140,15 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
             List<Subscription> subList = manager.getSubscriptionList();
             if (subList.size() > 0) {
                 if (!AzureSettings.getSafeInstance(myProject).isAppInsightsLoaded()) {
-                    if (manager.authenticated()) {
+                    // TODO for AD authentication
+                    /*if (manager.authenticated()) {
                         // authenticated using AD. Proceed for updating application insights registry.
                         updateApplicationInsightsResourceRegistry(subList, myProject);
-                    } else {
+                    } else {*/
                         // imported publish settings file. just show manually added list from preferences
                         // Neither clear subscription list nor show sign in dialog as user may just want to add key manually.
                         keeepManuallyAddedList(myProject);
-                    }
+//                    }
                 } else {
                     // show list from preferences - getTableContent() does it. So nothing to handle here
                 }
@@ -175,10 +176,11 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
                 }
             };
             manageSubscriptionPanel.setDialog(subscriptionsDialog);
-            JButton signInBtn = manageSubscriptionPanel.getSignInButton();
-            if (invokeSignIn && signInBtn != null && signInBtn.getText().equalsIgnoreCase("Sign In...")) {
-                signInBtn.doClick();
-            }
+            //TODO
+//            JButton signInBtn = manageSubscriptionPanel.getSignInButton();
+//            if (invokeSignIn && signInBtn != null && signInBtn.getText().equalsIgnoreCase("Sign In...")) {
+//                signInBtn.doClick();
+//            }
             subscriptionsDialog.show();
             List<Subscription> subList = AzureManagerImpl.getManager(myProject).getSubscriptionList();
             if (subList.size() == 0) {
@@ -217,14 +219,14 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
                     AzureManager manager = AzureManagerImpl.getManager(myProject);
                     List<Subscription> subList = manager.getSubscriptionList();
                     if (subList.size() > 0) {
-                        if (manager.authenticated()) {
+                        /*if (manager.authenticated()) {
                             createSubscriptionDialog(false);
-                        } else {
+                        } else {*/
                             // imported publish settings file.
                             manager.clearImportedPublishSettingsFiles();
                             WizardCacheManager.clearSubscriptions();
                             createSubscriptionDialog(true);
-                        }
+//                        }
                     } else {
                         createSubscriptionDialog(true);
                     }
@@ -319,14 +321,14 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
             AzureManager manager = AzureManagerImpl.getManager(project);
             List<Subscription> subList = manager.getSubscriptionList();
             if (subList.size() > 0 && !AzureSettings.getSafeInstance(project).isAppInsightsLoaded()) {
-                if (manager.authenticated()) {
+                /*if (manager.authenticated()) {
                     // authenticated using AD. Proceed for updating application insights registry.
                     updateApplicationInsightsResourceRegistry(subList, project);
-                } else {
+                } else {*/
                     // imported publish settings file. just show manually added list from preferences
                     // Neither clear subscription list nor show sign in dialog as user may just want to add key manually.
                     keeepManuallyAddedList(project);
-                }
+//                }
             }
         } catch(Exception ex) {
             AzurePlugin.log(ex.getMessage());
@@ -340,12 +342,12 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
                     AzureManager manager = AzureManagerImpl.getManager(myProject);
                     List<Subscription> subList = manager.getSubscriptionList();
                     if (subList.size() > 0) {
-                        if (!manager.authenticated()) {
+//                        if (!manager.authenticated()) {
                             // imported publish settings file.
                             manager.clearImportedPublishSettingsFiles();
                             WizardCacheManager.clearSubscriptions();
                             createSubscriptionDialog(true);
-                        }
+//                        }
                     } else {
                         createSubscriptionDialog(true);
                     }
