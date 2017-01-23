@@ -73,7 +73,7 @@ public class AzureArmManagerImpl extends AzureManagerBaseImpl {
 
             accessTokenByUser = new HashMap<UserInfo, String>();
             lockByUser = new HashMap<UserInfo, ReentrantReadWriteLock>();
-            subscriptionsChangedHandles = new HashSet<AzureManagerImpl.EventWaitHandleImpl>();
+            subscriptionsChangedHandles = new HashSet<AzureManager.EventWaitHandleImpl>();
         } finally {
             authDataLock.writeLock().unlock();
         }

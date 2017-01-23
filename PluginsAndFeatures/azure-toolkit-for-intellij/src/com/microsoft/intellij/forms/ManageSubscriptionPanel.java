@@ -272,7 +272,6 @@ public class ManageSubscriptionPanel implements AzureAbstractPanel {
 
         if (res == JOptionPane.YES_OPTION) {
             AzureManager apiManager = AzureManagerImpl.getManager(project);
-            apiManager.clearAuthentication();
             apiManager.clearImportedPublishSettingsFiles();
             WizardCacheManager.getPublishDatas().clear();
             AzureSettings.getSafeInstance(project).savePublishDatas();

@@ -28,7 +28,6 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	<property name="deploymentslot" value="Staging"/>
 	<property name="overwritepreviousdeployment" value="true"/>
 	<property name="creator.version" value="2.9.6"/>
-	<property name="accesstoken" value=""/>
 
 	<path id="build.classpath">
 		<!-- Setting cspack.jar in classpath -->
@@ -152,7 +151,7 @@ THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 					false:	Disables download URL verification
 
 			-->
-			<windowsazurepackage accesstoken="${accesstoken}" configurationfilename="ServiceConfiguration.cscfg" definitionfilename="ServiceDefinition.csdef" packagedir="${wapackagedir}" packagefilename="WindowsAzurePackage.cspkg" packagetype="local" portalurl="http://windows.azure.com" projectdir="${basedir}" publishsettingspath="${publishsettingspath}" region="${region}" rolepropertiesfilename=".rolePropertiesOS3" storageaccountname="${storageaccountname}" subscriptionid="${subscriptionid}">
+			<windowsazurepackage configurationfilename="ServiceConfiguration.cscfg" definitionfilename="ServiceDefinition.csdef" packagedir="${wapackagedir}" packagefilename="WindowsAzurePackage.cspkg" packagetype="local" portalurl="http://windows.azure.com" projectdir="${basedir}" publishsettingspath="${publishsettingspath}" region="${region}" rolepropertiesfilename=".rolePropertiesOS3" storageaccountname="${storageaccountname}" subscriptionid="${subscriptionid}">
 
 				<!-- Create a sample role -->
 				<workerrole approotdir="${basedir}\WorkerRole1\approot" name="WorkerRole1">

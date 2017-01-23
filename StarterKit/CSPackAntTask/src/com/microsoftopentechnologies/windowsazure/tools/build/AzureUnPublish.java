@@ -22,7 +22,7 @@ package com.microsoftopentechnologies.windowsazure.tools.build;
 import java.io.File;
 
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import org.apache.tools.ant.Task;
@@ -83,14 +83,14 @@ public class AzureUnPublish extends Task {
 	 */
 	private void initialize() {
 		
-//		if (Utils.isNotNullOrEmpty(publishSettingsPath)) {
-//			if (!Utils.isValidFilePath(publishSettingsPath)) {
-//				throw new BuildException("publishSettingsPath " +publishSettingsPath + " is not valid "
-//						+ "or points to a file that does not exist");
-//			}
-//		} else {
-//			throw new BuildException("publishSettingsPath is empty");
-//		}
+		if (Utils.isNotNullOrEmpty(publishSettingsPath)) {
+			if (!Utils.isValidFilePath(publishSettingsPath)) {
+				throw new BuildException("publishSettingsPath " +publishSettingsPath + " is not valid "
+						+ "or points to a file that does not exist");
+			}
+		} else {
+			throw new BuildException("publishSettingsPath is empty");
+		}
 
 		if (subscriptionId != null) {
 			subscriptionId = subscriptionId.trim();
@@ -107,22 +107,12 @@ public class AzureUnPublish extends Task {
 		} else {
 			deploymentSlot = deploymentSlot.trim();
 		}
-		if (Utils.isNotNullOrEmpty(publishSettingsPath) && Utils.isValidFilePath(publishSettingsPath)) {
-			try {
-				AzureManagerImpl.getManager().importPublishSettingsFile(publishSettingsPath);
-			} catch (AzureCmdException e) {
-				throw new BuildException(e);
-			}
-		} else {
-			String accessToken = getProject().getProperty("accesstoken");
-			if (!(accessToken == null || accessToken.isEmpty())) {
-				AzureManagerImpl.initManager(accessToken);
-			}
+
+		try {
+			AzureManager.getManager().importPublishSettingsFile(publishSettingsPath);
+		} catch (AzureCmdException e) {
+			throw new BuildException(e);
 		}
-//		String version = getProject().getProperty("creator.version");
-//		if (version != null && !version.isEmpty()) {
-//			WindowsAzureRestUtils.setUserAgent(String.format("Azure Starter Kit for Java, v%s", version));
-//		}
 	}
 
 
@@ -161,7 +151,7 @@ public class AzureUnPublish extends Task {
 			AzurePublish.pingAzure(subscriptionId);
 			
 			CloudService cloudService = new CloudService(cloudServiceName, "", "", subscriptionId);
-			cloudService = AzureManagerImpl.getManager().getCloudServiceDetailed(cloudService);
+			cloudService = AzureManager.getManager().getCloudServiceDetailed(cloudService);
 			boolean isDeleted = deleteDeployment(cloudService.getProductionDeployment());
 			isDeleted = isDeleted || deleteDeployment(cloudService.getStagingDeployment());
 			if (!isDeleted) {
@@ -186,8 +176,8 @@ public class AzureUnPublish extends Task {
 			ProgressBar progressBar = new ProgressBar(10000, "Undeploying deployment");
 			Thread progressBarThread = new Thread(progressBar);
 			progressBarThread.start();
-			OperationStatusResponse response = AzureManagerImpl.getManager().deleteDeployment(subscriptionId, cloudServiceName, deployment.getName(), true);
-			AzureManagerImpl.getManager().waitForStatus(subscriptionId, response);
+			OperationStatusResponse response = AzureManager.getManager().deleteDeployment(subscriptionId, cloudServiceName, deployment.getName(), true);
+			AzureManager.getManager().waitForStatus(subscriptionId, response);
 //					Utils.waitForStatus(configuration, instance, requestId);
 			isDeleted = true;
 			progressBarThread.interrupt();

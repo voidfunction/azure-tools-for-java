@@ -21,7 +21,7 @@ package com.microsoftopentechnologies.azuremanagementutil.task;
 
 import java.util.concurrent.Callable;
 
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.windowsazure.Configuration;
 
@@ -32,7 +32,7 @@ public class LoadStorageServiceTask implements Callable<StorageAccount> {
 	
 
 	public StorageAccount call() throws Exception {
-		return AzureManagerImpl.getManager().refreshStorageAccountInformation(storageAccount);
+		return AzureManager.getManager().refreshStorageAccountInformation(storageAccount);
 //		StorageService storageService = WindowsAzureServiceManagement.getStorageKeys(configuration, storageAccount.getName());
 //        storageService.setServiceName(storageAccount.getName());
 //        storageService.setStorageAccountProperties(storageAccount.getProperties());

@@ -30,11 +30,10 @@ import com.microsoft.applicationinsights.management.rest.client.RestOperationExc
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.*;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.*;
@@ -112,6 +111,8 @@ public class AzureSDKHelper {
     private static final String WINDOWS_PROVISIONING_CONFIGURATION = "WindowsProvisioningConfiguration";
     private static final String LINUX_PROVISIONING_CONFIGURATION = "LinuxProvisioningConfiguration";
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
+    private static boolean IS_INTELLIJ_PLUGIN = false;
 
     private static CloudStorageAccount getCloudStorageAccount(String blobLink, String saKey) throws Exception {
         if (blobLink == null || blobLink.isEmpty()) {
@@ -889,29 +890,6 @@ public class AzureSDKHelper {
 
     @NotNull
     public static ComputeManagementClient getComputeManagementClient(@NotNull String subscriptionId,
-                                                                     @NotNull String accessToken)
-            throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-            XPathExpressionException, ParserConfigurationException, SAXException, AzureCmdException {
-        Configuration configuration = getConfigurationFromAuthToken(subscriptionId);
-
-        if (configuration == null) {
-            throw new AzureCmdException("Unable to instantiate Configuration");
-        }
-
-        ComputeManagementClient client = ComputeManagementService.create(configuration);
-
-        if (client == null) {
-            throw new AzureCmdException("Unable to instantiate Compute Management client");
-        }
-        client.withRequestFilterFirst(new AzureToolkitFilter());
-        // add a request filter for tacking on the A/D auth token if the current authentication
-        // mode is active directory
-        AuthTokenRequestFilter requestFilter = new AuthTokenRequestFilter(accessToken);
-        return client.withRequestFilterFirst(requestFilter);
-    }
-
-    @NotNull
-    public static ComputeManagementClient getComputeManagementClient(@NotNull String subscriptionId,
                                                                      @NotNull String managementCertificate,
                                                                      @NotNull String serviceManagementUrl)
             throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
@@ -929,29 +907,6 @@ public class AzureSDKHelper {
         }
         client.withRequestFilterFirst(new AzureToolkitFilter());
         return client;
-    }
-
-    @NotNull
-    public static StorageManagementClient getStorageManagementClient(@NotNull String subscriptionId,
-                                                                     @NotNull String accessToken)
-            throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-            XPathExpressionException, ParserConfigurationException, SAXException, AzureCmdException {
-        Configuration configuration = getConfigurationFromAuthToken(subscriptionId);
-
-        if (configuration == null) {
-            throw new AzureCmdException("Unable to instantiate Configuration");
-        }
-
-        StorageManagementClient client = StorageManagementService.create(configuration);
-
-        if (client == null) {
-            throw new AzureCmdException("Unable to instantiate Storage Management client");
-        }
-        client.withRequestFilterFirst(new AzureToolkitFilter());
-        // add a request filter for tacking on the A/D auth token if the current authentication
-        // mode is active directory
-        AuthTokenRequestFilter requestFilter = new AuthTokenRequestFilter(accessToken);
-        return client.withRequestFilterFirst(requestFilter);
     }
 
     @NotNull
@@ -977,29 +932,6 @@ public class AzureSDKHelper {
 
     @NotNull
     public static NetworkManagementClient getNetworkManagementClient(@NotNull String subscriptionId,
-                                                                     @NotNull String accessToken)
-            throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-            XPathExpressionException, ParserConfigurationException, SAXException, AzureCmdException {
-        Configuration configuration = getConfigurationFromAuthToken(subscriptionId);
-
-        if (configuration == null) {
-            throw new AzureCmdException("Unable to instantiate Configuration");
-        }
-
-        NetworkManagementClient client = NetworkManagementService.create(configuration);
-
-        if (client == null) {
-            throw new AzureCmdException("Unable to instantiate Network Management client");
-        }
-        client.withRequestFilterFirst(new AzureToolkitFilter());
-        // add a request filter for tacking on the A/D auth token if the current authentication
-        // mode is active directory
-        AuthTokenRequestFilter requestFilter = new AuthTokenRequestFilter(accessToken);
-        return client.withRequestFilterFirst(requestFilter);
-    }
-
-    @NotNull
-    public static NetworkManagementClient getNetworkManagementClient(@NotNull String subscriptionId,
                                                                      @NotNull String managementCertificate,
                                                                      @NotNull String serviceManagementUrl)
             throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
@@ -1019,29 +951,6 @@ public class AzureSDKHelper {
         return client;
     }
 
-    @NotNull
-    public static ManagementClient getManagementClient(@NotNull String subscriptionId,
-                                                       @NotNull String accessToken)
-            throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-            XPathExpressionException, ParserConfigurationException, SAXException, AzureCmdException {
-        Configuration configuration = getConfigurationFromAuthToken(subscriptionId);
-
-        if (configuration == null) {
-            throw new AzureCmdException("Unable to instantiate Configuration");
-        }
-
-        ManagementClient client = ManagementService.create(configuration);
-
-        if (client == null) {
-            throw new AzureCmdException("Unable to instantiate Management client");
-        }
-        client.withRequestFilterFirst(new AzureToolkitFilter());
-        // add a request filter for tacking on the A/D auth token if the current authentication
-        // mode is active directory
-        AuthTokenRequestFilter requestFilter = new AuthTokenRequestFilter(accessToken);
-        return client.withRequestFilterFirst(requestFilter);
-    }
-    
     @NotNull
     public static ApplicationInsightsManagementClient getApplicationManagementClient(@NotNull String tenantId, @NotNull String accessToken)
     		throws RestOperationException, IOException {
@@ -1055,9 +964,9 @@ public class AzureSDKHelper {
     	ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
     	try {
     		// change classloader only for intellij plugin - for some reason Eclipse does not need it
-    		if (DefaultLoader.getPluginComponent() != null && isIntelliJPlugin()) {
+    		if (IS_INTELLIJ_PLUGIN) {
     			// Change context classloader to class context loader
-    			Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
+    			Thread.currentThread().setContextClassLoader(AzureManager.class.getClassLoader());
     		}
     		ManagementClient client = ManagementService.create(config);
     		return client.getSubscriptionsOperations().get();
@@ -1257,7 +1166,7 @@ public class AzureSDKHelper {
                                                                               @NotNull final DeploymentSlot slot) {
         final SettableFuture<DeploymentGetResponse> future = SettableFuture.create();
 
-        DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
+        AzureManager.getManager().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -1355,7 +1264,7 @@ public class AzureSDKHelper {
             throws Exception {
         final SettableFuture<StorageAccount> future = SettableFuture.create();
 
-        DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
+        AzureManager.getManager().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -1723,7 +1632,7 @@ public class AzureSDKHelper {
             @NotNull final ComputeManagementClient client) {
         final SettableFuture<List<VirtualMachineImage>> future = SettableFuture.create();
 
-        DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
+        AzureManager.getManager().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -1775,7 +1684,7 @@ public class AzureSDKHelper {
             @NotNull final ComputeManagementClient client) {
         final SettableFuture<List<VirtualMachineImage>> future = SettableFuture.create();
 
-        DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
+        AzureManager.getManager().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -2147,70 +2056,6 @@ public class AzureSDKHelper {
         return new String(hexChars);
     }
 
-    private static Configuration getConfigurationForArm(@NotNull String subscriptionId, @NotNull String token)
-    		throws IOException, URISyntaxException {
-    	ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
-    	try {
-    		if (isIntelliJPlugin()) {
-    			// Change context classloader to class context loader
-    			Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
-    		}
-    		Configuration configuration = ManagementConfiguration.configure(null,
-    				new URI(DefaultLoader.getPluginComponent().getSettings().getAzureServiceManagementUri()),
-    				subscriptionId, token);
-    		return configuration;
-    	} finally {
-    		// Call Azure API and reset back the context loader
-    		Thread.currentThread().setContextClassLoader(contextLoader);
-    	}
-    }
-
-    @Nullable
-    private static Configuration getConfigurationFromAuthToken(@NotNull String subscriptionId)
-            throws SAXException, ParserConfigurationException, XPathExpressionException, IOException {
-        // NOTE: This implementation has to be considered as somewhat hacky. It relies on certain
-        // internal implementation details of the Azure SDK for Java. For example we supply null
-        // values for the key store location and password and specify a key store type value
-        // though it will not be used. We also supply a no-op "credential provider". Ideally we want
-        // the SDK to directly support the scenario we need.
-
-        String azureServiceManagementUri = DefaultLoader.getPluginComponent().getSettings().getAzureServiceManagementUri();
-
-        ClassLoader old = Thread.currentThread().getContextClassLoader();
-        if (isIntelliJPlugin()) {
-            Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
-        }
-
-        try {
-            // create a default configuration object
-            Configuration configuration = ManagementConfiguration.configure(
-                    URI.create(azureServiceManagementUri),
-                    subscriptionId, null, null, KeyStoreType.pkcs12);
-
-            if (configuration != null) {
-                // replace the credential provider with a custom one that does nothing
-                configuration.setProperty(
-                        ManagementConfiguration.SUBSCRIPTION_CLOUD_CREDENTIALS,
-                        new EmptyCloudCredentials(subscriptionId));
-
-                // remove the SSL connection factory in case one was added; this is needed
-                // in the case when the user switches from subscription based auth to A/D
-                // sign-in because in that scenario the CertificateCloudCredentials class
-                // would have added an SSL connection factory object to the configuration
-                // object which would then be used when making the SSL call to the Azure
-                // service management API. This tells us that the configuration object is
-                // reused across calls to ManagementConfiguration.configure. The SSL connection
-                // factory object so configured will attempt to use certificate based auth
-                // which will fail since we don't have a certificate handy when using A/D auth.
-                configuration.getProperties().remove(ApacheConfigurationProperties.PROPERTY_SSL_CONNECTION_SOCKET_FACTORY);
-            }
-
-            return configuration;
-        } finally {
-            Thread.currentThread().setContextClassLoader(old);
-        }
-    }
-
 //    @Nullable
 //    private static Configuration getConfigurationFromCertificate(@NotNull String subscriptionId,
 //                                                                 @NotNull String serviceManagementUrl)
@@ -2227,7 +2072,7 @@ public class AzureSDKHelper {
 ////                OpenSSLHelper.PASSWORD);
 ////
 ////        ClassLoader old = Thread.currentThread().getContextClassLoader();
-////        Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
+////        Thread.currentThread().setContextClassLoader(AzureManager.class.getClassLoader());
 ////
 ////        try {
 ////            return ManagementConfiguration.configure(URI.create(serviceManagementUrl), subscriptionId, keyStorePath,
@@ -2254,7 +2099,7 @@ public class AzureSDKHelper {
 //                OpenSSLHelper.PASSWORD);
 //
 //        ClassLoader old = Thread.currentThread().getContextClassLoader();
-//        Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
+//        Thread.currentThread().setContextClassLoader(AzureManager.class.getClassLoader());
 //
 //        try {
 //            return ManagementConfiguration.configure(URI.create(serviceManagementUrl), subscriptionId, keyStorePath,
@@ -2289,9 +2134,9 @@ public class AzureSDKHelper {
     	ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
     	try {
     		// change classloader only for intellij plugin - for some reason Eclipse does not need it
-    		if (DefaultLoader.getPluginComponent() != null && isIntelliJPlugin()) {
+    		if (IS_INTELLIJ_PLUGIN) {
     			// Change context classloader to class context loader
-    			Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
+    			Thread.currentThread().setContextClassLoader(AzureManager.class.getClassLoader());
     		}
     		Configuration configuration = PublishSettingsLoader.createManagementConfiguration(file.getPath(), subscriptionId);
     		return configuration;
@@ -2308,9 +2153,9 @@ public class AzureSDKHelper {
         ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
         try {
             // change classloader only for intellij plugin - for some reason Eclipse does not need it
-            if (DefaultLoader.getPluginComponent() != null && isIntelliJPlugin()) {
+            if (IS_INTELLIJ_PLUGIN) {
                 // Change context classloader to class context loader
-                Thread.currentThread().setContextClassLoader(AzureManagerImpl.class.getClassLoader());
+                Thread.currentThread().setContextClassLoader(AzureManager.class.getClassLoader());
             }
             Configuration configuration = ManagementConfiguration.configure(null, Configuration.load(), mngUri, subscriptionId, keystore, "", KeyStoreType.pkcs12);
             return configuration;
@@ -2320,8 +2165,7 @@ public class AzureSDKHelper {
         }
     }
 
-    private static boolean isIntelliJPlugin() {
-        String pluginId = DefaultLoader.getPluginComponent().getPluginId();
-        return pluginId != null && pluginId.contains("intellij");
+    public static void setIsIntellijPlugin(boolean isIntellijPlugin) {
+        IS_INTELLIJ_PLUGIN = isIntellijPlugin;
     }
 }

@@ -21,9 +21,9 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer;
 
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 
 import java.util.concurrent.Semaphore;
 
@@ -72,7 +72,7 @@ public class EventHelper {
         eventSyncInfo.eventWaitHandle = eventHandler.registerEvent();
         eventSyncInfo.registeredEvent = true;
 
-        DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
+        AzureManager.getManager().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -93,7 +93,7 @@ public class EventHelper {
             }
         });
 
-        DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
+        AzureManager.getManager().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -133,6 +133,28 @@ public class EventHelper {
 
                 eventHandler.eventTriggeredAction();
             }
+        }
+    }
+    public static class EventWaitHandleImpl implements EventWaitHandle {
+        Semaphore eventSignal = new Semaphore(0, true);
+
+        public EventWaitHandleImpl() {
+        }
+
+        public void waitEvent(@NotNull Runnable callback) throws AzureCmdException {
+            try {
+                this.eventSignal.acquire();
+                callback.run();
+            } catch (InterruptedException var3) {
+                throw new AzureCmdException("Unable to aquire permit", var3);
+            }
+        }
+
+        public synchronized void signalEvent() {
+            if(this.eventSignal.availablePermits() == 0) {
+                this.eventSignal.release();
+            }
+
         }
     }
 }

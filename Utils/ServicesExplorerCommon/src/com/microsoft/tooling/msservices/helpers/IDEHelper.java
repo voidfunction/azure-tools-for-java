@@ -72,8 +72,6 @@ public interface IDEHelper {
             return artifactType;
         }
     }
-
-    com.microsoft.auth.IWebUi getWebUi();
     
     String getProjectSettingsPath();
     

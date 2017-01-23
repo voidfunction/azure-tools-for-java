@@ -46,6 +46,7 @@ import com.microsoft.intellij.ui.messages.AzureBundle;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.util.WAHelper;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureToolkitFilter;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
@@ -108,6 +109,7 @@ public class AzurePlugin extends AbstractProjectComponent {
         super(project);
         this.azureSettings = AzureSettings.getSafeInstance(project);
         CommonSettings.setUserAgent(String.format(USER_AGENT, PLUGIN_VERSION));
+        AzureSDKHelper.setIsIntellijPlugin(true);
     }
 
     public void projectOpened() {

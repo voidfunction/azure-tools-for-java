@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
 
@@ -60,7 +60,7 @@ public class Utils {
 		StorageAccount storageAccount = new StorageAccount(storageAccountName, subscriptionId);
 		storageAccount.setLocation(region);
 		boolean isStorageAccountExist = false;
-		List<StorageAccount> storageAccountList = AzureManagerImpl.getManager().getStorageAccounts(subscriptionId, false);
+		List<StorageAccount> storageAccountList = AzureManager.getManager().getStorageAccounts(subscriptionId, false);
 		for (StorageAccount storageService : storageAccountList) {
 			if (storageService.getName().equalsIgnoreCase(storageAccountName)) {
 				isStorageAccountExist = true;
@@ -71,7 +71,7 @@ public class Utils {
 		if (!isStorageAccountExist) {
 			storageAccount.setLabel(storageAccountName);
 			storageAccount.setType(STORAGE_ACCOUNT_DEFAULT_ACCOUNT_TYPE);
-			AzureManagerImpl.getManager().createStorageAccount(storageAccount);
+			AzureManager.getManager().createStorageAccount(storageAccount);
 		}
 		progressBarThread.interrupt();
 		try {
@@ -80,7 +80,7 @@ public class Utils {
 			;
 		}
 		// Get storage account object
-		storageAccount = AzureManagerImpl.getManager().refreshStorageAccountInformation(storageAccount);
+		storageAccount = AzureManager.getManager().refreshStorageAccountInformation(storageAccount);
 		if (managementUrl.equals("https://management.core.chinacloudapi.cn")) {
 			if (storageAccount.getBlobsUri().startsWith("https://")) {
 				storageAccount.setBlobsUri(storageAccount.getBlobsUri().replaceFirst("https://", "http://"));
@@ -97,7 +97,7 @@ public class Utils {
 
 	public static void createCloudServiceIfNotExists(String subscriptionId, String cloudServiceName, String region) throws Exception {
 		boolean isCloudServiceExist = false;
-		List<CloudService> list = AzureManagerImpl.getManager().getCloudServices(subscriptionId);
+		List<CloudService> list = AzureManager.getManager().getCloudServices(subscriptionId);
 		for (CloudService hostedService : list) {
 			if (hostedService.getName().equalsIgnoreCase(cloudServiceName)) {
 				isCloudServiceExist = true;
@@ -105,7 +105,7 @@ public class Utils {
 			}
 		}
 		if (!isCloudServiceExist) {
-			AzureManagerImpl.getManager().createCloudService(new CloudService(cloudServiceName, region, null, subscriptionId, cloudServiceName));
+			AzureManager.getManager().createCloudService(new CloudService(cloudServiceName, region, null, subscriptionId, cloudServiceName));
 		}
 	}
 
@@ -129,7 +129,7 @@ public class Utils {
 				dis.close();
 			}
 		}
-		AzureManagerImpl.getManager().createServiceCertificate(subscriptionId, cloudServiceName, buff, pfxPwd, false);
+		AzureManager.getManager().createServiceCertificate(subscriptionId, cloudServiceName, buff, pfxPwd, false);
 	}
 	
 	public static String prepareCloudBlobURL(String filePath,

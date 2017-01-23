@@ -25,9 +25,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import org.w3c.dom.Document;
@@ -56,7 +55,6 @@ public class AzurePublish extends Task {
 	private String storageAccountName;
 	private String deploymentSlot;
 	private String overwritePreviousDeployment;
-	private String accessToken;
 
 	private String DEFAULT_FILE_NAME = "package.xml";
 	private String WINAZURE_PACKAGE = "/project/target/parallel/windowsazurepackage";
@@ -129,13 +127,6 @@ public class AzurePublish extends Task {
 
 	public void setOverwritePreviousDeployment(String overwritePreviousDeployment) {
 		this.overwritePreviousDeployment = overwritePreviousDeployment;
-	}
-
-	/**
-	 * WindowsAzurePackage constructor
-	 */
-	public AzurePublish() {
-		DefaultLoader.setIdeHelper(new AntIDEHelper());
 	}
 
 	/**
@@ -215,14 +206,9 @@ public class AzurePublish extends Task {
 		}
 		if (Utils.isNotNullOrEmpty(publishSettingsPath) && Utils.isValidFilePath(publishSettingsPath)) {
 			try {
-				AzureManagerImpl.getManager().importPublishSettingsFile(publishSettingsPath);
+				AzureManager.getManager().importPublishSettingsFile(publishSettingsPath);
 			} catch (AzureCmdException e) {
 				throw new BuildException(e);
-			}
-		} else {
-			String accessToken = getProject().getProperty("accesstoken");
-			if (!(accessToken == null || accessToken.isEmpty())) {
-				AzureManagerImpl.initManager(accessToken);
 			}
 		}
 //		String version = getProject().getProperty("creator.version");
@@ -312,7 +298,7 @@ public class AzurePublish extends Task {
 	 */
 	public static void pingAzure(String subscriptionId) {
 		try {
-			AzureManagerImpl.getManager().getLocations(subscriptionId);
+			AzureManager.getManager().getLocations(subscriptionId);
 		} catch (Exception e) {
 			throw new BuildException("Error: Failed to call Azure Management Service, check network and proxy settings. "+e);
 		}
@@ -355,7 +341,7 @@ public class AzurePublish extends Task {
 
 		this.log("Waiting for deployment status...");
 
-		AzureManagerImpl.getManager().waitForStatus(subscriptionId, operationStatusResponse);
+		AzureManager.getManager().waitForStatus(subscriptionId, operationStatusResponse);
 		this.log("Successfully created deployment.");
 		return deploymentName;
 	}
@@ -377,7 +363,7 @@ public class AzurePublish extends Task {
 		Document cscfg = XMLUtil.parseXMLFile(cscfgFile);
 		if (XMLUtil.isSampleCertUsedInRole(cscfg, roleList)) {
 			boolean isPresent = false;
-			List<Certificate> certList = AzureManagerImpl.getManager().getCertificates(subscriptionId, cloudServiceName);
+			List<Certificate> certList = AzureManager.getManager().getCertificates(subscriptionId, cloudServiceName);
 			for (Certificate cert : certList) {
 				if (cert.getThumbprint().equalsIgnoreCase(defaultThumbprint)) {
 					isPresent = true;
@@ -443,7 +429,7 @@ public class AzurePublish extends Task {
 		parameters.setLabel(cloudServiceName);
 		parameters.setConfiguration(new String(cscfgBuff));
 		parameters.setStartDeployment(true);
-		return AzureManagerImpl.getManager().createDeployment(subscriptionId, cloudServiceName, deploymentSlot,
+		return AzureManager.getManager().createDeployment(subscriptionId, cloudServiceName, deploymentSlot,
 				parameters, overwritePreviousDeployment);
 	}
 
@@ -465,7 +451,7 @@ public class AzurePublish extends Task {
 		}
 		do {
 			Thread.sleep(20000);
-			AzureManagerImpl.getManager().getDeploymentBySlot(subscriptionId, cloudservicename, deploymentSlotTemp);
+			AzureManager.getManager().getDeploymentBySlot(subscriptionId, cloudservicename, deploymentSlotTemp);
 			for (RoleInstance instance : deployment.getRoleInstances()) {
 				status = instance.getInstanceStatus();
 				if (isRoleStatus(status)) {
@@ -489,7 +475,7 @@ public class AzurePublish extends Task {
 		DeploymentStatus deploymentStatus = null;
 		do {
 			Thread.sleep(10000);
-			deployment = AzureManagerImpl.getManager().getDeploymentBySlot(subscriptionId, cloudservicename, deploymentSlotTemp);
+			deployment = AzureManager.getManager().getDeploymentBySlot(subscriptionId, cloudservicename, deploymentSlotTemp);
 			deploymentStatus = deployment.getStatus();
 		} while(deploymentStatus != null
 				&& (deploymentStatus.equals(DeploymentStatus.RunningTransitioning)

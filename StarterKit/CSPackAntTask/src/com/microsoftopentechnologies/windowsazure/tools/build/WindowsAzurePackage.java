@@ -22,24 +22,15 @@ package com.microsoftopentechnologies.windowsazure.tools.build;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URL;
 import java.util.*;
 
 import com.google.gson.Gson;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.components.PluginComponent;
-import com.microsoft.tooling.msservices.components.PluginSettings;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
-import com.microsoftopentechnologies.azuremanagementutil.rest.WindowsAzureRestUtils;
 import com.microsoftopentechnologies.windowsazure.tools.cspack.BinaryPackageCreator;
 import com.microsoftopentechnologies.windowsazure.tools.cspack.Configuration;
-import com.microsoftopentechnologies.windowsazure.tools.cspack.PackageCreator;
-import com.microsoftopentechnologies.windowsazure.tools.build.Utils;
 import com.microsoftopentechnologies.windowsazure.tools.cspack.domain.xsd.serviceconfiguration.ConfigurationSettings.Setting;
 import com.microsoftopentechnologies.windowsazure.tools.cspack.domain.xsd.serviceconfiguration.Role;
 import com.microsoftopentechnologies.windowsazure.tools.cspack.domain.xsd.serviceconfiguration.ServiceConfiguration;
@@ -139,7 +130,6 @@ public class WindowsAzurePackage extends Task {
 	// To support auto storage in Ant task
 	private String publishSettingsPath;
 	private String subscriptionId;
-	private String accessToken;
 	private String storageAccountName;
 	private String region;
 	private final String auto = "auto";
@@ -167,47 +157,6 @@ public class WindowsAzurePackage extends Task {
         } catch (IOException ex) {
             log(ex, Project.MSG_WARN);
         }
-		DefaultLoader.setIdeHelper(new AntIDEHelper());
-		DefaultLoader.setPluginComponent(new AntPluginComponent());
-	}
-
-	class AntPluginComponent implements PluginComponent {
-		private PluginSettings settings;
-
-		public AntPluginComponent() {
-			BufferedReader reader = null;
-			try {
-				reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("settings.json")));
-				StringBuilder sb = new StringBuilder();
-				String line;
-
-				while ((line = reader.readLine()) != null) {
-					sb.append(line);
-				}
-
-				Gson gson = new Gson();
-				settings = gson.fromJson(sb.toString(), PluginSettings.class);
-			} catch (IOException e) {
-				log(e, Project.MSG_WARN);
-			} finally {
-				if (reader != null) {
-					try {
-						reader.close();
-					} catch (IOException ignored) {
-					}
-				}
-			}
-		}
-
-		@Override
-		public PluginSettings getSettings() {
-			return settings;
-		}
-
-		@Override
-		public String getPluginId() {
-			return null;
-		}
 	}
 
 	public String getPublishSettingsPath() {
@@ -216,14 +165,6 @@ public class WindowsAzurePackage extends Task {
 
 	public void setPublishSettingsPath(String publishSettingsPath) {
 		this.publishSettingsPath = publishSettingsPath;
-	}
-
-	public String getAccessToken() {
-		return accessToken;
-	}
-
-	public void setAccessToken(String accessToken) {
-		this.accessToken = accessToken;
 	}
 
 	public String getSubscriptionId() {
@@ -446,7 +387,7 @@ public class WindowsAzurePackage extends Task {
 				if (setting.getName().equalsIgnoreCase(settingName) && setting.getValue().equalsIgnoreCase(valueName)) {
 					// Get storage account and create if needed
 					if (curAcc == null) {
-						if (!Utils.isValidFilePath(publishSettingsPath) && Utils.isNullOrEmpty(accessToken)) {
+						if (!Utils.isValidFilePath(publishSettingsPath)) {
 
 							throw new BuildException("Storage account is specified as 'auto', ensure project contains valid Publish information");
 						}
@@ -517,7 +458,7 @@ public class WindowsAzurePackage extends Task {
 										// Get storage account and create if needed.
 										if (curAcc == null) {
 											// In next release validate rest of the parameters as well.
-											if (!Utils.isValidFilePath(publishSettingsPath) && Utils.isNullOrEmpty(accessToken)) {
+											if (!Utils.isValidFilePath(publishSettingsPath)) {
 												throw new BuildException("Storage account is specified as 'auto', ensure project contains valid Publish information");
 											}
 
@@ -628,7 +569,7 @@ public class WindowsAzurePackage extends Task {
 				}
 				managementUrl = XMLUtil.getManagementUrl(pubFile, subscriptionId);
 			} else {
-				managementUrl = DefaultLoader.getPluginComponent().getSettings().getAzureServiceManagementUri();
+				throw new AzureCmdException("Empty publishSettings file path");
 			}
 			this.log("SubscriptionId: " + subscriptionId);
 			storageAccount = Utils.createStorageAccountIfNotExists(subscriptionId, storageAccountName, region, managementUrl);
@@ -905,22 +846,11 @@ public class WindowsAzurePackage extends Task {
 		if(!isNetworkAvailable()) {
 			this.verifyDownloads = false;
 		}
-		if (Utils.isNotNullOrEmpty(publishSettingsPath)) {
-			try {
-				AzureManagerImpl.getManager().importPublishSettingsFile(publishSettingsPath);
-			} catch (AzureCmdException e) {
-				throw new BuildException(e);
-			}
-		} else {
-			String accessToken = getProject().getProperty("accesstoken");
-			if (!(accessToken == null || accessToken.isEmpty())) {
-				AzureManagerImpl.initManager(accessToken);
-			}
+		try {
+			AzureManager.getManager().importPublishSettingsFile(publishSettingsPath);
+		} catch (AzureCmdException e) {
+			throw new BuildException(e);
 		}
-//		String version = getProject().getProperty("creator.version");
-//		if (version != null && !version.isEmpty()) {
-//			WindowsAzureRestUtils.setUserAgent(String.format("Azure Starter Kit for Java, v%s", version));
-//		}
 	}
     
 	/**
