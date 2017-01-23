@@ -1,3 +1,27 @@
+/*
+ * *
+ *  * Copyright (c) Microsoft Corporation
+ *  * <p/>
+ *  * All rights reserved.
+ *  * <p/>
+ *  * MIT License
+ *  * <p/>
+ *  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ *  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ *  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+ *  * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *  * <p/>
+ *  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ *  * the Software.
+ *  * <p/>
+ *  * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ *  * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ *  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  * SOFTWARE.
+ *
+ */
+
 package com.microsoft.azuretools.authmanage;
 
 import com.microsoft.azuretools.adauth.JsonHelper;
@@ -15,7 +39,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static com.microsoft.azuretools.authmanage.CommonSettings.*;
 
 /**
  * Created by shch on 10/9/2016.
@@ -55,7 +78,7 @@ public class AuthMethodManager {
                 }
                 Path filePath = Paths.get(credFilePath);
                 if (!Files.exists(filePath)) {
-                    INotification nw = uiFactory.getNotificationWindow();
+                    INotification nw = CommonSettings.getUiFactory().getNotificationWindow();
                     nw.deliver("Auth method is not set", "File doesn't exist: " + filePath.toString());
                     return null;
                 }
@@ -66,35 +89,11 @@ public class AuthMethodManager {
         }
         return null;
     }
-/*
-    private void cleanAzureManager() throws Exception {
-        System.out.println("AuthMethodManager.cleanAzureManager()");
-        cleanAzureManager(getAuthMethod());
-    }
 
-    private void cleanAzureManager(AuthMethod authMethod) throws Exception {
-
-        switch (authMethod) {
-            case AD:
-                accessTokenAzureManager = null;
-                authMethodDetails.setAuthMethod(null);
-//                if (accessTokenAzureManager != null) {
-//                    accessTokenAzureManager.drop();
-//                    accessTokenAzureManager = null;
-//                }
-            case SP:
-                servicePrincipalAzureManager = null;
-                ServicePrincipalAzureManager.cleanPersist();
-                authMethodDetails.setCredFilePath(null);
-//                if (servicePrincipalAzureManager != null) {
-//                    System.out.println("dropping servicePrincipalAzureManager...");
-//                    servicePrincipalAzureManager.drop();
-//                    servicePrincipalAzureManager = null;
-//                };
-        }
-    }
-*/
     public void cleanAll() throws Exception {
+        if (isSignedIn()) {
+            getAzureManager().getSubscriptionManager().cleanSubscriptions();
+        }
         accessTokenAzureManager = null;
         servicePrincipalAzureManager = null;
         // AD sign out should be done outside if needed
@@ -129,11 +128,11 @@ public class AuthMethodManager {
 
     private void loadSettings() throws Exception {
         System.out.println("loading authMethodDetails...");
-        FileStorage fs = new FileStorage(authMethodDetailsFileName, settingsBaseDir);
+        FileStorage fs = new FileStorage(CommonSettings.authMethodDetailsFileName, CommonSettings.settingsBaseDir);
         byte[] data = fs.read();
         String json = new String(data);
         if (json.isEmpty()) {
-            System.out.println(authMethodDetailsFileName + "file is empty");
+            System.out.println(CommonSettings.authMethodDetailsFileName + "file is empty");
             authMethodDetails = new AuthMethodDetails();
             return;
         }
@@ -143,7 +142,7 @@ public class AuthMethodManager {
     private void saveSettings() throws Exception {
         System.out.println("saving authMethodDetails...");
         String sd = JsonHelper.serialize(authMethodDetails);
-        FileStorage fs = new FileStorage(authMethodDetailsFileName, settingsBaseDir);
+        FileStorage fs = new FileStorage(CommonSettings.authMethodDetailsFileName, CommonSettings.settingsBaseDir);
         fs.write(sd.getBytes(Charset.forName("utf-8")));
     }
 }

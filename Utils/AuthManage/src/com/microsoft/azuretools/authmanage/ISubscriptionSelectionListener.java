@@ -22,16 +22,11 @@
  *
  */
 
-package com.microsoft.azuretools.authmanage.interact;
-
-import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
-
-import java.util.List;
+package com.microsoft.azuretools.authmanage;
 
 /**
- * Created by shch on 10/3/2016.
+ * Created by vlashch on 1/10/17.
  */
-public interface ISelectSubscription {
-    void init(List<SubscriptionDetail> details);
-    List<SubscriptionDetail> update();
+public interface ISubscriptionSelectionListener {
+    void update(boolean isSinedOut);
 }
