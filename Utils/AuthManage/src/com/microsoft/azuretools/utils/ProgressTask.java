@@ -22,30 +22,20 @@
  *
  */
 
-package com.microsoft.azuretools.authmanage;
-
-import com.microsoft.azuretools.authmanage.interact.IUIFactory;
+package com.microsoft.azuretools.utils;
 
 /**
- * Created by shch on 10/10/2016.
+ * Created by vlashch on 1/23/17.
  */
-public class CommonSettings {
-    public static String settingsBaseDir = null;
-    public static final String authMethodDetailsFileName = "AuthMethodDetails.json";
+public class ProgressTask implements IProgressTask {
+    private IProgressTaskImpl impl;
 
-    private static IUIFactory uiFactory;
-    public static IUIFactory getUiFactory() {
-        return uiFactory;
-    }
-    public static void setUiFactory(IUIFactory uiFactory) {
-        CommonSettings.uiFactory = uiFactory;
+    public ProgressTask(IProgressTaskImpl impl) {
+        this.impl = impl;
     }
 
-    public static String USER_AGENT = "Azure Toolkit";
-    /**
-     * Need this as a static method when we call this class directly from Eclipse or IntelliJ plugin to know plugin version
-     */
-    public static void setUserAgent(String userAgent) {
-        USER_AGENT = userAgent;
+    @Override
+    public void work(IWorker worker) {
+        impl.doWork(worker);
     }
 }
