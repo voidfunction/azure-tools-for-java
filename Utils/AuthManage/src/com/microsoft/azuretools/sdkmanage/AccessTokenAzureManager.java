@@ -25,14 +25,19 @@
 package com.microsoft.azuretools.sdkmanage;
 
 import com.microsoft.azure.credentials.AzureTokenCredentials;
+import com.microsoft.azure.keyvault.KeyVaultClient;
+import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
+import com.microsoft.azuretools.Constants;
+import com.microsoft.azuretools.adauth.PromptBehavior;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.CommonSettings;
 import com.microsoft.azuretools.authmanage.RefreshableTokenCredentials;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.utils.Pair;
+import com.microsoft.rest.credentials.ServiceClientCredentials;
 import com.microsoft.rest.credentials.TokenCredentials;
 
 import java.util.LinkedList;
@@ -131,4 +136,26 @@ public class AccessTokenAzureManager implements AzureManager {
 //        return auth(token);
         return Azure.configure().withUserAgent(CommonSettings.USER_AGENT).authenticate(new RefreshableTokenCredentials(AdAuthManager.getInstance(), tid));
     }
+
+    @Override
+    public KeyVaultClient getKeyVaultClient(String tid) throws Exception {
+        ServiceClientCredentials creds = new KeyVaultCredentials() {
+            @Override
+            public String doAuthenticate(String authorization, String resource, String scope) {
+                try {
+                    return AdAuthManager.getInstance().getAccessToken(tid, Constants.resourceVault, PromptBehavior.Auto);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        };
+
+        return new KeyVaultClient(creds);
+    }
+
+    @Override
+    public String getCurrentUserId() throws  Exception{
+        return AdAuthManager.getInstance().getAccountEmail();
+    }
+
 }

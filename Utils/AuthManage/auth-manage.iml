@@ -33,6 +33,27 @@
     <orderEntry type="library" name="Maven: com.microsoft.azure:azure:1.0.0-beta4.1" level="project" />
     <orderEntry type="library" name="Maven: com.microsoft.azure:azure-client-runtime:1.0.0-beta4.1" level="project" />
     <orderEntry type="library" name="Maven: com.microsoft.rest:client-runtime:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-client-authentication:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-resources:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-storage:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-network:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-compute:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-graph-rbac:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-keyvault:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-batch:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-trafficmanager:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-dns:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-redis:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-appservice:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-cdn:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-sql:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-storage:4.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.6.0" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.12" level="project" />
+    <orderEntry type="library" name="Maven: commons-net:commons-net:3.2" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-client-runtime:1.0.0-beta4.1" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.rest:client-runtime:1.0.0-beta4.1" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:18.0" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.retrofit2:retrofit:2.0.2" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.okhttp3:okhttp:3.3.1" level="project" />
@@ -79,5 +100,23 @@
     <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-core-asl:1.9.13" level="project" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.9" level="project" />
     <orderEntry type="library" name="Maven: commons-net:commons-net:3.2" level="project" />
+    <orderEntry type="module-library">
+      <library name="Maven: com.microsoft.azure:azure-keyvault-webkey:1.0.0-beta5-SNAPSHOT">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/azure-keyvault-webkey-1.0.0-beta5-SNAPSHOT.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: com.microsoft.azure:azure-keyvault:1.0.0-beta5-SNAPSHOT">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/azure-keyvault-1.0.0-beta5-SNAPSHOT.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

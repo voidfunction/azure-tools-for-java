@@ -24,6 +24,7 @@
 
 package com.microsoft.azuretools.sdkmanage;
 
+import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
@@ -40,4 +41,6 @@ public interface AzureManager {
     SubscriptionManager getSubscriptionManager();
     void drop() throws Exception;
 //    public List<Tenant> getTenants() throws Throwable;
+    KeyVaultClient getKeyVaultClient(String tid) throws Exception;
+    String getCurrentUserId() throws Exception;
 }
