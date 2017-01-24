@@ -26,71 +26,117 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleTypeId;
-import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ui.configuration.ProjectStructureConfigurable;
+import com.intellij.openapi.wm.WindowManager;
+import com.intellij.packaging.artifacts.Artifact;
+import com.intellij.packaging.artifacts.ArtifactType;
+import com.intellij.packaging.artifacts.ModifiableArtifactModel;
 import com.intellij.util.PlatformUtils;
-import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.appservice.WebApp;
-import com.microsoft.azure.management.keyvault.Vault;
-import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
-import com.microsoft.azuretools.authmanage.SubscriptionManager;
-import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.ijidea.ui.ArtifactValidationWindow;
+import com.microsoft.azuretools.ijidea.ui.WarSelectDialog;
+import com.microsoft.azuretools.ijidea.ui.WebAppDeployDialog;
 //import com.microsoft.intellij.forms.WebSiteDeployForm;
-import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.tasks.WebSiteDeployTask;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-
+import javax.swing.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class AzureWebDeployAction extends AnAction {
     public void actionPerformed(AnActionEvent e) {
         Module module = LangDataKeys.MODULE.getData(e.getDataContext());
         Module module1 = e.getData(LangDataKeys.MODULE);
+        JFrame frame = WindowManager.getInstance().getFrame(module.getProject());
+
 
 
         try {
-            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-            // not signed in
-            if (azureManager == null) {
+
+            Project project = module.getProject();
+            ModifiableArtifactModel artifactModel =
+                    ProjectStructureConfigurable.getInstance(project).getArtifactsStructureConfigurable().getModifiableArtifactModel();
+
+            Artifact artifactToDeploy = null;
+            Collection<? extends Artifact> artifacts = artifactModel.getArtifactsByType(ArtifactType.findById("war"));
+
+            List<String> issues = new LinkedList<>();
+            if (artifacts.size() == 0 ) {
+                issues.add("A web archive (WAR) Artifact has not been configured yet. The artifact configurations are managed in the <b>Project Structure</b> dialog (<b>File | Project Structure | Artifacts</b>).");
+                ArtifactValidationWindow.go(issues, frame);
+                return;
+            } else if (artifacts.size() > 1 ) {
+                WarSelectDialog d = WarSelectDialog.go(new ArrayList<>(artifacts), frame);
+                if (d == null) {
+                    return;
+                }
+                artifactToDeploy = d.getSelectedArtifact();
+            } else {
+                artifactToDeploy = (Artifact)artifacts.toArray()[0];
+            }
+
+
+            // check artifact name is valid
+            String name = artifactToDeploy.getName();
+
+            if (!name.matches("^[A-Za-z0-9]*[A-Za-z0-9]$")) {
+                issues.add("The artifact name <b>'" + name + "'</b> is invalid. An artifact name may contain only the ASCII letters 'a' through 'z' (case-insensitive),\nand the digits '0' through '9'.");
+            }
+
+            boolean exists = Files.exists(Paths.get(artifactToDeploy.getOutputFilePath()));
+            if (!exists)  {
+                issues.add("The Artifact has not been built yet. You can initiate building an artifact using <b>Build | Build Artifacts...</b> menu.");
+            }
+
+            if (issues.size() > 0) {
+                ArtifactValidationWindow.go(issues, frame);
                 return;
             }
 
-            SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
-            System.out.println("getting sid list...");
-            Set<String> sidList = subscriptionManager.getAccountSidList();
-            for (String sid : sidList) {
-                System.out.println("sid : " + sid);
-                Azure azure = azureManager.getAzure(sid);
+            WebAppDeployDialog d = WebAppDeployDialog.go(module, artifactToDeploy);
 
-//                System.out.println("Creating a vault...");
-//                Vault vault =  azure.vaults().define("ShchKeyVault")
-//                        .withRegion(Region.US_EAST)
-//                        .withNewResourceGroup()
-//                        .defineAccessPolicy()
-//                        .forUser("vlashch@microsoft.com")
-//                        .allowKeyAllPermissions()
-//                        .attach()
-//                        .create()
-//                        ;
+//            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+//            // not signed in
+//            if (azureManager == null) {
+//                return;
+//            }
 //
-//                System.out.println(vault.name());
-//                System.out.println("Deleting a vault...");
-//                azure.vaults().deleteById(vault.id());
-
-                List<ResourceGroup>  rgList = azure.resourceGroups().list();
-                for (ResourceGroup rg : rgList) {
-                    //System.out.println("rg : " + rg);
-                    List<WebApp> waList = azure.webApps().listByGroup(rg.name());
-                    for (WebApp wa : waList ) {
-                        System.out.println("\twa : " + wa.name());
-                    }
-                }
-
-            }
+//            SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
+//            System.out.println("getting sid list...");
+//            Set<String> sidList = subscriptionManager.getAccountSidList();
+//            for (String sid : sidList) {
+//                System.out.println("sid : " + sid);
+//                Azure azure = azureManager.getAzure(sid);
+//
+////                System.out.println("Creating a vault...");
+////                Vault vault =  azure.vaults().define("ShchKeyVault")
+////                        .withRegion(Region.US_EAST)
+////                        .withNewResourceGroup()
+////                        .defineAccessPolicy()
+////                        .forUser("vlashch@microsoft.com")
+////                        .allowKeyAllPermissions()
+////                        .attach()
+////                        .create()
+////                        ;
+////
+////                System.out.println(vault.name());
+////                System.out.println("Deleting a vault...");
+////                azure.vaults().deleteById(vault.id());
+//
+//                List<ResourceGroup>  rgList = azure.resourceGroups().list();
+//                for (ResourceGroup rg : rgList) {
+//                    //System.out.println("rg : " + rg);
+//                    List<WebApp> waList = azure.webApps().listByGroup(rg.name());
+//                    for (WebApp wa : waList ) {
+//                        System.out.println("\twa : " + wa.name());
+//                    }
+//                }
+//
+//            }
 
 
         } catch (Exception e1) {

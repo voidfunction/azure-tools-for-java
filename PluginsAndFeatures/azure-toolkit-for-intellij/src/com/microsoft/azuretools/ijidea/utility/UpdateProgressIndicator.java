@@ -22,39 +22,38 @@
  *
  */
 
-package com.microsoft.azuretools.ijidea.ui;
+package com.microsoft.azuretools.ijidea.utility;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
-import com.microsoft.azuretools.adauth.IWebUi;
-import com.microsoft.azuretools.authmanage.interact.INotification;
-import com.microsoft.azuretools.authmanage.interact.IUIFactory;
-import com.microsoft.azuretools.ijidea.utility.ProgressTaskModal;
-import com.microsoft.azuretools.utils.IProgressTaskImpl;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.microsoft.azuretools.utils.IProgressIndicator;
 
 /**
- * Created by shch on 10/4/2016.
+ * Created by vlashch on 1/20/17.
  */
-public class UIFactory implements IUIFactory{
+public class UpdateProgressIndicator implements IProgressIndicator {
+    private ProgressIndicator progressIndicator;
 
+    public UpdateProgressIndicator(ProgressIndicator progressIndicator) {
+        this.progressIndicator = progressIndicator;
+    }
     @Override
-    public INotification getNotificationWindow() {
-        return new NotificationWindow();
+    public void setText(String s) {
+        progressIndicator.setText(s);
     }
 
     @Override
-    public IWebUi getWebUi() { return new WebUi(); }
+    public void setText2(String s) {
+        progressIndicator.setText2(s);
 
-    @Override
-    public IProgressTaskImpl getProgressTaskImpl() {
-        return new ProgressTaskModal(getProject());
     }
 
-    private Project getProject() {
-        Project[] projects = ProjectManager.getInstance().getOpenProjects();
-        if (projects.length > 0) {
-            return projects[0];
-        }
-        return null;
+    @Override
+    public void setFraction(double v) {
+        progressIndicator.setFraction(v);
+    }
+
+    @Override
+    public boolean isCanceled() {
+        return progressIndicator.isCanceled();
     }
 }

@@ -22,39 +22,39 @@
  *
  */
 
-package com.microsoft.azuretools.ijidea.ui;
+package com.microsoft.azuretools.ijidea.utility;
 
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
-import com.microsoft.azuretools.adauth.IWebUi;
-import com.microsoft.azuretools.authmanage.interact.INotification;
-import com.microsoft.azuretools.authmanage.interact.IUIFactory;
-import com.microsoft.azuretools.ijidea.utility.ProgressTaskModal;
 import com.microsoft.azuretools.utils.IProgressTaskImpl;
+import com.microsoft.azuretools.utils.IWorker;
 
 /**
- * Created by shch on 10/4/2016.
+ * Created by vlashch on 1/23/17.
  */
-public class UIFactory implements IUIFactory{
+public class ProgressTaskModal implements IProgressTaskImpl {
 
-    @Override
-    public INotification getNotificationWindow() {
-        return new NotificationWindow();
+    private Project project;
+
+    public ProgressTaskModal (Project project) {
+        this.project = project;
     }
 
     @Override
-    public IWebUi getWebUi() { return new WebUi(); }
+    public void doWork(IWorker worker) {
+        ProgressManager.getInstance().run(new Task.Modal(project, worker.getName(), true) {
+            @Override
+            public void run(ProgressIndicator progressIndicator) {
+                try {
+                    progressIndicator.setIndeterminate(true);
+                    worker.work(new UpdateProgressIndicator(progressIndicator));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
 
-    @Override
-    public IProgressTaskImpl getProgressTaskImpl() {
-        return new ProgressTaskModal(getProject());
-    }
-
-    private Project getProject() {
-        Project[] projects = ProjectManager.getInstance().getOpenProjects();
-        if (projects.length > 0) {
-            return projects[0];
-        }
-        return null;
     }
 }
