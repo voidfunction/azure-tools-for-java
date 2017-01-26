@@ -80,12 +80,12 @@ public class AzureServiceModule extends RefreshableNode {
     @Override
     public String getName() {
 //        try {
-            List<Subscription> subscriptionList = AzureManagerImpl.getManager(getProject()).getSubscriptionList();
+           /*   List<Subscription> subscriptionList = AzureManagerImpl.getManager(getProject()).getSubscriptionList();
             if (subscriptionList.size() > 0) {
                 return String.format("%s (%s)", BASE_MODULE_NAME, subscriptionList.size() > 1
                         ? String.format("%s subscriptions", subscriptionList.size())
                         : subscriptionList.get(0).getName());
-            }
+            }*/
 //        } catch (AzureCmdException e) {
 //        	String msg = "An error occurred while getting the subscription list." + "\n" + "(Message from Azure:" + e.getMessage() + ")";
 //        	DefaultLoader.getUIHelper().showException(msg, e,
