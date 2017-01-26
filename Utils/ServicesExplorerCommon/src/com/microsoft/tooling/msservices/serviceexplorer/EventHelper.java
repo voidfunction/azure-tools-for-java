@@ -24,6 +24,7 @@ package com.microsoft.tooling.msservices.serviceexplorer;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
+import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 
 import java.util.concurrent.Semaphore;
 
@@ -72,7 +73,7 @@ public class EventHelper {
         eventSyncInfo.eventWaitHandle = eventHandler.registerEvent();
         eventSyncInfo.registeredEvent = true;
 
-        AzureManager.getManager().executeOnPooledThread(new Runnable() {
+        AzureManagerImpl.getManager().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -93,7 +94,7 @@ public class EventHelper {
             }
         });
 
-        AzureManager.getManager().executeOnPooledThread(new Runnable() {
+        AzureManagerImpl.getManager().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
                 try {

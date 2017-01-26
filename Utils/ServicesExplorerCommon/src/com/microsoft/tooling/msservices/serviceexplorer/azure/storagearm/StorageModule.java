@@ -34,7 +34,7 @@ import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManage
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class StorageModule extends AzureRefreshableNode {
+public class StorageModule extends RefreshableNode {
     private static final String STORAGE_MODULE_ID = com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule.class.getName();
     private static final String ICON_PATH = "storage.png";
     private static final String BASE_MODULE_NAME = "Storage Accounts";
@@ -52,7 +52,7 @@ public class StorageModule extends AzureRefreshableNode {
     }
 
     @Override
-    protected void refresh(@NotNull EventStateHandle eventState)
+    protected void refreshItems()
             throws AzureCmdException {
         removeAllChildNodes();
         List<Pair<String, String>> failedSubscriptions = new ArrayList<>();
@@ -65,17 +65,11 @@ public class StorageModule extends AzureRefreshableNode {
             }
 
             SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
-            System.out.println("getting sid list...");
             Set<String> sidList = subscriptionManager.getAccountSidList();
             for (String sid : sidList) {
-                System.out.println("sid : " + sid);
                 try {
                     Azure azure = azureManager.getAzure(sid);
                     List<com.microsoft.azure.management.storage.StorageAccount> storageAccounts = azure.storageAccounts().list();
-                    if (eventState.isEventTriggered()) {
-                        return;
-                    }
-
                     for (StorageAccount sm : storageAccounts) {
                         addChildNode(new StorageNode(this, sid, sm));
                     }
@@ -109,13 +103,10 @@ public class StorageModule extends AzureRefreshableNode {
 //                }
 //                return storageAccounts;
 //            }
+        //TODO
         // load External Accounts
         for (ClientStorageAccount clientStorageAccount : ExternalStorageHelper.getList(getProject())) {
             ClientStorageAccount storageAccount = StorageClientSDKManager.getManager().getStorageAccount(clientStorageAccount.getConnectionString());
-
-            if (eventState.isEventTriggered()) {
-                return;
-            }
 
 //            addChildNode(new ExternalStorageNode(this, storageAccount));
         }

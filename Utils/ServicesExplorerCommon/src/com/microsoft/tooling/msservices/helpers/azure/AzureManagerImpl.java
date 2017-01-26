@@ -30,16 +30,38 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class AzureManagerImpl extends AzureManager {
     static Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+    private ReentrantReadWriteLock subscriptionsChangedLock = new ReentrantReadWriteLock(true);
+    private Set<EventHelper.EventWaitHandleImpl> subscriptionsChangedHandles = new HashSet<EventHelper.EventWaitHandleImpl>();;
 
     public AzureManagerImpl(Object projectObject) {
         super(projectObject);
+    }
+
+    public AzureManagerImpl() {
+        this(DEFAULT_PROJECT);
+    }
+
+    @NotNull
+    public static synchronized AzureManagerImpl getManager(Object currentProject) {
+        if (currentProject == null) {
+            currentProject = DEFAULT_PROJECT;
+        }
+        if (instances.get(currentProject) == null) {
+            AzureManager instance = new AzureManagerImpl(currentProject);
+            instances.put(currentProject, instance);
+        }
+        return (AzureManagerImpl) instances.get(currentProject);
     }
 
     /**
@@ -76,6 +98,69 @@ public class AzureManagerImpl extends AzureManager {
 
         for (String subscriptionId : subscriptions.keySet()) {
             lockBySubscriptionId.put(subscriptionId, new ReentrantReadWriteLock(false));
+        }
+    }
+
+    @NotNull
+    public EventHelper.EventWaitHandle registerSubscriptionsChanged()
+            throws AzureCmdException {
+        subscriptionsChangedLock.writeLock().lock();
+
+        try {
+            EventHelper.EventWaitHandleImpl handle = new EventHelper.EventWaitHandleImpl();
+
+            subscriptionsChangedHandles.add(handle);
+
+            return handle;
+        } finally {
+            subscriptionsChangedLock.writeLock().unlock();
+        }
+    }
+
+    public void setSelectedSubscriptions(@NotNull List<String> selectedList)
+            throws AzureCmdException {
+        authDataLock.writeLock().lock();
+
+        try {
+            for (String subscriptionId : subscriptions.keySet()) {
+                Subscription subscription = subscriptions.get(subscriptionId);
+                subscription.setSelected(selectedList.contains(subscriptionId));
+            }
+
+            storeSubscriptions();
+        } finally {
+            authDataLock.writeLock().unlock();
+        }
+
+        notifySubscriptionsChanged();
+    }
+
+    public void unregisterSubscriptionsChanged(@NotNull EventHelper.EventWaitHandle handle)
+            throws AzureCmdException {
+        if (!(handle instanceof EventHelper.EventWaitHandleImpl)) {
+            throw new AzureCmdException("Invalid handle instance");
+        }
+
+        subscriptionsChangedLock.writeLock().lock();
+
+        try {
+            subscriptionsChangedHandles.remove(handle);
+        } finally {
+            subscriptionsChangedLock.writeLock().unlock();
+        }
+
+        ((EventHelper.EventWaitHandleImpl) handle).signalEvent();
+    }
+
+    private void notifySubscriptionsChanged() {
+        subscriptionsChangedLock.readLock().lock();
+
+        try {
+            for (EventHelper.EventWaitHandleImpl handle : subscriptionsChangedHandles) {
+                handle.signalEvent();
+            }
+        } finally {
+            subscriptionsChangedLock.readLock().unlock();
         }
     }
 

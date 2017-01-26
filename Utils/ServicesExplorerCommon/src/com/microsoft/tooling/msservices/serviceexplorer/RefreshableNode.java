@@ -75,7 +75,7 @@ public abstract class RefreshableNode extends Node {
         final RefreshableNode node = this;
         final SettableFuture<List<Node>> future = SettableFuture.create();
 
-        DefaultLoader.getIdeHelper().runInBackground(getProject(), "Loading " + getName() + "...", false, true, null,
+        DefaultLoader.getIdeHelper().runInBackground(getProject(), "Loading " + getName() + "...", true, true, null,
                 new Runnable() {
                     @Override
                     public void run() {

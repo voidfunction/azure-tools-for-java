@@ -98,10 +98,10 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         // setup toolbar icons
         addToolbarItems(toolWindow, azureServiceModule);
 
-        try {
-            azureServiceModule.registerSubscriptionsChanged();
-        } catch (AzureCmdException ignored) {
-        }
+//        try {
+//            azureServiceModule.registerSubscriptionsChanged();
+//        } catch (AzureCmdException ignored) {
+//        }
     }
 
     private DefaultMutableTreeNode initRoot(Project project, AzureServiceModule azureServiceModule) {

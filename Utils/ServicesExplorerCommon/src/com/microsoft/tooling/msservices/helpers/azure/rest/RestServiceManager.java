@@ -64,16 +64,6 @@ public interface RestServiceManager {
             throws AzureCmdException;
 
     @NotNull
-    String executePollRequest(@NotNull String managementUrl,
-                              @NotNull String path,
-                              @NotNull ContentType contentType,
-                              @NotNull String method,
-                              @Nullable String postData,
-                              @NotNull String pollPath,
-                              @NotNull HttpsURLConnectionProvider sslConnectionProvider)
-            throws AzureCmdException;
-
-    @NotNull
     HttpsURLConnection getSSLConnection(@NotNull String managementUrl,
                                         @NotNull String path,
                                         @NotNull ContentType contentType)

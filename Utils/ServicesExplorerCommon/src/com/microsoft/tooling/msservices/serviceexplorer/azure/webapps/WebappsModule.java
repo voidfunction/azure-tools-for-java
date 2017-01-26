@@ -25,12 +25,9 @@ import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule;
 
 import java.util.ArrayList;
@@ -40,7 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WebappsModule extends AzureRefreshableNode {
+public class WebappsModule extends RefreshableNode {
 	private static final String WEBAPPS_MODULE_ID = WebappsModule.class.getName();
 	private static final String WEB_RUN_ICON = "website.png";
 	private static final String WEB_STOP_ICON = "stopWebsite.png";
@@ -52,11 +49,8 @@ public class WebappsModule extends AzureRefreshableNode {
 	}
 
 	@Override
-	protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
+	protected void refreshItems()
 			throws AzureCmdException {
-		if (eventState.isEventTriggered()) {
-			return;
-		}
 		removeAllChildNodes();
 		//todo
 //		AzureManager manager = AzureManagerImpl.getManager(getProject());
