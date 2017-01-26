@@ -54,7 +54,6 @@ import javax.xml.xpath.XPathExpressionException;
 import com.microsoft.tooling.msservices.components.AppSettingsNames;
 import com.microsoft.tooling.msservices.helpers.OpenSSLHelper;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -85,7 +84,6 @@ import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.*;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandle;
 import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.ManagementClient;
@@ -106,20 +104,18 @@ import sun.misc.BASE64Decoder;
 
 import java.util.logging.Logger;
 
-import static com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandleImpl;
-
 public abstract class AzureManager {
     public static final String DEFAULT_PROJECT = "DEFAULT_PROJECT";
     Logger logger = Logger.getLogger(AzureManager.class.getName());
-    Map<String, Subscription> subscriptions;
+    Map<String, Subscription> subscriptions = new HashMap<String, Subscription>();
     Map<String, ReentrantReadWriteLock> lockBySubscriptionId = new HashMap<String, ReentrantReadWriteLock>();
     Map<String, SSLSocketFactory> sslSocketFactoryBySubscriptionId;
     ReentrantReadWriteLock subscriptionMapLock = new ReentrantReadWriteLock(false);
     Map<UserInfo, ReentrantReadWriteLock> lockByUser;
     ReentrantReadWriteLock authDataLock = new ReentrantReadWriteLock(false);
-    Set<EventHelper.EventWaitHandleImpl> subscriptionsChangedHandles;
     Object projectObject;
-    private ReentrantReadWriteLock userMapLock = new ReentrantReadWriteLock(false);
+
+    protected static Map<Object, AzureManager> instances = new HashMap<>();
 
     @NotNull
     protected Subscription getSubscription(@NotNull String subscriptionId)
@@ -156,42 +152,6 @@ public abstract class AzureManager {
             }
 
             return lockBySubscriptionId.get(subscriptionId);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @NotNull
-    Optional<ReentrantReadWriteLock> getUserLock(@NotNull UserInfo userInfo) {
-        userMapLock.readLock().lock();
-
-        try {
-            if (lockByUser.containsKey(userInfo)) {
-                return Optional.of(lockByUser.get(userInfo));
-            } else {
-                return Optional.absent();
-            }
-        } finally {
-            userMapLock.readLock().unlock();
-        }
-    }
-
-    @NotNull
-    ReentrantReadWriteLock getUserLock(@NotNull UserInfo userInfo, boolean createOnMissing)
-            throws AzureCmdException {
-        Lock lock = createOnMissing ? userMapLock.writeLock() : userMapLock.readLock();
-        lock.lock();
-
-        try {
-            if (!lockByUser.containsKey(userInfo)) {
-                if (createOnMissing) {
-                    lockByUser.put(userInfo, new ReentrantReadWriteLock(false));
-                } else {
-                    throw new AzureCmdException("No access token for the specified User Information");
-                }
-            }
-
-            return lockByUser.get(userInfo);
         } finally {
             lock.unlock();
         }
@@ -265,10 +225,6 @@ public abstract class AzureManager {
                 throws Throwable;
     }
 
-    protected static Map<Object, AzureManager> instances = new HashMap<>();
-
-    private ReentrantReadWriteLock subscriptionsChangedLock = new ReentrantReadWriteLock(true);
-
     protected AzureManager(Object projectObject) {
         this.projectObject = projectObject;
         authDataLock.writeLock().lock();
@@ -282,7 +238,6 @@ public abstract class AzureManager {
             storeSubscriptions();
 
             lockByUser = new HashMap<UserInfo, ReentrantReadWriteLock>();
-            subscriptionsChangedHandles = new HashSet<EventWaitHandleImpl>();
         } catch (Exception e) {
             // TODO.shch: handle the exception
             logger.warning(e.getMessage());
@@ -393,57 +348,6 @@ public abstract class AzureManager {
         } finally {
             authDataLock.readLock().unlock();
         }
-    }
-
-    public void setSelectedSubscriptions(@NotNull List<String> selectedList)
-            throws AzureCmdException {
-        authDataLock.writeLock().lock();
-
-        try {
-            for (String subscriptionId : subscriptions.keySet()) {
-                Subscription subscription = subscriptions.get(subscriptionId);
-                subscription.setSelected(selectedList.contains(subscriptionId));
-            }
-
-            storeSubscriptions();
-        } finally {
-            authDataLock.writeLock().unlock();
-        }
-
-        notifySubscriptionsChanged();
-    }
-
-    @NotNull
-    public EventWaitHandle registerSubscriptionsChanged()
-            throws AzureCmdException {
-        subscriptionsChangedLock.writeLock().lock();
-
-        try {
-            EventHelper.EventWaitHandleImpl handle = new EventHelper.EventWaitHandleImpl();
-
-            subscriptionsChangedHandles.add(handle);
-
-            return handle;
-        } finally {
-            subscriptionsChangedLock.writeLock().unlock();
-        }
-    }
-
-    public void unregisterSubscriptionsChanged(@NotNull EventWaitHandle handle)
-            throws AzureCmdException {
-        if (!(handle instanceof EventWaitHandleImpl)) {
-            throw new AzureCmdException("Invalid handle instance");
-        }
-
-        subscriptionsChangedLock.writeLock().lock();
-
-        try {
-            subscriptionsChangedHandles.remove(handle);
-        } finally {
-            subscriptionsChangedLock.writeLock().unlock();
-        }
-
-        ((EventWaitHandleImpl) handle).signalEvent();
     }
 
     @NotNull
@@ -777,18 +681,6 @@ public abstract class AzureManager {
             }
         } finally {
             authDataLock.readLock().unlock();
-        }
-    }
-
-    private void notifySubscriptionsChanged() {
-        subscriptionsChangedLock.readLock().lock();
-
-        try {
-            for (EventWaitHandleImpl handle : subscriptionsChangedHandles) {
-                handle.signalEvent();
-            }
-        } finally {
-            subscriptionsChangedLock.readLock().unlock();
         }
     }
 
