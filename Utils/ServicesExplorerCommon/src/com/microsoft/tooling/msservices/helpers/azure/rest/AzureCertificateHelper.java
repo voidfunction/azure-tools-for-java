@@ -46,21 +46,6 @@ public class AzureCertificateHelper {
     }
 
     @NotNull
-    public static String executePollRequest(@NotNull String managementUrl,
-                                            @NotNull String path,
-                                            @NotNull ContentType contentType,
-                                            @NotNull String method,
-                                            @Nullable String postData,
-                                            @NotNull String pollPath,
-                                            @NotNull SSLSocketFactory sslSocketFactory,
-                                            @NotNull RestServiceManager manager)
-            throws AzureCmdException {
-        HttpsURLConnectionProvider sslConnectionProvider = getHttpsURLConnectionProvider(sslSocketFactory, manager);
-
-        return manager.executePollRequest(managementUrl, path, contentType, method, postData, pollPath, sslConnectionProvider);
-    }
-
-    @NotNull
     private static HttpsURLConnectionProvider getHttpsURLConnectionProvider(
             @NotNull final SSLSocketFactory sslSocketFactory,
             @NotNull final RestServiceManager manager) {

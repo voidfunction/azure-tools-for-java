@@ -35,7 +35,7 @@ public class Constants {
     public static String resourceGraph = "https://graph.windows.net/";
 //    public static String resourceARM = "https://management.core.windows.net/";
     public static String resourceARM = "https://management.azure.com/";
-    public static String resourceVault = "https://vault.azure.net/";
+    public static String resourceVault = "https://vault.azure.net";
 
 
 

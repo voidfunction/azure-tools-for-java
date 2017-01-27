@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class RestServiceManagerBaseImpl implements RestServiceManager {
+public class RestServiceManagerBaseImpl implements RestServiceManager {
     protected static class HttpResponse {
         private int code;
         private String message;

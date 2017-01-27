@@ -92,6 +92,7 @@ public class AdAuthManager {
                 ac1.acquireToken(AzureEnvironment.AZURE.getResourceManagerEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
 //                ac1.acquireToken(Constants.resourceGraph, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
                 ac1.acquireToken(AzureEnvironment.AZURE.getGraphEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
+                ac1.acquireToken(Constants.resourceVault, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
                 List<String> sids = new LinkedList<>();
                 for (Subscription s : AccessTokenAzureManager.getSubscriptions(tid)) {
                     sids.add(s.subscriptionId());

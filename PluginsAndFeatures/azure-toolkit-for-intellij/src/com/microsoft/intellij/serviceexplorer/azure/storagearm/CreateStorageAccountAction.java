@@ -30,7 +30,7 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 
 import java.util.List;
 

@@ -54,7 +54,6 @@ import javax.xml.xpath.XPathExpressionException;
 import com.microsoft.tooling.msservices.components.AppSettingsNames;
 import com.microsoft.tooling.msservices.helpers.OpenSSLHelper;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -85,7 +84,6 @@ import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.vm.*;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandle;
 import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.core.OperationStatusResponse;
 import com.microsoft.windowsazure.management.ManagementClient;
@@ -95,7 +93,6 @@ import com.microsoft.windowsazure.management.compute.models.DeploymentGetRespons
 import com.microsoft.windowsazure.management.compute.models.DeploymentSlot;
 import com.microsoft.windowsazure.management.compute.models.ServiceCertificateListResponse;
 import com.microsoft.windowsazure.management.models.SubscriptionGetResponse;
-import com.microsoft.windowsazure.management.network.NetworkManagementClient;
 import com.microsoft.windowsazure.management.storage.StorageManagementClient;
 import com.microsoftopentechnologies.azuremanagementutil.rest.SubscriptionTransformer;
 import org.apache.commons.net.ftp.FTP;
@@ -106,20 +103,18 @@ import sun.misc.BASE64Decoder;
 
 import java.util.logging.Logger;
 
-import static com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandleImpl;
-
 public abstract class AzureManager {
     public static final String DEFAULT_PROJECT = "DEFAULT_PROJECT";
     Logger logger = Logger.getLogger(AzureManager.class.getName());
-    Map<String, Subscription> subscriptions;
+    Map<String, Subscription> subscriptions = new HashMap<String, Subscription>();
     Map<String, ReentrantReadWriteLock> lockBySubscriptionId = new HashMap<String, ReentrantReadWriteLock>();
     Map<String, SSLSocketFactory> sslSocketFactoryBySubscriptionId;
     ReentrantReadWriteLock subscriptionMapLock = new ReentrantReadWriteLock(false);
     Map<UserInfo, ReentrantReadWriteLock> lockByUser;
     ReentrantReadWriteLock authDataLock = new ReentrantReadWriteLock(false);
-    Set<EventHelper.EventWaitHandleImpl> subscriptionsChangedHandles;
     Object projectObject;
-    private ReentrantReadWriteLock userMapLock = new ReentrantReadWriteLock(false);
+
+    protected static Map<Object, AzureManager> instances = new HashMap<>();
 
     @NotNull
     protected Subscription getSubscription(@NotNull String subscriptionId)
@@ -156,42 +151,6 @@ public abstract class AzureManager {
             }
 
             return lockBySubscriptionId.get(subscriptionId);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @NotNull
-    Optional<ReentrantReadWriteLock> getUserLock(@NotNull UserInfo userInfo) {
-        userMapLock.readLock().lock();
-
-        try {
-            if (lockByUser.containsKey(userInfo)) {
-                return Optional.of(lockByUser.get(userInfo));
-            } else {
-                return Optional.absent();
-            }
-        } finally {
-            userMapLock.readLock().unlock();
-        }
-    }
-
-    @NotNull
-    ReentrantReadWriteLock getUserLock(@NotNull UserInfo userInfo, boolean createOnMissing)
-            throws AzureCmdException {
-        Lock lock = createOnMissing ? userMapLock.writeLock() : userMapLock.readLock();
-        lock.lock();
-
-        try {
-            if (!lockByUser.containsKey(userInfo)) {
-                if (createOnMissing) {
-                    lockByUser.put(userInfo, new ReentrantReadWriteLock(false));
-                } else {
-                    throw new AzureCmdException("No access token for the specified User Information");
-                }
-            }
-
-            return lockByUser.get(userInfo);
         } finally {
             lock.unlock();
         }
@@ -265,10 +224,6 @@ public abstract class AzureManager {
                 throws Throwable;
     }
 
-    protected static Map<Object, AzureManager> instances = new HashMap<>();
-
-    private ReentrantReadWriteLock subscriptionsChangedLock = new ReentrantReadWriteLock(true);
-
     protected AzureManager(Object projectObject) {
         this.projectObject = projectObject;
         authDataLock.writeLock().lock();
@@ -282,7 +237,6 @@ public abstract class AzureManager {
             storeSubscriptions();
 
             lockByUser = new HashMap<UserInfo, ReentrantReadWriteLock>();
-            subscriptionsChangedHandles = new HashSet<EventWaitHandleImpl>();
         } catch (Exception e) {
             // TODO.shch: handle the exception
             logger.warning(e.getMessage());
@@ -395,98 +349,10 @@ public abstract class AzureManager {
         }
     }
 
-    public void setSelectedSubscriptions(@NotNull List<String> selectedList)
-            throws AzureCmdException {
-        authDataLock.writeLock().lock();
-
-        try {
-            for (String subscriptionId : subscriptions.keySet()) {
-                Subscription subscription = subscriptions.get(subscriptionId);
-                subscription.setSelected(selectedList.contains(subscriptionId));
-            }
-
-            storeSubscriptions();
-        } finally {
-            authDataLock.writeLock().unlock();
-        }
-
-        notifySubscriptionsChanged();
-    }
-
-    @NotNull
-    public EventWaitHandle registerSubscriptionsChanged()
-            throws AzureCmdException {
-        subscriptionsChangedLock.writeLock().lock();
-
-        try {
-            EventHelper.EventWaitHandleImpl handle = new EventHelper.EventWaitHandleImpl();
-
-            subscriptionsChangedHandles.add(handle);
-
-            return handle;
-        } finally {
-            subscriptionsChangedLock.writeLock().unlock();
-        }
-    }
-
-    public void unregisterSubscriptionsChanged(@NotNull EventWaitHandle handle)
-            throws AzureCmdException {
-        if (!(handle instanceof EventWaitHandleImpl)) {
-            throw new AzureCmdException("Invalid handle instance");
-        }
-
-        subscriptionsChangedLock.writeLock().lock();
-
-        try {
-            subscriptionsChangedHandles.remove(handle);
-        } finally {
-            subscriptionsChangedLock.writeLock().unlock();
-        }
-
-        ((EventWaitHandleImpl) handle).signalEvent();
-    }
-
     @NotNull
     public List<CloudService> getCloudServices(@NotNull String subscriptionId)
             throws AzureCmdException {
         return requestComputeSDK(subscriptionId, AzureSDKHelper.getCloudServices(subscriptionId));
-    }
-
-    @NotNull
-    public List<VirtualMachine> getVirtualMachines(@NotNull String subscriptionId)
-            throws AzureCmdException {
-        return requestComputeSDK(subscriptionId, AzureSDKHelper.getVirtualMachines(subscriptionId));
-    }
-
-    @NotNull
-    public VirtualMachine refreshVirtualMachineInformation(@NotNull VirtualMachine vm)
-            throws AzureCmdException {
-        return requestComputeSDK(vm.getSubscriptionId(), AzureSDKHelper.refreshVirtualMachineInformation(vm));
-    }
-
-    public void startVirtualMachine(@NotNull VirtualMachine vm)
-            throws AzureCmdException {
-        requestComputeSDK(vm.getSubscriptionId(), AzureSDKHelper.startVirtualMachine(vm));
-    }
-
-    public void shutdownVirtualMachine(@NotNull VirtualMachine vm, boolean deallocate)
-            throws AzureCmdException {
-        requestComputeSDK(vm.getSubscriptionId(), AzureSDKHelper.shutdownVirtualMachine(vm, deallocate));
-    }
-
-    public void restartVirtualMachine(@NotNull VirtualMachine vm)
-            throws AzureCmdException {
-        requestComputeSDK(vm.getSubscriptionId(), AzureSDKHelper.restartVirtualMachine(vm));
-    }
-
-    public void deleteVirtualMachine(@NotNull VirtualMachine vm, boolean deleteFromStorage)
-            throws AzureCmdException {
-        requestComputeSDK(vm.getSubscriptionId(), AzureSDKHelper.deleteVirtualMachine(vm, deleteFromStorage));
-    }
-
-    @NotNull
-    public byte[] downloadRDP(@NotNull VirtualMachine vm) throws AzureCmdException {
-        return requestComputeSDK(vm.getSubscriptionId(), AzureSDKHelper.downloadRDP(vm));
     }
 
     @NotNull
@@ -499,18 +365,6 @@ public abstract class AzureManager {
     public Boolean checkStorageNameAvailability(@NotNull final String subscriptionId, final String storageAccountName)
             throws AzureCmdException {
         return requestStorageSDK(subscriptionId, AzureSDKHelper.checkStorageNameAvailability(storageAccountName));
-    }
-
-    @NotNull
-    public List<VirtualMachineImage> getVirtualMachineImages(@NotNull String subscriptionId)
-            throws AzureCmdException {
-        return requestComputeSDK(subscriptionId, AzureSDKHelper.getVirtualMachineImages());
-    }
-
-    @NotNull
-    public List<VirtualMachineSize> getVirtualMachineSizes(@NotNull String subscriptionId)
-            throws AzureCmdException {
-        return requestManagementSDK(subscriptionId, AzureSDKHelper.getVirtualMachineSizes());
     }
 
     @NotNull
@@ -528,12 +382,6 @@ public abstract class AzureManager {
     public List<AffinityGroup> getAffinityGroups(@NotNull String subscriptionId)
             throws AzureCmdException {
         return requestManagementSDK(subscriptionId, AzureSDKHelper.getAffinityGroups());
-    }
-
-    @NotNull
-    public List<VirtualNetwork> getVirtualNetworks(@NotNull String subscriptionId)
-            throws AzureCmdException {
-        return requestNetworkSDK(subscriptionId, AzureSDKHelper.getVirtualNetworks(subscriptionId));
     }
 
     public OperationStatusResponse createStorageAccount(@NotNull StorageAccount storageAccount)
@@ -554,22 +402,6 @@ public abstract class AzureManager {
     public Boolean checkHostedServiceNameAvailability(@NotNull final String subscriptionId, final String hostedServiceName)
             throws AzureCmdException {
         return requestComputeSDK(subscriptionId, AzureSDKHelper.checkHostedServiceNameAvailability(hostedServiceName));
-    }
-
-    public void createVirtualMachine(@NotNull VirtualMachine virtualMachine, @NotNull VirtualMachineImage vmImage,
-                                     @NotNull StorageAccount storageAccount, @NotNull String virtualNetwork,
-                                     @NotNull String username, @NotNull String password, @NotNull byte[] certificate)
-            throws AzureCmdException {
-        requestComputeSDK(virtualMachine.getSubscriptionId(), AzureSDKHelper.createVirtualMachine(virtualMachine,
-                vmImage, storageAccount, virtualNetwork, username, password, certificate));
-    }
-
-    public void createVirtualMachine(@NotNull VirtualMachine virtualMachine, @NotNull VirtualMachineImage vmImage,
-                                     @NotNull String mediaLocation, @NotNull String virtualNetwork,
-                                     @NotNull String username, @NotNull String password, @NotNull byte[] certificate)
-            throws AzureCmdException {
-        requestComputeSDK(virtualMachine.getSubscriptionId(), AzureSDKHelper.createVirtualMachine(virtualMachine,
-                vmImage, mediaLocation, virtualNetwork, username, password, certificate));
     }
 
     public OperationStatusResponse createDeployment(@NotNull String subscriptionId, @NotNull String serviceName, @NotNull String slotName, @NotNull DeploymentCreateParameters parameters,
@@ -780,18 +612,6 @@ public abstract class AzureManager {
         }
     }
 
-    private void notifySubscriptionsChanged() {
-        subscriptionsChangedLock.readLock().lock();
-
-        try {
-            for (EventWaitHandleImpl handle : subscriptionsChangedHandles) {
-                handle.signalEvent();
-            }
-        } finally {
-            subscriptionsChangedLock.readLock().unlock();
-        }
-    }
-
     private boolean hasSSLSocketFactory(@NotNull String subscriptionId) {
         authDataLock.readLock().lock();
 
@@ -899,21 +719,6 @@ public abstract class AzureManager {
                         subscription.getManagementCertificate(), subscription.getServiceManagementUrl());
             }
         });
-    }
-
-    @NotNull
-    private <T> T requestNetworkSDK(@NotNull final String subscriptionId,
-    		@NotNull final SDKRequestCallback<T, NetworkManagementClient> requestCallback)
-    				throws AzureCmdException {
-    	return requestAzureSDK(subscriptionId, requestCallback, new AzureSDKClientProvider<NetworkManagementClient>() {
-    		@NotNull
-    		@Override
-    		public NetworkManagementClient getSSLClient(@NotNull Subscription subscription)
-    				throws Throwable {
-    			return AzureSDKHelper.getNetworkManagementClient(subscription.getId(),
-    					subscription.getManagementCertificate(), subscription.getServiceManagementUrl());
-    		}
-    	});
     }
     
     @NotNull

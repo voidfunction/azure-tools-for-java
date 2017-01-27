@@ -47,21 +47,6 @@ public class AzureAADHelper {
     }
 
     @NotNull
-    public static String executePollRequest(@NotNull String managementUrl,
-                                            @NotNull String path,
-                                            @NotNull ContentType contentType,
-                                            @NotNull String method,
-                                            @Nullable String postData,
-                                            @NotNull String pollPath,
-                                            @NotNull String accessToken,
-                                            @NotNull RestServiceManager manager)
-            throws AzureCmdException {
-        HttpsURLConnectionProvider sslConnectionProvider = getHttpsURLConnectionProvider(accessToken, manager);
-
-        return manager.executePollRequest(managementUrl, path, contentType, method, postData, pollPath, sslConnectionProvider);
-    }
-
-    @NotNull
     private static HttpsURLConnectionProvider getHttpsURLConnectionProvider(
             @NotNull final String accessToken,
             @NotNull final RestServiceManager manager) {

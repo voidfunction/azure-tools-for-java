@@ -21,34 +21,58 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.storage.StorageAccount;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.model.storage.StorageAccount;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
+import com.microsoft.tooling.msservices.model.storage.BlobContainer;
+import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
 
+import java.util.List;
 import java.util.Map;
 
-public class StorageNode extends ClientStorageNode {
+public class StorageNode extends AzureRefreshableNode {
+    private static final String STORAGE_ACCOUNT_ICON_PATH = "storageaccount.png";
+
+    private final StorageAccount storageAccount;
+    private String subscriptionId;
+
+    public StorageNode(Node parent, String subscriptionId, StorageAccount storageAccount) {
+        super(storageAccount.name(), storageAccount.name(), parent, STORAGE_ACCOUNT_ICON_PATH,  true);
+
+        this.subscriptionId = subscriptionId;
+        this.storageAccount = storageAccount;
+
+        loadActions();
+    }
+
     public class DeleteStorageAccountAction extends AzureNodeActionPromptListener {
         public DeleteStorageAccountAction() {
             super(StorageNode.this,
-                    String.format("This operation will delete storage account %s.\nAre you sure you want to continue?", storageAccount.getName()),
+                    String.format("This operation will delete storage account %s.\nAre you sure you want to continue?", storageAccount.name()),
                     "Deleting Storage Account");
         }
 
         @Override
-        protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
+        protected void azureNodeAction(NodeActionEvent e, @NotNull EventHelper.EventStateHandle stateHandle)
                 throws AzureCmdException {
             try {
-                AzureManagerImpl.getManager(getProject()).deleteStorageAccount(storageAccount);
-
+                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                // not signed in
+                if (azureManager == null) {
+                    return;
+                }
+                Azure azure = azureManager.getAzure(subscriptionId);
+                azure.storageAccounts().deleteByGroup(storageAccount.resourceGroupName(), storageAccount.name());
                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                     @Override
                     public void run() {
@@ -56,41 +80,45 @@ public class StorageNode extends ClientStorageNode {
                         getParent().removeDirectChildNode(StorageNode.this);
                     }
                 });
-            } catch (AzureCmdException ex) {
+            } catch (Exception ex) {
                 DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete storage account.", ex,
                         "MS Services - Error Deleting Storage Account", false, true);
             }
         }
 
         @Override
-        protected void onSubscriptionsChanged(NodeActionEvent e)
-                throws AzureCmdException {
+        protected void onSubscriptionsChanged(NodeActionEvent e) throws AzureCmdException {
         }
     }
 
-    private static final String WAIT_ICON_PATH = "storageaccount.png";
-    private static final String DEFAULT_STORAGE_FLAG = "(default)";
-    private final ClientStorageAccount storageAccount;
-
-    public StorageNode(Node parent, ClientStorageAccount sm, boolean isDefaultStorageAccount) {
-        super(sm.getName(), isDefaultStorageAccount ? sm.getName() + DEFAULT_STORAGE_FLAG : sm.getName(), parent, WAIT_ICON_PATH, sm, true);
-
-        this.storageAccount = sm;
-
-        loadActions();
-    }
-
     @Override
-    protected void refresh(@NotNull EventStateHandle eventState)
+    protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
             throws AzureCmdException {
         removeAllChildNodes();
 
-        fillChildren(eventState);
+        try {
+            List<BlobContainer> containerList = StorageClientSDKManager.getManager()
+                    .getBlobContainers(StorageClientSDKManager.getConnectionString(storageAccount));
+            for (BlobContainer blobContainer : containerList) {
+                addChildNode(new ContainerNode(this, storageAccount, blobContainer));
+            }
+        } catch (AzureCmdException ex) {
+            throw new AzureCmdException(ex.getMessage(), ex);
+        }
+    }
+
+    @Override
+    protected void onNodeClick(NodeActionEvent e) {
+        this.load();
     }
 
     @Override
     protected Map<String, Class<? extends NodeActionListener>> initActions() {
         addAction("Delete", new DeleteStorageAccountAction());
         return super.initActions();
+    }
+
+    public StorageAccount getStorageAccount() {
+        return storageAccount;
     }
 }

@@ -26,6 +26,7 @@ import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.OperatingSystemTypes;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
@@ -69,7 +70,8 @@ public class AzureSDKManager {
         return newStorageAccountWithGroup.withSku(SkuName.fromString(skuName)).create();
     }
 
-    public static VirtualMachine createVirtualMachine(String subscriptionId, @NotNull final com.microsoft.tooling.msservices.model.vm.VirtualMachine vm, @NotNull final VirtualMachineImage vmImage,
+    public static VirtualMachine createVirtualMachine(String subscriptionId, @NotNull String name, @NotNull String resourceGroup,
+                                                      @NotNull String size, @NotNull final VirtualMachineImage vmImage,
                                                       @NotNull final StorageAccount storageAccount, @NotNull final Network network,
                                                       @NotNull String subnet, @Nullable PublicIpAddress pip, boolean withNewPip,
                                                       @Nullable AvailabilitySet availabilitySet, boolean withNewAvailabilitySet,
@@ -77,16 +79,17 @@ public class AzureSDKManager {
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         Azure azure = azureManager.getAzure(subscriptionId);
         boolean isWindows = vmImage.osDiskImage().operatingSystem().equals(OperatingSystemTypes.WINDOWS);
-        VirtualMachine.DefinitionStages.WithPublicIpAddress withPublicIpAddress = azure.virtualMachines().define(vm.getName())
+        //TODO: resource group
+        VirtualMachine.DefinitionStages.WithPublicIpAddress withPublicIpAddress = azure.virtualMachines().define(name)
                 .withRegion(vmImage.location())
-                .withExistingResourceGroup(vm.getResourceGroup())
+                .withExistingResourceGroup(resourceGroup)
                 .withExistingPrimaryNetwork(network)
                 .withSubnet(subnet)
                 .withPrimaryPrivateIpAddressDynamic();
         VirtualMachine.DefinitionStages.WithOS withOS;
         if (pip == null) {
             if (withNewPip) {
-                withOS = withPublicIpAddress.withNewPrimaryPublicIpAddress(vm.getName() + "pip");
+                withOS = withPublicIpAddress.withNewPrimaryPublicIpAddress(name + "pip");
             } else {
                 withOS = withPublicIpAddress.withoutPrimaryPublicIpAddress();
             }
@@ -114,9 +117,9 @@ public class AzureSDKManager {
                 withCreate = withLinuxRootPasswordOrPublicKey.withSsh(publicKey);
             }
         }
-        withCreate = withCreate.withSize(vm.getSize()).withExistingStorageAccount(storageAccount);
+        withCreate = withCreate.withSize(size).withExistingStorageAccount(storageAccount);
         if (withNewAvailabilitySet) {
-            withCreate = withCreate.withNewAvailabilitySet(vm.getName() + "as");
+            withCreate = withCreate.withNewAvailabilitySet(name + "as");
         } else if (availabilitySet != null) {
             withCreate = withCreate.withExistingAvailabilitySet(availabilitySet);
         }

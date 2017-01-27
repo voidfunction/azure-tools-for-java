@@ -27,11 +27,9 @@ import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -39,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class VMArmModule extends AzureRefreshableNode {
+public class VMArmModule extends RefreshableNode {
     private static final String VM_SERVICE_MODULE_ID = com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule.class.getName();
     private static final String ICON_PATH = "virtualmachines.png";
     private static final String BASE_MODULE_NAME = "Virtual Machines";
@@ -49,8 +47,7 @@ public class VMArmModule extends AzureRefreshableNode {
     }
 
     @Override
-    protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
-            throws AzureCmdException {
+    protected void refreshItems() throws AzureCmdException {
         // remove all child nodes
         removeAllChildNodes();
         List<Pair<String, String>> failedSubscriptions = new ArrayList<>();
@@ -67,9 +64,6 @@ public class VMArmModule extends AzureRefreshableNode {
                 try {
                     Azure azure = azureManager.getAzure(sid);
                     List<VirtualMachine> virtualMachines = azure.virtualMachines().list();
-                    if (eventState.isEventTriggered()) {
-                        return;
-                    }
 
                     for (VirtualMachine vm : virtualMachines) {
                         addChildNode(new VMNode(this, sid, vm));

@@ -44,7 +44,7 @@ import com.microsoft.tooling.msservices.helpers.collections.ListChangedEvent;
 import com.microsoft.tooling.msservices.helpers.collections.ObservableList;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,12 +70,12 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
         // initialize azure service module
-        AzureServiceModule azureServiceModule = new AzureServiceModule(project, false);
+        AzureModule azureModule = new AzureModule(project);
 
-        HDInsightUtil.setHDInsightRootModule(azureServiceModule);
+        HDInsightUtil.setHDInsightRootModule(azureModule);
 
         // initialize with all the service modules
-        DefaultTreeModel treeModel = new DefaultTreeModel(initRoot(project, azureServiceModule));
+        DefaultTreeModel treeModel = new DefaultTreeModel(initRoot(project, azureModule));
         treeModelMap.put(project, treeModel);
 
         // initialize tree
@@ -96,25 +96,25 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         toolWindow.getComponent().add(new JBScrollPane(tree));
 
         // setup toolbar icons
-        addToolbarItems(toolWindow, azureServiceModule);
+        addToolbarItems(toolWindow, azureModule);
 
-        try {
-            azureServiceModule.registerSubscriptionsChanged();
-        } catch (AzureCmdException ignored) {
-        }
+//        try {
+//            azureModule.registerSubscriptionsChanged();
+//        } catch (AzureCmdException ignored) {
+//        }
     }
 
-    private DefaultMutableTreeNode initRoot(Project project, AzureServiceModule azureServiceModule) {
+    private DefaultMutableTreeNode initRoot(Project project, AzureModule azureModule) {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
 
         // add the azure service root service module
-        root.add(createTreeNode(azureServiceModule, project));
+        root.add(createTreeNode(azureModule, project));
 
         // kick-off asynchronous load of child nodes on all the modules
 //        if (AzureSettings.getSafeInstance(project).iswebAppLoaded()) {
-//            AzureServiceModule.webSiteConfigMap = AzureSettings.getSafeInstance(project).loadWebApps();
+//            azureModule.webSiteConfigMap = AzureSettings.getSafeInstance(project).loadWebApps();
 //        }
-        azureServiceModule.load();
+        azureModule.load();
 
         return root;
     }
@@ -325,7 +325,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         }
     }
 
-    private void addToolbarItems(ToolWindow toolWindow, final AzureServiceModule azureServiceModule) {
+    private void addToolbarItems(ToolWindow toolWindow, final AzureModule azureModule) {
         if (toolWindow instanceof ToolWindowEx) {
             ToolWindowEx toolWindowEx = (ToolWindowEx) toolWindow;
 
@@ -333,8 +333,8 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                     new AnAction("Refresh", "Refresh Service List", UIHelperImpl.loadIcon("refresh.png")) {
                         @Override
                         public void actionPerformed(AnActionEvent event) {
-//                            AzureServiceModule.webSiteConfigMap = null;
-                            azureServiceModule.load();
+//                            azureModule.webSiteConfigMap = null;
+                            azureModule.load();
                         }
                     },
                     new AnAction("Manage Subscriptions", "Manage Subscriptions", AllIcons.Ide.Link) {

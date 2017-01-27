@@ -22,11 +22,9 @@
 package com.microsoft.azure.hdinsight.serverexplore.hdinsightnode;
 
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 
-import java.util.List;
-
-public abstract class HDInsightRootModule extends AzureRefreshableNode {
+public abstract class HDInsightRootModule extends RefreshableNode {
 
     public HDInsightRootModule(String id, String name, Node parent, String iconPath) {
         super(id, name, parent, iconPath);

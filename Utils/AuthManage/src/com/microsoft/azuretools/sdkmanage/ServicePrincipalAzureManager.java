@@ -24,7 +24,12 @@
 
 package com.microsoft.azuretools.sdkmanage;
 
+import com.microsoft.aad.adal4j.AuthenticationContext;
+import com.microsoft.aad.adal4j.AuthenticationResult;
+import com.microsoft.aad.adal4j.ClientCredential;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
+import com.microsoft.azure.keyvault.KeyVaultClient;
+import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
@@ -32,11 +37,15 @@ import com.microsoft.azuretools.authmanage.CommonSettings;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManagerPersist;
 import com.microsoft.azuretools.utils.Pair;
+import com.microsoft.rest.credentials.ServiceClientCredentials;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class ServicePrincipalAzureManager extends AzureManagerBase {
 
@@ -123,5 +132,48 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
     public List<Tenant> getTenants() throws Exception {
         List<Tenant> tl = auth().tenants().list();
         return tl;
+    }
+
+    @Override
+    public KeyVaultClient getKeyVaultClient(String tid) throws Exception {
+        ServiceClientCredentials creds = new KeyVaultCredentials() {
+            @Override
+            public String doAuthenticate(String authorization, String resource, String scope) {
+                try {
+                    ExecutorService service = null;
+                    AuthenticationResult authenticationResult;
+                    try {
+                        ApplicationTokenCredentials credentials = (atc == null)
+                            ? ApplicationTokenCredentials.fromFile(credFile)
+                            : atc;
+
+                        service = Executors.newFixedThreadPool(1);
+                        AuthenticationContext context = new AuthenticationContext(authorization, false, service);
+                        ClientCredential clientCredential = new ClientCredential(credentials.getClientId(), credentials.getSecret());
+                        Future<AuthenticationResult> future = context.acquireToken(resource, clientCredential,null);
+                        authenticationResult = future.get();
+                    } finally {
+                        if (service != null) {
+                            service.shutdown();
+                        }
+                    }
+
+                    return authenticationResult.getAccessToken();
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        };
+
+        return new KeyVaultClient(creds);
+    }
+
+    @Override
+    public String getCurrentUserId() throws  Exception{
+        ApplicationTokenCredentials credentials = (atc == null)
+            ? ApplicationTokenCredentials.fromFile(credFile)
+            : atc;
+
+        return credentials.getClientId();
     }
 }
