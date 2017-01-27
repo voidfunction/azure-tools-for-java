@@ -24,6 +24,8 @@ package com.microsoft.azure.hdinsight.sdk.cluster;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.microsoft.azure.hdinsight.sdk.common.*;
+import com.microsoft.azuretools.authmanage.AdAuthManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.auth.UserInfo;
@@ -57,45 +59,39 @@ public class ClusterOperationImpl implements IClusterOperation {
      * @return cluster raw data info
      * @throws IOException
      */
-    public List<ClusterRawInfo> listCluster(final Subscription subscription) throws IOException, HDIException, AzureCmdException {
-        final AzureManagerImpl azureManager = AzureManagerImpl.getManager(project);
-        final UserInfo userInfo = azureManager.getUserInfo(subscription.getId());
+    public List<ClusterRawInfo> listCluster(final SubscriptionDetail subscription) throws IOException, HDIException, AzureCmdException {
+        try {
+            String response = requestWithToken(new RequestCallback<String>() {
+                @Override
+                public String execute() throws Throwable {
+                    String accessToken = AdAuthManager.getInstance().getAccessToken(subscription.getTenantId());
+                    return AzureAADHelper.executeRequest(CommonConstant.HDINSIGHT_CLUSTER_URI,
+                            String.format("api/Clusters/GetAll?subscriptionIds=%s;&_=%d", subscription.getSubscriptionId(), new Date().getTime()),
+                            RestServiceManager.ContentType.Json,
+                            "GET",
+                            null,
+                            accessToken,
+                            new RestServiceManagerBaseImpl());
+                }
+            });
+            return new AuthenticationErrorHandler<List<ClusterRawInfo>>() {
+                @Override
+                public List<ClusterRawInfo> execute(String response) {
+                    Type listType = new TypeToken<List<ClusterRawInfo>>() {
+                    }.getType();
+                    List<ClusterRawInfo> clusterRawInfoList = new Gson().fromJson(response, listType);
+                    return clusterRawInfoList;
+                }
+            }.run(response);
+        } catch (Throwable th) {
+            throw new AzureCmdException("Error listing HDInsight clusters", th);
+        }
+    }
 
-        String response = azureManager.requestWithToken(userInfo, new RequestCallback<String>() {
-            @Override
-            public String execute() throws Throwable {
-                String accessToken = azureManager.getAccessToken(userInfo);
-                return AzureAADHelper.executeRequest(CommonConstant.HDINSIGHT_CLUSTER_URI,
-                        String.format("api/Clusters/GetAll?subscriptionIds=%s;&_=%d", subscription.getId(), new Date().getTime()),
-                        RestServiceManager.ContentType.Json,
-                        "GET",
-                        null,
-                        accessToken,
-                        new RestServiceManagerBaseImpl() {
-                            @NotNull
-                            @Override
-                            public String executePollRequest(@NotNull String managementUrl,
-                                                             @NotNull String path,
-                                                             @NotNull ContentType contentType,
-                                                             @NotNull String method,
-                                                             @Nullable String postData,
-                                                             @NotNull String pollPath,
-                                                             @NotNull HttpsURLConnectionProvider sslConnectionProvider)
-                                    throws AzureCmdException {
-                                throw new UnsupportedOperationException();
-                            }
-                        });
-            }
-        });
-        return new AuthenticationErrorHandler<List<ClusterRawInfo>>() {
-            @Override
-            public List<ClusterRawInfo> execute(String response) {
-                Type listType = new TypeToken<List<ClusterRawInfo>>() {
-                }.getType();
-                List<ClusterRawInfo> clusterRawInfoList = new Gson().fromJson(response, listType);
-                return clusterRawInfoList;
-            }
-        }.run(response);
+    @NotNull
+    public <T> T requestWithToken(@NotNull final RequestCallback<T> requestCallback)
+            throws Throwable {
+        return requestCallback.execute();
     }
 
     /**
@@ -106,50 +102,37 @@ public class ClusterOperationImpl implements IClusterOperation {
      * @return cluster configuration info
      * @throws IOException
      */
-    public ClusterConfiguration getClusterConfiguration(final Subscription subscription, final String clusterId) throws IOException, HDIException, AzureCmdException {
-        final AzureManagerImpl azureManager = AzureManagerImpl.getManager(project);
-        final UserInfo userInfo = azureManager.getUserInfo(subscription.getId());
-
-        String response = azureManager.requestWithToken(userInfo, new RequestCallback<String>() {
-            @Override
-            public String execute() throws Throwable {
-                String accessToken = azureManager.getAccessToken(userInfo);
-                return AzureAADHelper.executeRequest(CommonConstant.MANAGEMENT_URI,
-                        String.format("%s/configurations?api-version=%s", clusterId.replaceAll("/+$", ""), VERSION),
-                        null,
-                        "GET",
-                        null,
-                        accessToken,
-                        new RestServiceManagerBaseImpl() {
-                            @NotNull
-                            @Override
-                            public String executePollRequest(@NotNull String managementUrl,
-                                                             @NotNull String path,
-                                                             @NotNull ContentType contentType,
-                                                             @NotNull String method,
-                                                             @Nullable String postData,
-                                                             @NotNull String pollPath,
-                                                             @NotNull HttpsURLConnectionProvider sslConnectionProvider)
-                                    throws AzureCmdException {
-                                throw new UnsupportedOperationException();
-                            }
-                        });
-            }
-        });
-        return new AuthenticationErrorHandler<ClusterConfiguration>() {
-            @Override
-            public ClusterConfiguration execute(String response) {
-                Type listType = new TypeToken<ClusterConfiguration>() {
-                }.getType();
-                ClusterConfiguration clusterConfiguration = new Gson().fromJson(response, listType);
-
-                if(clusterConfiguration == null || clusterConfiguration.getConfigurations() == null)
-                {
-                    return null;
+    public ClusterConfiguration getClusterConfiguration(final SubscriptionDetail subscription, final String clusterId) throws IOException, HDIException, AzureCmdException {
+        try {
+            String response = requestWithToken(new RequestCallback<String>() {
+                @Override
+                public String execute() throws Throwable {
+                    String accessToken = AdAuthManager.getInstance().getAccessToken(subscription.getTenantId());
+                    return AzureAADHelper.executeRequest(CommonConstant.MANAGEMENT_URI,
+                            String.format("%s/configurations?api-version=%s", clusterId.replaceAll("/+$", ""), VERSION),
+                            null,
+                            "GET",
+                            null,
+                            accessToken,
+                            new RestServiceManagerBaseImpl());
                 }
+            });
+            return new AuthenticationErrorHandler<ClusterConfiguration>() {
+                @Override
+                public ClusterConfiguration execute(String response) {
+                    Type listType = new TypeToken<ClusterConfiguration>() {
+                    }.getType();
+                    ClusterConfiguration clusterConfiguration = new Gson().fromJson(response, listType);
 
-                return clusterConfiguration;
-            }
-        }.run(response);
+                    if (clusterConfiguration == null || clusterConfiguration.getConfigurations() == null) {
+                        return null;
+                    }
+
+                    return clusterConfiguration;
+                }
+            }.run(response);
+        } catch (Throwable th) {
+            throw new AzureCmdException("Error getting cluster configuration", th);
+        }
     }
 }

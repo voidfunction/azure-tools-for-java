@@ -23,18 +23,16 @@ package com.microsoft.azure.hdinsight.serverexplore.hdinsightnode;
 
 import com.microsoft.azure.hdinsight.common.CommonConst;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
-import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 
 import java.util.List;
 
-public class StorageAccountNode extends AzureRefreshableNode {
+public class StorageAccountNode extends RefreshableNode {
     private static final String STORAGE_ACCOUNT_MODULE_ID = StorageAccountNode.class.getName();
     private static final String ICON_PATH = CommonConst.StorageAccountIConPath;
     private static final String DEFAULT_STORAGE_FLAG = "(default)";
@@ -48,7 +46,7 @@ public class StorageAccountNode extends AzureRefreshableNode {
     }
 
     @Override
-    protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
+    protected void refreshItems()
             throws AzureCmdException {
         removeAllChildNodes();
         //TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerStorageAccountExpand, null, null);

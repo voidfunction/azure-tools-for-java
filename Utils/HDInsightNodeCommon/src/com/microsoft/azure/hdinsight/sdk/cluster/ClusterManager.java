@@ -24,8 +24,8 @@ package com.microsoft.azure.hdinsight.sdk.cluster;
 import com.microsoft.azure.hdinsight.sdk.common.AggregatedException;
 import com.microsoft.azure.hdinsight.sdk.common.CommonRunnable;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.model.Subscription;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,7 +66,7 @@ public class ClusterManager {
      * @throws AggregatedException
      */
     public synchronized List<IClusterDetail> getHDInsightClusers(
-            List<Subscription> subscriptions, Object projectObject) throws AggregatedException {
+            List<SubscriptionDetail> subscriptions, Object projectObject) throws AggregatedException {
 
         return getClusterDetails(subscriptions, projectObject);
     }
@@ -80,7 +80,7 @@ public class ClusterManager {
      * @throws AggregatedException
      */
     public synchronized List<IClusterDetail> getHDInsightCausersWithSpecificType(
-            List<Subscription> subscriptions,
+            List<SubscriptionDetail> subscriptions,
             ClusterType type,
             String osType,
             Object projectObject) throws AggregatedException {
@@ -102,15 +102,15 @@ public class ClusterManager {
         return filterClusterDetailList;
     }
 
-    private List<IClusterDetail> getClusterDetails(List<Subscription> subscriptions, final Object project) throws AggregatedException {
+    private List<IClusterDetail> getClusterDetails(List<SubscriptionDetail> subscriptions, final Object project) throws AggregatedException {
         ExecutorService taskExecutor = Executors.newFixedThreadPool(MAX_CONCURRENT);
         final List<IClusterDetail> cachedClusterList = new ArrayList<>();
         final List<Exception> aggregateExceptions = new ArrayList<>();
 
-        for (Subscription subscription : subscriptions) {
-            taskExecutor.execute(new CommonRunnable<Subscription, Exception>(subscription) {
+        for (SubscriptionDetail subscription : subscriptions) {
+            taskExecutor.execute(new CommonRunnable<SubscriptionDetail, Exception>(subscription) {
                 @Override
-                public void runSpecificParameter(Subscription parameter) throws IOException, HDIException, AzureCmdException {
+                public void runSpecificParameter(SubscriptionDetail parameter) throws IOException, HDIException, AzureCmdException {
                     IClusterOperation clusterOperation = new ClusterOperationImpl(project);
                     List<ClusterRawInfo> clusterRawInfoList = clusterOperation.listCluster(parameter);
                     if (clusterRawInfoList != null) {

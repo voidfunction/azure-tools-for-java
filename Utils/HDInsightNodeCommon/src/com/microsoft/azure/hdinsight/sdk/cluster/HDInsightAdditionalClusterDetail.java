@@ -24,6 +24,7 @@ package com.microsoft.azure.hdinsight.sdk.cluster;
 import com.google.gson.annotations.Expose;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.tooling.msservices.model.Subscription;
 
 import java.io.IOException;
@@ -99,7 +100,7 @@ public class HDInsightAdditionalClusterDetail implements IClusterDetail {
     }
 
     @Override
-    public Subscription getSubscription() {
+    public SubscriptionDetail getSubscription() {
         return null;
     }
 

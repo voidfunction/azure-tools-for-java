@@ -26,6 +26,9 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.microsoft.azure.hdinsight.metadata.ClusterMetaDataService;
 import com.microsoft.azure.hdinsight.sdk.cluster.*;
+import com.microsoft.azuretools.authmanage.AdAuthManager;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azure.hdinsight.sdk.common.AggregatedException;
 import com.microsoft.azure.hdinsight.sdk.common.AuthenticationErrorHandler;
@@ -124,15 +127,21 @@ public class ClusterManagerEx {
         }
 
         isListClusterSuccess = false;
-        if (!AzureManagerImpl.getManager(project).authenticated()) {
+        com.microsoft.azuretools.sdkmanage.AzureManager manager;
+        try {
+            manager = AuthMethodManager.getInstance().getAzureManager();
+        } catch (Exception ex) {
+            manager = null;
+        }
+        // not authenticated
+        if (manager == null) {
             cachedClusterDetails.addAll(hdinsightAdditionalClusterDetails);
             cachedClusterDetails.addAll(emulatorClusterDetails);
             return cachedClusterDetails;
         }
-
-        List<Subscription> subscriptionList = AzureManagerImpl.getManager(project).getSubscriptionList();
-
+        List<SubscriptionDetail> subscriptionList = null;
         try {
+            subscriptionList = manager.getSubscriptionManager().getSubscriptionDetails();
             cachedClusterDetails = ClusterManager.getInstance().getHDInsightCausersWithSpecificType(subscriptionList, ClusterType.spark, OSTYPE, project);
             // TODO: so far we have not a good way to judge whether it is token expired as we have changed the way to list hdinsight clusters
             if (cachedClusterDetails.size() == 0) {
@@ -154,9 +163,11 @@ public class ClusterManagerEx {
 //                    }
 //                }
             }
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().showError("Falied to get HDInsight Clusters","List HDInsight Cluster Error");
         }
 
-        if (subscriptionList.isEmpty()) {
+        if (subscriptionList == null || subscriptionList.isEmpty()) {
             isSelectedSubscriptionExist = false;
         } else {
             isSelectedSubscriptionExist = true;
@@ -310,21 +321,5 @@ public class ClusterManagerEx {
         }
 
         return isReAuth;
-    }
-
-    private boolean isAuthSuccess() {
-
-        boolean isSuccess = false;
-        try {
-            AzureManager apiManager = AzureManagerImpl.getManager();
-            apiManager.authenticate();
-            isSuccess = true;
-        } catch (AzureCmdException e1) {
-            DefaultLoader.getUIHelper().showException(
-                    "An error occurred while attempting to sign in to your account.", e1,
-                    "Error Signing In", false, true);
-        } finally {
-            return isSuccess;
-        }
     }
 }

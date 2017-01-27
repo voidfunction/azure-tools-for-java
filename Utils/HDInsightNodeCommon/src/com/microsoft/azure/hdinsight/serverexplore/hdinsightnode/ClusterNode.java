@@ -30,17 +30,14 @@ import com.microsoft.azure.hdinsight.sdk.cluster.HDInsightAdditionalClusterDetai
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.CommonConstant;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.*;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
 
 import java.awt.*;
 import java.net.URI;
 import java.util.UUID;
 
-public class ClusterNode extends AzureRefreshableNode {
+public class ClusterNode extends RefreshableNode {
     private static final String CLUSTER_MODULE_ID = ClusterNode.class.getName();
     private static final String ICON_PATH = CommonConst.ClusterIConPath;
 
@@ -92,7 +89,7 @@ public class ClusterNode extends AzureRefreshableNode {
                     String resourceGroupName = clusterDetail.getResourceGroup();
                     if (resourceGroupName != null) {
                         String webPortHttpLink = String.format("https://portal.azure.com/#resource/subscriptions/%s/resourcegroups/%s/providers/Microsoft.HDInsight/clusters/%s",
-                                clusterDetail.getSubscription().getId(),
+                                clusterDetail.getSubscription().getSubscriptionId(),
                                 resourceGroupName,
                                 clusterDetail.getName());
                         openUrlLink(webPortHttpLink);
@@ -133,7 +130,7 @@ public class ClusterNode extends AzureRefreshableNode {
     }
 
     @Override
-    protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
+    protected void refreshItems()
             {
         removeAllChildNodes();
         if(!clusterDetail.isEmulator()) {

@@ -51,7 +51,7 @@ public class HDInsightRootModuleImpl extends HDInsightRootModule {
     }
 
     @Override
-    protected void refresh(@NotNull EventHelper.EventStateHandle eventState) throws AzureCmdException {
+    protected void refreshItems() throws AzureCmdException {
         synchronized (this) { //todo???
             removeAllChildNodes();
 //            TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerHDInsightNodeExpand, null, null);
