@@ -25,18 +25,22 @@
 package com.microsoft.azuretools.utils;
 
 
+import com.microsoft.azure.management.appservice.JavaVersion;
 import com.microsoft.azure.management.appservice.PublishingProfile;
 import com.microsoft.azure.management.appservice.WebApp;
+import com.microsoft.azure.management.appservice.WebContainer;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.concurrent.CancellationException;
 
 /**
@@ -49,34 +53,52 @@ public class WebAppUtils {
     private static String catalinaOpts = "-Dport.http=%HTTP_PLATFORM_PORT%";
     private static String aspScriptName = "getjdk.aspx";
 
-    public static void deployArtifact(String artifactName, String artifactPath, PublishingProfile pp, boolean toRoot) throws Exception {
+
+    private static FTPClient getFtpConnection(PublishingProfile pp) throws Exception {
+
         FTPClient ftp = new FTPClient();
+
+        System.out.println("\t\t" + pp.ftpUrl());
+        System.out.println("\t\t" + pp.ftpUsername());
+        System.out.println("\t\t" + pp.ftpPassword());
+
+        URI uri = URI.create("ftp://" + pp.ftpUrl());
+        ftp.connect(uri.getHost(), 21);
+        final int replyCode = ftp.getReplyCode();
+        if (!FTPReply.isPositiveCompletion(replyCode)) {
+            throw new ConnectException("Unable to connect to FTP server");
+        }
+
+        if (!ftp.login(pp.ftpUsername(), pp.ftpPassword())) {
+            throw new ConnectException("Unable to login to FTP server");
+        }
+
+        return ftp;
+    }
+
+    public static void deployArtifact(String artifactName, String artifactPath, PublishingProfile pp, boolean toRoot, IProgressIndicator indicator) throws Exception {
+        FTPClient ftp = null;
         try {
-            ftp.connect(pp.ftpUrl());
-            final int replyCode = ftp.getReplyCode();
+            if (indicator != null) indicator.setText("Connecting to FTP server...");
 
-            if (!FTPReply.isPositiveCompletion(replyCode)) {
-                throw new ConnectException("Unable to connect to FTP server");
-            }
-
-            if (!ftp.login(pp.ftpUsername(), pp.ftpPassword())) {
-                throw new ConnectException("Unable to login to FTP server");
-            }
+            ftp = getFtpConnection(pp);
 
             ftp.setFileType(FTP.BINARY_FILE_TYPE);
 
+            if (indicator != null) indicator.setText("Uploading the application...");
             InputStream input = new FileInputStream(artifactPath);
             if (toRoot) {
-                WebAppUtils.removeFtpDirectory(ftp, ftpRootPath + "ROOT", "");
-                ftp.storeFile(ftpRootPath + "ROOT.war", input);
+                WebAppUtils.removeFtpDirectory(ftp, ftpWebAppsPath + "ROOT", "");
+                ftp.storeFile(ftpWebAppsPath + "ROOT.war", input);
             } else {
-                WebAppUtils.removeFtpDirectory(ftp, ftpRootPath + artifactName, "");
-                ftp.storeFile(ftpRootPath + artifactName + ".war", input);
+                WebAppUtils.removeFtpDirectory(ftp, ftpWebAppsPath + artifactName, "");
+                ftp.storeFile(ftpWebAppsPath + artifactName + ".war", input);
             }
             input.close();
+            if (indicator != null) indicator.setText("Logging out of FTP server...");
             ftp.logout();
         } finally {
-            if (ftp.isConnected()) {
+            if (ftp != null && ftp.isConnected()) {
                 try {
                     ftp.disconnect();
                 } catch (IOException ignored) {
@@ -84,7 +106,6 @@ public class WebAppUtils {
             }
         }
     }
-
 
 
     public static void removeFtpDirectory(FTPClient ftpClient, String parentDir,
@@ -121,19 +142,19 @@ public class WebAppUtils {
         ftpClient.removeDirectory(dirToList);
     }
 
-    public static String getAbsolutePath(String dir) {
-        return "/" + dir.trim().replace('\\', '/').replaceAll("^/+", "").replaceAll("/+$", "");
-    }
+//    public static String getAbsolutePath(String dir) {
+//        return "/" + dir.trim().replace('\\', '/').replaceAll("^/+", "").replaceAll("/+$", "");
+//    }
 
-    public static void uploadJdkDownloadScript(FTPClient ftp, String jdkDownloadUrl) throws Exception {
+    private static void uploadJdkDownloadScript(FTPClient ftp, String jdkDownloadUrl) throws Exception {
 
         String aspxPageName = aspScriptName;
 
-        byte[] aspxPageData = generateAspxScriptForCustomJdk(jdkDownloadUrl);
+        byte[] aspxPageData = generateAspxScriptForCustomJdkDownload(jdkDownloadUrl);
         ftp.storeFile(ftpRootPath + aspxPageName, new ByteArrayInputStream(aspxPageData));
 
-        byte[] webXmlData = generateWebXmlForCustomJdk(aspxPageName, null);
-        ftp.storeFile(ftpRootPath + "web.config", new ByteArrayInputStream(webXmlData));
+        byte[] webConfigData = generateWebConfigForCustomJdkDownload(aspxPageName, null);
+        ftp.storeFile(ftpRootPath + "web.config", new ByteArrayInputStream(webConfigData));
     }
 
     public static boolean doesRemoteFileExist(FTPClient ftp, String path, String fileName) throws IOException {
@@ -154,22 +175,24 @@ public class WebAppUtils {
         return con.getResponseCode();
     }
 
-    private static void cleanupWorkerData(FTPClient ftp) {
-        try {
-            ftp.deleteFile(ftpRootPath + aspScriptName);
-            ftp.deleteFile(ftpRootPath + "jdk.zip");
-        } catch (Exception ex) {
-            ex.printStackTrace();
+    public static boolean isUrlAccessabel(String url) throws IOException {
+        HttpURLConnection.setFollowRedirects(false);
+        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+        con.setRequestMethod("HEAD");
+        if (con.getResponseCode() != HttpURLConnection.HTTP_OK) {
+            return false;
         }
+        return true;
     }
 
-    private static void cleanupJdk(FTPClient ftp, String customJdkFolderName) {
-        try {
-            if (customJdkFolderName != null) {
-                removeFtpDirectory(ftp, ftpRootPath, "jdk");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+    private static void cleanupWorkerData(FTPClient ftp) throws IOException {
+        ftp.deleteFile(ftpRootPath + aspScriptName);
+        ftp.deleteFile(ftpRootPath + "jdk.zip");
+    }
+
+    private static void cleanupJdk(FTPClient ftp, String customJdkFolderName) throws IOException {
+        if (customJdkFolderName != null) {
+            removeFtpDirectory(ftp, ftpRootPath, "jdk");
         }
     }
 
@@ -179,103 +202,152 @@ public class WebAppUtils {
         }
     }
 
-    public static void uploadJdk(WebApp webApp, String jdkDownloadUrl, IProgressIndicator indicator) throws Exception {
-        indicator.setText("Initializing FTP client...");
-        final FTPClient ftp = new FTPClient();
+    public static void deployCustomJdk(WebApp webApp, String jdkDownloadUrl, WebContainer webContainer, IProgressIndicator indicator) throws Exception {
+        FTPClient ftp = null;
         String customJdkFolderName =  null;
         try {
 
             PublishingProfile pp = webApp.getPublishingProfile();
-            try {
-                indicator.setText("Logging in...");
-                ftp.connect(pp.ftpUrl());
-                final int replyCode = ftp.getReplyCode();
-                if (!FTPReply.isPositiveCompletion(replyCode)) {
-                    ftp.disconnect();
-                }
-                if (!ftp.login(pp.ftpUsername(), pp.ftpPassword())) {
-                    ftp.logout();
-                }
-                ftp.setFileType(FTP.BINARY_FILE_TYPE);
-                ftp.setControlKeepAliveTimeout(3000);
+            ftp = getFtpConnection(pp);
+            ftp.setFileType(FTP.BINARY_FILE_TYPE);
+            ftp.setControlKeepAliveTimeout(3000);
 
-                indicator.setFraction(0.2);
+            // {{ debug only
+            System.out.println("\t\t" + pp.ftpUrl());
+            System.out.println("\t\t" + pp.ftpUsername());
+            System.out.println("\t\t" + pp.ftpPassword());
+            // }}
 
-                // {{ debug only
-                System.out.println("\t\t" + pp.ftpUrl());
-                System.out.println("\t\t" + pp.ftpUsername());
-                System.out.println("\t\t" + pp.ftpPassword());
-                // }}
+            // stop and restart web app
+            if (indicator != null) indicator.setText("Stopping the service...");
+            webApp.stop();
 
-                final String siteUrl = webApp.defaultHostName();
+            if (indicator != null) indicator.setText("Uploading scripts...");
+            uploadJdkDownloadScript(ftp, jdkDownloadUrl);
 
-                // stop and restart web app
-                indicator.setText("Stopping the site...");
-                webApp.stop();
-                indicator.setFraction(0.3);
+            if (indicator != null) indicator.setText("Starting the service...");
+            webApp.start();
 
-                indicator.setText("Uploading scripts...");
-                uploadJdkDownloadScript(ftp, jdkDownloadUrl);
-                indicator.setFraction(0.4);
-
-                indicator.setText("Starting the site...");
-                webApp.start();
-                indicator.setFraction(0.5);
-
-                // Polling report.txt...
-                indicator.setText("Checking the JDK gets downloaded and unpacked...");
-                int step = 0;
-                while (!doesRemoteFileExist(ftp, ftpRootPath, "report.txt")) {
-                    if (indicator.isCanceled()) throw new CancellationException("Canceled by user.");
-                    //if (step++ > 3) checkFreeSpaceAvailability(ftp);
-                    Thread.sleep(5000);
-                    sendGet(siteUrl);
-                }
-                indicator.setFraction(0.7);
-
-                indicator.setText("Checking status...");
-                OutputStream reportFileStream = new ByteArrayOutputStream();
-                ftp.retrieveFile("report.txt", reportFileStream);
-                String reportFileString = reportFileStream.toString();
-                if (reportFileString.startsWith("FAIL")) {
-                    String err = reportFileString.substring(reportFileString.indexOf(":"+1));
-                    throw new WebAppException(err);
-                }
-
-                // get top level jdk folder name (under jdk folder)
-                String jdkPath = ftpRootPath + "jdk/";
-                FTPFile[] ftpDirs = ftp.listDirectories(jdkPath);
-                if (ftpDirs.length != 1) {
-                    String err = "Bad JDK archive. Please make sure the JDK archive contains a single JDK folder. For example, 'my-jdk1.7.0_79.zip' archive should contain 'jdk1.7.0_79' folder only";
-                    throw new WebAppException(err);
-                }
-
-                customJdkFolderName = ftpDirs[0].getName();
-
-                //customJdkFolderName = jdkFolderName;
-
-                indicator.setFraction(1.0);
-            } finally {
-                cleanupWorkerData(ftp);
+            // Polling report.txt...
+            final String siteUrl = "https://" + webApp.defaultHostName();
+            if (indicator != null) indicator.setText("Checking the JDK gets downloaded and unpacked...");
+            int step = 0;
+            while (!doesRemoteFileExist(ftp, ftpRootPath, "report.txt")) {
+                if (indicator != null && indicator.isCanceled()) throw new CancellationException("Canceled by user.");
+                //if (step++ > 3) checkFreeSpaceAvailability(ftp);
+                Thread.sleep(5000);
+                sendGet(siteUrl);
             }
-        } finally {
+
+            if (indicator != null) indicator.setText("Checking status...");
+            OutputStream reportFileStream = new ByteArrayOutputStream();
+            ftp.retrieveFile("report.txt", reportFileStream);
+            String reportFileString = reportFileStream.toString();
+            if (reportFileString.startsWith("FAIL")) {
+                String err = reportFileString.substring(reportFileString.indexOf(":"+1));
+                throw new WebAppException(err);
+            }
+
+            // get top level jdk folder name (under jdk folder)
+            String jdkPath = ftpRootPath + "jdk/";
+            FTPFile[] ftpDirs = ftp.listDirectories(jdkPath);
+            if (ftpDirs.length != 1) {
+                String err = "Bad JDK archive. Please make sure the JDK archive contains a single JDK folder. For example, 'my-jdk1.7.0_79.zip' archive should contain 'jdk1.7.0_79' folder only";
+                throw new WebAppException(err);
+            }
+
+            customJdkFolderName = ftpDirs[0].getName();
+
+            uploadWebConfigForCustomJdk(ftp, webApp, customJdkFolderName, webContainer, indicator);
+        } catch (Exception ex){
             if (customJdkFolderName != null) {
                 cleanupJdk(ftp, customJdkFolderName);
             }
+            throw ex;
+        } finally {
+            cleanupWorkerData(ftp);
             if (ftp != null && ftp.isConnected()) {
-                try {
-                    ftp.logout();
-                    ftp.disconnect();
-                } catch (IOException ignored) {
-                    // go nothing
-                }
+                ftp.disconnect();
             }
         }
     }
 
-    public static byte[] prepareWebConfigForCustomJDKServer(String jdkPath, String serverPath) {
-        String arg = "-Djava.net.preferIPv4Stack=true  -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=127.0.0.1:%HTTP_PLATFORM_DEBUG_PORT% -Djetty.port=%HTTP_PLATFORM_PORT% -Djetty.base=\"" +
-                serverPath + "\" -Djetty.webapps=\"d:\\home\\site\\wwwroot\\webapps\"  -jar \"" + serverPath + "\\start.jar\" etc\\jetty-logging.xml";
+    private static void uploadWebConfigForCustomJdk(FTPClient ftp, WebApp webApp, String jdkFolderName, WebContainer webContainer, IProgressIndicator indicator) throws Exception {
+        if  (jdkFolderName == null || jdkFolderName.isEmpty()) {
+            throw new Exception("jdkFolderName is null or empty");
+        }
+
+        if(indicator != null) indicator.setText("Stopping the service...");
+        webApp.stop();
+
+        String webConfigFilename = "web.config";
+        if(indicator != null) indicator.setText("Deleting "+ webConfigFilename + "...");
+        ftp.deleteFile(ftpRootPath + webConfigFilename);
+
+        if (indicator != null) indicator.setText("Turning the App Service into java based...");
+        webApp.update().withJavaVersion(JavaVersion.JAVA_8_NEWEST).withWebContainer(webContainer).apply();
+
+        if(indicator != null) indicator.setText("Generating " + webConfigFilename + "...");
+        String jdkPath = "%HOME%\\site\\wwwroot\\jdk\\" + jdkFolderName;
+        String webContainerPath = generateWebContainerPath(webContainer);
+        byte[] webConfigData = generateWebConfigForCustomJDK(jdkPath, webContainerPath);
+
+        if(indicator != null) indicator.setText("Uploading " + webConfigFilename + "...");
+        ftp.storeFile(ftpRootPath + webConfigFilename,  new ByteArrayInputStream(webConfigData));
+
+        if(indicator != null) indicator.setText("Starting the service...");
+        webApp.start();
+    }
+
+//    public static String generateWebContainerPath(String webContainer, String version) {
+//        String path = "";
+//        if (webContainer.equalsIgnoreCase("TOMCAT")) {
+//            path = String.format("%s%s%s", "apache-tomcat", "-", version);
+//        } else {
+//            String version1 = version.substring(0, version.lastIndexOf('.') + 1);
+//            String version2 = version.substring(version.lastIndexOf('.') + 1, version.length());
+//            path = String.format("%s%s%s%s%s", "jetty-distribution", "-", version1, "v", version2);
+//        }
+//        return "%programfiles(x86)%\\" + path;
+//    }
+
+//    public static String generateWebContainerPath(WebContainer webContainer) {
+//        //String ver = webContainer.toString().indexOf("")
+//        if (webContainer.toString().startsWith(WebContainer.TOMCAT_7_0_NEWEST.toString())) {
+//            return "%AZURE_TOMCAT7_HOME%";
+//        } else if (webContainer.toString().startsWith(WebContainer.TOMCAT_8_0_NEWEST.toString())) {
+//            return "%AZURE_TOMCAT8_HOME%";
+//        } else if (webContainer.toString().startsWith(WebContainer.JETTY_9_1_NEWEST.toString())) {
+//            return "%AZURE_JETTY9_HOME%";
+//        }
+//
+//        return "UNDEFINED";
+//    }
+
+    public static String generateWebContainerPath(WebContainer webContainer) {
+        if (webContainer.equals(WebContainer.TOMCAT_7_0_NEWEST)) {
+            return "%AZURE_TOMCAT7_HOME%";
+        } else if (webContainer.equals(WebContainer.TOMCAT_8_0_NEWEST)) {
+            return "%AZURE_TOMCAT8_HOME%";
+        } else if (webContainer.equals(WebContainer.JETTY_9_1_NEWEST)) {
+            return "%AZURE_JETTY9_HOME%";
+        }
+        String binPath = "%programfiles(x86)%\\";
+        String wc = webContainer.toString();
+        int verIdx = wc.indexOf(" ") + 1;
+        String ver = wc.substring(verIdx);
+        if (wc.startsWith("tomcat")) {
+            return binPath + "apache-tomcat-" + ver;
+        } else if (wc.startsWith("jetty")) {
+            StringBuilder sbVer = new StringBuilder(ver);
+            sbVer.insert(ver.lastIndexOf('.')+1, 'v');
+            return binPath + "jetty-distribution-" + sbVer.toString();
+        }
+
+        return "%AZURE_TOMCAT8_HOME%";
+    }
+
+    public static byte[] generateWebConfigForCustomJDK(String jdkPath, String webContainerPath) {
         String jdkProcessPath = jdkPath.isEmpty() ? "%JAVA_HOME%\\bin\\java.exe" : jdkPath + "\\bin\\java.exe";
 
         StringBuilder sb = new StringBuilder();
@@ -286,16 +358,18 @@ public class WebAppUtils {
         sb.append("        <applicationInitialization remapManagedRequestsTo='/hostingstart.html'>\n");
         sb.append("        </applicationInitialization>\n");
 
-        if (serverPath.contains("tomcat")) {
-            sb.append("        <httpPlatform processPath='" + serverPath + "\\bin\\startup.bat" + "'>\n");
+        if (webContainerPath.toUpperCase().contains("TOMCAT")) {
+            sb.append("        <httpPlatform processPath='" + webContainerPath + "\\bin\\startup.bat" + "'>\n");
             sb.append("            <environmentVariables>\n");
             sb.append("                <environmentVariable name='JRE_HOME' value='"+ jdkPath +"'/>\n");
             sb.append("                <environmentVariable name='JAVA_OPTS' value='"+ javaOptsString +"'/>\n");
             sb.append("                <environmentVariable name='CATALINA_OPTS' value='"+ catalinaOpts +"'/>\n");
-            sb.append("                <environmentVariable name='CATALINA_HOME' value='" + serverPath + "'/>\n");
+            sb.append("                <environmentVariable name='CATALINA_HOME' value='" + webContainerPath + "'/>\n");
             sb.append("            </environmentVariables>\n");
             sb.append("        </httpPlatform>\n");
         } else {
+            String arg = "-Djava.net.preferIPv4Stack=true  -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=127.0.0.1:%HTTP_PLATFORM_DEBUG_PORT% -Djetty.port=%HTTP_PLATFORM_PORT% -Djetty.base=\"" +
+                    webContainerPath + "\" -Djetty.webapps=\"d:\\home\\site\\wwwroot\\webapps\"  -jar \"" + webContainerPath + "\\start.jar\" etc\\jetty-logging.xml";
             sb.append("        <httpPlatform processPath='"+ jdkProcessPath +"' startupTimeLimit='30' startupRetryCount='10' arguments='"+ arg +"'/>\n");
         }
         sb.append("    </system.webServer>\n");
@@ -312,7 +386,7 @@ public class WebAppUtils {
         return sb.toString().getBytes();
     }
 
-    public static byte[] generateAspxScriptForCustomJdk(String downloadPath) throws IOException {
+    public static byte[] generateAspxScriptForCustomJdkDownload(String jdkDownloadUrl) throws IOException {
 
         StringBuilder sb = new StringBuilder();
 
@@ -336,7 +410,7 @@ public class WebAppUtils {
 
         sb.append("static void getJdk() {\n");
         sb.append("    try {\n");
-        sb.append("         const string downloadSrc = @\"" + downloadPath + "\";\n");
+        sb.append("         const string downloadSrc = @\"" + jdkDownloadUrl + "\";\n");
         sb.append("         string downloadDst = Path.Combine(baseDir, \"jdk.zip\");\n");
         sb.append("         statusAdd(\"Deleting zip file, if any\");\n");
         sb.append("         if (File.Exists(downloadDst)) { File.Delete(downloadDst); }\n");
@@ -415,7 +489,7 @@ public class WebAppUtils {
         return sb.toString().getBytes();
     }
 
-    public static byte[] generateWebXmlForCustomJdk(String initializationPage, String[] assemblies) throws IOException {
+    public static byte[] generateWebConfigForCustomJdkDownload(String initializationPage, String[] assemblies) throws IOException {
 
         StringBuilder sb = new StringBuilder();
 
@@ -447,6 +521,4 @@ public class WebAppUtils {
         sb.append("</configuration>\n");
         return sb.toString().getBytes();
     }
-
-
 }

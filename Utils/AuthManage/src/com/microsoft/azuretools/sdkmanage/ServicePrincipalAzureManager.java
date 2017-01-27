@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ServicePrincipalAzureManager implements AzureManager {
+public class ServicePrincipalAzureManager extends AzureManagerBase {
 
     private static Settings settings;
     private final SubscriptionManager subscriptionManager;
@@ -75,7 +75,12 @@ public class ServicePrincipalAzureManager implements AzureManager {
     }
 
     public Azure getAzure(String sid) throws Exception {
-        return auth().withSubscription(sid);
+        if (sidToAzureMap.containsKey(sid)) {
+            return sidToAzureMap.get(sid);
+        }
+        Azure azure = auth().withSubscription(sid);
+        sidToAzureMap.put(sid, azure);
+        return azure;
     }
 
     public List<Subscription> getSubscriptions() throws Exception {

@@ -38,7 +38,7 @@ import com.microsoft.rest.credentials.TokenCredentials;
 import java.util.LinkedList;
 import java.util.List;
 
-public class AccessTokenAzureManager implements AzureManager {
+public class AccessTokenAzureManager extends AzureManagerBase {
 
     private final SubscriptionManager subscriptionManager;
 
@@ -66,8 +66,12 @@ public class AccessTokenAzureManager implements AzureManager {
 
     @Override
     public Azure getAzure(String sid) throws Exception {
+        if (sidToAzureMap.containsKey(sid)) {
+            return sidToAzureMap.get(sid);
+        }
         String tid = subscriptionManager.getSubscriptionTenant(sid);
         Azure azure = authTid(tid).withSubscription(sid);
+        sidToAzureMap.put(sid, azure);
         return azure;
     }
 

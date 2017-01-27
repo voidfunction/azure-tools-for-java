@@ -19,7 +19,7 @@ public enum AzulZuluModel {
     OpenJDK_180_u11("Azul Zulu, OpenJDK 1.8.0_u11", "http://azure.azulsystems.com/zulu/zulu1.8.0_11-8.2.0.1-win64.zip", true),
     OpenJDK_180_u05("Azul Zulu, OpenJDK 1.8.0_u05", "http://azure.azulsystems.com/zulu/zulu1.8.0_05-8.1.0.6-win64.zip", true),
 
-    OpenJDK_170_u121("Azul Zulu, OpenJDK 1.7.0_u121", "https://azure.azulsystems.com/zulu/zulu7.16.0.1-jdk7.0.121-win_x64.zip", false),
+    OpenJDK_170_u121("Azul Zulu, OpenJDK 1.7.0_u121", "http://azure.azulsystems.com/zulu/zulu7.16.0.1-jdk7.0.121-win_x64.zip", false),
     OpenJDK_170_u101("Azul Zulu, OpenJDK 1.7.0_u101", "http://azure.azulsystems.com/zulu/zulu7.14.0.5-jdk7.0.101-win_x64.zip", false),
     OpenJDK_170_u95("Azul Zulu, OpenJDK 1.7.0_u95", "http://azure.azulsystems.com/zulu/zulu7.13.0.1-jdk7.0.95-win_x64.zip", false),
     OpenJDK_170_u91("Azul Zulu, OpenJDK 1.7.0_u91", "http://azure.azulsystems.com/zulu/zulu1.7.0_91-7.12.0.3-win64.zip", false),
@@ -35,7 +35,7 @@ public enum AzulZuluModel {
     OpenJDK_170_u40("Azul Zulu, OpenJDK 1.7.0_u40", "http://azure.azulsystems.com/zulu/zulu1.7.0_40-7.1.0.0-win64.zip", true),
     OpenJDK_170_u25("Azul Zulu, OpenJDK 1.7.0_u25", "http://azure.azulsystems.com/zulu/zulu1.7.0_25-7.0.0.0-win64.zip", true),
 
-    OpenJDK_160_u87("Azul Zulu, OpenJDK 1.6.0_u87", "https://azure.azulsystems.com/zulu/zulu6.14.0.1-jdk6.0.87-win_x64.zip", false),
+    OpenJDK_160_u87("Azul Zulu, OpenJDK 1.6.0_u87", "http://azure.azulsystems.com/zulu/zulu6.14.0.1-jdk6.0.87-win_x64.zip", false),
     OpenJDK_160_u79("Azul Zulu, OpenJDK 1.6.0_u79", "http://azure.azulsystems.com/zulu/zulu6.12.0.2-jdk6.0.79-win_x64.zip", false),
     OpenJDK_160_u77("Azul Zulu, OpenJDK 1.6.0_u77", "http://azure.azulsystems.com/zulu/zulu6.11.0.2-jdk6.0.77-win_x64.zip", false),
     OpenJDK_160_u73("Azul Zulu, OpenJDK 1.6.0_u73", "http://azure.azulsystems.com/zulu/zulu1.6.0_73-6.10.0.3-win64.zip", false),

@@ -37,6 +37,7 @@ import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -198,6 +199,47 @@ public class AzureModelController {
         }
         azureModel.setResourceGroupToWebAppMap(rgwaMap);
         azureModel.setResourceGroupToAppServicePlanMap(rgspMap);
+    }
+
+    public static void addNewResourceGroup(SubscriptionDetail sd, ResourceGroup rg) {
+        AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(sd).add(rg);
+        // TODO:notify subscribers
+    }
+
+    public static void addNewWebAppToJustCreatedResourceGroup(ResourceGroup rg, WebApp webApp) {
+        // presume addNewResourceGroup goes first
+        AzureModel.getInstance().getResourceGroupToWebAppMap().put(rg, Arrays.asList(webApp));
+        // TODO:notify subscribers
+    }
+
+    public static void addNewWebAppToExistingResourceGroup(ResourceGroup rg, WebApp webApp) {
+        AzureModel.getInstance().getResourceGroupToWebAppMap().get(rg).add(webApp);
+        // TODO:notify subscribers
+    }
+
+    public static void removeWebAppFromExistingResourceGroup(ResourceGroup rg, WebApp webApp) {
+//        String waName = webApp.name().toLowerCase();
+//        List<WebApp> wal = AzureModel.getInstance().getResourceGroupToWebAppMap().get(rg);
+//        for (int i = 0; i < wal.size(); ++i) {
+//            if (wal.get(i).name().toLowerCase().equals(waName)) {
+//                wal.remove(i);
+//                break;
+//            }
+//        }
+        AzureModel.getInstance().getResourceGroupToWebAppMap().get(rg).remove(webApp);
+        // TODO:notify subscribers
+    }
+
+    public static void addNewAppServicePlanToJustCreatedResourceGroup(ResourceGroup rg, AppServicePlan appServicePlan) {
+        // presume addNewResourceGroup call goes first
+        AzureModel.getInstance().getResourceGroupToAppServicePlanMap().put(rg, Arrays.asList(appServicePlan));
+        // TODO:notify subscribers
+    }
+
+    public static void addNewAppServicePlanToExistingResourceGroup(ResourceGroup rg, AppServicePlan appServicePlan) {
+        // presume addNewResourceGroup call goes first
+        AzureModel.getInstance().getResourceGroupToAppServicePlanMap().get(rg).add(appServicePlan);
+        // TODO:notify subscribers
     }
 
 }
