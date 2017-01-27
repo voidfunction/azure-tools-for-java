@@ -28,23 +28,23 @@ import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
 @Name("Manage Subscriptions")
 public class ManageSubscriptionsAction extends NodeActionListener {
-    private AzureServiceModule azureServiceModule;
+    private AzureModule azureModule;
 
-    public ManageSubscriptionsAction(AzureServiceModule azureServiceModule) {
-        this.azureServiceModule = azureServiceModule;
+    public ManageSubscriptionsAction(AzureModule azureModule) {
+        this.azureModule = azureModule;
     }
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        final ManageSubscriptionPanel manageSubscriptionPanel = new ManageSubscriptionPanel((Project) azureServiceModule.getProject(), true);
-        final DefaultDialogWrapper subscriptionsDialog = new DefaultDialogWrapper((Project) azureServiceModule.getProject(),
+        final ManageSubscriptionPanel manageSubscriptionPanel = new ManageSubscriptionPanel((Project) azureModule.getProject(), true);
+        final DefaultDialogWrapper subscriptionsDialog = new DefaultDialogWrapper((Project) azureModule.getProject(),
                 manageSubscriptionPanel) {
             @Nullable
             @Override

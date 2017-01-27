@@ -33,37 +33,30 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageMod
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappsModule;
 
-import java.util.List;
-import java.util.Map;
-
-public class AzureServiceModule extends RefreshableNode {
-    private static final String AZURE_SERVICE_MODULE_ID = AzureServiceModule.class.getName();
+public class AzureModule extends RefreshableNode {
+    private static final String AZURE_SERVICE_MODULE_ID = AzureModule.class.getName();
     private static final String ICON_PATH = "azure_explorer.png";
     private static final String BASE_MODULE_NAME = "Azure";
 
     private Object project;
     private VMArmModule vmArmServiceModule;
-    private StorageModule storageServiceModule;
-    private com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageModule storageModule;
+    private StorageModule storageModule;
     private WebappsModule webappsModule;
     private HDInsightRootModule hdInsightModule;
-    private boolean storageModuleOnly;
     private EventWaitHandle subscriptionsChanged;
     private boolean registeredSubscriptionsChanged;
     private final Object subscriptionsChangedSync = new Object();
 
-    public AzureServiceModule(Object project, boolean storageModuleOnly) {
+    public AzureModule(Object project) {
         this(null, ICON_PATH, null);
         this.project = project;
-        this.storageModuleOnly = storageModuleOnly;
-        storageServiceModule = new StorageModule(this);
-        storageModule = new com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageModule(this);
+        storageModule = new StorageModule(this);
         webappsModule = new WebappsModule(this);
         //hdInsightModule = new HDInsightRootModule(this);
         vmArmServiceModule = new VMArmModule(this);
     }
 
-    public AzureServiceModule(Node parent, String iconPath, Object data) {
+    public AzureModule(Node parent, String iconPath, Object data) {
         super(AZURE_SERVICE_MODULE_ID, BASE_MODULE_NAME, parent, iconPath);
     }
 
@@ -99,14 +92,6 @@ public class AzureServiceModule extends RefreshableNode {
                 addChildNode(vmArmServiceModule);
             }
             vmArmServiceModule.load();
-        }
-
-        if (!storageServiceModule.isLoading()) {
-            if (!isDirectChild(storageServiceModule)) {
-                addChildNode(storageServiceModule);
-            }
-
-            storageServiceModule.load();
         }
         if (!storageModule.isLoading()) {
             if (!isDirectChild(storageModule)) {
@@ -159,9 +144,8 @@ public class AzureServiceModule extends RefreshableNode {
                                 public void run() {
                                     if (registeredSubscriptionsChanged) {
                                         removeAllChildNodes();
-                                        vmArmServiceModule = new VMArmModule(AzureServiceModule.this);
-                                        storageServiceModule = new StorageModule(AzureServiceModule.this);
-                                        hdInsightModule = hdInsightModule.getNewNode(AzureServiceModule.this);
+                                        vmArmServiceModule = new VMArmModule(AzureModule.this);
+                                        hdInsightModule = hdInsightModule.getNewNode(AzureModule.this);
 
                                         load();
                                     }

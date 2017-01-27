@@ -29,7 +29,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.BlobModule;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageNode;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageNode;
 
 @Name("Create blob container")
 public class CreateBlobContainer extends NodeActionListener {

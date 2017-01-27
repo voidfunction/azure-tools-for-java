@@ -36,7 +36,7 @@ import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 import com.microsoft.intellij.common.CommonConst;
 
 import javax.swing.*;
@@ -47,8 +47,8 @@ import static com.microsoft.azure.hdinsight.common.MessageInfoType.*;
 public class HDInsightUtil {
     private static final Object LOCK = new Object();
 
-    public static void setHDInsightRootModule(@NotNull AzureServiceModule azureServiceModule) {
-        HDInsightRootModuleImpl hdInsightRootModule =  new HDInsightRootModuleImpl(azureServiceModule);
+    public static void setHDInsightRootModule(@NotNull AzureModule azureModule) {
+        HDInsightRootModuleImpl hdInsightRootModule =  new HDInsightRootModuleImpl(azureModule);
 
         // add telemetry for HDInsight Node
         hdInsightRootModule.addClickActionListener(new NodeActionListener() {
@@ -58,7 +58,7 @@ public class HDInsightUtil {
             }
         });
 
-        azureServiceModule.setHdInsightModule(hdInsightRootModule);
+        azureModule.setHdInsightModule(hdInsightRootModule);
     }
 
     @Nullable

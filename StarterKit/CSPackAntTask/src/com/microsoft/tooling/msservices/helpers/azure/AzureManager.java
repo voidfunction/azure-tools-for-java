@@ -93,7 +93,6 @@ import com.microsoft.windowsazure.management.compute.models.DeploymentGetRespons
 import com.microsoft.windowsazure.management.compute.models.DeploymentSlot;
 import com.microsoft.windowsazure.management.compute.models.ServiceCertificateListResponse;
 import com.microsoft.windowsazure.management.models.SubscriptionGetResponse;
-import com.microsoft.windowsazure.management.network.NetworkManagementClient;
 import com.microsoft.windowsazure.management.storage.StorageManagementClient;
 import com.microsoftopentechnologies.azuremanagementutil.rest.SubscriptionTransformer;
 import org.apache.commons.net.ftp.FTP;
@@ -383,12 +382,6 @@ public abstract class AzureManager {
     public List<AffinityGroup> getAffinityGroups(@NotNull String subscriptionId)
             throws AzureCmdException {
         return requestManagementSDK(subscriptionId, AzureSDKHelper.getAffinityGroups());
-    }
-
-    @NotNull
-    public List<VirtualNetwork> getVirtualNetworks(@NotNull String subscriptionId)
-            throws AzureCmdException {
-        return requestNetworkSDK(subscriptionId, AzureSDKHelper.getVirtualNetworks(subscriptionId));
     }
 
     public OperationStatusResponse createStorageAccount(@NotNull StorageAccount storageAccount)
@@ -726,21 +719,6 @@ public abstract class AzureManager {
                         subscription.getManagementCertificate(), subscription.getServiceManagementUrl());
             }
         });
-    }
-
-    @NotNull
-    private <T> T requestNetworkSDK(@NotNull final String subscriptionId,
-    		@NotNull final SDKRequestCallback<T, NetworkManagementClient> requestCallback)
-    				throws AzureCmdException {
-    	return requestAzureSDK(subscriptionId, requestCallback, new AzureSDKClientProvider<NetworkManagementClient>() {
-    		@NotNull
-    		@Override
-    		public NetworkManagementClient getSSLClient(@NotNull Subscription subscription)
-    				throws Throwable {
-    			return AzureSDKHelper.getNetworkManagementClient(subscription.getId(),
-    					subscription.getManagementCertificate(), subscription.getServiceManagementUrl());
-    		}
-    	});
     }
     
     @NotNull
