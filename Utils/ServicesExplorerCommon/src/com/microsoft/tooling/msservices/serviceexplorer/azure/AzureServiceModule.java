@@ -26,12 +26,10 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappsModule;
 
@@ -44,7 +42,6 @@ public class AzureServiceModule extends RefreshableNode {
     private static final String BASE_MODULE_NAME = "Azure";
 
     private Object project;
-    private VMServiceModule vmServiceModule;
     private VMArmModule vmArmServiceModule;
     private StorageModule storageServiceModule;
     private com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageModule storageModule;
@@ -63,9 +60,6 @@ public class AzureServiceModule extends RefreshableNode {
         storageModule = new com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageModule(this);
         webappsModule = new WebappsModule(this);
         //hdInsightModule = new HDInsightRootModule(this);
-        if (!storageModuleOnly) {
-            vmServiceModule = new VMServiceModule(this);
-        }
         vmArmServiceModule = new VMArmModule(this);
     }
 
@@ -100,16 +94,6 @@ public class AzureServiceModule extends RefreshableNode {
         // already been added first because this method can be called
         // multiple times when the user clicks the "Refresh" context
         // menu item
-        if (!storageModuleOnly) {
-            if (!vmServiceModule.isLoading()) {
-                if (!isDirectChild(vmServiceModule)) {
-                    addChildNode(vmServiceModule);
-                }
-
-                vmServiceModule.load();
-            }
-        }
-
         if (!vmArmServiceModule.isLoading()) {
             if (!isDirectChild(vmArmServiceModule)) {
                 addChildNode(vmArmServiceModule);
@@ -175,9 +159,6 @@ public class AzureServiceModule extends RefreshableNode {
                                 public void run() {
                                     if (registeredSubscriptionsChanged) {
                                         removeAllChildNodes();
-                                        if (!storageModuleOnly) {
-                                            vmServiceModule = new VMServiceModule(AzureServiceModule.this);
-                                        }
                                         vmArmServiceModule = new VMArmModule(AzureServiceModule.this);
                                         storageServiceModule = new StorageModule(AzureServiceModule.this);
                                         hdInsightModule = hdInsightModule.getNewNode(AzureServiceModule.this);

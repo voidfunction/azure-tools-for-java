@@ -19,7 +19,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.intellij.wizards.createvm;
+package com.microsoft.intellij.wizards.createarmvm;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
@@ -36,17 +36,13 @@ import com.intellij.util.Consumer;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.OperatingSystemTypes;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.VMWizardModel;
-import com.microsoft.intellij.wizards.createarmvm.CreateVMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachineSize;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -64,7 +60,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class MachineSettingsStep extends WizardStep<VMWizardModel> {
     private JPanel rootPanel;
@@ -197,18 +192,14 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
         rootPanel.revalidate();
 
         boolean isLinux;
-        if (model instanceof com.microsoft.intellij.wizards.createvm.CreateVMWizardModel) {
-            VirtualMachineImage virtualMachineImage = ((com.microsoft.intellij.wizards.createvm.CreateVMWizardModel) model).getVirtualMachineImage();
-            isLinux = virtualMachineImage.getOperatingSystemType().equals("Linux");
-        } else {
-            try {
-                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-                azure = azureManager.getAzure(((CreateVMWizardModel) model).getSubscription().getSubscriptionId());
-            } catch (Exception ex) {
-                DefaultLoader.getUIHelper().logError("An error occurred when trying to authenticate\n\n" + ex.getMessage(), ex);
-            }
-            isLinux = ((CreateVMWizardModel) model).getVirtualMachineImage().osDiskImage().operatingSystem().equals(OperatingSystemTypes.LINUX);
+
+        try {
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            azure = azureManager.getAzure(((VMWizardModel) model).getSubscription().getSubscriptionId());
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().logError("An error occurred when trying to authenticate\n\n" + ex.getMessage(), ex);
         }
+        isLinux = model.getVirtualMachineImage().osDiskImage().operatingSystem().equals(OperatingSystemTypes.LINUX);
         if (isLinux) {
             certificateCheckBox.setEnabled(true);
             passwordCheckBox.setEnabled(true);
@@ -234,49 +225,36 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
                 public void run(@NotNull ProgressIndicator progressIndicator) {
                     progressIndicator.setIndeterminate(true);
 
-                    try {
-                        final List<VirtualMachineSize> virtualMachineSizes;
-                        if (model instanceof com.microsoft.intellij.wizards.createarmvm.CreateVMWizardModel) {
-                            PagedList<com.microsoft.azure.management.compute.VirtualMachineSize> sizes = azure.virtualMachines().sizes().listByRegion(((CreateVMWizardModel) model).getRegion());
-                            virtualMachineSizes = sizes.stream()
-                                    .map(p1 -> new com.microsoft.tooling.msservices.model.vm.VirtualMachineSize(p1.name(), p1.name(), p1.numberOfCores(), p1.memoryInMB()))
-                                    .collect(Collectors.toList());
-                        } else {
-                            virtualMachineSizes = AzureManagerImpl.getManager(project).getVirtualMachineSizes(((com.microsoft.intellij.wizards.createvm.CreateVMWizardModel)model).getSubscription().getId());
+                    PagedList<com.microsoft.azure.management.compute.VirtualMachineSize> sizes = azure.virtualMachines().sizes().listByRegion(((VMWizardModel) model).getRegion());
+                    Collections.sort(sizes, new Comparator<VirtualMachineSize>() {
+                        @Override
+                        public int compare(VirtualMachineSize t0, VirtualMachineSize t1) {
+                            if (t0.name().contains("Basic") && t1.name().contains("Basic")) {
+                                return t0.name().compareTo(t1.name());
+                            } else if (t0.name().contains("Basic")) {
+                                return -1;
+                            } else if (t1.name().contains("Basic")) {
+                                return 1;
+                            }
+
+                            int coreCompare = Integer.valueOf(t0.numberOfCores()).compareTo(t1.numberOfCores());
+
+                            if (coreCompare == 0) {
+                                return Integer.valueOf(t0.memoryInMB()).compareTo(t1.memoryInMB());
+                            } else {
+                                return coreCompare;
+                            }
                         }
-                        Collections.sort(virtualMachineSizes, new Comparator<VirtualMachineSize>() {
-                            @Override
-                            public int compare(VirtualMachineSize t0, VirtualMachineSize t1) {
-                                if (t0.getName().contains("Basic") && t1.getName().contains("Basic")) {
-                                    return t0.getName().compareTo(t1.getName());
-                                } else if (t0.getName().contains("Basic")) {
-                                    return -1;
-                                } else if (t1.getName().contains("Basic")) {
-                                    return 1;
-                                }
+                    });
 
-                                int coreCompare = Integer.valueOf(t0.getCores()).compareTo(t1.getCores());
+                    ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+                        @Override
+                        public void run() {
+                            vmSizeComboBox.setModel(new DefaultComboBoxModel(sizes.toArray()));
 
-                                if (coreCompare == 0) {
-                                    return Integer.valueOf(t0.getMemoryInMB()).compareTo(t1.getMemoryInMB());
-                                } else {
-                                    return coreCompare;
-                                }
-                            }
-                        });
-
-                        ApplicationManager.getApplication().invokeAndWait(new Runnable() {
-                            @Override
-                            public void run() {
-                                vmSizeComboBox.setModel(new DefaultComboBoxModel(virtualMachineSizes.toArray()));
-
-                                selectDefaultSize();
-                            }
-                        }, ModalityState.any());
-                    } catch (AzureCmdException e) {
-                        String msg = "An error occurred while attempting to load the VM sizes list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-                        PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
-                    }
+                            selectDefaultSize();
+                        }
+                    }, ModalityState.any());
                 }
             });
         } else {

@@ -22,14 +22,15 @@
 package com.microsoft.intellij.wizards.createarmvm;
 
 import com.intellij.ui.wizard.WizardDialog;
+import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class CreateVMWizard extends WizardDialog<CreateVMWizardModel> {
+public class CreateVMWizard extends WizardDialog<VMWizardModel> {
     public CreateVMWizard(VMArmModule node) {
-        super(true, true, new CreateVMWizardModel(node));
+        super(true, true, new VMWizardModel(node));
     }
 
     @Override

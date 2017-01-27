@@ -44,10 +44,10 @@ import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
 import com.microsoft.intellij.forms.CreateVirtualNetworkForm;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachine;
 import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import org.jetbrains.annotations.NotNull;
@@ -62,13 +62,13 @@ import java.util.List;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
-public class SettingsStep extends WizardStep<CreateVMWizardModel> {
+public class SettingsStep extends WizardStep<VMWizardModel> {
     private static final String CREATE_NEW = "<< Create new >>";
     private final String NONE = "(None)";
 
     private final Node parent;
     private Project project;
-    private CreateVMWizardModel model;
+    private VMWizardModel model;
     private JPanel rootPanel;
     private JList createVmStepsList;
     private JEditorPane imageDescriptionTextPane;
@@ -92,7 +92,7 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
 
     private Azure azure;
 
-    public SettingsStep(final CreateVMWizardModel model, Project project, Node parent) {
+    public SettingsStep(final VMWizardModel model, Project project, Node parent) {
         super("Settings", null, null);
 
         this.parent = parent;
@@ -710,16 +710,6 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
                 progressIndicator.setIndeterminate(true);
 
                 try {
-                    VirtualMachine virtualMachine = new VirtualMachine(
-                            model.getName(),
-                            resourceGroupName,
-                            null, // field not used for ARM vm anyway
-                            model.getSubnet(),
-                            model.getSize().getName(),
-                            VirtualMachine.Status.Unknown,
-                            model.getSubscription().getSubscriptionId()
-                    );
-
                     String certificate = model.getCertificate();
                     byte[] certData = new byte[0];
 
@@ -758,7 +748,9 @@ public class SettingsStep extends WizardStep<CreateVMWizardModel> {
 //                    }
                     final com.microsoft.azure.management.compute.VirtualMachine vm = AzureSDKManager
                             .createVirtualMachine(model.getSubscription().getSubscriptionId(),
-                                    virtualMachine,
+                                    model.getName(),
+                                    resourceGroupName,
+                                    model.getSize().name(),
                                     model.getVirtualMachineImage(),
                                     storageAccount,
                                     model.getVirtualNetwork(),

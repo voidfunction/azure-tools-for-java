@@ -39,6 +39,7 @@ import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import javax.swing.*;
@@ -53,7 +54,7 @@ import java.util.List;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
-public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
+public class SelectImageStep extends WizardStep<VMWizardModel> {
     private JPanel rootPanel;
     private JList createVmStepsList;
     private JComboBox regionComboBox;
@@ -65,7 +66,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     private JComboBox skuComboBox;
     private JPanel imageInfoPanel;
 
-    private CreateVMWizardModel model;
+    private VMWizardModel model;
     private Azure azure;
 
     private void createUIComponents() {
@@ -88,7 +89,7 @@ public class SelectImageStep extends WizardStep<CreateVMWizardModel> {
     List<VirtualMachineImage> virtualMachineImages;
     private Project project;
 
-    public SelectImageStep(final CreateVMWizardModel model, Project project) {
+    public SelectImageStep(final VMWizardModel model, Project project) {
         super("Select a Virtual Machine Image", null, null);
 
         this.model = model;

@@ -357,43 +357,6 @@ public abstract class AzureManager {
     }
 
     @NotNull
-    public List<VirtualMachine> getVirtualMachines(@NotNull String subscriptionId)
-            throws AzureCmdException {
-        return requestComputeSDK(subscriptionId, AzureSDKHelper.getVirtualMachines(subscriptionId));
-    }
-
-    @NotNull
-    public VirtualMachine refreshVirtualMachineInformation(@NotNull VirtualMachine vm)
-            throws AzureCmdException {
-        return requestComputeSDK(vm.getSubscriptionId(), AzureSDKHelper.refreshVirtualMachineInformation(vm));
-    }
-
-    public void startVirtualMachine(@NotNull VirtualMachine vm)
-            throws AzureCmdException {
-        requestComputeSDK(vm.getSubscriptionId(), AzureSDKHelper.startVirtualMachine(vm));
-    }
-
-    public void shutdownVirtualMachine(@NotNull VirtualMachine vm, boolean deallocate)
-            throws AzureCmdException {
-        requestComputeSDK(vm.getSubscriptionId(), AzureSDKHelper.shutdownVirtualMachine(vm, deallocate));
-    }
-
-    public void restartVirtualMachine(@NotNull VirtualMachine vm)
-            throws AzureCmdException {
-        requestComputeSDK(vm.getSubscriptionId(), AzureSDKHelper.restartVirtualMachine(vm));
-    }
-
-    public void deleteVirtualMachine(@NotNull VirtualMachine vm, boolean deleteFromStorage)
-            throws AzureCmdException {
-        requestComputeSDK(vm.getSubscriptionId(), AzureSDKHelper.deleteVirtualMachine(vm, deleteFromStorage));
-    }
-
-    @NotNull
-    public byte[] downloadRDP(@NotNull VirtualMachine vm) throws AzureCmdException {
-        return requestComputeSDK(vm.getSubscriptionId(), AzureSDKHelper.downloadRDP(vm));
-    }
-
-    @NotNull
     public List<StorageAccount> getStorageAccounts(@NotNull String subscriptionId, boolean detailed)
             throws AzureCmdException {
         return requestStorageSDK(subscriptionId, AzureSDKHelper.getStorageAccounts(subscriptionId, detailed));
@@ -403,18 +366,6 @@ public abstract class AzureManager {
     public Boolean checkStorageNameAvailability(@NotNull final String subscriptionId, final String storageAccountName)
             throws AzureCmdException {
         return requestStorageSDK(subscriptionId, AzureSDKHelper.checkStorageNameAvailability(storageAccountName));
-    }
-
-    @NotNull
-    public List<VirtualMachineImage> getVirtualMachineImages(@NotNull String subscriptionId)
-            throws AzureCmdException {
-        return requestComputeSDK(subscriptionId, AzureSDKHelper.getVirtualMachineImages());
-    }
-
-    @NotNull
-    public List<VirtualMachineSize> getVirtualMachineSizes(@NotNull String subscriptionId)
-            throws AzureCmdException {
-        return requestManagementSDK(subscriptionId, AzureSDKHelper.getVirtualMachineSizes());
     }
 
     @NotNull
@@ -458,22 +409,6 @@ public abstract class AzureManager {
     public Boolean checkHostedServiceNameAvailability(@NotNull final String subscriptionId, final String hostedServiceName)
             throws AzureCmdException {
         return requestComputeSDK(subscriptionId, AzureSDKHelper.checkHostedServiceNameAvailability(hostedServiceName));
-    }
-
-    public void createVirtualMachine(@NotNull VirtualMachine virtualMachine, @NotNull VirtualMachineImage vmImage,
-                                     @NotNull StorageAccount storageAccount, @NotNull String virtualNetwork,
-                                     @NotNull String username, @NotNull String password, @NotNull byte[] certificate)
-            throws AzureCmdException {
-        requestComputeSDK(virtualMachine.getSubscriptionId(), AzureSDKHelper.createVirtualMachine(virtualMachine,
-                vmImage, storageAccount, virtualNetwork, username, password, certificate));
-    }
-
-    public void createVirtualMachine(@NotNull VirtualMachine virtualMachine, @NotNull VirtualMachineImage vmImage,
-                                     @NotNull String mediaLocation, @NotNull String virtualNetwork,
-                                     @NotNull String username, @NotNull String password, @NotNull byte[] certificate)
-            throws AzureCmdException {
-        requestComputeSDK(virtualMachine.getSubscriptionId(), AzureSDKHelper.createVirtualMachine(virtualMachine,
-                vmImage, mediaLocation, virtualNetwork, username, password, certificate));
     }
 
     public OperationStatusResponse createDeployment(@NotNull String subscriptionId, @NotNull String serviceName, @NotNull String slotName, @NotNull DeploymentCreateParameters parameters,

@@ -30,6 +30,7 @@ import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.forms.ManageSubscriptionPanel;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
+import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.model.Subscription;
 import org.jetbrains.annotations.Nullable;
@@ -42,8 +43,8 @@ import java.awt.event.ItemListener;
 import java.util.List;
 import java.util.Vector;
 
-public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
-    CreateVMWizardModel model;
+public class SubscriptionStep extends WizardStep<VMWizardModel> {
+    VMWizardModel model;
     private JPanel rootPanel;
     private JList createVmStepsList;
     private JButton buttonLogin;
@@ -51,7 +52,7 @@ public class SubscriptionStep extends WizardStep<CreateVMWizardModel> {
     private JLabel userInfoLabel;
     private Project project;
 
-    public SubscriptionStep(final CreateVMWizardModel model, final Project project) {
+    public SubscriptionStep(final VMWizardModel model, final Project project) {
         super("Choose a Subscription", null, null);
 
         this.model = model;

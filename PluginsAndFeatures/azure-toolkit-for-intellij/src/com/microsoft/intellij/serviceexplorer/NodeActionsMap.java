@@ -26,16 +26,13 @@ import com.google.common.collect.ImmutableList;
 import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
 import com.microsoft.azure.hdinsight.serverexplore.action.AddNewClusterAction;
 import com.microsoft.azure.hdinsight.serverexplore.action.AddNewEmulatorAction;
-import com.microsoft.azure.hdinsight.serverexplore.ui.AddNewEmulatorForm;
 import com.microsoft.intellij.serviceexplorer.azure.ManageSubscriptionsAction;
 import com.microsoft.intellij.serviceexplorer.azure.storage.*;
-import com.microsoft.intellij.serviceexplorer.azure.vm.CreateVMAction;
 import com.microsoft.intellij.serviceexplorer.azure.webapps.OpenWebappAction;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.*;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vm.VMServiceModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappNode;
 
@@ -48,7 +45,6 @@ public class NodeActionsMap {
 
     static {
         node2Actions.put(AzureServiceModule.class, new ImmutableList.Builder().add(ManageSubscriptionsAction.class).build());
-        node2Actions.put(VMServiceModule.class, new ImmutableList.Builder().add(CreateVMAction.class).build());
         node2Actions.put(VMArmModule.class, new ImmutableList.Builder().add(com.microsoft.intellij.serviceexplorer.azure.vmarm.CreateVMAction.class).build());
         node2Actions.put(QueueModule.class, new ImmutableList.Builder().add(CreateQueueAction.class).build());
         node2Actions.put(TableModule.class, new ImmutableList.Builder().add(com.microsoft.intellij.serviceexplorer.azure.storage.CreateTableAction.class).build());
