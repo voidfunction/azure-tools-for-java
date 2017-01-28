@@ -24,6 +24,7 @@ package com.microsoft.intellij.actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleTypeId;
 import com.intellij.openapi.project.Project;
@@ -35,6 +36,7 @@ import com.intellij.packaging.artifacts.ModifiableArtifactModel;
 import com.intellij.util.PlatformUtils;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.ijidea.ui.ArtifactValidationWindow;
+import com.microsoft.azuretools.ijidea.ui.ErrorWindow;
 import com.microsoft.azuretools.ijidea.ui.WarSelectDialog;
 import com.microsoft.azuretools.ijidea.ui.WebAppDeployDialog;
 //import com.microsoft.intellij.forms.WebSiteDeployForm;
@@ -48,6 +50,8 @@ import java.util.List;
 
 
 public class AzureWebDeployAction extends AnAction {
+    private static final Logger LOGGER = Logger.getInstance(AzureWebDeployAction.class);
+
     public void actionPerformed(AnActionEvent e) {
         Module module = LangDataKeys.MODULE.getData(e.getDataContext());
         Module module1 = e.getData(LangDataKeys.MODULE);
@@ -99,48 +103,10 @@ public class AzureWebDeployAction extends AnAction {
 
             WebAppDeployDialog d = WebAppDeployDialog.go(module, artifactToDeploy);
 
-//            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-//            // not signed in
-//            if (azureManager == null) {
-//                return;
-//            }
-//
-//            SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
-//            System.out.println("getting sid list...");
-//            Set<String> sidList = subscriptionManager.getAccountSidList();
-//            for (String sid : sidList) {
-//                System.out.println("sid : " + sid);
-//                Azure azure = azureManager.getAzure(sid);
-//
-////                System.out.println("Creating a vault...");
-////                Vault vault =  azure.vaults().define("ShchKeyVault")
-////                        .withRegion(Region.US_EAST)
-////                        .withNewResourceGroup()
-////                        .defineAccessPolicy()
-////                        .forUser("vlashch@microsoft.com")
-////                        .allowKeyAllPermissions()
-////                        .attach()
-////                        .create()
-////                        ;
-////
-////                System.out.println(vault.name());
-////                System.out.println("Deleting a vault...");
-////                azure.vaults().deleteById(vault.id());
-//
-//                List<ResourceGroup>  rgList = azure.resourceGroups().list();
-//                for (ResourceGroup rg : rgList) {
-//                    //System.out.println("rg : " + rg);
-//                    List<WebApp> waList = azure.webApps().listByGroup(rg.name());
-//                    for (WebApp wa : waList ) {
-//                        System.out.println("\twa : " + wa.name());
-//                    }
-//                }
-//
-//            }
-
-
-        } catch (Exception e1) {
-            e1.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            LOGGER.error("actionPerformed", ex);
+            ErrorWindow.show(ex.getMessage(), "Azure Web Deploy Action Error", frame);
         }
 
 
@@ -170,8 +136,8 @@ public class AzureWebDeployAction extends AnAction {
             boolean isSignIn = AuthMethodManager.getInstance().isSignedIn();
             boolean isEnabled = isSignIn & module != null && ModuleTypeId.JAVA_MODULE.equals(module.getOptionValue(Module.ELEMENT_TYPE));
             e.getPresentation().setEnabled(isEnabled);
-        } catch (Exception e1) {
-            e1.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 }

@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.wm.WindowManager;
@@ -11,6 +12,7 @@ import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.interact.AuthMethod;
 import com.microsoft.azuretools.authmanage.models.AuthMethodDetails;
+import com.microsoft.azuretools.ijidea.ui.ErrorWindow;
 import com.microsoft.azuretools.ijidea.ui.SignInWindow;
 
 import javax.swing.*;
@@ -19,7 +21,7 @@ import javax.swing.*;
  * Created by vlashch on 11/14/16.
  */
 public class AzureSignInAction extends AnAction {
-
+    private static final Logger LOGGER = Logger.getInstance(AzureSignInAction.class);
     @Override
     public void actionPerformed(AnActionEvent e) {
         onAzureSignIn(e);
@@ -34,16 +36,16 @@ public class AzureSignInAction extends AnAction {
             } else {
                 e.getPresentation().setText("Azure Sign In...");
             }
-        } catch (Exception e1) {
-            e1.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            LOGGER.error("update", ex);
         }
     }
 
     public static void onAzureSignIn(AnActionEvent e) {
+        Project project = DataKeys.PROJECT.getData(e.getDataContext());
+        JFrame frame = WindowManager.getInstance().getFrame(project);
         try {
-            //Project project = ProjectManager.getInstance().getDefaultProject();
-            Project project = DataKeys.PROJECT.getData(e.getDataContext());
-            JFrame frame = WindowManager.getInstance().getFrame(project);
             AuthMethodManager authMethodManager = AuthMethodManager.getInstance();
             boolean isSignIn = authMethodManager.isSignedIn();
             if (isSignIn) {
@@ -72,6 +74,9 @@ public class AzureSignInAction extends AnAction {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+            LOGGER.error("onAzureSignIn", ex);
+            ErrorWindow.show(ex.getMessage(), "AzureSignIn Action Error", frame);
+
         }
     }
 }

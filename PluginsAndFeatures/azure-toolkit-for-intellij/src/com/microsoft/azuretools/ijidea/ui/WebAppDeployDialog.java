@@ -26,6 +26,7 @@ package com.microsoft.azuretools.ijidea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -33,36 +34,46 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.packaging.artifacts.Artifact;
+import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.appservice.AppServicePlan;
 import com.microsoft.azure.management.appservice.JavaVersion;
 import com.microsoft.azure.management.appservice.PublishingProfile;
 import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.ijidea.utility.UpdateProgressIndicator;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.azuretools.utils.WebAppUtils;
+import org.apache.sanselan.formats.tiff.TiffReader;
+import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class WebAppDeployDialog extends DialogWrapper {
+    private static final Logger LOGGER = Logger.getInstance(WebAppDeployDialog.class);
+
     private JPanel contentPane;
     private JTable table;
     private JButton createButton;
     private JButton deleteButton;
     private JButton refreshButton;
-    private JList listWebAppDetails;
     private JCheckBox deployToRootCheckBox;
+    private JEditorPane editorPaneAppServiceDetails;
 
     private final Module module;
     private final Artifact artifact;
@@ -98,7 +109,7 @@ public class WebAppDeployDialog extends DialogWrapper {
         this.artifact = artifact;
 
         setModal(true);
-        setTitle("Select Web App");
+        setTitle("Deploy Web App");
         setOKButtonText("Deploy");
 
         createButton.addActionListener(new ActionListener() {
@@ -111,7 +122,7 @@ public class WebAppDeployDialog extends DialogWrapper {
         deleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                deleteWebApp();
+                deleteAppService();
             }
         });
 
@@ -119,6 +130,7 @@ public class WebAppDeployDialog extends DialogWrapper {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 cleanTable();
+                editorPaneAppServiceDetails.setText("");
                 AzureModel.getInstance().setResourceGroupToWebAppMap(null);
                 fillTable();
             }
@@ -131,19 +143,33 @@ public class WebAppDeployDialog extends DialogWrapper {
             public void valueChanged(ListSelectionEvent event) {
                 if (event.getValueIsAdjusting()) return;
                 //System.out.println("row : " + table.getValueAt(table.getSelectedRow(), 0).toString());
-                fillWebAppDetails();
+                fillAppServiceDetails();
             }
         });
 
-        class DisabledItemSelectionModel extends DefaultListSelectionModel {
-            @Override
-            public void setSelectionInterval(int index0, int index1) {
-                super.setSelectionInterval(-1, -1);
-            }
-        }
+//        class DisabledItemSelectionModel extends DefaultListSelectionModel {
+//            @Override
+//            public void setSelectionInterval(int index0, int index1) {
+//                super.setSelectionInterval(-1, -1);
+//            }
+//        }
 
-        listWebAppDetails.setSelectionModel(new DisabledItemSelectionModel());
-        listWebAppDetails.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+//        listWebAppDetails.setSelectionModel(new DisabledItemSelectionModel());
+//        listWebAppDetails.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        editorPaneAppServiceDetails.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                    // Do something with e.getURL() here
+                    //e.getURL().toString()
+                    JXHyperlink link = new JXHyperlink();
+                    link.setURI(URI.create(e.getURL().toString()));
+                    link.doClick();
+                }
+            }
+        });
+
 
         init();
     }
@@ -175,7 +201,7 @@ public class WebAppDeployDialog extends DialogWrapper {
     }
 
     private void updateAndFillTable() {
-        ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Getting Web Apps...", true) {
+        ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Getting App Services...", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
 
@@ -201,6 +227,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                     }, ModalityState.any());
                 } catch (Exception ex) {
                     ex.printStackTrace();
+                    LOGGER.debug("updateAndFillTable", ex);
                 }
             }
         });
@@ -219,6 +246,14 @@ public class WebAppDeployDialog extends DialogWrapper {
         webAppWebAppDetailsMap.clear();
         for (SubscriptionDetail sd : srgMap.keySet()) {
             if (!sd.isSelected()) continue;
+
+            Map<String, AppServicePlan> aspMap = new HashMap<>();
+            for (ResourceGroup rg : srgMap.get(sd)) {
+                for (AppServicePlan asp : rgaspMap.get(rg)) {
+                    aspMap.put(asp.id(), asp);
+                }
+            }
+
             for (ResourceGroup rg : srgMap.get(sd)) {
                 for (WebApp wa : rgwaMap.get(rg)) {
                     if (wa.javaVersion() != JavaVersion.OFF) {
@@ -228,31 +263,31 @@ public class WebAppDeployDialog extends DialogWrapper {
                                 wa.javaContainer() + " " + wa.javaContainerVersion(),
                                 wa.resourceGroupName()
                         });
-                        //tableModel.fireTableDataChanged();
-
-                        WebAppDetails webAppDetails = new WebAppDetails();
-                        webAppDetails.webApp = wa;
-                        webAppDetails.subscriptionDetail = sd;
-                        webAppDetails.resourceGroup = rg;
-                        List<AppServicePlan> aspl = rgaspMap.get(rg);
-                        for (AppServicePlan asp : aspl) {
-                            if (asp.id().equals(wa.appServicePlanId())) {
-                                webAppDetails.appServicePlan = asp;
-                                break;
-                            }
-                        }
-                        webAppWebAppDetailsMap.put(wa.name(), webAppDetails);
+                    } else {
+                        tableModel.addRow(new String[]{
+                                wa.name(),
+                                "Off",
+                                "N/A",
+                                wa.resourceGroupName()
+                        });
                     }
+                    WebAppDetails webAppDetails = new WebAppDetails();
+                    webAppDetails.webApp = wa;
+                    webAppDetails.subscriptionDetail = sd;
+                    webAppDetails.resourceGroup = rg;
+                    webAppDetails.appServicePlan = aspMap.get(wa.appServicePlanId());
+                    webAppWebAppDetailsMap.put(wa.name(), webAppDetails);
                 }
             }
         }
+
         table.setModel(tableModel);
         if (tableModel.getRowCount() > 0)
             tableModel.fireTableDataChanged();
     }
 
     private void createWebApp() {
-        WebAppCreateDialog d = WebAppCreateDialog.go(this.module);
+        AppServiceCreateDialog d = AppServiceCreateDialog.go(this.module);
         if (d == null) {
             // something went wrong - report an error!
             return;
@@ -260,7 +295,7 @@ public class WebAppDeployDialog extends DialogWrapper {
         WebApp wa = d.getWebApp();
         doFillTable();
         selectTableRowWithWebAppName(wa.name());
-        //fillWebAppDetails();
+        //fillAppServiceDetails();
     }
 
     private void selectTableRowWithWebAppName(String webAppName) {
@@ -274,24 +309,98 @@ public class WebAppDeployDialog extends DialogWrapper {
         }
     }
 
-    private void deleteWebApp() {
-
-    }
-
-    private void fillWebAppDetails() {
+    private void deleteAppService() {
         DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
-        DefaultListModel<String> listModel = new DefaultListModel<String>();
+        //DefaultListModel<String> listModel = new DefaultListModel<String>();
         int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
-            WebAppDetails wad = webAppWebAppDetailsMap.get(tableModel.getValueAt(selectedRow, 0));
-            SubscriptionDetail sd = wad.subscriptionDetail;
-            listModel.addElement("Subsctiption Name: " + sd.getSubscriptionName() + "; ID: " + sd.getSubscriptionId());
-            ResourceGroup rg = wad.resourceGroup;
-            listModel.addElement("Resource Group: " + rg.name() + "; Region: " + rg.region().label());
-            AppServicePlan asp = wad.appServicePlan;
-            listModel.addElement("App Service Plan: " + asp.name() + "; Pricing Tier: " + asp.pricingTier().toString() + "; Region: " + asp.region().label());
+            String appServiceName = (String)tableModel.getValueAt(selectedRow, 0);
+            WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
+
+            int choice = JOptionPane.showOptionDialog(WebAppDeployDialog.this.getContentPane(),
+                    "Do you really want to delete the App Service '" + appServiceName + "'?",
+                    "Detete App Service",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null, null, null);
+
+            if (choice == JOptionPane.NO_OPTION)
+            {
+                return;
+            }
+
+            try{
+                AzureManager manager = AuthMethodManager.getInstance().getAzureManager();
+                if (manager == null) {
+                    return;
+                }
+                ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Deleting App Service...", true) {
+                    @Override
+                    public void run(ProgressIndicator progressIndicator) {
+                        try {
+                            progressIndicator.setIndeterminate(true);
+                            manager.getAzure(wad.subscriptionDetail.getSubscriptionId()).webApps().deleteById(wad.webApp.id());
+                            ApplicationManager.getApplication().invokeAndWait( new Runnable() {
+                                @Override
+                                public void run() {
+                                    tableModel.removeRow(selectedRow);
+                                    tableModel.fireTableDataChanged();
+                                    // update cache
+                                    AzureModelController.removeWebAppFromExistingResourceGroup(wad.resourceGroup, wad.webApp);
+                                    editorPaneAppServiceDetails.setText("");
+                                }
+                            }, ModalityState.any());
+
+
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            LOGGER.error("deleteAppService : Task.Modal ", ex);
+                            ErrorWindow.show(ex.getMessage(), "Delete App Service Error", WebAppDeployDialog.this.contentPane);
+
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                LOGGER.error("deleteAppService", e);
+                ErrorWindow.show(e.getMessage(), "Delete App Service Error", this.contentPane);
+            }
         }
-        listWebAppDetails.setModel(listModel);
+    }
+
+    private void fillAppServiceDetails() {
+        DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
+        //DefaultListModel<String> listModel = new DefaultListModel<String>();
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow >= 0) {
+            String appServiceName = (String)tableModel.getValueAt(selectedRow, 0);
+            WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
+            SubscriptionDetail sd = wad.subscriptionDetail;
+            AppServicePlan asp = wad.appServicePlan;
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("<div style=\"margin: 7px 7px 7px 7px;\">");
+            sb.append(String.format("<b>App Service Name:</b>&nbsp;%s<br/>", appServiceName));
+            sb.append(String.format("<b>Subscription Name:</b>&nbsp;%s;&nbsp;<b>ID:</b>&nbsp;%s<br/>", sd.getSubscriptionName(), sd.getSubscriptionId()));
+            String aspName = asp == null ? "N/A" : asp.name();
+            String aspPricingTier = asp == null ? "N/A" : asp.pricingTier().toString();
+            sb.append(String.format("<b>App Service Plan Name:</b>&nbsp;%s;&nbsp;<b>Pricing Tier:</b>&nbsp;%s<br/>", aspName, aspPricingTier));
+
+            String link = buildSiteLink(wad.webApp, null);
+            sb.append(String.format("<b>Link:</b>&nbsp;<a href=\"%s\">%s</a>", link, link));
+            sb.append("</div>");
+            editorPaneAppServiceDetails.setText(sb.toString());
+        }
+//        listWebAppDetails.setModel(listModel);
+    }
+
+    private static String buildSiteLink(WebApp webApp, String artifactName) {
+        String appServiceLink = "https://" + webApp.defaultHostName();
+        if (artifactName != null && !artifactName.isEmpty())
+            return appServiceLink + "/" + artifactName;
+        else
+            return appServiceLink;
+
     }
 
     @Nullable
@@ -299,10 +408,21 @@ public class WebAppDeployDialog extends DialogWrapper {
     protected ValidationInfo doValidate() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow < 0) {
-            return new ValidationInfo("Please select a Web App to deploy to", table);
+            return new ValidationInfo("Please select an App Service to deploy to", table);
+        }
+        DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
+        WebAppDetails wad = webAppWebAppDetailsMap.get(tableModel.getValueAt(selectedRow, 0));
+        if (wad.webApp.javaVersion()  == JavaVersion.OFF ) {
+            return new ValidationInfo("Please select JAVA bases App Service", table);
         }
 
         return super.doValidate();
+    }
+
+    @Override
+    protected void doOKAction() {
+        deploy();
+        super.doOKAction();
     }
 
     private void deploy() {
@@ -310,17 +430,72 @@ public class WebAppDeployDialog extends DialogWrapper {
         int selectedRow = table.getSelectedRow();
         WebAppDetails wad = webAppWebAppDetailsMap.get(tableModel.getValueAt(selectedRow, 0));
         WebApp webApp = wad.webApp;
-        try {
-            PublishingProfile pp = webApp.getPublishingProfile();
-            WebAppUtils.deployArtifact(artifact.getName(), artifact.getOutputFilePath(), pp, deployToRootCheckBox.isSelected());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        boolean isDeployToRoot = deployToRootCheckBox.isSelected();
+        ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Deploying Web App...", true) {
+            @Override
+            public void run(ProgressIndicator progressIndicator) {
+                try {
+                    progressIndicator.setIndeterminate(true);
+                    PublishingProfile pp = webApp.getPublishingProfile();
+                    WebAppUtils.deployArtifact(artifact.getName(), artifact.getOutputFilePath(),
+                            pp, isDeployToRoot, new UpdateProgressIndicator(progressIndicator));
+                    String sitePath = buildSiteLink(wad.webApp, artifact.getName());
+                    progressIndicator.setText("Checking the web app is available...");
+                    progressIndicator.setText2("Link: " + sitePath);
+
+                    // to make warn up cancelable
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                int stepLimit = 5;
+                                int sleepMs = 2000;
+                                for (int step = 0; step < stepLimit; ++step) {
+
+                                    if (WebAppUtils.isUrlAccessabel(sitePath))  { // warm up
+                                        break;
+                                    }
+                                    Thread.sleep(sleepMs);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                LOGGER.error("deploy::warmup", e);
+                            }
+                        }
+                    });
+                    thread.run();
+                    while (thread.isAlive()) {
+                        if (progressIndicator.isCanceled()) return;
+                        else Thread.sleep(2000);
+                    }
+                    showLink(sitePath);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    LOGGER.error("deploy", ex);
+                    ErrorWindow.show(ex.getMessage(), "Deploy Application Error", WebAppDeployDialog.this.contentPane);
+                }
+            }
+        });
     }
 
-    @Override
-    protected void doOKAction() {
-        deploy();
-        super.doOKAction();
+    private void showLink(String link) {
+        ApplicationManager.getApplication().invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                int choice = JOptionPane.showOptionDialog(WebAppDeployDialog.this.getContentPane(),
+                        "Web App has been uploaded successfully.\nLink: " + link + "\nOpen in browser?",
+                        "Web App Upload Status",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE,
+                        null, null, null);
+
+                if (choice == JOptionPane.YES_OPTION)
+                {
+                    JXHyperlink hl = new JXHyperlink();
+                    hl.setURI(URI.create(link));
+                    hl.doClick();
+                }
+            }
+        }, ModalityState.any());
     }
 }

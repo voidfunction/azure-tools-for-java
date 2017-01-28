@@ -26,6 +26,7 @@ package com.microsoft.azuretools.ijidea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -40,10 +41,7 @@ import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.ijidea.utility.UpdateProgressIndicator;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
-import com.microsoft.azuretools.utils.AzulZuluModel;
-import com.microsoft.azuretools.utils.AzureModel;
-import com.microsoft.azuretools.utils.AzureModelController;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;
+import com.microsoft.azuretools.utils.*;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,16 +49,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
 import java.util.*;
 import java.util.List;
 
-public class WebAppCreateDialog extends DialogWrapper {
+public class AppServiceCreateDialog extends DialogWrapper {
+    private static final Logger LOGGER = Logger.getInstance(AppServiceCreateDialog.class);
+
     private JPanel contentPane;
     private JTextField textFieldWebappName;
     private JComboBox comboBoxWebContainer;
@@ -89,11 +86,11 @@ public class WebAppCreateDialog extends DialogWrapper {
     private JPanel panelJdkDefault;
     private JPanel panelJdk3Party;
     private JPanel panelJdkOwn;
+    private JXHyperlink linkLicense;
 
     private Module module;
 
     private static final String textNotAvailable = "N/A";
-    //private static final String textCreateNew = "<Create New>";
 
     private static abstract class AdapterBase<T> {
         protected T adapted;
@@ -134,8 +131,8 @@ public class WebAppCreateDialog extends DialogWrapper {
         }
     }
 
-    public static WebAppCreateDialog go(Module module){
-        WebAppCreateDialog d = new WebAppCreateDialog(module);
+    public static AppServiceCreateDialog go(Module module){
+        AppServiceCreateDialog d = new AppServiceCreateDialog(module);
         d.show();
         if (d.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
             return d;
@@ -143,11 +140,11 @@ public class WebAppCreateDialog extends DialogWrapper {
         return null;
     }
 
-    protected WebAppCreateDialog(Module module) {
+    protected AppServiceCreateDialog(Module module) {
         super(module.getProject(), true, IdeModalityType.PROJECT);
         this.module =  module;
         setModal(true);
-        setTitle("Create Web App");
+        setTitle("Create App Service");
 
         setOKButtonText("Create");
 
@@ -165,16 +162,6 @@ public class WebAppCreateDialog extends DialogWrapper {
             }
         });
 
-//        comboBoxResourceGroup.addItemListener(new ItemListener() {
-//            @Override
-//            public void itemStateChanged(ItemEvent itemEvent) {
-//                if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
-//                    fillAppServicePlans();
-//                    fillAppServicePlansDetails();
-//                }
-//            }
-//        });
-
         comboBoxAppServicePlan.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
@@ -186,6 +173,9 @@ public class WebAppCreateDialog extends DialogWrapper {
 
         linkPricing.setURI(URI.create("https://azure.microsoft.com/en-us/pricing/details/app-service/"));
         linkPricing.setText("App Service Pricing Details");
+
+        linkLicense.setURI(URI.create(AzulZuluModel.getLicenseUrl()));
+        linkLicense.setText("GNU General Public License");
 
         fillWebContainers();
         fillSubscriptions();
@@ -206,7 +196,7 @@ public class WebAppCreateDialog extends DialogWrapper {
     @Nullable
     @Override
     protected String getDimensionServiceKey() {
-        return "WebAppCreateDialog";
+        return "AppServiceCreateDialog";
     }
 
     private void fillWebContainers() {
@@ -216,6 +206,7 @@ public class WebAppCreateDialog extends DialogWrapper {
 
         } catch (Exception ex) {
             ex.printStackTrace();
+            LOGGER.error("fillWebContainers", ex);
         }
     }
 
@@ -256,6 +247,7 @@ public class WebAppCreateDialog extends DialogWrapper {
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
+                    LOGGER.error("updateAndFillSubscriptions", ex);
                 }
             }
         });
@@ -278,6 +270,7 @@ public class WebAppCreateDialog extends DialogWrapper {
 
         } catch (Exception ex) {
             ex.printStackTrace();
+            LOGGER.error("doFillSubscriptions", ex);
         }
     }
 
@@ -375,8 +368,9 @@ public class WebAppCreateDialog extends DialogWrapper {
             }
             comboBoxAppServicePlanLocation.setModel(cbModel);
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            LOGGER.error("fillAppServicePlanLocations", ex);
         }
     }
 
@@ -387,6 +381,7 @@ public class WebAppCreateDialog extends DialogWrapper {
 
         } catch (Exception ex) {
             ex.printStackTrace();
+            LOGGER.error("fillAppServicePlanPricingTiers", ex);
         }
     }
 
@@ -398,7 +393,6 @@ public class WebAppCreateDialog extends DialogWrapper {
             cbModel.addElement(jdk);
         }
         comboBoxJDK3Party.setModel(cbModel);
-
     }
 
     private static <T> List<T> createLisFromClassFields(Class c) throws IllegalAccessException {
@@ -448,6 +442,7 @@ public class WebAppCreateDialog extends DialogWrapper {
         public String jdkOwnUrl;
         public String storageAccountKey;
         public JdkTab jdkTab;
+        public String jdkDownloadUrl;
 
         public void collectData() {
             webAppName = textFieldWebappName.getText().trim();
@@ -484,6 +479,7 @@ public class WebAppCreateDialog extends DialogWrapper {
             jdk3PartyUrl = jdk3Party == null ? null : jdk3Party.getDownloadUrl();
             jdkOwnUrl = textFieldJDKUrl.getText().trim();
             storageAccountKey = textFieldJDKAccountKey.getText().trim();
+            jdkDownloadUrl = null; // get value in validate phase
         }
     }
 
@@ -539,7 +535,7 @@ public class WebAppCreateDialog extends DialogWrapper {
 
         if (model.isAppServicePlanCreateNew) {
             if (model.appServicePlanNameCreateNew.isEmpty()) {
-                return new ValidationInfo("Enter a valid App Service Plan name", textFieldAppServicePlaneNew);
+                return new ValidationInfo("Enter a valid App Service Plan name.", textFieldAppServicePlaneNew);
             } else {
                 if (!model.appServicePlanNameCreateNew.matches("^[A-Za-z0-9-]*[A-Za-z0-9-]$")) {
                     return new ValidationInfo("App Service Plan name can only include alphanumeric characters and hyphens.", textFieldAppServicePlaneNew);
@@ -551,14 +547,14 @@ public class WebAppCreateDialog extends DialogWrapper {
                     List<AppServicePlan> aspl = AzureModel.getInstance().getResourceGroupToAppServicePlanMap().get(rg);
                     for (AppServicePlan asp : aspl) {
                         if (asp.name().toLowerCase().equals(model.appServicePlanNameCreateNew.toLowerCase())) {
-                            return new ValidationInfo("App service plan name must be unuque in each subscription", textFieldAppServicePlaneNew);
+                            return new ValidationInfo("App service plan name must be unuque in each subscription.", textFieldAppServicePlaneNew);
                         }
                     }
                 }
             }
         } else {
             if (model.appServicePlan == null ) {
-                return new ValidationInfo("Select a valid App Service Plan", comboBoxResourceGroup);
+                return new ValidationInfo("Select a valid App Service Plan.", comboBoxResourceGroup);
             }
         }
 
@@ -566,50 +562,49 @@ public class WebAppCreateDialog extends DialogWrapper {
             switch (model.jdkTab) {
                 case Default:
                     // do nothing
+                    model.jdkDownloadUrl = null;
                     break;
                 case ThirdParty:
-                        if (!isUrlAccessabel(model.jdk3PartyUrl)) {
-                            return new ValidationInfo("Please check the URL is valid ", comboBoxJDK3Party);
-                        }
+                    if (!WebAppUtils.isUrlAccessabel(model.jdk3PartyUrl)) {
+                        return new ValidationInfo("Please check the URL is valid.", comboBoxJDK3Party);
+                    }
+                    model.jdkDownloadUrl = model.jdk3PartyUrl;
                     break;
                 case Own:
                     if (model.jdkOwnUrl.isEmpty()) {
-                        return new ValidationInfo("Enter a valid URL", textFieldJDKUrl);
+                        return new ValidationInfo("Enter a valid URL.", textFieldJDKUrl);
                     } else {
                         // first check the link is accessible as it is
-                        if (!isUrlAccessabel(model.jdkOwnUrl)) {
+                        if (!WebAppUtils.isUrlAccessabel(model.jdkOwnUrl)) {
                             // create shared access signature url and check its accessibility
-                            if (!isUrlAccessabel(AzureSDKHelper.getBlobSasUri(model.jdkOwnUrl, model.storageAccountKey))) {
-                                return new ValidationInfo("Please check the storage account key and/or URL is valid ", textFieldJDKUrl);
+                            String sasUrl = StorageAccoutUtils.getBlobSasUri(model.jdkOwnUrl, model.storageAccountKey);
+                            if (!WebAppUtils.isUrlAccessabel(sasUrl)) {
+                                return new ValidationInfo("Please check the storage account key and/or URL is valid.", textFieldJDKUrl);
+                            } else {
+                                model.jdkDownloadUrl = sasUrl;
                             }
+                        } else {
+                            model.jdkDownloadUrl = model.jdkOwnUrl;
                         }
                     }
                     // link to a zip file
                     // consider it's a Sas link
                     String urlPath = new URI(model.jdkOwnUrl).getPath();
                     if (!urlPath.endsWith(".zip")) {
-                        return new ValidationInfo("link to a zip file is expected ", textFieldJDKUrl);
+                        return new ValidationInfo("link to a zip file is expected.", textFieldJDKUrl);
                     }
 
                     break;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            LOGGER.error("doValidate", ex);
+            ErrorWindow.show(ex.getMessage(), "Form Data Validation Error", this.contentPane);
         }
         return super.doValidate();
     }
 
-    private static boolean isUrlAccessabel(String url) throws IOException {
-        HttpURLConnection.setFollowRedirects(false);
-        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
-        con.setRequestMethod("HEAD");
-        if (con.getResponseCode() != HttpURLConnection.HTTP_OK) {
-            return false;
-        }
-        return true;
-    }
-
-    private WebApp createWebApp(ProgressIndicator progressIndicator) throws Exception {
+    private WebApp createAppService(IProgressIndicator progressIndicator) throws Exception {
 
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         // not signed in
@@ -634,31 +629,45 @@ public class WebAppCreateDialog extends DialogWrapper {
             ds2 = ds1.withExistingAppServicePlan(model.appServicePlan);
         }
 
-        ds2 = ds2.withJavaVersion(JavaVersion.JAVA_8_NEWEST).withWebContainer(model.webContainer);
+        if (model.jdkDownloadUrl == null) { // no custom jdk
+            ds2 = ds2.withJavaVersion(JavaVersion.JAVA_8_NEWEST).withWebContainer(model.webContainer);
+        }
+
         WebApp myWebApp = ds2.create();
+
+        if (model.jdkDownloadUrl != null ) {
+            progressIndicator.setText("Deploying custom jdk...");
+            WebAppUtils.deployCustomJdk(myWebApp, model.jdkDownloadUrl, model.webContainer, progressIndicator);
+        }
 
         // update cache
         AzureModel azureModel = AzureModel.getInstance();
-        ResourceGroup rg;
+        //ResourceGroup rg;
 
         if (model.isResourceGroupCreateNew) {
-            rg = azure.resourceGroups().getByName(model.resourceGroupNameCreateNew);
-            azureModel.getSubscriptionToResourceGroupMap().get(model.subscriptionDetail).add(rg);
+            ResourceGroup rg = azure.resourceGroups().getByName(model.resourceGroupNameCreateNew);
+            //azureModel.getSubscriptionToResourceGroupMap().get(model.subscriptionDetail).add(rg);
+            AzureModelController.addNewResourceGroup(model.subscriptionDetail, rg);
             if (model.isAppServicePlanCreateNew) {
                 AppServicePlan asp = azure.appServices().appServicePlans().getById(myWebApp.appServicePlanId());
-                azureModel.getResourceGroupToAppServicePlanMap().put(rg, Arrays.asList(asp));
-                azureModel.getResourceGroupToWebAppMap().put(rg, Arrays.asList(myWebApp));
+                //azureModel.getResourceGroupToAppServicePlanMap().put(rg, Arrays.asList(asp));
+                //azureModel.getResourceGroupToWebAppMap().put(rg, Arrays.asList(myWebApp));
+                AzureModelController.addNewAppServicePlanToJustCreatedResourceGroup(rg, asp);
+                AzureModelController.addNewWebAppToJustCreatedResourceGroup(rg, myWebApp);
             }
         } else {
-            rg = model.resourceGroup;
-            azureModel.getResourceGroupToWebAppMap().get(rg).add(myWebApp);
+            ResourceGroup rg = model.resourceGroup;
+            //azureModel.getResourceGroupToWebAppMap().get(rg).add(myWebApp);
+            AzureModelController.addNewWebAppToExistingResourceGroup(rg, myWebApp);
+            if (model.isAppServicePlanCreateNew) {
+                AppServicePlan asp = azure.appServices().appServicePlans().getById(myWebApp.appServicePlanId());
+                AzureModelController.addNewAppServicePlanToExistingResourceGroup(rg, asp);
+            }
         }
 
         return myWebApp;
     }
 
-//    String customJdkErrorMessage = null;
-//    String customJdkFolderName = null;
     private WebApp webApp;
 
     public WebApp getWebApp() {
@@ -671,81 +680,26 @@ public class WebAppCreateDialog extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-
-        ProgressManager.getInstance().run(new Task.Modal(null,"Creating Web App", true) {
+        ProgressManager.getInstance().run(new Task.Modal(null,"Creating App Service...", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
                 try {
                     progressIndicator.setIndeterminate(true);
-                    webApp = createWebApp(progressIndicator);
-                    //if (webApp == null) return;
+                    progressIndicator.setText("Creating Web App Service...");
+                    webApp = createAppService(new UpdateProgressIndicator(progressIndicator));
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
                         @Override
                         public void run() {
                             superDoOKAction();
                         }
                     }, ModalityState.any());
-
-
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     // TODO: show error message
+                    LOGGER.error("doOKAction :: Task.Modal", ex);
+                    ErrorWindow.show(ex.getMessage(), "Create App Service Error", AppServiceCreateDialog.this.contentPane);
                 }
             }
         });
-
-
-/*
-        try {
-            WebSite webSite = manager.createWebSite(subscription.getId(), webHostingPlan, nameTextField.getText().trim());
-            WebSiteConfiguration webSiteConfiguration = manager.getWebSiteConfiguration(subscription.getId(),
-                    webSite.getWebSpaceName(), webSite.getName());
-            if (customJDK.isSelected() || customJDKUser.isSelected()) {
-                CustomJdk task = new CustomJdk(webSiteConfiguration);
-                task.queue();
-            }
-
-            webSiteConfiguration.setJavaVersion("1.8.0_73");
-            String selectedContainer = (String) webContainerComboBox.getSelectedItem();
-            if (selectedContainer.equalsIgnoreCase(WebAppsContainers.TOMCAT_8.getName())) {
-                webSiteConfiguration.setJavaContainer("TOMCAT");
-                webSiteConfiguration.setJavaContainerVersion(WebAppsContainers.TOMCAT_8.getValue());
-            } else if (selectedContainer.equalsIgnoreCase(WebAppsContainers.TOMCAT_7.getName())) {
-                webSiteConfiguration.setJavaContainer("TOMCAT");
-                webSiteConfiguration.setJavaContainerVersion(WebAppsContainers.TOMCAT_7.getValue());
-            } else if (selectedContainer.equalsIgnoreCase(WebAppsContainers.JETTY_9.getName())) {
-                webSiteConfiguration.setJavaContainer("JETTY");
-                webSiteConfiguration.setJavaContainerVersion(WebAppsContainers.JETTY_9.getValue());
-            }
-            manager.updateWebSiteConfiguration(subscription.getId(), webSite.getWebSpaceName(), webSite.getName(), webSite.getLocation(), webSiteConfiguration);
-            webAppCreated = webSite.getName();
-            Map<WebSite, WebSiteConfiguration> tempMap = AzureSettings.getSafeInstance(project).loadWebApps();
-            tempMap.put(webSite, webSiteConfiguration);
-            AzureSettings.getSafeInstance(project).saveWebApps(tempMap);
-
-            // to not rewrite the default web config - throw an Exception here
-            if(customJdkErrorMessage != null) {
-                throw new AzureCommonsException(customJdkErrorMessage);
-            }
-
-            if (customJDK.isSelected() || customJDKUser.isSelected()) {
-                copyWebConfigForCustom(webSiteConfiguration, customJdkFolderName);
-            }
-        } catch (AzureCommonsException e) {
-            PluginUtil.displayErrorDialog("Error configuring custom jdk",  e.getMessage());
-        } catch (AzureCmdException e) {
-            String errorMessage = e.getMessage();
-            if (errorMessage.contains(message("nameConflict"))) {
-                errorMessage = message("inUseErrMsg");
-                isOK = false;
-            }
-            PluginUtil.displayErrorDialogAndLog(message("webAppErrTtl"), errorMessage, e);
-        } finally {
-            mainPanel.getRootPane().getParent().setCursor(Cursor.getDefaultCursor());
-        }
-*/
-        //super.doOKAction();
     }
-
-
 }
