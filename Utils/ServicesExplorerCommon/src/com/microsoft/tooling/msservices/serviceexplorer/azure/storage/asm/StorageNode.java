@@ -26,7 +26,6 @@ import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
@@ -44,7 +43,7 @@ public class StorageNode extends ClientStorageNode {
         }
 
         @Override
-        protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
+        protected void azureNodeAction(NodeActionEvent e)
                 throws AzureCmdException {
             try {
                 AzureManagerImpl.getManager(getProject()).deleteStorageAccount(storageAccount);
@@ -81,11 +80,11 @@ public class StorageNode extends ClientStorageNode {
     }
 
     @Override
-    protected void refresh(@NotNull EventStateHandle eventState)
+    protected void refreshItems()
             throws AzureCmdException {
         removeAllChildNodes();
 
-        fillChildren(eventState);
+        fillChildren();
     }
 
     @Override

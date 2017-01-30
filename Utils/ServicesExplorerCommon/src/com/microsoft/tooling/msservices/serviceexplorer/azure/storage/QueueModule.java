@@ -21,17 +21,15 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
-import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 
 import java.util.List;
 
-public class QueueModule extends AzureRefreshableNode {
+public class QueueModule extends RefreshableNode {
     private static final String QUEUES = "Queues";
     final ClientStorageAccount storageAccount;
 
@@ -43,15 +41,11 @@ public class QueueModule extends AzureRefreshableNode {
     }
 
     @Override
-    protected void refresh(@NotNull EventStateHandle eventState)
+    protected void refreshItems()
             throws AzureCmdException {
         removeAllChildNodes();
 
         final List<Queue> queues = StorageClientSDKManager.getManager().getQueues(storageAccount);
-
-        if (eventState.isEventTriggered()) {
-            return;
-        }
 
         for (Queue queue : queues) {
             addChildNode(new QueueNode(this, storageAccount, queue));

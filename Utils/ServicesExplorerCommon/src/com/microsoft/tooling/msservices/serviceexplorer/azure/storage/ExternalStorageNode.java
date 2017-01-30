@@ -21,12 +21,9 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.ExternalStorageHelper;
-import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
@@ -44,7 +41,7 @@ public class ExternalStorageNode extends ClientStorageNode {
         }
 
         @Override
-        protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
+        protected void azureNodeAction(NodeActionEvent e)
                 throws AzureCmdException {
             Node node = e.getAction().getNode();
             node.getParent().removeDirectChildNode(node);
@@ -67,7 +64,7 @@ public class ExternalStorageNode extends ClientStorageNode {
     }
 
     @Override
-    protected void refresh(@NotNull EventStateHandle eventState)
+    protected void refreshItems()
             throws AzureCmdException {
         removeAllChildNodes();
 
@@ -79,7 +76,7 @@ public class ExternalStorageNode extends ClientStorageNode {
                 throw new AzureCmdException("Error opening external storage", t);
             }
         } else {
-            fillChildren(eventState);
+            fillChildren();
         }
     }
 

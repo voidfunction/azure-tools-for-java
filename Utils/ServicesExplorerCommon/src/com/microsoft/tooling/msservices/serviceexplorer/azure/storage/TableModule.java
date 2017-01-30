@@ -26,12 +26,11 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Table;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 
 import java.util.List;
 
-public class TableModule extends AzureRefreshableNode {
+public class TableModule extends RefreshableNode {
     private static final String TABLES = "Tables";
     final ClientStorageAccount storageAccount;
 
@@ -43,15 +42,11 @@ public class TableModule extends AzureRefreshableNode {
     }
 
     @Override
-    protected void refresh(@NotNull EventStateHandle eventState)
+    protected void refreshItems()
             throws AzureCmdException {
         removeAllChildNodes();
 
         final List<Table> tables = StorageClientSDKManager.getManager().getTables(storageAccount);
-
-        if (eventState.isEventTriggered()) {
-            return;
-        }
 
         for (Table table : tables) {
             addChildNode(new TableNode(this, storageAccount, table));

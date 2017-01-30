@@ -22,7 +22,6 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm;
 
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,17 +33,15 @@ import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
 
-public class VMNode extends AzureRefreshableNode {
+public class VMNode extends RefreshableNode {
     private static String RUNNING_STATUS = "PowerState/running";
 
     public class DeleteVMAction extends AzureNodeActionPromptListener {
@@ -56,7 +53,7 @@ public class VMNode extends AzureRefreshableNode {
         }
 
         @Override
-        protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
+        protected void azureNodeAction(NodeActionEvent e)
                 throws AzureCmdException {
             try {
                 AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
@@ -90,7 +87,7 @@ public class VMNode extends AzureRefreshableNode {
         }
 
         @Override
-        protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
+        protected void azureNodeAction(NodeActionEvent e)
                 throws AzureCmdException {
             virtualMachine.restart();
 //            refreshItemsInternal();
@@ -110,7 +107,7 @@ public class VMNode extends AzureRefreshableNode {
         }
 
         @Override
-        protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
+        protected void azureNodeAction(NodeActionEvent e)
                 throws AzureCmdException {
             virtualMachine.powerOff();
             refreshItemsInternal();
@@ -176,13 +173,8 @@ public class VMNode extends AzureRefreshableNode {
     }
 
     @Override
-    protected void refresh(@NotNull EventStateHandle eventState)
-            throws AzureCmdException {
+    protected void refreshItems() throws AzureCmdException {
         virtualMachine.refresh();
-
-        if (eventState.isEventTriggered()) {
-            return;
-        }
 
         refreshItemsInternal();
     }

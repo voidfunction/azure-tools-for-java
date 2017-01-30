@@ -28,7 +28,6 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Table;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
@@ -78,7 +77,7 @@ public class TableNode extends Node {
         }
 
         @Override
-        protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
+        protected void azureNodeAction(NodeActionEvent e)
                 throws AzureCmdException {
         }
 

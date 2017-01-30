@@ -21,14 +21,12 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
-import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 
-public abstract class ClientStorageNode extends AzureRefreshableNode {
+public abstract class ClientStorageNode extends RefreshableNode {
     protected final ClientStorageAccount clientStorageAccount;
 
     public ClientStorageNode(String id, String name, Node parent, String iconPath, ClientStorageAccount sm) {
@@ -50,31 +48,19 @@ public abstract class ClientStorageNode extends AzureRefreshableNode {
         return clientStorageAccount;
     }
 
-    protected void fillChildren(@NotNull EventStateHandle eventState) {
+    protected void fillChildren() {
         BlobModule blobsNode = new BlobModule(this, clientStorageAccount);
         blobsNode.load();
-
-        if (eventState.isEventTriggered()) {
-            return;
-        }
 
         addChildNode(blobsNode);
 
         QueueModule queueNode = new QueueModule(this, clientStorageAccount);
         queueNode.load();
 
-        if (eventState.isEventTriggered()) {
-            return;
-        }
-
         addChildNode(queueNode);
 
         TableModule tableNode = new TableModule(this, clientStorageAccount);
         tableNode.load();
-
-        if (eventState.isEventTriggered()) {
-            return;
-        }
 
         addChildNode(tableNode);
     }

@@ -22,11 +22,8 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure;
 
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
@@ -43,9 +40,6 @@ public class AzureModule extends RefreshableNode {
     private StorageModule storageModule;
     private WebappsModule webappsModule;
     private HDInsightRootModule hdInsightModule;
-    private EventWaitHandle subscriptionsChanged;
-    private boolean registeredSubscriptionsChanged;
-    private final Object subscriptionsChangedSync = new Object();
 
     public AzureModule(Object project) {
         this(null, ICON_PATH, null);
@@ -123,52 +117,5 @@ public class AzureModule extends RefreshableNode {
     @Override
     public Object getProject() {
         return project;
-    }
-
-    public void registerSubscriptionsChanged()
-            throws AzureCmdException {
-        synchronized (subscriptionsChangedSync) {
-            if (subscriptionsChanged == null) {
-                subscriptionsChanged = AzureManagerImpl.getManager(getProject()).registerSubscriptionsChanged();
-            }
-
-            registeredSubscriptionsChanged = true;
-
-            DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
-                @Override
-                public void run() {
-                    while (registeredSubscriptionsChanged) {
-                        try {
-                            subscriptionsChanged.waitEvent(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (registeredSubscriptionsChanged) {
-                                        removeAllChildNodes();
-                                        vmArmServiceModule = new VMArmModule(AzureModule.this);
-                                        hdInsightModule = hdInsightModule.getNewNode(AzureModule.this);
-
-                                        load();
-                                    }
-                                }
-                            });
-                        } catch (AzureCmdException ignored) {
-                            break;
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    public void unregisterSubscriptionsChanged()
-            throws AzureCmdException {
-        synchronized (subscriptionsChangedSync) {
-            registeredSubscriptionsChanged = false;
-
-            if (subscriptionsChanged != null) {
-                AzureManagerImpl.getManager(getProject()).unregisterSubscriptionsChanged(subscriptionsChanged);
-                subscriptionsChanged = null;
-            }
-        }
     }
 }

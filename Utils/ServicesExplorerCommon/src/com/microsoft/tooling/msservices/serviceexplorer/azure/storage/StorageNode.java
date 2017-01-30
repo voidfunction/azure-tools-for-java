@@ -26,21 +26,19 @@ import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
 
 import java.util.List;
 import java.util.Map;
 
-public class StorageNode extends AzureRefreshableNode {
+public class StorageNode extends RefreshableNode {
     private static final String STORAGE_ACCOUNT_ICON_PATH = "storageaccount.png";
 
     private final StorageAccount storageAccount;
@@ -63,7 +61,7 @@ public class StorageNode extends AzureRefreshableNode {
         }
 
         @Override
-        protected void azureNodeAction(NodeActionEvent e, @NotNull EventHelper.EventStateHandle stateHandle)
+        protected void azureNodeAction(NodeActionEvent e)
                 throws AzureCmdException {
             try {
                 AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
@@ -92,7 +90,7 @@ public class StorageNode extends AzureRefreshableNode {
     }
 
     @Override
-    protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
+    protected void refreshItems()
             throws AzureCmdException {
         removeAllChildNodes();
 

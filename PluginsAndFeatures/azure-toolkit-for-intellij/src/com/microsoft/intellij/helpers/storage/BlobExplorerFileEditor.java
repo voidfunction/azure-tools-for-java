@@ -39,10 +39,8 @@ import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.CallableSingleArg;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.*;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import sun.misc.IOUtils;
@@ -90,10 +88,6 @@ public class BlobExplorerFileEditor implements FileEditor {
 
     private LinkedList<BlobDirectory> directoryQueue = new LinkedList<BlobDirectory>();
     private List<BlobItem> blobItems;
-
-    private EventWaitHandle subscriptionsChanged;
-    private boolean registeredSubscriptionsChanged;
-    private final Object subscriptionsChangedSync = new Object();
 
     public BlobExplorerFileEditor(Project project) {
         this.project = project;
@@ -289,11 +283,6 @@ public class BlobExplorerFileEditor implements FileEditor {
                 uploadFile();
             }
         });
-
-        try {
-            registerSubscriptionsChanged();
-        } catch (AzureCmdException ignored) {
-        }
     }
 
     public void fillGrid() {
@@ -874,47 +863,47 @@ public class BlobExplorerFileEditor implements FileEditor {
         this.blobContainer = blobContainer;
     }
 
-    private void registerSubscriptionsChanged()
-            throws AzureCmdException {
-        synchronized (subscriptionsChangedSync) {
-            if (subscriptionsChanged == null) {
-                subscriptionsChanged = AzureManagerImpl.getManager(project).registerSubscriptionsChanged();
-            }
-
-            registeredSubscriptionsChanged = true;
-
-            DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        subscriptionsChanged.waitEvent(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (registeredSubscriptionsChanged) {
-                                    Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(project, storageAccount.getName(), blobContainer);
-
-                                    if (openedFile != null) {
-                                        DefaultLoader.getIdeHelper().closeFile(project, openedFile);
-                                    }
-                                }
-                            }
-                        });
-                    } catch (AzureCmdException ignored) {
-                    }
-                }
-            });
-        }
-    }
+//    private void registerSubscriptionsChanged()
+//            throws AzureCmdException {
+//        synchronized (subscriptionsChangedSync) {
+//            if (subscriptionsChanged == null) {
+//                subscriptionsChanged = AzureManagerImpl.getManager(project).registerSubscriptionsChanged();
+//            }
+//
+//            registeredSubscriptionsChanged = true;
+//
+//            DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        subscriptionsChanged.waitEvent(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                if (registeredSubscriptionsChanged) {
+//                                    Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(project, storageAccount.getName(), blobContainer);
+//
+//                                    if (openedFile != null) {
+//                                        DefaultLoader.getIdeHelper().closeFile(project, openedFile);
+//                                    }
+//                                }
+//                            }
+//                        });
+//                    } catch (AzureCmdException ignored) {
+//                    }
+//                }
+//            });
+//        }
+//    }
 
     private void unregisterSubscriptionsChanged()
             throws AzureCmdException {
-        synchronized (subscriptionsChangedSync) {
-            registeredSubscriptionsChanged = false;
-
-            if (subscriptionsChanged != null) {
-                AzureManagerImpl.getManager(project).unregisterSubscriptionsChanged(subscriptionsChanged);
-                subscriptionsChanged = null;
-            }
-        }
+//        synchronized (subscriptionsChangedSync) {
+//            registeredSubscriptionsChanged = false;
+//
+//            if (subscriptionsChanged != null) {
+//                AzureManagerImpl.getManager(project).unregisterSubscriptionsChanged(subscriptionsChanged);
+//                subscriptionsChanged = null;
+//            }
+//        }
     }
 }

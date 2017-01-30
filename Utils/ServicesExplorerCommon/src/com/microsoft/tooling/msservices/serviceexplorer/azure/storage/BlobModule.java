@@ -21,17 +21,15 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
-import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 
 import java.util.List;
 
-public class BlobModule extends AzureRefreshableNode {
+public class BlobModule extends RefreshableNode {
     private static final String BLOBS = "Blobs";
     final ClientStorageAccount storageAccount;
 
@@ -42,15 +40,11 @@ public class BlobModule extends AzureRefreshableNode {
     }
 
     @Override
-    protected void refresh(@NotNull EventStateHandle eventState)
+    protected void refreshItems()
             throws AzureCmdException {
         removeAllChildNodes();
 
         final List<BlobContainer> blobContainers = StorageClientSDKManager.getManager().getBlobContainers(storageAccount.getConnectionString());
-
-        if (eventState.isEventTriggered()) {
-            return;
-        }
 
         for (BlobContainer blobContainer : blobContainers) {
 //            addChildNode(new ContainerNode(this, storageAccount, blobContainer)); todo:

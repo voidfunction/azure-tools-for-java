@@ -25,7 +25,6 @@ import java.util.List;
 
 import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
@@ -134,7 +133,7 @@ public class WebappNode extends Node {
 		}
 
 		@Override
-		protected void azureNodeAction(NodeActionEvent e, @NotNull EventHelper.EventStateHandle stateHandle) throws AzureCmdException {
+		protected void azureNodeAction(NodeActionEvent e) throws AzureCmdException {
 //			try {
 //				AzureManagerImpl.getManager(getProject()).deleteWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
 				DefaultLoader.getIdeHelper().invokeLater(new Runnable() {

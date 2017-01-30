@@ -23,11 +23,6 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure;
 
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventHandler;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventStateHandle;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper.EventWaitHandle;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListenerAsync;
@@ -56,34 +51,10 @@ public abstract class AzureNodeActionListener extends NodeActionListenerAsync {
 
     @Override
     protected void actionPerformed(final NodeActionEvent e) throws AzureCmdException {
-        EventHelper.runInterruptible(new EventHandler() {
-            @Override
-            public EventWaitHandle registerEvent()
-                    throws AzureCmdException {
-                return AzureManagerImpl.getManager(azureNode.getProject()).registerSubscriptionsChanged();
-            }
-
-            @Override
-            public void unregisterEvent(@NotNull EventWaitHandle waitHandle)
-                    throws AzureCmdException {
-                AzureManagerImpl.getManager(azureNode.getProject()).unregisterSubscriptionsChanged(waitHandle);
-            }
-
-            @Override
-            public void interruptibleAction(@NotNull EventStateHandle stateHandle)
-                    throws AzureCmdException {
-                azureNodeAction(e, stateHandle);
-            }
-
-            @Override
-            public void eventTriggeredAction()
-                    throws AzureCmdException {
-                onSubscriptionsChanged(e);
-            }
-        });
+        azureNodeAction(e);
     }
 
-    protected abstract void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
+    protected abstract void azureNodeAction(NodeActionEvent e)
             throws AzureCmdException;
 
     protected abstract void onSubscriptionsChanged(NodeActionEvent e)
