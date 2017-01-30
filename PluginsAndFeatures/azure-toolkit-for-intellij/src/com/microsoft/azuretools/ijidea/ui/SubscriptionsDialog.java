@@ -1,13 +1,19 @@
 package com.microsoft.azuretools.ijidea.ui;
 
+import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.table.JBTable;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -20,15 +26,18 @@ import java.awt.event.WindowEvent;
 import java.util.List;
 
 public class SubscriptionsDialog extends JDialog {
+    private static final Logger LOGGER = Logger.getInstance(SubscriptionsDialog.class);
+
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
     private JTable table;
+    private JButton refreshButton;
     private List<SubscriptionDetail> sdl;
     private int result = JOptionPane.CANCEL_OPTION;
 
 
-    private DefaultTableModel model = new DefaultTableModel() {
+    private static class SubscriptionTableModel extends DefaultTableModel {
         final Class[] columnClass = new Class[] {
                 Boolean.class, String.class, String.class
         };
@@ -92,22 +101,58 @@ public class SubscriptionsDialog extends JDialog {
             }
         });
 
+
+        DefaultTableModel model = new SubscriptionTableModel();
         model.addColumn("");
         model.addColumn("Subscription name");
         model.addColumn("Subscription ID");
-
         table.setModel(model);
-
         TableColumn column = table.getColumnModel().getColumn(0);
         column.setMinWidth(23);
         column.setMaxWidth(23);
 
+
+
         table.setRowSelectionAllowed(false);
         table.setCellSelectionEnabled(false);
+
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                refreshSubscriptions();
+            }
+        });
+    }
+
+    private void refreshSubscriptions() {
+        try {
+            AzureManager manager = AuthMethodManager.getInstance().getAzureManager();
+            if (manager == null) {
+                return;
+            }
+            Project project = null;
+            final SubscriptionManager subscriptionManager = manager.getSubscriptionManager();
+            subscriptionManager.cleanSubscriptions();
+
+            DefaultTableModel dm = (DefaultTableModel)table.getModel();
+            dm.getDataVector().removeAllElements();
+            dm.fireTableDataChanged();
+
+            SelectSubscriptionsAction.updateSubscriptionWithProgressDialog(subscriptionManager, project);
+            sdl = subscriptionManager.getSubscriptionDetails();
+            setSubscriptions();
+            subscriptionManager.setSubscriptionDetails(sdl);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            LOGGER.error("onShowSubscriptions", ex);
+            ErrorWindow.show(ex.getMessage(), "Select Subscriptions Action Error", SubscriptionsDialog.this);
+        }
 
     }
 
     private void setSubscriptions() {
+        DefaultTableModel model = (DefaultTableModel)table.getModel();
         for (SubscriptionDetail sd : sdl) {
             model.addRow(new Object[] {sd.isSelected(), sd.getSubscriptionName(), sd.getSubscriptionId()});
             model.fireTableDataChanged();
@@ -115,6 +160,7 @@ public class SubscriptionsDialog extends JDialog {
     }
 
     private void onOK() {
+        DefaultTableModel model = (DefaultTableModel)table.getModel();
         int rc = model.getRowCount();
         int unselectedCount = 0;
         for (int ri = 0; ri < rc; ++ri) {
@@ -144,74 +190,8 @@ public class SubscriptionsDialog extends JDialog {
         dispose();
     }
 
-//    private void deleteTableData() {
-//        while (model.getRowCount() != 0) model.removeRow(0);
-//    }
-
-
-//    private void loadSubscriptions() {
-////        LoadSubscriptionTask task = new LoadSubscriptionTask(null, this.sm);
-////        task.queue();
-//
-//        ProgressManager.getInstance().run(new Task.Modal(null, "Loading Subscriptions...", true) {
-//            @Override
-//            public void run(ProgressIndicator progressIndicator) {
-//                try {
-//                    progressIndicator.setIndeterminate(true);
-//
-//                    sdl = sm.getSubscriptionDetails();
-//                    ApplicationManager.getApplication().invokeLater(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            deleteTableData();
-//                            for (SubscriptionDetail sd : sdl) {
-//                                model.addRow(new Object[] {sd.isSelected(), sd.getSubscriptionName(), sd.getSubscriptionId()});
-//                                model.fireTableDataChanged();
-//                            }
-//                        }
-//                    }, ModalityState.any());
-//
-//                } catch (Exception ex) {
-//                    ex.printStackTrace();
-//                }
-//            }
-//        });
-//
-//    }
-
     private void createUIComponents() {
         // TODO: place custom component creation code here
         table = new JBTable();
     }
-/*
-    private class LoadSubscriptionTask extends Task.Modal  {
-        SubscriptionManager sm;
-
-        public LoadSubscriptionTask(@Nullable Project project, SubscriptionManager sm) {
-            super(project, "Loading Subscriptions", true);
-            this.sm = sm;
-        }
-
-        @Override
-        public void run(@NotNull ProgressIndicator progressIndicator) {
-            try {
-                progressIndicator.setIndeterminate(true);
-
-                sdl = sm.getSubscriptionDetails();
-                ApplicationManager.getApplication().invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        deleteTableDate();
-                        for (SubscriptionDetail sd : sdl) {
-                            statusTableModel.addRow(new Object[] {sd.isSelected(), sd.getSubscriptionName(), sd.getSubscriptionId()});
-                        }
-                    }
-                }, ModalityState.any());
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-*/
 }

@@ -147,6 +147,8 @@ public class AppServiceCreateDialog extends DialogWrapper {
         setTitle("Create App Service");
 
         setOKButtonText("Create");
+        textFieldAppServicePlanLocation.setOpaque(false);
+        textFieldAppServicePlanTier.setOpaque(false);
 
         init();
 

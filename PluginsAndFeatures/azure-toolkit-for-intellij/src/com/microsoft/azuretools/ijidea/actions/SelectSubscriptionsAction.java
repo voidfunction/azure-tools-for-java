@@ -46,17 +46,19 @@ public class SelectSubscriptionsAction extends AnAction {
 
             final SubscriptionManager subscriptionManager = manager.getSubscriptionManager();
 
-            ProgressManager.getInstance().run(new Task.Modal(project, "Loading Subscriptions...", true) {
-                @Override
-                public void run(ProgressIndicator progressIndicator) {
-                    try {
-                        progressIndicator.setIndeterminate(true);
-                        subscriptionManager.getSubscriptionDetails();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            });
+//            ProgressManager.getInstance().run(new Task.Modal(project, "Loading Subscriptions...", true) {
+//                @Override
+//                public void run(ProgressIndicator progressIndicator) {
+//                    try {
+//                        progressIndicator.setIndeterminate(true);
+//                        subscriptionManager.getSubscriptionDetails();
+//                    } catch (Exception ex) {
+//                        ex.printStackTrace();
+//                    }
+//                }
+//            });
+
+            updateSubscriptionWithProgressDialog(subscriptionManager, project);
 
             List<SubscriptionDetail> sdl = subscriptionManager.getSubscriptionDetails();
             for (SubscriptionDetail sd : sdl) {
@@ -72,7 +74,6 @@ public class SelectSubscriptionsAction extends AnAction {
             ex.printStackTrace();
             LOGGER.error("onShowSubscriptions", ex);
             ErrorWindow.show(ex.getMessage(), "Select Subscriptions Action Error", frame);
-
         }
     }
 
@@ -85,6 +86,21 @@ public class SelectSubscriptionsAction extends AnAction {
             ex.printStackTrace();
             LOGGER.error("update", ex);
         }
+    }
+
+    public static void updateSubscriptionWithProgressDialog(final SubscriptionManager subscriptionManager, Project project) {
+        ProgressManager.getInstance().run(new Task.Modal(project, "Loading Subscriptions...", true) {
+            @Override
+            public void run(ProgressIndicator progressIndicator) {
+                try {
+                    progressIndicator.setIndeterminate(true);
+                    subscriptionManager.getSubscriptionDetails();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
     }
 
 }

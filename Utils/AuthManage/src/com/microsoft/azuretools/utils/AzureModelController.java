@@ -79,25 +79,29 @@ public class AzureModelController {
     };
 
     private static void clearAll() {
+        System.out.println("AzureModelController.clearAll: set null to all the maps.");
         AzureModel azureModel = AzureModel.getInstance();
         azureModel.setSubscriptionToResourceGroupMap(null);
         azureModel.setResourceGroupToWebAppMap(null);
         azureModel.setResourceGroupToAppServicePlanMap(null);
+        // TODO: notify subscribers
     }
 
     private static void subscriptionSelectionChanged(IProgressIndicator progressIndicator) throws Exception {
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         // not signed in
         if (azureManager == null) {
+            System.out.println("AzureModelController.subscriptionSelectionChanged: azureManager == null -> return");
             return;
         }
 
-
         SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
-
         AzureModel azureModel = AzureModel.getInstance();
 
         Map<SubscriptionDetail, List<ResourceGroup>> srgMap = azureModel.getSubscriptionToResourceGroupMap();
+        if (srgMap == null) {
+            System.out.println("AzureModelController.subscriptionSelectionChanged: srgMap == null -> return");
+        }
         Map<ResourceGroup, List<WebApp>> rgwaMap = azureModel.getResourceGroupToWebAppMap();
         Map<ResourceGroup, List<AppServicePlan>> rgspMap = azureModel.getResourceGroupToAppServicePlanMap();
 
