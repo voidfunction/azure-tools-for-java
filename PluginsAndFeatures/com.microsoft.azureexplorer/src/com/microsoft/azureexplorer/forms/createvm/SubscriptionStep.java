@@ -129,12 +129,12 @@ public class SubscriptionStep extends WizardPage {
     private void loadSubscriptions() {
         AzureManager manager = AzureManagerImpl.getManager();
 
-        if (manager.authenticated()) {
+        /*if (manager.authenticated()) {
             String upn = manager.getUserInfo().getUniqueName();
             userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
         } else {
             userInfoLabel.setText("");
-        }
+        }*/
 
         java.util.List<Subscription> subscriptionList = manager.getSubscriptionList();
 

@@ -3,10 +3,9 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="resources/AzureCommons.jar" sourcepath="/Users/farlen/stuff/azure-tools-for-java-private.2.9.6.3/Utils/AzureCommons/src"/>
-	<classpathentry exported="true" kind="lib" path="resources/ProjectManagerLibrary.jar" sourcepath="/ProjectManagerLibrary/src"/>
-	<classpathentry exported="true" kind="lib" path="resources/.cspack.jar" sourcepath="/Users/farlen/stuff/azure-tools-for-java-private.2.9.6.3/StarterKit/CSPackAntTask/src"/>
-	<classpathentry exported="true" kind="lib" path="resources/hdinsight-node-common.jar"/>
 	<classpathentry exported="true" kind="lib" path="resources/azure-explorer-common.jar" sourcepath="/Users/farlen/stuff/azure-tools-for-java-private.2.9.6.3/Utils/ServicesExplorerCommon/src"/>
+	<classpathentry exported="true" kind="lib" path="resources/.cspack.jar"/>
+	<classpathentry exported="true" kind="lib" path="resources/AzureCommons.jar"/>
+	<classpathentry exported="true" kind="lib" path="resources/ProjectManagerLibrary.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

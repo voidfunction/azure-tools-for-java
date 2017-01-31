@@ -16,7 +16,7 @@
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+ *//*
 package com.microsoft.webapp.config;
 
 import java.io.ByteArrayInputStream;
@@ -393,7 +393,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                             // authenticated using AD. Proceed for Web Apps retrieval
                             for (Subscription sub : subList) {
                                 // TODO
-                            	/*List<String> resList = manager.getResourceGroupNames(sub.getId());
+                            	List<String> resList = manager.getResourceGroupNames(sub.getId());
                                 for (String res : resList) {
                                     List<WebSite> webList = manager.getWebSites(sub.getId(), res);
                                     for (WebSite webSite : webList) {
@@ -402,7 +402,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                                                         webSite.getWebSpaceName(), webSite.getName());
                                         webSiteConfigMap.put(webSite, webSiteConfiguration);
                                     }
-                                }*/
+                                }
                             }
                             PreferenceWebAppUtil.save(webSiteConfigMap);
                             PreferenceWebAppUtil.setLoaded(true);
@@ -1012,3 +1012,4 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         }
     }
 }
+*/

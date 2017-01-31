@@ -366,7 +366,6 @@ public class DeployWizard extends Wizard {
 		waProjManager.setPublishStorageAccountName(WizardCacheManager.getCurrentStorageAcount().getName());
 		waProjManager.setPublishDeploymentSlot(DeploymentSlot.valueOf(WizardCacheManager.getCurrentDeplyState()));
 		waProjManager.setPublishOverwritePreviousDeployment(Boolean.parseBoolean(WizardCacheManager.getUnpublish()));
-		waProjManager.setPublishAccessToken(AzureManagerImpl.getManager().getAccessToken(currentSubscriptionID));
 	}
 
 	@Override

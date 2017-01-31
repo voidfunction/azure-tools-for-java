@@ -51,7 +51,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
-import com.microsoft.tooling.msservices.components.AppSettingsNames;
 import com.microsoft.tooling.msservices.helpers.OpenSSLHelper;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import org.apache.commons.net.ftp.FTP;

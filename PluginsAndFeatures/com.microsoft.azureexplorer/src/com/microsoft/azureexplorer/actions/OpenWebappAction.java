@@ -4,8 +4,6 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSitePublishSettings;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappNode;
@@ -27,7 +25,7 @@ public class OpenWebappAction extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        WebSite webapp = webappNode.getWebSite();
+        /*WebSite webapp = webappNode.getWebSite();
         try {
             if (webapp.getWebSitePublishSettings() == null) {
                 webapp.setWebSitePublishSettings(AzureManagerImpl.getManager().
@@ -47,6 +45,6 @@ public class OpenWebappAction extends NodeActionListener {
         } catch (Exception e1) {
         	PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(), Messages.err,
         			"An error occurred while opening web apps in browser", e1);
-        }
+        }*/
     }
 }

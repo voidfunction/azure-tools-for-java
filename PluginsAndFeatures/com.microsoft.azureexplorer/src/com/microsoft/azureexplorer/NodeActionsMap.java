@@ -43,7 +43,7 @@ public class NodeActionsMap {
         node2Actions.put(TableModule.class, new ImmutableList.Builder().add(CreateTableAction.class).build());
         node2Actions.put(QueueModule.class, new ImmutableList.Builder().add(CreateQueueAction.class).build());
         node2Actions.put(BlobModule.class, new ImmutableList.Builder().add(CreateBlobContainer.class).build());
-        node2Actions.put(StorageModule.class, new ImmutableList.Builder().add(CreateStorageAccountAction.class, AttachExternalStorageAccountAction.class).build());
+        node2Actions.put(StorageModule.class, new ImmutableList.Builder().add(CreateArmStorageAccountAction.class, AttachExternalStorageAccountAction.class).build());
 //        node2Actions.put(ExternalStorageNode.class, new ImmutableList.Builder().add(ConfirmDialogAction.class, ModifyExternalStorageAccountAction.class).build());
         node2Actions.put(com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageModule.class, new ImmutableList.Builder().add(CreateArmStorageAccountAction.class).build());
         node2Actions.put(com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageNode.class, new ImmutableList.Builder().add(CreateBlobContainer.class).build());        

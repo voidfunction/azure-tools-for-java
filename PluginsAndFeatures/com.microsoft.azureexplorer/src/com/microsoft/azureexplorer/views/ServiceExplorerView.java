@@ -55,7 +55,6 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
-import com.gigaspaces.azure.util.PreferenceWebAppUtil;
 import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -140,14 +139,6 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
             invisibleRoot = new TreeNode(null);
             invisibleRoot.add(createTreeNode(azureServiceModule));
 
-            // kick-off asynchronous load of child nodes on all the modules
-            if (PreferenceWebAppUtil.isLoaded()) {
-            	try {
-            		AzureServiceModule.webSiteConfigMap = PreferenceWebAppUtil.load();
-            	} catch (RestAPIException e) {
-            		AzureServiceModule.webSiteConfigMap = null;
-            	}
-            }
             azureServiceModule.load();
         }
     }

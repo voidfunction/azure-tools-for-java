@@ -224,11 +224,6 @@ public class IDEHelperImpl implements IDEHelper {
     public boolean isApplicationPropertySet(@NotNull String name) {
     	return isPropertySet(name);
     }
-    
-    @Override
-    public  com.microsoft.auth.IWebUi getWebUi() {
-    	return new com.microsoftopentechnologies.wacommon.adauth.SwtBrowserWIndow();
-    }
 
 	@Override
 	public String getProjectSettingsPath() {

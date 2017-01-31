@@ -267,12 +267,12 @@ public class CreateArmStorageAccountForm extends Dialog {
             }
         });
 
-        if (AzureManagerImpl.getManager().authenticated()) {
+        /*if (AzureManagerImpl.getManager().authenticated()) {
             String upn = AzureManagerImpl.getManager().getUserInfo().getUniqueName();
             userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
         } else {
             userInfoLabel.setText("");
-        }
+        }*/
         
         fillFields();
 

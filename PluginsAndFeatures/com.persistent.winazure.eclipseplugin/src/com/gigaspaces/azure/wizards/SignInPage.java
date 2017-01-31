@@ -1185,7 +1185,6 @@ public class SignInPage extends WindowsAzurePage {
 				PluginUtil.showBusy(true, getShell());
 				List<com.microsoft.tooling.msservices.model.Subscription> oldSubList = AzureManagerImpl.getManager().getFullSubscriptionList();
 				AzureManager apiManager = AzureManagerImpl.getManager();
-				apiManager.clearAuthentication();
 				apiManager.importPublishSettingsFile(fileName);
 				// todo: remove tableViewer?
 				publishData = MethodUtils.handleFile(ImportSubscriptionDialog.getPubSetFilePath(), null);
