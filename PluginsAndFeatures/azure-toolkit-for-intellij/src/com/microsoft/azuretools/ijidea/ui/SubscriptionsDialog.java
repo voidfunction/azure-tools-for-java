@@ -1,12 +1,6 @@
 package com.microsoft.azuretools.ijidea.ui;
 
-import com.intellij.openapi.actionSystem.DataKeys;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.table.JBTable;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
@@ -24,6 +18,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class SubscriptionsDialog extends JDialog {
     private static final Logger LOGGER = Logger.getInstance(SubscriptionsDialog.class);
@@ -101,7 +97,6 @@ public class SubscriptionsDialog extends JDialog {
             }
         });
 
-
         DefaultTableModel model = new SubscriptionTableModel();
         model.addColumn("");
         model.addColumn("Subscription name");
@@ -110,9 +105,6 @@ public class SubscriptionsDialog extends JDialog {
         TableColumn column = table.getColumnModel().getColumn(0);
         column.setMinWidth(23);
         column.setMaxWidth(23);
-
-
-
         table.setRowSelectionAllowed(false);
         table.setCellSelectionEnabled(false);
 
@@ -125,6 +117,7 @@ public class SubscriptionsDialog extends JDialog {
     }
 
     private void refreshSubscriptions() {
+        ReadWriteLock rwLock = new ReentrantReadWriteLock();
         try {
             AzureManager manager = AuthMethodManager.getInstance().getAzureManager();
             if (manager == null) {
@@ -138,17 +131,21 @@ public class SubscriptionsDialog extends JDialog {
             dm.getDataVector().removeAllElements();
             dm.fireTableDataChanged();
 
-            SelectSubscriptionsAction.updateSubscriptionWithProgressDialog(subscriptionManager, project);
+            SelectSubscriptionsAction.updateSubscriptionWithProgressDialog(subscriptionManager, project, rwLock.writeLock());
+
+            rwLock.readLock().lock();
+            //System.out.println("refreshSubscriptions: calling getSubscriptionDetails()");
             sdl = subscriptionManager.getSubscriptionDetails();
             setSubscriptions();
             subscriptionManager.setSubscriptionDetails(sdl);
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.error("onShowSubscriptions", ex);
-            ErrorWindow.show(ex.getMessage(), "Select Subscriptions Action Error", SubscriptionsDialog.this);
+            LOGGER.error("refreshSubscriptions", ex);
+            ErrorWindow.show(ex.getMessage(), "Refresh Subscriptions Error", SubscriptionsDialog.this);
+        } finally {
+            rwLock.readLock().unlock();
         }
-
     }
 
     private void setSubscriptions() {

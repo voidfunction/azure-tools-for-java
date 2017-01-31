@@ -34,7 +34,6 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.packaging.artifacts.Artifact;
-import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.appservice.AppServicePlan;
 import com.microsoft.azure.management.appservice.JavaVersion;
 import com.microsoft.azure.management.appservice.PublishingProfile;
@@ -47,7 +46,6 @@ import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.azuretools.utils.WebAppUtils;
-import org.apache.sanselan.formats.tiff.TiffReader;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,11 +72,12 @@ public class WebAppDeployDialog extends DialogWrapper {
     private JButton refreshButton;
     private JCheckBox deployToRootCheckBox;
     private JEditorPane editorPaneAppServiceDetails;
+    private JButton editButton;
 
     private final Module module;
     private final Artifact artifact;
 
-    private static class WebAppDetails {
+    static class WebAppDetails {
         public SubscriptionDetail subscriptionDetail;
         public ResourceGroup resourceGroup;
         public AppServicePlan appServicePlan;
@@ -115,7 +114,7 @@ public class WebAppDeployDialog extends DialogWrapper {
         createButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                createWebApp();
+                createAppService();
             }
         });
 
@@ -133,6 +132,13 @@ public class WebAppDeployDialog extends DialogWrapper {
                 editorPaneAppServiceDetails.setText("");
                 AzureModel.getInstance().setResourceGroupToWebAppMap(null);
                 fillTable();
+            }
+        });
+
+        editButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                editAppService();
             }
         });
 
@@ -169,7 +175,6 @@ public class WebAppDeployDialog extends DialogWrapper {
                 }
             }
         });
-
 
         init();
     }
@@ -286,7 +291,7 @@ public class WebAppDeployDialog extends DialogWrapper {
             tableModel.fireTableDataChanged();
     }
 
-    private void createWebApp() {
+    private void createAppService() {
         AppServiceCreateDialog d = AppServiceCreateDialog.go(this.module);
         if (d == null) {
             // something went wrong - report an error!
@@ -295,6 +300,26 @@ public class WebAppDeployDialog extends DialogWrapper {
         WebApp wa = d.getWebApp();
         doFillTable();
         selectTableRowWithWebAppName(wa.name());
+        //fillAppServiceDetails();
+    }
+
+    private void editAppService() {
+
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow >= 0) {
+            DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
+            String appServiceName = (String) tableModel.getValueAt(selectedRow, 0);
+            WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
+
+            AppServiceChangeSettingsDialog d = AppServiceChangeSettingsDialog.go(wad, this.module);
+            if (d == null) {
+                // something went wrong - report an error!
+                return;
+            }
+            WebApp wa = d.getWebApp();
+            doFillTable();
+            selectTableRowWithWebAppName(wa.name());
+        }
         //fillAppServiceDetails();
     }
 
@@ -311,7 +336,6 @@ public class WebAppDeployDialog extends DialogWrapper {
 
     private void deleteAppService() {
         DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
-        //DefaultListModel<String> listModel = new DefaultListModel<String>();
         int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
             String appServiceName = (String)tableModel.getValueAt(selectedRow, 0);
@@ -324,8 +348,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                     JOptionPane.QUESTION_MESSAGE,
                     null, null, null);
 
-            if (choice == JOptionPane.NO_OPTION)
-            {
+            if (choice == JOptionPane.NO_OPTION) {
                 return;
             }
 
@@ -370,7 +393,6 @@ public class WebAppDeployDialog extends DialogWrapper {
 
     private void fillAppServiceDetails() {
         DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
-        //DefaultListModel<String> listModel = new DefaultListModel<String>();
         int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
             String appServiceName = (String)tableModel.getValueAt(selectedRow, 0);
@@ -400,7 +422,6 @@ public class WebAppDeployDialog extends DialogWrapper {
             return appServiceLink + "/" + artifactName;
         else
             return appServiceLink;
-
     }
 
     @Nullable

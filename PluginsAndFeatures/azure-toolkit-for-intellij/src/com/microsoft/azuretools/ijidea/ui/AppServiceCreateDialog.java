@@ -58,41 +58,43 @@ import java.util.List;
 public class AppServiceCreateDialog extends DialogWrapper {
     private static final Logger LOGGER = Logger.getInstance(AppServiceCreateDialog.class);
 
-    private JPanel contentPane;
-    private JTextField textFieldWebappName;
-    private JComboBox comboBoxWebContainer;
-    private JComboBox comboBoxSubscription;
-    private JComboBox comboBoxResourceGroup;
-    private JComboBox comboBoxAppServicePlan;
-    private JTextField textFieldAppServicePlanLocation;
-    private JTextField textFieldAppServicePlanTier;
-    private JComboBox comboBoxJDK3Party;
-    private JTextField textFieldJDKUrl;
-    private JTextField textFieldJDKAccountKey;
-    private JLabel labelJDKUrl;
-    private JLabel labelJDKAccountKey;
-    private JTabbedPane tabbedPaneAppService;
-    private JTextField textFieldAppServicePlaneNew;
-    private JTabbedPane tabbedPaneResourceGroup;
-    private JTextField textFieldResourceGroupNew;
-    private JComboBox comboBoxAppServicePlanLocation;
-    private JComboBox comboBoxAppServicePlanPricingTier;
-    private JTabbedPane tabbedPaneJdk;
-    private JXHyperlink linkPricing;
-    private JPanel panelResourceGroupUseExisting;
-    private JPanel panelResourceGroupCreateNew;
-    private JPanel panelAppServiceUseExisting;
-    private JPanel panelAppServiceCreateNew;
-    private JPanel panelJdkDefault;
-    private JPanel panelJdk3Party;
-    private JPanel panelJdkOwn;
-    private JXHyperlink linkLicense;
+    protected JPanel contentPane;
+    protected JTextField textFieldWebappName;
+    protected JComboBox comboBoxWebContainer;
+    protected JComboBox comboBoxSubscription;
+    protected JComboBox comboBoxResourceGroup;
+    protected JComboBox comboBoxAppServicePlan;
+    protected JTextField textFieldAppServicePlanLocation;
+    protected JTextField textFieldAppServicePlanTier;
+    protected JComboBox comboBoxJDK3Party;
+    protected JTextField textFieldJDKUrl;
+    protected JTextField textFieldJDKAccountKey;
+    protected JLabel labelJDKUrl;
+    protected JLabel labelJDKAccountKey;
+    protected JTabbedPane tabbedPaneAppService;
+    protected JTextField textFieldAppServicePlaneNew;
+    protected JTabbedPane tabbedPaneResourceGroup;
+    protected JTextField textFieldResourceGroupNew;
+    protected JComboBox comboBoxAppServicePlanLocation;
+    protected JComboBox comboBoxAppServicePlanPricingTier;
+    protected JTabbedPane tabbedPaneJdk;
+    protected JXHyperlink linkPricing;
+    protected JPanel panelResourceGroupUseExisting;
+    protected JPanel panelResourceGroupCreateNew;
+    protected JPanel panelAppServiceUseExisting;
+    protected JPanel panelAppServiceCreateNew;
+    protected JPanel panelJdkDefault;
+    protected JPanel panelJdk3Party;
+    protected JPanel panelJdkOwn;
+    protected JXHyperlink linkLicense;
+    protected JPanel panelResourceGroup;
+    protected JPanel panelAppServicePlan;
 
-    private Module module;
+    protected Module module;
 
-    private static final String textNotAvailable = "N/A";
+    protected static final String textNotAvailable = "N/A";
 
-    private static abstract class AdapterBase<T> {
+    protected static abstract class AdapterBase<T> {
         protected T adapted;
         protected AdapterBase(T adapted) {
             this.adapted = adapted;
@@ -102,7 +104,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
     }
 
-    private static class ResourceGroupAdapter extends AdapterBase<ResourceGroup> {
+    protected static class ResourceGroupAdapter extends AdapterBase<ResourceGroup> {
         public ResourceGroupAdapter(ResourceGroup rg) {
             super(rg);
         }
@@ -111,7 +113,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
             return adapted.name();
         }
     }
-    private static class AppServicePlanAdapter extends AdapterBase<AppServicePlan> {
+    protected static class AppServicePlanAdapter extends AdapterBase<AppServicePlan> {
         public AppServicePlanAdapter(AppServicePlan asp) {
             super(asp);
         }
@@ -121,7 +123,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
     }
 
-    private static class LocationAdapter extends AdapterBase<Location> {
+    protected static class LocationAdapter extends AdapterBase<Location> {
         public LocationAdapter(Location l) {
             super(l);
         }
@@ -201,7 +203,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         return "AppServiceCreateDialog";
     }
 
-    private void fillWebContainers() {
+    protected void fillWebContainers() {
         try {
             DefaultComboBoxModel<WebContainer> cbModel = createComboboxModelFromClassFields(WebContainer.class);
             comboBoxWebContainer.setModel(cbModel);
@@ -212,7 +214,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
     }
 
-    private void fillSubscriptions() {
+    protected void fillSubscriptions() {
         if (AzureModel.getInstance().getSubscriptionToResourceGroupMap() == null) {
             updateAndFillSubscriptions();
         } else {
@@ -220,7 +222,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
     }
 
-    private void updateAndFillSubscriptions() {
+    protected void updateAndFillSubscriptions() {
         ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Getting Web Apps...", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
@@ -255,7 +257,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         });
     }
 
-    private void doFillSubscriptions() {
+    protected void doFillSubscriptions() {
         try {
             // reset model
             Set<SubscriptionDetail> sdl = AzureModel.getInstance().getSubscriptionToResourceGroupMap().keySet();
@@ -276,7 +278,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
     }
 
-    private void fillResourceGroups() {
+    protected void fillResourceGroups() {
 
         DefaultComboBoxModel<SubscriptionDetail> cbModelSub = (DefaultComboBoxModel<SubscriptionDetail>)comboBoxSubscription.getModel();
         SubscriptionDetail sd = (SubscriptionDetail)cbModelSub.getSelectedItem();
@@ -301,7 +303,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
             comboBoxResourceGroup.setSelectedItem(null);
     }
 
-    private void fillAppServicePlans() {
+    protected void fillAppServicePlans() {
 //        DefaultComboBoxModel<ResourceGroupAdapter> cbModelRg = (DefaultComboBoxModel<ResourceGroupAdapter>)comboBoxResourceGroup.getModel();
 //        ResourceGroupAdapter rga = (ResourceGroupAdapter)cbModelRg.getSelectedItem();
 //        if (rga == null) { // empty
@@ -332,7 +334,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         comboBoxAppServicePlan.setModel(cbModel);
     }
 
-    private void fillAppServicePlansDetails() {
+    protected void fillAppServicePlansDetails() {
         DefaultComboBoxModel<AppServicePlanAdapter> cbModel =  (DefaultComboBoxModel<AppServicePlanAdapter>)comboBoxAppServicePlan.getModel();
         AppServicePlanAdapter aspa = (AppServicePlanAdapter)cbModel.getSelectedItem();
         if (aspa == null || aspa.getAdapted() == null) { // empty || <create new>
@@ -346,7 +348,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
     }
 
-    private void fillAppServicePlanLocations() {
+    protected void fillAppServicePlanLocations() {
         try {
 //            List<Region> list =  createLisFromClassFields(Region.class);
 //            DefaultComboBoxModel<RegionAdapter> cbModel = new DefaultComboBoxModel<>();
@@ -376,7 +378,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
     }
 
-    private void fillAppServicePlanPricingTiers() {
+    protected void fillAppServicePlanPricingTiers() {
         try {
             DefaultComboBoxModel<AppServicePricingTier> cbModel = createComboboxModelFromClassFields(AppServicePricingTier.class);
             comboBoxAppServicePlanPricingTier.setModel(cbModel);
@@ -387,7 +389,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
     }
 
-    private void fill3PartyJdk() {
+    protected void fill3PartyJdk() {
 
         DefaultComboBoxModel<AzulZuluModel> cbModel = new DefaultComboBoxModel<AzulZuluModel>();
         for (AzulZuluModel jdk : AzulZuluModel.values()) {
@@ -397,7 +399,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         comboBoxJDK3Party.setModel(cbModel);
     }
 
-    private static <T> List<T> createLisFromClassFields(Class c) throws IllegalAccessException {
+    protected static <T> List<T> createLisFromClassFields(Class c) throws IllegalAccessException {
         List<T> list = new LinkedList<T>();
 
         Field[] declaredFields = c.getDeclaredFields();
@@ -413,7 +415,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         return list;
     }
 
-    private static <T> DefaultComboBoxModel<T> createComboboxModelFromClassFields(Class c) throws IllegalAccessException {
+    protected static <T> DefaultComboBoxModel<T> createComboboxModelFromClassFields(Class c) throws IllegalAccessException {
         List<T> list = createLisFromClassFields(c);
         DefaultComboBoxModel<T> cbModel = new DefaultComboBoxModel<T>((T[]) list.toArray());
         return cbModel;
@@ -425,7 +427,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         Own;
     }
 
-    private class Model {
+    protected class Model {
         public String webAppName;
         public WebContainer webContainer;
         public SubscriptionDetail subscriptionDetail;
@@ -485,7 +487,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
     }
 
-    private Model model = new Model();
+    protected Model model = new Model();
 
 
     @Nullable
@@ -561,42 +563,9 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
 
         try {
-            switch (model.jdkTab) {
-                case Default:
-                    // do nothing
-                    model.jdkDownloadUrl = null;
-                    break;
-                case ThirdParty:
-                    if (!WebAppUtils.isUrlAccessabel(model.jdk3PartyUrl)) {
-                        return new ValidationInfo("Please check the URL is valid.", comboBoxJDK3Party);
-                    }
-                    model.jdkDownloadUrl = model.jdk3PartyUrl;
-                    break;
-                case Own:
-                    if (model.jdkOwnUrl.isEmpty()) {
-                        return new ValidationInfo("Enter a valid URL.", textFieldJDKUrl);
-                    } else {
-                        // first check the link is accessible as it is
-                        if (!WebAppUtils.isUrlAccessabel(model.jdkOwnUrl)) {
-                            // create shared access signature url and check its accessibility
-                            String sasUrl = StorageAccoutUtils.getBlobSasUri(model.jdkOwnUrl, model.storageAccountKey);
-                            if (!WebAppUtils.isUrlAccessabel(sasUrl)) {
-                                return new ValidationInfo("Please check the storage account key and/or URL is valid.", textFieldJDKUrl);
-                            } else {
-                                model.jdkDownloadUrl = sasUrl;
-                            }
-                        } else {
-                            model.jdkDownloadUrl = model.jdkOwnUrl;
-                        }
-                    }
-                    // link to a zip file
-                    // consider it's a Sas link
-                    String urlPath = new URI(model.jdkOwnUrl).getPath();
-                    if (!urlPath.endsWith(".zip")) {
-                        return new ValidationInfo("link to a zip file is expected.", textFieldJDKUrl);
-                    }
-
-                    break;
+            ValidationInfo res = volidateJdkTab();
+            if (res != null) {
+                return res;
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -606,7 +575,50 @@ public class AppServiceCreateDialog extends DialogWrapper {
         return super.doValidate();
     }
 
-    private WebApp createAppService(IProgressIndicator progressIndicator) throws Exception {
+    protected ValidationInfo volidateJdkTab() throws Exception {
+        switch (model.jdkTab) {
+            case Default:
+                // do nothing
+                model.jdkDownloadUrl = null;
+                break;
+            case ThirdParty:
+                if (!WebAppUtils.isUrlAccessabel(model.jdk3PartyUrl)) {
+                    return new ValidationInfo("Please check the URL is valid.", comboBoxJDK3Party);
+                }
+                model.jdkDownloadUrl = model.jdk3PartyUrl;
+                break;
+            case Own:
+                if (model.jdkOwnUrl.isEmpty()) {
+                    return new ValidationInfo("Enter a valid URL.", textFieldJDKUrl);
+                } else {
+                    // first check the link is accessible as it is
+                    if (!WebAppUtils.isUrlAccessabel(model.jdkOwnUrl)) {
+                        // create shared access signature url and check its accessibility
+                        String sasUrl = StorageAccoutUtils.getBlobSasUri(model.jdkOwnUrl, model.storageAccountKey);
+                        if (!WebAppUtils.isUrlAccessabel(sasUrl)) {
+                            return new ValidationInfo("Please check the storage account key and/or URL is valid.", textFieldJDKUrl);
+                        } else {
+                            model.jdkDownloadUrl = sasUrl;
+                        }
+                    } else {
+                        model.jdkDownloadUrl = model.jdkOwnUrl;
+                    }
+                }
+                // link to a zip file
+                // consider it's a Sas link
+                String urlPath = new URI(model.jdkOwnUrl).getPath();
+                if (!urlPath.endsWith(".zip")) {
+                    return new ValidationInfo("link to a zip file is expected.", textFieldJDKUrl);
+                }
+
+                break;
+        }
+
+        return null;
+
+    }
+
+    protected WebApp createAppService(IProgressIndicator progressIndicator) throws Exception {
 
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         // not signed in
@@ -670,7 +682,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         return myWebApp;
     }
 
-    private WebApp webApp;
+    protected WebApp webApp;
 
     public WebApp getWebApp() {
         return this.webApp;

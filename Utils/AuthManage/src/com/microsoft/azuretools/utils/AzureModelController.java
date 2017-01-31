@@ -49,9 +49,9 @@ public class AzureModelController {
 
     private static ISubscriptionSelectionListener subscriptionSelectionListener = new ISubscriptionSelectionListener() {
         @Override
-        public void update(boolean isSinedOut) {
+        public void update(boolean isSignedOut) {
             try {
-                if (isSinedOut) {
+                if (isSignedOut) {
                     clearAll();
                     return;
                 }
@@ -131,7 +131,10 @@ public class AzureModelController {
             Map<ResourceGroup, List<AppServicePlan>> rgspMap) {
 
         for (ResourceGroup rg : rgList) {
-            if (progressIndicator != null && progressIndicator.isCanceled()) break;
+            if (progressIndicator != null && progressIndicator.isCanceled()) {
+                clearAll();
+                return;
+            }
             //System.out.println("rg : " + rg);
             if (progressIndicator != null) progressIndicator.setText("Reading resource group '" + rg.name() + "'");
             List<WebApp> waList = azure.webApps().listByGroup(rg.name());
@@ -146,7 +149,10 @@ public class AzureModelController {
         // not signed in
         if (azureManager == null) { return; }
 
-        if (progressIndicator != null && progressIndicator.isCanceled()) return;
+        if (progressIndicator != null && progressIndicator.isCanceled()) {
+            clearAll();
+            return;
+        }
 
         // to get regions we nees subscription objects
         if (progressIndicator != null) progressIndicator.setText("Getting subscription list...");
@@ -168,7 +174,10 @@ public class AzureModelController {
         List<SubscriptionDetail> sdl = subscriptionManager.getSubscriptionDetails();
         for (SubscriptionDetail sd : sdl) {
             if (!sd.isSelected()) continue;
-            if (progressIndicator != null && progressIndicator.isCanceled()) break;
+            if (progressIndicator != null && progressIndicator.isCanceled()) {
+                clearAll();
+                return;
+            }
 
             System.out.println("sn : " + sd.getSubscriptionName());
             if (progressIndicator != null) progressIndicator.setText("Reading subscription '" + sd.getSubscriptionName() + "'");
@@ -196,7 +205,10 @@ public class AzureModelController {
         Map<ResourceGroup, List<WebApp>> rgwaMap = azureModel.createResourceGroupToWebAppMap();
         Map<ResourceGroup, List<AppServicePlan>> rgspMap = azureModel.createResourceGroupToAppServicePlanMap();
         for (SubscriptionDetail sd : azureModel.getSubscriptionToResourceGroupMap().keySet()) {
-            if (progressIndicator != null && progressIndicator.isCanceled()) break;
+            if (progressIndicator != null && progressIndicator.isCanceled()) {
+                clearAll();
+                return;
+            }
             Azure azure = azureManager.getAzure(sd.getSubscriptionId());
             List<ResourceGroup> rgList = azureModel.getSubscriptionToResourceGroupMap().get(sd);
             updateResGrDependency(azure, rgList, progressIndicator, rgwaMap, rgspMap);

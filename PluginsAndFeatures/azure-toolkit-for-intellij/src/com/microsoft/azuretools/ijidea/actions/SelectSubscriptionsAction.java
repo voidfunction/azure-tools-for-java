@@ -22,12 +22,17 @@ import com.microsoft.intellij.actions.AzureWebDeployAction;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Created by vlashch on 10/11/16.
  */
 public class SelectSubscriptionsAction extends AnAction {
     private static final Logger LOGGER = Logger.getInstance(SelectSubscriptionsAction.class);
+    private static ReadWriteLock rwLock = new ReentrantReadWriteLock();
+
     @Override
     public void actionPerformed(AnActionEvent e) {
         onShowSubscriptions(e);
@@ -58,12 +63,14 @@ public class SelectSubscriptionsAction extends AnAction {
 //                }
 //            });
 
-            updateSubscriptionWithProgressDialog(subscriptionManager, project);
-
+            updateSubscriptionWithProgressDialog(subscriptionManager, project, rwLock.writeLock());
+            rwLock.readLock().lock();
             List<SubscriptionDetail> sdl = subscriptionManager.getSubscriptionDetails();
             for (SubscriptionDetail sd : sdl) {
                 System.out.println(sd.getSubscriptionName());
             }
+
+            //System.out.println("onShowSubscriptions: calling getSubscriptionDetails()");
             SubscriptionsDialog d = SubscriptionsDialog.go(subscriptionManager.getSubscriptionDetails(), frame);
             List<SubscriptionDetail> subscriptionDetailsUpdated;
             if (d.getResult() == JOptionPane.OK_OPTION) {
@@ -74,6 +81,8 @@ public class SelectSubscriptionsAction extends AnAction {
             ex.printStackTrace();
             LOGGER.error("onShowSubscriptions", ex);
             ErrorWindow.show(ex.getMessage(), "Select Subscriptions Action Error", frame);
+        } finally {
+            rwLock.readLock().unlock();
         }
     }
 
@@ -88,15 +97,20 @@ public class SelectSubscriptionsAction extends AnAction {
         }
     }
 
-    public static void updateSubscriptionWithProgressDialog(final SubscriptionManager subscriptionManager, Project project) {
+    public static void updateSubscriptionWithProgressDialog(final SubscriptionManager subscriptionManager, Project project, Lock wLock) {
+        wLock.lock();
         ProgressManager.getInstance().run(new Task.Modal(project, "Loading Subscriptions...", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
                 try {
                     progressIndicator.setIndeterminate(true);
+                    //System.out.println("updateSubscriptionWithProgressDialog: calling getSubscriptionDetails()");
                     subscriptionManager.getSubscriptionDetails();
                 } catch (Exception ex) {
                     ex.printStackTrace();
+                    LOGGER.error("updateSubscriptionWithProgressDialog", ex);
+                } finally {
+                    wLock.unlock();
                 }
             }
         });

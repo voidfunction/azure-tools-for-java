@@ -35,26 +35,29 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.concurrent.CancellationException;
 
 /**
  * Created by vlashch on 1/19/17.
  */
 public class WebAppUtils {
+
     private static final String ftpRootPath = "/site/wwwroot/";
     private static final String ftpWebAppsPath = ftpRootPath + "webapps/";
+    private static String jdkFolderName = "jdk";
+    private static final String ftpJdkPath = ftpRootPath + jdkFolderName;
     private static String javaOptsString = "-Djava.net.preferIPv4Stack=true -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=127.0.0.1:%HTTP_PLATFORM_DEBUG_PORT%";
     private static String catalinaOpts = "-Dport.http=%HTTP_PLATFORM_PORT%";
     private static String aspScriptName = "getjdk.aspx";
+    private static String webConfigFilename = "web.config";
+    private static String reportFilename = "report.txt";
+    private static String statusFilename = "status.txt";
 
-
-    private static FTPClient getFtpConnection(PublishingProfile pp) throws Exception {
+    public static FTPClient getFtpConnection(PublishingProfile pp) throws Exception {
 
         FTPClient ftp = new FTPClient();
 
@@ -88,10 +91,10 @@ public class WebAppUtils {
             if (indicator != null) indicator.setText("Uploading the application...");
             InputStream input = new FileInputStream(artifactPath);
             if (toRoot) {
-                WebAppUtils.removeFtpDirectory(ftp, ftpWebAppsPath + "ROOT", "");
+                WebAppUtils.removeFtpDirectory(ftp, ftpWebAppsPath + "ROOT");
                 ftp.storeFile(ftpWebAppsPath + "ROOT.war", input);
             } else {
-                WebAppUtils.removeFtpDirectory(ftp, ftpWebAppsPath + artifactName, "");
+                WebAppUtils.removeFtpDirectory(ftp, ftpWebAppsPath + artifactName);
                 ftp.storeFile(ftpWebAppsPath + artifactName + ".war", input);
             }
             input.close();
@@ -107,39 +110,28 @@ public class WebAppUtils {
         }
     }
 
-
-    public static void removeFtpDirectory(FTPClient ftpClient, String parentDir,
-                                          String currentDir) throws IOException {
-        String dirToList = parentDir;
-        if (!currentDir.equals("")) {
-            dirToList += "/" + currentDir;
-        }
-        FTPFile[] subFiles = ftpClient.listFiles(dirToList);
-        if (subFiles != null && subFiles.length > 0) {
+    public static void removeFtpDirectory(FTPClient ftpClient, String path) throws IOException {
+        FTPFile[] subFiles = ftpClient.listFiles(path);
+        if (subFiles.length > 0) {
             for (FTPFile ftpFile : subFiles) {
                 String currentFileName = ftpFile.getName();
                 if (currentFileName.equals(".") || currentFileName.equals("..")) {
                     // skip parent directory and the directory itself
                     continue;
                 }
-                String filePath = parentDir + "/" + currentDir + "/" + currentFileName;
-                if (currentDir.equals("")) {
-                    filePath = parentDir + "/" + currentFileName;
-                }
 
+                String path1 = path + "/" + currentFileName;
                 if (ftpFile.isDirectory()) {
                     // remove the sub directory
-                    removeFtpDirectory(ftpClient, dirToList, currentFileName);
+                    removeFtpDirectory(ftpClient, path1);
                 } else {
                     // delete the file
-                    ftpClient.deleteFile(filePath);
+                    ftpClient.deleteFile(path1);
                 }
             }
-        } else {
-            // remove the empty directory
-            ftpClient.removeDirectory(dirToList);
         }
-        ftpClient.removeDirectory(dirToList);
+
+        ftpClient.removeDirectory(path);
     }
 
 //    public static String getAbsolutePath(String dir) {
@@ -154,13 +146,23 @@ public class WebAppUtils {
         ftp.storeFile(ftpRootPath + aspxPageName, new ByteArrayInputStream(aspxPageData));
 
         byte[] webConfigData = generateWebConfigForCustomJdkDownload(aspxPageName, null);
-        ftp.storeFile(ftpRootPath + "web.config", new ByteArrayInputStream(webConfigData));
+        ftp.storeFile(ftpRootPath + webConfigFilename, new ByteArrayInputStream(webConfigData));
     }
 
     public static boolean doesRemoteFileExist(FTPClient ftp, String path, String fileName) throws IOException {
         FTPFile[] files = ftp.listFiles(path);
         for (FTPFile file : files) {
             if (file.isFile() && file.getName().equalsIgnoreCase(fileName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean doesRemoteFolderExist(FTPClient ftp, String path, String folderName) throws IOException {
+        FTPFile[] files = ftp.listFiles(path);
+        for (FTPFile file : files) {
+            if (file.isDirectory() && file.getName().equalsIgnoreCase(folderName)) {
                 return true;
             }
         }
@@ -190,10 +192,19 @@ public class WebAppUtils {
         ftp.deleteFile(ftpRootPath + "jdk.zip");
     }
 
-    private static void cleanupJdk(FTPClient ftp, String customJdkFolderName) throws IOException {
-        if (customJdkFolderName != null) {
-            removeFtpDirectory(ftp, ftpRootPath, "jdk");
+//    private static void cleanupJdk(FTPClient ftp, String customJdkFolderName) throws IOException {
+//        if (customJdkFolderName != null) {
+//            removeFtpDirectory(ftp, ftpRootPath, "jdk");
+//        }
+//    }
+
+    public static void removeCustomJdkArtifacts(FTPClient ftp) throws IOException {
+        if (doesRemoteFolderExist(ftp, ftpRootPath, "jdk")) {
+            removeFtpDirectory(ftp, ftpJdkPath);
         }
+        ftp.deleteFile(ftpRootPath + webConfigFilename);
+        ftp.deleteFile(ftpRootPath + reportFilename);
+        ftp.deleteFile(ftpRootPath + statusFilename);
     }
 
     private static class WebAppException extends Exception {
@@ -222,6 +233,9 @@ public class WebAppUtils {
             if (indicator != null) indicator.setText("Stopping the service...");
             webApp.stop();
 
+            if (indicator != null) indicator.setText("Deleting custom jdk artifacts, if any (takes a while)...");
+            removeCustomJdkArtifacts(ftp);
+
             if (indicator != null) indicator.setText("Uploading scripts...");
             uploadJdkDownloadScript(ftp, jdkDownloadUrl);
 
@@ -232,7 +246,7 @@ public class WebAppUtils {
             final String siteUrl = "https://" + webApp.defaultHostName();
             if (indicator != null) indicator.setText("Checking the JDK gets downloaded and unpacked...");
             int step = 0;
-            while (!doesRemoteFileExist(ftp, ftpRootPath, "report.txt")) {
+            while (!doesRemoteFileExist(ftp, ftpRootPath, reportFilename)) {
                 if (indicator != null && indicator.isCanceled()) throw new CancellationException("Canceled by user.");
                 //if (step++ > 3) checkFreeSpaceAvailability(ftp);
                 Thread.sleep(5000);
@@ -260,11 +274,13 @@ public class WebAppUtils {
 
             uploadWebConfigForCustomJdk(ftp, webApp, customJdkFolderName, webContainer, indicator);
         } catch (Exception ex){
-            if (customJdkFolderName != null) {
-                cleanupJdk(ftp, customJdkFolderName);
+            if (doesRemoteFolderExist(ftp, ftpRootPath, jdkFolderName)) {
+                indicator.setText("Error happened. Cleaning up...");
+                removeFtpDirectory(ftp, ftpJdkPath);
             }
             throw ex;
         } finally {
+            indicator.setText("Removing working data from server...");
             cleanupWorkerData(ftp);
             if (ftp != null && ftp.isConnected()) {
                 ftp.disconnect();
@@ -280,7 +296,7 @@ public class WebAppUtils {
         if(indicator != null) indicator.setText("Stopping the service...");
         webApp.stop();
 
-        String webConfigFilename = "web.config";
+        //String webConfigFilename = "web.config";
         if(indicator != null) indicator.setText("Deleting "+ webConfigFilename + "...");
         ftp.deleteFile(ftpRootPath + webConfigFilename);
 
