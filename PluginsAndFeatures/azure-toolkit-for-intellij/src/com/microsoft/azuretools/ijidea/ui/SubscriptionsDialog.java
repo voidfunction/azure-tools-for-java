@@ -18,8 +18,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class SubscriptionsDialog extends JDialog {
     private static final Logger LOGGER = Logger.getInstance(SubscriptionsDialog.class);
@@ -117,7 +115,6 @@ public class SubscriptionsDialog extends JDialog {
     }
 
     private void refreshSubscriptions() {
-        ReadWriteLock rwLock = new ReentrantReadWriteLock();
         try {
             AzureManager manager = AuthMethodManager.getInstance().getAzureManager();
             if (manager == null) {
@@ -131,9 +128,8 @@ public class SubscriptionsDialog extends JDialog {
             dm.getDataVector().removeAllElements();
             dm.fireTableDataChanged();
 
-            SelectSubscriptionsAction.updateSubscriptionWithProgressDialog(subscriptionManager, project, rwLock.writeLock());
+            SelectSubscriptionsAction.updateSubscriptionWithProgressDialog(subscriptionManager, project);
 
-            rwLock.readLock().lock();
             //System.out.println("refreshSubscriptions: calling getSubscriptionDetails()");
             sdl = subscriptionManager.getSubscriptionDetails();
             setSubscriptions();
@@ -143,8 +139,6 @@ public class SubscriptionsDialog extends JDialog {
             ex.printStackTrace();
             LOGGER.error("refreshSubscriptions", ex);
             ErrorWindow.show(ex.getMessage(), "Refresh Subscriptions Error", SubscriptionsDialog.this);
-        } finally {
-            rwLock.readLock().unlock();
         }
     }
 

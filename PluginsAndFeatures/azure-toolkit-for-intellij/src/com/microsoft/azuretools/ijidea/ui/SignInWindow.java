@@ -1,5 +1,6 @@
 package com.microsoft.azuretools.ijidea.ui;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -10,6 +11,7 @@ import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.interact.AuthMethod;
 import com.microsoft.azuretools.authmanage.models.AuthMethodDetails;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction;
 import com.microsoft.azuretools.sdkmanage.AccessTokenAzureManager;
 
 import javax.swing.*;
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 public class SignInWindow extends JDialog {
+    private static final Logger LOGGER = Logger.getInstance(SignInWindow.class);
+
     private JPanel contentPane;
 
     private JRadioButton interactiveRadioButton;
@@ -198,6 +202,8 @@ public class SignInWindow extends JDialog {
                 authFileTextField.setText(filepath);
             } catch (IOException ex) {
                 ex.printStackTrace();
+                LOGGER.error("doSelectCredFilepath", ex);
+                ErrorWindow.show(ex.getMessage(), "File path Error", this);
             }
         }
     }
@@ -212,6 +218,9 @@ public class SignInWindow extends JDialog {
             accountEmail = adAuthManager.getAccountEmail();
         } catch (Exception ex) {
             ex.printStackTrace();
+            LOGGER.error("doSignIn", ex);
+            ErrorWindow.show(ex.getMessage(), "Sign In Error", this);
+
         }
     }
 
@@ -224,7 +233,10 @@ public class SignInWindow extends JDialog {
                     try {
                         AdAuthManager.getInstance().signIn();
                     } catch (Exception ex) {
-                        System.out.println("signInAsync ex: " + ex.getMessage());
+                        ex.printStackTrace();
+                        LOGGER.error("signInAsync", ex);
+                        ErrorWindow.show(ex.getMessage(), "Sign In Error", SignInWindow.this);
+
                     }
                 }
             }
@@ -237,6 +249,8 @@ public class SignInWindow extends JDialog {
             AdAuthManager.getInstance().signOut();
         } catch (Exception ex) {
             ex.printStackTrace();
+            LOGGER.error("doSingOut", ex);
+            ErrorWindow.show(ex.getMessage(), "Sign Out Error", this);
         }
     }
 
@@ -267,6 +281,9 @@ public class SignInWindow extends JDialog {
                         subscriptionManager.getSubscriptionDetails();
                     } catch (Exception ex) {
                         ex.printStackTrace();
+                        LOGGER.error("doCreateServicePrincipal::Task.Modal", ex);
+                        ErrorWindow.show(ex.getMessage(), "Get Subscription Error", SignInWindow.this);
+
                     }
                 }
             });
@@ -315,8 +332,10 @@ public class SignInWindow extends JDialog {
 
 
         } catch (Exception ex) {
-            System.out.println("doCreateServicePrincipal ex:");
             ex.printStackTrace();
+            LOGGER.error("doCreateServicePrincipal", ex);
+            ErrorWindow.show(ex.getMessage(), "Get Subscription Error", SignInWindow.this);
+
         } finally {
             if (adAuthManager != null) {
                 try {

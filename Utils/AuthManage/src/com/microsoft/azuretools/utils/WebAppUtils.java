@@ -91,10 +91,10 @@ public class WebAppUtils {
             if (indicator != null) indicator.setText("Uploading the application...");
             InputStream input = new FileInputStream(artifactPath);
             if (toRoot) {
-                WebAppUtils.removeFtpDirectory(ftp, ftpWebAppsPath + "ROOT");
+                WebAppUtils.removeFtpDirectory(ftp, ftpWebAppsPath + "ROOT", indicator);
                 ftp.storeFile(ftpWebAppsPath + "ROOT.war", input);
             } else {
-                WebAppUtils.removeFtpDirectory(ftp, ftpWebAppsPath + artifactName);
+                WebAppUtils.removeFtpDirectory(ftp, ftpWebAppsPath + artifactName, indicator);
                 ftp.storeFile(ftpWebAppsPath + artifactName + ".war", input);
             }
             input.close();
@@ -110,27 +110,30 @@ public class WebAppUtils {
         }
     }
 
-    public static void removeFtpDirectory(FTPClient ftpClient, String path) throws IOException {
+    public static void removeFtpDirectory(FTPClient ftpClient, String path, IProgressIndicator pi) throws IOException {
+        String prefix = "Removing form FTP server: ";
         FTPFile[] subFiles = ftpClient.listFiles(path);
         if (subFiles.length > 0) {
             for (FTPFile ftpFile : subFiles) {
+                if (pi != null && pi.isCanceled()) break;
                 String currentFileName = ftpFile.getName();
                 if (currentFileName.equals(".") || currentFileName.equals("..")) {
-                    // skip parent directory and the directory itself
-                    continue;
+                    continue; // skip
                 }
 
                 String path1 = path + "/" + currentFileName;
                 if (ftpFile.isDirectory()) {
                     // remove the sub directory
-                    removeFtpDirectory(ftpClient, path1);
+                    removeFtpDirectory(ftpClient, path1, pi);
                 } else {
                     // delete the file
+                    if (pi != null) pi.setText2(prefix + path1);
                     ftpClient.deleteFile(path1);
                 }
             }
         }
 
+        if (pi != null) pi.setText2(prefix + path);
         ftpClient.removeDirectory(path);
     }
 
@@ -198,9 +201,9 @@ public class WebAppUtils {
 //        }
 //    }
 
-    public static void removeCustomJdkArtifacts(FTPClient ftp) throws IOException {
-        if (doesRemoteFolderExist(ftp, ftpRootPath, "jdk")) {
-            removeFtpDirectory(ftp, ftpJdkPath);
+    public static void removeCustomJdkArtifacts(FTPClient ftp, IProgressIndicator pi) throws IOException {
+        if (doesRemoteFolderExist(ftp, ftpRootPath, jdkFolderName)) {
+            removeFtpDirectory(ftp, ftpJdkPath, pi);
         }
         ftp.deleteFile(ftpRootPath + webConfigFilename);
         ftp.deleteFile(ftpRootPath + reportFilename);
@@ -234,7 +237,7 @@ public class WebAppUtils {
             webApp.stop();
 
             if (indicator != null) indicator.setText("Deleting custom jdk artifacts, if any (takes a while)...");
-            removeCustomJdkArtifacts(ftp);
+            removeCustomJdkArtifacts(ftp, indicator);
 
             if (indicator != null) indicator.setText("Uploading scripts...");
             uploadJdkDownloadScript(ftp, jdkDownloadUrl);
@@ -263,8 +266,7 @@ public class WebAppUtils {
             }
 
             // get top level jdk folder name (under jdk folder)
-            String jdkPath = ftpRootPath + "jdk/";
-            FTPFile[] ftpDirs = ftp.listDirectories(jdkPath);
+            FTPFile[] ftpDirs = ftp.listDirectories(ftpJdkPath);
             if (ftpDirs.length != 1) {
                 String err = "Bad JDK archive. Please make sure the JDK archive contains a single JDK folder. For example, 'my-jdk1.7.0_79.zip' archive should contain 'jdk1.7.0_79' folder only";
                 throw new WebAppException(err);
@@ -276,7 +278,7 @@ public class WebAppUtils {
         } catch (Exception ex){
             if (doesRemoteFolderExist(ftp, ftpRootPath, jdkFolderName)) {
                 indicator.setText("Error happened. Cleaning up...");
-                removeFtpDirectory(ftp, ftpJdkPath);
+                removeFtpDirectory(ftp, ftpJdkPath, indicator);
             }
             throw ex;
         } finally {

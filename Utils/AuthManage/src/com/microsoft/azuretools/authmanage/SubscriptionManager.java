@@ -54,7 +54,9 @@ public class SubscriptionManager {
 
     public List<SubscriptionDetail> getSubscriptionDetails() throws Exception {
         System.out.println("getSubscriptionDetails()");
-        updateAccountSubscriptionList();
+        if (subscriptionDetails.isEmpty()) {
+            updateAccountSubscriptionList();
+        }
         return subscriptionDetails;
     }
 
@@ -80,7 +82,7 @@ public class SubscriptionManager {
 
     public String getSubscriptionTenant(String sid) throws Exception {
         if (!sidToTid.containsKey(sid)) {
-            updateAccountSubscriptionList();
+            updateSidToTidMap();
             if (!sidToTid.containsKey(sid)) {
                 throw new AuthException("sid was not found in the tenant: " +  sid);
             }
@@ -92,7 +94,7 @@ public class SubscriptionManager {
     public Set<String> getAccountSidList() throws Exception {
         System.out.println("getAccountSidList()");
         if (sidToTid.isEmpty()) {
-            updateAccountSubscriptionList();
+            updateSidToTidMap();
         }
         return sidToTid.keySet();
     }
@@ -116,10 +118,10 @@ public class SubscriptionManager {
     protected void updateAccountSubscriptionList() throws Exception {
         System.out.println("updateAccountSubscriptionList()");
 
-        if (!subscriptionDetails.isEmpty()) {
-            updateSidToTidMap();
-            return;
-        }
+//        if (!subscriptionDetails.isEmpty()) {
+//            updateSidToTidMap();
+//            return;
+//        }
 
         if (azureManager == null) {
             throw new IllegalArgumentException("azureManager is null");

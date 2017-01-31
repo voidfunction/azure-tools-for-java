@@ -51,7 +51,7 @@ public class AppServiceChangeSettingsDialog extends AppServiceCreateDialog {
 
         DefaultComboBoxModel<WebContainer> wcModel = (DefaultComboBoxModel<WebContainer>)comboBoxWebContainer.getModel();
         if (wad.webApp.javaVersion() != JavaVersion.OFF) {
-            wcModel.setSelectedItem(wad.webApp.javaContainerVersion());
+            wcModel.setSelectedItem(new WebContainer(wad.webApp.javaContainer() + " " + wad.webApp.javaContainerVersion()));
         }
 
         comboBoxSubscription.setEnabled(false);
@@ -84,16 +84,11 @@ public class AppServiceChangeSettingsDialog extends AppServiceCreateDialog {
 
         model.collectData();
 
-        try {
-            return volidateJdkTab();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            LOGGER.error("doValidate", ex);
-            ErrorWindow.show(ex.getMessage(), "Form Data Validation Error", this.contentPane);
-        }
-        return null;
-    }
+        ValidationInfo res = volidateJdkTab();
+        if (res != null) return res;
 
+        return super.superDoValidate();
+    }
 
     @Override
     protected void doOKAction() {
@@ -122,21 +117,20 @@ public class AppServiceChangeSettingsDialog extends AppServiceCreateDialog {
     protected WebApp editAppService(WebApp webApp, IProgressIndicator progressIndicator) throws Exception {
         if (model.jdkDownloadUrl != null ) {
             progressIndicator.setText("Turning App Service into .Net based...");
-            webApp.update().withNetFrameworkVersion(NetFrameworkVersion.V4_6).apply();
-            progressIndicator.setText("Deploying custom jdk...");
-            WebAppUtils.deployCustomJdk(webApp, model.jdkDownloadUrl, model.webContainer, progressIndicator);
+
+            //webApp.update().withNetFrameworkVersion(NetFrameworkVersion.V4_6).apply();
+            //progressIndicator.setText("Deploying custom jdk...");
+            //WebAppUtils.deployCustomJdk(webApp, model.jdkDownloadUrl, model.webContainer, progressIndicator);
         } else {
             FTPClient ftpClient = WebAppUtils.getFtpConnection(webApp.getPublishingProfile());
             progressIndicator.setText("Deleting custom jdk artifacts, if any (takes a while)...");
-            WebAppUtils.removeCustomJdkArtifacts(ftpClient);
+            WebAppUtils.removeCustomJdkArtifacts(ftpClient, progressIndicator);
             // TODO: make cancelable
-            WebAppUtils.removeCustomJdkArtifacts(WebAppUtils.getFtpConnection(webApp.getPublishingProfile()));
+            WebAppUtils.removeCustomJdkArtifacts(WebAppUtils.getFtpConnection(webApp.getPublishingProfile()), progressIndicator);
             progressIndicator.setText("Applying changes...");
             webApp.update().withJavaVersion(JavaVersion.JAVA_8_NEWEST).withWebContainer(model.webContainer).apply();
         }
 
         return webApp;
     }
-
-
 }

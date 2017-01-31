@@ -64,8 +64,6 @@ public class AppServiceCreateDialog extends DialogWrapper {
     protected JComboBox comboBoxSubscription;
     protected JComboBox comboBoxResourceGroup;
     protected JComboBox comboBoxAppServicePlan;
-    protected JTextField textFieldAppServicePlanLocation;
-    protected JTextField textFieldAppServicePlanTier;
     protected JComboBox comboBoxJDK3Party;
     protected JTextField textFieldJDKUrl;
     protected JTextField textFieldJDKAccountKey;
@@ -89,6 +87,8 @@ public class AppServiceCreateDialog extends DialogWrapper {
     protected JXHyperlink linkLicense;
     protected JPanel panelResourceGroup;
     protected JPanel panelAppServicePlan;
+    private JLabel labelFieldAppServicePlanLocation;
+    private JLabel labelFieldAppServicePlanTier;
 
     protected Module module;
 
@@ -149,8 +149,6 @@ public class AppServiceCreateDialog extends DialogWrapper {
         setTitle("Create App Service");
 
         setOKButtonText("Create");
-        textFieldAppServicePlanLocation.setOpaque(false);
-        textFieldAppServicePlanTier.setOpaque(false);
 
         init();
 
@@ -304,13 +302,6 @@ public class AppServiceCreateDialog extends DialogWrapper {
     }
 
     protected void fillAppServicePlans() {
-//        DefaultComboBoxModel<ResourceGroupAdapter> cbModelRg = (DefaultComboBoxModel<ResourceGroupAdapter>)comboBoxResourceGroup.getModel();
-//        ResourceGroupAdapter rga = (ResourceGroupAdapter)cbModelRg.getSelectedItem();
-//        if (rga == null) { // empty
-//            System.out.println("No resource group is selected");
-//            return;
-//        }
-
         DefaultComboBoxModel<SubscriptionDetail> cbModelSub = (DefaultComboBoxModel<SubscriptionDetail>)comboBoxSubscription.getModel();
         SubscriptionDetail sd = (SubscriptionDetail)cbModelSub.getSelectedItem();
         if (sd == null) { // empty
@@ -338,24 +329,18 @@ public class AppServiceCreateDialog extends DialogWrapper {
         DefaultComboBoxModel<AppServicePlanAdapter> cbModel =  (DefaultComboBoxModel<AppServicePlanAdapter>)comboBoxAppServicePlan.getModel();
         AppServicePlanAdapter aspa = (AppServicePlanAdapter)cbModel.getSelectedItem();
         if (aspa == null || aspa.getAdapted() == null) { // empty || <create new>
-            textFieldAppServicePlanLocation.setText(textNotAvailable);
-            textFieldAppServicePlanTier.setText(textNotAvailable);
+            labelFieldAppServicePlanLocation.setText(textNotAvailable);
+            labelFieldAppServicePlanTier.setText(textNotAvailable);
             return;
         } else {
             AppServicePlan asp = aspa.getAdapted();
-            textFieldAppServicePlanLocation.setText(asp.region().label());
-            textFieldAppServicePlanTier.setText(asp.pricingTier().toString());
+            labelFieldAppServicePlanLocation.setText(asp.region().label());
+            labelFieldAppServicePlanTier.setText(asp.pricingTier().toString());
         }
     }
 
     protected void fillAppServicePlanLocations() {
         try {
-//            List<Region> list =  createLisFromClassFields(Region.class);
-//            DefaultComboBoxModel<RegionAdapter> cbModel = new DefaultComboBoxModel<>();
-//            for (Region r : list) {
-//                cbModel.addElement(new RegionAdapter(r));
-//            }
-
             DefaultComboBoxModel<SubscriptionDetail> cbModelSub = (DefaultComboBoxModel<SubscriptionDetail>)comboBoxSubscription.getModel();
             SubscriptionDetail sd = (SubscriptionDetail)cbModelSub.getSelectedItem();
             if (sd == null) { // empty
@@ -562,60 +547,62 @@ public class AppServiceCreateDialog extends DialogWrapper {
             }
         }
 
-        try {
-            ValidationInfo res = volidateJdkTab();
-            if (res != null) {
-                return res;
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            LOGGER.error("doValidate", ex);
-            ErrorWindow.show(ex.getMessage(), "Form Data Validation Error", this.contentPane);
-        }
+        ValidationInfo res = volidateJdkTab();
+        if (res != null) return res;
+
         return super.doValidate();
     }
 
-    protected ValidationInfo volidateJdkTab() throws Exception {
-        switch (model.jdkTab) {
-            case Default:
-                // do nothing
-                model.jdkDownloadUrl = null;
-                break;
-            case ThirdParty:
-                if (!WebAppUtils.isUrlAccessabel(model.jdk3PartyUrl)) {
-                    return new ValidationInfo("Please check the URL is valid.", comboBoxJDK3Party);
-                }
-                model.jdkDownloadUrl = model.jdk3PartyUrl;
-                break;
-            case Own:
-                if (model.jdkOwnUrl.isEmpty()) {
-                    return new ValidationInfo("Enter a valid URL.", textFieldJDKUrl);
-                } else {
-                    // first check the link is accessible as it is
-                    if (!WebAppUtils.isUrlAccessabel(model.jdkOwnUrl)) {
-                        // create shared access signature url and check its accessibility
-                        String sasUrl = StorageAccoutUtils.getBlobSasUri(model.jdkOwnUrl, model.storageAccountKey);
-                        if (!WebAppUtils.isUrlAccessabel(sasUrl)) {
-                            return new ValidationInfo("Please check the storage account key and/or URL is valid.", textFieldJDKUrl);
-                        } else {
-                            model.jdkDownloadUrl = sasUrl;
-                        }
-                    } else {
-                        model.jdkDownloadUrl = model.jdkOwnUrl;
+    protected ValidationInfo superDoValidate() {
+        return super.doValidate();
+    }
+
+    protected ValidationInfo volidateJdkTab() {
+        try {
+            switch (model.jdkTab) {
+                case Default:
+                    // do nothing
+                    model.jdkDownloadUrl = null;
+                    break;
+                case ThirdParty:
+                    if (!WebAppUtils.isUrlAccessabel(model.jdk3PartyUrl)) {
+                        return new ValidationInfo("Please check the URL is valid.", comboBoxJDK3Party);
                     }
-                }
-                // link to a zip file
-                // consider it's a Sas link
-                String urlPath = new URI(model.jdkOwnUrl).getPath();
-                if (!urlPath.endsWith(".zip")) {
-                    return new ValidationInfo("link to a zip file is expected.", textFieldJDKUrl);
-                }
+                    model.jdkDownloadUrl = model.jdk3PartyUrl;
+                    break;
+                case Own:
+                    if (model.jdkOwnUrl.isEmpty()) {
+                        return new ValidationInfo("Enter a valid URL.", textFieldJDKUrl);
+                    } else {
+                        // first check the link is accessible as it is
+                        if (!WebAppUtils.isUrlAccessabel(model.jdkOwnUrl)) {
+                            // create shared access signature url and check its accessibility
+                            String sasUrl = StorageAccoutUtils.getBlobSasUri(model.jdkOwnUrl, model.storageAccountKey);
+                            if (!WebAppUtils.isUrlAccessabel(sasUrl)) {
+                                return new ValidationInfo("Please check the storage account key and/or URL is valid.", textFieldJDKUrl);
+                            } else {
+                                model.jdkDownloadUrl = sasUrl;
+                            }
+                        } else {
+                            model.jdkDownloadUrl = model.jdkOwnUrl;
+                        }
+                    }
+                    // link to a zip file
+                    // consider it's a Sas link
+                    String urlPath = new URI(model.jdkOwnUrl).getPath();
+                    if (!urlPath.endsWith(".zip")) {
+                        return new ValidationInfo("link to a zip file is expected.", textFieldJDKUrl);
+                    }
 
-                break;
+                    break;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            LOGGER.error("volidateJdkTab", ex);
+            //ErrorWindow.show(ex.getMessage(), "Form Data Validation Error", this.contentPane);
+            return new ValidationInfo("Url validation exception:" + ex.getMessage(), tabbedPaneJdk);
         }
-
         return null;
-
     }
 
     protected WebApp createAppService(IProgressIndicator progressIndicator) throws Exception {

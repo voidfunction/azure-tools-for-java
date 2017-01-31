@@ -52,7 +52,9 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
     @Override
     protected void updateAccountSubscriptionList() throws Exception {
         loadSubscriptions();
-        super.updateAccountSubscriptionList();
+        if (subscriptionDetails.isEmpty()) {
+            super.updateAccountSubscriptionList();
+        }
     }
 
     @Override
