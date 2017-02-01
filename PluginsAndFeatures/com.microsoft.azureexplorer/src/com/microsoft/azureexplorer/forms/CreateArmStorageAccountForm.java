@@ -39,6 +39,8 @@ import org.eclipse.ui.PlatformUI;
 
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.SubscriptionManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -95,11 +97,11 @@ public class CreateArmStorageAccountForm extends Dialog {
     private ComboViewer resourceGroupViewer;
 
     private Runnable onCreate;
-    private Subscription subscription;
+    private SubscriptionDetail subscription;
     private Region region;
     private StorageAccount storageAccount;
 
-    public CreateArmStorageAccountForm(Shell parentShell, Subscription subscription, Region region) {
+    public CreateArmStorageAccountForm(Shell parentShell, SubscriptionDetail subscription, Region region) {
         super(parentShell);
         this.subscription = subscription;
         this.region = region;
@@ -338,7 +340,7 @@ public class CreateArmStorageAccountForm extends Dialog {
 			final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getText();
 			String replication = replicationComboBox.getData(replicationComboBox.getText()).toString();
 			// TODO: encriptionCombo
-			storageAccount = AzureSDKManager.createStorageAccount(subscription.getId(), nameTextField.getText(), (Region) regionComboBox.getData(regionComboBox.getText()), 
+			storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), nameTextField.getText(), (Region) regionComboBox.getData(regionComboBox.getText()), 
 					isNewResourceGroup, resourceGroupName, (Kind) kindCombo.getData(kindCombo.getText()), (AccessTier)accessTierComboBox.getData(accessTierComboBox.getText()),
 					false, replication);
 			
@@ -391,33 +393,38 @@ public class CreateArmStorageAccountForm extends Dialog {
         	
             try {
                 subscriptionComboBox.setEnabled(true);
-
-                java.util.List<Subscription> fullSubscriptionList = AzureManagerImpl.getManager().getFullSubscriptionList();
-                for (Subscription sub : fullSubscriptionList) {
-                    subscriptionComboBox.add(sub.getName());
-                    subscriptionComboBox.setData(sub.getName(), sub);
+                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                // not signed in
+                if (azureManager == null) {
+                    return;
+                }
+                SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
+                List<SubscriptionDetail> subscriptionDetails = subscriptionManager.getSubscriptionDetails();
+                for (SubscriptionDetail sub : subscriptionDetails) {
+                    subscriptionComboBox.add(sub.getSubscriptionName());
+                    subscriptionComboBox.setData(sub.getSubscriptionName(), sub);
                 }
                 subscriptionComboBox.addSelectionListener(new SelectionAdapter() {
                     public void widgetSelected(SelectionEvent e) {
-                        CreateArmStorageAccountForm.this.subscription = (Subscription) subscriptionComboBox.getData(subscriptionComboBox.getText());
+                        CreateArmStorageAccountForm.this.subscription = (SubscriptionDetail) subscriptionComboBox.getData(subscriptionComboBox.getText());
                         loadGroups();
                         loadRegions();
                     }
                 });
 
-                if (fullSubscriptionList.size() > 0) {
-                    this.subscription = fullSubscriptionList.get(0);
+                if (subscriptionDetails.size() > 0) {
+                    this.subscription = subscriptionDetails.get(0);
                     subscriptionComboBox.select(0);
                     loadGroups();
                     loadRegions();
                 }
-            } catch (AzureCmdException e) {
+            } catch (Exception e) {
             	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
             			"An error occurred while loading subscriptions.", e);
             }
         } else { // create form create VM form
             subscriptionComboBox.setEnabled(false);
-            subscriptionComboBox.add(subscription.getName());
+            subscriptionComboBox.add(subscription.getSubscriptionName());
             subscriptionComboBox.select(0);
             kindCombo.add("General purpose"); // only General purpose accounts supported for VMs
             kindCombo.setData(Kind.STORAGE);
@@ -529,7 +536,7 @@ public class CreateArmStorageAccountForm extends Dialog {
             public void run() {
                 try {
                 	AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-                    Azure azure = azureManager.getAzure(subscription.getId());
+                    Azure azure = azureManager.getAzure(subscription.getSubscriptionId());
                     List<ResourceGroup> resourceGroups = azure.resourceGroups().list();
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                         @Override

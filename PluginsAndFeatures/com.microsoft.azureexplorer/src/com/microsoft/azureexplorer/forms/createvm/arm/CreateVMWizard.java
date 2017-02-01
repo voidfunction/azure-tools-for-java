@@ -23,6 +23,7 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
@@ -31,8 +32,8 @@ import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azureexplorer.forms.createvm.MachineSettingsStep;
 import com.microsoft.azureexplorer.forms.createvm.SubscriptionStep;
-import com.microsoft.azureexplorer.forms.createvm.VMWizard;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
@@ -50,9 +51,25 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-public class CreateVMWizard extends VMWizard {
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.List;
+
+public class CreateVMWizard extends Wizard {
     private VMArmModule node;
 
+	protected SubscriptionDetail subscription;
+	protected String name;
+	protected String userName;
+	protected String password;
+	protected String certificate;
+	protected String subnet;
+	protected VirtualMachineSize size;
+    
     private Region region;
     private Network virtualNetwork;
     private String resourceGroupName;
@@ -86,17 +103,6 @@ public class CreateVMWizard extends VMWizard {
             @Override
             public void run() {
                 try {
-                	com.microsoft.tooling.msservices.model.vm.VirtualMachine virtualMachine = new com.microsoft.tooling.msservices.model.vm.VirtualMachine(
-							name, 
-							resourceGroupName,
-                            null,
-                            subnet,
-                            size.getName(),
-                            com.microsoft.tooling.msservices.model.vm.VirtualMachine.Status.Unknown,
-                            subscription.getId()
-                    );
-
-
 //                    virtualMachine.getEndpoints().addAll(endpointStep.getEndpointsList());
 
                     byte[] certData = new byte[0];
@@ -125,8 +131,10 @@ public class CreateVMWizard extends VMWizard {
                         }
                     }
                     
-                    VirtualMachine vm = AzureSDKManager.createVirtualMachine(subscription.getId(),
-                            virtualMachine,
+                    VirtualMachine vm = AzureSDKManager.createVirtualMachine(subscription.getSubscriptionId(),
+                            name,
+                            resourceGroupName,
+                            size.name(),
                             virtualMachineImage,
                             storageAccount,
                             virtualNetwork,
@@ -144,7 +152,7 @@ public class CreateVMWizard extends VMWizard {
                         @Override
                         public void run() {
                             try {
-                                node.addChildNode(new VMNode(node, subscription.getId(), vm));
+                                node.addChildNode(new VMNode(node, subscription.getSubscriptionId(), vm));
                             } catch (AzureCmdException e) {
                             	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
                             			"An error occurred while refreshing the list of virtual machines.", e);
@@ -169,6 +177,47 @@ public class CreateVMWizard extends VMWizard {
         return getContainer().getCurrentPage() instanceof SettingsStep;
     }
 
+	public List configStepList(Composite parent, final int step) {
+		GridData gridData = new GridData();
+		gridData.widthHint = 100;
+		//
+		gridData.verticalAlignment = GridData.BEGINNING;
+		gridData.grabExcessVerticalSpace = true;
+		List createVmStepsList = new List(parent, SWT.BORDER);
+		createVmStepsList.setItems(getStepTitleList());
+		createVmStepsList.setSelection(step);
+		createVmStepsList.setLayoutData(gridData);
+		createVmStepsList.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				List l = (List) e.widget;
+				l.setSelection(step);
+			}
+		});
+		// createVmStepsList.setEnabled(false);
+
+		// jList.setBorder(new EmptyBorder(10, 0, 10, 0));
+
+		// jList.setCellRenderer(new DefaultListCellRenderer() {
+		// @Override
+		// public Component getListCellRendererComponent(JList jList, Object o,
+		// int i, boolean b, boolean b1) {
+		// return super.getListCellRendererComponent(jList, " " + o.toString(),
+		// i, b, b1);
+		// }
+		// });
+		//
+		// for (MouseListener mouseListener : jList.getMouseListeners()) {
+		// jList.removeMouseListener(mouseListener);
+		// }
+		//
+		// for (MouseMotionListener mouseMotionListener :
+		// jList.getMouseMotionListeners()) {
+		// jList.removeMouseMotionListener(mouseMotionListener);
+		// }
+		return createVmStepsList;
+	}
+    
     public String[] getStepTitleList() {
         return new String[]{
                 "Subscription",
@@ -186,15 +235,59 @@ public class CreateVMWizard extends VMWizard {
 		this.azure = azure;
 	}
 
-	public void setSubscription(Subscription subscription) {
+	public void setSubscription(SubscriptionDetail subscription) {
     	try {
-    		super.setSubscription(subscription);
+    		this.subscription = subscription;
     		AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-    		azure = azureManager.getAzure(subscription.getId());
+    		azure = azureManager.getAzure(subscription.getSubscriptionId());
     	} catch (Exception ex) {
 			DefaultLoader.getUIHelper().showException(ex.getMessage(), ex, "Error selecting subscription", true, false);
 		}
     }
+	
+	public SubscriptionDetail getSubscription() {
+	    return subscription;
+	}
+
+	public String getName() {
+	    return name;
+	}
+
+	public void setName(String name) {
+	    this.name = name;
+	}
+
+	public String getUserName() {
+	    return userName;
+	}
+
+	public void setUserName(String userName) {
+	    this.userName = userName;
+	}
+
+	public String getPassword() {
+	    return password;
+	}
+
+	public void setPassword(String password) {
+	    this.password = password;
+	}
+
+	public String getCertificate() {
+	    return certificate;
+	}
+
+	public void setCertificate(String certificate) {
+	    this.certificate = certificate;
+	}
+
+	public String getSubnet() {
+	    return subnet;
+	}
+
+	public void setSubnet(String subnet) {
+	    this.subnet = subnet;
+	}
     
     public Region getRegion() {
 		return region;
@@ -284,5 +377,11 @@ public class CreateVMWizard extends VMWizard {
 		this.withNewAvailabilitySet = withNewAvailabilitySet;
 	}
 	
-	
+	public VirtualMachineSize getSize() {
+	    return size;
+	}
+
+	public void setSize(VirtualMachineSize size) {
+	    this.size = size;
+	}	
 }

@@ -19,6 +19,7 @@
  */
 package com.microsoft.azureexplorer.forms.createvm;
 
+import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -34,25 +35,25 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.microsoft.azureexplorer.Activator;
-import com.microsoft.azureexplorer.forms.createvm.asm.CreateVMWizard;
+import com.microsoft.azureexplorer.forms.createvm.arm.CreateVMWizard;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.SubscriptionManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 
 public class SubscriptionStep extends WizardPage {
-    private Button buttonLogin;
     private Label userInfoLabel;
     private Label subscriptionLabel;
     private Combo subscriptionComboBox;
 
-    private VMWizard wizard;
+    private CreateVMWizard wizard;
 
-    public SubscriptionStep(VMWizard wizard) {
+    public SubscriptionStep(CreateVMWizard wizard) {
         super("Create new Virtual Machine", "Choose a Subscription", null);
         this.wizard = wizard;
     }
@@ -72,22 +73,22 @@ public class SubscriptionStep extends WizardPage {
 
         createSubscriptionCombo(container);
 
-        this.buttonLogin = new Button(container, SWT.PUSH);
-        this.buttonLogin.setImage(Activator.getImageDescriptor("icons/settings.png").createImage());
+//        this.buttonLogin = new Button(container, SWT.PUSH);
+//        this.buttonLogin.setImage(Activator.getImageDescriptor("icons/settings.png").createImage());
         gridData = new GridData();
         gridData.horizontalIndent = 5;
         gridData.widthHint = 50;
         gridData.heightHint = 40;
         gridData.verticalAlignment = GridData.BEGINNING;
-        buttonLogin.setLayoutData(gridData);
-        buttonLogin.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                Dialog subscriptionsDialog = new ManageSubscriptionDialog(PluginUtil.getParentShell(), true, false);
-                subscriptionsDialog.open();
-                loadSubscriptions();
-            }
-        });
+//        buttonLogin.setLayoutData(gridData);
+//        buttonLogin.addSelectionListener(new SelectionAdapter() {
+//            @Override
+//            public void widgetSelected(SelectionEvent e) {
+//                Dialog subscriptionsDialog = new ManageSubscriptionDialog(PluginUtil.getParentShell(), true, false);
+//                subscriptionsDialog.open();
+//                loadSubscriptions();
+//            }
+//        });
 
         this.setControl(container);
     }
@@ -119,35 +120,42 @@ public class SubscriptionStep extends WizardPage {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (subscriptionComboBox.getText() != null && !(subscriptionComboBox.getText().length() == 0)) {
-                    wizard.setSubscription((Subscription) subscriptionComboBox.getData(subscriptionComboBox.getText()));
+                    wizard.setSubscription((SubscriptionDetail) subscriptionComboBox.getData(subscriptionComboBox.getText()));
                 }
             }
         });
         loadSubscriptions();
     }
 
-    private void loadSubscriptions() {
-        AzureManager manager = AzureManagerImpl.getManager();
+	private void loadSubscriptions() {
+		try {
+			AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+			// not signed in
+			if (azureManager == null) {
+				return;
+			}
+			/*
+			 * if (manager.authenticated()) { String upn =
+			 * manager.getUserInfo().getUniqueName();
+			 * userInfoLabel.setText("Signed in as: " + (upn.contains("#") ?
+			 * upn.split("#")[1] : upn)); } else { userInfoLabel.setText(""); }
+			 */
 
-        /*if (manager.authenticated()) {
-            String upn = manager.getUserInfo().getUniqueName();
-            userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
-        } else {
-            userInfoLabel.setText("");
-        }*/
-
-        java.util.List<Subscription> subscriptionList = manager.getSubscriptionList();
-
-        final Vector<Subscription> subscriptions = new Vector<Subscription>((subscriptionList == null) ? new Vector<Subscription>() : subscriptionList);
-        for (Subscription subscription : subscriptions) {
-            subscriptionComboBox.add(subscription.getName());
-            subscriptionComboBox.setData(subscription.getName(), subscription);
-        }
-
-        if (!subscriptions.isEmpty()) {
-            subscriptionComboBox.select(0);
-            wizard.setSubscription((Subscription) subscriptionComboBox.getData(subscriptionComboBox.getText()));
-        }
-        setPageComplete(!subscriptions.isEmpty());
-    }
+			SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
+			List<SubscriptionDetail> subscriptionDetails = subscriptionManager.getSubscriptionDetails();
+			for (SubscriptionDetail subscription : subscriptionDetails) {
+				subscriptionComboBox.add(subscription.getSubscriptionName());
+				subscriptionComboBox.setData(subscription.getSubscriptionName(), subscription);
+			}
+			if (!subscriptionDetails.isEmpty()) {
+				subscriptionComboBox.select(0);
+				wizard.setSubscription(
+						(SubscriptionDetail) subscriptionComboBox.getData(subscriptionComboBox.getText()));
+			}
+			setPageComplete(!subscriptionDetails.isEmpty());
+		} catch (Exception ex) {
+			DefaultLoader.getUIHelper()
+					.logError("An error occurred when trying to load Subscriptions\n\n" + ex.getMessage(), ex);
+		}
+	}
 }

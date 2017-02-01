@@ -19,13 +19,13 @@
  */
 package com.microsoft.azureexplorer.forms.createvm;
 
+import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.compute.OperatingSystemTypes;
-import com.microsoft.azureexplorer.forms.createvm.asm.CreateVMWizard;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.microsoft.azureexplorer.forms.createvm.arm.CreateVMWizard;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachineSize;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
@@ -63,12 +63,11 @@ public class MachineSettingsStep extends WizardPage {
     private Button certificateCheckBox;
 //    private JPanel certificatePanel;
 //    private JPanel passwordPanel;
-    private Browser imageDescription;
-    private VMWizard wizard;
+    private CreateVMWizard wizard;
 
     private boolean inSetPageComplete = false;
 
-    public MachineSettingsStep(VMWizard wizard) {
+    public MachineSettingsStep(CreateVMWizard wizard) {
         super("Create new Virtual Machine", "Virtual Machine Basic Settings", null);
         this.wizard = wizard;
     }
@@ -87,8 +86,6 @@ public class MachineSettingsStep extends WizardPage {
         wizard.configStepList(container, 2);
 
         createSettings(container);
-
-        imageDescription = wizard.createImageDescriptor(container);
 
         this.setControl(container);
     }
@@ -218,13 +215,8 @@ public class MachineSettingsStep extends WizardPage {
 
     @Override
     public String getTitle() {
-    	boolean isLinux;
-    	if (wizard instanceof CreateVMWizard) {
-    		VirtualMachineImage virtualMachineImage = ((CreateVMWizard) wizard).getVirtualMachineImage();
-    		isLinux = virtualMachineImage.getOperatingSystemType().equals("Linux");
-    	} else {
-    		isLinux = ((com.microsoft.azureexplorer.forms.createvm.arm.CreateVMWizard) wizard).getVirtualMachineImage().osDiskImage().operatingSystem().equals(OperatingSystemTypes.LINUX);
-    	}
+    	boolean isLinux = ((com.microsoft.azureexplorer.forms.createvm.arm.CreateVMWizard) wizard).getVirtualMachineImage().osDiskImage().operatingSystem().equals(OperatingSystemTypes.LINUX);
+    	
         if (isLinux) {
             certificateCheckBox.setEnabled(true);
             passwordCheckBox.setEnabled(true);
@@ -241,51 +233,46 @@ public class MachineSettingsStep extends WizardPage {
 
 //        imageDescription.setText(wizard.getHtmlFromVMImage(virtualMachineImage));
 
-        if (vmSizeComboBox.getItemCount() == 0) {
-            vmSizeComboBox.setItems(new String[]{"<Loading...>"});            
-            DefaultLoader.getIdeHelper().runInBackground(null, "Loading VM sizes...", false, true, "", new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        final java.util.List<VirtualMachineSize> virtualMachineSizes = AzureManagerImpl.getManager().getVirtualMachineSizes(wizard.getSubscription().getId().toString());
+		if (vmSizeComboBox.getItemCount() == 0) {
+			vmSizeComboBox.setItems(new String[] { "<Loading...>" });
+			DefaultLoader.getIdeHelper().runInBackground(null, "Loading VM sizes...", false, true, "", new Runnable() {
+				@Override
+				public void run() {
+					PagedList<com.microsoft.azure.management.compute.VirtualMachineSize> sizes = wizard.getAzure()
+							.virtualMachines().sizes().listByRegion(wizard.getRegion());
+					Collections.sort(sizes, new Comparator<VirtualMachineSize>() {
+						@Override
+						public int compare(VirtualMachineSize t0, VirtualMachineSize t1) {
+							if (t0.name().contains("Basic") && t1.name().contains("Basic")) {
+								return t0.name().compareTo(t1.name());
+							} else if (t0.name().contains("Basic")) {
+								return -1;
+							} else if (t1.name().contains("Basic")) {
+								return 1;
+							}
 
-                        Collections.sort(virtualMachineSizes, new Comparator<VirtualMachineSize>() {
-                            @Override
-                            public int compare(VirtualMachineSize t0, VirtualMachineSize t1) {
-                                if (t0.getName().contains("Basic") && t1.getName().contains("Basic")) {
-                                    return t0.getName().compareTo(t1.getName());
-                                } else if (t0.getName().contains("Basic")) {
-                                    return -1;
-                                } else if (t1.getName().contains("Basic")) {
-                                    return 1;
-                                }
+							int coreCompare = Integer.valueOf(t0.numberOfCores()).compareTo(t1.numberOfCores());
 
-                                int coreCompare = Integer.valueOf(t0.getCores()).compareTo(t1.getCores());
-
-                                if (coreCompare == 0) {
-                                    return Integer.valueOf(t0.getMemoryInMB()).compareTo(t1.getMemoryInMB());
-                                } else {
-                                    return coreCompare;
-                                }
-                            }
-                        });
-                        DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
-                            @Override
-                            public void run() {
-                                vmSizeComboBox.removeAll();
-                                for (VirtualMachineSize size : virtualMachineSizes) {
-                                    vmSizeComboBox.add(size.toString());
-                                    vmSizeComboBox.setData(size.toString(), size);
-                                }
-                                selectDefaultSize();
-                            }
-                        });
-                    } catch (AzureCmdException e) {
-                    	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
-                    			"An error occurred while loading the VM sizes list.", e);
-                    }
-                }
-            });
+							if (coreCompare == 0) {
+								return Integer.valueOf(t0.memoryInMB()).compareTo(t1.memoryInMB());
+							} else {
+								return coreCompare;
+							}
+						}
+					});
+					DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
+						@Override
+						public void run() {
+							vmSizeComboBox.removeAll();
+							for (VirtualMachineSize size : sizes) {
+								vmSizeComboBox.add(size.toString());
+								vmSizeComboBox.setData(size.toString(), size);
+							}
+							selectDefaultSize();
+						}
+					});
+				}
+			});
         } else {
             selectDefaultSize();
         }
@@ -338,22 +325,21 @@ public class MachineSettingsStep extends WizardPage {
     }
 
     private void selectDefaultSize() {
-    	if (wizard instanceof CreateVMWizard) {
-        DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
+//TODO
+        /*DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
             @Override
             public void run() {
                 String recommendedVMSize = ((CreateVMWizard) wizard).getVirtualMachineImage().getRecommendedVMSize().isEmpty()
                         ? "Small"
-                        : ((CreateVMWizard) wizard).getVirtualMachineImage().getRecommendedVMSize();
+                        : ((CreateVMWizard) wizard).getVirtualMachineImage().recommendedVMSize();
                 for (String sizeLabel : vmSizeComboBox.getItems()) {
                     VirtualMachineSize size = (VirtualMachineSize) vmSizeComboBox.getData(sizeLabel);
-                    if (size != null && size.getName().equals(recommendedVMSize)) {
+                    if (size != null && size.name().equals(recommendedVMSize)) {
                         vmSizeComboBox.setText(sizeLabel);
                     }
                 }
             }
-        });
-    	}
+        });*/
     }
 
     private void validateEmptyFields() {

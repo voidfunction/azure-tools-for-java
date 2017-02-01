@@ -86,7 +86,6 @@ import com.microsoft.tooling.msservices.model.storage.BlobDirectory;
 import com.microsoft.tooling.msservices.model.storage.BlobFile;
 import com.microsoft.tooling.msservices.model.storage.BlobItem;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 import sun.misc.IOUtils;
@@ -109,10 +108,6 @@ public class BlobExplorerFileEditor extends EditorPart {
 
     private LinkedList<BlobDirectory> directoryQueue = new LinkedList<BlobDirectory>();
     private java.util.List<BlobItem> blobItems = new ArrayList<BlobItem>();
-
-    private EventHelper.EventWaitHandle subscriptionsChanged;
-    private boolean registeredSubscriptionsChanged;
-    private final Object subscriptionsChangedSync = new Object();
 
     @Override
     public void doSave(IProgressMonitor iProgressMonitor) {

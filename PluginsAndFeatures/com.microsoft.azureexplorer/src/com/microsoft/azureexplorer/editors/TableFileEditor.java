@@ -61,7 +61,6 @@ import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManage
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Table;
 import com.microsoft.tooling.msservices.model.storage.TableEntity;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class TableFileEditor extends EditorPart {
@@ -82,10 +81,6 @@ public class TableFileEditor extends EditorPart {
     private List<TableEntity> tableEntities;
     private Map<String, List<String>> columnData;
     private List<String> data;
-
-    private EventHelper.EventWaitHandle subscriptionsChanged;
-    private boolean registeredSubscriptionsChanged;
-    private final Object subscriptionsChangedSync = new Object();
 
     @Override
     public void doSave(IProgressMonitor iProgressMonitor) {

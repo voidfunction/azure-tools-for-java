@@ -28,7 +28,7 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.storagearm.StorageModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 @Name("Create Storage Account")
