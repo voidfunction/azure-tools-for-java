@@ -24,7 +24,9 @@
 
 package com.microsoft.azuretools.sdkmanage;
 
-import com.microsoft.azure.credentials.AzureTokenCredentials;
+import java.util.LinkedList;
+import java.util.List;
+
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
 import com.microsoft.azure.management.Azure;
@@ -38,10 +40,6 @@ import com.microsoft.azuretools.authmanage.RefreshableTokenCredentials;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.utils.Pair;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
-import com.microsoft.rest.credentials.TokenCredentials;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class AccessTokenAzureManager extends AzureManagerBase {
 

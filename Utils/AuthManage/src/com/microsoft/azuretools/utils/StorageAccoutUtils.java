@@ -75,7 +75,7 @@ public class StorageAccoutUtils {
         // Retrieve reference to a previously created container.
         CloudBlobContainer container = blobClient.getContainerReference(containerName);
 
-        CloudBlockBlob blob = container.getBlockBlobReference(blobName);
+        //CloudBlockBlob blob = container.getBlockBlobReference(blobName);
         SharedAccessBlobPolicy sharedAccessBlobPolicy = new SharedAccessBlobPolicy();
         GregorianCalendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.setTime(new Date());

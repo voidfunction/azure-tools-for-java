@@ -211,7 +211,12 @@ public class WebAppUtils {
     }
 
     private static class WebAppException extends Exception {
-        WebAppException(String message) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1352713295336034845L;
+
+		WebAppException(String message) {
             super(message);
         }
     }
@@ -248,7 +253,7 @@ public class WebAppUtils {
             // Polling report.txt...
             final String siteUrl = "https://" + webApp.defaultHostName();
             if (indicator != null) indicator.setText("Checking the JDK gets downloaded and unpacked...");
-            int step = 0;
+            //int step = 0;
             while (!doesRemoteFileExist(ftp, ftpRootPath, reportFilename)) {
                 if (indicator != null && indicator.isCanceled()) throw new CancellationException("Canceled by user.");
                 //if (step++ > 3) checkFreeSpaceAvailability(ftp);

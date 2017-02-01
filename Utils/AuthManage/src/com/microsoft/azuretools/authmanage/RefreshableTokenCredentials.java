@@ -24,14 +24,14 @@
 
 package com.microsoft.azuretools.authmanage;
 
+import java.io.IOException;
+
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.credentials.AzureTokenCredentialsInterceptor;
 import com.microsoft.azuretools.adauth.PromptBehavior;
-import com.microsoft.rest.credentials.TokenCredentials;
-import okhttp3.OkHttpClient;
 
-import java.io.IOException;
+import okhttp3.OkHttpClient;
 
 /**
  * Created by vlashch on 11/9/16.

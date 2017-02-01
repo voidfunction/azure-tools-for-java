@@ -77,7 +77,7 @@ public class AzureModel {
         this.subscriptionToResourceGroupMap = subsriptoionToResourceGroupMap;
     }
 
-    public static synchronized Map<SubscriptionDetail, List<ResourceGroup>> createSubscriptionToResourceGroupMap() {
+    public synchronized Map<SubscriptionDetail, List<ResourceGroup>> createSubscriptionToResourceGroupMap() {
         return new HashMap<SubscriptionDetail, List<ResourceGroup>>();
     }
 

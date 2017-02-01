@@ -165,8 +165,8 @@ public class AzureModelController {
 
         AzureModel azureModel = AzureModel.getInstance();
 
-        Map<SubscriptionDetail, List<ResourceGroup>> sdrgMap = azureModel.createSubscriptionToResourceGroupMap();
         Map<SubscriptionDetail, List<Location>> sdlocMap = azureModel.createSubscriptionToRegionMap();
+        Map<SubscriptionDetail, List<ResourceGroup>> sdrgMap = azureModel.createSubscriptionToResourceGroupMap();
 
         SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
         subscriptionManager.addListener(subscriptionSelectionListener);
