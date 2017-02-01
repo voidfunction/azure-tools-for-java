@@ -22,12 +22,11 @@
 package com.microsoft.intellij.serviceexplorer.azure.storagearm;
 
 import com.intellij.openapi.project.Project;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
@@ -46,11 +45,14 @@ public class CreateStorageAccountAction extends NodeActionListener {
     @Override
     public void actionPerformed(NodeActionEvent e) {
         // check if we have a valid subscription handy
-        AzureManager azureManager = AzureManagerImpl.getManager(storageModule.getProject());
+        AzureManager azureManager;
+        try {
+            azureManager = AuthMethodManager.getInstance().getAzureManager();
+        } catch (Exception e1) {
+            azureManager = null;
+        }
 
-        List<Subscription> subscriptions = azureManager.getSubscriptionList();
-
-        if (subscriptions.isEmpty()) {
+        if (azureManager == null) {
             DefaultLoader.getUIHelper().showException("No active Azure subscription was found. Please enable one more Azure " +
                             "subscriptions by right-clicking on the \"Azure\" " +
                             "node and selecting \"Manage subscriptions\".", null,

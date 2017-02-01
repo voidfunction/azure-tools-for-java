@@ -47,10 +47,6 @@ public class ManageSubscriptionDialog extends Dialog {
     @Override
     protected Control createContents(Composite parent) {
     	manageSubscriptionPanel = new ManageSubscriptionPanel(parent, SWT.NONE, this);
-    	Button signInBtn = manageSubscriptionPanel.getSignInButton();
-    	if (invokeSignIn && signInBtn != null && signInBtn.getText().equalsIgnoreCase("Sign In...")) {
-    		signInBtn.notifyListeners(SWT.Selection, new Event());
-    	}
     	return manageSubscriptionPanel;
     }
 

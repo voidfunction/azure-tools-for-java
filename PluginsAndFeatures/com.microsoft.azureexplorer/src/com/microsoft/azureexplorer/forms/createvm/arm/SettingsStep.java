@@ -56,7 +56,6 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
-import com.microsoft.tooling.msservices.model.vm.VirtualMachineImage;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.ResourceGroup;

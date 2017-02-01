@@ -52,15 +52,12 @@ import org.eclipse.swt.widgets.TableColumn;
 
 import com.gigaspaces.azure.util.MethodUtils;
 import com.gigaspaces.azure.util.PreferenceUtil;
-import com.gigaspaces.azure.util.PreferenceWebAppUtil;
 import com.gigaspaces.azure.wizards.WizardCacheManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoft.wacommon.applicationinsights.ApplicationInsightsResourceRegistryEclipse;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishProfile;
@@ -73,7 +70,6 @@ public class ManageSubscriptionPanel extends Composite {
 	private Table tblSubscriptions;
 	private CheckboxTableViewer tableViewer;
 	private Button removeButton;
-	private Button signInButton;
 	private Button btnImpFrmPubSetFile;
 	private Button closeButton;
 
@@ -102,87 +98,6 @@ public class ManageSubscriptionPanel extends Composite {
 	}
 
 	private void createButtons(Composite parent) {
-		signInButton = createButton(parent, "Sign In...");
-		signInButton.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent selectionEvent) {
-
-				if (AzureManagerImpl.getManager().authenticated()) {
-					clearSubscriptions(false);
-				} else {
-					BusyIndicator.showWhile(Display.getDefault(), new Runnable(){
-						public void run(){
-							try {
-								List<Subscription> oldSubList = AzureManagerImpl.getManager().getFullSubscriptionList();
-								final AzureManager apiManager = AzureManagerImpl.getManager();
-								apiManager.clearImportedPublishSettingsFiles();
-								apiManager.authenticate();
-
-								loadList();
-								WizardCacheManager.clearSubscriptions();
-								final List<Subscription> subscriptions = apiManager.getSubscriptionList();
-								PublishData pd  = new PublishData();
-								PublishProfile publishProfile = new PublishProfile();
-								pd.setPublishProfile(publishProfile);
-                                for (Subscription subscription : subscriptions) {
-                                    com.microsoftopentechnologies.azuremanagementutil.model.Subscription profileSubscription =
-                                            new com.microsoftopentechnologies.azuremanagementutil.model.Subscription();
-                                    profileSubscription.setSubscriptionID(subscription.getId());
-                                    profileSubscription.setSubscriptionName(subscription.getName());
-                                    publishProfile.getSubscriptions().add(profileSubscription);
-                                }
-								
-								DefaultLoader.getIdeHelper().runInBackground(null, "Caching webapps information", true,
-										true, "Caching webapps information...", new Runnable() {
-											@Override
-											public void run() {
-												try {
-//													Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
-//													for (Subscription subscription : subscriptions) {
-//														List<String> resList = apiManager.getResourceGroupNames(subscription.getId());
-//														for (String res : resList) {
-//															List<WebSite> webList = apiManager.getWebSites(subscription.getId(), res);
-//															for (WebSite webSite : webList) {
-//																WebSiteConfiguration webSiteConfiguration = apiManager.getWebSiteConfiguration(
-//																				webSite.getSubscriptionId(),
-//																				webSite.getWebSpaceName(),
-//																				webSite.getName());
-//																webSiteConfigMap.put(webSite, webSiteConfiguration);
-//															}
-//														}
-//													}
-													ApplicationInsightsResourceRegistryEclipse.updateApplicationInsightsResourceRegistry(subscriptions);
-//													PreferenceWebAppUtil.save(webSiteConfigMap);
-//													PreferenceWebAppUtil.setLoaded(true);
-												} catch (Exception ex) {
-													PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.error, "Error caching webapps", ex);
-												}
-											}
-										});			
-								pd.setCurrentSubscription(publishProfile.getSubscriptions().get(0));
-								try {
-									WizardCacheManager.cachePublishData(null, pd, null);
-									PreferenceUtil.save();
-								} catch (RestAPIException e1) {
-									Activator.getDefault().log(e1.getMessage(), e1);
-								} catch (IOException e1) {
-									Activator.getDefault().log(e1.getMessage(), e1);
-								}
-								PluginUtil.createSubscriptionTelemetryEvent(oldSubList, "Azure Explorer login");
-							} catch (Exception e1) {
-								PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.error,
-										"An error occurred while attempting to sign in to your account.", e1);
-							}
-						}
-					});
-				}
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent selectionEvent) {
-
-			}
-		});
 		btnImpFrmPubSetFile = createButton(parent, "Import Subscriptions");
 		btnImpFrmPubSetFile.addSelectionListener(new SelectionListener() {
 			@Override
@@ -195,17 +110,11 @@ public class ManageSubscriptionPanel extends Composite {
 						PluginUtil.showBusy(true, getShell());
 						List<Subscription> oldSubList = AzureManagerImpl.getManager().getFullSubscriptionList();
 						AzureManager apiManager = AzureManagerImpl.getManager();
-						if (apiManager.authenticated()) {
-							apiManager.clearAuthentication();
-							WizardCacheManager.clearSubscriptions();
-						}
 						apiManager.importPublishSettingsFile(fileName);
 						// todo: remove tableViewer?
 						MethodUtils.handleFile(ImportSubscriptionDialog.getPubSetFilePath(), tableViewer);
 						PluginUtil.createSubscriptionTelemetryEvent(oldSubList, "Azure Explorer import publish settings");
 						loadList();
-						PreferenceWebAppUtil.save(new HashMap<WebSite, WebSiteConfiguration>());
-						PreferenceWebAppUtil.setLoaded(false);
 						ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
 					} catch (Exception e) {
 						DefaultLoader.getUIHelper().showException("Error: " + e.getMessage(), e, "Error", false, true);
@@ -256,7 +165,7 @@ public class ManageSubscriptionPanel extends Composite {
 			for (Object s : tableViewer.getCheckedElements()) {
 				selectedList.add(((Subscription) s).getId());
 			}
-			AzureManagerImpl.getManager().setSelectedSubscriptions(selectedList);
+			((AzureManagerImpl) AzureManagerImpl.getManager()).setSelectedSubscriptions(selectedList);
 
 			//Saving the project is necessary to save the changes on the PropertiesComponent
 			//            if (project != null) {
@@ -271,8 +180,6 @@ public class ManageSubscriptionPanel extends Composite {
 	}
 
 	private void loadList() {
-		refreshSignInCaption();
-
 		tblSubscriptions.removeAll();
 
 		//        Vector<Object> vector = new Vector<Object>();
@@ -446,11 +353,6 @@ public class ManageSubscriptionPanel extends Composite {
 		});
 	}
 
-	private void refreshSignInCaption() {
-		boolean isNotSigned = !AzureManagerImpl.getManager().authenticated();
-		signInButton.setText(isNotSigned ? "Sign In..." : "Sign Out");
-	}
-
 	private void clearSubscriptions(boolean isSigningOut) {
 		boolean choice = MessageDialog.openConfirm(getShell(),
 				(isSigningOut
@@ -461,25 +363,17 @@ public class ManageSubscriptionPanel extends Composite {
 								: "Are you sure you would like to sign out?"));
 		if (choice) {
 			AzureManager apiManager = AzureManagerImpl.getManager();
-			apiManager.clearAuthentication();
 			apiManager.clearImportedPublishSettingsFiles();
 			WizardCacheManager.clearSubscriptions();
 			PreferenceUtil.save();
 			subscriptionList.clear();
 			tableViewer.refresh();
 			removeButton.setEnabled(false);
-			refreshSignInCaption();
-			PreferenceWebAppUtil.save(new HashMap<WebSite, WebSiteConfiguration>());
-			PreferenceWebAppUtil.setLoaded(false);
 			ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
 		}
 	}
 
 	private Object[] getTableContent() {
 		return subscriptionList.toArray();
-	}
-
-	public Button getSignInButton() {
-		return signInButton;
 	}
 }

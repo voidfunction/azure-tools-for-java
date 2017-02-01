@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/jackson-datatype-joda-2.7.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/joda-time-2.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/okhttp-3.3.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/okhttp-urlconnection-3.3.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/okio-1.8.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/retrofit-2.0.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/log4j-1.2.17.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/adauth4j.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-io-2.4.jar"/>
@@ -52,17 +46,8 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/azure-svc-mgmt-storage-0.9.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/azure-svc-mgmt-websites-0.9.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/azure-tracing-util-0.9.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-mgmt-websites-0.9.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-net-3.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/applicationinsights-management-1.0.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/java-json.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-1.0.0-beta4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-client-authentication-1.0.0-beta4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-client-runtime-1.0.0-beta4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-mgmt-compute-1.0.0-beta4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-mgmt-network-1.0.0-beta4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-mgmt-resources-1.0.0-beta4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/azure-mgmt-storage-1.0.0-beta4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/arm/client-runtime-1.0.0-beta4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

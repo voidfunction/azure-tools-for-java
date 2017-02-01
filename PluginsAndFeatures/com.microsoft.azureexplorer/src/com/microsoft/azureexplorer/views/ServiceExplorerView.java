@@ -55,7 +55,6 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
-import com.gigaspaces.azure.util.PreferenceWebAppUtil;
 import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -66,10 +65,9 @@ import com.microsoft.tooling.msservices.helpers.collections.ObservableList;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureServiceModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
-import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class ServiceExplorerView extends ViewPart implements PropertyChangeListener {
@@ -84,7 +82,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
     private Action manageSubscriptionAction;
     private Action doubleClickAction;
 
-    private AzureServiceModule azureServiceModule;
+    private AzureModule azureModule;
 
 	/*
      * The content provider class is responsible for
@@ -133,22 +131,14 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
         }
 
         private void initialize() {
-            azureServiceModule = new AzureServiceModule(null, true);
-            HDInsightRootModuleImpl hdInsightRootModule =  new HDInsightRootModuleImpl(azureServiceModule);
-            azureServiceModule.setHdInsightModule(hdInsightRootModule);
+            azureModule = new AzureModule(null);
+            HDInsightRootModuleImpl hdInsightRootModule =  new HDInsightRootModuleImpl(azureModule);
+            azureModule.setHdInsightModule(hdInsightRootModule);
             
             invisibleRoot = new TreeNode(null);
-            invisibleRoot.add(createTreeNode(azureServiceModule));
+            invisibleRoot.add(createTreeNode(azureModule));
 
-            // kick-off asynchronous load of child nodes on all the modules
-            if (PreferenceWebAppUtil.isLoaded()) {
-            	try {
-            		AzureServiceModule.webSiteConfigMap = PreferenceWebAppUtil.load();
-            	} catch (RestAPIException e) {
-            		AzureServiceModule.webSiteConfigMap = null;
-            	}
-            }
-            azureServiceModule.load();
+            azureModule.load();
         }
     }
 
@@ -384,18 +374,16 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
     private void makeActions() {
         refreshAction = new Action("Refresh", Activator.getImageDescriptor("icons/refresh.png")) {
             public void run() {
-            	AzureServiceModule.webSiteConfigMap = null;
-                azureServiceModule.load();
+                azureModule.load();
             }
         };
         refreshAction.setToolTipText("Refresh Service List");
 
         manageSubscriptionAction = new Action("Manage Subscriptions", Activator.getImageDescriptor("icons/azure_explorer.png")) {
             public void run() {
-                ManageSubscriptionDialog subscriptionDialog = new ManageSubscriptionDialog(PluginUtil.getParentShell(), true, false);
-                subscriptionDialog.open();
-                AzureServiceModule.webSiteConfigMap = null;
-                azureServiceModule.load();
+//                ManageSubscriptionDialog subscriptionDialog = new ManageSubscriptionDialog(PluginUtil.getParentShell(), true, false);
+//                subscriptionDialog.open();
+                azureModule.load();
 
             }
         };
@@ -408,9 +396,9 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
                 try {
                     List<Subscription> subscriptions = AzureManagerImpl.getManager().getFullSubscriptionList();
                     if ((subscriptions == null || subscriptions.isEmpty()) &&
-                            (((TreeNode) obj).node instanceof StorageModule || ((TreeNode) obj).node instanceof AzureServiceModule)) {
-                        ManageSubscriptionDialog subscriptionsDialog = new ManageSubscriptionDialog(getSite().getShell(), true, false);
-                        subscriptionsDialog.open();
+                            (((TreeNode) obj).node instanceof StorageModule || ((TreeNode) obj).node instanceof AzureModule)) {
+//                        ManageSubscriptionDialog subscriptionsDialog = new ManageSubscriptionDialog(getSite().getShell(), true, false);
+//                        subscriptionsDialog.open();
                     }
                 } catch (AzureCmdException e) {
                     Activator.getDefault().log(e.getMessage(), e);

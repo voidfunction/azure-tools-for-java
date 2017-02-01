@@ -16,7 +16,7 @@
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+ *//*
 package com.microsoft.webapp.config;
 
 import java.io.File;
@@ -242,10 +242,10 @@ public class CreateWebAppDialog extends TitleAreaDialog {
         return gridData;
     }
 
-    /**
+    *//**
      * Method creates grid data for text field.
      * @return
-     */
+     *//*
     private GridData gridDataForText(int width) {
         GridData gridData = new GridData();
         gridData.horizontalAlignment = SWT.FILL;
@@ -672,7 +672,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
 
     private void populateResourceGroups(String subId, String valToSet) {
         // TODO
-    	/*try {
+    	try {
             List<String> groupList = AzureManagerImpl.getManager().getResourceGroupNames(subId);
             if (groupList.size() > 0) {
                 String[] groupArray = groupList.toArray(new String[groupList.size()]);
@@ -694,7 +694,7 @@ public class CreateWebAppDialog extends TitleAreaDialog {
             job.schedule();
         } catch (AzureCmdException e) {
             Activator.getDefault().log(Messages.errTtl, e);
-        }*/
+        }
     }
 
     private class PrepareListJob extends Job {
@@ -914,3 +914,4 @@ public class CreateWebAppDialog extends TitleAreaDialog {
         return finalResGrp;
     }
 }
+*/

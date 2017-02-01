@@ -60,7 +60,6 @@ import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManage
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import com.microsoft.tooling.msservices.model.storage.QueueMessage;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class QueueFileEditor extends EditorPart {
@@ -74,10 +73,6 @@ public class QueueFileEditor extends EditorPart {
     private Table queueTable;
     private TableViewer tableViewer;
     private List<QueueMessage> queueMessages;
-
-    private EventHelper.EventWaitHandle subscriptionsChanged;
-    private boolean registeredSubscriptionsChanged;
-    private final Object subscriptionsChangedSync = new Object();
 
     @Override
     public void doSave(IProgressMonitor iProgressMonitor) {

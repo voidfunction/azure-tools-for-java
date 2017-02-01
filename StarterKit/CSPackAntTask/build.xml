@@ -33,7 +33,6 @@
         </jar>
 		<copy file="${basedir}\jar\.cspack.jar" tofile="${basedir}\..\WindowsAzureDeploymentProject\.cspack.jar" overwrite="true" />
 		<copy file="${basedir}\jar\.cspack.jar" tofile="${basedir}\..\..\Utils\AzureCommons\resources\.cspack.jar" overwrite="true" />
-		<copy file="${basedir}\jar\.cspack.jar" tofile="${basedir}\..\..\Utils\ServicesExplorerCommon\lib\.cspack.jar" overwrite="true" />
 		<copy file="${basedir}\jar\.cspack.jar" tofile="${basedir}\..\..\PluginsAndFeatures\com.microsoftopentechnologies.wacommon\resources\.cspack.jar" overwrite="true" />
 		<copy file="${basedir}\jar\.cspack.jar" tofile="${basedir}\..\..\PluginsAndFeatures\azure-toolkit-for-intellij\lib\.cspack.jar" overwrite="true" />
 		<copy file="${basedir}\jar\.cspack.jar" tofile="${basedir}\..\..\Utils\ServicesExplorerCommon\lib\.cspack.jar" overwrite="true" />

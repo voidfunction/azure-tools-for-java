@@ -35,7 +35,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import com.gigaspaces.azure.util.PreferenceWebAppUtil;
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azureexplorer.editors.BlobExplorerFileEditor;
@@ -51,8 +50,6 @@ import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import com.microsoft.tooling.msservices.model.storage.StorageServiceTreeItem;
 import com.microsoft.tooling.msservices.model.storage.Table;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class UIHelperImpl implements UIHelper {
@@ -220,10 +217,4 @@ public class UIHelperImpl implements UIHelper {
         int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
         return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
-
-	@Override
-	public void saveWebAppPreferences(Object project, Map<WebSite, WebSiteConfiguration> map) {
-		PreferenceWebAppUtil.save(map);
-		PreferenceWebAppUtil.setLoaded(true);
-	}
 }
