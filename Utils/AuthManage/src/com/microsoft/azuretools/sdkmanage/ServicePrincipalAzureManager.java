@@ -83,6 +83,7 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
                 : azureConfigurable.authenticate(atc);
     }
 
+    @Override
     public Azure getAzure(String sid) throws Exception {
         if (sidToAzureMap.containsKey(sid)) {
             return sidToAzureMap.get(sid);
@@ -92,6 +93,7 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
         return azure;
     }
 
+    @Override
     public List<Subscription> getSubscriptions() throws Exception {
         List<Subscription> sl = auth().subscriptions().list();
         return sl;
