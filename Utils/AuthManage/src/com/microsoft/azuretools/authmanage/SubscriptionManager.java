@@ -74,7 +74,7 @@ public class SubscriptionManager {
         }
     }
 
-    public void notifyAllListeners() {
+    private void notifyAllListeners() {
         for (ISubscriptionSelectionListener l : listners) {
             l.update(subscriptionDetails.isEmpty());
         }

@@ -38,17 +38,31 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
  * Created by shch on 10/9/2016.
  */
 public class AuthMethodManager {
-
     private AuthMethodDetails authMethodDetails = null;
     private static AuthMethodManager instance = null;
-    private AccessTokenAzureManager accessTokenAzureManager;
-    private ServicePrincipalAzureManager servicePrincipalAzureManager;
+    private AzureManager azureManager;
+    
+    private Set<Runnable> signInEventListeners = new HashSet<>();
+    
+    public void addSignInEventListener(Runnable l) {
+        if (!signInEventListeners.contains(l)) {
+        	signInEventListeners.add(l);
+        }
+    }
+
+    private void notifySignInEventListener() {
+        for (Runnable l : signInEventListeners) {
+            l.run();
+        }
+    }
 
     public static AuthMethodManager getInstance() throws Exception {
         if( instance == null) {
@@ -62,15 +76,13 @@ public class AuthMethodManager {
     }
 
     private AzureManager getAzureManager(AuthMethod authMethod) {
+    	if (azureManager != null) return azureManager;
         switch (authMethod) {
             case AD:
                 if (StringUtils.isNullOrEmpty(authMethodDetails.getAccountEmail())) {
                     return null;
                 }
-                if (accessTokenAzureManager == null) {
-                    accessTokenAzureManager = new AccessTokenAzureManager();
-                }
-                return accessTokenAzureManager;
+                azureManager = new AccessTokenAzureManager();
             case SP:
                 String credFilePath = authMethodDetails.getCredFilePath();
                 if (StringUtils.isNullOrEmpty(credFilePath)) {
@@ -82,21 +94,16 @@ public class AuthMethodManager {
                     nw.deliver("Auth method is not set", "File doesn't exist: " + filePath.toString());
                     return null;
                 }
-                if (servicePrincipalAzureManager == null) {
-                    servicePrincipalAzureManager = new ServicePrincipalAzureManager(new File(credFilePath));
-                }
-                return servicePrincipalAzureManager;
+                azureManager = new ServicePrincipalAzureManager(new File(credFilePath));
         }
-        return null;
+        return azureManager;
     }
 
     public void cleanAll() throws Exception {
         if (isSignedIn()) {
-            getAzureManager().getSubscriptionManager().cleanSubscriptions();
+        	azureManager.getSubscriptionManager().cleanSubscriptions();
+        	azureManager = null;
         }
-        accessTokenAzureManager = null;
-        servicePrincipalAzureManager = null;
-        // AD sign out should be done outside if needed
         ServicePrincipalAzureManager.cleanPersist();
         authMethodDetails.setAccountEmail(null);
         authMethodDetails.setCredFilePath(null);
@@ -111,10 +118,9 @@ public class AuthMethodManager {
     }
 
     public void setAuthMethodDetails(AuthMethodDetails authMethodDetails) throws Exception {
-        //dropAzureManager();
         cleanAll();
         this.authMethodDetails = authMethodDetails;
-        // clean previous manager of the same type
+        if (isSignedIn()) notifySignInEventListener();
         saveSettings();
     }
 
