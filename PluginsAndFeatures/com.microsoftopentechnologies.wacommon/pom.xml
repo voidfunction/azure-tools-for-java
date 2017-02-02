@@ -9,7 +9,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <groupId>com.microsoftopentechnologies.wap4ej.build</groupId>
-  <artifactId>com.microsoftopentechnologies.wacommon</artifactId>
+  <artifactId>com.microsoft.azurecore</artifactId>
   <version>2.9.6-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 	<dependencies>
