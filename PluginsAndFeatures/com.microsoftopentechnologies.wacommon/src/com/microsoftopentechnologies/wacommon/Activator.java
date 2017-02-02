@@ -25,12 +25,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.event.EventListenerList;
 
-import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureToolkitFilter;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -47,6 +49,7 @@ import com.gigaspaces.azure.views.Messages;
 import com.google.gson.Gson;
 import com.microsoft.azureexplorer.helpers.IDEHelperImpl;
 import com.microsoft.azuretools.authmanage.CommonSettings;
+import com.microsoft.azuretools.eclipse.ui.UIFactory;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginComponent;
 import com.microsoft.tooling.msservices.components.PluginSettings;
@@ -108,6 +111,20 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
 					"settings for the WACommon plugin.", e, "WACommon", false, true);
 		}
 		isHDInsightEnabled = isHDInsightEnabled(context);
+		try {
+            if (CommonSettings.getUiFactory() == null)
+                CommonSettings.setUiFactory(new UIFactory());
+            String wd = "EclipseActionWorkingDir";
+            Path dirPath = Paths.get(System.getProperty("user.home"), wd);
+            if (!Files.exists(dirPath)) {
+                    Files.createDirectory(dirPath);
+            }
+            CommonSettings.settingsBaseDir = dirPath.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+		super.start(context);
 	}
 	
 	public boolean isHDInsightEnabled() {

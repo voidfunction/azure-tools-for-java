@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Azure Common Plugin Library
-Bundle-SymbolicName: com.microsoftopentechnologies.wacommon;singleton:=true
+Bundle-Name: Azure Core Plugin Library
+Bundle-SymbolicName: com.microsoft.azurecore;singleton:=true
 Bundle-Version: 2.9.6.qualifier
 Bundle-Activator: com.microsoftopentechnologies.wacommon.Activator
 Require-Bundle: org.eclipse.ui,
@@ -13,8 +13,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.common.frameworks;bundle-version="1.2.0";resolution:=optional,
  org.eclipse.jst.j2ee;bundle-version="1.1.802";resolution:=optional,
  org.eclipse.jst.j2ee.web;bundle-version="1.1.810";resolution:=optional,
- com.microsoftopentechnologies.windowsazure.tools.sdk;bundle-version="0.9.2",
- AzureManagePlugin;bundle-version="1.0.0"
+ com.microsoftopentechnologies.windowsazure.tools.sdk;bundle-version="0.9.2"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Microsoft Corp.
@@ -22,17 +21,39 @@ Bundle-ClassPath: .,
  resources/AzureCommons.jar,
  resources/ProjectManagerLibrary.jar,
  resources/.cspack.jar,
- resources/azure-explorer-common.jar
+ resources/azure-explorer-common.jar,
+ resources/auth-manage-0.0.1-SNAPSHOT.jar
 Export-Package: com.gigaspaces.azure.views,
  com.interopbridges.tools.windowsazure,
  com.microsoft.applicationinsights.preference,
+ com.microsoft.azure.docker,
+ com.microsoft.azure.docker.model,
+ com.microsoft.azure.docker.ops,
+ com.microsoft.azure.docker.ops.utils,
  com.microsoft.azure.hdinsight.sdk.common,
  com.microsoft.azure.hdinsight.serverexplore.hdinsightnode,
  com.microsoft.azureexplorer.helpers,
+ com.microsoft.azuretools,
+ com.microsoft.azuretools.adauth,
+ com.microsoft.azuretools.authmanage,
+ com.microsoft.azuretools.authmanage.interact,
+ com.microsoft.azuretools.authmanage.models,
+ com.microsoft.azuretools.authmanage.srvpri,
+ com.microsoft.azuretools.authmanage.srvpri.entities,
+ com.microsoft.azuretools.authmanage.srvpri.exceptions,
+ com.microsoft.azuretools.authmanage.srvpri.report,
+ com.microsoft.azuretools.authmanage.srvpri.rest,
+ com.microsoft.azuretools.authmanage.srvpri.step,
+ com.microsoft.azuretools.eclipse.handlers,
+ com.microsoft.azuretools.eclipse.testers,
+ com.microsoft.azuretools.eclipse.ui,
+ com.microsoft.azuretools.sdkmanage,
+ com.microsoft.azuretools.utils,
  com.microsoft.tooling.msservices.components,
  com.microsoft.tooling.msservices.helpers,
  com.microsoft.tooling.msservices.helpers.auth,
  com.microsoft.tooling.msservices.helpers.azure,
+ com.microsoft.tooling.msservices.helpers.azure.rest,
  com.microsoft.tooling.msservices.helpers.azure.sdk,
  com.microsoft.tooling.msservices.helpers.collections,
  com.microsoft.tooling.msservices.helpers.tasks,
@@ -42,6 +63,7 @@ Export-Package: com.gigaspaces.azure.views,
  com.microsoft.tooling.msservices.serviceexplorer,
  com.microsoft.tooling.msservices.serviceexplorer.azure,
  com.microsoft.tooling.msservices.serviceexplorer.azure.storage,
+ com.microsoft.tooling.msservices.serviceexplorer.azure.storage.asm,
  com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm,
  com.microsoft.tooling.msservices.serviceexplorer.azure.webapps,
  com.microsoft.wacommon.applicationinsights,
@@ -81,4 +103,5 @@ Export-Package: com.gigaspaces.azure.views,
  com.microsoftopentechnologies.windowsazure.tools.cspack.domain.xsd.serviceconfiguration,
  com.microsoftopentechnologies.windowsazure.tools.cspack.domain.xsd.servicedefinition,
  com.persistent.util
-Import-Package: com.microsoft.tooling.msservices.helpers.azure
+Import-Package: com.microsoft.tooling.msservices.helpers.azure,
+ org.eclipse.core.expressions

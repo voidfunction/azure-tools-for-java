@@ -50,6 +50,11 @@ public class AzureManagerImpl extends AzureManager {
     }
 
     @NotNull
+    public static synchronized AzureManagerImpl getManager() {
+        return getManager(DEFAULT_PROJECT);
+    }
+
+    @NotNull
     public static synchronized AzureManagerImpl getManager(Object currentProject) {
         if (currentProject == null) {
             currentProject = DEFAULT_PROJECT;

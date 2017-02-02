@@ -4,8 +4,9 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="resources/azure-explorer-common.jar" sourcepath="/Users/farlen/stuff/azure-tools-for-java-private.2.9.6.3/Utils/ServicesExplorerCommon/src"/>
-	<classpathentry exported="true" kind="lib" path="resources/.cspack.jar"/>
+	<classpathentry exported="true" kind="lib" path="resources/.cspack.jar" sourcepath="/Users/farlen/stuff/azure-tools-for-java-private.2.9.6.3/StarterKit/CSPackAntTask/src"/>
 	<classpathentry exported="true" kind="lib" path="resources/AzureCommons.jar"/>
 	<classpathentry exported="true" kind="lib" path="resources/ProjectManagerLibrary.jar"/>
+	<classpathentry exported="true" kind="lib" path="resources/auth-manage-0.0.1-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

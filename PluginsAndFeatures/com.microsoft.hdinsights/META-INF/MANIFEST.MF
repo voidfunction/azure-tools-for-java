@@ -8,12 +8,12 @@ Bundle-Vendor: Microsoft Corp.
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  com.microsoft.azureexplorer;bundle-version="1.0.0",
- com.microsoftopentechnologies.wacommon;bundle-version="2.9.6",
  com.microsoftopentechnologies.windowsazure.tools.sdk;bundle-version="0.9.2",
  org.eclipse.swt,
  org.eclipse.ui.workbench,
  org.scala-ide.sdt.core;resolution:=optional,
- org.eclipse.jface
+ org.eclipse.jface,
+ com.microsoft.azurecore;bundle-version="2.9.6"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: com.microsoft.azure.hdinsight.common2,

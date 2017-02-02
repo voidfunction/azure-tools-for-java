@@ -12,4 +12,11 @@
   <artifactId>com.microsoftopentechnologies.wacommon</artifactId>
   <version>2.9.6-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+	<dependencies>
+        <dependency>
+            <groupId>com.microsoft.azuretools</groupId>
+            <artifactId>auth-manage</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 </project>

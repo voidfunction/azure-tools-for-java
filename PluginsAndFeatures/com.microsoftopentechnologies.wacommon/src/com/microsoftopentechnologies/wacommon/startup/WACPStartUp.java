@@ -43,34 +43,8 @@ import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
  */
 public class WACPStartUp implements IStartup {
 	
-	private static final String COMPONENTSETS_TYPE = "COMPONENTSETS";
-
 	public void earlyStartup() {
-		//this code is for copying encutil.exe in plugins folder
-		copyPluginComponents();
 		initialize();
-	}
-
-	private void copyPluginComponents() {
-		try {
-			String pluginInstLoc = String.format("%s%s%s",
-					PluginUtil.pluginFolder,
-					File.separator, Messages.waCommonFolderID);
-			if (!new File(pluginInstLoc).exists()) {
-				new File(pluginInstLoc).mkdir();
-			}
-			String enctFile = String.format("%s%s%s", pluginInstLoc,
-					File.separator, Messages.encFileName);
-
-			// Check for encutil.exe
-			if (new File(enctFile).exists()) {
-				new File(enctFile).delete();
-			}
-			FileUtil.copyResourceFile(Messages.encFileEntry,enctFile);
-		} catch (Exception e) {
-			Activator.getDefault().log(e.getMessage(), e);
-		}
-
 	}
 
 	/**
@@ -122,13 +96,6 @@ public class WACPStartUp implements IStartup {
 				FileUtil.copyResourceFile(Messages.dataFileEntry, dataFile);
 				setValues(dataFile);
 			}
-
-			String cmpntFile = String.format("%s%s%s", pluginInstLoc,
-					File.separator, Messages.cmpntFileName);
-			PluginUtil.upgradePluginComponent(cmpntFile,
-					Messages.cmpntFileEntry,
-					Messages.oldCmpntFileEntry,
-					COMPONENTSETS_TYPE);
 		} catch(Exception ex) {
 			Activator.getDefault().log(ex.getMessage(), ex);
 		}

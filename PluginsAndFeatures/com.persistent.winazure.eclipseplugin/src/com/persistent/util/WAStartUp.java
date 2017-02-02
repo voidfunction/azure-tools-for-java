@@ -269,18 +269,32 @@ public class WAStartUp implements IStartup {
             		File.separator, Messages.starterKitFileName);
             String prefFile = String.format("%s%s%s", pluginInstLoc,
             		File.separator, Messages.prefFileName);
-
+            String cmpntFile = String.format("%s%s%s", pluginInstLoc,
+                    File.separator, Messages.cmpntFileName);
             // upgrade component sets and preference sets
             upgradePluginComponent(prefFile,
             		Messages.prefFileEntry,
             		Messages.oldPrefFileEntry,
             		PREFERENCESETS_TYPE);
 
+            upgradePluginComponent(cmpntFile,
+                    Messages.cmpntFileEntry,
+                    Messages.oldCmpntFileEntry,
+                    COMPONENTSETS_TYPE);
+
             // Check for WAStarterKitForJava.zip
             if (new File(starterKit).exists()) {
             	new File(starterKit).delete();
             }
             copyResourceFile(Messages.starterKitEntry, starterKit);
+            String enctFile = String.format("%s%s%s", pluginInstLoc,
+                    File.separator, Messages.encFileName);
+
+            // Check for encutil.exe
+            if (new File(enctFile).exists()) {
+                new File(enctFile).delete();
+            }
+            copyResourceFile(Messages.encFileEntry,enctFile);
         } catch (Exception e) {
             Activator.getDefault().log(e.getMessage(), e);
         }
