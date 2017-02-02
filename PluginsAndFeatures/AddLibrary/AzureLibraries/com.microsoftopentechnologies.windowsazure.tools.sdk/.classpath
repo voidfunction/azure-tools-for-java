@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="dependencies/json-smart-1.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/nimbus-jose-jwt-3.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/oauth2-oidc-sdk-4.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/adal4j-1.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/rxjava-1.1.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/jackson-datatype-joda-2.7.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/adapter-rxjava-2.0.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/azure-1.0.0-beta4.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/azure-client-authentication-1.0.0-beta4.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/azure-client-runtime-1.0.0-beta4.1.jar"/>
