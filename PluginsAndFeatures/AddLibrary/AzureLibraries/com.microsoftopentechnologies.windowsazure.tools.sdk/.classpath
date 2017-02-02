@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-sql-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-appservice-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-cdn-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-dns-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-redis-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-trafficmanager-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-batch-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-graph-rbac-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-keyvault-1.0.0-beta4.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/json-smart-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/nimbus-jose-jwt-3.1.2.jar"/>
