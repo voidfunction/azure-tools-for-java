@@ -25,8 +25,8 @@
     <module>AddLibrary/QpidLibraries/com.microsoftopentechnologies.qpid.ui</module>
     <module>com.microsoft.azureexplorer</module>
     <module>com.microsoft.azureexplorer.feature</module>
-    <module>com.microsoft.webapp</module>
-    <module>com.microsoft.webapp.feature</module>
+<!--    <module>com.microsoft.webapp</module>
+    <module>com.microsoft.webapp.feature</module>-->
    <module>com.microsoft.hdinsights</module>
     <module>com.microsoft.hdinsights.feature</module>
     <module>com.persistent.winazure.eclipseplugin</module>
