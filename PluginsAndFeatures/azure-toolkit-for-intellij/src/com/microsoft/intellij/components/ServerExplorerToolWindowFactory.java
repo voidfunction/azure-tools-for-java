@@ -34,11 +34,9 @@ import com.intellij.openapi.wm.ex.ToolWindowEx;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
 import com.microsoft.azure.hdinsight.common.HDInsightUtil;
-import com.microsoft.intellij.AzureSettings;
-import com.microsoft.intellij.forms.ManageSubscriptionPanel;
+import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
+import com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction;
 import com.microsoft.intellij.helpers.UIHelperImpl;
-import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangeListener;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangedEvent;
 import com.microsoft.tooling.msservices.helpers.collections.ObservableList;
@@ -46,7 +44,6 @@ import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.tree.*;
@@ -333,30 +330,11 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                     new AnAction("Refresh", "Refresh Service List", UIHelperImpl.loadIcon("refresh.png")) {
                         @Override
                         public void actionPerformed(AnActionEvent event) {
-//                            azureModule.webSiteConfigMap = null;
                             azureModule.load();
                         }
                     },
-                    new AnAction("Manage Subscriptions", "Manage Subscriptions", AllIcons.Ide.Link) {
-                        @Override
-                        public void actionPerformed(AnActionEvent anActionEvent) {
-                            final ManageSubscriptionPanel manageSubscriptionPanel = new ManageSubscriptionPanel(anActionEvent.getProject(), true);
-                            final DefaultDialogWrapper subscriptionsDialog = new DefaultDialogWrapper(anActionEvent.getProject(),
-                                    manageSubscriptionPanel) {
-                                @Nullable
-                                @Override
-                                protected JComponent createSouthPanel() {
-                                    return null;
-                                }
-                                @Override
-                                protected JComponent createTitlePane() {
-                                    return null;
-                                }
-                            };
-                            manageSubscriptionPanel.setDialog(subscriptionsDialog);
-                            subscriptionsDialog.show();
-                        }
-                    });
+                    new AzureSignInAction(UIHelperImpl.loadIcon("azure.png")),
+                    new SelectSubscriptionsAction(AllIcons.Ide.Link));
         }
     }
 
