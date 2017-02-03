@@ -22,6 +22,7 @@
 package com.microsoft.azure.hdinsight.serverexplore.hdinsightnode;
 
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 
 public abstract class HDInsightRootModule extends RefreshableNode {
@@ -37,4 +38,9 @@ public abstract class HDInsightRootModule extends RefreshableNode {
     public abstract HDInsightRootModule getNewNode(Node parent);
 
     public abstract void refreshWithoutAsync();
+
+    @Override
+    protected void onNodeClick(NodeActionEvent e) {
+        this.load();
+    }
 }

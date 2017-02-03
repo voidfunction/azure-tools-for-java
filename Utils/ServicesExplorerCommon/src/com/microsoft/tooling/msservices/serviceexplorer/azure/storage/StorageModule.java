@@ -32,6 +32,7 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -47,6 +48,11 @@ public class StorageModule extends RefreshableNode {
 
     public StorageModule(Node parent) {
         super(STORAGE_MODULE_ID, BASE_MODULE_NAME, parent, ICON_PATH);
+    }
+
+    @Override
+    protected void onNodeClick(NodeActionEvent e) {
+        this.load();
     }
 
     @Override

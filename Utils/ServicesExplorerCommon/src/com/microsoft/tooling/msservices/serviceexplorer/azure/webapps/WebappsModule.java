@@ -23,6 +23,7 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure.webapps;
 
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 
 public class WebappsModule extends RefreshableNode {
@@ -34,6 +35,11 @@ public class WebappsModule extends RefreshableNode {
 
 	public WebappsModule(Node parent) {
 		super(WEBAPPS_MODULE_ID, BASE_MODULE_NAME, parent, WEB_RUN_ICON);
+	}
+
+	@Override
+	protected void onNodeClick(NodeActionEvent e) {
+		this.load();
 	}
 
 	@Override
