@@ -10,6 +10,9 @@
 			<include name="dependencies/*.jar"/>
 			<include name="dependencies/arm/*.jar"/>
 		</fileset>
+		<fileset dir="${cloudservices.lib.dir}">
+			<include name="*.jar"/>
+		</fileset>
 		<fileset dir="${cspack.dependant.lib.dir}">
 			<include name="*.jar"/>			
 			<include name="**/*.jar"/>
