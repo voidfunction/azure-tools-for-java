@@ -45,7 +45,6 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.Utils;
-import com.microsoftopentechnologies.azurecommons.xmlhandling.WebAppConfigOperations;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
