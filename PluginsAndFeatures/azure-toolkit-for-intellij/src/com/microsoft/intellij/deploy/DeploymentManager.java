@@ -47,7 +47,6 @@ import com.microsoftopentechnologies.azurecommons.deploy.DeploymentManagerUtilMe
 import com.microsoftopentechnologies.azurecommons.deploy.model.CertificateUpload;
 import com.microsoftopentechnologies.azurecommons.deploy.model.DeployDescriptor;
 import com.microsoftopentechnologies.azurecommons.exception.DeploymentException;
-import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccount;
 import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccountRegistry;
 import com.microsoftopentechnologies.azuremanagementutil.model.InstanceStatus;
@@ -404,7 +403,7 @@ public final class DeploymentManager {
     }
 
     public void undeploy(final String serviceName, final String deplymentName, final String deploymentState)
-            throws WACommonException, RestAPIException, InterruptedException {
+            throws WACommonException, InterruptedException {
         String subscriptionId = WizardCacheManager.getCurrentPublishData().getCurrentSubscription().getId();
         int[] progressArr = new int[]{50, 50};
         unPublish(subscriptionId, serviceName, deplymentName, progressArr);

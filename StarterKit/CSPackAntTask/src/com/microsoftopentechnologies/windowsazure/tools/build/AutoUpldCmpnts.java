@@ -21,7 +21,13 @@ package com.microsoftopentechnologies.windowsazure.tools.build;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Model class for storing which components
+ * got modified i.e. updating cloudurl and cloudkey
+ * of components having upload method as "auto".
+ * Purpose is to again restore auto settings
+ * after project build is completed.
+ */
 public class AutoUpldCmpnts {
 	String roleName;
 	List<Integer> cmpntIndices = new ArrayList<Integer>();

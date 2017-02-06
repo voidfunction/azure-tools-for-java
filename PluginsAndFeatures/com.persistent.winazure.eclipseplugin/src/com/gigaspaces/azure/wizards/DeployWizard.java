@@ -53,7 +53,6 @@ import com.interopbridges.tools.windowsazure.WindowsAzureRoleComponent;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.CloudService;
 import com.microsoft.windowsazure.management.compute.models.ServiceCertificateListResponse.Certificate;
-import com.microsoftopentechnologies.azurecommons.deploy.model.AutoUpldCmpnts;
 import com.microsoftopentechnologies.azurecommons.deploy.model.CertificateUpload;
 import com.microsoftopentechnologies.azurecommons.deploy.model.CertificateUploadList;
 import com.microsoftopentechnologies.azurecommons.deploy.model.RemoteDesktopDescriptor;
@@ -68,6 +67,7 @@ import com.microsoftopentechnologies.azurecommons.wacommonutil.PreferenceSetUtil
 import com.microsoftopentechnologies.wacommon.storageregistry.PreferenceUtilStrg;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.microsoftopentechnologies.wacommon.utils.WACommonException;
+import com.microsoftopentechnologies.windowsazure.tools.build.AutoUpldCmpnts;
 import com.persistent.util.JdkSrvConfig;
 import com.persistent.util.MessageUtil;
 import com.persistent.util.WAEclipseHelper;

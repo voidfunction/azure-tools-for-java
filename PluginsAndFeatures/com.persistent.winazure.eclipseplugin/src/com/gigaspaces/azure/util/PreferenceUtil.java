@@ -38,7 +38,6 @@ import org.osgi.service.prefs.Preferences;
 import com.gigaspaces.azure.wizards.WizardCacheManager;
 import com.microsoftopentechnologies.azurecommons.deploy.tasks.LoadingAccoutListener;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
-import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class PreferenceUtil {
@@ -89,7 +88,7 @@ public class PreferenceUtil {
 		loaded = bool;
 	}
 
-	public static void load(LoadingAccoutListener listener) throws RestAPIException {
+	public static void load(LoadingAccoutListener listener) {
 		INSTANCE.loadPreferences(listener);
 	}
 
@@ -123,7 +122,7 @@ public class PreferenceUtil {
 								WizardCacheManager.cachePublishData(
 										new File(pubFilePath), pubData, listener);
 							}
-						} catch (RestAPIException e) {
+						} catch (Exception e) {
 							Activator.getDefault().log(Messages.err, e);
 						}
 					}

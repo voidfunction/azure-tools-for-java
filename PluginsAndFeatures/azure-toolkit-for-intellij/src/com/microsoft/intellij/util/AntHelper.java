@@ -34,7 +34,7 @@ import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperation
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.actions.DeployAction;
-import com.microsoftopentechnologies.azurecommons.deploy.model.AutoUpldCmpnts;
+import com.microsoftopentechnologies.windowsazure.tools.build.AutoUpldCmpnts;
 
 import java.io.File;
 import java.io.IOException;

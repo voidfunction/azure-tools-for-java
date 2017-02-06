@@ -54,7 +54,6 @@ import com.microsoftopentechnologies.azurecommons.deploy.DeploymentManagerUtilMe
 import com.microsoftopentechnologies.azurecommons.deploy.model.CertificateUpload;
 import com.microsoftopentechnologies.azurecommons.deploy.model.DeployDescriptor;
 import com.microsoftopentechnologies.azurecommons.exception.DeploymentException;
-import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccount;
 import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccountRegistry;
 import com.microsoftopentechnologies.azuremanagementutil.model.InstanceStatus;
@@ -487,8 +486,7 @@ public final class DeploymentManager {
 	}
 
 	public void undeploy(final String serviceName, final String deplymentName,
-			final String deploymentState) throws WACommonException,
-			RestAPIException, InterruptedException, CommandLineException {
+			final String deploymentState) throws WACommonException, InterruptedException, CommandLineException {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {

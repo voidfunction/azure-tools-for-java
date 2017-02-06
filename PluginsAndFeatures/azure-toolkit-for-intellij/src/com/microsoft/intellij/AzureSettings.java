@@ -29,7 +29,6 @@ import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceR
 import com.microsoft.intellij.wizards.WizardCacheManager;
 import com.microsoftopentechnologies.azurecommons.deploy.tasks.LoadingAccoutListener;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
-import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccount;
 import com.microsoftopentechnologies.azurecommons.storageregistry.StorageAccountRegistry;
 import org.apache.xmlbeans.impl.util.Base64;
@@ -151,11 +150,11 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
                     PublishData[] publishDatas = (PublishData[]) input.readObject();
                     listener.setNumberOfAccounts(publishDatas.length);
                     for (PublishData pd : publishDatas) {
-                        try {
+//                        try {
                             WizardCacheManager.cachePublishData(null, pd, listener, project);
-                        } catch (RestAPIException e) {
-                            log(message("error"), e);
-                        }
+//                        } catch (RestAPIException e) {
+//                            log(message("error"), e);
+//                        }
                     }
                 } finally {
                     input.close();

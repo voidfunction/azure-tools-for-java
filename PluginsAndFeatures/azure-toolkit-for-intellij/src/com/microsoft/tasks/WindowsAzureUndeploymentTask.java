@@ -29,7 +29,6 @@ import com.microsoft.intellij.deploy.DeploymentManager;
 import com.wacommon.utils.WACommonException;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
-import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import org.jetbrains.annotations.NotNull;
 
 import static com.microsoft.intellij.AzurePlugin.log;
@@ -63,8 +62,6 @@ public class WindowsAzureUndeploymentTask extends Task.Backgroundable {
 
         try {
             new DeploymentManager(myProject).undeploy(serviceName, deploymentName, deploymentState);
-        } catch (RestAPIException e) {
-            log(message("error"), e);
         } catch (InterruptedException e) {
             log(message("error"), e);
         } catch (WACommonException e) {

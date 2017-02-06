@@ -31,7 +31,6 @@ import com.gigaspaces.azure.deploy.DeploymentManager;
 import com.gigaspaces.azure.util.CommandLineException;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
-import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.wacommon.Activator;
 import com.microsoftopentechnologies.wacommon.utils.WACommonException;
 
@@ -75,17 +74,12 @@ public class WindowsAzureUndeploymentJob extends Job {
 
 		try {
 			DeploymentManager.getInstance().undeploy(serviceName, deploymentName,deploymentState);
-		} 
-		catch (RestAPIException e) {
+		} catch (InterruptedException e) {
 			Activator.getDefault().log(Messages.error,e);
-		} 
-		catch (InterruptedException e) {
-			Activator.getDefault().log(Messages.error,e);
-		} 
-		catch (CommandLineException e) {
+		} catch (CommandLineException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}catch (WACommonException e) {
+		} catch (WACommonException e) {
 			Activator.getDefault().log(Messages.error,e);
 			e.printStackTrace();
 		}

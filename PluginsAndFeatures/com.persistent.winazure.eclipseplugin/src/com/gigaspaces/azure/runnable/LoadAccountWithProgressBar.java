@@ -25,7 +25,6 @@ import waeclipseplugin.Activator;
 import com.gigaspaces.azure.propertypage.Messages;
 import com.gigaspaces.azure.util.PreferenceUtil;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
-import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 
 public class LoadAccountWithProgressBar extends AccountActionRunnable {
 
@@ -38,7 +37,7 @@ public class LoadAccountWithProgressBar extends AccountActionRunnable {
 	public void doTask() {
 		try {
 			PreferenceUtil.load(this);
-		} catch (RestAPIException e) {
+		} catch (Exception e) {
 			Activator.getDefault().log(Messages.error, e);
 		}
 	}

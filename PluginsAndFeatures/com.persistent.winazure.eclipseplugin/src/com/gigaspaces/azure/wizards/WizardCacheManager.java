@@ -69,7 +69,6 @@ import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
 import com.microsoftopentechnologies.azurecommons.deploy.wizard.ConfigurationEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.wizard.ConfigurationEventListener;
 import com.microsoftopentechnologies.azurecommons.deploy.wizard.WizardCacheManagerUtilMethods;
-import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.PreferenceSetUtil;
 import com.microsoftopentechnologies.azuremanagementutil.model.KeyName;
@@ -119,7 +118,7 @@ public final class WizardCacheManager {
 			public void onConfigurationChanged(ConfigurationEventArgs config) {
 				try {
 					notifyConfiguration(config);
-				} catch (RestAPIException e) {
+				} catch (Exception e) {
 					Activator.getDefault().log(Messages.err, e);
 				}
 			}
@@ -381,7 +380,7 @@ public final class WizardCacheManager {
 		return selProject;
 	}
 
-	private void notifyConfiguration(ConfigurationEventArgs config) throws RestAPIException {
+	private void notifyConfiguration(ConfigurationEventArgs config) {
 		if (ConfigurationEventArgs.DEPLOY_FILE.equals(config.getKey())) {
 			deployFile = config.getValue().toString();
 		}
@@ -451,7 +450,7 @@ public final class WizardCacheManager {
 	}
 
 	public static void cachePublishData(File publishSettingsFile, PublishData publishData, LoadingAccoutListener listener)
-			throws RestAPIException, IOException {
+			throws IOException {
 
 		boolean canceled = false;
 		List<Subscription> subscriptions = null;

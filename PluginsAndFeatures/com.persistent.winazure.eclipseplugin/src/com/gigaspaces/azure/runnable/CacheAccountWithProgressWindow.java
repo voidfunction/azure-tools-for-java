@@ -30,7 +30,6 @@ import com.microsoftopentechnologies.wacommon.Activator;
 import com.microsoftopentechnologies.wacommon.commoncontrols.Messages;
 import com.gigaspaces.azure.wizards.WizardCacheManager;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
-import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.persistent.util.MessageUtil;
 
 public class CacheAccountWithProgressWindow extends AccountActionRunnable implements Runnable {
@@ -68,8 +67,6 @@ public class CacheAccountWithProgressWindow extends AccountActionRunnable implem
 	public void doTask() {
 		try {
 			WizardCacheManager.cachePublishData(publishSettingsFile, data, this);
-		} catch (RestAPIException e) {
-			Activator.getDefault().log(Messages.error, e);
 		} catch (IOException e) {
             Activator.getDefault().log(Messages.error, e);
         }

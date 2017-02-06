@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.gigaspaces.azure.util.PreferenceUtil;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
-import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.wacommon.Activator;
 import com.microsoftopentechnologies.wacommon.commoncontrols.Messages;
 import com.persistent.util.MessageUtil;
@@ -64,7 +63,7 @@ public class LoadAccountWithProgressWindow extends AccountActionRunnable impleme
 	public void doTask() {
 		try {
 			PreferenceUtil.load(this);
-		} catch (RestAPIException e) {
+		} catch (Exception e) {
 			Activator.getDefault().log(Messages.error, e);
 		}
 	}

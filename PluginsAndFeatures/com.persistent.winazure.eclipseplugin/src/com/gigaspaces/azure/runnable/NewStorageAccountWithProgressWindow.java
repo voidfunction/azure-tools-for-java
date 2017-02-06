@@ -36,7 +36,6 @@ import com.microsoft.windowsazure.exception.ServiceException;
 import com.microsoft.windowsazure.management.storage.models.StorageAccountCreateParameters;
 import com.microsoftopentechnologies.azurecommons.deploy.tasks.AccountCachingExceptionEvent;
 import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
-import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.persistent.util.MessageUtil;
 
 public class NewStorageAccountWithProgressWindow
@@ -114,17 +113,8 @@ extends AccountActionRunnable implements Runnable {
 	public void doTask() {
 		try {
 			storageService = WizardCacheManager.createStorageAccount(name, label, location, description);
-		}
-		catch (RestAPIException e) {
-			AccountCachingExceptionEvent event = new AccountCachingExceptionEvent(this);
-			event.setException(e);
-			event.setMessage(e.getMessage());
-			onRestAPIError(event);
-			Activator.getDefault().log(Messages.error, e);
-		}
-		catch (InterruptedException e) {
-		}
-		catch (CommandLineException e) {
+		} catch (InterruptedException e) {
+		} catch (CommandLineException e) {
 			AccountCachingExceptionEvent event = new AccountCachingExceptionEvent(this);
 			event.setException(e);
 			event.setMessage(e.getMessage());
@@ -137,8 +127,11 @@ extends AccountActionRunnable implements Runnable {
             onRestAPIError(event);
             Activator.getDefault().log(Messages.error, e);
         } catch(Exception e) {
+			AccountCachingExceptionEvent event = new AccountCachingExceptionEvent(this);
+			event.setException(e);
+			event.setMessage(e.getMessage());
+			onRestAPIError(event);
 			Activator.getDefault().log(Messages.error, e);
-			e.printStackTrace();
 		}
     }
 }

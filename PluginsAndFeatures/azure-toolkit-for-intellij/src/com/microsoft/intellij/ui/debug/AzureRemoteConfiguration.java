@@ -87,7 +87,7 @@ public class AzureRemoteConfiguration extends ModuleBasedConfiguration<JavaRunCo
             debuggerSettings.setDebugPort(USE_SOCKET_TRANSPORT ? PORT : SHMEM_ADDRESS);
             debuggerSettings.setTransport(USE_SOCKET_TRANSPORT ? DebuggerSettings.SOCKET_TRANSPORT : DebuggerSettings.SHMEM_TRANSPORT);
         }
-        return new AzureRemoteStateState(getProject(), createRemoteConnection(), WEBAPP, PORT);
+        return null;//new AzureRemoteStateState(getProject(), createRemoteConnection(), WEBAPP, PORT);
     }
 
     @Override

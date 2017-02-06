@@ -20,13 +20,13 @@
 package com.microsoft.applicationinsights.preference;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoftopentechnologies.azurecommons.storageregistry.StorageRegistryUtilMethods;
-
 
 public class ApplicationInsightsResourceRegistry {
 	/**
@@ -55,7 +55,7 @@ public class ApplicationInsightsResourceRegistry {
 		List<ApplicationInsightsResource> resourceList = getAppInsightsResrcList();
 		String [] nameArr = null;
 		// check whether registry entries with same resource names exist
-		if (StorageRegistryUtilMethods.chkDuplicateUsingSet(nameList)) {
+		if (chkDuplicateUsingSet(nameList)) {
 			List<ApplicationInsightsResourceWithSameName> sameResourceNameList =
 					identifyDuplicates(nameList);
 			// iterate over same resource name list.
@@ -131,6 +131,18 @@ public class ApplicationInsightsResourceRegistry {
 			}
 		}
 		return sameResourceNameList;
+	}
+
+	/**
+	 * Method to check whether storage account registry
+	 * contains entries with same account names
+	 * but different URL text.
+	 * @param nameList
+	 * @return
+	 */
+	public static boolean chkDuplicateUsingSet(List<String> nameList) {
+		Set<String> nameSet = new HashSet<String>(nameList);
+		return nameSet.size() < nameList.size();
 	}
 
 	/**

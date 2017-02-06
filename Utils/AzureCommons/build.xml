@@ -37,6 +37,7 @@
   	</jar>
   	<copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\..\PluginsAndFeatures\com.microsoftopentechnologies.wacommon\resources\${jar_name}" overwrite="true" />
   	<copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\..\PluginsAndFeatures\azure-toolkit-for-intellij\lib\${jar_name}" overwrite="true" />
+	<copy file="${basedir}\jar\${jar_name}" tofile="${basedir}\..\..\Utils\CloudServicesCommon\resources\${jar_name}" overwrite="true" />
   </target>
 
   <target name="clean" description="clean up" >
