@@ -565,7 +565,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
                     model.jdkDownloadUrl = null;
                     break;
                 case ThirdParty:
-                    if (!WebAppUtils.isUrlAccessabel(model.jdk3PartyUrl)) {
+                    if (!WebAppUtils.isUrlAccessible(model.jdk3PartyUrl)) {
                         return new ValidationInfo("Please check the URL is valid.", comboBoxJDK3Party);
                     }
                     model.jdkDownloadUrl = model.jdk3PartyUrl;
@@ -575,10 +575,10 @@ public class AppServiceCreateDialog extends DialogWrapper {
                         return new ValidationInfo("Enter a valid URL.", textFieldJDKUrl);
                     } else {
                         // first check the link is accessible as it is
-                        if (!WebAppUtils.isUrlAccessabel(model.jdkOwnUrl)) {
+                        if (!WebAppUtils.isUrlAccessible(model.jdkOwnUrl)) {
                             // create shared access signature url and check its accessibility
                             String sasUrl = StorageAccoutUtils.getBlobSasUri(model.jdkOwnUrl, model.storageAccountKey);
-                            if (!WebAppUtils.isUrlAccessabel(sasUrl)) {
+                            if (!WebAppUtils.isUrlAccessible(sasUrl)) {
                                 return new ValidationInfo("Please check the storage account key and/or URL is valid.", textFieldJDKUrl);
                             } else {
                                 model.jdkDownloadUrl = sasUrl;

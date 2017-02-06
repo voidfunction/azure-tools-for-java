@@ -52,10 +52,29 @@
     <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-sql:1.0.0-beta4.1" level="project" />
     <orderEntry type="library" name="Maven: com.microsoft.azure:azure-storage:4.0.0" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.6.0" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.12" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.9.13" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-core-asl:1.9.13" level="project" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.9" level="project" />
     <orderEntry type="library" name="Maven: commons-net:commons-net:3.2" level="project" />
+    <orderEntry type="module-library">
+      <library name="Maven: com.microsoft.azure:azure-keyvault-webkey:1.0.0-beta5-SNAPSHOT">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/azure-keyvault-webkey-1.0.0-beta5-SNAPSHOT.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: com.microsoft.azure:azure-keyvault:1.0.0-beta5-SNAPSHOT">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/azure-keyvault-1.0.0-beta5-SNAPSHOT.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

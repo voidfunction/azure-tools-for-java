@@ -76,6 +76,8 @@ public class WebAppUtils {
             throw new ConnectException("Unable to login to FTP server");
         }
 
+        ftp.setControlKeepAliveTimeout(3000);
+
         return ftp;
     }
 
@@ -180,7 +182,7 @@ public class WebAppUtils {
         return con.getResponseCode();
     }
 
-    public static boolean isUrlAccessabel(String url) throws IOException {
+    public static boolean isUrlAccessible(String url) throws IOException {
         HttpURLConnection.setFollowRedirects(false);
         HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
         con.setRequestMethod("HEAD");
@@ -229,7 +231,6 @@ public class WebAppUtils {
             PublishingProfile pp = webApp.getPublishingProfile();
             ftp = getFtpConnection(pp);
             ftp.setFileType(FTP.BINARY_FILE_TYPE);
-            ftp.setControlKeepAliveTimeout(3000);
 
             // {{ debug only
             System.out.println("\t\t" + pp.ftpUrl());
