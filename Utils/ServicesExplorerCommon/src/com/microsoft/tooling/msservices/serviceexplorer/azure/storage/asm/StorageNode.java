@@ -24,7 +24,7 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure.storage.asm;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+//import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
@@ -45,8 +45,9 @@ public class StorageNode extends ClientStorageNode {
         @Override
         protected void azureNodeAction(NodeActionEvent e)
                 throws AzureCmdException {
-            try {
-                AzureManagerImpl.getManager(getProject()).deleteStorageAccount(storageAccount);
+//            try {
+                // TODO
+//                AzureManagerImpl.getManager(getProject()).deleteStorageAccount(storageAccount);
 
                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                     @Override
@@ -55,10 +56,10 @@ public class StorageNode extends ClientStorageNode {
                         getParent().removeDirectChildNode(StorageNode.this);
                     }
                 });
-            } catch (AzureCmdException ex) {
-                DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete storage account.", ex,
-                        "MS Services - Error Deleting Storage Account", false, true);
-            }
+//            } catch (AzureCmdException ex) {
+//                DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete storage account.", ex,
+//                        "MS Services - Error Deleting Storage Account", false, true);
+//            }
         }
 
         @Override

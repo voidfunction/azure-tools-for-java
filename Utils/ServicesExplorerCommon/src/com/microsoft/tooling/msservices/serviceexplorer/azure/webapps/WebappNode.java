@@ -26,7 +26,6 @@ import java.util.List;
 import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.serviceexplorer.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
@@ -71,7 +70,7 @@ public class WebappNode extends Node {
 					@Override
 					public void run() {
 //						try {
-							AzureManager azureManager = AzureManagerImpl.getManager(getProject());
+//							AzureManager azureManager = AzureManagerImpl.getManager(getProject());
 //							azureManager.stopWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
 //							webApp = azureManager.getWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
 							setIconPath(WEB_STOP_ICON);
@@ -90,7 +89,7 @@ public class WebappNode extends Node {
 					@Override
 					public void run() {
 //						try {
-							AzureManager azureManager = AzureManagerImpl.getManager(getProject());
+//							AzureManager azureManager = AzureManagerImpl.getManager(getProject());
 //							azureManager.startWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
 //							webApp = azureManager.getWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
 							setIconPath(WEB_RUN_ICON);
@@ -109,7 +108,7 @@ public class WebappNode extends Node {
 					@Override
 					public void run() {
 //						try {
-							AzureManager azureManager = AzureManagerImpl.getManager(getProject());
+//							AzureManager azureManager = AzureManagerImpl.getManager(getProject());
 //							azureManager.restartWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
 //							webApp = azureManager.getWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
 							setIconPath(WEB_RUN_ICON);

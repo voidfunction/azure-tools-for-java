@@ -35,7 +35,6 @@ import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
 import com.microsoftopentechnologies.wacommon.Activator;
@@ -50,7 +49,8 @@ public class ApplicationInsightsResourceRegistryEclipse {
 	 * @throws RestOperationException
 	 * @throws AzureCmdException 
 	 */
-	public static void updateApplicationInsightsResourceRegistry(List<Subscription> subList)
+	//TODO
+	/*public static void updateApplicationInsightsResourceRegistry(List<Subscription> subList)
 			throws IOException, RestOperationException, AzureCmdException {
 		for (Subscription sub : subList) {
 			AzureManager manager = AzureManagerImpl.getManager();
@@ -68,10 +68,10 @@ public class ApplicationInsightsResourceRegistryEclipse {
 					String key = registryRes.getInstrumentationKey();
 					int index = ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(key);
 					if (inUsekeyList.contains(key)) {
-						/*
+						
 						 * key is used by project but not present in cloud,
 						 * so make it as manually added resource and not imported.
-						 */
+						 
 						ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
 								key, key, Messages.unknown, Messages.unknown,
 								Messages.unknown, Messages.unknown, false);
@@ -107,7 +107,7 @@ public class ApplicationInsightsResourceRegistryEclipse {
 		}
 		ApplicationInsightsPreferences.save();
 		ApplicationInsightsPreferences.setLoaded(true);
-	}
+	}*/
 
 	public static void keeepManuallyAddedList() {
 		List<ApplicationInsightsResource> addedList = ApplicationInsightsResourceRegistry.getAddedResources();
