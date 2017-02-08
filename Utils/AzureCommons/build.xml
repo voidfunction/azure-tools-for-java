@@ -17,6 +17,9 @@
 				<include name="*.jar"/>			
 				<include name="dependencies/*.jar"/>
 			</fileset>
+		<fileset dir="${cloudservices.lib.dir}">
+			<include name="*.jar"/>
+		</fileset>
 		<fileset dir="resources">
 				<include name="*.jar"/>
 		</fileset>

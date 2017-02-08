@@ -64,7 +64,6 @@ import org.osgi.service.prefs.Preferences;
 
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.wacommon.Activator;
@@ -384,7 +383,7 @@ public class PluginUtil {
 		return shell;
 	}
 
-	public static void createSubscriptionTelemetryEvent(List<Subscription> oldSubList, String eventName) {
+	/*public static void createSubscriptionTelemetryEvent(List<Subscription> oldSubList, String eventName) {
 		try {
 			List<Subscription> newSubList = AzureManagerImpl.getManager().getFullSubscriptionList();
 			if (newSubList != null && newSubList.size() > 0) {
@@ -401,7 +400,7 @@ public class PluginUtil {
 		} catch (AzureCmdException e) {
 			Activator.getDefault().log(e.getMessage(), e);
 		}
-	}
+	}*/
 
 	/**
 	 * This returns the resource has a file.

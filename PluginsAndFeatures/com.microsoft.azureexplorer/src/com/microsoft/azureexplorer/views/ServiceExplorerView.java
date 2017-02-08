@@ -67,7 +67,6 @@ import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
-import com.microsoftopentechnologies.azurecommons.exception.RestAPIException;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class ServiceExplorerView extends ViewPart implements PropertyChangeListener {

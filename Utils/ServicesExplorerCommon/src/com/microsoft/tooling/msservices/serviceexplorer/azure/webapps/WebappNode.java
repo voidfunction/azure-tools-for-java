@@ -24,10 +24,10 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure.webapps;
 import java.util.List;
 
 import com.microsoft.azure.management.appservice.WebApp;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.serviceexplorer.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
 
@@ -37,12 +37,14 @@ public class WebappNode extends Node {
 	private static final String ACTION_RESTART = "Restart";
 	private static final String WEB_RUN_ICON = "website.png";
 	private static final String WEB_STOP_ICON = "stopWebsite.png";
-	String runStatus = "Running";
+	private static final String RUN_STATUS = "Running";
 	private WebApp webApp;
+	private final String subscriptionId;
 
-	public WebappNode(WebappsModule parent, WebApp webApp, String icon) {
+	public WebappNode(WebappsModule parent, String subscriptionId, WebApp webApp, String icon) {
 		super(webApp.name(), webApp.name(), parent, icon, true);
-		this.webApp = this.webApp;
+		this.subscriptionId = subscriptionId;
+		this.webApp = webApp;
 
 		loadActions();
 	}
@@ -53,8 +55,7 @@ public class WebappNode extends Node {
 
 	@Override
 	public List<NodeAction> getNodeActions() {
-		// TODO
-		boolean running = true; //runStatus.equals(webApp.getStatus());
+		boolean running = RUN_STATUS.equals(webApp.inner().state());
 		getNodeActionByName(ACTION_START).setEnabled(!running);
 		getNodeActionByName(ACTION_STOP).setEnabled(running);
 		getNodeActionByName(ACTION_RESTART).setEnabled(running);
@@ -64,21 +65,14 @@ public class WebappNode extends Node {
 
 	@Override
 	protected void loadActions() {
-		addAction("Stop", WEB_STOP_ICON, new NodeActionListener() {
+		addAction(ACTION_STOP, WEB_STOP_ICON, new NodeActionListener() {
 			@Override
 			public void actionPerformed(NodeActionEvent e) {
 				DefaultLoader.getIdeHelper().runInBackground(null, "Stopping Web App", false, true, "Stopping Web App...", new Runnable() {
 					@Override
 					public void run() {
-//						try {
-							AzureManager azureManager = AzureManagerImpl.getManager(getProject());
-//							azureManager.stopWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
-//							webApp = azureManager.getWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
-							setIconPath(WEB_STOP_ICON);
-//						} catch (AzureCmdException e) {
-//							DefaultLoader.getUIHelper().showException("An error occurred while attempting to stop the Web App", e,
-//									"Azure Services Explorer - Error Stopping Web App", false, true);
-//						}
+						webApp.stop();
+						setIconPath(WEB_STOP_ICON);
 					}
 				});
 			}
@@ -89,15 +83,8 @@ public class WebappNode extends Node {
 				DefaultLoader.getIdeHelper().runInBackground(null, "Starting Web App", false, true, "Starting Web App...", new Runnable() {
 					@Override
 					public void run() {
-//						try {
-							AzureManager azureManager = AzureManagerImpl.getManager(getProject());
-//							azureManager.startWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
-//							webApp = azureManager.getWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
-							setIconPath(WEB_RUN_ICON);
-//						} catch (AzureCmdException e) {
-//							DefaultLoader.getUIHelper().showException("An error occurred while attempting to start the Web App", e,
-//									"Azure Services Explorer - Error Starting Web App", false, true);
-//						}
+						webApp.start();
+						setIconPath(WEB_RUN_ICON);
 					}
 				});
 			}
@@ -108,15 +95,8 @@ public class WebappNode extends Node {
 				DefaultLoader.getIdeHelper().runInBackground(null, "Restarting Web App", false, true, "Restarting Web App...", new Runnable() {
 					@Override
 					public void run() {
-//						try {
-							AzureManager azureManager = AzureManagerImpl.getManager(getProject());
-//							azureManager.restartWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
-//							webApp = azureManager.getWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
-							setIconPath(WEB_RUN_ICON);
-//						} catch (AzureCmdException e) {
-//							DefaultLoader.getUIHelper().showException("An error occurred while attempting to restart the Web App", e,
-//									"Azure Services Explorer - Error Restarting Web App", false, true);
-//						}
+						webApp.restart();
+						setIconPath(WEB_RUN_ICON);
 					}
 				});
 			}
@@ -134,8 +114,13 @@ public class WebappNode extends Node {
 
 		@Override
 		protected void azureNodeAction(NodeActionEvent e) throws AzureCmdException {
-//			try {
-//				AzureManagerImpl.getManager(getProject()).deleteWebSite(webApp.getSubscriptionId(), webApp.getWebSpaceName(), webApp.getName());
+			try {
+				AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+				// not signed in
+				if (azureManager == null) {
+					return;
+				}
+				azureManager.getAzure(subscriptionId).webApps().deleteByGroup(webApp.inner().resourceGroup(), webApp.name());
 				DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 					@Override
 					public void run() {
@@ -143,10 +128,10 @@ public class WebappNode extends Node {
 						getParent().removeDirectChildNode(WebappNode.this);
 					}
 				});
-//			} catch (AzureCmdException ex) {
-//				DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete the Web App", ex,
-//									"Azure Services Explorer - Error Deleting Web App", false, true);
-//			}
+			} catch (Exception ex) {
+				DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete the Web App", ex,
+						"Azure Services Explorer - Error Deleting Web App", false, true);
+			}
 		}
 
 		@Override

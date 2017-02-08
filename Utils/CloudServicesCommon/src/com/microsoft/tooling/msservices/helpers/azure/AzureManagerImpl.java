@@ -33,9 +33,7 @@ import com.microsoft.tooling.msservices.model.Subscription;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class AzureManagerImpl extends AzureManager {
