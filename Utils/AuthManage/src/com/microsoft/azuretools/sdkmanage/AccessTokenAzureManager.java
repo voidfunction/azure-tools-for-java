@@ -160,6 +160,6 @@ public class AccessTokenAzureManager extends AzureManagerBase {
 
     @Override
     public String getAccessToken(String tid) throws Exception {
-        return AdAuthManager.getInstance().getAccessToken(tid, Constants.resourceVault, PromptBehavior.Auto);
+        return AdAuthManager.getInstance().getAccessToken(tid, Constants.resourceARM, PromptBehavior.Auto);
     }
 }
