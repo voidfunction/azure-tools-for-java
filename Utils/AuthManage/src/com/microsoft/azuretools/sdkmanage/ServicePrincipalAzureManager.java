@@ -31,6 +31,7 @@ import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
+import com.microsoft.azuretools.Constants;
 import com.microsoft.azuretools.authmanage.CommonSettings;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManagerPersist;
@@ -175,5 +176,27 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
             : atc;
 
         return credentials.getClientId();
+    }
+
+    @Override
+    public String getAccessToken(String tid) throws Exception {
+        ExecutorService service = null;
+        AuthenticationResult authenticationResult;
+        try {
+            ApplicationTokenCredentials credentials = (atc == null)
+                    ? ApplicationTokenCredentials.fromFile(credFile)
+                    : atc;
+
+            service = Executors.newFixedThreadPool(1);
+            AuthenticationContext context = new AuthenticationContext(Constants.authority, false, service);
+            ClientCredential clientCredential = new ClientCredential(credentials.getClientId(), credentials.getSecret());
+            Future<AuthenticationResult> future = context.acquireToken(Constants.resourceVault, clientCredential, null);
+            authenticationResult = future.get();
+        } finally {
+            if (service != null) {
+                service.shutdown();
+            }
+        }
+        return authenticationResult.getAccessToken();
     }
 }

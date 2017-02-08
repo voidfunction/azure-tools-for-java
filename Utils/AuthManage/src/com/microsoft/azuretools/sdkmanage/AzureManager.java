@@ -41,4 +41,5 @@ public interface AzureManager {
 //    public List<Tenant> getTenants() throws Throwable;
     KeyVaultClient getKeyVaultClient(String tid) throws Exception;
     String getCurrentUserId() throws Exception;
+    String getAccessToken(String tid) throws Exception;
 }
