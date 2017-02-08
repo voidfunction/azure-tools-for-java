@@ -102,14 +102,30 @@ public class AzureModelController {
         if (srgMap == null) {
             System.out.println("AzureModelController.subscriptionSelectionChanged: srgMap == null -> return");
         }
+        Map <String, Subscription> sidToSubscriptionMap = azureModel.getSidToSubscriptionMap();
+        if (sidToSubscriptionMap == null) {
+            System.out.println("AzureModelController.subscriptionSelectionChanged: sidToSubscriptionMap == null -> return");
+        }
+
         Map<ResourceGroup, List<WebApp>> rgwaMap = azureModel.getResourceGroupToWebAppMap();
         Map<ResourceGroup, List<AppServicePlan>> rgspMap = azureModel.getResourceGroupToAppServicePlanMap();
+
 
         List<SubscriptionDetail> sdl = subscriptionManager.getSubscriptionDetails();
         for (SubscriptionDetail sd : sdl) {
             if (!srgMap.containsKey(sd)) {
                 if (!sd.isSelected()) continue;
+
+
                 Azure azure = azureManager.getAzure(sd.getSubscriptionId());
+                // subscription locations
+                List<Subscription> sl = azureManager.getSubscriptions();
+                System.out.println("Updating subscription locations");
+                List<Location> locl = sidToSubscriptionMap.get(sd.getSubscriptionId()).listLocations();
+                Map<SubscriptionDetail, List<Location>> sdlocMap = azureModel.getSubscriptionToLocationMap();
+                sdlocMap.put(sd, locl);
+
+                // resource group maps
                 List<ResourceGroup> rgList = azure.resourceGroups().list();
                 srgMap.put(sd, rgList);
                 updateResGrDependency(azure, rgList, progressIndicator, rgwaMap, rgspMap);
@@ -153,17 +169,18 @@ public class AzureModelController {
             clearAll();
             return;
         }
+        AzureModel azureModel = AzureModel.getInstance();
 
         // to get regions we nees subscription objects
         if (progressIndicator != null) progressIndicator.setText("Getting subscription list...");
         List<Subscription> sl = azureManager.getSubscriptions();
         // convert to map to easier find by sid
-        Map <String, Subscription> sidToSubscriptionMap = new HashMap<>();
+        Map <String, Subscription> sidToSubscriptionMap = azureModel.createSidToSubscriptionMap();
         for (Subscription s : sl) {
             sidToSubscriptionMap.put(s.subscriptionId(), s);
         }
+        azureModel.setSidToSubscriptionMap(sidToSubscriptionMap);
 
-        AzureModel azureModel = AzureModel.getInstance();
 
         Map<SubscriptionDetail, List<Location>> sdlocMap = azureModel.createSubscriptionToRegionMap();
         Map<SubscriptionDetail, List<ResourceGroup>> sdrgMap = azureModel.createSubscriptionToResourceGroupMap();
