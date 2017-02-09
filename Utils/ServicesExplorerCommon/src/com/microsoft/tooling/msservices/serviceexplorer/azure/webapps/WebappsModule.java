@@ -60,7 +60,7 @@ public class WebappsModule extends RefreshableNode {
 
 			for (ResourceGroup rg : srgMap.get(sd)) {
 				for (WebApp webApp : rgwaMap.get(rg)) {
-						addChildNode(new WebappNode(this, sd.getSubscriptionId(), webApp,
+						addChildNode(new WebappNode(this, sd.getSubscriptionId(), webApp, rg,
 								RUN_STATUS.equalsIgnoreCase(webApp.inner().state()) ? WEB_RUN_ICON : WEB_STOP_ICON));
 				}
 			}

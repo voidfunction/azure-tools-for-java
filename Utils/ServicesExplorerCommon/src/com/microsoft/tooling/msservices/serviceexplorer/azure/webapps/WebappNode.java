@@ -24,8 +24,10 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure.webapps;
 import java.util.List;
 
 import com.microsoft.azure.management.appservice.WebApp;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.*;
@@ -39,12 +41,14 @@ public class WebappNode extends Node {
 	private static final String WEB_STOP_ICON = "stopWebsite.png";
 	private static final String RUN_STATUS = "Running";
 	private WebApp webApp;
+	private ResourceGroup resourceGroup;
 	private final String subscriptionId;
 
-	public WebappNode(WebappsModule parent, String subscriptionId, WebApp webApp, String icon) {
+	public WebappNode(WebappsModule parent, String subscriptionId, WebApp webApp, ResourceGroup resourceGroup, String icon) {
 		super(webApp.name(), webApp.name(), parent, icon, true);
 		this.subscriptionId = subscriptionId;
 		this.webApp = webApp;
+		this.resourceGroup = resourceGroup;
 
 		loadActions();
 	}
@@ -121,6 +125,8 @@ public class WebappNode extends Node {
 					return;
 				}
 				azureManager.getAzure(subscriptionId).webApps().deleteByGroup(webApp.inner().resourceGroup(), webApp.name());
+				AzureModelController.removeWebAppFromExistingResourceGroup(resourceGroup, webApp);
+
 				DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 					@Override
 					public void run() {

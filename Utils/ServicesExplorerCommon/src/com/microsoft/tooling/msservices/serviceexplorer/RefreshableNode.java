@@ -64,7 +64,7 @@ public abstract class RefreshableNode extends Node {
         try {
             refreshItems();
             future.set(getChildNodes());
-        } catch (AzureCmdException e) {
+        } catch (Exception e) {
             future.setException(e);
         } finally {
             setLoading(false);
