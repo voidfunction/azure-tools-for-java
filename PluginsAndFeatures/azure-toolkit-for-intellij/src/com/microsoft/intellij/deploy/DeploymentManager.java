@@ -389,7 +389,6 @@ public final class DeploymentManager {
         arg.setDeployMessage(String.format(message, args));
         arg.setDeployCompleteness(progress);
         arg.setStartTime(startDate);
-        arg.setStatus(inprogress);
         AzurePlugin.fireDeploymentEvent(arg);
     }
 
