@@ -40,7 +40,6 @@ public class DeploymentEventArgs extends EventObject {
 	private String deployMessage;
 	private int deployCompleteness;
 	private Date startTime;
-	private OperationStatus status;
 	private String deploymentURL;
 
 	public String getDeploymentURL() {
@@ -96,19 +95,5 @@ public class DeploymentEventArgs extends EventObject {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	/**
-	 * @return the status
-	 */
-	public OperationStatus getStatus() {
-		return status;
-	}
-
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(OperationStatus status) {
-		this.status = status;
 	}
 }

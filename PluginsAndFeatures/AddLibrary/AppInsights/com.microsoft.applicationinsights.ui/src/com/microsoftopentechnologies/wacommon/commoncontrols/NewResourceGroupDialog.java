@@ -44,12 +44,11 @@ import org.eclipse.swt.widgets.Text;
 
 import com.microsoft.azure.management.resources.ResourceGroup;
 //import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.vm.Location;
 import com.microsoftopentechnologies.wacommon.Activator;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 /**
  * Class creates new resource group.
  */
@@ -66,7 +65,11 @@ public class NewResourceGroupDialog extends TitleAreaDialog {
 	public NewResourceGroupDialog(Shell parentShell, String subscription) {
 		super(parentShell);
 		this.subscription = subscription;
-		manager = AzureManagerImpl.getManager();
+		AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+        // not signed in
+        if (azureManager == null) {
+            return;
+        }
 	}
 
 	@Override
