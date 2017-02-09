@@ -12,5 +12,6 @@
     <orderEntry type="library" name=".cspack" level="project" />
     <orderEntry type="library" name="dependencies" level="project" />
     <orderEntry type="library" name="com.microsoft.azuretools:azure-explorer-common:0.0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="com.microsoft.azuretools:auth-manage:0.0.1-SNAPSHOT" level="project" />
   </component>
 </module>

@@ -19,8 +19,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.tooling.msservices.helpers.azure;
+package com.microsoft.azure.hdinsight.sdk.common;
 
 public interface RequestCallback<T> {
-    T execute() throws Throwable;
+    T execute(String accessToken) throws Throwable;
 }

@@ -24,6 +24,7 @@ package com.microsoft.azure.hdinsight.sdk.cluster;
 
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.Subscription;
 
@@ -50,7 +51,7 @@ public interface IClusterDetail {
 
     String getVersion();
 
-    Subscription getSubscription();
+    SubscriptionDetail getSubscription();
 
     int getDataNodes();
 
