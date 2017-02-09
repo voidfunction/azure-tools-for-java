@@ -24,6 +24,7 @@ package com.microsoft.azure.hdinsight.sdk.cluster;
 import com.microsoft.azure.hdinsight.sdk.common.CommonConstant;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.Subscription;
 
@@ -44,7 +45,7 @@ public class ClusterDetail implements IClusterDetail {
     private final String ResourceGroupStartTag = "resourceGroups/";
     private final String ResourceGroupEndTag = "/providers/";
 
-    private Subscription subscription;
+    private SubscriptionDetail subscription;
     private ClusterRawInfo clusterRawInfo;
 
     private int dataNodes;
@@ -55,7 +56,7 @@ public class ClusterDetail implements IClusterDetail {
 
     private boolean isConfigInfoAvailable = false;
 
-    public ClusterDetail(Subscription paramSubscription, ClusterRawInfo paramClusterRawInfo){
+    public ClusterDetail(SubscriptionDetail paramSubscription, ClusterRawInfo paramClusterRawInfo){
         this.subscription = paramSubscription;
         this.clusterRawInfo = paramClusterRawInfo;
         ExtractInfoFromComputeProfile();
@@ -135,7 +136,7 @@ public class ClusterDetail implements IClusterDetail {
         return clusterProperties == null ? null : clusterProperties.getClusterVersion();
     }
 
-    public Subscription getSubscription(){
+    public SubscriptionDetail getSubscription(){
         return subscription;
     }
 

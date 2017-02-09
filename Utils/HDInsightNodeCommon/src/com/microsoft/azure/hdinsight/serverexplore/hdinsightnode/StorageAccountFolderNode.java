@@ -25,17 +25,14 @@ import com.microsoft.azure.hdinsight.common.CommonConst;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.serviceexplorer.EventHelper;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureRefreshableNode;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageNode;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.asm.StorageNode;
 
 import java.util.List;
 
-public class StorageAccountFolderNode extends AzureRefreshableNode {
+public class StorageAccountFolderNode extends RefreshableNode {
     private static final String STORAGE_ACCOUNT_FOLDER_MODULE_ID = StorageAccountFolderNode.class.getName();
     private static final String STORAGE_ACCOUNT_NAME = "Storage Accounts";
     private static final String ICON_PATH = CommonConst.StorageAccountFoldIConPath;
@@ -48,7 +45,7 @@ public class StorageAccountFolderNode extends AzureRefreshableNode {
     }
 
     @Override
-    protected void refresh(@NotNull EventHelper.EventStateHandle eventState)
+    protected void refreshItems()
             throws AzureCmdException {
         removeAllChildNodes();
         if (clusterDetail != null && !clusterDetail.isEmulator()) {
