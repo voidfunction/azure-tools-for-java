@@ -383,8 +383,9 @@ public class PluginUtil {
 		return shell;
 	}
 
-	/*public static void createSubscriptionTelemetryEvent(List<Subscription> oldSubList, String eventName) {
-		try {
+	// TODO
+	public static void createSubscriptionTelemetryEvent(List<Subscription> oldSubList, String eventName) {
+		/*try {
 			List<Subscription> newSubList = AzureManagerImpl.getManager().getFullSubscriptionList();
 			if (newSubList != null && newSubList.size() > 0) {
 				for (Subscription sub : newSubList) {
@@ -399,8 +400,8 @@ public class PluginUtil {
 			}
 		} catch (AzureCmdException e) {
 			Activator.getDefault().log(e.getMessage(), e);
-		}
-	}*/
+		}*/
+	}
 
 	/**
 	 * This returns the resource has a file.

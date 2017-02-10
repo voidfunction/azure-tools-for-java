@@ -454,7 +454,6 @@ public final class DeploymentManager {
 		arg.setDeployMessage(String.format(message, args));
 		arg.setDeployCompleteness(progress);
 		arg.setStartTime(new Date());
-		arg.setStatus(inprogress);
 		com.microsoftopentechnologies.wacommon.Activator.getDefault().fireDeploymentEvent(arg);
 	}
 
