@@ -44,6 +44,8 @@ public class Messages extends NLS {
 	public static String HDInsightExplorerStorageAccountExpand;
 	public static String HDInsightExplorerContainerOpen;
 	public static String HDInsightFeatureEnabled;
+	public static String HDInsightDownloadSparkLibrary;
+	public static String HDInsightJobViewOpenAction;
     /**
      * Constructor.
      */

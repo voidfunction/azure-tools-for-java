@@ -21,17 +21,24 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.webapps;
 
+import com.microsoft.azure.management.appservice.WebApp;
+import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
+
+import java.util.List;
+import java.util.Map;
 
 public class WebappsModule extends RefreshableNode {
 	private static final String WEBAPPS_MODULE_ID = WebappsModule.class.getName();
 	private static final String WEB_RUN_ICON = "website.png";
 	private static final String WEB_STOP_ICON = "stopWebsite.png";
 	private static final String BASE_MODULE_NAME = "Web Apps";
-	String runStatus = "Running";
+	private static final String RUN_STATUS = "Running";
 
 	public WebappsModule(Node parent) {
 		super(WEBAPPS_MODULE_ID, BASE_MODULE_NAME, parent, WEB_RUN_ICON);
@@ -43,31 +50,22 @@ public class WebappsModule extends RefreshableNode {
 	}
 
 	@Override
-	protected void refreshItems()
-			throws AzureCmdException {
+	protected void refreshItems() throws AzureCmdException {
 		removeAllChildNodes();
-		//todo
-//		AzureManager manager = AzureManagerImpl.getManager(getProject());
-//		List<Subscription> subscriptionList = manager.getSubscriptionList();
-//		for (Subscription subscription : subscriptionList) {
-//			Map<WebSite, WebSiteConfiguration> webSiteConfigMapTemp = new HashMap<WebSite, WebSiteConfiguration>();
-//			if (AzureModule.webSiteConfigMap == null) {
-//				// map null means load data and don't use cached data
-//				for (final String webSpace : manager.getResourceGroupNames(subscription.getId())) {
-//					List<WebSite> webapps = manager.getWebSites(subscription.getId(), webSpace);
-//					for (WebSite webapp : webapps) {
-//						WebSiteConfiguration webSiteConfiguration = manager.
-//								getWebSiteConfiguration(webapp.getSubscriptionId(),
-//										webapp.getWebSpaceName(), webapp.getName());
-//						webSiteConfigMapTemp.put(webapp, webSiteConfiguration);
-//					}
-//				}
-//				// save preferences
-//				DefaultLoader.getUIHelper().saveWebAppPreferences(getProject(), webSiteConfigMapTemp);
-//			} else {
-//				webSiteConfigMapTemp = AzureModule.webSiteConfigMap;
-//			}
-//
+		Map<SubscriptionDetail, List<ResourceGroup>> srgMap = AzureModel.getInstance().getSubscriptionToResourceGroupMap();
+		Map<ResourceGroup, List<WebApp>> rgwaMap = AzureModel.getInstance().getResourceGroupToWebAppMap();
+
+		for (SubscriptionDetail sd : srgMap.keySet()) {
+			if (!sd.isSelected()) continue;
+
+			for (ResourceGroup rg : srgMap.get(sd)) {
+				for (WebApp webApp : rgwaMap.get(rg)) {
+						addChildNode(new WebappNode(this, sd.getSubscriptionId(), webApp, rg,
+								RUN_STATUS.equalsIgnoreCase(webApp.inner().state()) ? WEB_RUN_ICON : WEB_STOP_ICON));
+				}
+			}
+		}
+
 //			if (webSiteConfigMapTemp != null && !webSiteConfigMapTemp.isEmpty()) {
 //				List<WebSite> webSiteList = new ArrayList<WebSite>(webSiteConfigMapTemp.keySet());
 //				Collections.sort(webSiteList, new Comparator<WebSite>() {
@@ -85,6 +83,5 @@ public class WebappsModule extends RefreshableNode {
 //				}
 //			}
 //		}
-//		AzureModule.webSiteConfigMap = null;
 	}
 }

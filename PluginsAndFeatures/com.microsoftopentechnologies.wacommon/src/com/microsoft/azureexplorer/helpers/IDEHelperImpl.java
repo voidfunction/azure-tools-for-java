@@ -33,14 +33,13 @@ import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 
 public class IDEHelperImpl implements IDEHelper {
-
+    public static final String DEFAULT_PROJECT = "DEFAULT_PROJECT";
     @Override
     public void runInBackground(Object project, String name, boolean canBeCancelled, boolean isIndeterminate, final String indicatorText, final Runnable runnable) {
         Job job = new Job(name) {
@@ -185,7 +184,7 @@ public class IDEHelperImpl implements IDEHelper {
 	}
 
     public Object getCurrentProject() {
-        return AzureManagerImpl.DEFAULT_PROJECT;
+        return DEFAULT_PROJECT;
     }
 
     @Override

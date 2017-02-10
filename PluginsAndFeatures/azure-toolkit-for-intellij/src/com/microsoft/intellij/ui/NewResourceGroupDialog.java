@@ -23,13 +23,12 @@ package com.microsoft.intellij.ui;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TitlePanel;
-//import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
+import com.microsoft.azure.management.resources.Location;
+import com.microsoft.azure.management.resources.Subscription;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.vm.Location;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
@@ -45,15 +44,22 @@ public class NewResourceGroupDialog extends DialogWrapper {
     private JTextField txtName;
     private JComboBox comboSub;
     private JComboBox comboReg;
-    String subscription;
-    Map<String, String> subMap = new HashMap<String, String>();
-//    static ResourceGroupExtended group;
-    AzureManager manager;
+    private Subscription subscription;
+    private Map<String, Subscription> subMap = new HashMap<String, Subscription>();
+    private AzureManager azureManager;
 
-    public NewResourceGroupDialog(String subscription) {
+    public NewResourceGroupDialog(Subscription subscription) {
         super(true);
-        manager = AzureManagerImpl.getManager();
         this.subscription = subscription;
+        try {
+            azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null) {
+                AzurePlugin.log("Not signed in");
+            }
+        } catch (Exception ex) {
+            AzurePlugin.log("Not signed in", ex);
+        }
         setTitle(message("newResGrpTtl"));
         comboSub.addItemListener(new ItemListener() {
             @Override
@@ -73,32 +79,29 @@ public class NewResourceGroupDialog extends DialogWrapper {
 
     private void populateValues() {
         try {
-            if (manager != null) {
-                List<Subscription> subList = manager.getSubscriptionList();
-                // check at least single subscription is associated with the account
-                if (subList.size() > 0) {
-                    for (Subscription sub : subList) {
-                        subMap.put(sub.getId(), sub.getName());
-                    }
-                    Collection<String> values = subMap.values();
-                    String[] subNameArray = values.toArray(new String[values.size()]);
-                    comboSub.setModel(new DefaultComboBoxModel(subNameArray));
+            List<Subscription> subscriptions = azureManager.getSubscriptions();
+            // check at least single subscription is associated with the account
+            if (subscriptions.size() > 0) {
+                for (Subscription sub : subscriptions) {
+                    subMap.put(sub.subscriptionId(), sub);
+                }
+                comboSub.setModel(new DefaultComboBoxModel(subMap.values().toArray()));
 
 					/*
-					 * If subscription name is there,
+                     * If subscription name is there,
 					 * dialog invoked from application insights/web sites dialog
 					 * hence disable subscription combo.
 					 */
-                    if (subscription != null && !subscription.isEmpty()) {
-                        comboSub.setEnabled(false);
-                        comboSub.setSelectedItem(subscription);
-                    } else {
-                        comboSub.setSelectedItem(subNameArray[0]);
-                    }
-                    // Get list of locations available for subscription.
-                    populateLocations();
+                if (subscription != null) {
+                    comboSub.setEnabled(false);
+                    comboSub.setSelectedItem(subscription);
+                } else {
+                    comboSub.setSelectedIndex(0);
                 }
+                // Get list of locations available for subscription.
+                populateLocations();
             }
+
         } catch (Exception ex) {
             AzurePlugin.log(message("getValuesErrMsg"), ex);
         }
@@ -106,10 +109,10 @@ public class NewResourceGroupDialog extends DialogWrapper {
 
     private void populateLocations() {
         try {
-            List<Location> locationList = manager.getLocations(findKeyAsPerValue((String) comboSub.getSelectedItem()));
+            List<Location> locationList = ((Subscription) comboSub.getSelectedItem()).listLocations();
             List<String> locationNameList = new ArrayList<String>();
             for (Location location : locationList) {
-                locationNameList.add(location.getName());
+                locationNameList.add(location.displayName());
             }
             String[] regionArray = locationNameList.toArray(new String[locationNameList.size()]);
             comboReg.setModel(new DefaultComboBoxModel(regionArray));
@@ -128,17 +131,6 @@ public class NewResourceGroupDialog extends DialogWrapper {
         return new TitlePanel(message("newResGrpTtl"), message("newResGrpMsg"));
     }
 
-    private String findKeyAsPerValue(String subName) {
-        String key = "";
-        for (Map.Entry<String, String> entry : subMap.entrySet()) {
-            if (entry.getValue().equalsIgnoreCase(subName)) {
-                key = entry.getKey();
-                break;
-            }
-        }
-        return key;
-    }
-
     @Override
     protected void doOKAction() {
         boolean isValid = false;
@@ -151,6 +143,7 @@ public class NewResourceGroupDialog extends DialogWrapper {
                 PluginUtil.displayErrorDialog(message("err"), message("nameEmptyMsg"));
             }
         } else {
+
             throw new NotImplementedException();
 /*
             try {

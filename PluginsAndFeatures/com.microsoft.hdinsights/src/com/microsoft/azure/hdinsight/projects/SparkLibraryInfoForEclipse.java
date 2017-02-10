@@ -20,8 +20,11 @@
 package com.microsoft.azure.hdinsight.projects;
 
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
+import com.microsoft.auth.StringUtils;
 import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.tooling.msservices.helpers.StringHelper;
 
 public class SparkLibraryInfoForEclipse {
     private String localPath;
@@ -31,15 +34,27 @@ public class SparkLibraryInfoForEclipse {
     private static final String TITLE_LABEL = "Implementation-Title";
     private static final String VERSION_LABEL = "Implementation-Version";
 
-    public SparkLibraryInfoForEclipse(@NotNull String path) throws Exception{
+	public SparkLibraryInfoForEclipse(@NotNull String path) throws Exception{
         if(path.endsWith("!/")) {
             path = path.substring(0, path.length() - 2);
         }
 
         this.localPath = path.toLowerCase();
         JarFile jarFile = new JarFile(this.localPath);
-        title = jarFile.getManifest().getMainAttributes().getValue(TITLE_LABEL);
-        version = jarFile.getManifest().getMainAttributes().getValue(VERSION_LABEL);
+        Manifest mainFest = jarFile.getManifest();
+        if(mainFest != null) {
+            title = jarFile.getManifest().getMainAttributes().getValue(TITLE_LABEL);
+            version = jarFile.getManifest().getMainAttributes().getValue(VERSION_LABEL);
+        }
+        
+        if(StringHelper.isNullOrWhiteSpace(title)) {
+        	title = "unkown";
+        }
+        
+        if(StringHelper.isNullOrWhiteSpace(version)) {
+        	version = "unkown";
+        }
+        
         jarFile.close();
     }
 

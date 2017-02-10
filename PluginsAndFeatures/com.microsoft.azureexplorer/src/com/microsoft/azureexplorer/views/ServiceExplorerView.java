@@ -58,7 +58,6 @@ import org.eclipse.ui.part.ViewPart;
 import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangeListener;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangedEvent;
 import com.microsoft.tooling.msservices.helpers.collections.ObservableList;
@@ -376,7 +375,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
                 azureModule.load();
             }
         };
-        refreshAction.setToolTipText("Refresh Service List");
+        refreshAction.setToolTipText("Refresh");
 
         manageSubscriptionAction = new Action("Manage Subscriptions", Activator.getImageDescriptor("icons/azure_explorer.png")) {
             public void run() {
@@ -389,19 +388,19 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
         manageSubscriptionAction.setToolTipText("Manage Subscriptions");
         doubleClickAction = new Action() {
             public void run() {
-                ISelection selection = viewer.getSelection();
-                Object obj = ((IStructuredSelection) selection).getFirstElement();
-                viewer.expandToLevel(obj, 1);
-                try {
-                    List<Subscription> subscriptions = AzureManagerImpl.getManager().getFullSubscriptionList();
-                    if ((subscriptions == null || subscriptions.isEmpty()) &&
-                            (((TreeNode) obj).node instanceof StorageModule || ((TreeNode) obj).node instanceof AzureModule)) {
-//                        ManageSubscriptionDialog subscriptionsDialog = new ManageSubscriptionDialog(getSite().getShell(), true, false);
-//                        subscriptionsDialog.open();
-                    }
-                } catch (AzureCmdException e) {
-                    Activator.getDefault().log(e.getMessage(), e);
-                }
+//                ISelection selection = viewer.getSelection();
+//                Object obj = ((IStructuredSelection) selection).getFirstElement();
+//                viewer.expandToLevel(obj, 1);
+//                try {
+//                    List<Subscription> subscriptions = AzureManagerImpl.getManager().getFullSubscriptionList();
+//                    if ((subscriptions == null || subscriptions.isEmpty()) &&
+//                            (((TreeNode) obj).node instanceof StorageModule || ((TreeNode) obj).node instanceof AzureModule)) {
+////                        ManageSubscriptionDialog subscriptionsDialog = new ManageSubscriptionDialog(getSite().getShell(), true, false);
+////                        subscriptionsDialog.open();
+//                    }
+//                } catch (AzureCmdException e) {
+//                    Activator.getDefault().log(e.getMessage(), e);
+//                }
             }
         };
     }

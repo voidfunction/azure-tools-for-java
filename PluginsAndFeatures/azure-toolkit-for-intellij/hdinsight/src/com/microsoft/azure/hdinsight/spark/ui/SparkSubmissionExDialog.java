@@ -75,6 +75,8 @@ public class SparkSubmissionExDialog extends JDialog {
     private JRadioButton localArtifactRadioButton;
     private JButton buttonSubmit;
 
+    private static final String REFRESH_BUTTON_PATH = "/icons/refresh.png";
+
     private final JLabel[] errorMessageLabels = new JLabel[5];
     private enum ErrorMessageLabelTag {
         ClusterName,
@@ -118,7 +120,8 @@ public class SparkSubmissionExDialog extends JDialog {
 
     //region UI Constructor
     private void initializeComponents() {
-        setIconImage(StreamUtil.getImageResourceFile(CommonConst.ProductIConPath).getImage());
+        Image image = StreamUtil.getImageResourceFile(CommonConst.ProductIConPath).getImage();
+        setIconImage(image);
 
         contentPane = new JPanel();
         setContentPane(contentPane);
@@ -187,7 +190,7 @@ public class SparkSubmissionExDialog extends JDialog {
 
 
         clustersListComboBox = new ComboboxWithBrowseButton();
-        clustersListComboBox.setButtonIcon(StreamUtil.getImageResourceFile(CommonConst.RefreshIConPath));
+        clustersListComboBox.setButtonIcon(StreamUtil.getImageResourceFile(REFRESH_BUTTON_PATH));
         clustersListComboBox.getButton().setToolTipText("Refresh");
         clustersListComboBox.getButton().addActionListener(new ActionListener() {
             @Override

@@ -24,9 +24,6 @@ import java.lang.reflect.Method;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
@@ -44,9 +41,14 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.scalaide.core.SdtConstants;
 import org.scalaide.ui.ScalaImages;
 import org.scalaide.ui.internal.wizards.NewScalaProjectWizardPageOne;
@@ -60,7 +62,8 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 	private Composite sparkLibraryOptionsPanel;
 	private HDInsightScalaPageOne pageOne;
 	private HDInsightScalaPageTwo pageTwo;
-
+	private static boolean canFinish = false;
+	
 	public HDInsightsScalaProjectWizard() {
 		this(new HDInsightScalaPageOne());
 	}
@@ -71,6 +74,7 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 
 	public HDInsightsScalaProjectWizard(HDInsightScalaPageOne page1, HDInsightScalaPageTwo page2) {
 		super(page1, page2);
+		canFinish = false;
 		pageOne = page1;
 		pageTwo = page2;
 		setWindowTitle("New HDInsight Scala Project");
@@ -87,6 +91,11 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 		this.id = parameter.getAttribute("id");
 
 	}
+	
+	@Override
+	public boolean canFinish() {
+		return canFinish && super.canFinish();
+	}
 
 	@Override
 	public boolean performFinish() {
@@ -100,8 +109,18 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 	}
 
 	static class HDInsightScalaPageOne extends NewScalaProjectWizardPageOne {
+		
 		private SparkLibraryOptionsPanel sparkLibraryOptionsPanel;
-
+		
+		@Override
+		public boolean canFlipToNextPage() {
+			final String jarPathString = sparkLibraryOptionsPanel.getSparkLibraryPath();
+			if(StringUtils.isNullOrEmpty(jarPathString)) {
+				return false;
+			}
+			return super.canFlipToNextPage();
+		}
+		
 		@Override
 		public IClasspathEntry[] getDefaultClasspathEntries() {
 			final IClasspathEntry[] entries = super.getDefaultClasspathEntries();
@@ -125,37 +144,62 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 			});
 			return newEntries[0] == null ? entries : newEntries;
 		}
-
+		
 		@Override
 		public void createControl(Composite parent) {
-			final IWorkspace workspace = ResourcesPlugin.getWorkspace();
-			final IWorkspaceRoot root = workspace.getRoot();
+			initializeDialogUnits(parent);
 
-			// display help contents
-			// PlatformUI.getWorkbench().getHelpSystem().setHelp(parent.getShell(),
-			// "com.persistent.winazure.eclipseplugin." +
-			// "windows_azure_project");
+			final Composite composite= new Composite(parent, SWT.NULL);
+			composite.setFont(parent.getFont());
+			composite.setLayout(initGridLayout(new GridLayout(1, false), true));
+			composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
-			// GridLayout gridLayout = new GridLayout();
-			// gridLayout.numColumns = 2;
-			// GridData gridData = new GridData();
-			// gridData.grabExcessHorizontalSpace = true;
-			// Composite container = new Composite(parent, SWT.NONE);
-			//
-			// container.setLayout(gridLayout);mysc
-			// container.setLayoutData(gridData);
+			// create UI elements
+			Control nameControl= createNameControl(composite);
+			nameControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-			super.createControl(parent);
-			Composite container = (Composite) getControl();
-			sparkLibraryOptionsPanel = new SparkLibraryOptionsPanel(container, SWT.NONE);
-			// Text textProjName = new Text(container, SWT.SINGLE | SWT.BORDER);
-			// GridData gridData = new GridData();
-			// gridData.widthHint = 330;
-			// gridData.horizontalAlignment = SWT.FILL;
-			// gridData.grabExcessHorizontalSpace = true;
-			// textProjName.setLayoutData(gridData);
+			Control locationControl= createLocationControl(composite);
+			locationControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-			setControl(container);
+			Control jreControl= createJRESelectionControl(composite);
+			jreControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			Control layoutControl= createProjectLayoutControl(composite);
+			layoutControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			Control sparkControl = createSparkControl(composite);
+			sparkControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			
+			Control workingSetControl= createWorkingSetControl(composite);
+			workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			
+			Control infoControl= createInfoControl(composite);
+			infoControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			setControl(composite);
+		}
+		
+		private Control createSparkControl(Composite composite) {
+			Group sparkGroup = new Group(composite, SWT.NONE);
+			sparkGroup.setFont(composite.getFont());
+			sparkGroup.setText("Spark Library");
+			sparkGroup.setLayout(new GridLayout(1, false));
+			
+			sparkLibraryOptionsPanel = new SparkLibraryOptionsPanel(this, sparkGroup, SWT.NONE);
+			return sparkGroup;
+		}
+		
+		private GridLayout initGridLayout(GridLayout layout, boolean margins) {
+			layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+			layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+			if (margins) {
+				layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+				layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+			} else {
+				layout.marginWidth= 0;
+				layout.marginHeight= 0;
+			}
+			return layout;
 		}
 	}
 
@@ -179,15 +223,15 @@ public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements I
 				Object r = method.invoke(this);
 				((BuildPathsBlock) r).configureJavaProject(newProjectCompliance,
 						new SubProgressMonitor((IProgressMonitor) monitor, 5));
+				canFinish = true;
 			} catch (OperationCanceledException | NoSuchMethodException | SecurityException | IllegalAccessException
 					| IllegalArgumentException | InvocationTargetException ex) {
 				throw new InterruptedException();
 			} finally {
 				((IProgressMonitor) monitor).done();
 			}
-
 		}
-
+		
 		private IProject addHDInsightNature(IProgressMonitor monitor) throws CoreException {
 			if (monitor != null && monitor.isCanceled()) {
 				throw new OperationCanceledException();

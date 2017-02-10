@@ -26,12 +26,12 @@ import com.intellij.openapi.ui.TitlePanel;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.resources.Location;
+import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
@@ -52,13 +52,23 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
     private JComboBox comboGrp;
     private JComboBox comboReg;
     private JButton btnNew;
-    Map<String, String> subMap = new HashMap<String, String>();
-    String currentSub;
+    Map<String, Subscription> subMap = new HashMap<String, Subscription>();
+    private Subscription currentSub;
     static ApplicationInsightsResource resourceToAdd;
+    private AzureManager azureManager;
 
     public ApplicationInsightsNewDialog() {
         super(true);
         setTitle(message("aiErrTtl"));
+        try {
+            azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null) {
+                AzurePlugin.log("Not signed in");
+            }
+        } catch (Exception ex) {
+            AzurePlugin.log("Not signed in", ex);
+        }
         init();
     }
 
@@ -73,19 +83,14 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
         return new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                String newSub = (String) comboSub.getSelectedItem();
+                Subscription newSub = (Subscription) comboSub.getSelectedItem();
                 String prevResGrpVal = (String) comboGrp.getSelectedItem();
-                String key = findKeyAsPerValue(newSub);
-                if (key != null && !key.isEmpty()) {
-                    if (currentSub.equalsIgnoreCase(newSub)) {
-                        populateResourceGroupValues(key, prevResGrpVal);
-                    } else {
-                        populateResourceGroupValues(key, "");
-                    }
-                    currentSub = newSub;
+                if (currentSub.equals(newSub)) {
+                    populateResourceGroupValues(currentSub.subscriptionId(), prevResGrpVal);
                 } else {
-                    AzurePlugin.log(message("getSubIdErrMsg"));
+                    populateResourceGroupValues(currentSub.subscriptionId(), "");
                 }
+                currentSub = newSub;
             }
         };
     }
@@ -94,8 +99,8 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String subTxt = (String) comboSub.getSelectedItem();
-                NewResourceGroupDialog newResourceGroupDialog = new NewResourceGroupDialog(subTxt);
+                Subscription sub = (Subscription) comboSub.getSelectedItem();
+                NewResourceGroupDialog newResourceGroupDialog = new NewResourceGroupDialog(sub);
                 newResourceGroupDialog.show();
                 // populate data in storage registry dialog
                 if (newResourceGroupDialog.isOK()) {
@@ -113,29 +118,22 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
 
     private void populateValues() {
         try {
-            AzureManager manager = AzureManagerImpl.getManager();
-            List<Subscription> subList = manager.getSubscriptionList();
+            List<Subscription> subList = azureManager.getSubscriptions();
             // check at least single subscription is associated with the account
             if (subList.size() > 0) {
                 for (Subscription sub : subList) {
-                    subMap.put(sub.getId(), sub.getName());
+                    subMap.put(sub.subscriptionId(), sub);
                 }
-                Collection<String> values = subMap.values();
-                String[] subNameArray = values.toArray(new String[values.size()]);
-                Set<String> keySet = subMap.keySet();
-                String[] subKeyArray = keySet.toArray(new String[keySet.size()]);
+                comboSub.setModel(new DefaultComboBoxModel(subList.toArray()));
+                comboSub.setSelectedIndex(0);
+                currentSub = subList.get(0);
 
-                comboSub.setModel(new DefaultComboBoxModel(subNameArray));
-                comboSub.setSelectedItem(subNameArray[0]);
-                currentSub = subNameArray[0];
-
-                populateResourceGroupValues(subKeyArray[0], "");
+                populateResourceGroupValues(currentSub.subscriptionId(), "");
                 btnNew.setEnabled(true);
 
-                List<String> regionList = manager.getLocationsForApplicationInsights(subKeyArray[0]);
-                String[] regionArray = regionList.toArray(new String[regionList.size()]);
-                comboReg.setModel(new DefaultComboBoxModel(regionArray));
-                comboReg.setSelectedItem(regionArray[0]);
+                List<Location> regionList =currentSub.listLocations();
+                comboReg.setModel(new DefaultComboBoxModel(regionList.toArray()));
+                comboReg.setSelectedIndex(0);
             } else {
                 btnNew.setEnabled(false);
             }
@@ -144,10 +142,10 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
         }
     }
 
-    private void populateResourceGroupValues(String subId, String valtoSet) {
+    private void populateResourceGroupValues(String subscriptionId, String valtoSet) {
         try {
             com.microsoft.azuretools.sdkmanage.AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-            Azure azure = azureManager.getAzure(subId);
+            Azure azure = azureManager.getAzure(subscriptionId);
             List<com.microsoft.azure.management.resources.ResourceGroup> groups = azure.resourceGroups().list();
             List<String> groupStringList = groups.stream().map(com.microsoft.azure.management.resources.ResourceGroup::name).collect(Collectors.toList());
             if (groupStringList.size() > 0) {
@@ -174,17 +172,6 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
         return new TitlePanel(message("newKeyTtl"), message("newKeyMsg"));
     }
 
-    private String findKeyAsPerValue(String subName) {
-        String key = "";
-        for (Map.Entry<String, String> entry : subMap.entrySet()) {
-            if (entry.getValue().equalsIgnoreCase(subName)) {
-                key = entry.getKey();
-                break;
-            }
-        }
-        return key;
-    }
-
     @Override
     protected void doOKAction() {
         boolean isValid = false;
@@ -201,12 +188,13 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
             }
         } else {
             try {
-                String subId = findKeyAsPerValue((String) comboSub.getSelectedItem());
-                Resource resource = AzureManagerImpl.getManager().createApplicationInsightsResource(subId, (String) comboGrp.getSelectedItem(),
-                        txtName.getText(), (String) comboReg.getSelectedItem());
-                resourceToAdd = new ApplicationInsightsResource(resource.getName(), resource.getInstrumentationKey(),
-                        (String) comboSub.getSelectedItem(), subId, resource.getLocation(),
-                        resource.getResourceGroup(), true);
+//                String subId = findKeyAsPerValue((String) comboSub.getSelectedItem());
+                // TODO
+//                Resource resource = AzureManagerImpl.getManager().createApplicationInsightsResource(subId, (String) comboGrp.getSelectedItem(),
+//                        txtName.getText(), (String) comboReg.getSelectedItem());
+//                resourceToAdd = new ApplicationInsightsResource(resource.getName(), resource.getInstrumentationKey(),
+//                        (String) comboSub.getSelectedItem(), subId, resource.getLocation(),
+//                        resource.getResourceGroup(), true);
                 isValid = true;
             } catch (Exception ex) {
                 PluginUtil.displayErrorDialogAndLog(message("aiErrTtl"), message("resCreateErrMsg"), ex);

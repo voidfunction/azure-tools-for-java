@@ -50,7 +50,8 @@ public class FxClassLoader {
 		
 		if(isJavaFxLoaded) {
 			try {
-				method.invoke(null, composite, url, new JobUtils());
+				// new JobUtils() case crash on Eclipse under Mac&Ubuntu, so we just pass empty string to JavaFx.
+				method.invoke(null, composite, url, "");
 			} catch (Exception e) {
 				Activator.getDefault().log("HDInsight: load JavaFx error", e);
 			}
