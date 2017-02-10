@@ -11,9 +11,11 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 
+import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azureexplorer.hdinsight.*;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 
 public class JobViewEditor extends EditorPart {
 
@@ -22,13 +24,16 @@ public class JobViewEditor extends EditorPart {
 
 	@Override
 	public void doSave(IProgressMonitor iProgressMonitor) {
+		AppInsightsCustomEvent.create("HDInsight.Spark.CloseJobviewPage", null);
 	}
 
 	@Override
 	public void doSaveAs() {
+		AppInsightsCustomEvent.create("HDInsight.Spark.CloseJobviewPage", null);
 	}
 
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+		AppInsightsCustomEvent.create("HDInsight.Spark.OpenJobviewPage", null);
 		setSite(site);
 		setInput(input);
 		clusterDetail = ((JobViewInput) input).getClusterDetail();
@@ -49,7 +54,16 @@ public class JobViewEditor extends EditorPart {
 	@Override
 	public void createPartControl(Composite composite) {
 		composite.setLayout(new FillLayout());
-		final String indexPath = PluginUtil.pluginFolder + "/com.microsoft.azure.hdinsight" + "/hdinsight/job/html/index.html";
+		final String indexPath = PluginUtil.pluginFolder + "/com.microsoft.azure.hdinsight"
+				+ "/hdinsight/job/html/index.html";
+		File indexFile = new File(indexPath);
+		if(indexFile.exists()) {
+			final String queryString = "?projectid=" + uuid + "&engintype=javafx&sourcetype=eclipse&clustername=" + clusterDetail.getName();
+			final String webUrl = "file:///" + indexPath.replace("\\", "/") + queryString;
+			FxClassLoader.loadJavaFxForJobView(composite, webUrl);
+		} else {
+			Activator.getDefault().log("HDInsight Job View index page not exist!", null);
+		}
 
 		final String queryString = "?projectid=" + uuid + "&engintype=javafx";
 		final String webUrl = "file:///" + indexPath.replace("\\", "/") + queryString;

@@ -56,7 +56,7 @@ public class JobViewFxUtil {
                                                     Worker.State oldState, Worker.State newState) {
                                     if (newState == Worker.State.SUCCEEDED) {
                                         JSObject win = (JSObject) webEngine.executeScript("window");
-                                        win.setMember("JobUtils", jobUtils);
+                                        win.setMember("JobUtils", new JobUtilsForEclipse());
                                     }
                                 }
                             }

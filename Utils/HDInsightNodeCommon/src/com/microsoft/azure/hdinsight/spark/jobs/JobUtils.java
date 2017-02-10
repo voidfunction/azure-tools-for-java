@@ -35,6 +35,8 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
+import javafx.application.Application;
+import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 
@@ -102,7 +104,7 @@ public class JobUtils {
         } else {
             yarnHistoryUrl = String.format(yarnUIHisotryFormat, requestDetail.getClusterDetail().getName(), applicationId);
         }
-        openFileExplorer(yarnHistoryUrl);
+        openDefaultBrowser(yarnHistoryUrl);
     }
 
     public void openSparkUIHistory(String applicationId) {
@@ -114,27 +116,28 @@ public class JobUtils {
             sparkHistoryUrl = String.format(sparkUIHistoryFormat, requestDetail.getClusterDetail().getName(), applicationId);
         }
 
-        openFileExplorer(sparkHistoryUrl);
+        openDefaultBrowser(sparkHistoryUrl);
     }
 
-    public void openFileExplorer(@NotNull String url) {
+    public void openDefaultBrowser(@NotNull final String url) {
+        Application application = new Application() {
+            @Override
+            public void start(Stage primaryStage) throws Exception {
+                getHostServices().showDocument(url);
+            }
+        };
+
         try {
-            URI uri = new URI(url);
-            openFileExplorer(uri);
-        }catch (URISyntaxException e) {
-            DefaultLoader.getUIHelper().showError(e.getMessage(), e.getReason());
+            application.start(null);
+        }catch (Exception e) {
+            DefaultLoader.getUIHelper().showError("Failed to open browser", "Open browser Error");
         }
     }
 
     public void openFileExplorer(URI uri) {
-        if (Desktop.isDesktopSupported()) {
-            try {
-                Desktop.getDesktop().browse(uri);
-            } catch (Exception browseException) {
-                DefaultLoader.getUIHelper().showError("Failed to open browser", "Open browser Error");
-            }
-        }
+        openDefaultBrowser(uri.toString());
     }
+
     public void openLivyLog(String applicationId) {
         openFileExplorer(getLivyLogPath(HDInsightLoader.getHDInsightHelper().getPluginRootPath(), applicationId));
     }

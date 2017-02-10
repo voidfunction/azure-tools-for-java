@@ -76,7 +76,7 @@ public class AddNewEmulatorForm extends DialogWrapper {
         this.project = project;
         this.hdInsightModule = hdInsightModule;
 
-        this.setTitle("Link A New Emulator");
+        this.setTitle("Link a New Emulator");
 
         errorMessageField.setBackground(this.addNewEmulatorPanel.getBackground());
         errorMessageField.setBorder(BorderFactory.createEmptyBorder());

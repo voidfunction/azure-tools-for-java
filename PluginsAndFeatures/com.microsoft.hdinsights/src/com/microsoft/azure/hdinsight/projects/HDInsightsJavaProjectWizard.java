@@ -44,12 +44,15 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
 import com.microsoft.auth.StringUtils;
@@ -95,6 +98,16 @@ public class HDInsightsJavaProjectWizard extends JavaProjectWizard implements IE
 //	        setPageComplete(true);
 		}
 		
+		
+		@Override
+		public boolean canFlipToNextPage() {
+			final String jarPathString = sparkLibraryOptionsPanel.getSparkLibraryPath();
+			if(StringUtils.isNullOrEmpty(jarPathString)) {
+				return false;
+			}
+			return super.canFlipToNextPage();
+		}
+
 		@Override
 		public IClasspathEntry[] getDefaultClasspathEntries() {
 			final IClasspathEntry[] entries = super.getDefaultClasspathEntries();
@@ -119,34 +132,61 @@ public class HDInsightsJavaProjectWizard extends JavaProjectWizard implements IE
 		
 		@Override
 		public void createControl(Composite parent) {
-			final IWorkspace workspace = ResourcesPlugin.getWorkspace();
-	        final IWorkspaceRoot root = workspace.getRoot();
+			initializeDialogUnits(parent);
 
-	        //display help contents
-//	        PlatformUI.getWorkbench().getHelpSystem().setHelp(parent.getShell(),
-//	                "com.persistent.winazure.eclipseplugin." +
-//	                "windows_azure_project");
+			final Composite composite= new Composite(parent, SWT.NULL);
+			composite.setFont(parent.getFont());
+			composite.setLayout(initGridLayout(new GridLayout(1, false), true));
+			composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
-//	        GridLayout gridLayout = new GridLayout();
-//	        gridLayout.numColumns = 2;
-//	        GridData gridData = new GridData();
-//	        gridData.grabExcessHorizontalSpace = true;
-//	        Composite container = new Composite(parent, SWT.NONE);
-	//
-//	        container.setLayout(gridLayout);
-//	        container.setLayoutData(gridData);
+			// create UI elements
+			Control nameControl= createNameControl(composite);
+			nameControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-	        super.createControl(parent);
-	        Composite container = (Composite) getControl();
-	        sparkLibraryOptionsPanel = new SparkLibraryOptionsPanel(container, SWT.NONE);
-//	        Text textProjName = new Text(container, SWT.SINGLE | SWT.BORDER);
-//	        GridData gridData = new GridData();
-//	        gridData.widthHint = 330;
-//	        gridData.horizontalAlignment = SWT.FILL;
-//	        gridData.grabExcessHorizontalSpace = true;
-//	        textProjName.setLayoutData(gridData);
+			Control locationControl= createLocationControl(composite);
+			locationControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-	        setControl(container);
+			Control jreControl= createJRESelectionControl(composite);
+			jreControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			Control layoutControl= createProjectLayoutControl(composite);
+			layoutControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			Control sparkControl = createSparkControl(composite);
+			sparkControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			
+			Control workingSetControl= createWorkingSetControl(composite);
+			workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			
+
+			
+			Control infoControl= createInfoControl(composite);
+			infoControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			setControl(composite);
+		}
+		
+		private Control createSparkControl(Composite composite) {
+			Group sparkGroup = new Group(composite, SWT.NONE);
+			sparkGroup.setFont(composite.getFont());
+			sparkGroup.setText("Spark Library");
+			sparkGroup.setLayout(new GridLayout(1, false));
+			
+			sparkLibraryOptionsPanel = new SparkLibraryOptionsPanel(this, sparkGroup, SWT.NONE);
+			return sparkGroup;
+		}
+		
+		private GridLayout initGridLayout(GridLayout layout, boolean margins) {
+			layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+			layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+			if (margins) {
+				layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+				layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+			} else {
+				layout.marginWidth= 0;
+				layout.marginHeight= 0;
+			}
+			return layout;
 		}
 	}
 	

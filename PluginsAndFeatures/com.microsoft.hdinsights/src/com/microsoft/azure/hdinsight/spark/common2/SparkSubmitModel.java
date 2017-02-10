@@ -47,7 +47,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -210,11 +212,15 @@ public class SparkSubmitModel {
 
 		@Override
 		protected IStatus run(final IProgressMonitor monitor) {
+			monitor.beginTask("Begin building task", IProgressMonitor.UNKNOWN);
 			try {
-				project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
+				// build will new thread to run and we have no better way to get status of the thread
+				// project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
+				
 				super.setName("");
 				final JarPackageData jarPackageData = new JarPackageData();
-				jarPackageData.setElements(new Object[] { project });
+				jarPackageData.setElements(new Object[]{project});
+				
 				jarPackageData.setExportClassFiles(true);
 				jarPackageData.setBuildIfNeeded(true);
 				jarPackageData.setExportOutputFolders(true);
@@ -227,8 +233,7 @@ public class SparkSubmitModel {
 				jarPackageData.setOverwrite(true);
 				String dest = String.format("%s%s%s%s", project.getLocation(), File.separator, project.getName(), ".jar");
 				IPath destPath = new Path(dest);
-				// IFile cdkProjectJarFile =
-				// project.getFile(cdkProjectJarLocation.lastSegment());
+				
 				jarPackageData.setJarLocation(destPath);
 				monitor.worked(5);
 				monitor.setTaskName("Creating Jar file...");
@@ -259,39 +264,7 @@ public class SparkSubmitModel {
               return Status.CANCEL_STATUS;
 			} else {
 				return Status.OK_STATUS;
-			}
-           
-        	
-        	
-//            List<Artifact> artifacts = new ArrayList<>();
-//            final Artifact artifact = artifactHashMap.get(submissionParameter.getArtifactName());
-//            artifacts.add(artifact);
-//            ArtifactsWorkspaceSettings.getInstance(project).setArtifactsToBuild(artifacts);
-
-//            final CompileScope scope = ArtifactCompileScope.createArtifactsScope(project, artifacts, true);
-
-            
-            
-//            CompilerManager.getInstance(project).make(scope, new CompileStatusNotification() {
-//                @Override
-//                public void finished(boolean aborted, int errors, int warnings, CompileContext compileContext) {
-//                    if (aborted || errors != 0) {
-//                        postEventProperty.put("IsSubmitSucceed", "false");
-//                        postEventProperty.put("SubmitFailedReason", "CompileFailed");
-//                        TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
-//                        PluginUtil.getJobStatusManager(project).setJobRunningState(false);
-//                        return;
-//                    } else {
-//                        CompilerManager.getInstance(project).make(new CompileStatusNotification() {
-//                            @Override
-//                            public void finished(boolean aborted1, int errors1, int warnings1, CompileContext compileContext1) {
-//                                PluginUtil.showInfoOnSubmissionMessageWindow(project, String.format("Info : Build %s successfully.", artifact.getOutputFile()));
-//                                submit();
-//                            }
-//                        });
-//                    }
-//                }
-//            });
+			}    
 		}
     	
     }

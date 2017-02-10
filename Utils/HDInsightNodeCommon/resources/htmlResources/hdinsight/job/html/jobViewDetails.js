@@ -46,7 +46,7 @@ function renderJobSummary(times, svg_g_id) {
 
 var jobDetailsColumn= ["Job Id", "Name", "Submission Time", "Job Status", "Task(s)", "Failed Task(s)", "Failed Stage(s)"];
 
-var jobSummaryColumn = ['numTasks', 'numCompletedTasks', 'numFailedTasks', 'numSkippedTasks', 'numStages', 'numCompletedStages', 'numFailedStages', 'numSkippedStages' ];
+var jobSummaryColumn = ['Jobs Number', 'Tasks Number', 'Completed Tasks', 'Failed Tasks', 'Skipped Tasks', 'Stages Number', 'Completed Stages', 'Failed Stages', 'Skipped Stages' ];
 function renderJobDetails(myData) {
     var counter = 0;
     d3.select("#job-details-by-job").html("");

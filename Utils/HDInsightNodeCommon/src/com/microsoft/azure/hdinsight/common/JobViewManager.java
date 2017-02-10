@@ -32,38 +32,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JobViewManager {
-    private static Map<String, Pair<IClusterDetail, JobViewPanel>> jobViewPanelMap = new HashMap<String, Pair<IClusterDetail, JobViewPanel>>();
-    private static Map<String, SparkJobInfo> jobInfoMap = new HashMap<String, SparkJobInfo>();
+    private static Map<String, IClusterDetail> jobViewPanelMap = new HashMap<String, IClusterDetail>();
 
-    public static void registerJobViewInfo(@NotNull String clusterName, @NotNull SparkJobInfo info) {
-        synchronized (jobInfoMap) {
-            jobInfoMap.put(clusterName, info);
-        }
-    }
-
-    @Nullable
-    public static SparkJobInfo getJobViewInfo(@NotNull String clusterName) {
-        return jobInfoMap.get(clusterName);
-    }
-
-    public static void registerJovViewNode(@NotNull String uuid, @NotNull IClusterDetail clusterDetail) {
-        synchronized(jobViewPanelMap) {
-            jobViewPanelMap.put(uuid, new Pair<IClusterDetail, JobViewPanel>(clusterDetail,null));
-        }
+    public synchronized static void registerJovViewNode(@NotNull String uuid, @NotNull IClusterDetail clusterDetail) {
+        jobViewPanelMap.put(uuid, clusterDetail);
     }
 
     @Nullable
     public static IClusterDetail getCluster(@NotNull String uuid) {
-        if(!jobViewPanelMap.containsKey(uuid)) {
-            return null;
-        }
-        return jobViewPanelMap.get(uuid).getKey();
+        return jobViewPanelMap.get(uuid);
     }
 
-    public static void unRegisterJobView(@NotNull String uuid) {
-        synchronized(jobViewPanelMap) {
-            jobViewPanelMap.remove(uuid);
-        }
+    public synchronized static void unRegisterJobView(@NotNull String uuid) {
+        jobViewPanelMap.remove(uuid);
     }
-
 }

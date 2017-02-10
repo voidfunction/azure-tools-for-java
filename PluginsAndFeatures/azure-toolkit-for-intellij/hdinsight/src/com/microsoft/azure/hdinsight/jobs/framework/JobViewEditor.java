@@ -140,7 +140,7 @@ public class JobViewEditor implements FileEditor {
 
     @Override
     public void dispose() {
-
+        AppInsightsCustomEvent.create(HDInsightBundle.message("HDInsight.SParkJobView.Close"), null);
     }
 
     @Nullable

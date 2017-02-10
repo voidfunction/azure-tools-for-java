@@ -27,6 +27,7 @@ import com.microsoft.azure.hdinsight.projects.HDInsightProjectNature;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.spark.common.SparkSubmissionParameter;
 import com.microsoft.azure.hdinsight.spark.common2.SparkSubmitModel;
+import com.microsoft.azure.hdinsight.util.Messages;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.resources.IProject;
@@ -56,6 +57,7 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 import java.util.ArrayList;
@@ -500,6 +502,7 @@ public class SparkSubmissionExDialog extends Dialog {
     
     @Override
     protected void okPressed() {
+    	AppInsightsCustomEvent.create(Messages.SparkSubmissionButtonClickEvent, null);
     	submitModel.action(constructSubmissionParameter());
         super.okPressed();
     }

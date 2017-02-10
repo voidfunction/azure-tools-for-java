@@ -37,8 +37,10 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import com.microsoft.azure.hdinsight.util.Messages;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 
 public class CreateProjectUtil {
 
@@ -86,11 +88,14 @@ public class CreateProjectUtil {
 		switch (id) {
 		case "com.microsoft.azure.hdinsight.local-scala.projwizard":
 			createResourceStructForLocalRunScalaProject(sourceRootFolder, rootPath, project);
+			AppInsightsCustomEvent.create(Messages.SparkProjectSystemScalaCreation, null);
 			break;
 		case "com.microsoft.azure.hdinsight.local-java.projwizard":
+			AppInsightsCustomEvent.create(Messages.SparkProjectSystemJavaSampleCreation, null);
 			copyFileTo(Java_Local_RunSample, rootPath);
 			break;
 		case "com.microsoft.azure.hdinsight.cluster-scala.projwizard":
+			AppInsightsCustomEvent.create(Messages.SparkProjectSystemScalaSampleCreation, null);
 			copyFileTo(Scala_Cluster_Run_Sample, rootPath);
 			break;
 		default:

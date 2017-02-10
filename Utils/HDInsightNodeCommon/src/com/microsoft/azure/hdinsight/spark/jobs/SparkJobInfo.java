@@ -35,7 +35,6 @@ public class SparkJobInfo {
     private String currentSelectedApp;
 
     public SparkJobInfo(@NotNull IClusterDetail clusterDetail) {
-        JobViewManager.registerJobViewInfo(clusterDetail.getName(), this);
         // get rest api
         //TaskExecutor.submit(new SparkRestUtil())
     }

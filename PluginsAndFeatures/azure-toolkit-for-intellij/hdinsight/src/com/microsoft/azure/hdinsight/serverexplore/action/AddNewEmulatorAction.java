@@ -9,7 +9,7 @@ import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 
-@Name("Link A Emulator")
+@Name("Link an Emulator")
 public class AddNewEmulatorAction extends NodeActionListener {
 
     private HDInsightRootModule hdInsightRootModule;

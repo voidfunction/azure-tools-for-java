@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -39,16 +40,19 @@ import org.eclipse.ui.PlatformUI;
 
 import com.microsoft.azure.hdinsight.Activator;
 import com.microsoft.azure.hdinsight.common.CommonConst;
+import com.microsoft.azure.hdinsight.util.Messages;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 
 public class SparkLibraryOptionsPanel extends Composite {
 	private Combo comboBox;
 	private Button button;
-	
+	private WizardPage parentPage;
 	private List<String> cachedLibraryPath = new ArrayList<>();
 	
-	public SparkLibraryOptionsPanel(Composite parent, int style) {
+	public SparkLibraryOptionsPanel(WizardPage parentPage,Composite parent, int style) {
 		super(parent, style);
+		this.parentPage = parentPage;
 //		Composite composite = new Composite(parent, SWT.NONE);
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 2;
@@ -73,7 +77,27 @@ public class SparkLibraryOptionsPanel extends Composite {
 		gridData.grabExcessHorizontalSpace = true;
 		comboBox = new Combo(composite, SWT.READ_ONLY);
 		comboBox.setLayoutData(gridData);
-
+		
+		comboBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Combo combo = (Combo)e.getSource();
+				if(combo != null) {
+					int index = combo.getSelectionIndex();
+					if(index != -1) {
+						String selectItem = combo.getItem(index);
+						cachedLibraryPath.remove(selectItem);
+						cachedLibraryPath.add(0, selectItem);
+					} else if(combo.getItemCount() >= 1){
+						combo.select(0);
+					}
+					
+					updateNextPageStatus();
+					DefaultLoader.getIdeHelper().setProperties(CommonConst.CACHED_SPARK_SDK_PATHS, comboBox.getItems());
+				}
+			}
+		});
+		
 		String[] tmp = DefaultLoader.getIdeHelper().getProperties(CommonConst.CACHED_SPARK_SDK_PATHS);
 		if (tmp != null) {
             cachedLibraryPath.addAll(Arrays.asList(tmp));
@@ -85,6 +109,7 @@ public class SparkLibraryOptionsPanel extends Composite {
 				SparkLibraryInfoForEclipse info = new SparkLibraryInfoForEclipse(cachedLibraryPath.get(i));
 				comboBox.setData(cachedLibraryPath.get(i), info);
 			} catch (Exception e) {
+				e.printStackTrace(System.err);
 				// do nothing if we can not get the library info
 			}
 		}
@@ -102,9 +127,10 @@ public class SparkLibraryOptionsPanel extends Composite {
 				String file = dialog.open();
 				if (file != null) {
 					try {
-						comboBox.add(file);
+						comboBox.add(file, 0);
 						comboBox.setData(file, new SparkLibraryInfoForEclipse(file));
-						comboBox.select(comboBox.getItems().length - 1);
+						comboBox.select(0);
+						updateNextPageStatus();
 						DefaultLoader.getIdeHelper().setProperties(CommonConst.CACHED_SPARK_SDK_PATHS, comboBox.getItems());
 					} catch (Exception e) {
 						Activator.getDefault().log("Error adding Spark library", e);
@@ -123,6 +149,7 @@ public class SparkLibraryOptionsPanel extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				try {
+					AppInsightsCustomEvent.create(Messages.HDInsightDownloadSparkLibrary, null);
 					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(event.text));
 				} catch (Exception ex) {
 					/*
@@ -135,6 +162,13 @@ public class SparkLibraryOptionsPanel extends Composite {
 		});
 	}	
         
+	private void updateNextPageStatus() 
+	{
+		if(parentPage.canFlipToNextPage()) {
+			parentPage.setPageComplete(true);
+		}
+	}
+	
 	public String getSparkLibraryPath() {
 		return comboBox.getText();
 	}
