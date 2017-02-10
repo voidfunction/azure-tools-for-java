@@ -23,13 +23,15 @@ package com.microsoft.azure.docker.model;
 
 public class AzureDockerImageInstance {
   public boolean hasNewDockerHost;
-  public boolean hasRunConfiguration;
-  public boolean hasDebugConfiguration;
-  public String subscriptionId;
+  public String sid;
   public DockerHost host;
   public String dockerImageName;
+  public String id;
   public String artifactName;
+  public String artifactPath;
+  public String remotePath;
   public String dockerContainerName;
   public String dockerPortSettings;
   public String dockerfileContent;
+  public boolean isHttpsWebApp;
 }

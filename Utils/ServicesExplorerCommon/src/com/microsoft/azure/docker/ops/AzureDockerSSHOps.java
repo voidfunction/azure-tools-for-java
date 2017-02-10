@@ -30,20 +30,32 @@ import java.net.URI;
 
 public class AzureDockerSSHOps {
   public static Session createLoginInstance(DockerHost dockerHost) {
-    if (dockerHost == null) {
+    if (dockerHost != null && dockerHost.certVault != null &&
+        dockerHost.certVault.vmUsername != null && !dockerHost.certVault.vmUsername.isEmpty() &&
+        ((dockerHost.certVault.vmPwd != null  && !dockerHost.certVault.vmPwd.isEmpty()) ||
+         (dockerHost.certVault.sshPubKey != null && !dockerHost.certVault.sshPubKey.isEmpty()))) {
+      try {
+        JSch jsch = new JSch();
+        jsch.setKnownHosts(System.getProperty("user.home")+"/.ssh/known_hosts");
+        if (dockerHost.certVault.vmPwd != null && !dockerHost.certVault.vmPwd.isEmpty()) {
+          jsch.addIdentity(dockerHost.certVault.hostName, dockerHost.certVault.sshKey.getBytes(), dockerHost.certVault.sshPubKey.getBytes(), (byte[]) null);
+        }
+
+        Session session = jsch.getSession(dockerHost.certVault.vmUsername, dockerHost.hostVM.dnsName);
+
+        if (dockerHost.certVault.sshPubKey != null && !dockerHost.certVault.sshPubKey.isEmpty()) {
+          session.setPassword(dockerHost.certVault.vmPwd);
+        }
+        session.setConfig("StrictHostKeyChecking", "no");
+        session.setConfig("PreferredAuthentications", "publickey,keyboard-interactive,password");
+        session.connect();
+
+        return session;
+      } catch (Exception e) {
+        throw new AzureDockerException(e.getMessage(), e);
+      }
+    } else {
       throw new AzureDockerException("Unexpected param values; dockerHost cannot be null");
-    }
-
-    try {
-      JSch jsch = new JSch();
-      Session session = jsch.getSession(dockerHost.certVault.vmUsername, dockerHost.hostVM.dnsName);
-      session.setPassword(dockerHost.certVault.vmPwd);
-      session.setConfig("StrictHostKeyChecking", "no");
-      session.connect();
-
-      return session;
-    } catch (Exception e) {
-      throw new AzureDockerException(e.getMessage(), e);
     }
   }
 
@@ -54,10 +66,10 @@ public class AzureDockerSSHOps {
       ((ChannelExec)channel).setCommand(command);
       InputStream commandOutput = channel.getInputStream();
       channel.connect();
-      byte[] tmp  = new byte[1024];
+      byte[] tmp  = new byte[4096];
       while(true){
         while(commandOutput.available()>0){
-          int i=commandOutput.read(tmp, 0, 1024);
+          int i=commandOutput.read(tmp, 0, 4096);
           if(i<0)break;
           result += new String(tmp, 0, i);
         }
@@ -77,13 +89,14 @@ public class AzureDockerSSHOps {
     }
   }
 
-  public static String download(String fileName, String fromPath, Session session) {
+  public static String download(Session session, String fileName, String fromPath, boolean isUserHomeBased) {
     try {
       ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
       channel.connect();
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
       BufferedOutputStream buff = new BufferedOutputStream(outputStream);
-      channel.cd(fromPath);
+      String absolutePath = isUserHomeBased ? channel.getHome() + "/" + fromPath : fromPath;
+      channel.cd(absolutePath);
       channel.get(fileName, buff);
 
       channel.disconnect();
@@ -94,7 +107,7 @@ public class AzureDockerSSHOps {
     }
   }
 
-  public static void download(String fileName, String fromPath, String toPath, Session session) {
+  public static void download(Session session, String fileName, String fromPath, String toPath) {
     try {
       ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
       channel.connect();
@@ -110,12 +123,25 @@ public class AzureDockerSSHOps {
     }
   }
 
-  public static void upload(InputStream from, String fileName, String toPath, Session session) {
+  public static void upload(Session session, InputStream from, String fileName, String toPath, boolean isUserHomeBased, String filePerm) {
     try {
       ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
       channel.connect();
-      channel.cd(toPath);
+      String absolutePath = isUserHomeBased ? channel.getHome() + "/" + toPath : toPath;
+
+      String path = "";
+      for (String dir : absolutePath.split("/")) {
+        path = path + "/" + dir;
+        try {
+          channel.mkdir(path);
+        } catch (Exception ee) {
+        }
+      }
+      channel.cd(absolutePath);
       channel.put(from, fileName);
+      if (filePerm != null) {
+        channel.chmod(Integer.parseInt(filePerm), absolutePath + "/" + fileName);
+      }
 
       channel.disconnect();
     } catch (Exception e) {
@@ -123,11 +149,21 @@ public class AzureDockerSSHOps {
     }
   }
 
-  public static void upload(String fileName, String fromPath, String toPath, Session session) {
+  public static void upload(Session session, String fileName, String fromPath, String toPath, boolean isUserHomeBased, String filePerm) {
     try {
+      FileInputStream inputStream = new FileInputStream(fromPath + File.separator + fileName);
       ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
       channel.connect();
-      FileInputStream inputStream = new FileInputStream(fromPath + File.separator + fileName);
+      String absolutePath = isUserHomeBased ? channel.getHome() + "/" + toPath : toPath;
+
+      String path = "";
+      for (String dir : absolutePath.split("/")) {
+        path = path + "/" + dir;
+        try {
+          channel.mkdir(path);
+        } catch (Exception ee) {
+        }
+      }
       channel.cd(toPath);
       channel.put(inputStream, fileName);
 

@@ -21,9 +21,35 @@
  */
 package com.microsoft.azure.docker.model;
 
+import com.microsoft.azure.management.compute.ImageReference;
+
 public class AzureOSHost {
   public String publisher;
   public String sku;
   public String offer;
   public String version;
+
+  public AzureOSHost() {}
+
+  public AzureOSHost(ImageReference imageReference) {
+    this.publisher = imageReference.publisher();
+    this.offer = imageReference.offer();
+    this.sku = imageReference.sku();
+    this.version = imageReference.version();
+  }
+
+  public AzureOSHost(String publisher, String offer, String sku, String version) {
+    this.publisher = publisher;
+    this.offer = offer;
+    this.sku = sku;
+    this.version = version;
+  }
+
+  public ImageReference imageReference() {
+    return new ImageReference()
+        .withPublisher(publisher)
+        .withOffer(offer)
+        .withSku(sku)
+        .withVersion(version);
+  }
 }

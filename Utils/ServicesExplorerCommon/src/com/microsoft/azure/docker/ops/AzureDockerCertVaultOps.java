@@ -26,6 +26,7 @@ import com.jcraft.jsch.KeyPair;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.docker.model.AzureDockerCertVault;
 import com.microsoft.azure.docker.model.AzureDockerException;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.keyvault.models.SecretBundle;
 import com.microsoft.azure.keyvault.requests.SetSecretRequest;
@@ -41,6 +42,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.DEBUG;
+
 public class AzureDockerCertVaultOps {
   private static final String DELETE_SECRET = "*DELETE*";
   private static final String SECRETENTRY_DOCKERHOSTNAMES = "dockerhostnames";
@@ -49,20 +52,37 @@ public class AzureDockerCertVaultOps {
     return ResourceNamer.randomResourceName(prefix, 20);
   }
 
+  private static Map<String, String> getSecretsUpdateMap(AzureDockerCertVault certVault) {
+    if (certVault == null) return null;
+    Map<String, String> secretsUpdateMap = new HashMap<>();
+    secretsUpdateMap.put("vmUsername",     certVault.vmUsername != null ?     certVault.vmUsername : DELETE_SECRET);
+    secretsUpdateMap.put("vmPwd",          certVault.vmPwd != null ?          certVault.vmPwd : DELETE_SECRET);
+    secretsUpdateMap.put("sshKey",         certVault.sshKey != null ?         certVault.sshKey : DELETE_SECRET);
+    secretsUpdateMap.put("sshPubKey",      certVault.sshPubKey != null ?      certVault.sshPubKey : DELETE_SECRET);
+    secretsUpdateMap.put("tlsCACert",      certVault.tlsCACert != null ?      certVault.tlsCACert : DELETE_SECRET);
+    secretsUpdateMap.put("tlsCAKey",       certVault.tlsCAKey != null ?       certVault.tlsCAKey : DELETE_SECRET);
+    secretsUpdateMap.put("tlsClientCert",  certVault.tlsClientCert != null ?  certVault.tlsClientCert : DELETE_SECRET);
+    secretsUpdateMap.put("tlsClientKey",   certVault.tlsClientKey != null ?   certVault.tlsClientKey : DELETE_SECRET);
+    secretsUpdateMap.put("tlsServerCert",  certVault.tlsServerCert != null ?  certVault.tlsServerCert : DELETE_SECRET);
+    secretsUpdateMap.put("tlsServerKey",   certVault.tlsServerKey != null ?   certVault.tlsServerKey : DELETE_SECRET);
+
+    return secretsUpdateMap;
+  }
+
   private static Map<String, String> getSecretsMap(AzureDockerCertVault certVault) {
     if (certVault == null || certVault.hostName == null) return null;
 
     Map<String, String> secretsMap = new HashMap<>();
-    secretsMap.put("vmUsername",     certVault.vmUsername != null ?     certVault.vmUsername : DELETE_SECRET);
-    secretsMap.put("vmPwd",          certVault.vmPwd != null ?          certVault.vmPwd : DELETE_SECRET);
-    secretsMap.put("sshKey",         certVault.sshKey != null ?         certVault.sshKey : DELETE_SECRET);
-    secretsMap.put("sshPubKey",      certVault.sshPubKey != null ?      certVault.sshPubKey : DELETE_SECRET);
-    secretsMap.put("tlsCACert",      certVault.tlsCACert != null ?      certVault.tlsCACert : DELETE_SECRET);
-    secretsMap.put("tlsCAKey",       certVault.tlsCAKey != null ?       certVault.tlsCAKey : DELETE_SECRET);
-    secretsMap.put("tlsClientCert",  certVault.tlsClientCert != null ?  certVault.tlsClientCert : DELETE_SECRET);
-    secretsMap.put("tlsClientKey",   certVault.tlsClientKey != null ?   certVault.tlsClientKey : DELETE_SECRET);
-    secretsMap.put("tlsServerCert",  certVault.tlsServerCert != null ?  certVault.tlsServerCert : DELETE_SECRET);
-    secretsMap.put("tlsServerKey",   certVault.tlsServerKey != null ?   certVault.tlsServerKey : DELETE_SECRET);
+    if (certVault.vmUsername != null)    secretsMap.put("vmUsername", certVault.vmUsername);
+    if (certVault.vmPwd != null)         secretsMap.put("vmPwd", certVault.vmPwd);
+    if (certVault.sshKey != null)        secretsMap.put("sshKey",         certVault.sshKey);
+    if (certVault.sshPubKey != null)     secretsMap.put("sshPubKey",      certVault.sshPubKey);
+    if (certVault.tlsCACert != null)     secretsMap.put("tlsCACert",      certVault.tlsCACert);
+    if (certVault.tlsCAKey != null)      secretsMap.put("tlsCAKey",       certVault.tlsCAKey);
+    if (certVault.tlsClientCert != null) secretsMap.put("tlsClientCert",  certVault.tlsClientCert);
+    if (certVault.tlsClientKey != null)  secretsMap.put("tlsClientKey",   certVault.tlsClientKey);
+    if (certVault.tlsServerCert != null) secretsMap.put("tlsServerCert",  certVault.tlsServerCert);
+    if (certVault.tlsServerKey != null)  secretsMap.put("tlsServerKey",   certVault.tlsServerKey);
 
     return secretsMap;
   }
@@ -71,83 +91,98 @@ public class AzureDockerCertVaultOps {
     if (azureClient == null  || keyVaultClient == null || certVault == null ||
         certVault.name == null || certVault.hostName == null ||
         certVault.resourceGroupName == null || certVault.region == null ||
-        (certVault.servicePrincipalId == null && certVault.userName == null)) {
+        (certVault.servicePrincipalId == null && certVault.userId == null)) {
       throw new AzureDockerException("Unexpected argument values; azureClient, vault name, hostName, resourceGroupName, region and userName/servicePrincipalId cannot be null");
     }
 
     try {
-      Vault vault;
+      Vault vault = null;
+      boolean isNewVault = false;
 
       try {
         vault = azureClient.vaults().getByGroup(certVault.resourceGroupName, certVault.name);
       } catch (CloudException e) {
         if (e.getBody().getCode().equals("ResourceNotFound") || e.getBody().getCode().equals("ResourceGroupNotFound")) {
-          // Vault does not exist so this is a create op
-          vault = azureClient.vaults()
-              .define(certVault.name)
-              .withRegion(certVault.region)
-              .withNewResourceGroup(certVault.resourceGroupName)
-              .withEmptyAccessPolicy()
-              .create();
+          vault = null; // Vault does no exist
         } else {
           throw e;
         }
       }
 
-      // Attempt to set permissions to the userName and/or servicePrincipalId identities
-      // If login authority is a service principal, we might fail to set vault permissions
+      if (vault == null) {
+        // Vault does not exist so this is the create op
+        Vault.DefinitionStages.WithAccessPolicy withAccessPolicy = azureClient.vaults()
+            .define(certVault.name)
+            .withRegion(certVault.region)
+            .withNewResourceGroup(certVault.resourceGroupName);
+
+        if (certVault.servicePrincipalId != null) {
+          vault = withAccessPolicy.defineAccessPolicy()
+              .forServicePrincipal(certVault.servicePrincipalId)
+              .allowSecretAllPermissions()
+              .attach()
+              .withTag("dockerhost", "1")
+              .create();
+        } else {
+          vault = withAccessPolicy.defineAccessPolicy()
+              .forUser(certVault.userId)
+              .allowSecretAllPermissions()
+              .attach()
+              .withTag("dockerhost", "1")
+              .create();
+        }
+        isNewVault = true;
+      } else {
+        // Attempt to set permissions to the userName and/or servicePrincipalId identities
+        // If original owner is an AD user, we might fail to set vault permissions
+        try {
+          setVaultPermissionsAll(azureClient, certVault);
+        } catch (Exception e) {
+        }
+      }
       try {
         setVaultPermissionsAll(azureClient, certVault);
-      } catch (Exception e) {}
+      } catch (Exception e) {
+      }
 
+      vault = azureClient.vaults().getByGroup(certVault.resourceGroupName, certVault.name);
+      String vaultUri = vault.vaultUri();
       // vault is not immediately available so the next operation could fail
       // add a retry policy to make sure it got created
-      for (int retries = 0; retries <= 1500; retries = 100 + retries * 2 ) {
+      for (int sleepMs = 5000; sleepMs <= 200000; sleepMs += 5000 ) {
         try {
-          keyVaultClient.listSecrets(vault.vaultUri());
+          keyVaultClient.listSecrets(vaultUri);
           break;
-        } catch (Exception e) {}
+        } catch (Exception e) {
+          try {
+            if (DEBUG) System.out.format("ERROR: can't find %s (sleepMs: %d)\n", vaultUri, sleepMs);
+            if (DEBUG) System.out.println(e.getMessage());
+            Thread.sleep(5000);
+          } catch (Exception e3) {
+          }
+        }
       }
 
       Map<String, String> secretsMap = getSecretsMap(certVault);
       boolean storeDockerHostNames = false;
       for( Map.Entry<String, String> entry : secretsMap.entrySet()) {
-        SecretBundle secret;
-        // check if secret exists
         try {
-          secret = keyVaultClient.getSecret(vault.vaultUri(), entry.getKey());
-        } catch (Exception e) {
-          secret = null;
-        }
-
-        if (entry.getValue().equals(DELETE_SECRET)) {
-          // delete the secret from keyvault
-          if (secret != null) {
-            keyVaultClient.deleteSecret(vault.vaultUri(), entry.getKey());
-          }
-        } else {
-          keyVaultClient.setSecret(new SetSecretRequest.Builder(vault.vaultUri(), entry.getKey(), entry.getValue()).build());
+          keyVaultClient.setSecret(new SetSecretRequest.Builder(vaultUri, entry.getKey(), entry.getValue()).build());
           storeDockerHostNames = true;
+        } catch (Exception e) {
+          System.out.format("ERROR: can't write %s secret %s: %s\n", vaultUri, entry.getKey(), entry.getValue());
+          System.out.println(e.getMessage());
         }
       }
 
       SecretBundle secretDockerHostNames;
-      try {
-        secretDockerHostNames = keyVaultClient.getSecret(vault.vaultUri(), SECRETENTRY_DOCKERHOSTNAMES);
-      } catch (Exception e) {
-        secretDockerHostNames = null;
-      }
-      if (storeDockerHostNames) {
-        String secretValue = (secretDockerHostNames != null) ? secretDockerHostNames.value() : certVault.hostName;
-        if (!secretValue.contains(certVault.hostName)) {
-          // hostname is not registered
-          secretValue += " " + certVault.hostName;
-        }
-        keyVaultClient.setSecret(new SetSecretRequest.Builder(vault.vaultUri(), SECRETENTRY_DOCKERHOSTNAMES, secretValue).build());
+      if (storeDockerHostNames && certVault.hostName != null && !certVault.hostName.isEmpty()) {
+        keyVaultClient.setSecret(new SetSecretRequest.Builder(vaultUri, SECRETENTRY_DOCKERHOSTNAMES, certVault.hostName).build());
       } else {
-        keyVaultClient.deleteSecret(vault.vaultUri(), SECRETENTRY_DOCKERHOSTNAMES);
+        // something unexpected went wrong... delete the vault
+        if (DEBUG) System.out.println("ERROR: something went wrong");
+        //if (isNewVault) azureClient.vaults().deleteById(vault.id());
       }
-
     } catch(Exception e) {
       throw new AzureDockerException(e.getMessage());
     }
@@ -155,7 +190,7 @@ public class AzureDockerCertVaultOps {
 
   public static void setVaultPermissionsAll(Azure azureClient, AzureDockerCertVault certVault) throws AzureDockerException {
     if (azureClient == null || certVault.name == null || certVault.resourceGroupName == null ||
-        (certVault.servicePrincipalId == null && certVault.userName == null)){
+        (certVault.servicePrincipalId == null && certVault.userId == null)){
       throw new AzureDockerException("Unexpected argument values; azureClient, vault name, resourceGroupName and userName/servicePrincipalId cannot be null");
     }
 
@@ -171,10 +206,10 @@ public class AzureDockerCertVaultOps {
             .apply();
       }
 
-      if (certVault.userName != null) {
+      if (certVault.userId != null) {
         vault.update()
             .defineAccessPolicy()
-            .forUser(certVault.userName)
+            .forUser(certVault.userId)
             .allowSecretAllPermissions()
             .attach()
             .apply();
@@ -187,17 +222,17 @@ public class AzureDockerCertVaultOps {
 
   public static void setVaultPermissionsRead(Azure azureClient, AzureDockerCertVault certVault) throws AzureDockerException {
     if (azureClient == null || certVault.name == null || certVault.resourceGroupName == null ||
-        (certVault.servicePrincipalId == null && certVault.userName == null)){
+        (certVault.servicePrincipalId == null && certVault.userId == null)){
       throw new AzureDockerException("Unexpected argument values; azureClient, vault name, resourceGroupName and userName/servicePrincipalId cannot be null");
     }
 
     try {
       Vault vault = azureClient.vaults().getByGroup(certVault.resourceGroupName, certVault.name);
 
-      if (certVault.userName != null) {
+      if (certVault.userId != null) {
         vault.update()
             .defineAccessPolicy()
-              .forUser(certVault.userName)
+              .forUser(certVault.userId)
               .allowSecretPermissions(SecretPermissions.LIST)
               .allowSecretPermissions(SecretPermissions.GET)
               .attach()
@@ -232,71 +267,89 @@ public class AzureDockerCertVaultOps {
 
   public static AzureDockerCertVault getVault(Azure azureClient, AzureDockerCertVault certVault, KeyVaultClient keyVaultClient) throws AzureDockerException {
     if (azureClient == null || certVault == null || keyVaultClient == null ||
-        certVault.name == null || certVault.resourceGroupName == null){
+        certVault.name == null || certVault.resourceGroupName == null) {
       throw new AzureDockerException("Unexpected argument values; azureClient, vault name and resourceGroupName cannot be null");
     }
+    Vault vault = null;
 
     try {
-      Vault vault = azureClient.vaults().getByGroup(certVault.resourceGroupName, certVault.name);
-
-      try {
-        SecretBundle secret = keyVaultClient.getSecret(vault.vaultUri(), SECRETENTRY_DOCKERHOSTNAMES);
-        if (secret != null) certVault.hostName = secret.value();
-      } catch (Exception e){}
-
-      try {
-        SecretBundle secret = keyVaultClient.getSecret(vault.vaultUri(), "vmUsername");
-        if (secret != null) certVault.vmUsername = secret.value();
-      } catch (Exception e){}
-
-      try {
-        SecretBundle secret = keyVaultClient.getSecret(vault.vaultUri(), "vmPwd");
-        if (secret != null) certVault.vmPwd = secret.value();
-      } catch (Exception e){}
-
-      try {
-        SecretBundle secret = keyVaultClient.getSecret(vault.vaultUri(), "sshKey");
-        if (secret != null) certVault.sshKey = secret.value();
-      } catch (Exception e){}
-
-      try {
-        SecretBundle secret = keyVaultClient.getSecret(vault.vaultUri(), "sshPubKey");
-        if (secret != null) certVault.sshPubKey = secret.value();
-      } catch (Exception e){}
-
-      try {
-        SecretBundle secret = keyVaultClient.getSecret(vault.vaultUri(), "tlsCACert");
-        if (secret != null) certVault.tlsCACert = secret.value();
-      } catch (Exception e){}
-
-      try {
-        SecretBundle secret = keyVaultClient.getSecret(vault.vaultUri(), "tlsCAKey");
-        if (secret != null) certVault.tlsCAKey = secret.value();
-      } catch (Exception e){}
-
-      try {
-        SecretBundle secret = keyVaultClient.getSecret(vault.vaultUri(), "tlsClientCert");
-        if (secret != null) certVault.tlsClientCert = secret.value();
-      } catch (Exception e){}
-
-      try {
-        SecretBundle secret = keyVaultClient.getSecret(vault.vaultUri(), "tlsClientKey");
-        if (secret != null) certVault.tlsClientKey = secret.value();
-      } catch (Exception e){}
-
-      try {
-        SecretBundle secret = keyVaultClient.getSecret(vault.vaultUri(), "tlsServerCert");
-        if (secret != null) certVault.tlsServerCert = secret.value();
-      } catch (Exception e){}
-
-      try {
-        SecretBundle secret = keyVaultClient.getSecret(vault.vaultUri(), "tlsServerKey");
-        if (secret != null) certVault.tlsServerKey = secret.value();
-      } catch (Exception e){}
-
+      vault = azureClient.vaults().getByGroup(certVault.resourceGroupName, certVault.name);
+      certVault.uri = vault.vaultUri();
     } catch(Exception e) {
       throw new AzureDockerException(e.getMessage());
     }
+
+    return getVault(certVault, keyVaultClient);
+  }
+
+  public static AzureDockerCertVault getVault(AzureDockerCertVault certVault, KeyVaultClient keyVaultClient) throws AzureDockerException {
+    if (certVault == null || keyVaultClient == null || certVault.uri == null){
+      throw new AzureDockerException("Unexpected argument values; azureClient, vault name and resourceGroupName cannot be null");
+    }
+
+    String vaultUri = certVault.uri;
+
+    try {
+      SecretBundle secret = keyVaultClient.getSecret(vaultUri, SECRETENTRY_DOCKERHOSTNAMES);
+      if (secret != null) {
+        certVault.hostName = secret.value();
+      } else {
+        certVault.hostName = null;
+        return null;
+      }
+    } catch (Exception e){
+      return null;
+    }
+
+    try {
+      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "vmUsername");
+      certVault.vmUsername = (secret != null) ? secret.value() : null;
+    } catch (Exception e){}
+
+    try {
+      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "vmPwd");
+      certVault.vmPwd = (secret != null) ? secret.value() : null;
+    } catch (Exception e){}
+
+    try {
+      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "sshKey");
+      certVault.sshKey = (secret != null) ? secret.value() : null;
+    } catch (Exception e){}
+
+    try {
+      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "sshPubKey");
+      certVault.sshPubKey = (secret != null) ? secret.value() : null;
+    } catch (Exception e){}
+
+    try {
+      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsCACert");
+      certVault.tlsCACert = (secret != null) ? secret.value() : null;
+    } catch (Exception e){}
+
+    try {
+      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsCAKey");
+      certVault.tlsCAKey = (secret != null) ? secret.value() : null;
+    } catch (Exception e){}
+
+    try {
+      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsClientCert");
+      certVault.tlsClientCert = (secret != null) ? secret.value() : null;
+    } catch (Exception e){}
+
+    try {
+      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsClientKey");
+      certVault.tlsClientKey = (secret != null) ? secret.value() : null;
+    } catch (Exception e){}
+
+    try {
+      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsServerCert");
+      certVault.tlsServerCert = (secret != null) ? secret.value() : null;
+    } catch (Exception e){}
+
+    try {
+      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsServerKey");
+      certVault.tlsServerKey = (secret != null) ? secret.value() : null;
+    } catch (Exception e){}
 
     return certVault;
   }
@@ -314,10 +367,10 @@ public class AzureDockerCertVaultOps {
     }
   }
 
-  public static void copyVault(Azure azureClientSource, AzureDockerCertVault certVaultSource, Azure azureClientDest, AzureDockerCertVault certVaultDest, KeyVaultClient keyVaultClient) throws AzureDockerException {
+  public static void cloneVault(Azure azureClientSource, AzureDockerCertVault certVaultSource, Azure azureClientDest, AzureDockerCertVault certVaultDest, KeyVaultClient keyVaultClient) throws AzureDockerException {
     if (azureClientSource == null || certVaultSource == null || certVaultSource.name == null || certVaultSource.resourceGroupName == null ||
         azureClientDest == null || certVaultDest == null || certVaultDest.name == null || certVaultDest.resourceGroupName == null || certVaultDest.region == null ||
-        (certVaultDest.servicePrincipalId == null && certVaultDest.userName == null) || keyVaultClient == null ){
+        (certVaultDest.servicePrincipalId == null && certVaultDest.userId == null) || keyVaultClient == null ){
         throw new AzureDockerException("Unexpected argument values; azureClient, vault name, hostName, resourceGroupName and destination region and userName/servicePrincipalId cannot be null");
     }
 
@@ -326,7 +379,7 @@ public class AzureDockerCertVaultOps {
       certVaultResult.name = certVaultDest.name;
       certVaultResult.resourceGroupName = certVaultDest.resourceGroupName;
       certVaultResult.region = certVaultDest.region;
-      certVaultResult.userName = certVaultDest.userName;
+      certVaultResult.userId = certVaultDest.userId;
       certVaultResult.servicePrincipalId = certVaultDest.servicePrincipalId;
 
       createOrUpdateVault(azureClientDest, certVaultResult, keyVaultClient);
@@ -335,12 +388,37 @@ public class AzureDockerCertVaultOps {
     }
   }
 
+  public static AzureDockerCertVault copyVaultLoginCreds(AzureDockerCertVault certVaultDest, AzureDockerCertVault certVaultSource) {
+    certVaultDest.vmUsername = certVaultSource.vmUsername;
+    certVaultDest.vmPwd = certVaultSource.vmPwd;
+
+    return certVaultDest;
+  }
+
+  public static AzureDockerCertVault copyVaultSshKeys(AzureDockerCertVault certVaultDest, AzureDockerCertVault certVaultSource) {
+    certVaultDest.sshKey = certVaultSource.sshKey; // see "id_rsa"
+    certVaultDest.sshPubKey = certVaultSource.sshPubKey; // see "id_rsa.pub"
+
+    return certVaultDest;
+  }
+
+  public static AzureDockerCertVault copyVaultTlsCerts(AzureDockerCertVault certVaultDest, AzureDockerCertVault certVaultSource) {
+    certVaultDest.tlsCACert = certVaultSource.tlsCACert; // see "ca.pem";
+    certVaultDest.tlsCAKey = certVaultSource.tlsCAKey; // see "ca-key.pem";
+    certVaultDest.tlsClientCert = certVaultSource.tlsClientCert; // see "cert.pem";
+    certVaultDest.tlsClientKey = certVaultSource.tlsClientKey; // see "key.pem";
+    certVaultDest.tlsServerCert = certVaultSource.tlsServerCert; // see "server.pem";
+    certVaultDest.tlsServerKey = certVaultSource.tlsServerKey; // see "server-key.pem";
+
+    return certVaultDest;
+  }
+
   public static AzureDockerCertVault getSSHKeysFromLocalFile(String localPath) throws AzureDockerException {
     AzureDockerCertVault certVault = new AzureDockerCertVault();
 
     try {
-      certVault.sshKey         = new String(Files.readAllBytes(Paths.get(localPath + "/id_rsa")));
-      certVault.sshPubKey      = new String(Files.readAllBytes(Paths.get(localPath + "/id_rsa.pub")));
+      certVault.sshKey         = new String(Files.readAllBytes(Paths.get(localPath, "id_rsa")));
+      certVault.sshPubKey      = new String(Files.readAllBytes(Paths.get(localPath, "id_rsa.pub")));
     } catch(Exception e) {
       throw new AzureDockerException(e.getMessage());
     }
@@ -352,12 +430,12 @@ public class AzureDockerCertVaultOps {
     AzureDockerCertVault certVault = new AzureDockerCertVault();
 
     try {
-      certVault.tlsCACert      = new String(Files.readAllBytes(Paths.get(localPath + "/ca.pem")));
-      certVault.tlsCACert      = new String(Files.readAllBytes(Paths.get(localPath + "/ca-key.pem")));
-      certVault.tlsClientCert  = new String(Files.readAllBytes(Paths.get(localPath + "/cert.pem")));
-      certVault.tlsClientKey   = new String(Files.readAllBytes(Paths.get(localPath + "/key.pem")));
-      certVault.tlsServerCert  = new String(Files.readAllBytes(Paths.get(localPath + "/server.pem")));
-      certVault.tlsServerKey   = new String(Files.readAllBytes(Paths.get(localPath + "/server-key.pem")));
+      certVault.tlsCACert      = new String(Files.readAllBytes(Paths.get(localPath, "ca.pem")));
+      certVault.tlsCAKey       = new String(Files.readAllBytes(Paths.get(localPath, "ca-key.pem")));
+      certVault.tlsClientCert  = new String(Files.readAllBytes(Paths.get(localPath, "cert.pem")));
+      certVault.tlsClientKey   = new String(Files.readAllBytes(Paths.get(localPath, "key.pem")));
+      certVault.tlsServerCert  = new String(Files.readAllBytes(Paths.get(localPath, "server.pem")));
+      certVault.tlsServerKey   = new String(Files.readAllBytes(Paths.get(localPath, "server-key.pem")));
     } catch(Exception e) {
       throw new AzureDockerException(e.getMessage());
     }
@@ -366,21 +444,35 @@ public class AzureDockerCertVaultOps {
   }
 
   public static void saveToLocalFiles(String localPath, AzureDockerCertVault certVault) throws AzureDockerException {
+    saveSshKeysToLocalFiles(localPath, certVault);
+    saveTlsCertsToLocalFiles(localPath, certVault);
+  }
+
+  public static void saveSshKeysToLocalFiles(String localPath, AzureDockerCertVault certVault) throws AzureDockerException {
     try {
-      if(certVault.sshKey != null)         { FileWriter file = new FileWriter(localPath + "/id_rsa");         file.write(certVault.sshKey);         file.close();}
-      if(certVault.sshPubKey != null)      { FileWriter file = new FileWriter(localPath + "/id_rsa.pub");     file.write(certVault.sshPubKey);      file.close();}
-      if(certVault.tlsCACert != null)      { FileWriter file = new FileWriter(localPath + "/ca.pem");         file.write(certVault.tlsCACert);      file.close();}
-      if(certVault.tlsCAKey != null)       { FileWriter file = new FileWriter(localPath + "/ca-key.pem");     file.write(certVault.tlsCACert);      file.close();}
-      if(certVault.tlsClientCert != null)  { FileWriter file = new FileWriter(localPath + "/cert.pem");       file.write(certVault.tlsClientCert);  file.close();}
-      if(certVault.tlsClientKey != null)   { FileWriter file = new FileWriter(localPath + "/key.pem");        file.write(certVault.tlsClientKey);   file.close();}
-      if(certVault.tlsServerCert != null)  { FileWriter file = new FileWriter(localPath + "/server.pem");     file.write(certVault.tlsServerCert);  file.close();}
-      if(certVault.tlsServerKey != null)   { FileWriter file = new FileWriter(localPath + "/server-key.pem"); file.write(certVault.tlsServerKey);   file.close();}
+      String sep = AzureDockerUtils.getPathSeparator();
+      if(certVault.sshKey != null)         { FileWriter file = new FileWriter(localPath + sep + "id_rsa");         file.write(certVault.sshKey);         file.close();}
+      if(certVault.sshPubKey != null)      { FileWriter file = new FileWriter(localPath + sep + "id_rsa.pub");     file.write(certVault.sshPubKey);      file.close();}
     } catch(Exception e) {
       throw new AzureDockerException(e.getMessage());
     }
   }
 
-  public static AzureDockerCertVault generateSSHCerts(String passPhrase, String comment) throws AzureDockerException{
+  public static void saveTlsCertsToLocalFiles(String localPath, AzureDockerCertVault certVault) throws AzureDockerException {
+    try {
+      String sep = AzureDockerUtils.getPathSeparator();
+      if(certVault.tlsCACert != null)      { FileWriter file = new FileWriter(localPath + sep + "ca.pem");         file.write(certVault.tlsCACert);      file.close();}
+      if(certVault.tlsCAKey != null)       { FileWriter file = new FileWriter(localPath + sep + "ca-key.pem");     file.write(certVault.tlsCACert);      file.close();}
+      if(certVault.tlsClientCert != null)  { FileWriter file = new FileWriter(localPath + sep + "cert.pem");       file.write(certVault.tlsClientCert);  file.close();}
+      if(certVault.tlsClientKey != null)   { FileWriter file = new FileWriter(localPath + sep + "key.pem");        file.write(certVault.tlsClientKey);   file.close();}
+      if(certVault.tlsServerCert != null)  { FileWriter file = new FileWriter(localPath + sep + "server.pem");     file.write(certVault.tlsServerCert);  file.close();}
+      if(certVault.tlsServerKey != null)   { FileWriter file = new FileWriter(localPath + sep + "server-key.pem"); file.write(certVault.tlsServerKey);   file.close();}
+    } catch(Exception e) {
+      throw new AzureDockerException(e.getMessage());
+    }
+  }
+
+  public static AzureDockerCertVault generateSSHKeys(String passPhrase, String comment) throws AzureDockerException{
     try {
       AzureDockerCertVault result = new AzureDockerCertVault();
       JSch jsch = new JSch();

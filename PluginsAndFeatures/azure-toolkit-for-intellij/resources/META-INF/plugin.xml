@@ -132,6 +132,10 @@
             text="Publish as Azure Web App..." description="Azure website deployment for Java"
             icon="/icons/publishWebsite.png">
     </action>
+    <action id="Actions.AzureDockerHostDeploy" class="com.microsoft.intellij.actions.AzureDockerHostDeployAction"
+            text="Publish as Docker Container..." description="Azure website deployment for Java on Docker"
+            icon="/icons/publish.png">
+    </action>
     <action id="Actions.AzureCodeSamples"
             class="com.microsoft.intellij.actions.AzureCodeSamples"
             text="Azure Code Samples"
@@ -150,6 +154,7 @@
     <group id="AzurePopupGroup" text="Azure" description="Azure" icon="/icons/azure.png" popup="true"
            class="com.microsoft.intellij.actions.AzurePopupGroup">
       <reference ref="Actions.AzureWebDeploy"/>
+      <reference ref="Actions.AzureDockerHostDeploy"/>
       <separator/>
       <reference ref="Actions.ApplicationInsightsAction"/>
       <separator/>
@@ -166,6 +171,7 @@
     <group id="AzureToolbarGroup" text="Azure" description="Azure">
       <group id="PublishToAzureGroup" text="Publish Group" description="Publish Group" popup="true" icon="/icons/publish.png">
         <reference ref="Actions.AzureWebDeploy"/>
+        <reference ref="Actions.AzureDockerHostDeploy"/>
         <reference ref="Actions.DeployAction"/>
       </group>
       <reference ref="Actions.RunInEmulatorAction"/>

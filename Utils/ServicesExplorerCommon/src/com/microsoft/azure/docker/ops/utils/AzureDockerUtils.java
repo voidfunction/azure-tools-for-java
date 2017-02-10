@@ -21,8 +21,390 @@
  */
 package com.microsoft.azure.docker.ops.utils;
 
+import com.microsoft.azure.docker.model.*;
+import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
+import com.microsoft.azure.docker.ops.AzureDockerVMOps;
+import com.microsoft.azure.keyvault.KeyVaultClient;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.keyvault.Vault;
+import com.microsoft.azure.management.network.Network;
+import com.microsoft.azure.management.network.Subnet;
+import com.microsoft.azure.management.resources.Location;
+import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.resources.Subscription;
+import com.microsoft.azure.management.storage.StorageAccount;
+import com.microsoft.azuretools.authmanage.SubscriptionManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.sdkmanage.ServicePrincipalAzureManager;
+import com.microsoft.azuretools.utils.Pair;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.*;
+
 public class AzureDockerUtils {
+  public static boolean DEBUG = true;
+
   public static Boolean isValid(String str) {
     return str != null && !str.isEmpty();
+  }
+
+  public static KnownDockerVirtualMachineImage getKnownDockerVirtualMachineImage(DockerHost.DockerHostOSType dockerHostOSType) {
+    switch (dockerHostOSType) {
+      case UBUNTU_SERVER_14_04_LTS:
+        return KnownDockerVirtualMachineImage.UBUNTU_SERVER_14_04_LTS;
+      case UBUNTU_SERVER_16_04_LTS:
+        return KnownDockerVirtualMachineImage.UBUNTU_SERVER_16_04_LTS;
+      case UBUNTU_SNAPPY_CORE_15_04:
+        return KnownDockerVirtualMachineImage.UBUNTU_SNAPPY_CORE_15_04;
+      case COREOS_STABLE_LATEST:
+        return KnownDockerVirtualMachineImage.COREOS_STABLE_LATEST;
+      case OPENLOGIC_CENTOS_7_2:
+        return KnownDockerVirtualMachineImage.OPENLOGIC_CENTOS_7_2;
+      default:
+        return KnownDockerVirtualMachineImage.UBUNTU_SERVER_16_04_LTS;
+    }
+  }
+
+  public static String getPathSeparator(){
+    //generate TLS certs using keytool
+    return System.getProperty("os.name").toLowerCase().contains("windows") ? "\\" : "/";
+  }
+
+  public static String getDefaultDockerHostName() {
+    return String.format("%s%d", "mydocker", new Random().nextInt(1000000));
+  }
+
+  public final static int MAX_RESOURCE_LENGTH = 30;
+
+  public static String getDefaultRandomName(String namePrefix) {
+    if (namePrefix.length() > MAX_RESOURCE_LENGTH) {
+      return String.format("%s%d", namePrefix.substring(0, MAX_RESOURCE_LENGTH), new Random().nextInt(1000000));
+    } else {
+      return String.format("%s%d", namePrefix, new Random().nextInt(1000000));
+    }
+  }
+
+  public static String getDefaultRandomName(String namePrefix, int maxLength) {
+    String randInt = String.format("%d", new Random().nextInt(1000000));
+    if (maxLength <= randInt.length()) {
+      return null;
+    }
+    if (namePrefix.length() + randInt.length() > maxLength) {
+      return namePrefix.substring(0, maxLength - randInt.length()) + randInt;
+    } else {
+      return namePrefix + randInt;
+    }
+  }
+
+  public static String getDefaultName(String projectName) {
+    return projectName.replaceAll(" ", "");
+  }
+
+  public static String getDefaultDockerImageName(String projectName) {
+    return String.format("%s%d", getDefaultName(projectName), new Random().nextInt(10000));
+  }
+
+  public static String getDefaultDockerContainerName(String imageName) {
+    return String.format("%s-%d", imageName, new Random().nextInt(10000));
+  }
+
+  public static String getDefaultArtifactName(String projectName) {
+    return getDefaultName(projectName) + ".war";
+  }
+
+  public static boolean checkKeyvaultNameAvailability(String name) {
+    try {
+      URL url = new URL("https://" + name + ".vault.azure.net");
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setRequestMethod("GET");
+      connection.connect();
+
+      return connection.getResponseCode() != 403;
+    } catch (UnknownHostException uhe) {
+      return true;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+
+  public static List<String> getResourceGroups(Azure azureClient) {
+    List<String> result = new ArrayList<>();
+    if (azureClient != null) {
+      for (ResourceGroup resourceGroup : azureClient.resourceGroups().list()) {
+        result.add(resourceGroup.name());
+      }
+    }
+
+    return result;
+  }
+
+  public static List<AzureDockerVnet> getVirtualNetworks(Azure azureClient) {
+    List<AzureDockerVnet> result = new ArrayList<>();
+    if (azureClient != null) {
+      for (Network net : azureClient.networks().list()) {
+        AzureDockerVnet vnet = new AzureDockerVnet();
+        vnet.name = net.name();
+        vnet.addrSpace = net.addressSpaces().get(0);
+        vnet.id = net.id();
+        vnet.region = net.regionName().toLowerCase();
+        vnet.resourceGroup = net.resourceGroupName();
+        vnet.subnets = new ArrayList<>();
+        for (Subnet subnet : net.subnets().values()) {
+          vnet.subnets.add(subnet.name());
+        }
+        result.add(vnet);
+      }
+    }
+
+    return result;
+  }
+
+  public static Map<String, Pair<String, List<String>>> getVirtualNetworks(Azure azureClient, String region) {
+    Map<String, Pair<String, List<String>>> result = new HashMap<>();
+    if (azureClient != null) {
+      for (Network vnet : azureClient.networks().list()) {
+        if (vnet.regionName().toLowerCase().equals(region) || vnet.regionName().toLowerCase().equals(region)) {
+          List<String> subnets = new ArrayList<>();
+          subnets.addAll(vnet.subnets().keySet());
+          result.put(vnet.id(), new Pair<>(vnet.name(), subnets));
+        }
+      }
+    }
+
+    return result;
+  }
+
+  public static List<String> getAvailableStorageAccounts(List<AzureDockerStorageAccount> storageAccounts, String vmImageSizeType) {
+    List<String> result = new ArrayList<>();
+
+    if (storageAccounts != null) {
+      for (AzureDockerStorageAccount storageAccount : storageAccounts) {
+        if (vmImageSizeType != null) {
+          if (storageAccount.skuType.toLowerCase().equals(vmImageSizeType.toLowerCase())) {
+            result.add(storageAccount.name);
+          }
+        } else {
+          result.add(storageAccount.name);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  public static List<String> getAvailableStorageAccounts(Azure azureClient, String vmImageSizeType) {
+    List<String> result = new ArrayList<>();
+
+    if (azureClient != null) {
+      for (StorageAccount storageAccount : azureClient.storageAccounts().list()) {
+        if (vmImageSizeType != null) {
+          if (storageAccount.sku().name().name().toLowerCase().equals(vmImageSizeType.toLowerCase())) {
+            result.add(storageAccount.name());
+          }
+        } else {
+          result.add(storageAccount.name());
+        }
+      }
+    }
+
+    return result;
+  }
+
+  public static List<AzureDockerStorageAccount> getStorageAccounts(Azure azureClient) {
+    List<AzureDockerStorageAccount> result = new ArrayList<>();
+
+    if (azureClient != null) {
+      for (StorageAccount storageAccount : azureClient.storageAccounts().list()) {
+        AzureDockerStorageAccount dockerStorageAccount = new AzureDockerStorageAccount();
+        dockerStorageAccount.name = storageAccount.name();
+        dockerStorageAccount.region = storageAccount.regionName();
+        dockerStorageAccount.resourceGroup = storageAccount.resourceGroupName();
+        dockerStorageAccount.sid = azureClient.subscriptionId();
+        dockerStorageAccount.skuType = storageAccount.sku().name().name();
+        result.add(dockerStorageAccount);
+      }
+    }
+
+    return result;
+  }
+
+  public static boolean checkStorageNameAvailability(Azure azureClient, String name) {
+    if (azureClient != null) {
+      return azureClient.storageAccounts().checkNameAvailability(name).isAvailable();
+    } else {
+      return false;
+    }
+  }
+
+  public static String getStorageTypeForVMSize(String name) {
+    return (name == null) ? null : name.contains("_DS") ? "Premium_LSR" : "Standard_LSR";
+  }
+
+  public static boolean hasServicePrincipalAzureManager(AzureManager azureAuthManager){
+    return azureAuthManager.getClass().equals(ServicePrincipalAzureManager.class);
+  }
+
+  public static Map<String, AzureDockerSubscription> refreshDockerSubscriptions(AzureManager azureAuthManager) {
+    Map<String, AzureDockerSubscription> subsMap = new HashMap<>();
+
+    try {
+      if (DEBUG) System.out.format("Get AzureDockerHostsManage subscription details: %d\n", System.currentTimeMillis());
+      SubscriptionManager subscriptionManager = azureAuthManager.getSubscriptionManager();
+      List<SubscriptionDetail> subscriptions = subscriptionManager.getSubscriptionDetails();
+      if (DEBUG) System.out.format("Get AzureDockerHostsManage Docker subscription details: %d\n", System.currentTimeMillis());
+      for (SubscriptionDetail subscriptionDetail : subscriptions ) {
+        if(subscriptionDetail.isSelected()) {
+          AzureDockerSubscription dockerSubscription = new AzureDockerSubscription();
+          dockerSubscription.id = subscriptionDetail.getSubscriptionId();
+          if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker subscription: %s at %d\n", dockerSubscription.id, System.currentTimeMillis());
+          dockerSubscription.tid = subscriptionDetail.getTenantId();
+          dockerSubscription.name = subscriptionDetail.getSubscriptionName();
+          dockerSubscription.azureClient = azureAuthManager.getAzure(dockerSubscription.id);
+          dockerSubscription.keyVaultClient = azureAuthManager.getKeyVaultClient(subscriptionDetail.getTenantId());
+          dockerSubscription.isSelected = true;
+          if (AzureDockerUtils.hasServicePrincipalAzureManager(azureAuthManager)) {
+            dockerSubscription.userId = null;
+            dockerSubscription.servicePrincipalId = azureAuthManager.getCurrentUserId();
+          } else {
+            dockerSubscription.userId = azureAuthManager.getCurrentUserId();
+            dockerSubscription.servicePrincipalId = null;
+          }
+
+          subsMap.put(dockerSubscription.id, dockerSubscription);
+        }
+      }
+
+      if (DEBUG) System.out.format("Get AzureDockerHostsManage locations: %d\n", System.currentTimeMillis());
+      List<Subscription> azureSubscriptionList = azureAuthManager.getSubscriptions();
+      for (Subscription subscription : azureSubscriptionList) {
+        AzureDockerSubscription dockerSubscription = subsMap.get(subscription.subscriptionId());
+
+        if (dockerSubscription != null) {
+          dockerSubscription.locations = new ArrayList<>();
+          for (Location location : subscription.listLocations()) {
+            dockerSubscription.locations.add(location.name().toLowerCase());
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      DefaultLoader.getUIHelper().showError(e.getMessage(), "Error loading subscription details");
+    }
+
+    return subsMap;
+  }
+
+  public static Map<String, Pair<Vault, KeyVaultClient>> refreshDockerVaults(List<AzureDockerSubscription> azureDockerSubscriptions) {
+    Map<String, Pair<Vault, KeyVaultClient>> vaults = new HashMap<>();
+
+    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker key vault: %d\n", System.currentTimeMillis());
+    try {
+      for (AzureDockerSubscription dockerSubscription : azureDockerSubscriptions) {
+        for (Vault vault : dockerSubscription.azureClient.vaults().list()) {
+          if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker vault: %s at %d\n", vault.name(), System.currentTimeMillis());
+
+          // TODO: clean the work around for bug with getting vault props for a listed vault
+          vault = dockerSubscription.azureClient.vaults().getById(vault.id());
+
+          if (vault.tags().get("dockerhost") != null) {
+            if (DEBUG) System.out.format("\t\t...adding Docker vault: %s at %d\n", vault.name(), System.currentTimeMillis());
+            vaults.put(vault.name(), new Pair<>(vault, dockerSubscription.keyVaultClient));
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      DefaultLoader.getUIHelper().showError(e.getMessage(), "Error loading key vaults");
+    }
+
+    return vaults;
+  }
+
+  public static Map<String, AzureDockerCertVault> refreshDockerVaultDetails(List<AzureDockerSubscription> azureDockerSubscriptions) {
+    Map<String, AzureDockerCertVault> dockerVaultDetails = new HashMap<>();
+
+    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker key vault details: %d\n", System.currentTimeMillis());
+    try {
+      for (AzureDockerSubscription dockerSubscription : azureDockerSubscriptions) {
+        for (Vault vault : dockerSubscription.azureClient.vaults().list()) {
+          if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker vault details for: %s at %d\n", vault.name(), System.currentTimeMillis());
+
+          // TODO: clean the work around for bug with getting vault props for a listed vault
+          vault = dockerSubscription.azureClient.vaults().getById(vault.id());
+
+          AzureDockerCertVault certVault = new AzureDockerCertVault();
+          certVault.name = vault.name();
+          certVault.resourceGroupName = vault.resourceGroupName();
+          certVault.userId = dockerSubscription.userId;
+          certVault.servicePrincipalId = dockerSubscription.servicePrincipalId;
+          certVault.region = vault.regionName();
+          certVault.uri = vault.vaultUri();
+          certVault = AzureDockerCertVaultOps.getVault(certVault, dockerSubscription.keyVaultClient);
+
+          if (certVault != null && certVault.hostName != null) {
+            if (DEBUG) System.out.format("\t\t...adding Docker vault details: %s at %d\n", vault.name(), System.currentTimeMillis());
+            dockerVaultDetails.put(vault.name(), certVault);
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      DefaultLoader.getUIHelper().showError(e.getMessage(), "Error loading key vault details");
+    }
+
+    return dockerVaultDetails;
+  }
+
+  public static Map<String, List<AzureDockerVnet>> refreshDockerVnetDetails(List<AzureDockerSubscription> azureDockerSubscriptions) {
+    Map<String, List<AzureDockerVnet>> vnetMaps = new HashMap<>();
+
+    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker virtual network details: %d\n", System.currentTimeMillis());
+    try {
+      for (AzureDockerSubscription dockerSubscription : azureDockerSubscriptions) {
+        vnetMaps.put(dockerSubscription.id, AzureDockerUtils.getVirtualNetworks(dockerSubscription.azureClient));
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      DefaultLoader.getUIHelper().showError(e.getMessage(), "Error loading virtual network details");
+    }
+
+    return vnetMaps;
+  }
+
+  public static Map<String, List<AzureDockerStorageAccount>> refreshDockerStorageAccountDetails(List<AzureDockerSubscription> azureDockerSubscriptions) {
+    Map<String, List<AzureDockerStorageAccount>> storageMaps = new HashMap<>();
+
+    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker storage account details: %d\n", System.currentTimeMillis());
+    try {
+      for (AzureDockerSubscription dockerSubscription : azureDockerSubscriptions) {
+        storageMaps.put(dockerSubscription.id, AzureDockerUtils.getStorageAccounts(dockerSubscription.azureClient));
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      DefaultLoader.getUIHelper().showError(e.getMessage(), "Error loading storage account details");
+    }
+
+    return storageMaps;
+  }
+
+  public static Map<String, List<DockerHost>> refreshDockerHostDetails(List<AzureDockerSubscription> azureDockerSubscriptions, Map<String, AzureDockerCertVault> dockerVaultsMap) {
+    Map<String, List<DockerHost>> dockerHosts = new HashMap<>();
+
+    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker virtual machine details: %d\n", System.currentTimeMillis());
+    try {
+      for (AzureDockerSubscription dockerSubscription : azureDockerSubscriptions) {
+        dockerHosts.put(dockerSubscription.id, new ArrayList<>(AzureDockerVMOps.getDockerHosts(dockerSubscription.azureClient, dockerVaultsMap).values()));
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      DefaultLoader.getUIHelper().showError(e.getMessage(), "Error loading virtual machine details");
+    }
+
+    return dockerHosts;
   }
 }

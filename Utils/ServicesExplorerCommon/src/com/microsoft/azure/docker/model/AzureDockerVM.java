@@ -41,5 +41,7 @@ public class AzureDockerVM {
   public String storageAccountType;
   public String osDiskName;
   public AzureOSHost osHost;
+  public String state;
   public Map<String, String> tags;
+  public String sid;
 }

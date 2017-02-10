@@ -24,12 +24,13 @@ package com.microsoft.azure.docker.model;
 import static com.microsoft.azure.docker.model.KnownDockerImages.KnownDefaultDockerfiles.*;
 
 public enum KnownDockerImages {
-  JBOSS_WILDFLY("JBoss WildFly", JBOSS_WILDFLY_DEFAULT_DOCKERFILE, "18080:80"),
-  TOMCAT8("tomcat:8.0.20-jre8", TOMCAT8_DEFAULT_DOCKERFILE, "18080:80");
+  JBOSS_WILDFLY("JBoss WildFly", JBOSS_WILDFLY_DEFAULT_DOCKERFILE, "8080"),
+  TOMCAT8("tomcat:8.0.20-jre8", TOMCAT8_DEFAULT_DOCKERFILE, "8080");
 
   private final String dockerfileContent;
   private final String name;
   private final String portSettings;
+  public final static String DOCKER_ARTIFACT_FILENAME = "[$]DOCKER_ARTIFACT_FILENAME[$]";
 
   KnownDockerImages(String name, String dockerFile, String defaultPortSettings) {
     this.dockerfileContent = dockerFile;
@@ -47,9 +48,9 @@ public enum KnownDockerImages {
   public static class KnownDefaultDockerfiles {
     public static final String JBOSS_WILDFLY_DEFAULT_DOCKERFILE =
         "FROM jboss/wildfly\n" +
-            "ADD _MyArtifact.war_ /opt/jboss/wildfly/standalone/deployments/\n";
+            "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /opt/jboss/wildfly/standalone/deployments/\n";
     public static final String TOMCAT8_DEFAULT_DOCKERFILE =
         "FROM tomcat:8.0.20-jre8\n" +
-            "ADD _MyArtifact.war_ /usr/local/tomcat/webapps/\n";
+            "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /usr/local/tomcat/webapps/\n";
   }
 }

@@ -22,14 +22,29 @@
 package com.microsoft.azure.docker.model;
 
 public class AzureDockerContainerInstance {
-  public boolean hasRunConfiguration;
-  public boolean hasDebugConfiguration;
-  public DockerHost host;
+  public DockerHost dockerHost;
   public String dockerImageName;
-  public String artifactName;
+  public String artifactFile;
+  public String remotePath;
   public String dockerContainerName;
   public String dockerPortSettings;
   public String dockerfileContent;
   public DockerImage dockerImage;
   public DockerContainer dockerContainer;
+
+  public AzureDockerContainerInstance() {}
+
+  public AzureDockerContainerInstance(AzureDockerImageInstance dockerImageInstance) {
+    this.dockerHost = dockerImageInstance.host;
+    this.dockerImageName = dockerImageInstance.dockerImageName;
+    this.dockerContainerName = dockerImageInstance.dockerContainerName;
+    this.dockerPortSettings = dockerImageInstance.dockerPortSettings;
+    this.dockerfileContent = dockerImageInstance.dockerfileContent;
+
+    this.artifactFile = dockerImageInstance.artifactPath;
+    this.remotePath = dockerImageInstance.remotePath;
+
+    this.dockerImage = new DockerImage(dockerImageInstance);
+    this.dockerContainer = new DockerContainer();
+  }
 }

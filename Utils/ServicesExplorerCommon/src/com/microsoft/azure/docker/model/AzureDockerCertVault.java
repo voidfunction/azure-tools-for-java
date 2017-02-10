@@ -25,13 +25,14 @@ import java.util.Objects;
 
 public class AzureDockerCertVault {
   public String name;                   // Azure Key Vault's name
-  public String url;                    // Azure Key Vault's url
-  public String hostName;               // name of the host (Docker host) to store the credentials for
+  public String uri;                    // Azure Key Vault's uri
+  public String hostName;               // name of the dockerHost (Docker dockerHost) to store the credentials for
   public String resourceGroupName;      // Azure resource group where to create the vault
   public String region;                 // Azure location where to create the vault
-  public String userName;               // current user name as logged in via Azure Auth
-  public String vmUsername;             // username to be used fro VM (Docker host) login
-  public String vmPwd;                  // password to be used for VM (Docker host) login
+  public String userId;                 // current user id or client id as logged in via Azure Auth
+  public String sid;                    // subscription id to which the resource belongs to
+  public String vmUsername;             // username to be used fro VM (Docker dockerHost) login
+  public String vmPwd;                  // password to be used for VM (Docker dockerHost) login
   public String sshKey;                 // see "id_rsa"
   public String sshPubKey;              // see "id_rsa.pub"
   public String tlsCACert;              // see "ca.pem"
@@ -48,12 +49,13 @@ public class AzureDockerCertVault {
 
   public AzureDockerCertVault(AzureDockerCertVault otherVault) {
     this.name = otherVault.name;
-    this.url = otherVault.url;
+    this.uri = otherVault.uri;
     this.hostName = otherVault.hostName;
     this.resourceGroupName = otherVault.resourceGroupName;
     this.region = otherVault.region;
+    this.sid = otherVault.sid;
     this.servicePrincipalId = otherVault.servicePrincipalId;
-    this.userName = otherVault.userName;
+    this.userId = otherVault.userId;
     this.vmUsername = otherVault.vmUsername;
     this.vmPwd = otherVault.vmPwd;
     this.sshKey = otherVault.sshKey;
@@ -71,7 +73,7 @@ public class AzureDockerCertVault {
         Objects.equals(this.hostName, otherVault.hostName) &&
         Objects.equals(this.resourceGroupName, otherVault.resourceGroupName) &&
         Objects.equals(this.region, otherVault.region) &&
-        Objects.equals(this.userName, otherVault.userName) &&
+        Objects.equals(this.userId, otherVault.userId) &&
         Objects.equals(this.vmUsername, otherVault.vmUsername) &&
         Objects.equals(this.vmPwd, otherVault.vmPwd) &&
         Objects.equals(this.sshKey, otherVault.sshKey) &&
@@ -82,4 +84,6 @@ public class AzureDockerCertVault {
         Objects.equals(this.tlsServerCert, otherVault.tlsServerCert) &&
         Objects.equals(this.tlsServerKey, otherVault.tlsServerKey);
   }
+
+  public String toString() { return this.name; }
 }

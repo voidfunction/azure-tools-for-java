@@ -24,4 +24,5 @@ package com.microsoft.azure.docker.model;
 public class DockerContainer {
   public String name;
   public String id;
+  public String portSettings;
 }

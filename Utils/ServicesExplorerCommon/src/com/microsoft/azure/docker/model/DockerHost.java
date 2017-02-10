@@ -21,6 +21,7 @@
  */
 package com.microsoft.azure.docker.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jcraft.jsch.Session;
 
 import java.util.List;
@@ -32,7 +33,6 @@ public class DockerHost {
   public DockerHostVMState state;
   public boolean hasPwdLogIn;
   public boolean hasSSHLogIn;
-  public Session session;
   public DockerHostOSType hostOSType;
   public AzureDockerCertVault certVault; // see using Azure Key Vault to store secrets
   public boolean isTLSSecured;
@@ -41,6 +41,10 @@ public class DockerHost {
   public String port;
   public List<DockerImage> dockerImages;
   public boolean isUpdating;
+  public String sid;
+
+  @JsonIgnore
+  public Session session;
 
   public DockerHost() {}
 
@@ -63,6 +67,7 @@ public class DockerHost {
     this.dockerImages = copyHost.dockerImages;
     this.session = null;
     this.isUpdating = copyHost.isUpdating;
+    this.sid = copyHost.sid;
   }
 
   public boolean equalsTo(DockerHost otherHost) {
@@ -80,21 +85,21 @@ public class DockerHost {
   }
 
   public enum DockerHostOSType {
-    UBUNTU_SERVER_14,
-    UBUNTU_SERVER_16,
-    UBUNTU_SNAPPY_CORE,
-    COREOS,
-    OPENLOGIC_CENTOS,
+    UBUNTU_SERVER_16_04_LTS,
+    UBUNTU_SERVER_14_04_LTS,
+    UBUNTU_SNAPPY_CORE_15_04,
+    COREOS_STABLE_LATEST,
+    OPENLOGIC_CENTOS_7_2,
     LINUX_OTHER
   }
 
   public enum DockerHostVMState {
     RUNNING,
+    DEALLOCATING,
+    DEALLOCATED,
     STARTING,
     STOPPED,
-    DELETING,
-    FAILED,
-    CREATING,
+    UNKNOWN,
     UPDATING
   }
 }

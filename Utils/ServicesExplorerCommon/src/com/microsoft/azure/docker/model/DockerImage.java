@@ -29,9 +29,10 @@ public class DockerImage {
   public String repository;
   public String tag;
   public long virtualSize;
-  public String artifactName;    // .war or .jar output file path representing the application to be deployed and run
-  public String ports;           // container᾿s port or a range of ports to the host to be published (i.e. "1234-1236:1234-1236/tcp")
+  public String artifactPath;    // .war or .jar output file path representing the application to be deployed and run
+  public String ports;           // container᾿s port or a range of ports to the dockerHost to be published (i.e. "1234-1236:1234-1236/tcp")
   public String dockerfile;      // Dockerfile input from which the image will be created
+  public String remotePath;      // Docker dockerHost path to Dockerfile and artifact
   public String imageBase;       // see FROM directive
   public String exposeCMD;       // see EXPOSE directive
   public List<String> addCMDs;   // see ADD directive
@@ -40,14 +41,24 @@ public class DockerImage {
   public List<String> envCMDs;   // see ENV directive
   public List<String> workCMDs;  // see WORK directive
 
-  public DockerHost dockerHost;  // parent Docker host
+  public List<DockerContainer> containers; // list of Docker containers for this image
+
+  public DockerHost dockerHost;  // parent Docker dockerHost
 
   public DockerImage() {}
 
-  public DockerImage(String name, String customContent, String ports, String artifactName) {
+  public DockerImage(AzureDockerImageInstance dockerImageInstance) {
+    this.name = dockerImageInstance.dockerImageName;
+    this.artifactPath = dockerImageInstance.artifactPath;
+    this.dockerfile = dockerImageInstance.dockerfileContent;
+    this.ports = dockerImageInstance.dockerPortSettings;
+    this.dockerHost = dockerImageInstance.host;
+  }
+
+  public DockerImage(String name, String customContent, String ports, String artifactPath) {
     this.name = name;
     this.dockerfile = customContent;
     this.ports = ports;
-    this.artifactName = artifactName;
+    this.artifactPath = artifactPath;
   }
 }

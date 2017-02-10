@@ -28,6 +28,13 @@ import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.interopbridges.tools.windowsazure.*;
+import com.jcraft.jsch.Session;
+import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.ops.*;
+import com.microsoft.azure.keyvault.KeyVaultClient;
+import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
@@ -53,6 +60,9 @@ import com.microsoftopentechnologies.azuremanagementutil.model.InstanceStatus;
 import com.microsoftopentechnologies.azuremanagementutil.model.Notifier;
 import com.microsoftopentechnologies.azuremanagementutil.rest.WindowsAzureRestUtils;
 import com.microsoftopentechnologies.azuremanagementutil.rest.WindowsAzureStorageServices;
+import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -465,6 +475,105 @@ public final class DeploymentManager {
             notifyProgress(webApp.name(), startDate, url, 20, OperationStatus.Succeeded, message("runStatus"), webApp.name());
         } catch (InterruptedException e) {
             notifyProgress(webApp.name(), startDate, url, 100, OperationStatus.Succeeded, message("runStatus"), webApp.name());
+        }
+    }
+
+    public void deployToDockerContainer(AzureDockerImageInstance dockerImageInstance, String url) {
+        Date startDate = new Date();
+        try {
+            ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+
+            String msg = String.format("Deploying application to Docker host %s ...", dockerImageInstance.host.name);
+            notifyProgress(dockerImageInstance.host.name, startDate, null, 5, OperationStatus.InProgress, msg);
+            AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
+            Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerImageInstance.sid).azureClient;
+            KeyVaultClient keyVaultClient = dockerManager.getSubscriptionsMap().get(dockerImageInstance.sid).keyVaultClient;
+
+            if (dockerImageInstance.hasNewDockerHost) {
+                msg = String.format("Creating new virtual machine %s ...", dockerImageInstance.host.name);
+                notifyProgress(dockerImageInstance.host.name, startDate, null, 25, OperationStatus.InProgress, msg);
+                System.out.println("Creating new virtual machine: " + new Date().toString());
+                AzureDockerVMOps.createDockerHostVM(azureClient, dockerImageInstance.host);
+                System.out.println("Done creating new virtual machine: " + new Date().toString());
+
+                msg = String.format("Waiting for virtual machine to be up %s ...", dockerImageInstance.host.name);
+                notifyProgress(dockerImageInstance.host.name, startDate, null, 5, OperationStatus.InProgress, msg);
+                System.out.println("Waiting for virtual machine to be up: " + new Date().toString());
+                AzureDockerVMOps.waitForVirtualMachineStartup(azureClient, dockerImageInstance.host);
+                System.out.println("Done Waiting for virtual machine to be up: " + new Date().toString());
+
+                msg = String.format("Configuring Docker service for %s ...", dockerImageInstance.host.name);
+                notifyProgress(dockerImageInstance.host.name, startDate, null, 15, OperationStatus.InProgress, msg);
+                System.out.println("Configuring Docker host: " + new Date().toString());
+                AzureDockerVMOps.installDocker(dockerImageInstance.host);
+                System.out.println("Done configuring Docker host: " + new Date().toString());
+
+                System.out.println("Finished setting up Docker host");
+            } else {
+                msg = String.format("Using virtual machine %s ...", dockerImageInstance.host.name);
+                notifyProgress(dockerImageInstance.host.name, startDate, null, 45, OperationStatus.InProgress, msg);
+            }
+            System.out.println(mapper.writeValueAsString(dockerImageInstance.host));
+
+            if (dockerImageInstance.host.session == null) {
+                System.out.println("Opening a remote connection to the Docker host: " + new Date().toString());
+                dockerImageInstance.host.session = AzureDockerSSHOps.createLoginInstance(dockerImageInstance.host);
+                System.out.println("Done opening a remote connection to the Docker host: " + new Date().toString());
+            }
+
+            msg = String.format("Uploading Dockerfile and artifact %s on %s ...", dockerImageInstance.artifactName, dockerImageInstance.host.name);
+            notifyProgress(dockerImageInstance.host.name, startDate, null, 10, OperationStatus.InProgress, msg);
+            System.out.println("Uploading Dockerfile and artifact: " + new Date().toString());
+            AzureDockerVMOps.uploadDockerfileAndArtifact(dockerImageInstance, dockerImageInstance.host.session);
+            System.out.println("Uploading Dockerfile and artifact: " + new Date().toString());
+
+            msg = String.format("Creating Docker image %s on %s ...", dockerImageInstance.dockerImageName, dockerImageInstance.host.name);
+            notifyProgress(dockerImageInstance.host.name, startDate, null, 10, OperationStatus.InProgress, msg);
+            System.out.println("Creating a Docker image to the Docker host: " + new Date().toString());
+            AzureDockerImageOps.create(dockerImageInstance, dockerImageInstance.host.session);
+            System.out.println("Done creating a Docker image to the Docker host: " + new Date().toString());
+
+            msg = String.format("Creating Docker container %s for image %s on %s ...", dockerImageInstance.dockerContainerName, dockerImageInstance.dockerImageName, dockerImageInstance.host.name);
+            notifyProgress(dockerImageInstance.host.name, startDate, null, 5, OperationStatus.InProgress, msg);
+            System.out.println("Creating a Docker container to the Docker host: " + new Date().toString());
+            AzureDockerContainerOps.create(dockerImageInstance, dockerImageInstance.host.session);
+            System.out.println("Done creating a Docker container to the Docker host: " + new Date().toString());
+
+            msg = String.format("Starting Docker container %s for image %s on %s ...", dockerImageInstance.dockerContainerName, dockerImageInstance.dockerImageName, dockerImageInstance.host.name);
+            notifyProgress(dockerImageInstance.host.name, startDate, null, 5, OperationStatus.InProgress, msg);
+            System.out.println("Starting a Docker container to the Docker host: " + new Date().toString());
+            AzureDockerContainerOps.start(dockerImageInstance, dockerImageInstance.host.session);
+            System.out.println("Done starting a Docker container to the Docker host: " + new Date().toString());
+
+            if (dockerImageInstance.hasNewDockerHost && dockerImageInstance.host.certVault.hostName != null) {
+                msg = String.format("Creating new key vault %s ...", dockerImageInstance.host.certVault.name);
+                notifyProgress(dockerImageInstance.host.name, startDate, null, 15, OperationStatus.InProgress, msg);
+                System.out.println("Creating new Docker key vault: " + new Date().toString());
+                AzureDockerCertVaultOps.createOrUpdateVault(azureClient, dockerImageInstance.host.certVault, keyVaultClient);
+                System.out.println("Done creating new key vault: " + new Date().toString());
+
+                msg = String.format("Updating key vaults ...");
+                notifyProgress(dockerImageInstance.host.name, startDate, null, 10, OperationStatus.InProgress, msg);
+                System.out.println("Refreshing key vaults: " + new Date().toString());
+                dockerManager.refreshDockerVaults();
+                dockerManager.refreshDockerVaultDetails();
+                System.out.println("Done refreshing key vaults: " + new Date().toString());
+            }
+
+            msg = String.format("Updating Docker hosts ...");
+            notifyProgress(dockerImageInstance.host.name, startDate, null, 25, OperationStatus.InProgress, msg);
+            System.out.println("Refreshing docker hosts: " + new Date().toString());
+            dockerManager.refreshDockerHostDetails();
+            System.out.println("Done refreshing Docker hosts: " + new Date().toString());
+            System.out.println("Done refreshing key vaults: " + new Date().toString());
+
+            notifyProgress(dockerImageInstance.host.name, startDate, url, 100, OperationStatus.Succeeded, message("runStatus"), dockerImageInstance.host.name);
+        } catch (InterruptedException e) {
+            notifyProgress(dockerImageInstance.host.name, startDate, url, 100, OperationStatus.Succeeded, message("runStatus"), dockerImageInstance.host.name);
+        } catch (Exception ee) {
+
         }
     }
 }

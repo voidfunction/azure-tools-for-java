@@ -21,12 +21,18 @@
  */
 package com.microsoft.azure.docker.ops;
 
+import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.model.*;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.DEBUG;
+import static com.microsoft.azure.docker.ops.utils.AzureDockerVMSetupScriptsForUbuntu.DEFAULT_DOCKER_IMAGES_DIRECTORY;
+
 public class AzureDockerContainerOps {
+
   public static AzureDockerContainerInstance get(String name, DockerHost dockerHost) {
     AzureDockerContainerInstance container = new AzureDockerContainerInstance();
     container.dockerImage = new DockerImage();
@@ -51,61 +57,6 @@ public class AzureDockerContainerOps {
     }
   }
 
-  public static String getDetails(String name, DockerHost dockerHost) {
-    AzureDockerContainerInstance container = new AzureDockerContainerInstance();
-    container.dockerImage = new DockerImage();
-    container.dockerImage.dockerHost = dockerHost;
-
-    return getDetails(container);
-  }
-
-  public static String getDetails(AzureDockerContainerInstance dockerContainerInstance) {
-    if (dockerContainerInstance == null || dockerContainerInstance.dockerImage == null || dockerContainerInstance.dockerImage.dockerHost == null) {
-      throw new AzureDockerException("Unexpected argument values; dockerContainer, name/id, dockerImage, dockerHost can not be null");
-    }
-    try {
-      DockerHost dockerHost = dockerContainerInstance.dockerImage.dockerHost;
-      if (dockerHost.session == null || !dockerHost.session.isConnected()) {
-        dockerHost.session = AzureDockerSSHOps.createLoginInstance(dockerHost);
-      }
-
-      String dockerContainerName = AzureDockerUtils.isValid(dockerContainerInstance.dockerContainer.id) ? dockerContainerInstance.dockerContainer.id : dockerContainerInstance.dockerContainer.name;
-
-      return AzureDockerSSHOps.executeCommand("docker inspect " + dockerContainerName, dockerHost.session, false);
-    } catch (Exception e) {
-      throw new AzureDockerException(e.getMessage(), e);
-    }
-  }
-
-  public static void start(AzureDockerContainerInstance dockerContainer) {
-    try {
-    } catch (Exception e) {
-      throw new AzureDockerException(e.getMessage(), e);
-    }
-  }
-
-  public static void stop(AzureDockerContainerInstance dockerContainer) {
-    try {
-    } catch (Exception e) {
-      throw new AzureDockerException(e.getMessage(), e);
-    }
-  }
-
-  public static void delete(AzureDockerContainerInstance dockerContainer) {
-    try {
-    } catch (Exception e) {
-      throw new AzureDockerException(e.getMessage(), e);
-    }
-  }
-
-  public static AzureDockerContainerInstance create(AzureDockerContainerInstance dockerContainer) {
-    try {
-      return null;
-    } catch (Exception e) {
-      throw new AzureDockerException(e.getMessage(), e);
-    }
-  }
-
   public static List<AzureDockerContainerInstance> list(AzureDockerContainerInstance dockerContainer) {
     try {
       return null;
@@ -121,4 +72,211 @@ public class AzureDockerContainerOps {
       throw new AzureDockerException(e.getMessage(), e);
     }
   }
+
+  public static String getDetails(AzureDockerContainerInstance dockerContainer, Session session) {
+    if (dockerContainer == null || dockerContainer.dockerHost == null || (session == null && dockerContainer.dockerHost.session == null)) {
+      throw new AzureDockerException("Unexpected param values; dockerContainer, Docker dockerHost and login session cannot be null");
+    }
+
+    if (session == null) session = dockerContainer.dockerHost.session;
+
+    try {
+      if (!session.isConnected()) session.connect();
+
+      AzureDockerVMOps.waitForDockerDaemonStartup(session);
+
+      String cmd1 = String.format("docker inspect %s \n", dockerContainer.dockerContainerName);
+      if (DEBUG) System.out.format("Start executing: %s", cmd1);
+      String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, false);
+      if (DEBUG) System.out.println(cmdOut1);
+      if (DEBUG) System.out.format("Done executing: %s", cmd1);
+
+      return cmdOut1;
+
+    } catch (Exception e) {
+      throw new AzureDockerException(e.getMessage(), e);
+    }
+  }
+
+  public static String getDetails(AzureDockerImageInstance dockerImageInstance, Session session) {
+    if (dockerImageInstance == null || dockerImageInstance.host == null || (session == null && dockerImageInstance.host.session == null)) {
+      throw new AzureDockerException("Unexpected param values; dockerImageInstance, Docker dockerHost and login session cannot be null");
+    }
+
+    AzureDockerContainerInstance dockerContainerInstance = new AzureDockerContainerInstance(dockerImageInstance);
+
+    return getDetails(dockerContainerInstance, session);
+  }
+
+  public static String getDetails(AzureDockerContainerInstance dockerContainer) {
+    if (dockerContainer == null || dockerContainer.dockerHost == null || dockerContainer.dockerHost.session == null) {
+      throw new AzureDockerException("Unexpected param values; dockerContainer, Docker dockerHost and login session cannot be null");
+    }
+
+    return getDetails(dockerContainer, dockerContainer.dockerHost.session);
+  }
+
+  public static void start(AzureDockerContainerInstance dockerContainer, Session session) {
+    if (dockerContainer == null || dockerContainer.dockerHost == null || (session == null && dockerContainer.dockerHost.session == null)) {
+      throw new AzureDockerException("Unexpected param values; dockerContainer, Docker dockerHost and login session cannot be null");
+    }
+
+    if (session == null) session = dockerContainer.dockerHost.session;
+
+    AzureDockerVMOps.waitForDockerDaemonStartup(session);
+
+    try {
+      if (!session.isConnected()) session.connect();
+
+      String cmd1 = String.format("docker start %s \n", dockerContainer.dockerContainerName);
+      if (DEBUG) System.out.format("Start executing: %s", cmd1);
+      String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
+      if (DEBUG) System.out.println(cmdOut1);
+      if (DEBUG) System.out.format("Done executing: %s", cmd1);
+
+    } catch (Exception e) {
+      throw new AzureDockerException(e.getMessage(), e);
+    }
+  }
+
+  public static void start(AzureDockerImageInstance dockerImageInstance, Session session) {
+    if (dockerImageInstance == null || dockerImageInstance.host == null || (session == null && dockerImageInstance.host.session == null)) {
+      throw new AzureDockerException("Unexpected param values; dockerImageInstance, Docker dockerHost and login session cannot be null");
+    }
+
+    AzureDockerContainerInstance dockerContainerInstance = new AzureDockerContainerInstance(dockerImageInstance);
+    start(dockerContainerInstance, session);
+  }
+
+  public static void start(AzureDockerContainerInstance dockerContainer) {
+    if (dockerContainer == null || dockerContainer.dockerHost == null || dockerContainer.dockerHost.session == null) {
+      throw new AzureDockerException("Unexpected param values; dockerContainer, Docker dockerHost and login session cannot be null");
+    }
+
+    start(dockerContainer, dockerContainer.dockerHost.session);
+  }
+
+  public static void stop(AzureDockerContainerInstance dockerContainer, Session session) {
+    if (dockerContainer == null || dockerContainer.dockerHost == null || (session == null && dockerContainer.dockerHost.session == null)) {
+      throw new AzureDockerException("Unexpected param values; dockerContainer, Docker dockerHost and login session cannot be null");
+    }
+
+    if (session == null) session = dockerContainer.dockerHost.session;
+
+    try {
+      if (!session.isConnected()) session.connect();
+
+      AzureDockerVMOps.waitForDockerDaemonStartup(session);
+
+      String cmd1 = String.format("docker stop %s \n", dockerContainer.dockerContainerName);
+      if (DEBUG) System.out.format("Start executing: %s", cmd1);
+      String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
+      if (DEBUG) System.out.println(cmdOut1);
+      if (DEBUG) System.out.format("Done executing: %s", cmd1);
+
+    } catch (Exception e) {
+      throw new AzureDockerException(e.getMessage(), e);
+    }
+  }
+
+  public static void stop(AzureDockerImageInstance dockerImageInstance, Session session) {
+    if (dockerImageInstance == null || dockerImageInstance.host == null || (session == null && dockerImageInstance.host.session == null)) {
+      throw new AzureDockerException("Unexpected param values; dockerImageInstance, Docker dockerHost and login session cannot be null");
+    }
+
+    AzureDockerContainerInstance dockerContainerInstance = new AzureDockerContainerInstance(dockerImageInstance);
+    stop(dockerContainerInstance, session);
+  }
+
+  public static void stop(AzureDockerContainerInstance dockerContainer) {
+    if (dockerContainer == null || dockerContainer.dockerHost == null || dockerContainer.dockerHost.session == null) {
+      throw new AzureDockerException("Unexpected param values; dockerContainer, Docker dockerHost and login session cannot be null");
+    }
+
+    stop(dockerContainer, dockerContainer.dockerHost.session);
+  }
+
+  public static void delete(AzureDockerContainerInstance dockerContainer, Session session) {
+    if (dockerContainer == null || dockerContainer.dockerHost == null || (session == null && dockerContainer.dockerHost.session == null)) {
+      throw new AzureDockerException("Unexpected param values; dockerContainer, Docker dockerHost and login session cannot be null");
+    }
+
+    if (session == null) session = dockerContainer.dockerHost.session;
+
+    try {
+      if (!session.isConnected()) session.connect();
+
+      stop(dockerContainer, session);
+
+      String cmd1 = String.format("docker rm %s \n", dockerContainer.dockerContainerName);
+      if (DEBUG) System.out.format("Start executing: %s", cmd1);
+      String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
+      if (DEBUG) System.out.println(cmdOut1);
+      if (DEBUG) System.out.format("Done executing: %s", cmd1);
+
+    } catch (Exception e) {
+      throw new AzureDockerException(e.getMessage(), e);
+    }
+  }
+
+  public static void delete(AzureDockerImageInstance dockerImageInstance, Session session) {
+    if (dockerImageInstance == null || dockerImageInstance.host == null || (session == null && dockerImageInstance.host.session == null)) {
+      throw new AzureDockerException("Unexpected param values; dockerImageInstance, Docker dockerHost and login session cannot be null");
+    }
+
+    AzureDockerContainerInstance dockerContainerInstance = new AzureDockerContainerInstance(dockerImageInstance);
+    delete(dockerContainerInstance, session);
+  }
+
+  public static void delete(AzureDockerContainerInstance dockerContainer) {
+    if (dockerContainer == null || dockerContainer.dockerHost == null || dockerContainer.dockerHost.session == null) {
+      throw new AzureDockerException("Unexpected param values; dockerContainer, Docker dockerHost and login session cannot be null");
+    }
+
+    delete(dockerContainer, dockerContainer.dockerHost.session);
+  }
+
+  public static AzureDockerContainerInstance create(AzureDockerContainerInstance dockerContainer, Session session) {
+    if (dockerContainer == null || dockerContainer.dockerHost == null || (session == null && dockerContainer.dockerHost.session == null)) {
+      throw new AzureDockerException("Unexpected param values; dockerContainer, Docker dockerHost and login session cannot be null");
+    }
+
+    if (session == null) session = dockerContainer.dockerHost.session;
+
+    try {
+      if (!session.isConnected()) session.connect();
+
+      AzureDockerVMOps.waitForDockerDaemonStartup(session);
+
+      String cmd1 = String.format("docker create -p \"%s\" --name %s %s \n", dockerContainer.dockerPortSettings, dockerContainer.dockerContainerName, dockerContainer.dockerImageName);
+      if (DEBUG) System.out.format("Start executing: %s", cmd1);
+      String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
+      if (DEBUG) System.out.println(cmdOut1);
+      if (DEBUG) System.out.format("Done executing: %s", cmd1);
+
+      return  dockerContainer;
+    } catch (Exception e) {
+      throw new AzureDockerException(e.getMessage(), e);
+    }
+  }
+
+  public static AzureDockerContainerInstance create(AzureDockerImageInstance dockerImageInstance, Session session) {
+    if (dockerImageInstance == null || dockerImageInstance.host == null || (session == null && dockerImageInstance.host.session == null)) {
+      throw new AzureDockerException("Unexpected param values; dockerImageInstance, Docker dockerHost and login session cannot be null");
+    }
+
+    AzureDockerContainerInstance dockerContainerInstance = new AzureDockerContainerInstance(dockerImageInstance);
+    dockerContainerInstance = create(dockerContainerInstance, session);
+
+    return dockerContainerInstance;
+  }
+
+  public static AzureDockerContainerInstance create(AzureDockerContainerInstance dockerContainerInstance) {
+    if (dockerContainerInstance == null || dockerContainerInstance.dockerHost == null || dockerContainerInstance.dockerHost.session == null) {
+      throw new AzureDockerException("Unexpected param values; dockerImageInstance, Docker dockerHost and login session cannot be null");
+    }
+
+    return create(dockerContainerInstance, dockerContainerInstance.dockerHost.session);
+  }
+
 }
