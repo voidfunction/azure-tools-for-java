@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.microsoft.applicationinsights.management.rest.model.Resource;
-import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.azure.management.resources.Subscription;
 
 public class ApplicationInsightsResourceRegistry {
 	/**
@@ -216,7 +216,7 @@ public class ApplicationInsightsResourceRegistry {
 		for (Resource resource : resourceList) {
 			ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
 					resource.getName(), resource.getInstrumentationKey(),
-					sub.getName(), sub.getId(),
+					sub.displayName(), sub.subscriptionId(),
 					resource.getLocation(), resource.getResourceGroup(), true);
 			list.add(resourceToAdd);
 		}
