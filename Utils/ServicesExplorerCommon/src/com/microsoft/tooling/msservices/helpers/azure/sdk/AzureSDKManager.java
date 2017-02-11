@@ -73,19 +73,25 @@ public class AzureSDKManager {
     public static VirtualMachine createVirtualMachine(String subscriptionId, @NotNull String name, @NotNull String resourceGroup,
                                                       @NotNull String size, @NotNull final VirtualMachineImage vmImage,
                                                       @NotNull final StorageAccount storageAccount, @NotNull final Network network,
-                                                      @NotNull String subnet, @Nullable PublicIpAddress pip, boolean withNewPip,
+                                                      @NotNull String subnet, boolean withNewNetwork, @Nullable PublicIpAddress pip, boolean withNewPip,
                                                       @Nullable AvailabilitySet availabilitySet, boolean withNewAvailabilitySet,
                                                       @NotNull final String username, @Nullable final String password, @Nullable String publicKey) throws Exception {
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         Azure azure = azureManager.getAzure(subscriptionId);
         boolean isWindows = vmImage.osDiskImage().operatingSystem().equals(OperatingSystemTypes.WINDOWS);
         //TODO: resource group
-        VirtualMachine.DefinitionStages.WithPublicIpAddress withPublicIpAddress = azure.virtualMachines().define(name)
+        VirtualMachine.DefinitionStages.WithNetwork withNetwork = azure.virtualMachines().define(name)
                 .withRegion(vmImage.location())
-                .withExistingResourceGroup(resourceGroup)
-                .withExistingPrimaryNetwork(network)
-                .withSubnet(subnet)
-                .withPrimaryPrivateIpAddressDynamic();
+                .withExistingResourceGroup(resourceGroup);
+        VirtualMachine.DefinitionStages.WithPublicIpAddress withPublicIpAddress;
+        if (withNewNetwork) {
+            withPublicIpAddress = withNetwork.withNewPrimaryNetwork("10.0.0.0/28")
+                    .withPrimaryPrivateIpAddressDynamic();
+        } else {
+            withPublicIpAddress = withNetwork.withExistingPrimaryNetwork(network)
+                    .withSubnet(subnet)
+                    .withPrimaryPrivateIpAddressDynamic();
+        }
         VirtualMachine.DefinitionStages.WithOS withOS;
         if (pip == null) {
             if (withNewPip) {

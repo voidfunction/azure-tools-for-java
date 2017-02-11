@@ -84,7 +84,7 @@
                   <forms/>
                 </constraints>
                 <properties>
-                  <text value="Image Label:"/>
+                  <text value="Version #:"/>
                 </properties>
               </component>
               <scrollpane id="7abd">

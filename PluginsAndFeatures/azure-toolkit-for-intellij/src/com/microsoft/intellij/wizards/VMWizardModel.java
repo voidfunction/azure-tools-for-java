@@ -50,6 +50,7 @@ public class VMWizardModel extends WizardModel {
     protected Region region;
     protected VirtualMachineImage virtualMachineImage;
     protected Network virtualNetwork;
+    private boolean withNewNetwork;
     protected StorageAccount storageAccount;
     //    private String availabilitySet;
     protected PublicIpAddress publicIpAddress;
@@ -184,6 +185,14 @@ public class VMWizardModel extends WizardModel {
 
     public void setVirtualNetwork(Network virtualNetwork) {
         this.virtualNetwork = virtualNetwork;
+    }
+
+    public boolean isWithNewNetwork() {
+        return withNewNetwork;
+    }
+
+    public void setWithNewNetwork(boolean withNewNetwork) {
+        this.withNewNetwork = withNewNetwork;
     }
 
     public StorageAccount getStorageAccount() {

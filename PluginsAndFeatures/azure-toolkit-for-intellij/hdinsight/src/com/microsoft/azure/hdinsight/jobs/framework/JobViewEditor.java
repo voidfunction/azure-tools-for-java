@@ -31,6 +31,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.microsoft.azure.hdinsight.jobs.framework.JobViewEditorProvider;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.spark.jobs.framework.JobViewPanel;
+import com.microsoft.intellij.hdinsight.messages.HDInsightBundle;
+import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
