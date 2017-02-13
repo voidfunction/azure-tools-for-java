@@ -31,6 +31,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.ListCellRendererWrapper;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.AccessTier;
@@ -41,6 +42,8 @@ import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.utils.AzureModel;
+import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.helpers.LinkListener;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -55,15 +58,17 @@ import javax.swing.event.DocumentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class CreateArmStorageAccountForm extends DialogWrapper {
     private JPanel contentPane;
-    private JComboBox subscriptionComboBox;
+    private JComboBox<SubscriptionDetail> subscriptionComboBox;
     private JTextField nameTextField;
-    private JComboBox regionComboBox;
+    private JComboBox<String> regionComboBox;
     private JComboBox replicationComboBox;
     private JLabel pricingLabel;
     private JLabel userInfoLabel;
@@ -153,6 +158,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
         regionComboBox.addItemListener(validateListener);
         resourceGrpCombo.addItemListener(validateListener);
+        regionComboBox.addItemListener(e -> loadGroups());
         // TODO
 //        userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
 
@@ -245,7 +251,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         try {
             boolean isNewResourceGroup = createNewRadioButton.isSelected();
             final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
-            storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), nameTextField.getText(), (Region) regionComboBox.getSelectedItem(),
+            storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), nameTextField.getText(), (String) regionComboBox.getSelectedItem(),
                     isNewResourceGroup, resourceGroupName, (Kind) accoountKindCombo.getSelectedItem(), (AccessTier)accessTeirComboBox.getSelectedItem(),
                     (Boolean)encriptonComboBox.getSelectedItem(), replicationComboBox.getSelectedItem().toString());
 
@@ -268,10 +274,10 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         return false;
     }
 
-    public void fillFields(final SubscriptionDetail subscription, Region region) {
+    public void fillFields(final SubscriptionDetail subscription, String region) {
         final CreateArmStorageAccountForm createStorageAccountForm = this;
         if (subscription == null) {
-            loadRegions();
+//            loadRegions();
             accoountKindCombo.setModel(new DefaultComboBoxModel(Kind.values()));
             accoountKindCombo.addItemListener(new ItemListener() {
                 @Override
@@ -297,12 +303,12 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                 }
                 SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
                 List<SubscriptionDetail> subscriptionDetails = subscriptionManager.getSubscriptionDetails();
-                final Vector<SubscriptionDetail> subscriptions = new Vector<SubscriptionDetail>(subscriptionDetails);
-                subscriptionComboBox.setModel(new DefaultComboBoxModel(subscriptions));
-                if (!subscriptions.isEmpty()) {
-                    createStorageAccountForm.subscription = subscriptions.get(0);
-//                    loadRegions();
-                    loadGroups();
+                List<SubscriptionDetail> selectedSubscriptions = subscriptionDetails.stream().filter(SubscriptionDetail::isSelected).collect(Collectors.toList());
+
+                subscriptionComboBox.setModel(new DefaultComboBoxModel<>(selectedSubscriptions.toArray(new SubscriptionDetail[selectedSubscriptions.size()])));
+                if (selectedSubscriptions.size() > 0) {
+                    createStorageAccountForm.subscription = selectedSubscriptions.get(0);
+                    loadRegions();
                 }
             } catch (Exception ex) {
                 DefaultLoader.getUIHelper().logError("An error occurred when trying to load Subscriptions\n\n" + ex.getMessage(), ex);
@@ -312,13 +318,12 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                 @Override
                 public void itemStateChanged(ItemEvent itemEvent) {
                     createStorageAccountForm.subscription = (SubscriptionDetail) itemEvent.getItem();
-//                        loadRegions();
-                    loadGroups();
+                    loadRegions();
                 }
             });
         } else { // if you create SA while creating VM
             this.subscription = subscription;
-            subscriptionComboBox.addItem(subscription.getSubscriptionName());
+            subscriptionComboBox.addItem(subscription);
             accoountKindCombo.addItem(Kind.STORAGE); // only General purpose accounts supported for VMs
             accoountKindCombo.setEnabled(false);
             regionComboBox.addItem(region);
@@ -394,8 +399,23 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     }
 
     public void loadRegions() {
-        // todo: load regions from subscription
-        regionComboBox.setModel(new DefaultComboBoxModel(Region.values()));
+        Map<SubscriptionDetail, List<Location>> subscription2Location = AzureModel.getInstance().getSubscriptionToLocationMap();
+        if (subscription2Location == null || subscription2Location.get(subscriptionComboBox.getSelectedItem()) == null) {
+            ProgressManager.getInstance().run(new Task.Modal(project,"Loading Available Locations...", false) {
+                @Override
+                public void run(ProgressIndicator indicator) {
+                    try {
+                        AzureModelController.updateSubscriptionMaps(null);
+                        fillRegions();
+                    } catch (Exception ex) {
+                        AzurePlugin.log("Error loading locations", ex);
+                    }
+                }
+            });
+        } else {
+            fillRegions();
+        }
+
 //        isLoading = true;
 //
 //        regionComboBox.addItem("<Loading...>");
@@ -437,49 +457,18 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 //        });
     }
 
+    private void fillRegions() {
+        List<String> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(subscriptionComboBox.getSelectedItem())
+                .stream().map(Location::name).sorted().collect(Collectors.toList());
+        regionComboBox.setModel(new DefaultComboBoxModel(locations.toArray()));
+        loadGroups();
+    }
+
     public void loadGroups() {
-        isLoading = true;
-
-        resourceGrpCombo.addItem("<Loading...>");
-
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading resource groups...", false) {
-            @Override
-            public void run(@NotNull ProgressIndicator progressIndicator) {
-                progressIndicator.setIndeterminate(true);
-
-                try {
-                    AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-                    Azure azure = azureManager.getAzure(subscription.getSubscriptionId());
-                    List<ResourceGroup> resourceGroups = azure.resourceGroups().list();
-
-                    final Vector<Object> vector = new Vector<Object>();
-                    vector.addAll(resourceGroups);
-                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            isLoading = false;
-
-                            validateEmptyFields();
-
-                            resourceGrpCombo.removeAllItems();
-                            resourceGrpCombo.setModel(new DefaultComboBoxModel(vector) {
-                                public void setSelectedItem(Object o) {
-                                    if (!(o instanceof String)) {
-                                        super.setSelectedItem(o);
-                                    }
-                                }
-                            });
-                            if (vector.size() > 0) {
-                                resourceGrpCombo.setSelectedIndex(0);
-                            }
-                        }
-                    });
-                } catch (Exception e) {
-                    String msg = "An error occurred while attempting to load resource groups list." + "<br>" + String.format(message("webappExpMsg"), e.getMessage());
-                    DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
-                    AzurePlugin.log(msg, e);
-                }
-            }
-        });
+        // Resource groups already initialized in cache when loading locations on SelectImageStep
+        List<ResourceGroup> groups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(subscriptionComboBox.getSelectedItem()    );
+        List<String> filteredGroups = groups.stream().filter(group -> regionComboBox.getSelectedItem().equals(group.regionName()))
+                .map(ResourceGroup::name).sorted().collect(Collectors.toList());
+        resourceGrpCombo.setModel(new DefaultComboBoxModel<>(filteredGroups.toArray(new String[filteredGroups.size()])));
     }
 }

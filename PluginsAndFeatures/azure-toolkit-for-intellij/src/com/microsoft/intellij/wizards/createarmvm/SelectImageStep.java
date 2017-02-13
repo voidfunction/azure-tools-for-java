@@ -22,6 +22,7 @@
 package com.microsoft.intellij.wizards.createarmvm;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -35,12 +36,19 @@ import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachineOffer;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.compute.VirtualMachineSku;
+import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.ijidea.utility.UpdateProgressIndicator;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.utils.AzureModel;
+import com.microsoft.azuretools.utils.AzureModelController;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -51,13 +59,15 @@ import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class SelectImageStep extends WizardStep<VMWizardModel> {
     private JPanel rootPanel;
     private JList createVmStepsList;
-    private JComboBox regionComboBox;
+    private JComboBox<String> regionComboBox;
 
     private JList imageLabelList;
     private JEditorPane imageDescriptionTextPane;
@@ -203,10 +213,27 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
                 }
             }
         });
-
-        regionComboBox.setModel(new DefaultComboBoxModel(Region.values()));
-        selectRegion();
-
+        Map<SubscriptionDetail, List<Location>> subscription2Location = AzureModel.getInstance().getSubscriptionToLocationMap();
+        if (subscription2Location == null || subscription2Location.get(model.getSubscription()) == null) {
+            ProgressManager.getInstance().run(new Task.Backgroundable(project,"Loading Available Locations...", false) {
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    try {
+                        AzureModelController.updateSubscriptionMaps(null);
+                        ApplicationManager.getApplication().invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                fillRegions();
+                            }
+                        });
+                    } catch (Exception ex) {
+                        AzurePlugin.log("Error loading locations", ex);
+                    }
+                }
+            });
+        } else {
+            fillRegions();
+        }
         if (virtualMachineImages == null) {
             model.getCurrentNavigationState().NEXT.setEnabled(false);
 
@@ -217,9 +244,18 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
         return rootPanel;
     }
 
+    private void fillRegions() {
+        List<String> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(model.getSubscription())
+                .stream().map(Location::name).sorted().collect(Collectors.toList());
+        regionComboBox.setModel(new DefaultComboBoxModel(locations.toArray()));
+        if (locations.size() > 0) {
+            selectRegion();
+        }
+    }
+
     private void selectRegion() {
         fillPublishers();
-        model.setRegion((Region) regionComboBox.getSelectedItem());
+        model.setRegion((String) regionComboBox.getSelectedItem());
     }
 
     private void fillPublishers() {
@@ -230,7 +266,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
             public void run(@org.jetbrains.annotations.NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
 
-                final List<VirtualMachinePublisher> publishers = azure.virtualMachineImages().publishers().listByRegion((Region) regionComboBox.getSelectedItem());
+                final List<VirtualMachinePublisher> publishers = azure.virtualMachineImages().publishers().listByRegion((String) regionComboBox.getSelectedItem());
 
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
                     @Override

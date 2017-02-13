@@ -44,10 +44,9 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.text.SimpleDateFormat;
 
 public class VMWizardModel extends WizardModel {
-    protected Region region;
+    protected String region;
     protected VirtualMachineImage virtualMachineImage;
     protected Network virtualNetwork;
     private boolean withNewNetwork;
@@ -59,7 +58,7 @@ public class VMWizardModel extends WizardModel {
     protected AvailabilitySet availabilitySet;
     protected boolean withNewAvailabilitySet;
     private String name;
-    private VirtualMachineSize size;
+    private String size;
     private String userName;
     private String password;
     private String certificate;
@@ -123,11 +122,11 @@ public class VMWizardModel extends WizardModel {
         this.name = name;
     }
 
-    public VirtualMachineSize getSize() {
+    public String getSize() {
         return size;
     }
 
-    public void setSize(VirtualMachineSize size) {
+    public void setSize(String size) {
         this.size = size;
     }
 
@@ -171,11 +170,11 @@ public class VMWizardModel extends WizardModel {
         this.virtualMachineImage = virtualMachineImage;
     }
 
-    public Region getRegion() {
+    public String getRegion() {
         return region;
     }
 
-    public void setRegion(Region region) {
+    public void setRegion(String region) {
         this.region = region;
     }
 

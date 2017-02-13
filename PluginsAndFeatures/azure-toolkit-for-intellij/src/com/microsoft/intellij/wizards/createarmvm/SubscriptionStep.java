@@ -29,12 +29,8 @@ import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
-import com.microsoft.intellij.forms.ManageSubscriptionPanel;
-import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
 import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.model.Subscription;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -42,14 +38,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
-import java.util.Vector;
+import java.util.stream.Collectors;
 
 public class SubscriptionStep extends WizardStep<VMWizardModel> {
     VMWizardModel model;
     private JPanel rootPanel;
     private JList createVmStepsList;
     private JButton buttonLogin;
-    private JComboBox subscriptionComboBox;
+    private JComboBox<SubscriptionDetail> subscriptionComboBox;
     private JLabel userInfoLabel;
     private Project project;
 
@@ -72,7 +68,7 @@ public class SubscriptionStep extends WizardStep<VMWizardModel> {
         subscriptionComboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
-                if (itemEvent.getItem() instanceof Subscription) {
+                if (itemEvent.getItem() instanceof SubscriptionDetail) {
                     model.setSubscription((SubscriptionDetail) itemEvent.getItem());
                 }
             }
@@ -93,16 +89,18 @@ public class SubscriptionStep extends WizardStep<VMWizardModel> {
             AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
             // not signed in
             if (azureManager == null) {
+                model.getCurrentNavigationState().NEXT.setEnabled(false);
                 return;
             }
             SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
             List<SubscriptionDetail> subscriptionDetails = subscriptionManager.getSubscriptionDetails();
-            final Vector<SubscriptionDetail> subscriptions = new Vector<SubscriptionDetail>(subscriptionDetails);
-            subscriptionComboBox.setModel(new DefaultComboBoxModel(subscriptions));
-            if (!subscriptions.isEmpty()) {
-                model.setSubscription(subscriptions.get(0));
+            List<SubscriptionDetail> selectedSubscriptions = subscriptionDetails.stream().filter(SubscriptionDetail::isSelected).collect(Collectors.toList());
+
+            subscriptionComboBox.setModel(new DefaultComboBoxModel<>(selectedSubscriptions.toArray(new SubscriptionDetail[selectedSubscriptions.size()])));
+            if (selectedSubscriptions.size() > 0) {
+                model.setSubscription(selectedSubscriptions.get(0));
             }
-            model.getCurrentNavigationState().NEXT.setEnabled(!subscriptions.isEmpty());
+            model.getCurrentNavigationState().NEXT.setEnabled(selectedSubscriptions.size() > 0);
         } catch (Exception ex) {
             DefaultLoader.getUIHelper().logError("An error occurred when trying to load Subscriptions\n\n" + ex.getMessage(), ex);
         }

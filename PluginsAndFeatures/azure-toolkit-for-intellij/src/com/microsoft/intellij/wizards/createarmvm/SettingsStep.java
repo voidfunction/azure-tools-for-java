@@ -35,15 +35,16 @@ import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
 import com.microsoft.intellij.forms.CreateVirtualNetworkForm;
-import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -59,6 +60,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
@@ -79,7 +81,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
     private JRadioButton createNewRadioButton;
     private JRadioButton useExistingRadioButton;
     private JTextField resourceGrpField;
-    private JComboBox resourceGrpCombo;
+    private JComboBox<String> resourceGrpCombo;
     private JComboBox pipCombo;
     private JComboBox nsgCombo;
 
@@ -134,9 +136,8 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
         networkComboBox.setRenderer(new ListCellRendererWrapper<Object>() {
             @Override
             public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
-                if (o instanceof VirtualNetwork) {
-                    VirtualNetwork vn = (VirtualNetwork) o;
-                    setText(String.format("%s (%s)", vn.getName(), vn.getLocation()));
+                if (o instanceof Network) {
+                    setText(String.format("%s (%s)", ((Network) o).name(), ((Network) o).name()));
                 }
             }
         });
@@ -158,7 +159,6 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                 }
             }
         });
-
         nsgCombo.setRenderer(new ListCellRendererWrapper<Object>() {
             @Override
             public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
@@ -167,10 +167,22 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                 }
             }
         });
+        availabilityComboBox.setRenderer(new ListCellRendererWrapper<Object>() {
+            @Override
+            public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
+                if (o instanceof AvailabilitySet) {
+                    setText(((AvailabilitySet) o).name());
+                }
+            }
+        });
     }
 
     private void fillResourceGroups() {
-        resourceGrpCombo.setModel(new DefaultComboBoxModel(azure.resourceGroups().list().toArray()));
+        // Resource groups already initialized in cache when loading locations on SelectImageStep
+        List<ResourceGroup> groups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(model.getSubscription());
+        List<String> filteredGroups = groups.stream().filter(group -> model.getRegion().equals(group.regionName()))
+                .map(ResourceGroup::name).sorted().collect(Collectors.toList());
+        resourceGrpCombo.setModel(new DefaultComboBoxModel<>(filteredGroups.toArray(new String[filteredGroups.size()])));
     }
 
     @Override
@@ -307,7 +319,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
         List<Network> filteredNetworks = new ArrayList<>();
 
         for (Network network : virtualNetworks) {
-            if (network.region() != null && network.region().equals(model.getRegion())) {
+            if (network.regionName() != null && network.regionName().equals(model.getRegion())) {
                 filteredNetworks.add(network);
             }
         }
@@ -413,7 +425,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
             // VM and storage account need to be in the same region;
             // only general purpose accounts support page blobs, so only they can be used to create vm;
             // zone-redundant acounts not supported for vm
-            if (storageAccount.region().equals(model.getRegion())
+            if (storageAccount.regionName().equals(model.getRegion())
                     && storageAccount.kind() == Kind.STORAGE
                     && storageAccount.sku().name() != SkuName.STANDARD_ZRS) {
                 filteredStorageAccounts.add(storageAccount);
@@ -502,7 +514,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
         for (PublicIpAddress publicIpAddress : publicIpAddresses) {
 
             // VM and public ip address need to be in the same region
-            if (publicIpAddress.region() != null && publicIpAddress.region().equals(model.getRegion())) {
+            if (publicIpAddress.regionName() != null && publicIpAddress.regionName().equals(model.getRegion())) {
                 filteredPips.add(publicIpAddress);
             }
         }
@@ -578,7 +590,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
 
         for (NetworkSecurityGroup nsg : networkSecurityGroups) {
             // VM and network security group
-            if (nsg.region().equals(model.getRegion())) {
+            if (model.getRegion().equals(nsg.regionName())) {
                 filteredNsgs.add(nsg);
             }
         }
@@ -760,7 +772,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                             .createVirtualMachine(model.getSubscription().getSubscriptionId(),
                                     model.getName(),
                                     resourceGroupName,
-                                    model.getSize().name(),
+                                    model.getSize(),
                                     model.getVirtualMachineImage(),
                                     storageAccount,
                                     model.getVirtualNetwork(),

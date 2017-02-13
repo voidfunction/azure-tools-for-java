@@ -46,7 +46,7 @@ public class AzureSDKManager {
         return azureManager.getAzure(subscriptionId);
     }
 
-    public static StorageAccount createStorageAccount(String subscriptionId, String name, Region region, boolean newResourceGroup, String resourceGroup,
+    public static StorageAccount createStorageAccount(String subscriptionId, String name, String region, boolean newResourceGroup, String resourceGroup,
                                                       Kind kind, AccessTier accessTier, boolean enableEncription, String skuName) throws Exception {
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         Azure azure = azureManager.getAzure(subscriptionId);

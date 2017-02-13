@@ -53,10 +53,10 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
     private Runnable onCreate;
     private Network network;
     private String subscriptionId;
-    private Region region;
+    private String region;
     private Project project;
 
-    public CreateVirtualNetworkForm(Project project, String subscriptionId, Region region) {
+    public CreateVirtualNetworkForm(Project project, String subscriptionId, String region) {
         super(project, true);
 
         this.project = project;

@@ -66,7 +66,7 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
     private JList createVmStepsList;
     private JEditorPane imageDescriptionTextPane;
     private JTextField vmNameTextField;
-    private JComboBox vmSizeComboBox;
+    private JComboBox<String> vmSizeComboBox;
     private JTextField vmUserTextField;
     private JPasswordField vmPasswordField;
     private JPasswordField confirmPasswordField;
@@ -250,7 +250,7 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
                     ApplicationManager.getApplication().invokeAndWait(new Runnable() {
                         @Override
                         public void run() {
-                            vmSizeComboBox.setModel(new DefaultComboBoxModel(sizes.toArray()));
+                            vmSizeComboBox.setModel(new DefaultComboBoxModel<>(sizes.stream().map(VirtualMachineSize::name).toArray(String[]::new)));
 
                             selectDefaultSize();
                         }
@@ -302,7 +302,7 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
         String certificate = certificateCheckBox.isSelected() ? certificateField.getText() : "";
 
         model.setName(name);
-        model.setSize(((VirtualMachineSize) vmSizeComboBox.getSelectedItem()));
+        model.setSize((String)vmSizeComboBox.getSelectedItem());
         model.setUserName(vmUserTextField.getText());
         model.setPassword(password);
         model.setCertificate(certificate);
