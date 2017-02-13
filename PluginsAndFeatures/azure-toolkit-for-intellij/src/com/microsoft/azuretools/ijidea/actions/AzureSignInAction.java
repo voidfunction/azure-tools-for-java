@@ -93,7 +93,7 @@ public class AzureSignInAction extends AnAction {
                 if (w.getResult() == JOptionPane.OK_OPTION) {
                     AuthMethodDetails authMethodDetailsUpdated = w.getAuthMethodDetails();
                     authMethodManager.setAuthMethodDetails(authMethodDetailsUpdated);
-                    SelectSubscriptionsAction.onShowSubscriptions(e);
+                    SelectSubscriptionsAction.onShowSubscriptions(project);
                 }
             }
         } catch (Exception ex) {

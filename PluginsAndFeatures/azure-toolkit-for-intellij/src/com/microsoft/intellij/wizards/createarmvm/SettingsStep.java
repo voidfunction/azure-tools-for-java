@@ -218,10 +218,14 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                                           final DefaultComboBoxModel loadingVNModel = new DefaultComboBoxModel(new String[]{CREATE_NEW, "<Loading...>"}) {
                                               @Override
                                               public void setSelectedItem(Object o) {
+                                                  super.setSelectedItem(o);
                                                   if (CREATE_NEW.equals(o)) {
-                                                      showNewVirtualNetworkForm();
+//                                                      showNewVirtualNetworkForm();
+                                                      model.setWithNewNetwork(true);
+                                                      model.setVirtualNetwork(null);
+                                                      model.setSubnet(null);
                                                   } else {
-                                                      super.setSelectedItem(o);
+//                                                      super.setSelectedItem(o);
                                                       model.setVirtualNetwork((Network) o);
                                                   }
                                               }
@@ -240,10 +244,15 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
         DefaultComboBoxModel refreshedVNModel = new DefaultComboBoxModel(filterVN().toArray()) {
             @Override
             public void setSelectedItem(final Object o) {
+                super.setSelectedItem(o);
                 if (CREATE_NEW.equals(o)) {
-                    showNewVirtualNetworkForm();
+//                    showNewVirtualNetworkForm();
+                    model.setWithNewNetwork(true);
+                    model.setVirtualNetwork(null);
+                    model.setSubnet(null);
                 } else {
-                    super.setSelectedItem(o);
+//                    super.setSelectedItem(o);
+                    model.setWithNewNetwork(false);
                     if (o instanceof Network) {
                         model.setVirtualNetwork((Network) o);
                         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
@@ -491,8 +500,9 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
         Vector<PublicIpAddress> filteredPips = new Vector<>();
 
         for (PublicIpAddress publicIpAddress : publicIpAddresses) {
+
             // VM and public ip address need to be in the same region
-            if (publicIpAddress.region().equals(model.getRegion())) {
+            if (publicIpAddress.region() != null && publicIpAddress.region().equals(model.getRegion())) {
                 filteredPips.add(publicIpAddress);
             }
         }
@@ -755,6 +765,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                                     storageAccount,
                                     model.getVirtualNetwork(),
                                     model.getSubnet(),
+                                    model.isWithNewNetwork(),
                                     model.getPublicIpAddress(),
                                     model.isWithNewPip(),
                                     model.getAvailabilitySet(),

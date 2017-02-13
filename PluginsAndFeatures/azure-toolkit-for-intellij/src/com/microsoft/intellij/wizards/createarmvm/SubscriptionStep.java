@@ -27,6 +27,7 @@ import com.intellij.ui.wizard.WizardStep;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.forms.ManageSubscriptionPanel;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
@@ -63,21 +64,7 @@ public class SubscriptionStep extends WizardStep<VMWizardModel> {
         buttonLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                final ManageSubscriptionPanel manageSubscriptionPanel = new ManageSubscriptionPanel(project, true);
-                final DefaultDialogWrapper subscriptionsDialog = new DefaultDialogWrapper(null, manageSubscriptionPanel) {
-                    @Nullable
-                    @Override
-                    protected JComponent createSouthPanel() {
-                        return null;
-                    }
-                    @Override
-                    protected JComponent createTitlePane() {
-                        return null;
-                    }
-                };
-                manageSubscriptionPanel.setDialog(subscriptionsDialog);
-                subscriptionsDialog.show();
-
+                SelectSubscriptionsAction.onShowSubscriptions(project);
                 loadSubscriptions();
             }
         });

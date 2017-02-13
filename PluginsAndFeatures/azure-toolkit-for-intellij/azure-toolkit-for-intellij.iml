@@ -18,11 +18,21 @@
     <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="com.microsoft.azure:azure-storage:4.0.0" level="project" />
     <orderEntry type="library" name="adauth4j" level="project" />
-    <orderEntry type="module" module-name="hdinsight" />
-    <orderEntry type="module" module-name="common" />
+    <orderEntry type="module" module-name="hdinsight" exported="" />
+    <orderEntry type="module" module-name="common" exported="" />
     <orderEntry type="library" name="hdinsight-node-common" level="project" />
-    <orderEntry type="library" name="com.microsoft.azuretools:auth-manage:0.0.1-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="com.microsoft.azuretools:azure-explorer-common:0.0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" exported="" name="com.microsoft.azuretools:azure-explorer-common:0.0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" exported="" name="com.microsoft.azuretools:auth-manage:0.0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-compute:1.0.0-beta4.1" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/CloudServicesCommons.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
   <component name="POM File Configuration" pomFile="" />
 </module>

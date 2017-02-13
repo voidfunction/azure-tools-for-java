@@ -52,11 +52,11 @@ public class SelectSubscriptionsAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-        onShowSubscriptions(e);
+        Project project = DataKeys.PROJECT.getData(e.getDataContext());
+        onShowSubscriptions(project);
     }
 
-    public static void onShowSubscriptions(AnActionEvent e) {
-        Project project = DataKeys.PROJECT.getData(e.getDataContext());
+    public static void onShowSubscriptions(Project project) {
         JFrame frame = WindowManager.getInstance().getFrame(project);
 
         try {
