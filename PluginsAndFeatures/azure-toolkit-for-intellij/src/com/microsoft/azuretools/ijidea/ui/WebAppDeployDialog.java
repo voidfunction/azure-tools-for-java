@@ -22,6 +22,8 @@
 
 package com.microsoft.azuretools.ijidea.ui;
 
+import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
@@ -32,6 +34,11 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.packaging.artifacts.Artifact;
+import com.intellij.ui.AnActionButton;
+import com.intellij.ui.AnActionButtonRunnable;
+import com.intellij.ui.AnActionButtonUpdater;
+import com.intellij.ui.ToolbarDecorator;
+import com.intellij.ui.table.JBTable;
 import com.microsoft.azure.management.appservice.AppServicePlan;
 import com.microsoft.azure.management.appservice.JavaVersion;
 import com.microsoft.azure.management.appservice.PublishingProfile;
@@ -53,6 +60,8 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.html.HTMLDocument;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
@@ -71,9 +80,85 @@ public class WebAppDeployDialog extends DialogWrapper {
     private JCheckBox deployToRootCheckBox;
     private JEditorPane editorPaneAppServiceDetails;
     private JButton editButton;
+    private JLabel labelDescription;
+    private JScrollPane scrollPane;
+    private JPanel panelTable;
 
     private final Module module;
     private final Artifact artifact;
+
+    private void createUIComponents() {
+        DefaultTableModel tableModel = new DefaultTableModel();
+        tableModel.addColumn("Name");
+        tableModel.addColumn("JDK");
+        tableModel.addColumn("Web Container");
+        tableModel.addColumn("Resource Group");
+
+        table = new JBTable(tableModel);
+        table.setRowSelectionAllowed(true);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent event) {
+                if (event.getValueIsAdjusting()) return;
+                //System.out.println("row : " + table.getValueAt(table.getSelectedRow(), 0).toString());
+                fillAppServiceDetails();
+            }
+        });
+
+        AnActionButton refreshDockerHostsAction = new AnActionButton("Refresh", AllIcons.Actions.Refresh) {
+            @Override
+            public void actionPerformed(AnActionEvent anActionEvent) {
+                refreshAppServices();
+            }
+        };
+
+        ToolbarDecorator tableToolbarDecorator = ToolbarDecorator.createDecorator(table)
+                .setAddAction(new AnActionButtonRunnable() {
+                    @Override
+                    public void run(AnActionButton button) {
+                        createAppService();
+                    }
+                })
+//                .setEditAction(new AnActionButtonRunnable() {
+//                    @Override
+//                    public void run(AnActionButton anActionButton) {
+//                        onEditDockerHostAction();
+//                    }
+//                })
+                .setRemoveAction(new AnActionButtonRunnable() {
+                    @Override
+                    public void run(AnActionButton button) {
+                        deleteAppService();
+                    }
+                })
+//                .setEditActionUpdater(new AnActionButtonUpdater() {
+//                    @Override
+//                    public boolean isEnabled(AnActionEvent e) {
+//                        return table.getSelectedRow() != -1;
+//                    }
+//                })
+                .setRemoveActionUpdater(new AnActionButtonUpdater() {
+                    @Override
+                    public boolean isEnabled(AnActionEvent e) {
+                        return table.getSelectedRow() != -1;
+                    }
+                })
+                .disableUpDownActions()
+                .addExtraActions(refreshDockerHostsAction);
+
+
+        panelTable = tableToolbarDecorator.createPanel();
+
+
+    }
+
+    private void refreshAppServices() {
+        cleanTable();
+        editorPaneAppServiceDetails.setText("");
+        AzureModel.getInstance().setResourceGroupToWebAppMap(null);
+        fillTable();
+    }
 
     static class WebAppDetails {
         public SubscriptionDetail subscriptionDetail;
@@ -109,47 +194,6 @@ public class WebAppDeployDialog extends DialogWrapper {
         setTitle("Deploy Web App");
         setOKButtonText("Deploy");
 
-        createButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                createAppService();
-            }
-        });
-
-        deleteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                deleteAppService();
-            }
-        });
-
-        refreshButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                cleanTable();
-                editorPaneAppServiceDetails.setText("");
-                AzureModel.getInstance().setResourceGroupToWebAppMap(null);
-                fillTable();
-            }
-        });
-
-        editButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                editAppService();
-            }
-        });
-
-        table.setRowSelectionAllowed(true);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent event) {
-                if (event.getValueIsAdjusting()) return;
-                //System.out.println("row : " + table.getValueAt(table.getSelectedRow(), 0).toString());
-                fillAppServiceDetails();
-            }
-        });
 
 //        class DisabledItemSelectionModel extends DefaultListSelectionModel {
 //            @Override
@@ -173,6 +217,11 @@ public class WebAppDeployDialog extends DialogWrapper {
                 }
             }
         });
+
+        Font font = UIManager.getFont("Label.font");
+        String bodyRule = "body { font-family: " + font.getFamily() + "; " +
+                "font-size: " + font.getSize() + "pt; }";
+        ((HTMLDocument)editorPaneAppServiceDetails.getDocument()).getStyleSheet().addRule(bodyRule);
 
         init();
     }
@@ -241,12 +290,11 @@ public class WebAppDeployDialog extends DialogWrapper {
         Map<ResourceGroup, List<WebApp>> rgwaMap = AzureModel.getInstance().getResourceGroupToWebAppMap();
         Map<ResourceGroup, List<AppServicePlan>> rgaspMap = AzureModel.getInstance().getResourceGroupToAppServicePlanMap();
 
-        DefaultTableModel tableModel = new DefaultTableModel();
-        tableModel.addColumn("Name");
-        tableModel.addColumn("JDK");
-        tableModel.addColumn("Web Container");
-        tableModel.addColumn("Resource Group");
+        DefaultTableModel tableModel = (DefaultTableModel)table.getModel();
+        tableModel.getDataVector().removeAllElements();
+
         webAppWebAppDetailsMap.clear();
+
         for (SubscriptionDetail sd : srgMap.keySet()) {
             if (!sd.isSelected()) continue;
 

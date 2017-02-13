@@ -27,6 +27,7 @@ import org.jdesktop.swingx.JXHyperlink;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.text.html.HTMLDocument;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URI;
@@ -37,6 +38,7 @@ public class ArtifactValidationWindow extends JDialog {
     private JButton buttonCancel;
     //private JTextPane textPane;
     private JEditorPane editorPane;
+    private JLabel labelDescription;
 
     private List<String> issues;
 
@@ -88,6 +90,8 @@ public class ArtifactValidationWindow extends JDialog {
 
 
         editorPane.setText(sb.toString());
+        editorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
+
         editorPane.addHyperlinkListener(new HyperlinkListener() {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -100,10 +104,16 @@ public class ArtifactValidationWindow extends JDialog {
                 }
             }
         });
+
+        Font font = UIManager.getFont("Label.font");
+        String bodyRule = "body { font-family: " + font.getFamily() + "; " +
+                "font-size: " + font.getSize() + "pt; }";
+        ((HTMLDocument)editorPane.getDocument()).getStyleSheet().addRule(bodyRule);
     }
 
     private void onCancel() {
         // add your code here if necessary
         dispose();
     }
+
 }
