@@ -44,9 +44,6 @@ import com.microsoft.intellij.ui.AzureAbstractPanel;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
 import com.microsoft.intellij.util.PluginHelper;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
 import org.jdesktop.swingx.JXHyperlink;
 
 import javax.swing.*;

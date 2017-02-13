@@ -31,17 +31,15 @@ import com.microsoft.applicationinsights.preference.ApplicationInsightsPageTable
 import com.microsoft.applicationinsights.preference.ApplicationInsightsPageTableElements;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
+import com.microsoft.azure.management.resources.Subscription;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
-import com.microsoft.intellij.forms.ManageSubscriptionPanel;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
 import com.microsoft.intellij.util.MethodUtils;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.intellij.wizards.WizardCacheManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 import com.microsoft.applicationinsights.management.rest.client.RestOperationException;
 import org.jetbrains.annotations.Nullable;
@@ -83,8 +81,8 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
             TableColumn each = insightsTable.getColumnModel().getColumn(i);
             each.setPreferredWidth(InsightsTableModel.getColumnWidth(i, 450));
         }
-        importInstrumentationKeysFromButton.addActionListener(importButtonListener());
-        newButton.addActionListener(newButtonListener());
+//        importInstrumentationKeysFromButton.addActionListener(importButtonListener());
+//        newButton.addActionListener(newButtonListener());
         removeButton.addActionListener(removeButtonListener());
         addButton.addActionListener(addButtonListener());
         detailsButton.addActionListener(detailsButtonListener());
@@ -136,10 +134,15 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
 
     private void loadInfoFirstTime() {
         try {
-            AzureManager manager = AzureManagerImpl.getManager(myProject);
-            List<Subscription> subList = manager.getSubscriptionList();
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null) {
+                return;
+            }
+            List<Subscription> subList = azureManager.getSubscriptions();
             if (subList.size() > 0) {
                 if (!AzureSettings.getSafeInstance(myProject).isAppInsightsLoaded()) {
+                    updateApplicationInsightsResourceRegistry(subList, myProject);
                     // TODO for AD authentication
                     /*if (manager.authenticated()) {
                         // authenticated using AD. Proceed for updating application insights registry.
@@ -162,27 +165,33 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
     }
 
     private void createSubscriptionDialog(boolean invokeSignIn) {
-        try {
-            final ManageSubscriptionPanel manageSubscriptionPanel = new ManageSubscriptionPanel(myProject, false);
-            final DefaultDialogWrapper subscriptionsDialog = new DefaultDialogWrapper(myProject, manageSubscriptionPanel) {
-                @Nullable
-                @Override
-                protected JComponent createSouthPanel() {
-                    return null;
-                }
-                @Override
-                protected JComponent createTitlePane() {
-                    return null;
-                }
-            };
-            manageSubscriptionPanel.setDialog(subscriptionsDialog);
+//        try {
+//            final ManageSubscriptionPanel manageSubscriptionPanel = new ManageSubscriptionPanel(myProject, false);
+//            final DefaultDialogWrapper subscriptionsDialog = new DefaultDialogWrapper(myProject, manageSubscriptionPanel) {
+//                @Nullable
+//                @Override
+//                protected JComponent createSouthPanel() {
+//                    return null;
+//                }
+//                @Override
+//                protected JComponent createTitlePane() {
+//                    return null;
+//                }
+//            };
+//            manageSubscriptionPanel.setDialog(subscriptionsDialog);
             //TODO
 //            JButton signInBtn = manageSubscriptionPanel.getSignInButton();
 //            if (invokeSignIn && signInBtn != null && signInBtn.getText().equalsIgnoreCase("Sign In...")) {
 //                signInBtn.doClick();
 //            }
-            subscriptionsDialog.show();
-            List<Subscription> subList = AzureManagerImpl.getManager(myProject).getSubscriptionList();
+            /*subscriptionsDialog.show();
+            com.microsoft.azuretools.sdkmanage.AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null) {
+                return;
+            }
+            List<Subscription> subList =
+                    AzureManagerImpl.getManager(myProject).getSubscriptionList();
             if (subList.size() == 0) {
                 keeepManuallyAddedList(myProject);
             } else {
@@ -192,7 +201,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
             ((InsightsTableModel) insightsTable.getModel()).fireTableDataChanged();
         } catch(Exception ex) {
             PluginUtil.displayErrorDialog(message("errTtl"), message("importErrMsg"));
-        }
+        }*/
     }
 
     private List<ApplicationInsightsPageTableElement> getTableContent() {
@@ -212,16 +221,16 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
         return elements.getElements();
     }
 
-    private ActionListener importButtonListener() {
+    /*private ActionListener importButtonListener() {
         return new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     AzureManager manager = AzureManagerImpl.getManager(myProject);
                     List<Subscription> subList = manager.getSubscriptionList();
                     if (subList.size() > 0) {
-                        /*if (manager.authenticated()) {
+                        *//**//*if (manager.authenticated()) {
                             createSubscriptionDialog(false);
-                        } else {*/
+                        } else {*//**//*
                             // imported publish settings file.
                             manager.clearImportedPublishSettingsFiles();
                             WizardCacheManager.clearSubscriptions();
@@ -235,10 +244,10 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
                 }
             }
         };
-    }
+    }*/
 
     public static void updateApplicationInsightsResourceRegistry(List<Subscription> subList, Project project) throws IOException, RestOperationException, AzureCmdException {
-        for (Subscription sub : subList) {
+/*        for (Subscription sub : subList) {
             AzureManager manager = AzureManagerImpl.getManager(project);
             // fetch resources available for particular subscription
             List<Resource> resourceList = manager.getApplicationInsightsResources(sub.getId());
@@ -254,10 +263,10 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
                     String key = registryRes.getInstrumentationKey();
                     int index = ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(key);
                     if (inUsekeyList.contains(key)) {
-						/*
+						*//*
 						 * key is used by project but not present in cloud,
 						 * so make it as manually added resource and not imported.
-						 */
+						 *//*
                         ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
                                 key, key, message("unknown"), message("unknown"),
                                 message("unknown"), message("unknown"), false);
@@ -292,7 +301,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
             }
         }
         AzureSettings.getSafeInstance(project).saveAppInsights();
-        AzureSettings.getSafeInstance(project).setAppInsightsLoaded(true);
+        AzureSettings.getSafeInstance(project).setAppInsightsLoaded(true);*/
     }
 
     public static void keeepManuallyAddedList(Project project) {
@@ -318,8 +327,12 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
     public static void refreshDataForDialog() {
         try {
             Project project = PluginUtil.getSelectedProject();
-            AzureManager manager = AzureManagerImpl.getManager(project);
-            List<Subscription> subList = manager.getSubscriptionList();
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null) {
+                return;
+            }
+            List<Subscription> subList = azureManager.getSubscriptions();
             if (subList.size() > 0 && !AzureSettings.getSafeInstance(project).isAppInsightsLoaded()) {
                 /*if (manager.authenticated()) {
                     // authenticated using AD. Proceed for updating application insights registry.
@@ -335,7 +348,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
         }
     }
 
-    private ActionListener newButtonListener() {
+    /*private ActionListener newButtonListener() {
         return new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -357,7 +370,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
                 }
             }
         };
-    }
+    }*/
 
     private void createNewDilaog() {
         try {
