@@ -26,6 +26,7 @@ import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappsModule;
@@ -40,6 +41,7 @@ public class AzureModule extends RefreshableNode {
     private StorageModule storageModule;
     private WebappsModule webappsModule;
     private HDInsightRootModule hdInsightModule;
+    private DockerHostModule dockerHostModule;
 
     public AzureModule(Object project) {
         this(null, ICON_PATH, null);
@@ -48,6 +50,7 @@ public class AzureModule extends RefreshableNode {
         webappsModule = new WebappsModule(this);
         //hdInsightModule = new HDInsightRootModule(this);
         vmArmServiceModule = new VMArmModule(this);
+        dockerHostModule = new DockerHostModule(this);
     }
 
     public AzureModule(Node parent, String iconPath, Object data) {
@@ -111,6 +114,13 @@ public class AzureModule extends RefreshableNode {
                 addChildNode(hdInsightModule);
             }
             hdInsightModule.load();
+        }
+        if (!dockerHostModule.isLoading()) {
+            if (!isDirectChild(dockerHostModule)) {
+                addChildNode(dockerHostModule);
+            }
+
+            dockerHostModule.load();
         }
     }
 

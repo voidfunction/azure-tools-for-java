@@ -28,9 +28,6 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tasks.DockerContainerDeployTask;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -86,7 +83,7 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
 //  }
 
   public void DialogShaker(ValidationInfo info) {
-    PluginUtil.DialogShaker(info, this);
+    PluginUtil.dialogShaker(info, this);
   }
 
   public String deploy() {
@@ -112,7 +109,7 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
    */
   private void performFinish() {
 
-    DefaultLoader.getIdeHelper().runInBackground(model.getProject(), "Deploying Web app to a Docker host on Azure", false, true, "Deploying Web app to a Docker host on Azure...", new Runnable() {
+    DefaultLoader.getIdeHelper().runInBackground(model.getProject(), "Deploying Web App to a Docker Host on Azure", false, true, "Deploying Web app to a Docker host on Azure...", new Runnable() {
       @Override
       public void run() {
         try {

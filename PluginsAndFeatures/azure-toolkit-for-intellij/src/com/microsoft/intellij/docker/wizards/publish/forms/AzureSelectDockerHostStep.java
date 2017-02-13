@@ -492,7 +492,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
 //    protected void doAction(ActionEvent e) {
 //      ValidationInfo info = doClickApplyValidate();
 //      if(info != null) {
-//        DialogShaker(info);
+//        dialogShaker(info);
 //      } else {
 //        doClickApplyAction();
 //      }

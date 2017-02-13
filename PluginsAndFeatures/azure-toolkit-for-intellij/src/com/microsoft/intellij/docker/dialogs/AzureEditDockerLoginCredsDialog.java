@@ -233,7 +233,7 @@ public class AzureEditDockerLoginCredsDialog extends DialogWrapper {
   }
 
   private void DialogShaker(ValidationInfo info) {
-    PluginUtil.DialogShaker(info, this);
+    PluginUtil.dialogShaker(info, this);
   }
 
   private class AzureDockerUpdateRunner extends Task.Backgroundable {

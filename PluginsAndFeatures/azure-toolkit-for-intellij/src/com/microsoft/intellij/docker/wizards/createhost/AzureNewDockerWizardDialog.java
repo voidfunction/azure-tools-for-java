@@ -39,7 +39,7 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
   }
 
   public void DialogShaker(ValidationInfo info) {
-    PluginUtil.DialogShaker(info, this);
+    PluginUtil.dialogShaker(info, this);
   }
 
   @Override

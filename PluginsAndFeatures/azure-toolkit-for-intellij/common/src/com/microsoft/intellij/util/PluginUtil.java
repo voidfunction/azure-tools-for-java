@@ -36,9 +36,13 @@ import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogEarthquakeShaker;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.IdeFocusManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureRole;
@@ -226,5 +230,13 @@ public class PluginUtil {
 
     public static Icon getIcon(String iconPath) {
         return IconLoader.getIcon(iconPath);
+    }
+
+    public static void dialogShaker(ValidationInfo info, DialogWrapper dialogWrapper) {
+        if(info.component != null && info.component.isVisible()) {
+            IdeFocusManager.getInstance((Project)null).requestFocus(info.component, true);
+        }
+
+        DialogEarthquakeShaker.shake(dialogWrapper.getPeer().getWindow());
     }
 }
