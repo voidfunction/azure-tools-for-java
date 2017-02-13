@@ -55,7 +55,6 @@ configurations {
 
 dependencies {
     compile 'com.microsoft.azuretools:auth-manage:0.0.1-SNAPSHOT'
-    compile 'com.microsoft.azuretools:ad-auth:0.0.1-SNAPSHOT'
     compile 'com.microsoft.azuretools:azure-explorer-common:0.0.1-SNAPSHOT'
     compile 'com.microsoft.azure:azure-storage:4.0.0'
     compile fileTree(dir: 'lib', include: ['*.jar'])
