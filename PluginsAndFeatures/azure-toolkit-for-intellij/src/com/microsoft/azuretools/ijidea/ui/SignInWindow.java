@@ -102,7 +102,7 @@ public class SignInWindow extends JDialog {
         fileChooser.setFileFilter(filter);
         fileChooser.addChoosableFileFilter(filter);
         fileChooser.setApproveButtonText("Select");
-        fileChooser.setDialogTitle("Select Authenticated File");
+        fileChooser.setDialogTitle("Select Authentication File");
 
         this.authMethodDetails = authMethodDetails;
         authFileTextField.setText(authMethodDetails.getCredFilePath());
