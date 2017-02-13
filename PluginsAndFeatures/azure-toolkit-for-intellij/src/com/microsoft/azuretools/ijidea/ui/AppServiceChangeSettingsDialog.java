@@ -31,19 +31,17 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
-import com.microsoft.azure.management.appservice.*;
-import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azure.management.appservice.JavaVersion;
+import com.microsoft.azure.management.appservice.WebApp;
+import com.microsoft.azure.management.appservice.WebContainer;
 import com.microsoft.azuretools.ijidea.utility.UpdateProgressIndicator;
-import com.microsoft.azuretools.utils.*;
+import com.microsoft.azuretools.utils.IProgressIndicator;
+import com.microsoft.azuretools.utils.WebAppUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.List;
-import java.net.URI;
-import java.util.*;
 
 /**
  * Created by vlashch on 1/30/17.

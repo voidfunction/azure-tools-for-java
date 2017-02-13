@@ -106,7 +106,7 @@ public class WarSelectDialog extends JDialog {
         if (i < 0) {
             JOptionPane.showMessageDialog(this,
                     "Please select an artifact",
-                    "Select artifact info",
+                    "Select Artifact Status",
                     JOptionPane.INFORMATION_MESSAGE);
             return;
         }

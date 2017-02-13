@@ -62,8 +62,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.html.HTMLDocument;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -74,9 +72,6 @@ public class WebAppDeployDialog extends DialogWrapper {
 
     private JPanel contentPane;
     private JTable table;
-    private JButton createButton;
-    private JButton deleteButton;
-    private JButton refreshButton;
     private JCheckBox deployToRootCheckBox;
     private JEditorPane editorPaneAppServiceDetails;
     private JButton editButton;
@@ -149,8 +144,6 @@ public class WebAppDeployDialog extends DialogWrapper {
 
 
         panelTable = tableToolbarDecorator.createPanel();
-
-
     }
 
     private void refreshAppServices() {
@@ -498,7 +491,7 @@ public class WebAppDeployDialog extends DialogWrapper {
         WebAppDetails wad = webAppWebAppDetailsMap.get(tableModel.getValueAt(selectedRow, 0));
         WebApp webApp = wad.webApp;
         boolean isDeployToRoot = deployToRootCheckBox.isSelected();
-        ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Deploying Web App...", true) {
+        ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Deploy Web App Progress", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
                 try {
@@ -539,7 +532,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     LOGGER.error("deploy", ex);
-                    ErrorWindow.show(ex.getMessage(), "Deploy Application Error", WebAppDeployDialog.this.contentPane);
+                    ErrorWindow.show(ex.getMessage(), "Deploy Web App Error", WebAppDeployDialog.this.contentPane);
                 }
             }
         });
@@ -551,7 +544,7 @@ public class WebAppDeployDialog extends DialogWrapper {
             public void run() {
                 int choice = JOptionPane.showOptionDialog(WebAppDeployDialog.this.getContentPane(),
                         "Web App has been uploaded successfully.\nLink: " + link + "\nOpen in browser?",
-                        "Web App Upload Status",
+                        "Upload Web App Status",
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.QUESTION_MESSAGE,
                         null, null, null);

@@ -679,7 +679,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-        ProgressManager.getInstance().run(new Task.Modal(null,"Creating App Service...", true) {
+        ProgressManager.getInstance().run(new Task.Modal(null,"Create App Service Progress", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
                 try {

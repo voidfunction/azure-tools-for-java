@@ -32,7 +32,6 @@ import com.intellij.ui.table.JBTable;
 import com.microsoft.azuretools.authmanage.srvpri.SrvPriManager;
 import com.microsoft.azuretools.authmanage.srvpri.report.IListener;
 import com.microsoft.azuretools.authmanage.srvpri.step.Status;
-import com.microsoft.azuretools.utils.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -41,8 +40,10 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class SrvPriCreationStatusDialog extends JDialog {
     private JPanel contentPane;
@@ -104,7 +105,7 @@ public class SrvPriCreationStatusDialog extends JDialog {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
-        setTitle("Service Principal Creation Status");
+        setTitle("Creation Service Principal Status");
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -200,7 +201,7 @@ public class SrvPriCreationStatusDialog extends JDialog {
     private class ActionRunner extends Task.Modal implements IListener<Status> {
         //ProgressIndicator progressIndicator;
         public ActionRunner(Project project) {
-            super(project, "Creating Service Principal...", true);
+            super(project, "Create Service Principal Progress", true);
         }
         @Override
         public void run(@NotNull ProgressIndicator progressIndicator) {

@@ -22,13 +22,7 @@
 
 package com.microsoft.azuretools.ijidea.ui;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.table.JBTable;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
@@ -94,7 +88,7 @@ public class SrvPriSettingsDialog extends JDialog {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
-        setTitle("Create authentication files");
+        setTitle("Create Authentication Files");
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -130,7 +124,7 @@ public class SrvPriSettingsDialog extends JDialog {
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         model.addColumn("");
-        model.addColumn("Subscription name");
+        model.addColumn("Subscription Name");
         model.addColumn("Subscription ID");
 
         table.setModel(model);
@@ -165,7 +159,7 @@ public class SrvPriSettingsDialog extends JDialog {
         if (unselectedCount == rc) {
             JOptionPane.showMessageDialog(this,
                     "Please select at least one subscription",
-                    "Subscription dialog info",
+                    "Subscription Dialog Status",
                     JOptionPane.INFORMATION_MESSAGE);
             return;
         }

@@ -224,7 +224,7 @@ public class SignInWindow extends JDialog {
             } catch (IOException ex) {
                 ex.printStackTrace();
                 LOGGER.error("doSelectCredFilepath", ex);
-                ErrorWindow.show(ex.getMessage(), "File path Error", this);
+                ErrorWindow.show(ex.getMessage(), "File Path Error", this);
             }
         }
     }
@@ -247,7 +247,7 @@ public class SignInWindow extends JDialog {
 
     private void signInAsync() {
         ProgressManager.getInstance().run(
-            new Task.Modal(ProjectManager.getInstance().getDefaultProject(), "Signing in...", false) {
+            new Task.Modal(ProjectManager.getInstance().getDefaultProject(), "Sign In Progress", false) {
                 @Override
                 public void run(ProgressIndicator indicator) {
                     indicator.setIndeterminate(true);
