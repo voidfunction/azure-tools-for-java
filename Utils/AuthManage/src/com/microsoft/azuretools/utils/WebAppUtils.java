@@ -111,7 +111,7 @@ public class WebAppUtils {
     }
 
     public static void removeFtpDirectory(FTPClient ftpClient, String path, IProgressIndicator pi) throws IOException {
-        String prefix = "Removing form FTP server: ";
+        String prefix = "Removing from FTP server: ";
         FTPFile[] subFiles = ftpClient.listFiles(path);
         if (subFiles.length > 0) {
             for (FTPFile ftpFile : subFiles) {
@@ -135,6 +135,7 @@ public class WebAppUtils {
 
         if (pi != null) pi.setText2(prefix + path);
         ftpClient.removeDirectory(path);
+        if (pi != null) pi.setText2("");
     }
 
 //    public static String getAbsolutePath(String dir) {
