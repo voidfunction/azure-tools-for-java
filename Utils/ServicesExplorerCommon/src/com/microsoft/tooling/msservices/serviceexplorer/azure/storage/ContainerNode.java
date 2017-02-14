@@ -101,7 +101,7 @@ public class ContainerNode extends Node {
         final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.name(), blobContainer);
 
         if (openedFile == null) {
-//            DefaultLoader.getUIHelper().openItem(getProject(), storageAccount, blobContainer, " [Container]", "BlobContainer", "container.png");
+            DefaultLoader.getUIHelper().openItem(getProject(), storageAccount, blobContainer, " [Container]", "BlobContainer", "container.png");
         } else {
             DefaultLoader.getUIHelper().openItem(getProject(), openedFile);
         }

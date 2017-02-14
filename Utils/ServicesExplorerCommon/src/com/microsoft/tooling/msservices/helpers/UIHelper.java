@@ -21,7 +21,12 @@
  */
 package com.microsoft.tooling.msservices.helpers;
 
-import com.microsoft.tooling.msservices.model.storage.*;
+import com.microsoft.azure.management.storage.StorageAccount;
+import com.microsoft.tooling.msservices.model.storage.BlobContainer;
+import com.microsoft.tooling.msservices.model.storage.Queue;
+import com.microsoft.tooling.msservices.model.storage.StorageServiceTreeItem;
+import com.microsoft.tooling.msservices.model.storage.Table;
+
 import java.io.File;
 
 public interface UIHelper {
@@ -39,15 +44,15 @@ public interface UIHelper {
 
     File showFileChooser(String title);
 
-    <T extends StorageServiceTreeItem> void openItem(Object projectObject, final ClientStorageAccount storageAccount, final T item, String itemType, String itemName, String iconName);
+    <T extends StorageServiceTreeItem> void openItem(Object projectObject, final StorageAccount storageAccount, final T item, String itemType, String itemName, String iconName);
 
     void openItem(@NotNull Object projectObject, @NotNull Object itemVirtualFile);
 
-    void refreshQueue(@NotNull Object projectObject, @NotNull ClientStorageAccount storageAccount, @NotNull Queue queue);
+    void refreshQueue(@NotNull Object projectObject, @NotNull StorageAccount storageAccount, @NotNull Queue queue);
 
     void refreshBlobs(@NotNull Object projectObject, @NotNull String accountName, @NotNull BlobContainer container);
 
-    void refreshTable(@NotNull Object projectObject, @NotNull ClientStorageAccount storageAccount, @NotNull Table table);
+    void refreshTable(@NotNull Object projectObject, @NotNull StorageAccount storageAccount, @NotNull Table table);
 
     String promptForOpenSSLPath();
 

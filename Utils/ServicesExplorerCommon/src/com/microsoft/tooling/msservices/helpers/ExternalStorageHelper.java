@@ -23,6 +23,7 @@ package com.microsoft.tooling.msservices.helpers;
 
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 
@@ -64,7 +65,7 @@ public class ExternalStorageHelper {
         DefaultLoader.getIdeHelper().setProperties(EXTERNAL_STORAGE_LIST, list.toArray(new String[list.size()]));
     }
 
-    public static void detach(ClientStorageAccount clientStorageAccount) {
+    public static void detach(StorageAccount storageAccount) {
         String[] storageArray = DefaultLoader.getIdeHelper().getProperties(EXTERNAL_STORAGE_LIST);
 
         if (storageArray != null) {
@@ -73,7 +74,7 @@ public class ExternalStorageHelper {
             for (String json : storageArray) {
                 ClientStorageAccount csa = new Gson().fromJson(json, ClientStorageAccount.class);
 
-                if (csa.getName().equals(clientStorageAccount.getName())) {
+                if (csa.getName().equals(storageAccount.name())) {
                     storageList.remove(json);
                 }
             }

@@ -30,6 +30,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
@@ -41,7 +42,7 @@ public class QueueExplorerFileEditorProvider implements FileEditorProvider, Dumb
 
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        ClientStorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
+        StorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
         Queue queue = virtualFile.getUserData(QUEUE_KEY);
 
         return (storageAccount != null && queue != null);
@@ -52,11 +53,11 @@ public class QueueExplorerFileEditorProvider implements FileEditorProvider, Dumb
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         QueueFileEditor queueFileEditor = new QueueFileEditor(project);
 
-        ClientStorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
+        StorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
         Queue queue = virtualFile.getUserData(QUEUE_KEY);
 
         queueFileEditor.setQueue(queue);
-        queueFileEditor.setStorageAccount(storageAccount);
+//        queueFileEditor.setStorageAccount(storageAccount);
 
         queueFileEditor.fillGrid();
 

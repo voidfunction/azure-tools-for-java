@@ -21,6 +21,7 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage.asm;
 
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -38,7 +39,7 @@ public class StorageNode extends ClientStorageNode {
     public class DeleteStorageAccountAction extends AzureNodeActionPromptListener {
         public DeleteStorageAccountAction() {
             super(StorageNode.this,
-                    String.format("This operation will delete storage account %s.\nAre you sure you want to continue?", storageAccount.getName()),
+                    String.format("This operation will delete storage account %s.\nAre you sure you want to continue?", storageAccount.name()),
                     "Deleting Storage Account");
         }
 
@@ -70,10 +71,10 @@ public class StorageNode extends ClientStorageNode {
 
     private static final String WAIT_ICON_PATH = "storageaccount.png";
     private static final String DEFAULT_STORAGE_FLAG = "(default)";
-    private final ClientStorageAccount storageAccount;
+    private final StorageAccount storageAccount;
 
-    public StorageNode(Node parent, ClientStorageAccount sm, boolean isDefaultStorageAccount) {
-        super(sm.getName(), isDefaultStorageAccount ? sm.getName() + DEFAULT_STORAGE_FLAG : sm.getName(), parent, WAIT_ICON_PATH, sm, true);
+    public StorageNode(Node parent, StorageAccount sm, boolean isDefaultStorageAccount) {
+        super(sm.name(), isDefaultStorageAccount ? sm.name() + DEFAULT_STORAGE_FLAG : sm.name(), parent, WAIT_ICON_PATH, sm, true);
 
         this.storageAccount = sm;
 

@@ -30,6 +30,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.intellij.helpers.IDEHelperImpl;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
@@ -42,7 +43,7 @@ public class BlobExplorerFileEditorProvider implements FileEditorProvider, DumbA
 
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        ClientStorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
+        StorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
         BlobContainer blobContainer = virtualFile.getUserData(CONTAINER_KEY);
 
         return (storageAccount != null && blobContainer != null);
@@ -53,7 +54,7 @@ public class BlobExplorerFileEditorProvider implements FileEditorProvider, DumbA
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         BlobExplorerFileEditor blobExplorerFileEditor = new BlobExplorerFileEditor(project);
 
-        ClientStorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
+        StorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
         BlobContainer blobContainer = virtualFile.getUserData(CONTAINER_KEY);
 
         blobExplorerFileEditor.setBlobContainer(blobContainer);

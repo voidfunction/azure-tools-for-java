@@ -22,6 +22,7 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
 import com.google.common.collect.ImmutableMap;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
@@ -59,7 +60,7 @@ public class TableNode extends Node {
 
         @Override
         public void actionPerformed(final NodeActionEvent e) {
-            Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.getName(), table);
+            Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.name(), table);
 
             if (openedFile != null) {
                 DefaultLoader.getIdeHelper().closeFile(getProject(), openedFile);
@@ -90,9 +91,9 @@ public class TableNode extends Node {
     private static final String TABLE_MODULE_ID = TableNode.class.getName();
     private static final String ICON_PATH = "container.png";
     private final Table table;
-    private final ClientStorageAccount storageAccount;
+    private final StorageAccount storageAccount;
 
-    public TableNode(TableModule parent, ClientStorageAccount storageAccount, Table table) {
+    public TableNode(TableModule parent, StorageAccount storageAccount, Table table) {
         super(TABLE_MODULE_ID, table.getName(), parent, ICON_PATH, true);
 
         this.storageAccount = storageAccount;
@@ -103,7 +104,7 @@ public class TableNode extends Node {
 
     @Override
     protected void onNodeClick(NodeActionEvent ex) {
-        final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.getName(), table);
+        final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.name(), table);
 
         if (openedFile == null) {
             DefaultLoader.getUIHelper().openItem(getProject(), storageAccount, table, " [Table]", "Table", "container.png");

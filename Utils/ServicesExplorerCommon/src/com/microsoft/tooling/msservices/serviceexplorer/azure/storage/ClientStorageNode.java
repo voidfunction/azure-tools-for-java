@@ -21,22 +21,23 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 
 public abstract class ClientStorageNode extends RefreshableNode {
-    protected final ClientStorageAccount clientStorageAccount;
+    protected final StorageAccount storageAccount;
 
-    public ClientStorageNode(String id, String name, Node parent, String iconPath, ClientStorageAccount sm) {
+    public ClientStorageNode(String id, String name, Node parent, String iconPath, StorageAccount sm) {
         super(id, name, parent, iconPath);
-        this.clientStorageAccount = sm;
+        this.storageAccount = sm;
     }
 
-    public ClientStorageNode(String id, String name, Node parent, String iconPath, ClientStorageAccount sm, boolean delayActionLoading) {
+    public ClientStorageNode(String id, String name, Node parent, String iconPath, StorageAccount sm, boolean delayActionLoading) {
         super(id, name, parent, iconPath, delayActionLoading);
-        this.clientStorageAccount = sm;
+        this.storageAccount = sm;
     }
 
     @Override
@@ -44,22 +45,22 @@ public abstract class ClientStorageNode extends RefreshableNode {
         this.load();
     }
 
-    public ClientStorageAccount getClientStorageAccount() {
-        return clientStorageAccount;
+    public StorageAccount getStorageAccount() {
+        return storageAccount;
     }
 
     protected void fillChildren() {
-        BlobModule blobsNode = new BlobModule(this, clientStorageAccount);
+        BlobModule blobsNode = new BlobModule(this, storageAccount);
         blobsNode.load();
 
         addChildNode(blobsNode);
 
-        QueueModule queueNode = new QueueModule(this, clientStorageAccount);
+        QueueModule queueNode = new QueueModule(this, storageAccount);
         queueNode.load();
 
         addChildNode(queueNode);
 
-        TableModule tableNode = new TableModule(this, clientStorageAccount);
+        TableModule tableNode = new TableModule(this, storageAccount);
         tableNode.load();
 
         addChildNode(tableNode);
