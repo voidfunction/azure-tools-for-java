@@ -45,11 +45,15 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
@@ -65,12 +69,11 @@ public class AppServiceCreateDialog extends DialogWrapper {
     protected JComboBox comboBoxJDK3Party;
     protected JTextField textFieldJDKUrl;
     protected JTextField textFieldJDKAccountKey;
-    protected JLabel labelJDKUrl;
     protected JLabel labelJDKAccountKey;
     protected JTabbedPane tabbedPaneAppService;
-    protected JTextField textFieldAppServicePlaneNew;
+    protected JTextField textFieldAppServicePlanName;
     protected JTabbedPane tabbedPaneResourceGroup;
-    protected JTextField textFieldResourceGroupNew;
+    protected JTextField textFieldResourceGroupName;
     protected JComboBox comboBoxAppServicePlanLocation;
     protected JComboBox comboBoxAppServicePlanPricingTier;
     protected JTabbedPane tabbedPaneJdk;
@@ -87,10 +90,38 @@ public class AppServiceCreateDialog extends DialogWrapper {
     protected JPanel panelAppServicePlan;
     private JLabel labelFieldAppServicePlanLocation;
     private JLabel labelFieldAppServicePlanTier;
+    private JTabbedPane tabbedPaneOptions;
+    private JPanel panelTabAppServicePlan;
+    private JRadioButton radioButtonAppServicePlanCreateNew;
+    private JRadioButton radioButtonAppServicePlanUseExisting;
+    private JRadioButton radioButtonResourceGroupCreatNew;
+    private JPanel panelTabResourceGroup;
+    private JRadioButton radioButtonResourceGroupUseExisting;
+    private JPanel panelTabJdk;
+    private JRadioButton radioButtonJdkDefault;
+    private JRadioButton radioButtonJdk3rdParty;
+    private JRadioButton radioButtonJdkOwn;
+    private JLabel labelJdkDefault;
+    private JLabel labelStorageAccountComment;
+    private JLabel labelAppServicePlanLocation;
+    private JLabel labelAppServicePlanPricingTier;
 
     protected Module module;
 
     protected static final String textNotAvailable = "N/A";
+
+    private void createUIComponents() {
+        textFieldWebappName = new HintTextField("<enter name>");
+        textFieldAppServicePlanName = new HintTextField("<enter name>");
+        textFieldResourceGroupName = new HintTextField("<enter name>");
+        // generate random name
+        DateFormat df = new SimpleDateFormat("yyMMddHHmmss");
+        String rgRandomName = "rg-webapp-" + df.format(new Date());
+        textFieldResourceGroupName.setText(rgRandomName);
+
+        textFieldJDKUrl = new HintTextField("<enter url>");
+        textFieldJDKAccountKey = new HintTextField("<enter key>");
+    }
 
     protected static abstract class AdapterBase<T> {
         protected T adapted;
@@ -175,7 +206,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         linkPricing.setText("App Service Pricing Details");
 
         linkLicense.setURI(URI.create(AzulZuluModel.getLicenseUrl()));
-        linkLicense.setText("GNU General Public License");
+        linkLicense.setText("License");
 
         fillWebContainers();
         fillSubscriptions();
@@ -185,6 +216,97 @@ public class AppServiceCreateDialog extends DialogWrapper {
         fillAppServicePlanLocations();
         fillAppServicePlanPricingTiers();
         fill3PartyJdk();
+
+        radioButtonAppServicePlanCreateNew.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    radioAppServicePlanLogic();
+                }
+            }
+        });
+        radioButtonAppServicePlanUseExisting.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    radioAppServicePlanLogic();
+                }
+
+            }
+        });
+        radioButtonResourceGroupCreatNew.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    radioResourceGroupLogic();
+                }
+            }
+        });
+        radioButtonResourceGroupUseExisting.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    radioResourceGroupLogic();
+                }
+            }
+        });
+        radioButtonJdkDefault.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    radioJdkLogic();
+                }
+            }
+        });
+        radioButtonJdk3rdParty.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    radioJdkLogic();
+                }
+            }
+        });
+        radioButtonJdkOwn.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    radioJdkLogic();
+                }
+            }
+        });
+    }
+
+    private void radioAppServicePlanLogic() {
+        boolean enabled = radioButtonAppServicePlanCreateNew.isSelected();
+        textFieldAppServicePlanName.setEnabled(enabled);
+        comboBoxAppServicePlanLocation.setEnabled(enabled);
+        comboBoxAppServicePlanPricingTier.setEnabled(enabled);
+        comboBoxAppServicePlan.setEnabled(!enabled);
+        labelAppServicePlanLocation.setEnabled(!enabled);
+        labelFieldAppServicePlanLocation.setEnabled(!enabled);
+        labelAppServicePlanPricingTier.setEnabled(!enabled);
+        labelFieldAppServicePlanTier.setEnabled(!enabled);
+    }
+
+    private void radioResourceGroupLogic() {
+        boolean enabled = radioButtonResourceGroupCreatNew.isSelected();
+        textFieldResourceGroupName.setEnabled(enabled);
+        comboBoxResourceGroup.setEnabled(!enabled);
+    }
+
+    private void radioJdkLogic() {
+        boolean enabledDefault = radioButtonJdkDefault.isSelected();
+        labelJdkDefault.setEnabled(enabledDefault);
+
+        boolean enabled3Party = radioButtonJdk3rdParty.isSelected();
+        comboBoxJDK3Party.setEnabled(enabled3Party);
+        linkLicense.setEnabled(enabled3Party);
+
+        boolean enabledOwn = radioButtonJdkOwn.isSelected();
+        textFieldJDKUrl.setEnabled(enabledOwn);
+        labelJDKAccountKey.setEnabled(enabledOwn);
+        textFieldJDKAccountKey.setEnabled(enabledOwn);
+        labelStorageAccountComment.setEnabled(enabledOwn);
     }
 
     @Nullable
@@ -219,7 +341,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
     }
 
     protected void updateAndFillSubscriptions() {
-        ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Getting Web Apps...", true) {
+        ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Update Azure Local Cache Progress", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
 
@@ -436,16 +558,18 @@ public class AppServiceCreateDialog extends DialogWrapper {
             webContainer = (WebContainer)comboBoxWebContainer.getSelectedItem();
             subscriptionDetail = (SubscriptionDetail)comboBoxSubscription.getSelectedItem();
 
-            isResourceGroupCreateNew = tabbedPaneResourceGroup.getSelectedComponent() == panelResourceGroupCreateNew;
+            //isResourceGroupCreateNew = tabbedPaneResourceGroup.getSelectedComponent() == panelResourceGroupCreateNew;
+            isResourceGroupCreateNew = radioButtonResourceGroupCreatNew.isSelected();
             ResourceGroupAdapter rga = (ResourceGroupAdapter) comboBoxResourceGroup.getModel().getSelectedItem();
             resourceGroup = rga == null ? null : rga.getAdapted();
-            resourceGroupNameCreateNew = textFieldResourceGroupNew.getText().trim();
+            resourceGroupNameCreateNew = textFieldResourceGroupName.getText().trim();
 
-            isAppServicePlanCreateNew = tabbedPaneAppService.getSelectedComponent() == panelAppServiceCreateNew;
+            //isAppServicePlanCreateNew = tabbedPaneAppService.getSelectedComponent() == panelAppServiceCreateNew;
+            isAppServicePlanCreateNew = radioButtonAppServicePlanCreateNew.isSelected();
             AppServicePlanAdapter aspa = (AppServicePlanAdapter)comboBoxAppServicePlan.getModel().getSelectedItem();
             appServicePlan = aspa == null ? null : aspa.getAdapted();
 
-            appServicePlanNameCreateNew = textFieldAppServicePlaneNew.getText().trim();
+            appServicePlanNameCreateNew = textFieldAppServicePlanName.getText().trim();
 
             AppServicePricingTier appServicePricingTier = (AppServicePricingTier) comboBoxAppServicePlanPricingTier.getModel().getSelectedItem();
             appServicePricingTierCreateNew = appServicePricingTier == null ? null : appServicePricingTier;
@@ -453,12 +577,12 @@ public class AppServiceCreateDialog extends DialogWrapper {
             LocationAdapter loca = (LocationAdapter) comboBoxAppServicePlanLocation.getModel().getSelectedItem();
             appServicePlanLocationCreateNew = loca == null ? null : loca.getAdapted();
 
-            Component selectedJdkPanel = tabbedPaneJdk.getSelectedComponent();
-            jdkTab = (selectedJdkPanel == panelJdkDefault)
+            //Component selectedJdkPanel = tabbedPaneJdk.getSelectedComponent();
+            jdkTab = (radioButtonJdkDefault.isSelected())
                 ? JdkTab.Default
-                : (selectedJdkPanel == panelJdk3Party)
+                : (radioButtonJdk3rdParty.isSelected())
                     ? JdkTab.ThirdParty
-                    : (selectedJdkPanel == panelJdkOwn)
+                    : (radioButtonJdkOwn.isSelected())
                         ? JdkTab.Own
                         : null;
 
@@ -498,34 +622,12 @@ public class AppServiceCreateDialog extends DialogWrapper {
             return new ValidationInfo("Select a valid subscription.", comboBoxSubscription);
         }
 
-        if (model.isResourceGroupCreateNew) {
-            if (model.resourceGroupNameCreateNew.isEmpty()) {
-                return new ValidationInfo("Enter a valid resource group name", textFieldResourceGroupNew);
-            } else {
-                if (!model.resourceGroupNameCreateNew.matches("^[A-Za-z0-9-_()\\.]*[A-Za-z0-9-_()]$")) {
-                    return new ValidationInfo("Resounce group name can only include alphanumeric characters, periods, underscores, hyphens, and parenthesis and can't end in a period.", textFieldResourceGroupNew);
-                }
-
-                for (List<ResourceGroup> rgl : AzureModel.getInstance().getSubscriptionToResourceGroupMap().values()) {
-                    for (ResourceGroup rg : rgl) {
-                        if (rg.name().toLowerCase().equals(model.resourceGroupNameCreateNew.toLowerCase())) {
-                            return new ValidationInfo("The name is already taken", textFieldResourceGroupNew);
-                        }
-                    }
-                }
-            }
-        } else {
-            if (model.resourceGroup == null ) {
-                return new ValidationInfo("Select a valid resource group.", comboBoxResourceGroup);
-            }
-        }
-
         if (model.isAppServicePlanCreateNew) {
             if (model.appServicePlanNameCreateNew.isEmpty()) {
-                return new ValidationInfo("Enter a valid App Service Plan name.", textFieldAppServicePlaneNew);
+                return new ValidationInfo("Enter a valid App Service Plan name.", textFieldAppServicePlanName);
             } else {
                 if (!model.appServicePlanNameCreateNew.matches("^[A-Za-z0-9-]*[A-Za-z0-9-]$")) {
-                    return new ValidationInfo("App Service Plan name can only include alphanumeric characters and hyphens.", textFieldAppServicePlaneNew);
+                    return new ValidationInfo("App Service Plan name can only include alphanumeric characters and hyphens.", textFieldAppServicePlanName);
                 }
                 // App service plan name must be unuque in each subscription
                 SubscriptionDetail sd = model.subscriptionDetail;
@@ -534,7 +636,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
                     List<AppServicePlan> aspl = AzureModel.getInstance().getResourceGroupToAppServicePlanMap().get(rg);
                     for (AppServicePlan asp : aspl) {
                         if (asp.name().toLowerCase().equals(model.appServicePlanNameCreateNew.toLowerCase())) {
-                            return new ValidationInfo("App service plan name must be unuque in each subscription.", textFieldAppServicePlaneNew);
+                            return new ValidationInfo("App service plan name must be unuque in each subscription.", textFieldAppServicePlanName);
                         }
                     }
                 }
@@ -542,6 +644,28 @@ public class AppServiceCreateDialog extends DialogWrapper {
         } else {
             if (model.appServicePlan == null ) {
                 return new ValidationInfo("Select a valid App Service Plan.", comboBoxResourceGroup);
+            }
+        }
+
+        if (model.isResourceGroupCreateNew) {
+            if (model.resourceGroupNameCreateNew.isEmpty()) {
+                return new ValidationInfo("Enter a valid resource group name", textFieldResourceGroupName);
+            } else {
+                if (!model.resourceGroupNameCreateNew.matches("^[A-Za-z0-9-_()\\.]*[A-Za-z0-9-_()]$")) {
+                    return new ValidationInfo("Resounce group name can only include alphanumeric characters, periods, underscores, hyphens, and parenthesis and can't end in a period.", textFieldResourceGroupName);
+                }
+
+                for (List<ResourceGroup> rgl : AzureModel.getInstance().getSubscriptionToResourceGroupMap().values()) {
+                    for (ResourceGroup rg : rgl) {
+                        if (rg.name().toLowerCase().equals(model.resourceGroupNameCreateNew.toLowerCase())) {
+                            return new ValidationInfo("The name is already taken", textFieldResourceGroupName);
+                        }
+                    }
+                }
+            }
+        } else {
+            if (model.resourceGroup == null ) {
+                return new ValidationInfo("Select a valid resource group.", comboBoxResourceGroup);
             }
         }
 
@@ -641,22 +765,17 @@ public class AppServiceCreateDialog extends DialogWrapper {
 
         // update cache
         AzureModel azureModel = AzureModel.getInstance();
-        //ResourceGroup rg;
 
         if (model.isResourceGroupCreateNew) {
             ResourceGroup rg = azure.resourceGroups().getByName(model.resourceGroupNameCreateNew);
-            //azureModel.getSubscriptionToResourceGroupMap().get(model.subscriptionDetail).add(rg);
             AzureModelController.addNewResourceGroup(model.subscriptionDetail, rg);
             if (model.isAppServicePlanCreateNew) {
                 AppServicePlan asp = azure.appServices().appServicePlans().getById(myWebApp.appServicePlanId());
-                //azureModel.getResourceGroupToAppServicePlanMap().put(rg, Arrays.asList(asp));
-                //azureModel.getResourceGroupToWebAppMap().put(rg, Arrays.asList(myWebApp));
                 AzureModelController.addNewAppServicePlanToJustCreatedResourceGroup(rg, asp);
                 AzureModelController.addNewWebAppToJustCreatedResourceGroup(rg, myWebApp);
             }
         } else {
             ResourceGroup rg = model.resourceGroup;
-            //azureModel.getResourceGroupToWebAppMap().get(rg).add(myWebApp);
             AzureModelController.addNewWebAppToExistingResourceGroup(rg, myWebApp);
             if (model.isAppServicePlanCreateNew) {
                 AppServicePlan asp = azure.appServices().appServicePlans().getById(myWebApp.appServicePlanId());

@@ -101,7 +101,7 @@ public class WebAppDeployDialog extends DialogWrapper {
             }
         });
 
-        AnActionButton refreshDockerHostsAction = new AnActionButton("Refresh", AllIcons.Actions.Refresh) {
+        AnActionButton refreshAction = new AnActionButton("Refresh", AllIcons.Actions.Refresh) {
             @Override
             public void actionPerformed(AnActionEvent anActionEvent) {
                 refreshAppServices();
@@ -140,17 +140,10 @@ public class WebAppDeployDialog extends DialogWrapper {
                     }
                 })
                 .disableUpDownActions()
-                .addExtraActions(refreshDockerHostsAction);
+                .addExtraActions(refreshAction);
 
 
         panelTable = tableToolbarDecorator.createPanel();
-    }
-
-    private void refreshAppServices() {
-        cleanTable();
-        editorPaneAppServiceDetails.setText("");
-        AzureModel.getInstance().setResourceGroupToWebAppMap(null);
-        fillTable();
     }
 
     static class WebAppDetails {
@@ -222,6 +215,7 @@ public class WebAppDeployDialog extends DialogWrapper {
     private void cleanTable() {
         DefaultTableModel dm = (DefaultTableModel) table.getModel();
         dm.getDataVector().removeAllElements();
+        webAppWebAppDetailsMap.clear();
         dm.fireTableDataChanged();
     }
 
@@ -246,7 +240,7 @@ public class WebAppDeployDialog extends DialogWrapper {
     }
 
     private void updateAndFillTable() {
-        ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Getting App Services...", true) {
+        ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Update Azure Local Cache Progress", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
 
@@ -283,10 +277,10 @@ public class WebAppDeployDialog extends DialogWrapper {
         Map<ResourceGroup, List<WebApp>> rgwaMap = AzureModel.getInstance().getResourceGroupToWebAppMap();
         Map<ResourceGroup, List<AppServicePlan>> rgaspMap = AzureModel.getInstance().getResourceGroupToAppServicePlanMap();
 
+        cleanTable();
         DefaultTableModel tableModel = (DefaultTableModel)table.getModel();
-        tableModel.getDataVector().removeAllElements();
-
-        webAppWebAppDetailsMap.clear();
+//        tableModel.getDataVector().removeAllElements();
+//        webAppWebAppDetailsMap.clear();
 
         for (SubscriptionDetail sd : srgMap.keySet()) {
             if (!sd.isSelected()) continue;
@@ -340,6 +334,13 @@ public class WebAppDeployDialog extends DialogWrapper {
         doFillTable();
         selectTableRowWithWebAppName(wa.name());
         //fillAppServiceDetails();
+    }
+
+    private void refreshAppServices() {
+        cleanTable();
+        editorPaneAppServiceDetails.setText("");
+        AzureModel.getInstance().setResourceGroupToWebAppMap(null);
+        fillTable();
     }
 
     private void editAppService() {
@@ -396,11 +397,12 @@ public class WebAppDeployDialog extends DialogWrapper {
                 if (manager == null) {
                     return;
                 }
-                ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Deleting App Service...", true) {
+                ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Delete App Service Progress", true) {
                     @Override
                     public void run(ProgressIndicator progressIndicator) {
                         try {
                             progressIndicator.setIndeterminate(true);
+                            progressIndicator.setText("Deleting App Service...");
                             manager.getAzure(wad.subscriptionDetail.getSubscriptionId()).webApps().deleteById(wad.webApp.id());
                             ApplicationManager.getApplication().invokeAndWait( new Runnable() {
                                 @Override

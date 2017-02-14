@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.microsoft.azuretools.ijidea.ui.AppServiceCreateDialog">
-  <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="48" y="139" width="623" height="976"/>
+      <xy x="48" y="321" width="539" height="419"/>
     </constraints>
     <properties/>
     <border type="none"/>
     <children>
-      <grid id="d71aa" layout-manager="GridLayoutManager" row-count="9" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="d71aa" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -16,428 +16,338 @@
         <properties/>
         <border type="none" title="App Service"/>
         <children>
-          <component id="998c9" class="javax.swing.JTextField" binding="textFieldWebappName">
+          <component id="fefdd" class="javax.swing.JTextField" binding="textFieldWebappName" custom-create="true">
             <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
             <properties/>
+          </component>
+          <component id="9ab8c" class="javax.swing.JComboBox" binding="comboBoxSubscription">
+            <constraints>
+              <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+          </component>
+          <component id="ee635" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value=".azurewebsites.net"/>
+            </properties>
+          </component>
+          <component id="2d094" class="javax.swing.JComboBox" binding="comboBoxWebContainer">
+            <constraints>
+              <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+          </component>
+          <component id="8e375" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Web Container"/>
+            </properties>
           </component>
           <component id="20221" class="javax.swing.JLabel">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Enter Name"/>
+              <text value="Name"/>
             </properties>
           </component>
           <component id="1b132" class="javax.swing.JLabel">
             <constraints>
-              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Subscription"/>
             </properties>
           </component>
-          <component id="9ab8c" class="javax.swing.JComboBox" binding="comboBoxSubscription">
-            <constraints>
-              <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties/>
-          </component>
-          <grid id="39eeb" binding="panelAppServicePlan" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        </children>
+      </grid>
+      <tabbedpane id="407a1" binding="tabbedPaneOptions">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="200" height="200"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <grid id="5357a" binding="panelTabAppServicePlan" layout-manager="GridLayoutManager" row-count="7" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
-              <grid row="7" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+              <tabbedpane title="App Service Plan"/>
             </constraints>
             <properties/>
-            <border type="none" title="App Service Plan"/>
+            <border type="none"/>
             <children>
-              <tabbedpane id="4fe07" binding="tabbedPaneAppService">
+              <component id="1afc6" class="javax.swing.JRadioButton" binding="radioButtonAppServicePlanCreateNew">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="1" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="200" height="200"/>
-                  </grid>
-                </constraints>
-                <properties/>
-                <border type="none"/>
-                <children>
-                  <grid id="dfc53" binding="panelAppServiceUseExisting" layout-manager="GridLayoutManager" row-count="5" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                    <margin top="0" left="0" bottom="0" right="0"/>
-                    <constraints>
-                      <tabbedpane title="Use Existing"/>
-                    </constraints>
-                    <properties/>
-                    <border type="none"/>
-                    <children>
-                      <component id="540be" class="javax.swing.JComboBox" binding="comboBoxAppServicePlan">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties/>
-                      </component>
-                      <component id="e95b1" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Location:"/>
-                        </properties>
-                      </component>
-                      <component id="13e39" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Pricing tier:"/>
-                        </properties>
-                      </component>
-                      <vspacer id="d75b5">
-                        <constraints>
-                          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                      </vspacer>
-                      <component id="4028e" class="javax.swing.JLabel" binding="labelFieldAppServicePlanTier">
-                        <constraints>
-                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="N/A"/>
-                        </properties>
-                      </component>
-                      <component id="b19f6" class="javax.swing.JLabel" binding="labelFieldAppServicePlanLocation">
-                        <constraints>
-                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="N/A"/>
-                        </properties>
-                      </component>
-                      <hspacer id="84985">
-                        <constraints>
-                          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="6417a">
-                        <constraints>
-                          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                      </hspacer>
-                      <component id="93841" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Select App Service Plan"/>
-                        </properties>
-                      </component>
-                    </children>
-                  </grid>
-                  <grid id="15e65" binding="panelAppServiceCreateNew" layout-manager="GridLayoutManager" row-count="7" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                    <margin top="0" left="0" bottom="0" right="0"/>
-                    <constraints>
-                      <tabbedpane title="Create New"/>
-                    </constraints>
-                    <properties/>
-                    <border type="none"/>
-                    <children>
-                      <component id="57bd6" class="javax.swing.JTextField" binding="textFieldAppServicePlaneNew">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                            <preferred-size width="150" height="-1"/>
-                          </grid>
-                        </constraints>
-                        <properties/>
-                      </component>
-                      <component id="45887" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Enter Name"/>
-                        </properties>
-                      </component>
-                      <component id="feee6" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Select Location"/>
-                        </properties>
-                      </component>
-                      <component id="3ec37" class="javax.swing.JComboBox" binding="comboBoxAppServicePlanLocation">
-                        <constraints>
-                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties/>
-                      </component>
-                      <component id="127dc" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Select Pricing Tier"/>
-                        </properties>
-                      </component>
-                      <component id="a6d00" class="javax.swing.JComboBox" binding="comboBoxAppServicePlanPricingTier">
-                        <constraints>
-                          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties/>
-                      </component>
-                      <vspacer id="e1806">
-                        <constraints>
-                          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                      </vspacer>
-                    </children>
-                  </grid>
-                </children>
-              </tabbedpane>
-              <component id="df4be" class="org.jdesktop.swingx.JXHyperlink" binding="linkPricing">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="App Service Pricing"/>
+                  <selected value="true"/>
+                  <text value="Create New"/>
+                </properties>
+              </component>
+              <component id="57bd6" class="javax.swing.JTextField" binding="textFieldAppServicePlanName" custom-create="true">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+              </component>
+              <component id="3ec37" class="javax.swing.JComboBox" binding="comboBoxAppServicePlanLocation">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+              </component>
+              <component id="feee6" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="3" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Location:"/>
+                </properties>
+              </component>
+              <component id="127dc" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="3" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Pricing Tier:"/>
+                </properties>
+              </component>
+              <component id="a6d00" class="javax.swing.JComboBox" binding="comboBoxAppServicePlanPricingTier">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+              </component>
+              <component id="7fd50" class="javax.swing.JRadioButton" binding="radioButtonAppServicePlanUseExisting">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Use Existing:"/>
+                </properties>
+              </component>
+              <component id="540be" class="javax.swing.JComboBox" binding="comboBoxAppServicePlan">
+                <constraints>
+                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <enabled value="false"/>
+                </properties>
+              </component>
+              <component id="df4be" class="org.jdesktop.swingx.JXHyperlink" binding="linkPricing">
+                <constraints>
+                  <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="App Service Pricing Details"/>
+                </properties>
+              </component>
+              <vspacer id="c9469">
+                <constraints>
+                  <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+              <component id="2b502" class="javax.swing.JLabel" binding="labelAppServicePlanLocation">
+                <constraints>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="3" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <enabled value="false"/>
+                  <text value="Location:"/>
+                </properties>
+              </component>
+              <component id="7c6f8" class="javax.swing.JLabel" binding="labelAppServicePlanPricingTier">
+                <constraints>
+                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="3" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <enabled value="false"/>
+                  <text value="Pricing Tier:"/>
+                </properties>
+              </component>
+              <component id="3bbd9" class="javax.swing.JLabel" binding="labelFieldAppServicePlanLocation">
+                <constraints>
+                  <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <enabled value="false"/>
+                  <text value="N/A"/>
+                </properties>
+              </component>
+              <component id="34127" class="javax.swing.JLabel" binding="labelFieldAppServicePlanTier">
+                <constraints>
+                  <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <enabled value="false"/>
+                  <text value="N/A"/>
                 </properties>
               </component>
             </children>
           </grid>
-          <component id="ee635" class="javax.swing.JLabel">
-            <constraints>
-              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value=".azurewebsites.net"/>
-            </properties>
-          </component>
-          <component id="8e375" class="javax.swing.JLabel">
-            <constraints>
-              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Web Container"/>
-            </properties>
-          </component>
-          <component id="2d094" class="javax.swing.JComboBox" binding="comboBoxWebContainer">
-            <constraints>
-              <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties/>
-          </component>
-          <grid id="987a" binding="panelResourceGroup" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="e7ecc" binding="panelTabResourceGroup" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
-              <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+              <tabbedpane title="Resource Group"/>
             </constraints>
             <properties/>
-            <border type="none" title="Resource Group"/>
+            <border type="none"/>
             <children>
-              <tabbedpane id="9637b" binding="tabbedPaneResourceGroup">
+              <component id="84d7d" class="javax.swing.JRadioButton" binding="radioButtonResourceGroupCreatNew">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="200" height="200"/>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <selected value="true"/>
+                  <text value="Create New:"/>
+                </properties>
+              </component>
+              <component id="a8c39" class="javax.swing.JComboBox" binding="comboBoxResourceGroup">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <enabled value="false"/>
+                </properties>
+              </component>
+              <component id="33069" class="javax.swing.JTextField" binding="textFieldResourceGroupName" custom-create="true">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
                   </grid>
                 </constraints>
                 <properties/>
-                <border type="none"/>
-                <children>
-                  <grid id="9e007" binding="panelResourceGroupUseExisting" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                    <margin top="0" left="0" bottom="0" right="0"/>
-                    <constraints>
-                      <tabbedpane title="Use Existing"/>
-                    </constraints>
-                    <properties/>
-                    <border type="none"/>
-                    <children>
-                      <component id="a8c39" class="javax.swing.JComboBox" binding="comboBoxResourceGroup">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties/>
-                      </component>
-                      <vspacer id="4fe8c">
-                        <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                      </vspacer>
-                      <component id="8c814" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Select Resource Group"/>
-                        </properties>
-                      </component>
-                    </children>
-                  </grid>
-                  <grid id="92f5d" binding="panelResourceGroupCreateNew" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                    <margin top="0" left="0" bottom="0" right="0"/>
-                    <constraints>
-                      <tabbedpane title="Create New"/>
-                    </constraints>
-                    <properties/>
-                    <border type="none"/>
-                    <children>
-                      <component id="33069" class="javax.swing.JTextField" binding="textFieldResourceGroupNew">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                            <preferred-size width="150" height="-1"/>
-                          </grid>
-                        </constraints>
-                        <properties/>
-                      </component>
-                      <vspacer id="954e2">
-                        <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                      </vspacer>
-                      <component id="9aa72" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Enter Name"/>
-                        </properties>
-                      </component>
-                    </children>
-                  </grid>
-                </children>
-              </tabbedpane>
+              </component>
+              <vspacer id="b59b3">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+              <component id="19f5f" class="javax.swing.JRadioButton" binding="radioButtonResourceGroupUseExisting">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Use Existing:"/>
+                </properties>
+              </component>
             </children>
           </grid>
-          <grid id="90ed2" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="3d5f2" binding="panelTabJdk" layout-manager="GridLayoutManager" row-count="6" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
-              <grid row="8" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+              <tabbedpane title="JDK"/>
             </constraints>
             <properties/>
-            <border type="none" title="JDK"/>
+            <border type="none"/>
             <children>
-              <tabbedpane id="ec7d6" binding="tabbedPaneJdk">
+              <component id="685c4" class="javax.swing.JRadioButton" binding="radioButtonJdkDefault">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="200" height="200"/>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <selected value="true"/>
+                  <text value="Default"/>
+                </properties>
+              </component>
+              <component id="57a7" class="javax.swing.JLabel" binding="labelJdkDefault">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Deploy the default JDK (JDK 8)"/>
+                </properties>
+              </component>
+              <component id="9dbfc" class="javax.swing.JRadioButton" binding="radioButtonJdk3rdParty">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="3rd Party"/>
+                </properties>
+              </component>
+              <component id="c46bd" class="javax.swing.JRadioButton" binding="radioButtonJdkOwn">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Download From URL"/>
+                </properties>
+              </component>
+              <component id="3cd86" class="javax.swing.JComboBox" binding="comboBoxJDK3Party">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <enabled value="false"/>
+                </properties>
+              </component>
+              <component id="a2b1e" class="javax.swing.JTextField" binding="textFieldJDKUrl" custom-create="true">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <enabled value="false"/>
+                </properties>
+              </component>
+              <component id="9d709" class="javax.swing.JLabel" binding="labelJDKAccountKey">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="3" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <enabled value="false"/>
+                  <text value="Storage Account Key"/>
+                </properties>
+              </component>
+              <component id="462b4" class="javax.swing.JTextField" binding="textFieldJDKAccountKey" custom-create="true">
+                <constraints>
+                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
                   </grid>
                 </constraints>
-                <properties/>
-                <border type="none"/>
-                <children>
-                  <grid id="a6313" binding="panelJdkDefault" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                    <margin top="0" left="0" bottom="0" right="0"/>
-                    <constraints>
-                      <tabbedpane title="Default"/>
-                    </constraints>
-                    <properties/>
-                    <border type="none"/>
-                    <children>
-                      <component id="57a7" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Deploy the default JDK offered by Azure Web Apps service (JDK 8)"/>
-                        </properties>
-                      </component>
-                      <vspacer id="66c2">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                      </vspacer>
-                    </children>
-                  </grid>
-                  <grid id="76cc" binding="panelJdk3Party" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                    <margin top="0" left="0" bottom="0" right="0"/>
-                    <constraints>
-                      <tabbedpane title="3rd Party"/>
-                    </constraints>
-                    <properties/>
-                    <border type="none"/>
-                    <children>
-                      <component id="3cd86" class="javax.swing.JComboBox" binding="comboBoxJDK3Party">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties/>
-                      </component>
-                      <vspacer id="d0691">
-                        <constraints>
-                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                      </vspacer>
-                      <component id="468a5" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Deploy a 3rd party JDK available on Azure"/>
-                        </properties>
-                      </component>
-                      <component id="1574d" class="org.jdesktop.swingx.JXHyperlink" binding="linkLicense">
-                        <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="GNU General Public License"/>
-                        </properties>
-                      </component>
-                    </children>
-                  </grid>
-                  <grid id="1efd2" binding="panelJdkOwn" layout-manager="GridLayoutManager" row-count="5" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                    <margin top="0" left="0" bottom="0" right="0"/>
-                    <constraints>
-                      <tabbedpane title="My Own"/>
-                    </constraints>
-                    <properties/>
-                    <border type="none"/>
-                    <children>
-                      <component id="ec70f" class="javax.swing.JLabel" binding="labelJDKUrl">
-                        <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="JDK Zip Archive URL"/>
-                        </properties>
-                      </component>
-                      <vspacer id="7df24">
-                        <constraints>
-                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                      </vspacer>
-                      <component id="a2b1e" class="javax.swing.JTextField" binding="textFieldJDKUrl">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                            <preferred-size width="150" height="-1"/>
-                          </grid>
-                        </constraints>
-                        <properties/>
-                      </component>
-                      <component id="9d709" class="javax.swing.JLabel" binding="labelJDKAccountKey">
-                        <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Storage Account Key (if the URL above is a private blob)"/>
-                        </properties>
-                      </component>
-                      <component id="462b4" class="javax.swing.JTextField" binding="textFieldJDKAccountKey">
-                        <constraints>
-                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                            <preferred-size width="150" height="-1"/>
-                          </grid>
-                        </constraints>
-                        <properties/>
-                      </component>
-                    </children>
-                  </grid>
-                </children>
-              </tabbedpane>
+                <properties>
+                  <enabled value="false"/>
+                </properties>
+              </component>
+              <component id="c7abc" class="javax.swing.JLabel" binding="labelStorageAccountComment">
+                <constraints>
+                  <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <enabled value="false"/>
+                  <text value="(If the URL above is a private blob)"/>
+                </properties>
+              </component>
+              <vspacer id="14ee7">
+                <constraints>
+                  <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+              <component id="60d42" class="org.jdesktop.swingx.JXHyperlink" binding="linkLicense">
+                <constraints>
+                  <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <enabled value="false"/>
+                  <text value="License"/>
+                </properties>
+              </component>
             </children>
           </grid>
         </children>
-      </grid>
+      </tabbedpane>
     </children>
   </grid>
   <buttonGroups>
@@ -445,6 +355,17 @@
       <member id="bdf09"/>
       <member id="e7ac8"/>
       <member id="839c5"/>
+      <member id="685c4"/>
+      <member id="9dbfc"/>
+      <member id="c46bd"/>
+    </group>
+    <group name="buttonGroupResourceGroup">
+      <member id="84d7d"/>
+      <member id="19f5f"/>
+    </group>
+    <group name="buttonGroupAppServicePlan">
+      <member id="1afc6"/>
+      <member id="7fd50"/>
     </group>
   </buttonGroups>
 </form>
