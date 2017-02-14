@@ -38,7 +38,6 @@ public class ArtifactValidationWindow extends JDialog {
     private JButton buttonCancel;
     //private JTextPane textPane;
     private JEditorPane editorPane;
-    private JLabel labelDescription;
 
     private List<String> issues;
 

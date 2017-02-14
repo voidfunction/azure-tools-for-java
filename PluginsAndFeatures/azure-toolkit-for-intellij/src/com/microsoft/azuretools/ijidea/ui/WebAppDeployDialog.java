@@ -443,14 +443,14 @@ public class WebAppDeployDialog extends DialogWrapper {
 
             StringBuilder sb = new StringBuilder();
             sb.append("<div style=\"margin: 7px 7px 7px 7px;\">");
-            sb.append(String.format("<b>App Service Name:</b>&nbsp;%s<br/>", appServiceName));
-            sb.append(String.format("<b>Subscription Name:</b>&nbsp;%s;&nbsp;<b>ID:</b>&nbsp;%s<br/>", sd.getSubscriptionName(), sd.getSubscriptionId()));
+            sb.append(String.format("App Service Name:&nbsp;<b>%s</b><br/>", appServiceName));
+            sb.append(String.format("Subscription Name:&nbsp;<b>%s</b>;&nbsp;ID:&nbsp;<b>%s</b><br/>", sd.getSubscriptionName(), sd.getSubscriptionId()));
             String aspName = asp == null ? "N/A" : asp.name();
             String aspPricingTier = asp == null ? "N/A" : asp.pricingTier().toString();
-            sb.append(String.format("<b>App Service Plan Name:</b>&nbsp;%s;&nbsp;<b>Pricing Tier:</b>&nbsp;%s<br/>", aspName, aspPricingTier));
+            sb.append(String.format("App Service Plan Name:&nbsp;<b>%s</b>;&nbsp;Pricing Tier:&nbsp;<b>%s</b><br/>", aspName, aspPricingTier));
 
             String link = buildSiteLink(wad.webApp, null);
-            sb.append(String.format("<b>Link:</b>&nbsp;<a href=\"%s\">%s</a>", link, link));
+            sb.append(String.format("Link:&nbsp;<a href=\"%s\">%s</a>", link, link));
             sb.append("</div>");
             editorPaneAppServiceDetails.setText(sb.toString());
         }
@@ -475,7 +475,7 @@ public class WebAppDeployDialog extends DialogWrapper {
         DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
         WebAppDetails wad = webAppWebAppDetailsMap.get(tableModel.getValueAt(selectedRow, 0));
         if (wad.webApp.javaVersion()  == JavaVersion.OFF ) {
-            return new ValidationInfo("Please select JAVA bases App Service", table);
+            return new ValidationInfo("Please select java based App Service", table);
         }
 
         return super.doValidate();
