@@ -28,9 +28,8 @@ import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.serviceexplorer.AzureRefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
-import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -38,18 +37,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class VMArmModule extends RefreshableNode {
+public class VMArmModule extends AzureRefreshableNode {
     private static final String VM_SERVICE_MODULE_ID = com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule.class.getName();
     private static final String ICON_PATH = "virtualmachines.png";
     private static final String BASE_MODULE_NAME = "Virtual Machines";
 
     public VMArmModule(Node parent) {
         super(VM_SERVICE_MODULE_ID, BASE_MODULE_NAME, parent, ICON_PATH);
-    }
-
-    @Override
-    protected void onNodeClick(NodeActionEvent e) {
-        this.load();
     }
 
     @Override

@@ -22,6 +22,8 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure;
 
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
@@ -84,43 +86,41 @@ public class AzureModule extends RefreshableNode {
         // already been added first because this method can be called
         // multiple times when the user clicks the "Refresh" context
         // menu item
-        if (!vmArmServiceModule.isLoading()) {
-            if (!isDirectChild(vmArmServiceModule)) {
-                addChildNode(vmArmServiceModule);
-            }
-            vmArmServiceModule.load();
+        if (!isDirectChild(vmArmServiceModule)) {
+            addChildNode(vmArmServiceModule);
         }
-        if (!storageModule.isLoading()) {
-            if (!isDirectChild(storageModule)) {
-                addChildNode(storageModule);
-            }
-            storageModule.load();
+        if (!isDirectChild(storageModule)) {
+            addChildNode(storageModule);
         }
-        if (!webappsModule.isLoading()) {
-            if (!isDirectChild(webappsModule)) {
-                addChildNode(webappsModule);
-            }
-
-            webappsModule.load();
+        if (!isDirectChild(webappsModule)) {
+            addChildNode(webappsModule);
         }
-//        if (!vmArmServiceModule.isLoading()) {
-//            if (!isDirectChild(vmArmServiceModule)) {
-//                addChildNode(vmArmServiceModule);
-//            }
-//            vmArmServiceModule.load();
-//        }
-        if (hdInsightModule != null && !hdInsightModule.isLoading()) {
-            if (!isDirectChild(hdInsightModule)) {
-                addChildNode(hdInsightModule);
-            }
-            hdInsightModule.load();
+        if (hdInsightModule != null && !isDirectChild(hdInsightModule)) {
+            addChildNode(hdInsightModule);
         }
-        if (!dockerHostModule.isLoading()) {
-            if (!isDirectChild(dockerHostModule)) {
-                addChildNode(dockerHostModule);
+        if (!isDirectChild(dockerHostModule)) {
+            addChildNode(dockerHostModule);
+        }
+        try {
+            if (AuthMethodManager.getInstance().isSignedIn()) {
+                if (!vmArmServiceModule.isLoading()) {
+                    vmArmServiceModule.load();
+                }
+                if (!storageModule.isLoading()) {
+                    storageModule.load();
+                }
+                if (!webappsModule.isLoading()) {
+                    webappsModule.load();
+                }
+                if (hdInsightModule != null && !hdInsightModule.isLoading()) {
+                    hdInsightModule.load();
+                }
+                if (!dockerHostModule.isLoading()) {
+                    dockerHostModule.load();
+                }
             }
-
-            dockerHostModule.load();
+        } catch (Exception e) {
+            throw new AzureCmdException("Error loading Azure Explorer modules", e);
         }
     }
 
