@@ -50,7 +50,8 @@ public class AzureDockerValidationUtils {
   }
 
   public static boolean validateDockerArtifactPath(String name) {
-    return Files.isRegularFile(Paths.get(name)) &&
+    return Files.exists(Paths.get(name)) &&
+        Files.isRegularFile(Paths.get(name)) &&
         Files.isReadable(Paths.get(name));
   }
 
@@ -82,7 +83,8 @@ public class AzureDockerValidationUtils {
   }
 
   public static boolean validateDockerfilePath(String name) {
-    return Files.isRegularFile(Paths.get(name)) &&
+    return Files.exists(Paths.get(name)) &&
+        Files.isRegularFile(Paths.get(name)) &&
         Files.isReadable(Paths.get(name));
   }
 

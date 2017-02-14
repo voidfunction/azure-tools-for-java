@@ -102,14 +102,6 @@ public class AzureDockerHostDeployAction extends AnAction {
       dockerImageDescription.artifactName = AzureDockerUtils.getDefaultArtifactName(project.getName());
       dockerImageDescription.host = dockerManager.createNewDockerHostDescription(AzureDockerUtils.getDefaultRandomName(AzureDockerUtils.getDefaultName(project.getName())));
       dockerImageDescription.hasNewDockerHost = false;
-      AzureDockerCertVault certVault = AzureDockerCertVaultOps.getTLSCertsFromLocalFile("/Users/milis/temp/keys/tls/using_openssl");
-
-      dockerImageDescription.host.certVault.tlsCACert = certVault.tlsCACert;
-      dockerImageDescription.host.certVault.tlsCAKey = certVault.tlsCAKey;
-      dockerImageDescription.host.certVault.tlsClientCert = certVault.tlsClientCert;
-      dockerImageDescription.host.certVault.tlsClientKey = certVault.tlsClientKey;
-      dockerImageDescription.host.certVault.tlsServerCert = certVault.tlsServerCert;
-      dockerImageDescription.host.certVault.tlsServerKey = certVault.tlsServerKey;
 
       AzureSelectDockerWizardModel model = new AzureSelectDockerWizardModel(project, dockerManager, dockerImageDescription);
       AzureSelectDockerWizardDialog wizard = new AzureSelectDockerWizardDialog(model);

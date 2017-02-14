@@ -329,6 +329,9 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       tableModel.insertRow(0, row);
       tableModel.setValueAt(true, 0, 0);
       dockerHostsTable.setRowSelectionInterval(0, 0);
+
+      setFinishButtonState(doValidate(false) == null);
+      setNextButtonState(doValidate(false) == null);
     }
   }
 
