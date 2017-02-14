@@ -22,10 +22,10 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
 import com.google.common.collect.ImmutableMap;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
-import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
@@ -59,7 +59,7 @@ public class QueueNode extends Node {
         @Override
         protected void azureNodeAction(NodeActionEvent e)
                 throws AzureCmdException {
-            Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.getName(), queue);
+            Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.name(), queue);
 
             if (openedFile != null) {
                 DefaultLoader.getIdeHelper().closeFile(getProject(), openedFile);
@@ -111,9 +111,9 @@ public class QueueNode extends Node {
     private static final String QUEUE_MODULE_ID = QueueNode.class.getName();
     private static final String ICON_PATH = "container.png";
     private final Queue queue;
-    private final ClientStorageAccount storageAccount;
+    private final StorageAccount storageAccount;
 
-    public QueueNode(QueueModule parent, ClientStorageAccount storageAccount, Queue queue) {
+    public QueueNode(QueueModule parent, StorageAccount storageAccount, Queue queue) {
         super(QUEUE_MODULE_ID, queue.getName(), parent, ICON_PATH, true);
 
         this.storageAccount = storageAccount;
@@ -124,7 +124,7 @@ public class QueueNode extends Node {
 
     @Override
     protected void onNodeClick(NodeActionEvent ex) {
-        final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.getName(), queue);
+        final Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(getProject(), storageAccount.name(), queue);
 
         if (openedFile == null) {
             DefaultLoader.getUIHelper().openItem(getProject(), storageAccount, queue, " [Queue]", "Queue", "container.png");

@@ -21,7 +21,7 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
@@ -32,10 +32,10 @@ import java.util.List;
 
 public class TableModule extends RefreshableNode {
     private static final String TABLES = "Tables";
-    final ClientStorageAccount storageAccount;
+    final StorageAccount storageAccount;
 
-    public TableModule(ClientStorageNode parent, ClientStorageAccount storageAccount) {
-        super(TABLES + storageAccount.getName(), TABLES, parent, null);
+    public TableModule(ClientStorageNode parent, StorageAccount storageAccount) {
+        super(TABLES + storageAccount.name(), TABLES, parent, null);
 
         this.storageAccount = storageAccount;
         this.parent = parent;
@@ -53,7 +53,7 @@ public class TableModule extends RefreshableNode {
         }
     }
 
-    public ClientStorageAccount getStorageAccount() {
+    public StorageAccount getStorageAccount() {
         return storageAccount;
     }
 }

@@ -21,9 +21,9 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.helpers.ExternalStorageHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
@@ -36,7 +36,7 @@ public class ExternalStorageNode extends ClientStorageNode {
     private class DetachAction extends AzureNodeActionPromptListener {
         public DetachAction() {
             super(ExternalStorageNode.this,
-                    String.format("This operation will detach external storage account %s.\nAre you sure you want to continue?", clientStorageAccount.getName()),
+                    String.format("This operation will detach external storage account %s.\nAre you sure you want to continue?", storageAccount.name()),
                     "Detaching External Storage Account");
         }
 
@@ -46,7 +46,7 @@ public class ExternalStorageNode extends ClientStorageNode {
             Node node = e.getAction().getNode();
             node.getParent().removeDirectChildNode(node);
 
-            ExternalStorageHelper.detach(clientStorageAccount);
+            ExternalStorageHelper.detach(storageAccount);
         }
 
         @Override
@@ -57,8 +57,8 @@ public class ExternalStorageNode extends ClientStorageNode {
 
     private static final String WAIT_ICON_PATH = "externalstorageaccount.png";
 
-    public ExternalStorageNode(StorageModule parent, ClientStorageAccount sm) {
-        super(sm.getName(), sm.getName(), parent, WAIT_ICON_PATH, sm, true);
+    public ExternalStorageNode(StorageModule parent, StorageAccount sm) {
+        super(sm.name(), sm.name(), parent, WAIT_ICON_PATH, sm, true);
 
         loadActions();
     }
@@ -68,7 +68,7 @@ public class ExternalStorageNode extends ClientStorageNode {
             throws AzureCmdException {
         removeAllChildNodes();
 
-        if (clientStorageAccount.getPrimaryKey().isEmpty()) {
+        if (storageAccount.getKeys().isEmpty()) {
             try {
                 NodeActionListener listener = node2Actions.get(this.getClass()).get(0).getConstructor().newInstance();
                 listener.actionPerformedAsync(new NodeActionEvent(new NodeAction(this, this.getName()))).get();

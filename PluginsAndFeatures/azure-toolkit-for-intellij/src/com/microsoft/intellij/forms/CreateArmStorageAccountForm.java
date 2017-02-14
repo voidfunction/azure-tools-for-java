@@ -89,8 +89,6 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     private StorageAccount storageAccount;
     private Project project;
 
-    private boolean isLoading = true;
-
     private static final String PRICING_LINK = "http://go.microsoft.com/fwlink/?LinkID=400838";
 
     public CreateArmStorageAccountForm(Project project) {
@@ -193,7 +191,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         || (createNewRadioButton.isSelected() && resourceGrpField.getText().trim().isEmpty())
         || (useExistingRadioButton.isSelected() && resourceGrpCombo.getSelectedObjects().length == 0));
 
-        setOKActionEnabled(!isLoading && allFieldsCompleted);
+        setOKActionEnabled(allFieldsCompleted);
     }
 
 
@@ -415,46 +413,6 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         } else {
             fillRegions();
         }
-
-//        isLoading = true;
-//
-//        regionComboBox.addItem("<Loading...>");
-//
-//        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading regions...", false) {
-//            @Override
-//            public void run(@NotNull ProgressIndicator progressIndicator) {
-//                progressIndicator.setIndeterminate(true);
-//
-//                try {
-//                    java.util.List<Location> locations = AzureArmManagerImpl.getManager(project).getLocations(subscription.getId().toString());
-//
-//                    final Vector<Object> vector = new Vector<Object>();
-//                    vector.addAll(locations);
-//                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            isLoading = false;
-//
-//                            validateEmptyFields();
-//
-//                            regionComboBox.removeAllItems();
-//                            regionComboBox.setModel(new DefaultComboBoxModel(vector) {
-//                                public void setSelectedItem(Object o) {
-//                                    if (!(o instanceof String)) {
-//                                        super.setSelectedItem(o);
-//                                    }
-//                                }
-//                            });
-//
-//                            regionComboBox.setSelectedIndex(1);
-//                        }
-//                    });
-//                } catch (AzureCmdException e) {
-//                    String msg = "An error occurred while attempting to load the regions list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
-//                    PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
-//                }
-//            }
-//        });
     }
 
     private void fillRegions() {

@@ -30,6 +30,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.forms.ErrorMessageForm;
@@ -41,7 +42,10 @@ import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.UIHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.model.storage.*;
+import com.microsoft.tooling.msservices.model.storage.BlobContainer;
+import com.microsoft.tooling.msservices.model.storage.Queue;
+import com.microsoft.tooling.msservices.model.storage.StorageServiceTreeItem;
+import com.microsoft.tooling.msservices.model.storage.Table;
 
 import javax.swing.*;
 import java.io.File;
@@ -51,7 +55,7 @@ import java.text.DecimalFormat;
 import java.util.Map;
 
 public class UIHelperImpl implements UIHelper {
-    public static Key<ClientStorageAccount> STORAGE_KEY = new Key<ClientStorageAccount>("clientStorageAccount");
+    public static Key<StorageAccount> STORAGE_KEY = new Key<StorageAccount>("storageAccount");
     private Map<Class<? extends StorageServiceTreeItem>, Key<? extends StorageServiceTreeItem>> name2Key = ImmutableMap.of(BlobContainer.class, BlobExplorerFileEditorProvider.CONTAINER_KEY,
             Queue.class, QueueExplorerFileEditorProvider.QUEUE_KEY,
             Table.class, TableExplorerFileEditorProvider.TABLE_KEY);
@@ -119,7 +123,7 @@ public class UIHelperImpl implements UIHelper {
 
     @Override
     public <T extends StorageServiceTreeItem> void openItem(@NotNull Object projectObject,
-                                                            @Nullable ClientStorageAccount storageAccount,
+                                                            @Nullable StorageAccount storageAccount,
                                                             @NotNull T item,
                                                             @Nullable String itemType,
                                                             @NotNull final String itemName,
@@ -183,12 +187,12 @@ public class UIHelperImpl implements UIHelper {
     }
 
     @Override
-    public void refreshQueue(@NotNull final Object projectObject, @NotNull final ClientStorageAccount storageAccount,
+    public void refreshQueue(@NotNull final Object projectObject, @NotNull final StorageAccount storageAccount,
                              @NotNull final Queue queue) {
         ApplicationManager.getApplication().runReadAction(new Runnable() {
             @Override
             public void run() {
-                VirtualFile file = (VirtualFile) getOpenedFile(projectObject, storageAccount.getName(), queue);
+                VirtualFile file = (VirtualFile) getOpenedFile(projectObject, storageAccount.name(), queue);
                 if (file != null) {
                     final QueueFileEditor queueFileEditor = (QueueFileEditor) FileEditorManager.getInstance((Project) projectObject).getEditors(file)[0];
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -223,12 +227,12 @@ public class UIHelperImpl implements UIHelper {
     }
 
     @Override
-    public void refreshTable(@NotNull final Object projectObject, @NotNull final ClientStorageAccount storageAccount,
+    public void refreshTable(@NotNull final Object projectObject, @NotNull final StorageAccount storageAccount,
                              @NotNull final Table table) {
         ApplicationManager.getApplication().runReadAction(new Runnable() {
             @Override
             public void run() {
-                VirtualFile file = (VirtualFile) getOpenedFile(projectObject, storageAccount.getName(), table);
+                VirtualFile file = (VirtualFile) getOpenedFile(projectObject, storageAccount.name(), table);
                 if (file != null) {
                     final TableFileEditor tableFileEditor = (TableFileEditor) FileEditorManager.getInstance((Project) projectObject).getEditors(file)[0];
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -261,11 +265,11 @@ public class UIHelperImpl implements UIHelper {
 
         for (VirtualFile editedFile : fileEditorManager.getOpenFiles()) {
             T editedItem = editedFile.getUserData((Key<T>) name2Key.get(item.getClass()));
-            ClientStorageAccount editedStorageAccount = editedFile.getUserData(STORAGE_KEY);
+            StorageAccount editedStorageAccount = editedFile.getUserData(STORAGE_KEY);
 
             if (editedStorageAccount != null
                     && editedItem != null
-                    && editedStorageAccount.getName().equals(accountName)
+                    && editedStorageAccount.name().equals(accountName)
                     && editedItem.getName().equals(item.getName())) {
                 return editedFile;
             }

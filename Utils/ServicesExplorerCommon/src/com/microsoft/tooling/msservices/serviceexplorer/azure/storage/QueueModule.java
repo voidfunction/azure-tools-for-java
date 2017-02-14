@@ -21,9 +21,9 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
-import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 
@@ -31,10 +31,10 @@ import java.util.List;
 
 public class QueueModule extends RefreshableNode {
     private static final String QUEUES = "Queues";
-    final ClientStorageAccount storageAccount;
+    final StorageAccount storageAccount;
 
-    public QueueModule(ClientStorageNode parent, ClientStorageAccount storageAccount) {
-        super(QUEUES + storageAccount.getName(), QUEUES, parent, null);
+    public QueueModule(ClientStorageNode parent, StorageAccount storageAccount) {
+        super(QUEUES + storageAccount.name(), QUEUES, parent, null);
 
         this.storageAccount = storageAccount;
         this.parent = parent;
@@ -52,7 +52,7 @@ public class QueueModule extends RefreshableNode {
         }
     }
 
-    public ClientStorageAccount getStorageAccount() {
+    public StorageAccount getStorageAccount() {
         return storageAccount;
     }
 }

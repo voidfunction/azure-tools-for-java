@@ -21,6 +21,7 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
@@ -31,10 +32,10 @@ import java.util.List;
 
 public class BlobModule extends RefreshableNode {
     private static final String BLOBS = "Blobs";
-    final ClientStorageAccount storageAccount;
+    final StorageAccount storageAccount;
 
-    public BlobModule(ClientStorageNode parent, ClientStorageAccount storageAccount) {
-        super(BLOBS + storageAccount.getName(), BLOBS, parent, null);
+    public BlobModule(ClientStorageNode parent, StorageAccount storageAccount) {
+        super(BLOBS + storageAccount.name(), BLOBS, parent, null);
         this.parent = parent;
         this.storageAccount = storageAccount;
     }
@@ -44,14 +45,14 @@ public class BlobModule extends RefreshableNode {
             throws AzureCmdException {
         removeAllChildNodes();
 
-        final List<BlobContainer> blobContainers = StorageClientSDKManager.getManager().getBlobContainers(storageAccount.getConnectionString());
+        final List<BlobContainer> blobContainers = StorageClientSDKManager.getManager().getBlobContainers(StorageClientSDKManager.getConnectionString(storageAccount));
 
         for (BlobContainer blobContainer : blobContainers) {
 //            addChildNode(new ContainerNode(this, storageAccount, blobContainer)); todo:
         }
     }
 
-    public ClientStorageAccount getStorageAccount() {
+    public StorageAccount getStorageAccount() {
         return storageAccount;
     }
 }

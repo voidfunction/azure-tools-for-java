@@ -30,6 +30,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Table;
@@ -41,7 +42,7 @@ public class TableExplorerFileEditorProvider implements FileEditorProvider, Dumb
 
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-        ClientStorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
+        StorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
         Table table = virtualFile.getUserData(TABLE_KEY);
 
         return (storageAccount != null && table != null);
@@ -52,11 +53,11 @@ public class TableExplorerFileEditorProvider implements FileEditorProvider, Dumb
     public FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         TableFileEditor tableFileEditor = new TableFileEditor(project);
 
-        ClientStorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
+        StorageAccount storageAccount = virtualFile.getUserData(UIHelperImpl.STORAGE_KEY);
         Table table = virtualFile.getUserData(TABLE_KEY);
 
         tableFileEditor.setTable(table);
-        tableFileEditor.setStorageAccount(storageAccount);
+//        tableFileEditor.setStorageAccount(storageAccount);
 
         tableFileEditor.fillGrid();
 
