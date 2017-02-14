@@ -90,24 +90,14 @@ public class StorageNode extends RefreshableNode {
     }
 
     @Override
-    protected void refreshItems()
-            throws AzureCmdException {
+    protected void refreshItems() throws AzureCmdException {
         removeAllChildNodes();
 
-        try {
-            List<BlobContainer> containerList = StorageClientSDKManager.getManager()
-                    .getBlobContainers(StorageClientSDKManager.getConnectionString(storageAccount));
-            for (BlobContainer blobContainer : containerList) {
-                addChildNode(new ContainerNode(this, storageAccount, blobContainer));
-            }
-        } catch (AzureCmdException ex) {
-            throw new AzureCmdException(ex.getMessage(), ex);
+        List<BlobContainer> containerList = StorageClientSDKManager.getManager()
+                .getBlobContainers(StorageClientSDKManager.getConnectionString(storageAccount));
+        for (BlobContainer blobContainer : containerList) {
+            addChildNode(new ContainerNode(this, storageAccount, blobContainer));
         }
-    }
-
-    @Override
-    protected void onNodeClick(NodeActionEvent e) {
-        this.load();
     }
 
     @Override

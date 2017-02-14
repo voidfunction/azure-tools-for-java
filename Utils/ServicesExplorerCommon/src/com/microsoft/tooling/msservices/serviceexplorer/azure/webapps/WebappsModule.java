@@ -25,15 +25,16 @@ import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.utils.AzureModel;
+import com.microsoft.azuretools.utils.AzureModelController;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.serviceexplorer.AzureRefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
-import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 
 import java.util.List;
 import java.util.Map;
 
-public class WebappsModule extends RefreshableNode {
+public class WebappsModule extends AzureRefreshableNode {
 	private static final String WEBAPPS_MODULE_ID = WebappsModule.class.getName();
 	private static final String WEB_RUN_ICON = "website.png";
 	private static final String WEB_STOP_ICON = "stopWebsite.png";
@@ -45,25 +46,22 @@ public class WebappsModule extends RefreshableNode {
 	}
 
 	@Override
-	protected void onNodeClick(NodeActionEvent e) {
-		this.load();
-	}
-
-	@Override
 	protected void refreshItems() throws AzureCmdException {
 		removeAllChildNodes();
-		Map<SubscriptionDetail, List<ResourceGroup>> srgMap = AzureModel.getInstance().getSubscriptionToResourceGroupMap();
-		Map<ResourceGroup, List<WebApp>> rgwaMap = AzureModel.getInstance().getResourceGroupToWebAppMap();
-
-		for (SubscriptionDetail sd : srgMap.keySet()) {
-			if (!sd.isSelected()) continue;
-
-			for (ResourceGroup rg : srgMap.get(sd)) {
-				for (WebApp webApp : rgwaMap.get(rg)) {
-						addChildNode(new WebappNode(this, sd.getSubscriptionId(), webApp, rg,
-								RUN_STATUS.equalsIgnoreCase(webApp.inner().state()) ? WEB_RUN_ICON : WEB_STOP_ICON));
-				}
+		if (AzureModel.getInstance().getResourceGroupToWebAppMap() == null) {
+			try {
+				AzureModelController.updateResourceGroupMaps(null);
+			} catch (Exception ex) {
+				DefaultLoader.getUIHelper().logError("Error updating webapps cache", ex);
 			}
+			DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					fillWebappsNodes();
+				}
+			});
+		} else {
+			fillWebappsNodes();
 		}
 
 //			if (webSiteConfigMapTemp != null && !webSiteConfigMapTemp.isEmpty()) {
@@ -83,5 +81,21 @@ public class WebappsModule extends RefreshableNode {
 //				}
 //			}
 //		}
+	}
+
+	private void fillWebappsNodes() {
+		Map<SubscriptionDetail, List<ResourceGroup>> srgMap = AzureModel.getInstance().getSubscriptionToResourceGroupMap();
+		Map<ResourceGroup, List<WebApp>> rgwaMap = AzureModel.getInstance().getResourceGroupToWebAppMap();
+
+		for (SubscriptionDetail sd : srgMap.keySet()) {
+			if (!sd.isSelected()) continue;
+
+			for (ResourceGroup rg : srgMap.get(sd)) {
+				for (WebApp webApp : rgwaMap.get(rg)) {
+						addChildNode(new WebappNode(this, sd.getSubscriptionId(), webApp, rg,
+								RUN_STATUS.equalsIgnoreCase(webApp.inner().state()) ? WEB_RUN_ICON : WEB_STOP_ICON));
+				}
+			}
+		}
 	}
 }

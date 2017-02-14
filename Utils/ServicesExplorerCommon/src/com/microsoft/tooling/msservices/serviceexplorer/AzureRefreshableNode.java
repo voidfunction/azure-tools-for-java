@@ -19,24 +19,28 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.tooling.msservices.serviceexplorer.azure.docker;
+package com.microsoft.tooling.msservices.serviceexplorer;
 
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.serviceexplorer.AzureRefreshableNode;
-import com.microsoft.tooling.msservices.serviceexplorer.Node;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 
-public class DockerHostModule extends AzureRefreshableNode {
-  private static final String DOCKER_HOST_MODULE_ID = DockerHostModule.class.getName();
-  private static final String DOCKER_HOST_ICON = "virtualmachines.png";
-  private static final String BASE_MODULE_NAME = "Docker Hosts";
+public abstract class AzureRefreshableNode extends RefreshableNode {
+    public AzureRefreshableNode(String id, String name, Node parent, String iconPath) {
+        super(id, name, parent, iconPath);
+    }
 
-  public DockerHostModule(Node parent) {
-    super(DOCKER_HOST_MODULE_ID, BASE_MODULE_NAME, parent, DOCKER_HOST_ICON);
-  }
+    public AzureRefreshableNode(String id, String name, Node parent, String iconPath, boolean delayActionLoading) {
+        super(id, name, parent, iconPath, delayActionLoading);
+    }
 
-  @Override
-  protected void refreshItems() throws AzureCmdException {
-    // remove all child nodes
-    removeAllChildNodes();
-  }
+    @Override
+    protected void onNodeClick(NodeActionEvent e) {
+        try {
+            if (AuthMethodManager.getInstance().isSignedIn()) {
+                super.onNodeClick(e);
+            }
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().logError("Error loading webapps", ex);
+        }
+    }
 }

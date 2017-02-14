@@ -31,6 +31,8 @@ import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import java.util.List;
 
 public abstract class RefreshableNode extends Node {
+    private boolean initialized;
+
     public RefreshableNode(String id, String name, Node parent, String iconPath) {
         super(id, name, parent, iconPath);
     }
@@ -51,6 +53,14 @@ public abstract class RefreshableNode extends Node {
         super.loadActions();
     }
 
+    @Override
+    protected void onNodeClick(NodeActionEvent e) {
+        if (!initialized) {
+            initialized = true;
+            this.load();
+        }
+    }
+
     // Sub-classes are expected to override this method if they wish to
     // refresh items synchronously. The default implementation does nothing.
     protected abstract void refreshItems() throws AzureCmdException;
@@ -60,14 +70,16 @@ public abstract class RefreshableNode extends Node {
     // delegates to "refreshItems" *synchronously* and completes the Future
     // with the result of calling getChildNodes.
     protected void refreshItems(SettableFuture<List<Node>> future) {
-        setLoading(true);
-        try {
-            refreshItems();
-            future.set(getChildNodes());
-        } catch (Exception e) {
-            future.setException(e);
-        } finally {
-            setLoading(false);
+        if (!loading) {
+            setLoading(true);
+            try {
+                refreshItems();
+                future.set(getChildNodes());
+            } catch (Exception e) {
+                future.setException(e);
+            } finally {
+                setLoading(false);
+            }
         }
     }
 
@@ -80,39 +92,40 @@ public abstract class RefreshableNode extends Node {
                     @Override
                     public void run() {
                         final String nodeName = node.getName();
-                        node.setName(nodeName + " (Refreshing...)");
+                        updateName(nodeName + " (Refreshing...)", null);
+//                        node.setName(nodeName + " (Refreshing...)");
 
                         Futures.addCallback(future, new FutureCallback<List<Node>>() {
                             @Override
                             public void onSuccess(List<Node> nodes) {
-                                updateName(null);
+                                updateName(nodeName, null);
                             }
 
                             @Override
                             public void onFailure(Throwable throwable) {
-                                updateName(throwable);
-                            }
-
-                            private void updateName(final Throwable throwable) {
-                                DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        node.setName(nodeName);
-
-                                        if (throwable != null) {
-                                            DefaultLoader.getUIHelper().showException("An error occurred while attempting " +
-                                                            "to load " + node.getName() + ".",
-                                                    throwable,
-                                                    "MS Services - Error Loading " + node.getName(),
-                                                    false,
-                                                    true);
-                                        }
-                                    }
-                                });
+                                updateName(nodeName, throwable);
                             }
                         });
 
                         node.refreshItems(future);
+                    }
+
+                    private void updateName(String name, final Throwable throwable) {
+                        DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                node.setName(name);
+
+                                if (throwable != null) {
+                                    DefaultLoader.getUIHelper().showException("An error occurred while attempting " +
+                                                    "to load " + node.getName() + ".",
+                                            throwable,
+                                            "MS Azure Explorer - Error Loading " + node.getName(),
+                                            false,
+                                            true);
+                                }
+                            }
+                        });
                     }
                 }
         );
