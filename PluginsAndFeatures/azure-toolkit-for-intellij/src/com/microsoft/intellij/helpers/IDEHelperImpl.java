@@ -44,7 +44,6 @@ import com.intellij.packaging.artifacts.Artifact;
 import com.intellij.packaging.impl.artifacts.ArtifactUtil;
 import com.intellij.packaging.impl.compiler.ArtifactCompileScope;
 import com.intellij.packaging.impl.compiler.ArtifactsWorkspaceSettings;
-import com.microsoft.auth.IWebUi;
 import com.microsoft.intellij.ApplicationSettings;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.helpers.tasks.CancellableTaskHandleImpl;
