@@ -111,14 +111,16 @@ public class AppServiceCreateDialog extends DialogWrapper {
     protected static final String textNotAvailable = "N/A";
 
     private void createUIComponents() {
-        textFieldWebappName = new HintTextField("<enter name>");
-        textFieldAppServicePlanName = new HintTextField("<enter name>");
-        textFieldResourceGroupName = new HintTextField("<enter name>");
         // generate random name
         DateFormat df = new SimpleDateFormat("yyMMddHHmmss");
-        String rgRandomName = "rg-webapp-" + df.format(new Date());
-        textFieldResourceGroupName.setText(rgRandomName);
+        String date = df.format(new Date());
 
+        textFieldWebappName = new HintTextField("<enter name>");
+        textFieldWebappName.setText("webapp-" + date);
+        textFieldAppServicePlanName = new HintTextField("<enter name>");
+        textFieldAppServicePlanName.setText("asp-" + date);
+        textFieldResourceGroupName = new HintTextField("<enter name>");
+        textFieldResourceGroupName.setText("rg-webapp-" + date);
         textFieldJDKUrl = new HintTextField("<enter url>");
         textFieldJDKAccountKey = new HintTextField("<enter key>");
     }
