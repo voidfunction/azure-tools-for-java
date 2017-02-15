@@ -26,7 +26,8 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
-import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.project.Project;
+import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.adauth.StringUtils;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
@@ -74,6 +75,8 @@ public class SignInWindow extends JDialog {
 
     final JFileChooser fileChooser;
 
+    private Project project;
+
     public int getResult() {
         return result;
     }
@@ -82,15 +85,16 @@ public class SignInWindow extends JDialog {
         return authMethodDetailsResult;
     }
 
-    public static SignInWindow go(AuthMethodDetails authMethodDetails, Component parent) {
+    public static SignInWindow go(AuthMethodDetails authMethodDetails, Component parent, Project project) {
         SignInWindow d = new SignInWindow(authMethodDetails);
+        d.project = project;
         d.pack();
         d.setLocationRelativeTo(parent);
         d.setVisible(true);
         return d;
     }
 
-    public SignInWindow(AuthMethodDetails authMethodDetails) {
+    private SignInWindow(AuthMethodDetails authMethodDetails) {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -241,23 +245,28 @@ public class SignInWindow extends JDialog {
             ex.printStackTrace();
             LOGGER.error("doSignIn", ex);
             ErrorWindow.show(ex.getMessage(), "Sign In Error", this);
-
         }
     }
 
     private void signInAsync() {
         ProgressManager.getInstance().run(
-            new Task.Modal(ProjectManager.getInstance().getDefaultProject(), "Sign In Progress", false) {
+            new Task.Modal(project, "Sign In Progress", false) {
                 @Override
                 public void run(ProgressIndicator indicator) {
                     indicator.setIndeterminate(true);
+                    indicator.setText("Signing In...");
                     try {
                         AdAuthManager.getInstance().signIn();
+                    } catch (AuthException ex) {
+                        LOGGER.error("signInAsync", ex.getMessage());
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         LOGGER.error("signInAsync", ex);
-                        ErrorWindow.show(ex.getMessage(), "Sign In Error", SignInWindow.this);
-
+                        try {
+                            ErrorWindow.show(ex.getMessage(), "Sign In Error", SignInWindow.this);
+                        } catch (Exception e) {
+                            ex.printStackTrace();
+                        }
                     }
                 }
             }
@@ -294,16 +303,17 @@ public class SignInWindow extends JDialog {
             AccessTokenAzureManager accessTokenAzureManager = new AccessTokenAzureManager();
             SubscriptionManager subscriptionManager = accessTokenAzureManager.getSubscriptionManager();
 
-            ProgressManager.getInstance().run(new Task.Modal(ProjectManager.getInstance().getDefaultProject(), "Loading Subscriptions...", true) {
+            ProgressManager.getInstance().run(new Task.Modal(project, "Load Subscriptions Progress", true) {
                 @Override
                 public void run(ProgressIndicator progressIndicator) {
+                    progressIndicator.setText("Loading subscriptions...");
                     try {
                         progressIndicator.setIndeterminate(true);
                         subscriptionManager.getSubscriptionDetails();
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         LOGGER.error("doCreateServicePrincipal::Task.Modal", ex);
-                        ErrorWindow.show(ex.getMessage(), "Get Subscription Error", SignInWindow.this);
+                        ErrorWindow.show(ex.getMessage(), "Load Subscription Error", SignInWindow.this);
 
                     }
                 }

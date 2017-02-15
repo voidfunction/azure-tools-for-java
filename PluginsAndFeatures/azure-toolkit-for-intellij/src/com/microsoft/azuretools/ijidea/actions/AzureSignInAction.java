@@ -89,7 +89,7 @@ public class AzureSignInAction extends AnAction {
                     authMethodManager.cleanAll();
                 }
             } else {
-                SignInWindow w = SignInWindow.go(authMethodManager.getAuthMethodDetails(), frame);
+                SignInWindow w = SignInWindow.go(authMethodManager.getAuthMethodDetails(), frame, project);
                 if (w.getResult() == JOptionPane.OK_OPTION) {
                     AuthMethodDetails authMethodDetailsUpdated = w.getAuthMethodDetails();
                     authMethodManager.setAuthMethodDetails(authMethodDetailsUpdated);
