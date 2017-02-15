@@ -156,7 +156,7 @@ public class Program {
 
             //printResourceGroups(am);
             //printTenants(atManager);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             System.exit(1);
@@ -215,14 +215,14 @@ public class Program {
                     }
                 }
             }
-        } catch (Throwable t) {
+        } catch (Exception t) {
             t.printStackTrace();
         }
     }
 
 
     @SuppressWarnings("unused")
-	private static void graphApiAction() throws Throwable {
+	private static void graphApiAction() throws Exception {
 
 
         AdAuthManager adAuthManager = AdAuthManager.getInstance();
@@ -248,7 +248,7 @@ public class Program {
     }
 
     @SuppressWarnings("unused")
-	private static void printResourceGroups(AzureManager manager) throws Throwable {
+	private static void printResourceGroups(AzureManager manager) throws Exception {
 
         Set<String> sidList = manager.getSubscriptionManager().getAccountSidList();
         for (String sid: sidList) {
@@ -262,7 +262,7 @@ public class Program {
     }
 
     @SuppressWarnings("unused")
-	private static void printSubscriptions(AzureManager manager) throws Throwable {
+	private static void printSubscriptions(AzureManager manager) throws Exception {
 
         for ( Subscription s : manager.getSubscriptions()) {
             System.out.println("    " + s.displayName());
@@ -307,7 +307,7 @@ public class Program {
         }
     }
 
-//    private static void printTenants(AzureManager manager) throws Throwable {
+//    private static void printTenants(AzureManager manager) throws Exception {
 //
 //        for ( Tenant t : manager.getTenants()) {
 //            String tid = t.tenantId();

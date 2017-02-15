@@ -39,7 +39,7 @@ public class ServicePrincipalStep implements IStep {
     private Reporter<String> reporter;
 
     @Override
-    public void execute(Map<String, Object> params) throws Throwable {
+    public void execute(Map<String, Object> params) throws Exception {
         //System.out.println("ServicePrincipalStep execute...");
 
         UUID appId = (UUID)params.get("appId");
@@ -79,7 +79,7 @@ public class ServicePrincipalStep implements IStep {
     // helpers
 
     // Create Service Principals
-    private ServicePrincipalRet createAadServicePrincipal(UUID appId) throws Throwable {
+    private ServicePrincipalRet createAadServicePrincipal(UUID appId) throws Exception {
     /*
         POST https://graph.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/servicePrincipals?api-version=1.6-internal HTTP/1.1
 

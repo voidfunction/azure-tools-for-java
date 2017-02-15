@@ -70,7 +70,7 @@ public class StepManager {
             reporter.report("!! Rolling back...");
 
             rollback();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             //e.printStackTrace();
             reporter.report(">> Executing step FAILED: " + e.getMessage());
             reporter.report("!! Rolling back...");
@@ -86,7 +86,7 @@ public class StepManager {
                 IStep step =  steps.get(curStep);
                 reporter.report("<< Rolling back step: " + step.getName() + "...");
                 step.rollback(getParamMap());
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 isOk = false;
                 reporter.report("<< Roll back FAILED: " + e.getMessage());
                 //e.printStackTrace();

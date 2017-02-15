@@ -48,8 +48,6 @@ public class WebAppUtils {
     private static final String ftpWebAppsPath = ftpRootPath + "webapps/";
     private static String jdkFolderName = "jdk";
     private static final String ftpJdkPath = ftpRootPath + jdkFolderName;
-    private static String javaOptsString = "-Djava.net.preferIPv4Stack=true -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=127.0.0.1:%HTTP_PLATFORM_DEBUG_PORT%";
-    private static String catalinaOpts = "-Dport.http=%HTTP_PLATFORM_PORT%";
     private static String aspScriptName = "getjdk.aspx";
     private static String webConfigFilename = "web.config";
     private static String reportFilename = "report.txt";
@@ -138,10 +136,6 @@ public class WebAppUtils {
         if (pi != null) pi.setText2("");
     }
 
-//    public static String getAbsolutePath(String dir) {
-//        return "/" + dir.trim().replace('\\', '/').replaceAll("^/+", "").replaceAll("/+$", "");
-//    }
-
     private static void uploadJdkDownloadScript(FTPClient ftp, String jdkDownloadUrl) throws Exception {
 
         String aspxPageName = aspScriptName;
@@ -195,12 +189,6 @@ public class WebAppUtils {
         ftp.deleteFile(ftpRootPath + aspScriptName);
         ftp.deleteFile(ftpRootPath + "jdk.zip");
     }
-
-//    private static void cleanupJdk(FTPClient ftp, String customJdkFolderName) throws IOException {
-//        if (customJdkFolderName != null) {
-//            removeFtpDirectory(ftp, ftpRootPath, "jdk");
-//        }
-//    }
 
     public static void removeCustomJdkArtifacts(FTPClient ftp, IProgressIndicator pi) throws IOException {
         if (doesRemoteFolderExist(ftp, ftpRootPath, jdkFolderName)) {
@@ -303,7 +291,6 @@ public class WebAppUtils {
         if(indicator != null) indicator.setText("Stopping the service...");
         webApp.stop();
 
-        //String webConfigFilename = "web.config";
         if(indicator != null) indicator.setText("Deleting "+ webConfigFilename + "...");
         ftp.deleteFile(ftpRootPath + webConfigFilename);
 
@@ -321,31 +308,6 @@ public class WebAppUtils {
         if(indicator != null) indicator.setText("Starting the service...");
         webApp.start();
     }
-
-//    public static String generateWebContainerPath(String webContainer, String version) {
-//        String path = "";
-//        if (webContainer.equalsIgnoreCase("TOMCAT")) {
-//            path = String.format("%s%s%s", "apache-tomcat", "-", version);
-//        } else {
-//            String version1 = version.substring(0, version.lastIndexOf('.') + 1);
-//            String version2 = version.substring(version.lastIndexOf('.') + 1, version.length());
-//            path = String.format("%s%s%s%s%s", "jetty-distribution", "-", version1, "v", version2);
-//        }
-//        return "%programfiles(x86)%\\" + path;
-//    }
-
-//    public static String generateWebContainerPath(WebContainer webContainer) {
-//        //String ver = webContainer.toString().indexOf("")
-//        if (webContainer.toString().startsWith(WebContainer.TOMCAT_7_0_NEWEST.toString())) {
-//            return "%AZURE_TOMCAT7_HOME%";
-//        } else if (webContainer.toString().startsWith(WebContainer.TOMCAT_8_0_NEWEST.toString())) {
-//            return "%AZURE_TOMCAT8_HOME%";
-//        } else if (webContainer.toString().startsWith(WebContainer.JETTY_9_1_NEWEST.toString())) {
-//            return "%AZURE_JETTY9_HOME%";
-//        }
-//
-//        return "UNDEFINED";
-//    }
 
     public static String generateWebContainerPath(WebContainer webContainer) {
         if (webContainer.equals(WebContainer.TOMCAT_7_0_NEWEST)) {
@@ -382,6 +344,10 @@ public class WebAppUtils {
         sb.append("        </applicationInitialization>\n");
 
         if (webContainerPath.toUpperCase().contains("TOMCAT")) {
+            String javaOptsString =
+                    "-Djava.net.preferIPv4Stack=true -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=127.0.0.1:%HTTP_PLATFORM_DEBUG_PORT%";
+            String catalinaOpts = "-Dport.http=%HTTP_PLATFORM_PORT%";
+
             sb.append("        <httpPlatform processPath='" + webContainerPath + "\\bin\\startup.bat" + "'>\n");
             sb.append("            <environmentVariables>\n");
             sb.append("                <environmentVariable name='JRE_HOME' value='"+ jdkPath +"'/>\n");
@@ -391,8 +357,10 @@ public class WebAppUtils {
             sb.append("            </environmentVariables>\n");
             sb.append("        </httpPlatform>\n");
         } else {
-            String arg = "-Djava.net.preferIPv4Stack=true  -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=127.0.0.1:%HTTP_PLATFORM_DEBUG_PORT% -Djetty.port=%HTTP_PLATFORM_PORT% -Djetty.base=\"" +
+            String arg =
+                    "-Djava.net.preferIPv4Stack=true  -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=127.0.0.1:%HTTP_PLATFORM_DEBUG_PORT% -Djetty.port=%HTTP_PLATFORM_PORT% -Djetty.base=\"" +
                     webContainerPath + "\" -Djetty.webapps=\"d:\\home\\site\\wwwroot\\webapps\"  -jar \"" + webContainerPath + "\\start.jar\" etc\\jetty-logging.xml";
+
             sb.append("        <httpPlatform processPath='"+ jdkProcessPath +"' startupTimeLimit='30' startupRetryCount='10' arguments='"+ arg +"'/>\n");
         }
         sb.append("    </system.webServer>\n");

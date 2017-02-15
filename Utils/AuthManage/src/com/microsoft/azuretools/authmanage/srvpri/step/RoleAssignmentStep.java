@@ -46,7 +46,7 @@ public class RoleAssignmentStep implements IStep {
     private List<Pair<String, String>> roleAssignmentNames = new LinkedList<>();
 
     @Override
-    public void execute(Map<String, Object> params) throws Throwable {
+    public void execute(Map<String, Object> params) throws Exception {
         String roleDefinitionName = "Contributor";
         String tenantId = CommonParams.getTenantId();
         armRestHelper = new ArmRestHelper(tenantId);
@@ -110,7 +110,7 @@ public class RoleAssignmentStep implements IStep {
     }
 
     @Override
-    public void rollback(Map<String, Object> params) throws Throwable {
+    public void rollback(Map<String, Object> params) throws Exception {
         for (Pair<String, String> rap : roleAssignmentNames) {
             String roleAssignmentName = rap.first();
             String sid = rap.second();
@@ -138,7 +138,7 @@ public class RoleAssignmentStep implements IStep {
     }
 
     // Assign role
-    public RoleAssignmentRet assignRole(String roleDefinitionId, UUID principalId, String subscriptionId) throws Throwable {
+    public RoleAssignmentRet assignRole(String roleDefinitionId, UUID principalId, String subscriptionId) throws Exception {
         /*
             PUT https://management.azure.com//subscriptions/9657ab5d-4a4a-4fd2-ae7a-4cd9fbd030ef/providers/Microsoft.Authorization/roleAssignments/25a768e8-523b-4e39-a520-f6978657ffb7?api-version=2015-07-01
             {
@@ -179,7 +179,7 @@ public class RoleAssignmentStep implements IStep {
     }
 
     @SuppressWarnings("unused")
-	private static RoleAssignmentRet getRoleAsiignment(String roleAsiignmetnName, UUID subscriptionId) throws Throwable {
+	private static RoleAssignmentRet getRoleAsiignment(String roleAsiignmetnName, UUID subscriptionId) throws Exception {
         //TODO.shch: implement
         return null;
     }

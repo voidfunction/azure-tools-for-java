@@ -45,7 +45,7 @@ public class ApplicationStep implements IStep {
     private Reporter<String> reporter;
 
     @Override
-    public void execute(Map<String, Object> params) throws Throwable {
+    public void execute(Map<String, Object> params) throws Exception {
 
         //System.out.println("ApplicationStep execute...");
 
