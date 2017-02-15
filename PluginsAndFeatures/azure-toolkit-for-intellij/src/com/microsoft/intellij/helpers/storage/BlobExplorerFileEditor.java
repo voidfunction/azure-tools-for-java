@@ -86,7 +86,7 @@ public class BlobExplorerFileEditor implements FileEditor {
     private JButton backButton;
     private JLabel pathLabel;
 
-    private StorageAccount storageAccount;
+    private String connectionString;
     private BlobContainer blobContainer;
     private Project project;
 
@@ -299,10 +299,10 @@ public class BlobExplorerFileEditor implements FileEditor {
                     progressIndicator.setIndeterminate(true);
 
                     if (directoryQueue.peekLast() == null) {
-                        directoryQueue.addLast(StorageClientSDKManager.getManager().getRootDirectory(StorageClientSDKManager.getConnectionString(storageAccount), blobContainer));
+                        directoryQueue.addLast(StorageClientSDKManager.getManager().getRootDirectory(connectionString, blobContainer));
                     }
 
-                    blobItems = StorageClientSDKManager.getManager().getBlobItems(StorageClientSDKManager.getConnectionString(storageAccount), directoryQueue.peekLast());
+                    blobItems = StorageClientSDKManager.getManager().getBlobItems(connectionString, directoryQueue.peekLast());
 
                     if (!queryTextField.getText().isEmpty()) {
                         for (int i = blobItems.size() - 1; i >= 0; i--) {
@@ -490,11 +490,11 @@ public class BlobExplorerFileEditor implements FileEditor {
                     public void run(@NotNull ProgressIndicator progressIndicator) {
                         progressIndicator.setIndeterminate(true);
                         try {
-                            StorageClientSDKManager.getManager().deleteBlobFile(StorageClientSDKManager.getConnectionString(storageAccount), blobItem);
+                            StorageClientSDKManager.getManager().deleteBlobFile(connectionString, blobItem);
 
                             if (blobItems.size() <= 1) {
                                 directoryQueue.clear();
-                                directoryQueue.addLast(StorageClientSDKManager.getManager().getRootDirectory(StorageClientSDKManager.getConnectionString(storageAccount), blobContainer));
+                                directoryQueue.addLast(StorageClientSDKManager.getManager().getRootDirectory(connectionString, blobContainer));
 
                                 queryTextField.setText("");
                             }
@@ -583,7 +583,7 @@ public class BlobExplorerFileEditor implements FileEditor {
                                 @Override
                                 public void run() {
                                     try {
-                                        StorageClientSDKManager.getManager().downloadBlobFileContent(StorageClientSDKManager.getConnectionString(storageAccount), fileSelection, bufferedOutputStream);
+                                        StorageClientSDKManager.getManager().downloadBlobFileContent(connectionString, fileSelection, bufferedOutputStream);
 
                                         if (open && targetFile.exists()) {
                                             Desktop.getDesktop().open(targetFile);
@@ -689,7 +689,7 @@ public class BlobExplorerFileEditor implements FileEditor {
                             public Void call() throws AzureCmdException {
                                 try {
                                     StorageClientSDKManager.getManager().uploadBlobFileContent(
-                                            StorageClientSDKManager.getConnectionString(storageAccount),
+                                            connectionString,
                                             blobContainer,
                                             path,
                                             bufferedInputStream,
@@ -715,9 +715,9 @@ public class BlobExplorerFileEditor implements FileEditor {
                                 future.cancel(true);
                                 bufferedInputStream.close();
 
-                                for (BlobItem blobItem : StorageClientSDKManager.getManager().getBlobItems(StorageClientSDKManager.getConnectionString(storageAccount), blobDirectory)) {
+                                for (BlobItem blobItem : StorageClientSDKManager.getManager().getBlobItems(connectionString, blobDirectory)) {
                                     if (blobItem instanceof BlobFile && blobItem.getPath().equals(path)) {
-                                        StorageClientSDKManager.getManager().deleteBlobFile(StorageClientSDKManager.getConnectionString(storageAccount), (BlobFile) blobItem);
+                                        StorageClientSDKManager.getManager().deleteBlobFile(connectionString, (BlobFile) blobItem);
                                     }
                                 }
                             }
@@ -725,10 +725,10 @@ public class BlobExplorerFileEditor implements FileEditor {
 
                         try {
                             directoryQueue.clear();
-                            directoryQueue.addLast(StorageClientSDKManager.getManager().getRootDirectory(StorageClientSDKManager.getConnectionString(storageAccount), blobContainer));
+                            directoryQueue.addLast(StorageClientSDKManager.getManager().getRootDirectory(connectionString, blobContainer));
 
                             for (String pathDir : path.split("/")) {
-                                for (BlobItem blobItem : StorageClientSDKManager.getManager().getBlobItems(StorageClientSDKManager.getConnectionString(storageAccount), directoryQueue.getLast())) {
+                                for (BlobItem blobItem : StorageClientSDKManager.getManager().getBlobItems(connectionString, directoryQueue.getLast())) {
                                     if (blobItem instanceof BlobDirectory && blobItem.getName().equals(pathDir)) {
                                         directoryQueue.addLast((BlobDirectory) blobItem);
                                     }
@@ -859,8 +859,8 @@ public class BlobExplorerFileEditor implements FileEditor {
     public <T> void putUserData(@NotNull Key<T> key, @Nullable T t) {
     }
 
-    public void setStorageAccount(StorageAccount storageAccount) {
-        this.storageAccount = storageAccount;
+    public void setConnectionString(String connectionString) {
+        this.connectionString = connectionString;
     }
 
     public void setBlobContainer(BlobContainer blobContainer) {

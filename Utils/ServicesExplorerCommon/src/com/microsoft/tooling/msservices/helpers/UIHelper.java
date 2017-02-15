@@ -23,6 +23,7 @@ package com.microsoft.tooling.msservices.helpers;
 
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
+import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import com.microsoft.tooling.msservices.model.storage.StorageServiceTreeItem;
 import com.microsoft.tooling.msservices.model.storage.Table;
@@ -45,6 +46,8 @@ public interface UIHelper {
     File showFileChooser(String title);
 
     <T extends StorageServiceTreeItem> void openItem(Object projectObject, final StorageAccount storageAccount, final T item, String itemType, String itemName, String iconName);
+
+    <T extends StorageServiceTreeItem> void openItem(Object projectObject, final ClientStorageAccount clientStorageAccount, final T item, String itemType, String itemName, String iconName);
 
     void openItem(@NotNull Object projectObject, @NotNull Object itemVirtualFile);
 

@@ -27,6 +27,7 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
+import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
@@ -85,13 +86,23 @@ public class ContainerNode extends Node {
     private static final String CONTAINER_MODULE_ID = ContainerNode.class.getName();
     private static final String ICON_PATH = "container.png";
     private final BlobContainer blobContainer;
-    private final StorageAccount storageAccount;
+    private StorageAccount storageAccount;
+    private ClientStorageAccount clientStorageAccount;
 
     public ContainerNode(final Node parent, StorageAccount sa, BlobContainer bc) {
         super(CONTAINER_MODULE_ID, bc.getName(), parent, ICON_PATH, true);
 
         blobContainer = bc;
         storageAccount = sa;
+
+        loadActions();
+    }
+
+    public ContainerNode(final Node parent, ClientStorageAccount sa, BlobContainer bc) {
+        super(CONTAINER_MODULE_ID, bc.getName(), parent, ICON_PATH, true);
+
+        blobContainer = bc;
+        clientStorageAccount = sa;
 
         loadActions();
     }

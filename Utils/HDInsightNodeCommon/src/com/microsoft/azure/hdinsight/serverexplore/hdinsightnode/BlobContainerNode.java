@@ -23,6 +23,7 @@ package com.microsoft.azure.hdinsight.serverexplore.hdinsightnode;
 
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.hdinsight.common.CommonConst;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;

@@ -19,51 +19,42 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
+package com.microsoft.tooling.msservices.serviceexplorer.azure.storage.asm;
 
 import com.microsoft.azure.management.storage.StorageAccount;
+import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
+import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.asm.ClientBlobModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.ClientStorageNode;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.ContainerNode;
 
-public abstract class ClientStorageNode extends RefreshableNode {
-    protected final ClientStorageAccount storageAccount;
+import java.util.List;
 
-    public ClientStorageNode(String id, String name, Node parent, String iconPath, ClientStorageAccount sm) {
-        super(id, name, parent, iconPath);
-        this.storageAccount = sm;
-    }
+public class ClientBlobModule extends RefreshableNode {
+    private static final String BLOBS = "Blobs";
+    final ClientStorageAccount storageAccount;
 
-    public ClientStorageNode(String id, String name, Node parent, String iconPath, ClientStorageAccount sm, boolean delayActionLoading) {
-        super(id, name, parent, iconPath, delayActionLoading);
-        this.storageAccount = sm;
+    public ClientBlobModule(ClientStorageNode parent, ClientStorageAccount storageAccount) {
+        super(BLOBS + storageAccount.getName(), BLOBS, parent, null);
+        this.parent = parent;
+        this.storageAccount = storageAccount;
     }
 
     @Override
-    protected void onNodeClick(NodeActionEvent e) {
-        this.load();
+    protected void refreshItems()
+            throws AzureCmdException {
+        removeAllChildNodes();
+
+        final List<BlobContainer> blobContainers = StorageClientSDKManager.getManager().getBlobContainers(storageAccount.getConnectionString());
+
+        for (BlobContainer blobContainer : blobContainers) {
+            addChildNode(new ContainerNode(this, storageAccount, blobContainer));
+        }
     }
 
     public ClientStorageAccount getStorageAccount() {
         return storageAccount;
-    }
-
-    protected void fillChildren() {
-        ClientBlobModule blobsNode = new ClientBlobModule(this, storageAccount);
-        blobsNode.load();
-
-        addChildNode(blobsNode);
-
-//        QueueModule queueNode = new QueueModule(this, storageAccount);
-//        queueNode.load();
-//
-//        addChildNode(queueNode);
-//
-//        TableModule tableNode = new TableModule(this, storageAccount);
-//        tableNode.load();
-//
-//        addChildNode(tableNode);
     }
 }

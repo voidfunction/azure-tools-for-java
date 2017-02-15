@@ -43,6 +43,7 @@ import com.microsoft.tooling.msservices.helpers.Nullable;
 import com.microsoft.tooling.msservices.helpers.UIHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
+import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
 import com.microsoft.tooling.msservices.model.storage.StorageServiceTreeItem;
 import com.microsoft.tooling.msservices.model.storage.Table;
@@ -56,6 +57,7 @@ import java.util.Map;
 
 public class UIHelperImpl implements UIHelper {
     public static Key<StorageAccount> STORAGE_KEY = new Key<StorageAccount>("storageAccount");
+    public static Key<ClientStorageAccount> CLIENT_STORAGE_KEY = new Key<ClientStorageAccount>("clientStorageAccount");
     private Map<Class<? extends StorageServiceTreeItem>, Key<? extends StorageServiceTreeItem>> name2Key = ImmutableMap.of(BlobContainer.class, BlobExplorerFileEditorProvider.CONTAINER_KEY,
             Queue.class, QueueExplorerFileEditorProvider.QUEUE_KEY,
             Table.class, TableExplorerFileEditorProvider.TABLE_KEY);
@@ -132,7 +134,35 @@ public class UIHelperImpl implements UIHelper {
         itemVirtualFile.putUserData((Key<T>) name2Key.get(item.getClass()), item);
         itemVirtualFile.putUserData(STORAGE_KEY, storageAccount);
 
-        itemVirtualFile.setFileType(new FileType() {
+        itemVirtualFile.setFileType(getFileType(itemName, iconName));
+
+        openItem(projectObject, itemVirtualFile);
+    }
+
+    @Override
+    public <T extends StorageServiceTreeItem> void openItem(Object projectObject, ClientStorageAccount clientStorageAccount, T item, String itemType, String itemName, String iconName) {
+        LightVirtualFile itemVirtualFile = new LightVirtualFile(item.getName() + itemType);
+        itemVirtualFile.putUserData((Key<T>) name2Key.get(item.getClass()), item);
+        itemVirtualFile.putUserData(CLIENT_STORAGE_KEY, clientStorageAccount);
+
+        itemVirtualFile.setFileType(getFileType(itemName, iconName));
+
+        openItem(projectObject, itemVirtualFile);
+    }
+
+    @Override
+    public void openItem(@NotNull final Object projectObject, @NotNull final Object itemVirtualFile) {
+        ApplicationManager.getApplication().invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                FileEditorManager.getInstance((Project) projectObject).openFile((VirtualFile) itemVirtualFile, true, true);
+            }
+        }, ModalityState.any());
+    }
+
+    @org.jetbrains.annotations.NotNull
+    private FileType getFileType(@NotNull final String itemName, @Nullable final String iconName) {
+        return new FileType() {
             @NotNull
             @Override
             public String getName() {
@@ -171,19 +201,7 @@ public class UIHelperImpl implements UIHelper {
             public String getCharset(@NotNull VirtualFile virtualFile, @NotNull byte[] bytes) {
                 return "UTF8";
             }
-        });
-
-        openItem(projectObject, itemVirtualFile);
-    }
-
-    @Override
-    public void openItem(@NotNull final Object projectObject, @NotNull final Object itemVirtualFile) {
-        ApplicationManager.getApplication().invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                FileEditorManager.getInstance((Project) projectObject).openFile((VirtualFile) itemVirtualFile, true, true);
-            }
-        }, ModalityState.any());
+        };
     }
 
     @Override
