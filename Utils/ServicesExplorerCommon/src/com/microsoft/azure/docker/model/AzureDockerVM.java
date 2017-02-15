@@ -29,6 +29,7 @@ public class AzureDockerVM {
   public String resourceGroupName;
   public String region;
   public String availabilitySet;
+  public String nicName;
   public String vnetName;
   public String vnetAddressSpace;
   public String subnetName;

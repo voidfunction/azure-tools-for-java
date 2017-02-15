@@ -28,34 +28,19 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.ModuleTypeId;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.util.PlatformUtils;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
-import com.microsoft.azure.docker.model.AzureDockerCertVault;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
-import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
-import com.microsoft.azure.keyvault.KeyVaultClient;
-import com.microsoft.azure.management.Azure;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
-import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
-import com.microsoft.intellij.docker.utils.AzureDockerRefreshResources;
-import com.microsoft.intellij.docker.wizards.createhost.AzureNewDockerWizardDialog;
-import com.microsoft.intellij.docker.wizards.createhost.AzureNewDockerWizardModel;
+import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardDialog;
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardModel;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.tasks.DockerContainerDeployTask;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
 
 import java.util.Arrays;
 import java.util.List;
@@ -69,7 +54,7 @@ public class AzureDockerHostDeployAction extends AnAction {
 
   public void actionPerformed(AnActionEvent actionEvent) {
     try {
-      AzureDockerRefreshResources.CANCELED = false;
+      AzureDockerUIResources.CANCELED = false;
 
       Project project = getCurrentProject();
       Module module = PluginUtil.getSelectedModule();
@@ -81,8 +66,8 @@ public class AzureDockerHostDeployAction extends AnAction {
         module = modules.iterator().next();
       }
 
-      AzureDockerRefreshResources.updateAzureResourcesWithProgressDialog(project);
-      if (AzureDockerRefreshResources.CANCELED) {
+      AzureDockerUIResources.updateAzureResourcesWithProgressDialog(project);
+      if (AzureDockerUIResources.CANCELED) {
         return;
       }
 

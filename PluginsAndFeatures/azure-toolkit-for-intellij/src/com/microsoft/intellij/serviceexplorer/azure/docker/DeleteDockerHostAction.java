@@ -1,0 +1,66 @@
+/**
+ * Copyright (c) Microsoft Corporation
+ * <p/>
+ * All rights reserved.
+ * <p/>
+ * MIT License
+ * <p/>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * <p/>
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ * <p/>
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package com.microsoft.intellij.serviceexplorer.azure.docker;
+
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
+import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
+import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.helpers.Name;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostNode;
+
+
+@Name("Delete Docker Host")
+public class DeleteDockerHostAction extends NodeActionListener {
+  private static final Logger LOGGER = Logger.getInstance(DeleteDockerHostAction.class);
+  DockerHost dockerHost;
+  AzureDockerHostsManager dockerManager;
+  Project project;
+
+  public DeleteDockerHostAction(DockerHostNode dockerHostNode) {
+    this.dockerManager = dockerHostNode.getDockerManager();
+    this.dockerHost = dockerHostNode.getDockerHost();
+    this.project = (Project) dockerHostNode.getProject();
+  }
+
+  @Override
+  public void actionPerformed(NodeActionEvent e) {
+    Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
+    int option = AzureDockerUIResources.deleteAzureDockerHostConfirmationDialog(azureClient, dockerHost);
+
+    if (option !=1 && option != 2) {
+      if (AzureDockerUtils.DEBUG) System.out.format("User canceled delete Docker host op: %d\n", option);
+    }
+
+    AzureDockerUIResources.deleteDockerHost(project, azureClient, dockerHost, option, null);
+  }
+}
+

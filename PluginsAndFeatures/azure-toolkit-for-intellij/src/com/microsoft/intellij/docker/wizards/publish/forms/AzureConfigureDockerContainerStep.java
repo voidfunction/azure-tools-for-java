@@ -21,6 +21,7 @@
  */
 package com.microsoft.intellij.docker.wizards.publish.forms;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
@@ -29,6 +30,7 @@ import com.intellij.ui.wizard.WizardStep;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.KnownDockerImages;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.intellij.docker.utils.AzureDockerValidationUtils;
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardModel;
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardStep;
@@ -46,6 +48,8 @@ import java.nio.file.Paths;
 import java.util.Random;
 
 public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardStep {
+  private static final Logger LOGGER = Logger.getInstance(AzureConfigureDockerContainerStep.class);
+
   private AzureSelectDockerWizardModel model;
   private JPanel rootConfigureContainerPanel;
   private JTextField dockerContainerNameTextField;
@@ -209,12 +213,16 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       try {
         model.getDockerImageDescription().dockerfileContent = new String(Files.readAllBytes(Paths.get(customDockerfileBrowseButton.getText())));
       } catch (Exception e) {
-        String msg = "An error occurred while attempting to get the content of " + customDockerfileBrowseButton.getText() + "\n" + e.getMessage();
-        PluginUtil.displayErrorDialogAndLog("Error", msg, e);
         customDockerfileBrowseLabel.setVisible(true);
         setFinishButtonState(false);
 
-        return new ValidationInfo("Error reading Dockerfile content", customDockerfileBrowseButton);
+        String errTitle = "Error reading Dockerfile content";
+        String msg = "An error occurred while attempting to get the content of " + customDockerfileBrowseButton.getText() + "\n" + e.getMessage();
+        if (AzureDockerUtils.DEBUG) e.printStackTrace();
+        LOGGER.error("doValidate", e);
+        PluginUtil.displayErrorDialog(errTitle, msg);
+
+        return new ValidationInfo(errTitle, customDockerfileBrowseButton);
       }
     }
 

@@ -169,13 +169,14 @@ public class AzureDockerHostsManager {
 
   public Map<String, DockerHost> refreshDockerHostDetails() {
     try {
-      dockerHostsMap = new HashMap<>();
+      Map<String, DockerHost> localDockerHostsMap = new HashMap<>();
       for (List<DockerHost> dockerHostList : AzureDockerUtils.refreshDockerHostDetails(subscriptionsList, dockerVaultsMap).values()) {
         for (DockerHost dockerHost : dockerHostList) {
-          dockerHostsMap.put(dockerHost.apiUrl, dockerHost);
+          localDockerHostsMap.put(dockerHost.apiUrl, dockerHost);
         }
       }
 
+      dockerHostsMap = localDockerHostsMap;
       dockerHostsList = new ArrayList<>(dockerHostsMap.values());
     } catch (Exception e) {
       e.printStackTrace();

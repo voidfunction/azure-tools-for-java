@@ -23,11 +23,9 @@ package com.microsoft.intellij.docker.wizards.publish.forms;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.packaging.artifacts.Artifact;
@@ -43,11 +41,11 @@ import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.model.EditableDockerHost;
-import com.microsoft.azuretools.authmanage.AuthMethodManager;
-import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
+import com.microsoft.azure.management.Azure;
 import com.microsoft.intellij.docker.dialogs.AzureEditDockerLoginCredsDialog;
 import com.microsoft.intellij.docker.dialogs.AzureViewDockerDialog;
-import com.microsoft.intellij.docker.utils.AzureDockerRefreshResources;
+import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.intellij.docker.utils.AzureDockerValidationUtils;
 import com.microsoft.intellij.docker.wizards.createhost.AzureNewDockerWizardDialog;
 import com.microsoft.intellij.docker.wizards.createhost.AzureNewDockerWizardModel;
@@ -55,6 +53,7 @@ import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardMode
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardStep;
 import com.microsoft.intellij.ui.util.UIUtils;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -67,6 +66,8 @@ import java.util.List;
 import java.util.Vector;
 
 public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
+  private static final Logger LOGGER = Logger.getInstance(AzureSelectDockerHostStep.class);
+
   private JPanel rootPanel;
   private JPanel dockerHostsPanel;
   private JTextField dockerImageNameTextField;
@@ -271,9 +272,8 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     dockerHostsPanel = tableToolbarDecorator.createPanel();
   }
 
-  private static final Logger LOGGER = Logger.getInstance(AzureSelectDockerHostStep.class);
   private void onRefreshDockerHostAction() {
-    AzureDockerRefreshResources.updateAzureResourcesWithProgressDialog(model.getProject());
+    AzureDockerUIResources.updateAzureResourcesWithProgressDialog(model.getProject());
 
     refreshDockerHostsTable();
   }
@@ -297,6 +297,9 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     } catch (Exception e) {
       String msg = "An error occurred while attempting to view the selected Docker host.\n" + e.getMessage();
       PluginUtil.displayErrorDialogAndLog("Error", msg, e);
+      if (AzureDockerUtils.DEBUG) e.printStackTrace();
+      LOGGER.error("onViewDockerHostAction", e);
+      PluginUtil.displayErrorDialog("View Docker Hosts Error", msg);
     }
   }
 
@@ -350,11 +353,49 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       }
     } catch (Exception e) {
       String msg = "An error occurred while attempting to edit the selected Docker host.\n" + e.getMessage();
-      PluginUtil.displayErrorDialogAndLog("Error", msg, e);
+      if (AzureDockerUtils.DEBUG) e.printStackTrace();
+      LOGGER.error("onEditDockerHostAction", e);
+      PluginUtil.displayErrorDialog("Update Docker Hosts Error", msg);
     }
   }
 
   private void onRemoveDockerHostAction() {
+    DefaultTableModel tableModel = (DefaultTableModel) dockerHostsTable.getModel();
+    String apiURL = (String) tableModel.getValueAt(dockerHostsTable.getSelectedRow(), 4);
+    DockerHost deleteHost = dockerManager.getDockerHostForURL(apiURL);
+    Azure azureClient = dockerManager.getSubscriptionsMap().get(deleteHost.sid).azureClient;
+
+    int option = AzureDockerUIResources.deleteAzureDockerHostConfirmationDialog(azureClient, deleteHost);
+
+    if (option !=1 && option != 2) {
+      if (AzureDockerUtils.DEBUG) System.out.format("User canceled delete Docker host op: %d\n", option);
+    }
+
+    tableModel.removeRow(dockerHostsTable.getSelectedRow());
+    tableModel.fireTableDataChanged();
+
+    AzureDockerUIResources.deleteDockerHost(model.getProject(), azureClient, deleteHost, option, new Runnable() {
+      @Override
+      public void run() {
+        dockerManager.refreshDockerHostDetails();
+        ApplicationManager.getApplication().invokeLater(new Runnable() {
+          @Override
+          public void run() {
+            refreshDockerHostsTable();
+          }
+        });
+      }
+    });
+  }
+
+  private void refreshDockerHostsAndUI() {
+    dockerManager.refreshDockerHostDetails();
+    ApplicationManager.getApplication().invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        refreshDockerHostsTable();
+      }
+    });
   }
 
   /* Force a refresh of the docker hosts entries in the select host table
@@ -390,7 +431,9 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       }
     } catch (Exception e) {
       String msg = "An error occurred while attempting to get the list of recognizable Docker hosts.\n" + e.getMessage();
-      PluginUtil.displayErrorDialogAndLog("Error", msg, e);
+      if (AzureDockerUtils.DEBUG) e.printStackTrace();
+      LOGGER.error("refreshDockerHostsTable", e);
+      PluginUtil.displayErrorDialog("Refresh Docker Hosts Error", msg);
     }
   }
 

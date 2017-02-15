@@ -30,9 +30,7 @@ import com.microsoft.azure.management.compute.ImageReference;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineSizeTypes;
 import com.microsoft.azure.management.keyvault.Vault;
-import com.microsoft.azure.management.network.Network;
-import com.microsoft.azure.management.network.NicIpConfiguration;
-import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.network.*;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.ResourceUtils;
 import com.microsoft.azure.management.resources.fluentcore.utils.ResourceNamer;
@@ -42,10 +40,7 @@ import com.microsoft.azuretools.utils.Pair;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.DEBUG;
 import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.isValid;
@@ -205,6 +200,7 @@ public class AzureDockerVMOps {
           (publicIp.ipAddress() != null && !publicIp.ipAddress().isEmpty()) ?
               publicIp.ipAddress() :
               dockerVM.name + "." + dockerVM.region + ".cloudapp.azure.com";
+      dockerVM.nicName = vm.getPrimaryNetworkInterface().name();
       dockerVM.vnetName = vnet.name();
       dockerVM.vnetAddressSpace = vnet.addressSpaces().get(0);
       dockerVM.subnetName = nicIpConfiguration.subnetName();
@@ -243,6 +239,68 @@ public class AzureDockerVMOps {
       return azureClient.virtualMachines().getByGroup(resourceGroup, hostName);
     } catch (Exception e) {
       throw new AzureDockerException(e.getMessage(), e);
+    }
+  }
+
+  public static boolean isDeletingDockerHostAllSafe(Azure azureClient, String resourceGroup, String vmName) {
+    if (azureClient == null || resourceGroup == null || vmName == null ) {
+      return false;
+    }
+
+    VirtualMachine vm = azureClient.virtualMachines().getByGroup(resourceGroup, vmName);
+    if (vm == null) {
+      return false;
+    }
+
+    PublicIpAddress publicIp = vm.getPrimaryPublicIpAddress();
+    NicIpConfiguration nicIpConfiguration = publicIp.getAssignedNetworkInterfaceIpConfiguration();
+    Network vnet = nicIpConfiguration.getNetwork();
+    NetworkInterface nic = vm.getPrimaryNetworkInterface();
+
+    return nic.ipConfigurations().size() == 1 &&
+        vnet.subnets().size() == 1  &&
+        vnet.subnets().values().toArray(new Subnet[1])[0].inner().ipConfigurations().size() == 1;
+  }
+
+  public static void deleteDockerHostAll(Azure azureClient, String resourceGroup, String vmName) {
+    if (azureClient == null || resourceGroup == null || vmName == null ) {
+      throw new AzureDockerException("Unexpected param values; Azure instance, resource group and VM name cannot be null");
+    }
+
+    VirtualMachine vm = azureClient.virtualMachines().getByGroup(resourceGroup, vmName);
+    if (vm == null) {
+      throw new AzureDockerException(String.format("Unexpected error retrieving VM %s from Azure", vmName));
+    }
+
+    try {
+      PublicIpAddress publicIp = vm.getPrimaryPublicIpAddress();
+      NicIpConfiguration nicIpConfiguration = publicIp.getAssignedNetworkInterfaceIpConfiguration();
+      Network vnet = nicIpConfiguration.getNetwork();
+      NetworkInterface nic = vm.getPrimaryNetworkInterface();
+
+      azureClient.virtualMachines().deleteById(vm.id());
+      azureClient.networkInterfaces().deleteById(nic.id());
+      azureClient.publicIpAddresses().deleteById(publicIp.id());
+      azureClient.networks().deleteById(vnet.id());
+    } catch (Exception e) {
+      throw new AzureDockerException(String.format("Unexpected error while deleting VM %s and its associated resources", vmName));
+    }
+  }
+
+  public static void deleteDockerHost(Azure azureClient, String resourceGroup, String vmName) {
+    if (azureClient == null || resourceGroup == null || vmName == null ) {
+      throw new AzureDockerException("Unexpected param values; Azure instance, resource group and VM name cannot be null");
+    }
+
+    VirtualMachine vm = azureClient.virtualMachines().getByGroup(resourceGroup, vmName);
+    if (vm == null) {
+      throw new AzureDockerException(String.format("Unexpected error retrieving VM %s from Azure", vmName));
+    }
+
+    try {
+      azureClient.virtualMachines().deleteById(vm.id());
+    } catch (Exception e) {
+      throw new AzureDockerException(String.format("Unexpected error while deleting VM %s and its associated resources", vmName));
     }
   }
 
