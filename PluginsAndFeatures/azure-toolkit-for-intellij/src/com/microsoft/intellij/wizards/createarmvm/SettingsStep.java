@@ -386,7 +386,6 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
             @Override
             public void run() {
                 storageComboBox.setModel(refreshedSAModel);
-                model.getCurrentNavigationState().NEXT.setEnabled(selectedSA != null);
             }
         }, ModalityState.any());
     }

@@ -22,7 +22,6 @@
 package com.microsoft.intellij.wizards.createarmvm;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -37,10 +36,8 @@ import com.microsoft.azure.management.compute.VirtualMachineOffer;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.compute.VirtualMachineSku;
 import com.microsoft.azure.management.resources.Location;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
-import com.microsoft.azuretools.ijidea.utility.UpdateProgressIndicator;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
@@ -56,7 +53,6 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +74,8 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
 
     private VMWizardModel model;
     private Azure azure;
+    List<VirtualMachineImage> virtualMachineImages;
+    private Project project;
 
     private void createUIComponents() {
         imageInfoPanel = new JPanel() {
@@ -96,9 +94,6 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
         };
     }
 
-    List<VirtualMachineImage> virtualMachineImages;
-    private Project project;
-
     public SelectImageStep(final VMWizardModel model, Project project) {
         super("Select a Virtual Machine Image", null, null);
 
@@ -107,17 +102,17 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
 
         model.configStepList(createVmStepsList, 1);
 
-//        regionComboBox.addItemListener(new ItemListener() {
-//            @Override
-//            public void itemStateChanged(ItemEvent e) {
-//                fillPublishers();
-//                model.setRegion((Region) regionComboBox.getSelectedItem());
-//            }
-//        });
-//
-//        regionComboBox.setModel(new DefaultComboBoxModel(Region.values()));
-//        regionComboBox.setSelectedIndex(0);
-
+        try {
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            azure = azureManager.getAzure(model.getSubscription().getSubscriptionId());
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().logError("An error occurred when trying to authenticate\n\n" + ex.getMessage(), ex);
+        }
+        regionComboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                selectRegion();
+            }
+        });
         publisherComboBox.setRenderer(new ListCellRendererWrapper<Object>() {
             @Override
             public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
@@ -199,48 +194,31 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
     @Override
     public JComponent prepare(WizardNavigationState wizardNavigationState) {
         rootPanel.revalidate();
-        try {
-            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-            azure = azureManager.getAzure(model.getSubscription().getSubscriptionId());
-        } catch (Exception ex) {
-            DefaultLoader.getUIHelper().logError("An error occurred when trying to authenticate\n\n" + ex.getMessage(), ex);
-        }
-        regionComboBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    selectRegion();
-                }
-            }
-        });
-        Map<SubscriptionDetail, List<Location>> subscription2Location = AzureModel.getInstance().getSubscriptionToLocationMap();
-        if (subscription2Location == null || subscription2Location.get(model.getSubscription()) == null) {
-            ProgressManager.getInstance().run(new Task.Backgroundable(project,"Loading Available Locations...", false) {
-                @Override
-                public void run(@NotNull ProgressIndicator indicator) {
-                    try {
-                        AzureModelController.updateSubscriptionMaps(null);
-                        ApplicationManager.getApplication().invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                fillRegions();
-                            }
-                        });
-                    } catch (Exception ex) {
-                        AzurePlugin.log("Error loading locations", ex);
+
+        // will set to null if selected subscription changes
+        if (model.getRegion() == null) {
+            Map<SubscriptionDetail, List<Location>> subscription2Location = AzureModel.getInstance().getSubscriptionToLocationMap();
+            if (subscription2Location == null || subscription2Location.get(model.getSubscription()) == null) {
+                ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading Available Locations...", false) {
+                    @Override
+                    public void run(@NotNull ProgressIndicator indicator) {
+                        try {
+                            AzureModelController.updateSubscriptionMaps(null);
+                            ApplicationManager.getApplication().invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    fillRegions();
+                                }
+                            });
+                        } catch (Exception ex) {
+                            AzurePlugin.log("Error loading locations", ex);
+                        }
                     }
-                }
-            });
-        } else {
-            fillRegions();
+                });
+            } else {
+                fillRegions();
+            }
         }
-        if (virtualMachineImages == null) {
-            model.getCurrentNavigationState().NEXT.setEnabled(false);
-
-            imageLabelList.setListData(new String[]{"loading..."});
-            imageLabelList.setEnabled(false);
-        }
-
         return rootPanel;
     }
 
@@ -259,7 +237,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
     }
 
     private void fillPublishers() {
-        model.getCurrentNavigationState().NEXT.setEnabled(false);
+        disableNext();
 
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading publishers...", false) {
             @Override
@@ -280,7 +258,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
     }
 
     private void fillOffers() {
-        model.getCurrentNavigationState().NEXT.setEnabled(false);
+        disableNext();
 
         skuComboBox.setEnabled(true);
 
@@ -307,7 +285,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
     }
 
     private void fillSkus() {
-        model.getCurrentNavigationState().NEXT.setEnabled(false);
+        disableNext();
 
         if (offerComboBox.getItemCount() > 0) {
             ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading skus...", false) {
@@ -336,7 +314,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
     }
 
     private void fillImages() {
-        model.getCurrentNavigationState().NEXT.setEnabled(false);
+        disableNext();
 
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading images...", false) {
             @Override
@@ -360,5 +338,12 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
                 }
             }
         });
+    }
+
+    public void disableNext() {
+        //validation might be delayed, so lets check if we are still on this screen
+        if (model.getCurrentStep().equals(this)) {
+            model.getCurrentNavigationState().NEXT.setEnabled(false);
+        }
     }
 }

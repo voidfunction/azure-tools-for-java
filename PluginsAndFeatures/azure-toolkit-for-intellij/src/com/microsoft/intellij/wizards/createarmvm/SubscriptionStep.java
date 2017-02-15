@@ -68,19 +68,19 @@ public class SubscriptionStep extends WizardStep<VMWizardModel> {
         subscriptionComboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
-                if (itemEvent.getItem() instanceof SubscriptionDetail) {
+                if (itemEvent.getStateChange() == ItemEvent.SELECTED && itemEvent.getItem() instanceof SubscriptionDetail) {
                     model.setSubscription((SubscriptionDetail) itemEvent.getItem());
+                    model.setRegion(null);
                 }
             }
         });
+        loadSubscriptions();
     }
 
     @Override
     public JComponent prepare(WizardNavigationState wizardNavigationState) {
         rootPanel.revalidate();
-
-        loadSubscriptions();
-
+        model.getCurrentNavigationState().NEXT.setEnabled(subscriptionComboBox.getSelectedItem() != null);
         return rootPanel;
     }
 
@@ -100,7 +100,6 @@ public class SubscriptionStep extends WizardStep<VMWizardModel> {
             if (selectedSubscriptions.size() > 0) {
                 model.setSubscription(selectedSubscriptions.get(0));
             }
-            model.getCurrentNavigationState().NEXT.setEnabled(selectedSubscriptions.size() > 0);
         } catch (Exception ex) {
             DefaultLoader.getUIHelper().logError("An error occurred when trying to load Subscriptions\n\n" + ex.getMessage(), ex);
         }
