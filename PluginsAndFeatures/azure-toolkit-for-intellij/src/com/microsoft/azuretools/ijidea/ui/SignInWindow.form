@@ -18,7 +18,7 @@
           </grid>
         </constraints>
         <properties/>
-        <border type="none" title="Authentication Method"/>
+        <border type="none" title="Authentication method"/>
         <children>
           <component id="aeb98" class="javax.swing.JRadioButton" binding="interactiveRadioButton" default-binding="true">
             <constraints>
