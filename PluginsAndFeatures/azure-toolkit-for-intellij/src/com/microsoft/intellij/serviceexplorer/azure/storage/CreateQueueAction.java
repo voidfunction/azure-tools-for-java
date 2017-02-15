@@ -40,7 +40,7 @@ public class CreateQueueAction extends NodeActionListener {
     @Override
     public void actionPerformed(NodeActionEvent e) {
         CreateQueueForm form = new CreateQueueForm((Project) queueModule.getProject());
-        form.setStorageAccount(queueModule.getStorageAccount());
+//        form.setStorageAccount(queueModule.getStorageAccount());
 
         form.setOnCreate(new Runnable() {
             @Override

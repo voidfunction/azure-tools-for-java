@@ -231,7 +231,7 @@ public class TableEntityForm extends DialogWrapper {
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
 
-                try {
+                /*try {
                     if (tableEntity == null) {
                         tableEntity = StorageClientSDKManager.getManager().createTableEntity(storageAccount,
                                 tableName,
@@ -248,7 +248,7 @@ public class TableEntityForm extends DialogWrapper {
                 } catch (AzureCmdException e) {
                     String msg = "An error occurred while attempting to create entity." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                     PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
-                }
+                }*/
             }
         });
 

@@ -46,7 +46,7 @@ public abstract class ClientStorageNode extends RefreshableNode {
         this.load();
     }
 
-    public ClientStorageAccount getStorageAccount() {
+    public ClientStorageAccount getClientStorageAccount() {
         return storageAccount;
     }
 

@@ -242,13 +242,13 @@ public class TableFileEditor implements FileEditor {
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
-                try {
+                /*try {
                     tableEntities = StorageClientSDKManager.getManager().getTableEntities(storageAccount, table, queryText);
                     refreshGrid();
                 } catch (AzureCmdException e) {
                     String msg = "An error occurred while attempting to query entities." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                     PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
-                }
+                }*/
             }
         });
     }
@@ -313,7 +313,7 @@ public class TableFileEditor implements FileEditor {
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(false);
 
-                try {
+                /*try {
                     if (selectedEntities != null) {
                         for (int i = 0; i < selectedEntities.length; i++) {
                             progressIndicator.setFraction((double) i / selectedEntities.length);
@@ -332,7 +332,7 @@ public class TableFileEditor implements FileEditor {
                 } catch (AzureCmdException ex) {
                     String msg = "An error occurred while attempting to delete entities." + "\n" + String.format(message("webappExpMsg"), ex.getMessage());
                     PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, ex);
-                }
+                }*/
             }
         });
     }

@@ -147,7 +147,7 @@ public class ExternalStorageAccountForm extends DialogWrapper {
     @Override
     protected void doOKAction() {
 
-        try {
+        /*try {
             //Validate querystring by making a request
             StorageClientSDKManager.getManager().getTables(StorageClientSDKManager.getManager().getStorageAccount(
                             getFullStorageAccount().getConnectionString()));
@@ -156,7 +156,7 @@ public class ExternalStorageAccountForm extends DialogWrapper {
             JOptionPane.showMessageDialog(contentPane,
                     "The storage account contains invalid values. More information:\n" + e.getCause().getMessage(), "Azure Explorer", JOptionPane.ERROR_MESSAGE);
             return;
-        }
+        }*/
 
         if (onFinish != null) {
             onFinish.run();

@@ -41,7 +41,7 @@ public class CreateTableAction extends NodeActionListener {
     public void actionPerformed(NodeActionEvent e) {
         CreateTableForm form = new CreateTableForm((Project) tableModule.getProject());
 
-        form.setStorageAccount(tableModule.getStorageAccount());
+//        form.setStorageAccount(tableModule.getStorageAccount());
 
         form.setOnCreate(new Runnable() {
             @Override

@@ -116,7 +116,7 @@ public class CreateQueueForm extends DialogWrapper {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Creating queue...", false) {
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
-                try {
+                /*try {
                     progressIndicator.setIndeterminate(true);
 
                     for (Queue queue : StorageClientSDKManager.getManager().getQueues(storageAccount)) {
@@ -141,7 +141,7 @@ public class CreateQueueForm extends DialogWrapper {
                 } catch (AzureCmdException e) {
                     String msg = "An error occurred while attempting to create queue." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                     PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
-                }
+                }*/
             }
         });
 

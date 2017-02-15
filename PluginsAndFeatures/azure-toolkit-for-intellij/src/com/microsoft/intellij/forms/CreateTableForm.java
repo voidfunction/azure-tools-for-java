@@ -103,7 +103,7 @@ public class CreateTableForm extends DialogWrapper {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Creating table...", false) {
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
-                try {
+                /*try {
                     progressIndicator.setIndeterminate(true);
 
                     for (Table table : StorageClientSDKManager.getManager().getTables(storageAccount)) {
@@ -128,7 +128,7 @@ public class CreateTableForm extends DialogWrapper {
                 } catch (AzureCmdException e) {
                     String msg = "An error occurred while attempting to create table." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                     PluginUtil.displayErrorDialogAndLog(message("errTtl"), msg, e);
-                }
+                }*/
             }
         });
 
