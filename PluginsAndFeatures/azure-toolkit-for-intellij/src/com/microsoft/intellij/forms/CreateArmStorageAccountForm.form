@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.microsoft.intellij.forms.CreateArmStorageAccountForm">
-  <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="22" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="21" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
       <xy x="48" y="54" width="478" height="655"/>
@@ -12,7 +12,7 @@
     <children>
       <component id="71f1e" class="javax.swing.JLabel" binding="userInfoLabel">
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value=""/>
@@ -20,7 +20,7 @@
       </component>
       <component id="8a2d6" class="javax.swing.JComboBox" binding="subscriptionComboBox" default-binding="true">
         <constraints>
-          <grid row="14" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="14" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <enabled value="false"/>
@@ -29,7 +29,7 @@
       </component>
       <component id="8237c" class="javax.swing.JLabel">
         <constraints>
-          <grid row="13" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="13" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <labelFor value="8a2d6"/>
@@ -38,7 +38,7 @@
       </component>
       <component id="eb323" class="javax.swing.JLabel">
         <constraints>
-          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <labelFor value="939a1"/>
@@ -47,19 +47,72 @@
       </component>
       <component id="939a1" class="javax.swing.JTextField" binding="nameTextField" default-binding="true">
         <constraints>
-          <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+          <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="-1"/>
           </grid>
         </constraints>
         <properties/>
       </component>
-      <component id="a443b" class="javax.swing.JLabel">
+      <component id="16b06" class="javax.swing.JTextField" binding="resourceGrpField">
         <constraints>
-          <grid row="17" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="18" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="2e9a" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Resource group:"/>
+          <text value="Account kind:"/>
         </properties>
+      </component>
+      <component id="f5bf9" class="javax.swing.JComboBox" binding="accoountKindCombo">
+        <constraints>
+          <grid row="4" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="94faa" class="javax.swing.JComboBox" binding="performanceComboBox">
+        <constraints>
+          <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="b27be" class="javax.swing.JLabel" binding="pricingLabel">
+        <constraints>
+          <grid row="20" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <font size="11"/>
+          <foreground color="-14140765"/>
+          <text value="Read more about replication services and pricing details"/>
+        </properties>
+      </component>
+      <component id="1153d" class="javax.swing.JComboBox" binding="resourceGrpCombo">
+        <constraints>
+          <grid row="19" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <enabled value="false"/>
+        </properties>
+      </component>
+      <component id="b9704" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="15" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <labelFor value="3b986"/>
+          <text value="Location:"/>
+        </properties>
+      </component>
+      <component id="3b986" class="javax.swing.JComboBox" binding="regionComboBox">
+        <constraints>
+          <grid row="16" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
       </component>
       <component id="ce716" class="javax.swing.JRadioButton" binding="createNewRadioButton" default-binding="true">
         <constraints>
@@ -70,48 +123,28 @@
         <properties>
           <minimumSize width="0" height="26"/>
           <selected value="true"/>
-          <text value="Create new"/>
+          <text value="Create new:"/>
         </properties>
       </component>
-      <component id="16b06" class="javax.swing.JTextField" binding="resourceGrpField">
+      <component id="b1381" class="javax.swing.JRadioButton" binding="useExistingRadioButton" default-binding="true">
         <constraints>
-          <grid row="19" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="150" height="-1"/>
-          </grid>
-        </constraints>
-        <properties/>
-      </component>
-      <component id="2e9a" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="3" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="19" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Account kind:"/>
+          <text value="Use existing:"/>
         </properties>
-      </component>
-      <component id="f5bf9" class="javax.swing.JComboBox" binding="accoountKindCombo">
-        <constraints>
-          <grid row="4" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties/>
       </component>
       <component id="8eed6" class="javax.swing.JLabel">
         <constraints>
-          <grid row="5" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="Performance:"/>
         </properties>
       </component>
-      <component id="94faa" class="javax.swing.JComboBox" binding="performanceComboBox">
-        <constraints>
-          <grid row="6" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties/>
-      </component>
       <component id="65d14" class="javax.swing.JLabel">
         <constraints>
-          <grid row="7" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="7" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <labelFor value="717d6"/>
@@ -120,36 +153,13 @@
       </component>
       <component id="717d6" class="javax.swing.JComboBox" binding="replicationComboBox" default-binding="true">
         <constraints>
-          <grid row="8" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="8" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
       </component>
-      <component id="b27be" class="javax.swing.JLabel" binding="pricingLabel">
-        <constraints>
-          <grid row="21" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <font size="11"/>
-          <foreground color="-14140765"/>
-          <text value="Read more about replication services and pricing details"/>
-        </properties>
-      </component>
-      <hspacer id="8bac2">
-        <constraints>
-          <grid row="18" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </hspacer>
-      <component id="b1381" class="javax.swing.JRadioButton" binding="useExistingRadioButton" default-binding="true">
-        <constraints>
-          <grid row="18" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Use existing"/>
-        </properties>
-      </component>
       <component id="90f2b" class="javax.swing.JLabel" binding="accessTierLabel">
         <constraints>
-          <grid row="9" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="9" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <enabled value="false"/>
@@ -160,7 +170,7 @@
       </component>
       <component id="78a09" class="javax.swing.JComboBox" binding="accessTeirComboBox">
         <constraints>
-          <grid row="10" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="10" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <enabled value="false"/>
@@ -170,7 +180,7 @@
       </component>
       <component id="27247" class="javax.swing.JLabel" binding="encriptonLabel">
         <constraints>
-          <grid row="11" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="11" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <enabled value="false"/>
@@ -181,35 +191,20 @@
       </component>
       <component id="189dc" class="javax.swing.JComboBox" binding="encriptonComboBox">
         <constraints>
-          <grid row="12" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="12" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <enabled value="false"/>
           <toolTipText value=""/>
         </properties>
       </component>
-      <component id="1153d" class="javax.swing.JComboBox" binding="resourceGrpCombo">
+      <component id="a443b" class="javax.swing.JLabel">
         <constraints>
-          <grid row="20" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="17" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <enabled value="true"/>
+          <text value="Resource group"/>
         </properties>
-      </component>
-      <component id="b9704" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="15" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <labelFor value="3b986"/>
-          <text value="Location:"/>
-        </properties>
-      </component>
-      <component id="3b986" class="javax.swing.JComboBox" binding="regionComboBox">
-        <constraints>
-          <grid row="16" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties/>
       </component>
     </children>
   </grid>

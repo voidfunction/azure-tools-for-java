@@ -109,12 +109,11 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         final ItemListener updateListener = new ItemListener() {
             public void itemStateChanged(final ItemEvent e) {
                 final boolean isNewGroup = createNewRadioButton.isSelected();
-                resourceGrpField.setVisible(isNewGroup);
-                resourceGrpCombo.setVisible(!isNewGroup);
+                resourceGrpField.setEnabled(isNewGroup);
+                resourceGrpCombo.setEnabled(!isNewGroup);
             }
         };
         createNewRadioButton.addItemListener(updateListener);
-        resourceGrpCombo.setVisible(false);
 
         pricingLabel.addMouseListener(new LinkListener(PRICING_LINK));
 

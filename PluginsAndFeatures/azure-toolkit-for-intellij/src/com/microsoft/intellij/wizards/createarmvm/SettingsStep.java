@@ -109,8 +109,8 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
         final ItemListener updateListener = new ItemListener() {
             public void itemStateChanged(final ItemEvent e) {
                 final boolean isNewGroup = createNewRadioButton.isSelected();
-                resourceGrpField.setVisible(isNewGroup);
-                resourceGrpCombo.setVisible(!isNewGroup);
+                resourceGrpField.setEnabled(isNewGroup);
+                resourceGrpCombo.setEnabled(!isNewGroup);
             }
         };
         createNewRadioButton.addItemListener(updateListener);
@@ -121,7 +121,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
             public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
                 if (o instanceof StorageAccount) {
                     StorageAccount sa = (StorageAccount) o;
-                    setText(String.format("%s (%s)", sa.name(), sa.region()));
+                    setText(String.format("%s (%s)", sa.name(), sa.resourceGroupName()));
                 }
             }
         });
@@ -137,7 +137,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
             @Override
             public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
                 if (o instanceof Network) {
-                    setText(String.format("%s (%s)", ((Network) o).name(), ((Network) o).name()));
+                    setText(String.format("%s (%s)", ((Network) o).name(), ((Network) o).resourceGroupName()));
                 }
             }
         });
@@ -155,7 +155,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
             public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
                 if (o instanceof PublicIpAddress) {
                     PublicIpAddress pip = (PublicIpAddress) o;
-                    setText(String.format("%s (%s)", pip.name(), pip.region()));
+                    setText(String.format("%s (%s)", pip.name(), pip.resourceGroupName()));
                 }
             }
         });
@@ -772,6 +772,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                             .createVirtualMachine(model.getSubscription().getSubscriptionId(),
                                     model.getName(),
                                     resourceGroupName,
+                                    createNewRadioButton.isSelected(),
                                     model.getSize(),
                                     model.getVirtualMachineImage(),
                                     storageAccount,
