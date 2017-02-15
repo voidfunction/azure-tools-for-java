@@ -65,7 +65,7 @@
             </constraints>
             <properties>
               <labelFor value="650f8"/>
-              <text value="Choose the subscription to use when creating the new virtual machine."/>
+              <text value="Choose the subscription to use when creating the new virtual machine:"/>
             </properties>
           </component>
           <component id="650f8" class="javax.swing.JComboBox" binding="subscriptionComboBox">

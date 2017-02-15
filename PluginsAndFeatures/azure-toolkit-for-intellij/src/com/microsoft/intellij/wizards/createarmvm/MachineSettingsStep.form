@@ -76,7 +76,7 @@
                 </constraints>
                 <properties>
                   <labelFor value="a2767"/>
-                  <text value="Virtual Machine Name"/>
+                  <text value="Virtual machine name:"/>
                 </properties>
               </component>
               <component id="80aea" class="javax.swing.JLabel">
@@ -86,7 +86,7 @@
                 </constraints>
                 <properties>
                   <labelFor value="40594"/>
-                  <text value="Size"/>
+                  <text value="Size:"/>
                 </properties>
               </component>
               <component id="a2767" class="javax.swing.JTextField" binding="vmNameTextField">
@@ -105,7 +105,7 @@
                 </constraints>
                 <properties>
                   <labelFor value="acec"/>
-                  <text value="User name"/>
+                  <text value="User name:"/>
                 </properties>
               </component>
               <component id="acec" class="javax.swing.JTextField" binding="vmUserTextField">
@@ -183,7 +183,7 @@
                     </constraints>
                     <properties>
                       <labelFor value="ac837"/>
-                      <text value="Certificate"/>
+                      <text value="Certificate:"/>
                     </properties>
                   </component>
                 </children>
@@ -209,7 +209,7 @@
                     </constraints>
                     <properties>
                       <labelFor value="ac837"/>
-                      <text value="Password"/>
+                      <text value="Password:"/>
                     </properties>
                   </component>
                   <component id="6ef2d" class="javax.swing.JLabel">
@@ -219,7 +219,7 @@
                     </constraints>
                     <properties>
                       <labelFor value="960f7"/>
-                      <text value="Confirm "/>
+                      <text value="Confirm:"/>
                     </properties>
                   </component>
                   <component id="ac837" class="javax.swing.JPasswordField" binding="vmPasswordField">
@@ -264,7 +264,7 @@
                   <editable value="false"/>
                   <inheritsPopupMenu value="false"/>
                   <preferredSize width="250" height="6"/>
-                  <text value="&lt;html&gt;&#13;&#10;  &lt;head&gt;&#13;&#10;&#13;&#10;  &lt;/head&gt;&#13;&#10;  &lt;body&gt;&#13;&#10;    &lt;p style=&quot;margin-top: 0&quot;&gt;&#13;&#10;      &#13;&#10;    &lt;/p&gt;&#13;&#10;  &lt;/body&gt;&#13;&#10;&lt;/html&gt;&#13;&#10;"/>
+                  <text value="&lt;html&gt;&#13;&#10;  &lt;head&gt;&#13;&#10;    &#13;&#10;  &lt;/head&gt;&#13;&#10;  &lt;body&gt;&#13;&#10;  &lt;/body&gt;&#13;&#10;&lt;/html&gt;&#13;&#10;"/>
                 </properties>
               </component>
             </children>

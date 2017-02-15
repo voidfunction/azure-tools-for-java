@@ -70,7 +70,7 @@ public class AzureSDKManager {
         return newStorageAccountWithGroup.withSku(SkuName.fromString(skuName)).create();
     }
 
-    public static VirtualMachine createVirtualMachine(String subscriptionId, @NotNull String name, @NotNull String resourceGroup,
+    public static VirtualMachine createVirtualMachine(String subscriptionId, @NotNull String name, @NotNull String resourceGroup, boolean withNewResourceGroup,
                                                       @NotNull String size, @NotNull final VirtualMachineImage vmImage,
                                                       @NotNull final StorageAccount storageAccount, @NotNull final Network network,
                                                       @NotNull String subnet, boolean withNewNetwork, @Nullable PublicIpAddress pip, boolean withNewPip,
@@ -79,10 +79,10 @@ public class AzureSDKManager {
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         Azure azure = azureManager.getAzure(subscriptionId);
         boolean isWindows = vmImage.osDiskImage().operatingSystem().equals(OperatingSystemTypes.WINDOWS);
-        //TODO: resource group
-        VirtualMachine.DefinitionStages.WithNetwork withNetwork = azure.virtualMachines().define(name)
-                .withRegion(vmImage.location())
-                .withExistingResourceGroup(resourceGroup);
+        VirtualMachine.DefinitionStages.WithGroup withGroup = azure.virtualMachines().define(name)
+                .withRegion(vmImage.location());
+        VirtualMachine.DefinitionStages.WithNetwork withNetwork = withNewResourceGroup ?
+                withGroup.withNewResourceGroup(resourceGroup) : withGroup.withExistingResourceGroup(resourceGroup);
         VirtualMachine.DefinitionStages.WithPublicIpAddress withPublicIpAddress;
         if (withNewNetwork) {
             withPublicIpAddress = withNetwork.withNewPrimaryNetwork("10.0.0.0/28")
