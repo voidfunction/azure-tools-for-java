@@ -35,6 +35,7 @@ import com.intellij.ui.wizard.WizardStep;
 import com.intellij.util.Consumer;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.compute.KnownLinuxVirtualMachineImage;
 import com.microsoft.azure.management.compute.OperatingSystemTypes;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
@@ -199,7 +200,11 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
         } catch (Exception ex) {
             DefaultLoader.getUIHelper().logError("An error occurred when trying to authenticate\n\n" + ex.getMessage(), ex);
         }
-        isLinux = model.getVirtualMachineImage().osDiskImage().operatingSystem().equals(OperatingSystemTypes.LINUX);
+        if (model.isKnownMachineImage()) {
+            isLinux = model.getKnownMachineImage() instanceof KnownLinuxVirtualMachineImage;
+        } else {
+            isLinux = model.getVirtualMachineImage().osDiskImage().operatingSystem().equals(OperatingSystemTypes.LINUX);
+        }
         if (isLinux) {
             certificateCheckBox.setEnabled(true);
             passwordCheckBox.setEnabled(true);
