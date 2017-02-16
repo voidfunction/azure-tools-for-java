@@ -42,6 +42,7 @@ import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.utils.AzureModel;
+import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
 import com.microsoft.intellij.forms.CreateVirtualNetworkForm;
@@ -787,6 +788,11 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                                     model.getUserName(),
                                     model.getPassword(),
                                     certData.length > 0 ? new String(certData) : null);
+                    // update resource groups cache if new resource group was created when creating vm
+                    if (createNewRadioButton.isSelected()) {
+                        ResourceGroup rg = azure.resourceGroups().getByName(resourceGroupName);
+                        AzureModelController.addNewResourceGroup(model.getSubscription(), rg);
+                    }
 
 //                    virtualMachine = AzureManagerImpl.getManager(project).refreshVirtualMachineInformation(virtualMachine);
 

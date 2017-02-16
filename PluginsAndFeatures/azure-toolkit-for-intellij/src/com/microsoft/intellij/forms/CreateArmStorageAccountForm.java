@@ -251,7 +251,17 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), nameTextField.getText(), (String) regionComboBox.getSelectedItem(),
                     isNewResourceGroup, resourceGroupName, (Kind) accoountKindCombo.getSelectedItem(), (AccessTier)accessTeirComboBox.getSelectedItem(),
                     (Boolean)encriptonComboBox.getSelectedItem(), replicationComboBox.getSelectedItem().toString());
-
+            // update resource groups cache if new resource group was created when creating storage account
+            if (createNewRadioButton.isSelected()) {
+                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                // not signed in; does not matter what we return as storage account already created
+                if (azureManager == null) {
+                    return true;
+                }
+                SubscriptionDetail subscriptionDetail = (SubscriptionDetail) subscriptionComboBox.getSelectedItem();
+                ResourceGroup rg = azureManager.getAzure(subscriptionDetail.getSubscriptionId()).resourceGroups().getByName(resourceGroupName);
+                AzureModelController.addNewResourceGroup(subscriptionDetail, rg);
+            }
             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                 @Override
                 public void run() {
