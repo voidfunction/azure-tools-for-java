@@ -228,6 +228,11 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
         };
         knownImageBtn.addItemListener(updateListener);
         customImageBtn.addItemListener(updateListener);
+        customImageBtn.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                fillPublishers();
+            }
+        });
         knownImageBtn.setSelected(true);
     }
 
@@ -236,7 +241,6 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
         knownImageComboBox.setEnabled(!customImage);
         model.getCurrentNavigationState().NEXT.setEnabled(!customImage || !imageLabelList.isSelectionEmpty());
         imageLabelList.setEnabled(customImage);
-        imageDescriptionTextPane.setEnabled(customImage);
         publisherComboBox.setEnabled(customImage);
         offerComboBox.setEnabled(customImage);
         skuComboBox.setEnabled(customImage);
@@ -287,7 +291,9 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
     }
 
     private void selectRegion() {
-        fillPublishers();
+        if (customImageBtn.isSelected()) {
+            fillPublishers();
+        }
         model.setRegion((String) regionComboBox.getSelectedItem());
     }
 
