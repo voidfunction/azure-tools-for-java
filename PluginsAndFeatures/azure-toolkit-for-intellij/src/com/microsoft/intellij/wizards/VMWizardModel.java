@@ -26,11 +26,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.wizard.WizardModel;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
-import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.intellij.wizards.createarmvm.MachineSettingsStep;
@@ -46,17 +44,19 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 public class VMWizardModel extends WizardModel {
-    protected String region;
-    protected VirtualMachineImage virtualMachineImage;
-    protected Network virtualNetwork;
+    private String region;
+    private VirtualMachineImage virtualMachineImage;
+    private boolean isKnownMachineImage;
+    private Object knownMachineImage;
+    private Network virtualNetwork;
     private boolean withNewNetwork;
-    protected StorageAccount storageAccount;
+    private StorageAccount storageAccount;
     //    private String availabilitySet;
-    protected PublicIpAddress publicIpAddress;
-    protected boolean withNewPip;
-    protected NetworkSecurityGroup networkSecurityGroup;
-    protected AvailabilitySet availabilitySet;
-    protected boolean withNewAvailabilitySet;
+    private PublicIpAddress publicIpAddress;
+    private boolean withNewPip;
+    private NetworkSecurityGroup networkSecurityGroup;
+    private AvailabilitySet availabilitySet;
+    private boolean withNewAvailabilitySet;
     private String name;
     private String size;
     private String userName;
@@ -168,6 +168,22 @@ public class VMWizardModel extends WizardModel {
 
     public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
         this.virtualMachineImage = virtualMachineImage;
+    }
+
+    public boolean isKnownMachineImage() {
+        return isKnownMachineImage;
+    }
+
+    public void setKnownMachineImage(boolean knownMachineImage) {
+        this.isKnownMachineImage = knownMachineImage;
+    }
+
+    public Object getKnownMachineImage() {
+        return knownMachineImage;
+    }
+
+    public void setKnownMachineImage(Object knownMachineImage) {
+        this.knownMachineImage = knownMachineImage;
     }
 
     public String getRegion() {

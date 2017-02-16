@@ -23,6 +23,8 @@ package com.microsoft.tooling.msservices.helpers.azure.sdk;
 
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
+import com.microsoft.azure.management.compute.KnownLinuxVirtualMachineImage;
+import com.microsoft.azure.management.compute.KnownWindowsVirtualMachineImage;
 import com.microsoft.azure.management.compute.OperatingSystemTypes;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
@@ -71,14 +73,19 @@ public class AzureSDKManager {
     }
 
     public static VirtualMachine createVirtualMachine(String subscriptionId, @NotNull String name, @NotNull String resourceGroup, boolean withNewResourceGroup,
-                                                      @NotNull String size, @NotNull final VirtualMachineImage vmImage,
+                                                      @NotNull String size, final VirtualMachineImage vmImage, Object knownImage, boolean isKnownImage,
                                                       @NotNull final StorageAccount storageAccount, @NotNull final Network network,
                                                       @NotNull String subnet, boolean withNewNetwork, @Nullable PublicIpAddress pip, boolean withNewPip,
                                                       @Nullable AvailabilitySet availabilitySet, boolean withNewAvailabilitySet,
                                                       @NotNull final String username, @Nullable final String password, @Nullable String publicKey) throws Exception {
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         Azure azure = azureManager.getAzure(subscriptionId);
-        boolean isWindows = vmImage.osDiskImage().operatingSystem().equals(OperatingSystemTypes.WINDOWS);
+        boolean isWindows;
+        if (isKnownImage) {
+            isWindows = knownImage instanceof KnownWindowsVirtualMachineImage;
+        } else {
+            isWindows = vmImage.osDiskImage().operatingSystem().equals(OperatingSystemTypes.WINDOWS);
+        }
         VirtualMachine.DefinitionStages.WithGroup withGroup = azure.virtualMachines().define(name)
                 .withRegion(vmImage.location());
         VirtualMachine.DefinitionStages.WithNetwork withNetwork = withNewResourceGroup ?
@@ -104,12 +111,20 @@ public class AzureSDKManager {
         }
         VirtualMachine.DefinitionStages.WithCreate withCreate;
         if (isWindows) {
-            withCreate = withOS.withSpecificWindowsImageVersion(vmImage.imageReference())
-                    .withAdminUsername(username)
-                    .withAdminPassword(password);
+            VirtualMachine.DefinitionStages.WithWindowsAdminUsername withWindowsAdminUsername;
+            if (isKnownImage) {
+                withWindowsAdminUsername = withOS.withPopularWindowsImage((KnownWindowsVirtualMachineImage) knownImage);
+            } else {
+                withWindowsAdminUsername = withOS.withSpecificWindowsImageVersion(vmImage.imageReference());
+            }
+            withCreate = withWindowsAdminUsername.withAdminUsername(username).withAdminPassword(password);
         } else {
-            VirtualMachine.DefinitionStages.WithLinuxRootPasswordOrPublicKey withLinuxRootPasswordOrPublicKey = withOS.withSpecificLinuxImageVersion(vmImage.imageReference())
-                    .withRootUsername(username);
+            VirtualMachine.DefinitionStages.WithLinuxRootPasswordOrPublicKey withLinuxRootPasswordOrPublicKey;
+            if (isKnownImage) {
+                withLinuxRootPasswordOrPublicKey = withOS.withPopularLinuxImage((KnownLinuxVirtualMachineImage) knownImage).withRootUsername(username);
+            } else {
+                withLinuxRootPasswordOrPublicKey = withOS.withSpecificLinuxImageVersion(vmImage.imageReference()).withRootUsername(username);
+            }
             VirtualMachine.DefinitionStages.WithLinuxCreate withLinuxCreate;
             // we assume either password or public key is not empty
             if (password != null) {

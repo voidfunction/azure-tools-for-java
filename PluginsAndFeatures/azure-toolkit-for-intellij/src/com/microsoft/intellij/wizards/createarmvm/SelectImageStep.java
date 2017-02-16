@@ -31,6 +31,8 @@ import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.compute.KnownLinuxVirtualMachineImage;
+import com.microsoft.azure.management.compute.KnownWindowsVirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachineOffer;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
@@ -54,6 +56,7 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -70,6 +73,13 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
     private JComboBox publisherComboBox;
     private JComboBox offerComboBox;
     private JComboBox skuComboBox;
+    private JRadioButton knownImageBtn;
+    private JRadioButton customImageBtn;
+    private JComboBox knownImageComboBox;
+    private JLabel publisherLabel;
+    private JLabel offerLabel;
+    private JLabel skuLabel;
+    private JLabel versionLabel;
     private JPanel imageInfoPanel;
 
     private VMWizardModel model;
@@ -189,6 +199,51 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
                 }
             }
         });
+        final ButtonGroup imageGroup = new ButtonGroup();
+        imageGroup.add(knownImageBtn);
+        imageGroup.add(customImageBtn);
+        List<Object> knownImages = new ArrayList<>();
+        knownImages.addAll(Arrays.asList(KnownWindowsVirtualMachineImage.values()));
+        knownImages.addAll(Arrays.asList(KnownLinuxVirtualMachineImage.values()));
+        knownImageComboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                model.setKnownMachineImage(knownImageComboBox.getSelectedItem());
+            }
+        });
+        knownImageComboBox.setModel(new DefaultComboBoxModel(knownImages.toArray()));
+        knownImageComboBox.setRenderer(new ListCellRendererWrapper<Object>() {
+            @Override
+            public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
+                if (o instanceof KnownWindowsVirtualMachineImage) {
+                    setText(((KnownWindowsVirtualMachineImage) o).offer() + " - " + ((KnownWindowsVirtualMachineImage) o).sku());
+                } else if (o instanceof KnownLinuxVirtualMachineImage){
+                    setText(((KnownLinuxVirtualMachineImage) o).offer() + " - " + ((KnownLinuxVirtualMachineImage) o).sku());
+                }
+            }
+        });
+        final ItemListener updateListener = e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                enableControls(!knownImageBtn.isSelected());
+            }
+        };
+        knownImageBtn.addItemListener(updateListener);
+        customImageBtn.addItemListener(updateListener);
+        knownImageBtn.setSelected(true);
+    }
+
+    private void enableControls(boolean customImage) {
+        model.setKnownMachineImage(knownImageBtn.isSelected());
+        knownImageComboBox.setEnabled(!customImage);
+        model.getCurrentNavigationState().NEXT.setEnabled(!customImage || !imageLabelList.isSelectionEmpty());
+        imageLabelList.setEnabled(customImage);
+        imageDescriptionTextPane.setEnabled(customImage);
+        publisherComboBox.setEnabled(customImage);
+        offerComboBox.setEnabled(customImage);
+        skuComboBox.setEnabled(customImage);
+        publisherLabel.setEnabled(customImage);
+        offerLabel.setEnabled(customImage);
+        skuLabel.setEnabled(customImage);
+        versionLabel.setEnabled(customImage);
     }
 
     @Override
@@ -342,7 +397,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
 
     public void disableNext() {
         //validation might be delayed, so lets check if we are still on this screen
-        if (model.getCurrentStep().equals(this)) {
+        if (customImageBtn.isSelected() && model.getCurrentStep().equals(this)) {
             model.getCurrentNavigationState().NEXT.setEnabled(false);
         }
     }
