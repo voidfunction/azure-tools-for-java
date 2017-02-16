@@ -27,8 +27,16 @@ public class AzureDockerVMSetupScriptsForUbuntu {
       "if [ ! -d ~/.azuredocker/tls ]; then mkdir -p ~/.azuredocker/tls ; fi &&" +
       "echo Running: sudo apt-get update &&" +
       "sudo apt-get update &&" +
-      "echo Running: sudo apt-get -y install docker.io &&" +
-      "sudo apt-get -y install docker.io &&" +
+      "echo Running: sudo apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common &&" +
+      "sudo apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common &&" +
+      "echo Running: curl -fsSL https://apt.dockerproject.org/gpg | sudo apt-key add - &&" +
+      "curl -fsSL https://apt.dockerproject.org/gpg | sudo apt-key add - &&" +
+      "echo Running: sudo add-apt-repository \"deb https://apt.dockerproject.org/repo/ ubuntu-$(lsb_release -cs) main\" &&" +
+      "sudo add-apt-repository \"deb https://apt.dockerproject.org/repo/ ubuntu-xenial main\" &&" +
+      "echo Running: sudo apt-get update &&" +
+      "sudo apt-get update &&" +
+      "echo Running: sudo apt-get -y install docker-engine &&" +
+      "sudo apt-get -y install docker-engine &&" +
       "echo Running: sudo groupadd docker &&" +
       "sudo groupadd docker &&" +
       "echo Running: sudo usermod -aG docker $USER &&" +
@@ -37,6 +45,14 @@ public class AzureDockerVMSetupScriptsForUbuntu {
   public static final String INSTALL_DOCKER_FOR_UBUNTU_SERVER_14_04_LTS = "" +
       "echo Running: \"if [ ! -d ~/.azuredocker/tls ]; then mkdir -p ~/.azuredocker/tls ; fi\" &&" +
       "if [ ! -d ~/.azuredocker/tls ]; then mkdir -p ~/.azuredocker/tls ; fi &&" +
+      "echo Running: sudo apt-get update &&" +
+      "sudo apt-get update &&" +
+      "echo Running: sudo apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common &&" +
+      "sudo apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl software-properties-common &&" +
+      "echo Running: curl -fsSL https://apt.dockerproject.org/gpg | sudo apt-key add - &&" +
+      "curl -fsSL https://apt.dockerproject.org/gpg | sudo apt-key add - &&" +
+      "echo Running: sudo add-apt-repository \"deb https://apt.dockerproject.org/repo/ ubuntu-$(lsb_release -cs) main\" &&" +
+      "sudo add-apt-repository \"deb https://apt.dockerproject.org/repo/ ubuntu-trusty main\" &&" +
       "echo Running: sudo apt-get update &&" +
       "sudo apt-get update &&" +
       "echo Running: sudo apt-get -y install docker-engine &&" +

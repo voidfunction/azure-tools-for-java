@@ -214,7 +214,8 @@ public class AzureDockerVMOps {
       dockerVM.storageAccountName = vm.storageProfile().osDisk().vhd().uri().split("[.]")[0].split("/")[2];
       dockerVM.storageAccountType = AzureDockerUtils.getStorageTypeForVMSize(dockerVM.vmSize);
       // "PowerState/running" -> "RUNNING"
-      dockerVM.state = vm.powerState().toString().split("/")[1].toUpperCase();
+      String powerState = (vm.powerState() != null) ? vm.powerState().toString() : "UNKNOWN/UNKNOWN";
+      dockerVM.state =  powerState.contains("/") ? powerState.split("/")[1].toUpperCase() : "UNKNOWN";
       dockerVM.tags = vm.tags();
 
       return dockerVM;
@@ -323,7 +324,7 @@ public class AzureDockerVMOps {
             dockerHost.hostOSType = DockerHost.DockerHostOSType.OPENLOGIC_CENTOS_7_2;
             break;
           case "UbuntuServer":
-            dockerHost.hostOSType = dockerHost.hostVM.osHost.offer.equals("14.04.4-LTS") ? DockerHost.DockerHostOSType.UBUNTU_SERVER_14_04_LTS : DockerHost.DockerHostOSType.UBUNTU_SERVER_16_04_LTS;
+            dockerHost.hostOSType = dockerHost.hostVM.osHost.sku.contains("14.04.4-LTS") ? DockerHost.DockerHostOSType.UBUNTU_SERVER_14_04_LTS : DockerHost.DockerHostOSType.UBUNTU_SERVER_16_04_LTS;
             break;
           default:
             dockerHost.hostOSType = DockerHost.DockerHostOSType.LINUX_OTHER;
@@ -351,7 +352,7 @@ public class AzureDockerVMOps {
           Integer.parseInt(dockerHost.port) < 1 || Integer.parseInt(dockerHost.port) > 65535) {
         dockerHost.port = (dockerHost.isTLSSecured) ? DOCKER_API_PORT_TLS_ENABLED : DOCKER_API_PORT_TLS_DISABLED;
       }
-      dockerHost.dockerImages = new ArrayList<DockerImage>();
+      dockerHost.dockerImages = new HashMap<>();
 
       return dockerHost;
     }

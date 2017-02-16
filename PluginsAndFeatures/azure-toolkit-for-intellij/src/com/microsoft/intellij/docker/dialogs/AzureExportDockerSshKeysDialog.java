@@ -33,6 +33,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class AzureExportDockerSshKeysDialog extends DialogWrapper {
   private JPanel mainPanel;
@@ -52,6 +54,12 @@ public class AzureExportDockerSshKeysDialog extends DialogWrapper {
     exportSshPath.addActionListener(UIUtils.createFileChooserListener(exportSshPath, project,
         FileChooserDescriptorFactory.createSingleFolderDescriptor()));
     exportSshPath.setText(project.getBasePath() + "/out/Docker/ssh");
+    exportSshPath.getTextField().setInputVerifier(new InputVerifier() {
+      @Override
+      public boolean verify(JComponent input) {
+        return Files.isDirectory(Paths.get(exportSshPath.getText()));
+      }
+    });
 
     init();
     setTitle("Export SSH Keys");

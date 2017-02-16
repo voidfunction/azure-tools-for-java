@@ -39,26 +39,26 @@ public class AzureViewDockerDialog extends DialogWrapper {
   public static final int CLOSE_EXIT_CODE = 1;
   public static final int UPDATE_EXIT_CODE = 3;
   private JPanel mainPanel;
-  private JLabel dockerHostNameLabel;
   private JTabbedPane tabbedPane1;
-  private JLabel dockerHostUsernameLabel;
   private JLabel dockerHostPwdLoginLabel;
   private JLabel dockerHostSshLoginLabel;
   private JLabel dockerHostTlsAuthLabel;
-  private JLabel dockerHostKeyvaultLabel;
   private JXHyperlink dockerHostAuthUpdateHyperlink;
   private JXHyperlink dockerHostSshExportHyperlink;
   private JXHyperlink dockerHostTlsExportHyperlink;
-  private JLabel dockerHostOSTypeLabel;
-  private JLabel dockerHostVMSizeLabel;
-  private JLabel dockerHostRGNameLabel;
-  private JLabel dockerHostVnetNameAddrLabel;
-  private JLabel dockerHostSubnetNameAddrLabel;
-  private JLabel dockerHostStorageNameTypeLabel;
-  private JLabel dockerHostUrlLabel;
-  private JLabel dockerHostLocationLabel;
-  private JLabel dockerHostStatusLabel;
-  private JLabel dockerHostPortLabel;
+  private JTextField dockerHostNameTextField;
+  private JTextField dockerHostUrlTextField;
+  private JTextField dockerHostLocationTextField;
+  private JTextField dockerHostStatusTextField;
+  private JTextField dockerHostUsernameTextField;
+  private JTextField dockerHostKeyvaultTextField;
+  private JTextField dockerHostOSTypeTextField;
+  private JTextField dockerHostVMSizeTextField;
+  private JTextField dockerHostRGNameTextField;
+  private JTextField dockerHostVnetNameAddrTextField;
+  private JTextField dockerHostSubnetNameAddrTextField;
+  private JTextField dockerHostStorageNameTypeTextField;
+  private JTextField dockerHostPortTextField;
 
   private Action myClickApplyAction;
   private Project project;
@@ -68,29 +68,29 @@ public class AzureViewDockerDialog extends DialogWrapper {
 
   private void initDefaultUIValues(String updating) {
     // Docker VM info
-    dockerHostNameLabel.setText(dockerHost.name);
-    dockerHostUrlLabel.setText(dockerHost.apiUrl);
-    dockerHostLocationLabel.setText(dockerHost.hostVM.region);
-    dockerHostStatusLabel.setText((updating != null) ?
+    setTextField(dockerHostNameTextField, dockerHost.name);
+    setTextField(dockerHostUrlTextField, dockerHost.apiUrl);
+    setTextField(dockerHostLocationTextField, dockerHost.hostVM.region);
+    setTextField(dockerHostStatusTextField, (updating != null) ?
         dockerHost.state.toString() + updating :
         dockerHost.state.toString()
     );
 
     // Docker VM settings
-    dockerHostOSTypeLabel.setText(dockerHost.hostOSType.toString());
+    setTextField(dockerHostOSTypeTextField, dockerHost.hostOSType.toString());
     // TODO: enable resizing of the current VM -> see VirtualMachine::availableSizes() and update.withSize();
-    dockerHostVMSizeLabel.setText((updating != null) ?
+    setTextField(dockerHostVMSizeTextField, (updating != null) ?
         dockerHost.hostVM.vmSize + updating :
         dockerHost.hostVM.vmSize
     );
-    dockerHostRGNameLabel.setText(dockerHost.hostVM.resourceGroupName);
-    dockerHostVnetNameAddrLabel.setText(String.format("%s (%s)", dockerHost.hostVM.vnetName, dockerHost.hostVM.vnetAddressSpace));
-    dockerHostSubnetNameAddrLabel.setText(String.format("%s (%s)", dockerHost.hostVM.subnetName, dockerHost.hostVM.subnetAddressRange));
-    dockerHostStorageNameTypeLabel.setText(String.format("%s (%s)", dockerHost.hostVM.storageAccountName, dockerHost.hostVM.storageAccountType));
+    setTextField(dockerHostRGNameTextField, dockerHost.hostVM.resourceGroupName);
+    setTextField(dockerHostVnetNameAddrTextField, String.format("%s (%s)", dockerHost.hostVM.vnetName, dockerHost.hostVM.vnetAddressSpace));
+    setTextField(dockerHostSubnetNameAddrTextField, String.format("%s (%s)", dockerHost.hostVM.subnetName, dockerHost.hostVM.subnetAddressRange));
+    setTextField(dockerHostStorageNameTypeTextField, String.format("%s (%s)", dockerHost.hostVM.storageAccountName, dockerHost.hostVM.storageAccountType));
 
     // Docker VM log in settings
     dockerHostAuthUpdateHyperlink.setEnabled(!dockerHost.isUpdating);
-    dockerHostUsernameLabel.setText((updating != null) ?
+    setTextField(dockerHostUsernameTextField, (updating != null) ?
         dockerHost.certVault.vmUsername + updating :
         dockerHost.certVault.vmUsername
     );
@@ -111,13 +111,13 @@ public class AzureViewDockerDialog extends DialogWrapper {
     );
     dockerHostTlsExportHyperlink.setEnabled(!dockerHost.isUpdating && dockerHost.isTLSSecured);
 
-    dockerHostPortLabel.setText((updating != null) ?
+    setTextField(dockerHostPortTextField, (updating != null) ?
             dockerHost.port + updating :
             dockerHost.port
     );
 
     // Docker Keyvault settings
-    dockerHostKeyvaultLabel.setText((updating != null) ?
+    setTextField(dockerHostKeyvaultTextField, (updating != null) ?
         (dockerHost.hasKeyVault ? dockerHost.certVault.uri : "Not using Key Vault") + updating :
         (dockerHost.hasKeyVault ? dockerHost.certVault.uri : "Not using Key Vault")
     );
@@ -125,6 +125,13 @@ public class AzureViewDockerDialog extends DialogWrapper {
     exitCode = CLOSE_EXIT_CODE;
 
 //    myClickApplyAction.setEnabled(!editableHost.originalDockerHost.equalsTo(dockerHost));
+  }
+
+  private void setTextField(JTextField textField, String text) {
+    textField.setText(text);
+    textField.setEditable(false);
+    textField.setBackground(null);
+    textField.setBorder(null);
   }
 
   public AzureViewDockerDialog(Project project, DockerHost host, AzureDockerHostsManager dockerManager) {

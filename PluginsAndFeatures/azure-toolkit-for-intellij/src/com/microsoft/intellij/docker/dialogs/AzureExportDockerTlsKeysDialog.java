@@ -33,6 +33,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class AzureExportDockerTlsKeysDialog extends DialogWrapper {
   private JPanel mainPanel;
@@ -52,6 +54,12 @@ public class AzureExportDockerTlsKeysDialog extends DialogWrapper {
     exportTlsPath.addActionListener(UIUtils.createFileChooserListener(exportTlsPath, project,
         FileChooserDescriptorFactory.createSingleFolderDescriptor()));
     exportTlsPath.setText(project.getBasePath() + "/out/Docker/tls");
+    exportTlsPath.getTextField().setInputVerifier(new InputVerifier() {
+      @Override
+      public boolean verify(JComponent input) {
+        return Files.isDirectory(Paths.get(exportTlsPath.getText()));
+      }
+    });
 
     init();
     setTitle("Export TLS Certificates");

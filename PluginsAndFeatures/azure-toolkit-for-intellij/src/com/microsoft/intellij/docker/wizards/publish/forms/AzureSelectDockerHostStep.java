@@ -127,7 +127,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
         artifact.getOutputFilePath() :
         ArtifactUtil.getDefaultArtifactOutputPath(dockerImageInstance.artifactName, model.getProject()));
     dockerArtifactPath.setToolTipText(AzureDockerValidationUtils.getDockerArtifactPathTip());
-    dockerArtifactPath.setInputVerifier(new InputVerifier() {
+    dockerArtifactPath.getTextField().setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {
         if (AzureDockerValidationUtils.validateDockerArtifactPath(dockerArtifactPath.getText())) {
@@ -287,6 +287,8 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       if (dockerHost == null) {
         throw  new RuntimeException(String.format("Unexpected error: can't locate the Docker host for %s!", apiURL));
       }
+
+      // TODO: Check if dockerHost.certVault and dockerHost.hostVM have valid values and if not warn
 
       AzureViewDockerDialog viewDockerDialog = new AzureViewDockerDialog(model.getProject(), dockerHost, dockerManager);
       viewDockerDialog.show();
@@ -468,8 +470,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     }
     dockerImageDescription.dockerImageName = dockerImageNameTextField.getText();
 
-    if (dockerArtifactPath.getText() == null || dockerArtifactPath.getText().equals("") ||
-        (artifact == null && !Files.isRegularFile(Paths.get(dockerArtifactPath.getText())))) {
+    if (dockerArtifactPath.getText() == null || !Files.isRegularFile(Paths.get(dockerArtifactPath.getText()))) {
       ValidationInfo info = new ValidationInfo("Missing the artifact to be published", dockerArtifactPath);
       dockerArtifactPathLabel.setVisible(true);
       model.getSelectDockerWizardDialog().DialogShaker(info);

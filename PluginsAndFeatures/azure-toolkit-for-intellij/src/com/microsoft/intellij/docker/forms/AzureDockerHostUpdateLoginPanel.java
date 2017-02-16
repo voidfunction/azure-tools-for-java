@@ -21,12 +21,15 @@
  */
 package com.microsoft.intellij.docker.forms;
 
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.EditableDockerHost;
 import com.microsoft.intellij.docker.dialogs.AzureSelectKeyVault;
+import com.microsoft.intellij.docker.utils.AzureDockerValidationUtils;
+import com.microsoft.intellij.ui.util.UIUtils;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -99,6 +102,17 @@ public class AzureDockerHostUpdateLoginPanel {
         dockerHostImportSshRadioButton.setEnabled(true);
       }
     });
+
+    dockerHostImportSSHBrowseTextField.addActionListener(UIUtils.createFileChooserListener(dockerHostImportSSHBrowseTextField, project,
+        FileChooserDescriptorFactory.createSingleFolderDescriptor()));
+    dockerHostImportSSHBrowseTextField.getTextField().setInputVerifier(new InputVerifier() {
+      @Override
+      public boolean verify(JComponent input) {
+        return AzureDockerValidationUtils.validateDockerHostSshDirectory(dockerHostImportSSHBrowseTextField.getText());
+      }
+    });
+
+
   }
 
   private void initDefaultUI() {

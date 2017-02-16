@@ -66,11 +66,6 @@ public class AzureDockerHostDeployAction extends AnAction {
         module = modules.iterator().next();
       }
 
-      AzureDockerUIResources.updateAzureResourcesWithProgressDialog(project);
-      if (AzureDockerUIResources.CANCELED) {
-        return;
-      }
-
       AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
       // not signed in
       if (azureAuthManager == null) {
@@ -80,6 +75,14 @@ public class AzureDockerHostDeployAction extends AnAction {
 
 
       AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(azureAuthManager);
+
+      if (!dockerManager.isInitialized()) {
+        AzureDockerUIResources.updateAzureResourcesWithProgressDialog(project);
+        if (AzureDockerUIResources.CANCELED) {
+          return;
+        }
+      }
+
 
       AzureDockerImageInstance dockerImageDescription = new AzureDockerImageInstance();
       dockerImageDescription.dockerImageName = AzureDockerUtils.getDefaultDockerImageName(project.getName()).toLowerCase();

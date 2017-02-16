@@ -107,7 +107,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
     customDockerfileBrowseButton.setEnabled(false);
     customDockerfileBrowseButton.addActionListener(UIUtils.createFileChooserListener(customDockerfileBrowseButton, model.getProject(),
         FileChooserDescriptorFactory.createSingleLocalFileDescriptor()));
-    customDockerfileBrowseButton.setInputVerifier(new InputVerifier() {
+    customDockerfileBrowseButton.getTextField().setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {
         if (AzureDockerValidationUtils.validateDockerfilePath(customDockerfileBrowseButton.getText())) {

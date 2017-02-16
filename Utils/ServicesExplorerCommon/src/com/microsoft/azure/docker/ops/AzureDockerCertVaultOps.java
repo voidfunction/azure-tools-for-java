@@ -34,6 +34,12 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.keyvault.SecretPermissions;
 import com.microsoft.azure.management.keyvault.Vault;
 import com.microsoft.azure.management.resources.fluentcore.utils.ResourceNamer;
+import com.microsoft.azuretools.utils.Pair;
+import com.microsoft.rest.ServiceCallback;
+import rx.Observable;
+import rx.Subscriber;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
@@ -47,6 +53,18 @@ import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.DEBUG;
 public class AzureDockerCertVaultOps {
   private static final String DELETE_SECRET = "*DELETE*";
   private static final String SECRETENTRY_DOCKERHOSTNAMES = "dockerhostnames";
+  private static final String[] DOCKERHOST_SECRETS = new String[]{
+      "vmUsername",
+      "vmPwd",
+      "sshKey",
+      "sshPubKey",
+      "tlsCACert",
+      "tlsCAKey",
+      "tlsClientCert",
+      "tlsClientKey",
+      "tlsServerCert",
+      "tlsServerKey"
+  };
 
   public static String generateUniqueKeyVaultName(String prefix) {
     return ResourceNamer.randomResourceName(prefix, 20);
@@ -73,16 +91,16 @@ public class AzureDockerCertVaultOps {
     if (certVault == null || certVault.hostName == null) return null;
 
     Map<String, String> secretsMap = new HashMap<>();
-    if (certVault.vmUsername != null)    secretsMap.put("vmUsername", certVault.vmUsername);
-    if (certVault.vmPwd != null)         secretsMap.put("vmPwd", certVault.vmPwd);
-    if (certVault.sshKey != null)        secretsMap.put("sshKey",         certVault.sshKey);
-    if (certVault.sshPubKey != null)     secretsMap.put("sshPubKey",      certVault.sshPubKey);
-    if (certVault.tlsCACert != null)     secretsMap.put("tlsCACert",      certVault.tlsCACert);
-    if (certVault.tlsCAKey != null)      secretsMap.put("tlsCAKey",       certVault.tlsCAKey);
-    if (certVault.tlsClientCert != null) secretsMap.put("tlsClientCert",  certVault.tlsClientCert);
-    if (certVault.tlsClientKey != null)  secretsMap.put("tlsClientKey",   certVault.tlsClientKey);
-    if (certVault.tlsServerCert != null) secretsMap.put("tlsServerCert",  certVault.tlsServerCert);
-    if (certVault.tlsServerKey != null)  secretsMap.put("tlsServerKey",   certVault.tlsServerKey);
+    secretsMap.put("vmUsername",     certVault.vmUsername);
+    secretsMap.put("vmPwd",          certVault.vmPwd);
+    secretsMap.put("sshKey",         certVault.sshKey);
+    secretsMap.put("sshPubKey",      certVault.sshPubKey);
+    secretsMap.put("tlsCACert",      certVault.tlsCACert);
+    secretsMap.put("tlsCAKey",       certVault.tlsCAKey);
+    secretsMap.put("tlsClientCert",  certVault.tlsClientCert);
+    secretsMap.put("tlsClientKey",   certVault.tlsClientKey);
+    secretsMap.put("tlsServerCert",  certVault.tlsServerCert);
+    secretsMap.put("tlsServerKey",   certVault.tlsServerKey);
 
     return secretsMap;
   }
@@ -116,21 +134,20 @@ public class AzureDockerCertVaultOps {
             .withRegion(certVault.region)
             .withNewResourceGroup(certVault.resourceGroupName);
 
-        if (certVault.servicePrincipalId != null) {
-          vault = withAccessPolicy.defineAccessPolicy()
-              .forServicePrincipal(certVault.servicePrincipalId)
-              .allowSecretAllPermissions()
-              .attach()
-              .withTag("dockerhost", "1")
+        Vault.DefinitionStages.WithCreate withCreate = certVault.servicePrincipalId != null ?
+            withAccessPolicy.defineAccessPolicy()
+                .forServicePrincipal(certVault.servicePrincipalId)
+                .allowSecretAllPermissions()
+                .attach() :
+            withAccessPolicy.defineAccessPolicy()
+                .forUser(certVault.userId)
+                .allowSecretAllPermissions()
+                .attach();
+
+        vault = withCreate
+              .withTag("dockerhost", "true")
               .create();
-        } else {
-          vault = withAccessPolicy.defineAccessPolicy()
-              .forUser(certVault.userId)
-              .allowSecretAllPermissions()
-              .attach()
-              .withTag("dockerhost", "1")
-              .create();
-        }
+
         isNewVault = true;
       } else {
         // Attempt to set permissions to the userName and/or servicePrincipalId identities
@@ -140,22 +157,18 @@ public class AzureDockerCertVaultOps {
         } catch (Exception e) {
         }
       }
-      try {
-        setVaultPermissionsAll(azureClient, certVault);
-      } catch (Exception e) {
-      }
 
       vault = azureClient.vaults().getByGroup(certVault.resourceGroupName, certVault.name);
       String vaultUri = vault.vaultUri();
       // vault is not immediately available so the next operation could fail
-      // add a retry policy to make sure it got created
+      // add a retry policy to make sure it got created and it is readable
       for (int sleepMs = 5000; sleepMs <= 200000; sleepMs += 5000 ) {
         try {
           keyVaultClient.listSecrets(vaultUri);
           break;
         } catch (Exception e) {
           try {
-            if (DEBUG) System.out.format("ERROR: can't find %s (sleepMs: %d)\n", vaultUri, sleepMs);
+            if (DEBUG) System.out.format("WARN: can't find %s (sleepMs: %d)\n", vaultUri, sleepMs);
             if (DEBUG) System.out.println(e.getMessage());
             Thread.sleep(5000);
           } catch (Exception e3) {
@@ -165,17 +178,48 @@ public class AzureDockerCertVaultOps {
 
       Map<String, String> secretsMap = getSecretsMap(certVault);
       boolean storeDockerHostNames = false;
+
+      // TODO: Test before enable
+      //Execute Key Vault Secret Update in parallel
+//      Observable.from(DOCKERHOST_SECRETS).flatMap( secretName -> {
+//            return Observable.create(new Observable.OnSubscribe<SecretBundle>() {
+//              @Override
+//              public void call(Subscriber<? super SecretBundle> subscriber) {
+//                String secretValue = secretsMap.get(secretName);
+//                if (secretValue != null && !secretValue.isEmpty()) {
+//                  keyVaultClient.setSecretAsync(new SetSecretRequest.Builder(vaultUri, secretName, secretValue).build(),
+//                      new ServiceCallback<SecretBundle>() {
+//                        @Override
+//                        public void failure(Throwable throwable) {
+//                          subscriber.onError(throwable);
+//                        }
+//
+//                        @Override
+//                        public void success(SecretBundle secretBundle) {
+//                          subscriber.onNext(secretBundle);
+//                          subscriber.onCompleted();
+//                        }
+//                      }
+//                  );
+//                }
+//              }
+//            }).subscribeOn(Schedulers.io());
+//          }
+//      ).subscribe();
+
+      // TODO: remove this after enabling parallel secrets write from above
       for( Map.Entry<String, String> entry : secretsMap.entrySet()) {
         try {
-          keyVaultClient.setSecret(new SetSecretRequest.Builder(vaultUri, entry.getKey(), entry.getValue()).build());
-          storeDockerHostNames = true;
+          if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+            keyVaultClient.setSecret(new SetSecretRequest.Builder(vaultUri, entry.getKey(), entry.getValue()).build());
+            storeDockerHostNames = true;
+          }
         } catch (Exception e) {
           System.out.format("ERROR: can't write %s secret %s: %s\n", vaultUri, entry.getKey(), entry.getValue());
           System.out.println(e.getMessage());
         }
       }
 
-      SecretBundle secretDockerHostNames;
       if (storeDockerHostNames && certVault.hostName != null && !certVault.hostName.isEmpty()) {
         keyVaultClient.setSecret(new SetSecretRequest.Builder(vaultUri, SECRETENTRY_DOCKERHOSTNAMES, certVault.hostName).build());
       } else {
@@ -301,55 +345,136 @@ public class AzureDockerCertVaultOps {
       return null;
     }
 
-    try {
-      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "vmUsername");
-      certVault.vmUsername = (secret != null) ? secret.value() : null;
-    } catch (Exception e){}
+    //Execute Key Vault Secret read in parallel
+    Map<String, String> secretNamesAndValueMap = new HashMap<>();
 
-    try {
-      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "vmPwd");
-      certVault.vmPwd = (secret != null) ? secret.value() : null;
-    } catch (Exception e){}
+    Observable.from(DOCKERHOST_SECRETS).flatMap( secretName -> {
+          return Observable.create(new Observable.OnSubscribe<Pair<String, String>>() {
+            @Override
+            public void call(Subscriber<? super Pair<String, String>> subscriber) {
+              keyVaultClient.getSecretAsync(vaultUri, secretName,
+                  new ServiceCallback<SecretBundle>() {
+                    @Override
+                    public void failure(Throwable throwable) {
+                      // subscriber.onError(throwable);
+                      // ignore any errors due to the call trowing an unexpected exception
+                      subscriber.onCompleted();
+                    }
 
-    try {
-      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "sshKey");
-      certVault.sshKey = (secret != null) ? secret.value() : null;
-    } catch (Exception e){}
+                    @Override
+                    public void success(SecretBundle secretBundle) {
+                      if (secretBundle != null) {
+                        subscriber.onNext(new Pair<String, String>(secretName, secretBundle.value()));
+                      }
+                      subscriber.onCompleted();
+                    }
+                  }
+              );
+            }
+          }).subscribeOn(Schedulers.io());
+        }
+    , 5).subscribeOn(Schedulers.io())
+        .toBlocking()
+        .subscribe(new Action1<Pair<String, String>>() {
+          @Override
+          public void call(Pair<String, String> secretNameAndValue) {
+            secretNamesAndValueMap.put(secretNameAndValue.first(), secretNameAndValue.second());
+          }
+        });
 
-    try {
-      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "sshPubKey");
-      certVault.sshPubKey = (secret != null) ? secret.value() : null;
-    } catch (Exception e){}
+    String currentSecretValue;
 
-    try {
-      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsCACert");
-      certVault.tlsCACert = (secret != null) ? secret.value() : null;
-    } catch (Exception e){}
+    currentSecretValue = secretNamesAndValueMap.get("vmUsername");
+    if (currentSecretValue != null && !currentSecretValue.isEmpty()) {
+      certVault.vmUsername = currentSecretValue;
+    }
 
-    try {
-      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsCAKey");
-      certVault.tlsCAKey = (secret != null) ? secret.value() : null;
-    } catch (Exception e){}
+    currentSecretValue = secretNamesAndValueMap.get("vmPwd");
+    if (currentSecretValue != null && !currentSecretValue.isEmpty()) {
+      certVault.vmPwd = currentSecretValue;
+    }
+    currentSecretValue = secretNamesAndValueMap.get("sshKey");
+    if (currentSecretValue != null && !currentSecretValue.isEmpty()) {
+      certVault.sshKey = currentSecretValue;
+    }
+    currentSecretValue = secretNamesAndValueMap.get("sshPubKey");
+    if (currentSecretValue != null && !currentSecretValue.isEmpty()) {
+      certVault.sshPubKey = currentSecretValue;
+    }
+    currentSecretValue = secretNamesAndValueMap.get("tlsCACert");
+    if (currentSecretValue != null && !currentSecretValue.isEmpty()) {
+      certVault.tlsCACert = currentSecretValue;
+    }
+    currentSecretValue = secretNamesAndValueMap.get("tlsCAKey");
+    if (currentSecretValue != null && !currentSecretValue.isEmpty()) {
+      certVault.tlsCAKey = currentSecretValue;
+    }
+    currentSecretValue = secretNamesAndValueMap.get("tlsClientCert");
+    if (currentSecretValue != null && !currentSecretValue.isEmpty()) {
+      certVault.tlsClientCert = currentSecretValue;
+    }
+    currentSecretValue = secretNamesAndValueMap.get("tlsClientKey");
+    if (currentSecretValue != null && !currentSecretValue.isEmpty()) {
+      certVault.tlsClientKey = currentSecretValue;
+    }
+    currentSecretValue = secretNamesAndValueMap.get("tlsServerCert");
+    if (currentSecretValue != null && !currentSecretValue.isEmpty()) {
+      certVault.tlsServerCert = currentSecretValue;
+    }
+    currentSecretValue = secretNamesAndValueMap.get("tlsServerKey");
+    if (currentSecretValue != null && !currentSecretValue.isEmpty()) {
+      certVault.tlsServerKey = currentSecretValue;
+    }
 
-    try {
-      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsClientCert");
-      certVault.tlsClientCert = (secret != null) ? secret.value() : null;
-    } catch (Exception e){}
-
-    try {
-      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsClientKey");
-      certVault.tlsClientKey = (secret != null) ? secret.value() : null;
-    } catch (Exception e){}
-
-    try {
-      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsServerCert");
-      certVault.tlsServerCert = (secret != null) ? secret.value() : null;
-    } catch (Exception e){}
-
-    try {
-      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsServerKey");
-      certVault.tlsServerKey = (secret != null) ? secret.value() : null;
-    } catch (Exception e){}
+//    try {
+//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "vmUsername");
+//      certVault.vmUsername = (secret != null) ? secret.value() : null;
+//    } catch (Exception e){}
+//
+//    try {
+//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "vmPwd");
+//      certVault.vmPwd = (secret != null) ? secret.value() : null;
+//    } catch (Exception e){}
+//
+//    try {
+//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "sshKey");
+//      certVault.sshKey = (secret != null) ? secret.value() : null;
+//    } catch (Exception e){}
+//
+//    try {
+//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "sshPubKey");
+//      certVault.sshPubKey = (secret != null) ? secret.value() : null;
+//    } catch (Exception e){}
+//
+//    try {
+//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsCACert");
+//      certVault.tlsCACert = (secret != null) ? secret.value() : null;
+//    } catch (Exception e){}
+//
+//    try {
+//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsCAKey");
+//      certVault.tlsCAKey = (secret != null) ? secret.value() : null;
+//    } catch (Exception e){}
+//
+//    try {
+//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsClientCert");
+//      certVault.tlsClientCert = (secret != null) ? secret.value() : null;
+//    } catch (Exception e){}
+//
+//    try {
+//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsClientKey");
+//      certVault.tlsClientKey = (secret != null) ? secret.value() : null;
+//    } catch (Exception e){}
+//
+//    try {
+//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsServerCert");
+//      certVault.tlsServerCert = (secret != null) ? secret.value() : null;
+//    } catch (Exception e){}
+//
+//    try {
+//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsServerKey");
+//      certVault.tlsServerKey = (secret != null) ? secret.value() : null;
+//    } catch (Exception e){}
 
     return certVault;
   }

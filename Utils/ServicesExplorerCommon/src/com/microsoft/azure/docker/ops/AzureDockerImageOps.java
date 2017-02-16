@@ -24,9 +24,12 @@ package com.microsoft.azure.docker.ops;
 import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.model.AzureDockerException;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.model.DockerImage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.DEBUG;
 import static com.microsoft.azure.docker.ops.utils.AzureDockerVMSetupScriptsForUbuntu.DEFAULT_DOCKER_IMAGES_DIRECTORY;
@@ -99,9 +102,9 @@ public class AzureDockerImageOps {
 
       // add the image to the Docker dockerHost list of Docker images
       if (dockerImage.dockerHost.dockerImages == null) {
-        dockerImage.dockerHost.dockerImages = new ArrayList<>();
+        dockerImage.dockerHost.dockerImages = new HashMap<>();
       }
-      dockerImage.dockerHost.dockerImages.add(dockerImage);
+      dockerImage.dockerHost.dockerImages.put(dockerImage.name, dockerImage);
       dockerImage.remotePath = dockerImageDir;
 
       return dockerImage;
@@ -163,6 +166,32 @@ public class AzureDockerImageOps {
 
     try {
       if (!session.isConnected()) session.connect();
+
+      return null;
+    } catch (Exception e) {
+      throw new AzureDockerException(e.getMessage(), e);
+    }
+  }
+
+  public static Map<String, DockerImage> getImages(DockerHost dockerHost) {
+    if (dockerHost == null || (dockerHost.session == null && dockerHost.certVault == null)) {
+      throw new AzureDockerException("Unexpected param values: dockerHost and login session cannot be null");
+    }
+
+    if (dockerHost.session == null) dockerHost.session = AzureDockerSSHOps.createLoginInstance(dockerHost);
+
+    try {
+      if (!dockerHost.session.isConnected()) dockerHost.session.connect();
+
+      Map<String, DockerImage> dockerImageMap = new HashMap<>();
+
+      AzureDockerVMOps.waitForDockerDaemonStartup(dockerHost.session);
+
+//      String cmd1 = String.format("docker inspect %s \n", dockerContainer.dockerContainerName);
+//      if (DEBUG) System.out.format("Start executing: %s", cmd1);
+//      String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, false);
+//      if (DEBUG) System.out.println(cmdOut1);
+//      if (DEBUG) System.out.format("Done executing: %s", cmd1);
 
       return null;
     } catch (Exception e) {

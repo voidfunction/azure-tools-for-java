@@ -39,11 +39,17 @@ import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.sdkmanage.ServicePrincipalAzureManager;
 import com.microsoft.azuretools.utils.Pair;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
+import rx.Observable;
+import rx.Subscriber;
+import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 public class AzureDockerUtils {
   public static boolean DEBUG = true;
@@ -253,15 +259,15 @@ public class AzureDockerUtils {
     Map<String, AzureDockerSubscription> subsMap = new HashMap<>();
 
     try {
-      if (DEBUG) System.out.format("Get AzureDockerHostsManage subscription details: %d\n", System.currentTimeMillis());
+      if (DEBUG) System.out.format("Get AzureDockerHostsManage subscription details: %s\n", new Date().toString());
       SubscriptionManager subscriptionManager = azureAuthManager.getSubscriptionManager();
       List<SubscriptionDetail> subscriptions = subscriptionManager.getSubscriptionDetails();
-      if (DEBUG) System.out.format("Get AzureDockerHostsManage Docker subscription details: %d\n", System.currentTimeMillis());
+      if (DEBUG) System.out.format("Get AzureDockerHostsManage Docker subscription details: %s\n", new Date().toString());
       for (SubscriptionDetail subscriptionDetail : subscriptions ) {
         if(subscriptionDetail.isSelected()) {
           AzureDockerSubscription dockerSubscription = new AzureDockerSubscription();
           dockerSubscription.id = subscriptionDetail.getSubscriptionId();
-          if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker subscription: %s at %d\n", dockerSubscription.id, System.currentTimeMillis());
+          if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker subscription: %s at %s\n", dockerSubscription.id, new Date().toString());
           dockerSubscription.tid = subscriptionDetail.getTenantId();
           dockerSubscription.name = subscriptionDetail.getSubscriptionName();
           dockerSubscription.azureClient = azureAuthManager.getAzure(dockerSubscription.id);
@@ -279,7 +285,7 @@ public class AzureDockerUtils {
         }
       }
 
-      if (DEBUG) System.out.format("Get AzureDockerHostsManage locations: %d\n", System.currentTimeMillis());
+      if (DEBUG) System.out.format("Get AzureDockerHostsManage locations: %s\n", new Date().toString());
       List<Subscription> azureSubscriptionList = azureAuthManager.getSubscriptions();
       for (Subscription subscription : azureSubscriptionList) {
         AzureDockerSubscription dockerSubscription = subsMap.get(subscription.subscriptionId());
@@ -302,17 +308,17 @@ public class AzureDockerUtils {
   public static Map<String, Pair<Vault, KeyVaultClient>> refreshDockerVaults(List<AzureDockerSubscription> azureDockerSubscriptions) {
     Map<String, Pair<Vault, KeyVaultClient>> vaults = new HashMap<>();
 
-    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker key vault: %d\n", System.currentTimeMillis());
+    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker key vault: %s\n", new Date().toString());
     try {
       for (AzureDockerSubscription dockerSubscription : azureDockerSubscriptions) {
         for (Vault vault : dockerSubscription.azureClient.vaults().list()) {
-          if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker vault: %s at %d\n", vault.name(), System.currentTimeMillis());
+          if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker vault: %s at %s\n", vault.name(), new Date().toString());
 
           // TODO: clean the work around for bug with getting vault props for a listed vault
           vault = dockerSubscription.azureClient.vaults().getById(vault.id());
 
           if (vault.tags().get("dockerhost") != null) {
-            if (DEBUG) System.out.format("\t\t...adding Docker vault: %s at %d\n", vault.name(), System.currentTimeMillis());
+            if (DEBUG) System.out.format("\t\t...adding Docker vault: %s at %s\n", vault.name(), new Date().toString());
             vaults.put(vault.name(), new Pair<>(vault, dockerSubscription.keyVaultClient));
           }
         }
@@ -328,29 +334,51 @@ public class AzureDockerUtils {
   public static Map<String, AzureDockerCertVault> refreshDockerVaultDetails(List<AzureDockerSubscription> azureDockerSubscriptions) {
     Map<String, AzureDockerCertVault> dockerVaultDetails = new HashMap<>();
 
-    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker key vault details: %d\n", System.currentTimeMillis());
+    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker key vault details: %s\n", new Date().toString());
     try {
+
       for (AzureDockerSubscription dockerSubscription : azureDockerSubscriptions) {
-        for (Vault vault : dockerSubscription.azureClient.vaults().list()) {
-          if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker vault details for: %s at %d\n", vault.name(), System.currentTimeMillis());
+        Observable.from(dockerSubscription.azureClient.vaults().list()).flatMap(vault -> {
+            return Observable.create(
+                new Observable.OnSubscribe<AzureDockerCertVault>() {
+                  @Override
+                  public void call(Subscriber<? super AzureDockerCertVault> vaultSubscriber) {
+                    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker vault details for: %s at %s\n", vault.name(), new Date().toString());
 
-          // TODO: clean the work around for bug with getting vault props for a listed vault
-          vault = dockerSubscription.azureClient.vaults().getById(vault.id());
+                    try {
+                      // TODO: clean the work around for bug with getting vault props for a listed vault
+                      Vault vaultWithInner = dockerSubscription.azureClient.vaults().getById(vault.id());
 
-          AzureDockerCertVault certVault = new AzureDockerCertVault();
-          certVault.name = vault.name();
-          certVault.resourceGroupName = vault.resourceGroupName();
-          certVault.userId = dockerSubscription.userId;
-          certVault.servicePrincipalId = dockerSubscription.servicePrincipalId;
-          certVault.region = vault.regionName();
-          certVault.uri = vault.vaultUri();
-          certVault = AzureDockerCertVaultOps.getVault(certVault, dockerSubscription.keyVaultClient);
+                      AzureDockerCertVault certVault = new AzureDockerCertVault();
+                      certVault.name = vaultWithInner.name();
+                      certVault.resourceGroupName = vaultWithInner.resourceGroupName();
+                      certVault.userId = dockerSubscription.userId;
+                      certVault.servicePrincipalId = dockerSubscription.servicePrincipalId;
+                      certVault.region = vaultWithInner.regionName();
+                      certVault.uri = vaultWithInner.vaultUri();
+                      certVault = AzureDockerCertVaultOps.getVault(certVault, dockerSubscription.keyVaultClient);
 
-          if (certVault != null && certVault.hostName != null) {
-            if (DEBUG) System.out.format("\t\t...adding Docker vault details: %s at %d\n", vault.name(), System.currentTimeMillis());
-            dockerVaultDetails.put(vault.name(), certVault);
+                      if (certVault != null && certVault.hostName != null) {
+                        vaultSubscriber.onNext(certVault);
+                      }
+                    } catch (Exception e) {
+                      e.printStackTrace();
+                    }
+                    vaultSubscriber.onCompleted();
+                  }
+                }).subscribeOn(Schedulers.io());
+        }, 5).subscribeOn(Schedulers.io())
+          .toBlocking().subscribe(new Action1<AzureDockerCertVault>() {
+          @Override
+          public void call(AzureDockerCertVault certVault) {
+            if (certVault != null && certVault.hostName != null && certVault.name != null) {
+              if (DEBUG)
+                System.out.format("\t\t...adding Docker vault details: %s at %s\n", certVault.name, new Date().toString());
+              dockerVaultDetails.put(certVault.name, certVault);
+            }
           }
-        }
+        });
+        if (DEBUG) System.out.format("\tDone getting AzureDockerHostsManage Docker key vault details: %s\n", new Date().toString());
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -363,7 +391,7 @@ public class AzureDockerUtils {
   public static Map<String, List<AzureDockerVnet>> refreshDockerVnetDetails(List<AzureDockerSubscription> azureDockerSubscriptions) {
     Map<String, List<AzureDockerVnet>> vnetMaps = new HashMap<>();
 
-    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker virtual network details: %d\n", System.currentTimeMillis());
+    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker virtual network details: %s\n", new Date().toString());
     try {
       for (AzureDockerSubscription dockerSubscription : azureDockerSubscriptions) {
         vnetMaps.put(dockerSubscription.id, AzureDockerUtils.getVirtualNetworks(dockerSubscription.azureClient));
@@ -379,7 +407,7 @@ public class AzureDockerUtils {
   public static Map<String, List<AzureDockerStorageAccount>> refreshDockerStorageAccountDetails(List<AzureDockerSubscription> azureDockerSubscriptions) {
     Map<String, List<AzureDockerStorageAccount>> storageMaps = new HashMap<>();
 
-    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker storage account details: %d\n", System.currentTimeMillis());
+    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker storage account details: %s\n", new Date().toString());
     try {
       for (AzureDockerSubscription dockerSubscription : azureDockerSubscriptions) {
         storageMaps.put(dockerSubscription.id, AzureDockerUtils.getStorageAccounts(dockerSubscription.azureClient));
@@ -395,7 +423,7 @@ public class AzureDockerUtils {
   public static Map<String, List<DockerHost>> refreshDockerHostDetails(List<AzureDockerSubscription> azureDockerSubscriptions, Map<String, AzureDockerCertVault> dockerVaultsMap) {
     Map<String, List<DockerHost>> dockerHosts = new HashMap<>();
 
-    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker virtual machine details: %d\n", System.currentTimeMillis());
+    if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker virtual machine details: %s\n", new Date().toString());
     try {
       for (AzureDockerSubscription dockerSubscription : azureDockerSubscriptions) {
         dockerHosts.put(dockerSubscription.id, new ArrayList<>(AzureDockerVMOps.getDockerHosts(dockerSubscription.azureClient, dockerVaultsMap).values()));

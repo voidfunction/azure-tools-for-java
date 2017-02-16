@@ -68,49 +68,46 @@ public class AzureDockerUIResources {
             return;
           }
 
-          if (!dockerManager.isInitialized()) {
+          progressIndicator.setFraction(.2);
+          progressIndicator.setText2("Retrieving the subscription details...");
+          dockerManager.refreshDockerSubscriptions();
+          if (progressIndicator.isCanceled()) {
+            return;
+          }
 
-            progressIndicator.setFraction(.2);
-            progressIndicator.setText2("Retrieving the subscription details...");
-            dockerManager.refreshDockerSubscriptions();
-            if (progressIndicator.isCanceled()) {
-              return;
-            }
+          progressIndicator.setFraction(.3);
+          progressIndicator.setText2("Retrieving the key vault...");
+          dockerManager.refreshDockerVaults();
+          if (progressIndicator.isCanceled()) {
+            return;
+          }
 
-            progressIndicator.setFraction(.3);
-            progressIndicator.setText2("Retrieving the key vault...");
-            dockerManager.refreshDockerVaults();
-            if (progressIndicator.isCanceled()) {
-              return;
-            }
+          progressIndicator.setFraction(.45);
+          progressIndicator.setText2("Retrieving the key vault details...");
+          dockerManager.refreshDockerVaultDetails();
+          if (progressIndicator.isCanceled()) {
+            return;
+          }
 
-            progressIndicator.setFraction(.45);
-            progressIndicator.setText2("Retrieving the key vault details...");
-            dockerManager.refreshDockerVaultDetails();
-            if (progressIndicator.isCanceled()) {
-              return;
-            }
+          progressIndicator.setFraction(.7);
+          progressIndicator.setText2("Retrieving the network details...");
+          dockerManager.refreshDockerVnetDetails();
+          if (progressIndicator.isCanceled()) {
+            return;
+          }
 
-            progressIndicator.setFraction(.7);
-            progressIndicator.setText2("Retrieving the network details...");
-            dockerManager.refreshDockerVnetDetails();
-            if (progressIndicator.isCanceled()) {
-              return;
-            }
+          progressIndicator.setFraction(.8);
+          progressIndicator.setText2("Retrieving the storage account details...");
+          dockerManager.refreshDockerStorageAccountDetails();
+          if (progressIndicator.isCanceled()) {
+            return;
+          }
 
-            progressIndicator.setFraction(.8);
-            progressIndicator.setText2("Retrieving the storage account details...");
-            dockerManager.refreshDockerStorageAccountDetails();
-            if (progressIndicator.isCanceled()) {
-              return;
-            }
-
-            progressIndicator.setIndeterminate(true);
-            progressIndicator.setText2("Retrieving the Docker virtual machines details...");
-            dockerManager.refreshDockerHostDetails();
-            if (progressIndicator.isCanceled()) {
-              return;
-            }
+          progressIndicator.setIndeterminate(true);
+          progressIndicator.setText2("Retrieving the Docker virtual machines details...");
+          dockerManager.refreshDockerHostDetails();
+          if (progressIndicator.isCanceled()) {
+            return;
           }
 
           progressIndicator.setIndeterminate(true);

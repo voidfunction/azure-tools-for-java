@@ -22,6 +22,7 @@
 package com.microsoft.azure.docker.model;
 
 import java.util.List;
+import java.util.Map;
 
 public class DockerImage {
   public String name;
@@ -41,7 +42,7 @@ public class DockerImage {
   public List<String> envCMDs;   // see ENV directive
   public List<String> workCMDs;  // see WORK directive
 
-  public List<DockerContainer> containers; // list of Docker containers for this image
+  public Map<String, DockerContainer> containers; // map of all Docker containers for this image
 
   public DockerHost dockerHost;  // parent Docker dockerHost
 

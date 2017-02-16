@@ -21,12 +21,15 @@
  */
 package com.microsoft.intellij.docker.forms;
 
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.EditableDockerHost;
 import com.microsoft.intellij.docker.dialogs.AzureSelectKeyVault;
+import com.microsoft.intellij.docker.utils.AzureDockerValidationUtils;
+import com.microsoft.intellij.ui.util.UIUtils;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -56,7 +59,6 @@ public class AzureDockerHostUpdateDaemonPanel {
     this.dockerManager = dockerUIManager;
 
     dockerDaemonPortTextField.setText(editableHost.updatedDockerHost.port);
-
 
     mainSelectionGroup = new ButtonGroup();
     mainSelectionGroup.add(dockerHostNoTlsRadioButton);
@@ -116,6 +118,16 @@ public class AzureDockerHostUpdateDaemonPanel {
     } else {
       dockerDaemonPortTextField.setText(editableHost.originalDockerHost.port);
     }
+
+    dockerHostImportTLSBrowseTextField.addActionListener(UIUtils.createFileChooserListener(dockerHostImportTLSBrowseTextField, project,
+        FileChooserDescriptorFactory.createSingleFolderDescriptor()));
+    dockerHostImportTLSBrowseTextField.getTextField().setInputVerifier(new InputVerifier() {
+      @Override
+      public boolean verify(JComponent input) {
+        return AzureDockerValidationUtils.validateDockerHostTlsDirectory(dockerHostImportTLSBrowseTextField.getText());
+      }
+    });
+
   }
 
   public void disableTlsUI() {

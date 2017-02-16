@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jcraft.jsch.Session;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class DockerHost {
@@ -39,7 +40,7 @@ public class DockerHost {
   public boolean hasKeyVault;
   public String apiUrl;
   public String port;
-  public List<DockerImage> dockerImages;
+  public Map<String, DockerImage> dockerImages;
   public boolean isUpdating;
   public String sid;
 
