@@ -21,6 +21,7 @@
  */
 package com.microsoft.azure.hdinsight.spark.common;
 
+import com.microsoft.azure.hdinsight.common.HDInsightLoader;
 import com.microsoft.azure.hdinsight.common.StreamUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
@@ -40,12 +41,15 @@ import java.io.IOException;
 
 public class SparkBatchSubmission {
 
-    private static String UserAgentName;
+    private static String userAgentName;
 
     static {
-        UserAgentName = SparkBatchSubmission.class.getClassLoader().getClass().getName().toLowerCase().contains("intellij")
-                                ? "Azure Toolkit for IntelliJ" : "Azure Toolkit for Eclipse";
+        String installID = HDInsightLoader.getHDInsightHelper().getInstallationId();
+        String userAgentSource = SparkBatchSubmission.class.getClassLoader().getClass().getName().toLowerCase().contains("intellij")
+                                        ? "Azure Toolkit for IntelliJ" : "Azure Toolkit for Eclipse";
+        userAgentName = userAgentSource + installID;
     }
+
     // Singleton Instance
     private static SparkBatchSubmission instance = null;
 
@@ -77,6 +81,7 @@ public class SparkBatchSubmission {
 
         HttpGet httpGet = new HttpGet(connectUrl);
         httpGet.addHeader("Content-Type", "application/json");
+        httpGet.addHeader("User-Agent", userAgentName);
         try(CloseableHttpResponse response = httpclient.execute(httpGet)) {
             return StreamUtil.getResultFromHttpResponse(response);
         }
@@ -103,7 +108,7 @@ public class SparkBatchSubmission {
         CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).build();
         HttpPost httpPost = new HttpPost(connectUrl);
         httpPost.addHeader("Content-Type", "application/json");
-        httpPost.addHeader("User-Agent", UserAgentName);
+        httpPost.addHeader("User-Agent", userAgentName);
         StringEntity postingString =new StringEntity(submissionParameter.serializeToJson());
         httpPost.setEntity(postingString);
         try(CloseableHttpResponse response = httpclient.execute(httpPost)) {
@@ -132,7 +137,7 @@ public class SparkBatchSubmission {
     public HttpResponse killBatchJob(String connectUrl, int batchId)throws IOException {
         CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).build();
         HttpDelete httpDelete = new HttpDelete(connectUrl +  "/" + batchId);
-        httpDelete.addHeader("User-Agent", UserAgentName);
+        httpDelete.addHeader("User-Agent", userAgentName);
         httpDelete.addHeader("Content-Type", "application/json");
 
         try(CloseableHttpResponse response = httpclient.execute(httpDelete)) {

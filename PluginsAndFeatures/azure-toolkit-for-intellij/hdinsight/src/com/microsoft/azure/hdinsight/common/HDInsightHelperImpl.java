@@ -30,13 +30,23 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.microsoft.azure.hdinsight.jobs.framework.JobViewEditorProvider;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
+import com.microsoft.intellij.ui.messages.AzureBundle;
+import com.microsoft.intellij.util.PluginHelper;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.Nullable;
+import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
 
 import javax.swing.*;
 
 public class HDInsightHelperImpl implements HDInsightHelper {
+
+
+    static {
+        String dataFile = PluginHelper.getTemplateFile(AzureBundle.message("dataFileName"));
+        instID = DataOperations.getProperty(dataFile, AzureBundle.message("instID"));
+    }
+
     @Override
     public void closeJobViewEditor(@NotNull Object projectObject, @NotNull String uuid) {
 
@@ -45,6 +55,12 @@ public class HDInsightHelperImpl implements HDInsightHelper {
     @Override
     public String getPluginRootPath() {
         return PluginUtil.getPluginRootDirectory();
+    }
+
+
+    @Override
+    public String getInstallationId() {
+        return instID;
     }
 
     public void openJobViewEditor(Object projectObject, String uuid) {
@@ -134,4 +150,6 @@ public class HDInsightHelperImpl implements HDInsightHelper {
         virtualFile.putUserData(JobViewEditorProvider.JOB_VIEW_UUID, uuid);
         openItem(project, virtualFile, closeableFile);
     }
+
+    private static String instID = "";
 }

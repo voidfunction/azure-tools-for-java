@@ -19,6 +19,8 @@
  */
 package com.microsoft.azureexplorer.helpers;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorPart;
@@ -34,42 +36,61 @@ import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azureexplorer.editors.JobViewInput;
+import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
+import com.microsoftopentechnologies.wacommon.utils.Messages;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class HDInsightHelperImpl implements HDInsightHelper {
 	private static final String HDINSIHGT_BUNDLE_ID = "com.microsoft.hdinsights";
-	
-    public void openJobViewEditor(Object projectObject, String uuid) {
-    	try {
-        	loadHDInsightPlugin();
+	private static String instID = "";
+
+	static {
+		final String pluginInstLoc = String.format("%s%s%s", PluginUtil.pluginFolder, File.separator,
+				Messages.commonPluginID);
+		final String dataFile = String.format("%s%s%s", pluginInstLoc, File.separator, Messages.dataFileName);
+		instID = DataOperations.getProperty(dataFile, Messages.instID);
+	}
+
+	public void openJobViewEditor(Object projectObject, String uuid) {
+		try {
+			loadHDInsightPlugin();
 		} catch (BundleException bundleException) {
 			Activator.getDefault().log("Error loading plugin com.microsoft.hdinsights", bundleException);
 		}
 
-        IClusterDetail clusterDetail = JobViewManager.getCluster(uuid);
-        IWorkbench workbench = PlatformUI.getWorkbench();
-        IEditorDescriptor editorDescriptor = workbench.getEditorRegistry().findEditor("com.microsoft.azure.hdinsight.jobview");
-        try {
-            IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-            IEditorPart newEditor = page.openEditor(new JobViewInput(clusterDetail, uuid), editorDescriptor.getId());
-        } catch (PartInitException e2) {
-            Activator.getDefault().log("Error opening " + clusterDetail.getName(), e2);
-        }
-    }
+		IClusterDetail clusterDetail = JobViewManager.getCluster(uuid);
+		IWorkbench workbench = PlatformUI.getWorkbench();
+		IEditorDescriptor editorDescriptor = workbench.getEditorRegistry()
+				.findEditor("com.microsoft.azure.hdinsight.jobview");
+		try {
+			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			IEditorPart newEditor = page.openEditor(new JobViewInput(clusterDetail, uuid), editorDescriptor.getId());
+		} catch (PartInitException e2) {
+			Activator.getDefault().log("Error opening " + clusterDetail.getName(), e2);
+		}
+	}
 
-    public void closeJobViewEditor(Object projectObject, String uuid) {
+	public void closeJobViewEditor(Object projectObject, String uuid) {
 
-    }
+	}
 
-    public String getPluginRootPath() {
-        return null;
-    }
+	public String getPluginRootPath() {
+		return null;
+	}
 
-    private void loadHDInsightPlugin() throws BundleException{
+	private void loadHDInsightPlugin() throws BundleException {
 		Bundle bundle = Platform.getBundle(HDINSIHGT_BUNDLE_ID);
-		if(bundle == null || bundle.getState() == Bundle.ACTIVE) {
+		if (bundle == null || bundle.getState() == Bundle.ACTIVE) {
 			return;
 		} else {
 			bundle.start();
 		}
-    }
+	}
+
+	@Override
+	public String getInstallationId() {
+		// TODO Auto-generated method stub
+		return instID;
+	}
+
 }
