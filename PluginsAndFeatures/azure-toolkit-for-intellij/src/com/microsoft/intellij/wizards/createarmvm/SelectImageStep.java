@@ -298,30 +298,30 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
     }
 
     private void fillPublishers() {
-        disableNext();
+        if (customImageBtn.isSelected()) {
+            disableNext();
 
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading publishers...", false) {
-            @Override
-            public void run(@org.jetbrains.annotations.NotNull ProgressIndicator progressIndicator) {
-                progressIndicator.setIndeterminate(true);
+            ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading publishers...", false) {
+                @Override
+                public void run(@org.jetbrains.annotations.NotNull ProgressIndicator progressIndicator) {
+                    progressIndicator.setIndeterminate(true);
 
-                final List<VirtualMachinePublisher> publishers = azure.virtualMachineImages().publishers().listByRegion((String) regionComboBox.getSelectedItem());
+                    final List<VirtualMachinePublisher> publishers = azure.virtualMachineImages().publishers().listByRegion((String) regionComboBox.getSelectedItem());
 
-                ApplicationManager.getApplication().invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        publisherComboBox.setModel(new DefaultComboBoxModel(publishers.toArray()));
-                        fillOffers();
-                    }
-                });
-            }
-        });
+                    ApplicationManager.getApplication().invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            publisherComboBox.setModel(new DefaultComboBoxModel(publishers.toArray()));
+                            fillOffers();
+                        }
+                    });
+                }
+            });
+        }
     }
 
     private void fillOffers() {
         disableNext();
-
-        skuComboBox.setEnabled(true);
 
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading offers...", false) {
             @Override
@@ -390,7 +390,6 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
                         @Override
                         public void run() {
                             imageLabelList.setListData(images.toArray());
-                            imageLabelList.setEnabled(true);
                         }
                     });
                 } catch (CloudException e) {
