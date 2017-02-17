@@ -105,7 +105,7 @@ public class SrvPriCreationStatusDialog extends JDialog {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
-        setTitle("Creation Service Principal Status");
+        setTitle("Create Service Principal Status");
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -207,6 +207,7 @@ public class SrvPriCreationStatusDialog extends JDialog {
         public void run(@NotNull ProgressIndicator progressIndicator) {
             //this.progressIndicator = progressIndicator;
             progressIndicator.setIndeterminate(true);
+            progressIndicator.setText("Creating Service Principal for the selected subscription(s)...");
             for (String tid : tidSidsMap.keySet()) {
                 if (progressIndicator.isCanceled()) {
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
