@@ -83,7 +83,6 @@ public class AzureDockerHostDeployAction extends AnAction {
         }
       }
 
-
       AzureDockerImageInstance dockerImageDescription = new AzureDockerImageInstance();
       dockerImageDescription.dockerImageName = AzureDockerUtils.getDefaultDockerImageName(project.getName()).toLowerCase();
       dockerImageDescription.dockerContainerName = AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName);

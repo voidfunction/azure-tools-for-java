@@ -23,22 +23,33 @@ package com.microsoft.intellij.docker.utils;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardDialog;
+import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardModel;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.*;
+
+import static com.intellij.projectImport.ProjectImportBuilder.getCurrentProject;
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class AzureDockerUIResources {
   private static final Logger LOGGER = Logger.getInstance(AzureDockerUIResources.class);
@@ -205,8 +216,6 @@ public class AzureDockerUIResources {
           } else {
             AzureDockerVMOps.deleteDockerHost(azureClient, dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
           }
-          // TODO: remove this
-          Thread.sleep(10000);
         } catch (Exception e) {
           ApplicationManager.getApplication().invokeLater(new Runnable() {
             @Override
@@ -223,5 +232,60 @@ public class AzureDockerUIResources {
         }
       }
     });
+  }
+
+  public static void publish2DockerHostContainer(Project project) {
+    try {
+      AzureDockerUIResources.CANCELED = false;
+
+      Module module = PluginUtil.getSelectedModule();
+      java.util.List<Module> modules = Arrays.asList(ModuleManager.getInstance(project).getModules());
+
+      if (module == null && modules.isEmpty()) {
+        Messages.showErrorDialog(message("noModule"), message("error"));
+      } else if (module == null) {
+        module = modules.iterator().next();
+      }
+
+      AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
+      // not signed in
+      if (azureAuthManager == null) {
+        System.out.println("ERROR! Not signed in!");
+        return;
+      }
+
+
+      AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(azureAuthManager);
+
+      if (!dockerManager.isInitialized()) {
+        AzureDockerUIResources.updateAzureResourcesWithProgressDialog(project);
+        if (AzureDockerUIResources.CANCELED) {
+          return;
+        }
+      }
+
+      AzureDockerImageInstance dockerImageDescription = new AzureDockerImageInstance();
+      dockerImageDescription.dockerImageName = AzureDockerUtils.getDefaultDockerImageName(project.getName()).toLowerCase();
+      dockerImageDescription.dockerContainerName = AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName);
+      dockerImageDescription.artifactName = AzureDockerUtils.getDefaultArtifactName(project.getName());
+      dockerImageDescription.host = dockerManager.createNewDockerHostDescription(AzureDockerUtils.getDefaultRandomName(AzureDockerUtils.getDefaultName(project.getName())));
+      dockerImageDescription.hasNewDockerHost = false;
+
+      AzureSelectDockerWizardModel model = new AzureSelectDockerWizardModel(project, dockerManager, dockerImageDescription);
+      AzureSelectDockerWizardDialog wizard = new AzureSelectDockerWizardDialog(model);
+      wizard.setTitle("New Deployment of a Docker Container on Azure");
+      wizard.show();
+
+      if (wizard.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+        try {
+          String url = wizard.deploy();
+          System.out.println("Web app published at: " + url);
+        } catch (Exception ex) {
+          PluginUtil.displayErrorDialogAndLog(message("webAppDplyErr"), ex.getMessage(), ex);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

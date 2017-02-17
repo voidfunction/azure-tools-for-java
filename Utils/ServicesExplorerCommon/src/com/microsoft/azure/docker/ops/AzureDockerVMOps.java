@@ -354,6 +354,11 @@ public class AzureDockerVMOps {
       }
       dockerHost.dockerImages = new HashMap<>();
 
+      Map<String, DockerImage> dockerImages = AzureDockerImageOps.getImages(dockerHost);
+      Map<String, DockerContainer> dockerContainers = AzureDockerContainerOps.getContainers(dockerHost);
+      AzureDockerContainerOps.setContainersAndImages(dockerContainers, dockerImages);
+      dockerHost.dockerImages = dockerImages;
+
       return dockerHost;
     }
 

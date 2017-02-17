@@ -340,6 +340,25 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     }
   }
 
+  public void selectDefaultDockerHost(DockerHost dockerHost) {
+    dockerHostsTable.setEnabled(false);
+
+    dockerImageDescription.host = dockerHost;
+    dockerImageDescription.hasNewDockerHost = false;
+    dockerImageDescription.sid = dockerHost.sid;
+
+    final DefaultTableModel tableModel = (DefaultTableModel) dockerHostsTable.getModel();
+    tableModel.setValueAt(false, 0, 0);
+    for (int i = 0; i < tableModel.getRowCount(); i++ ) {
+      String apiURL = (String) tableModel.getValueAt(i, 4);
+      if (dockerHost.apiUrl.equals(apiURL)) {
+        tableModel.setValueAt(true, i, 0);
+        dockerHostsTable.setRowSelectionInterval(i, i);
+        break;
+      }
+    }
+  }
+
   private void onEditDockerHostAction() {
     try {
       DefaultTableModel tableModel = (DefaultTableModel) dockerHostsTable.getModel();

@@ -96,4 +96,10 @@ public class AzureSelectDockerWizardModel extends WizardModel {
 
   public boolean canClose() { return finishedOK;}
 
+  public void selectDefaultDockerHost(DockerHost dockerHost) {
+    if (selectDockerHostForm != null) {
+      selectDockerHostForm.selectDefaultDockerHost(dockerHost);
+    }
+  }
+
 }

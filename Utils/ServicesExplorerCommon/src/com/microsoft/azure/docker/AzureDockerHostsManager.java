@@ -98,6 +98,8 @@ public class AzureDockerHostsManager {
 
   public Map<String, Pair<Vault, KeyVaultClient>> getVaultsMap() { return vaultsMap; }
 
+  public Map<String, AzureDockerCertVault> getDockerVaultsMap() { return dockerVaultsMap;}
+
   public String getUserId() { return userId; }
 
   public List<DockerHost> getDockerHostsList() { return dockerHostsList; }

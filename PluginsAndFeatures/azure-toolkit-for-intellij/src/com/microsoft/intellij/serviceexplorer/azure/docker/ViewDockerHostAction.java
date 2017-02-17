@@ -25,57 +25,44 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
-import com.microsoft.azure.management.Azure;
-import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.azure.docker.model.EditableDockerHost;
+import com.microsoft.intellij.docker.dialogs.AzureEditDockerLoginCredsDialog;
+import com.microsoft.intellij.docker.dialogs.AzureViewDockerDialog;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostNode;
 
 
-@Name("Delete")
-public class DeleteDockerHostAction extends NodeActionListener {
-  private static final Logger LOGGER = Logger.getInstance(DeleteDockerHostAction.class);
+@Name("Details")
+public class ViewDockerHostAction extends NodeActionListener {
+  private static final Logger LOGGER = Logger.getInstance(ViewDockerHostAction.class);
   DockerHost dockerHost;
   AzureDockerHostsManager dockerManager;
   Project project;
   DockerHostNode dockerHostNode;
 
-  public DeleteDockerHostAction(DockerHostNode dockerHostNode) {
+  public ViewDockerHostAction(DockerHostNode dockerHostNode) {
     this.dockerManager = dockerHostNode.getDockerManager();
     this.dockerHost = dockerHostNode.getDockerHost();
     this.project = (Project) dockerHostNode.getProject();
     this.dockerHostNode = dockerHostNode;
-
   }
 
   @Override
   public void actionPerformed(NodeActionEvent e) {
-    Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
-    int option = AzureDockerUIResources.deleteAzureDockerHostConfirmationDialog(azureClient, dockerHost);
+    AzureViewDockerDialog viewDockerDialog = new AzureViewDockerDialog(project, dockerHost, dockerManager);
+    viewDockerDialog.show();
 
-    if (option !=1 && option != 2) {
-      if (AzureDockerUtils.DEBUG) System.out.format("User canceled delete Docker host op: %d\n", option);
-      return;
+    if (viewDockerDialog.getInternalExitCode() == AzureViewDockerDialog.UPDATE_EXIT_CODE) {
+      EditableDockerHost editableDockerHost = new EditableDockerHost(dockerHost);
+
+      AzureEditDockerLoginCredsDialog editDockerDialog = new AzureEditDockerLoginCredsDialog(project, editableDockerHost, dockerManager);
+      editDockerDialog.show();
+
+      if (editDockerDialog.getExitCode() == 0) {
+        // TODO: Apply the edit actions here
+      }
     }
-
-    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        // instruct parent node to remove this node
-        dockerHostNode.getParent().removeDirectChildNode(dockerHostNode);
-      }
-    });
-
-    AzureDockerUIResources.deleteDockerHost(project, azureClient, dockerHost, option, null);
-    DefaultLoader.getIdeHelper().runInBackground(project, "Updating Docker Hosts Details ", false, true, "Updating Docker hosts details...", new Runnable() {
-      @Override
-      public void run() {
-        dockerManager.refreshDockerHostDetails();
-      }
-    });
   }
 }
-

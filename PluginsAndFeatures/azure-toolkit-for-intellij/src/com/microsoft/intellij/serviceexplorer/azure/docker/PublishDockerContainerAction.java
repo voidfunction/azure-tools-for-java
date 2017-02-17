@@ -19,17 +19,27 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.docker.model;
+package com.microsoft.intellij.serviceexplorer.azure.docker;
 
-public class DockerContainer {
-  public String name;
-  public String id;
-  public String status;
-  public String ports;
-  public String image;
-  public String command;
-  public String size;
-  public String dockerHostApiUrl;
-  public boolean isRunning;
-  public String url;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
+import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
+import com.microsoft.tooling.msservices.helpers.Name;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostModule;
+
+@Name("Publish")
+public class PublishDockerContainerAction extends NodeActionListener {
+  private static final Logger LOGGER = Logger.getInstance(PublishDockerContainerAction.class);
+  Project project;
+
+  public PublishDockerContainerAction(DockerHostModule dockerHostModule) {
+    this.project = (Project) dockerHostModule.getProject();
+  }
+
+  @Override
+  public void actionPerformed(NodeActionEvent e) {
+    AzureDockerUIResources.publish2DockerHostContainer(project);
+  }
 }

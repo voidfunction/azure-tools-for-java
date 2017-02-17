@@ -522,6 +522,21 @@ public final class DeploymentManager {
                 System.out.println("Done opening a remote connection to the Docker host: " + new Date().toString());
             }
 
+            if (dockerImageInstance.hasNewDockerHost && dockerImageInstance.host.certVault.hostName != null) {
+                msg = String.format("Creating new key vault %s ...", dockerImageInstance.host.certVault.name);
+                notifyProgress(dockerImageInstance.host.name, startDate, null, 15, OperationStatus.InProgress, msg);
+                System.out.println("Creating new Docker key vault: " + new Date().toString());
+                AzureDockerCertVaultOps.createOrUpdateVault(azureClient, dockerImageInstance.host.certVault, keyVaultClient);
+                System.out.println("Done creating new key vault: " + new Date().toString());
+
+                msg = String.format("Updating key vaults ...");
+                notifyProgress(dockerImageInstance.host.name, startDate, null, 10, OperationStatus.InProgress, msg);
+                System.out.println("Refreshing key vaults: " + new Date().toString());
+                dockerManager.refreshDockerVaults();
+                dockerManager.refreshDockerVaultDetails();
+                System.out.println("Done refreshing key vaults: " + new Date().toString());
+            }
+
             msg = String.format("Uploading Dockerfile and artifact %s on %s ...", dockerImageInstance.artifactName, dockerImageInstance.host.name);
             notifyProgress(dockerImageInstance.host.name, startDate, null, 10, OperationStatus.InProgress, msg);
             System.out.println("Uploading Dockerfile and artifact: " + new Date().toString());
@@ -546,21 +561,6 @@ public final class DeploymentManager {
             AzureDockerContainerOps.start(dockerImageInstance, dockerImageInstance.host.session);
             System.out.println("Done starting a Docker container to the Docker host: " + new Date().toString());
 
-            if (dockerImageInstance.hasNewDockerHost && dockerImageInstance.host.certVault.hostName != null) {
-                msg = String.format("Creating new key vault %s ...", dockerImageInstance.host.certVault.name);
-                notifyProgress(dockerImageInstance.host.name, startDate, null, 15, OperationStatus.InProgress, msg);
-                System.out.println("Creating new Docker key vault: " + new Date().toString());
-                AzureDockerCertVaultOps.createOrUpdateVault(azureClient, dockerImageInstance.host.certVault, keyVaultClient);
-                System.out.println("Done creating new key vault: " + new Date().toString());
-
-                msg = String.format("Updating key vaults ...");
-                notifyProgress(dockerImageInstance.host.name, startDate, null, 10, OperationStatus.InProgress, msg);
-                System.out.println("Refreshing key vaults: " + new Date().toString());
-                dockerManager.refreshDockerVaults();
-                dockerManager.refreshDockerVaultDetails();
-                System.out.println("Done refreshing key vaults: " + new Date().toString());
-            }
-
             msg = String.format("Updating Docker hosts ...");
             notifyProgress(dockerImageInstance.host.name, startDate, null, 25, OperationStatus.InProgress, msg);
             System.out.println("Refreshing docker hosts: " + new Date().toString());
@@ -570,9 +570,9 @@ public final class DeploymentManager {
 
             notifyProgress(dockerImageInstance.host.name, startDate, url, 100, OperationStatus.Succeeded, message("runStatus"), dockerImageInstance.host.name);
         } catch (InterruptedException e) {
-            notifyProgress(dockerImageInstance.host.name, startDate, url, 100, OperationStatus.Succeeded, message("runStatus"), dockerImageInstance.host.name);
+            notifyProgress(dockerImageInstance.host.name, startDate, url, 100, OperationStatus.Failed, message("runStatus"), dockerImageInstance.host.name);
         } catch (Exception ee) {
-
+            notifyProgress(dockerImageInstance.host.name, startDate, url, 100, OperationStatus.Failed, ee.getMessage(), dockerImageInstance.host.name);
         }
     }
 }

@@ -23,59 +23,60 @@ package com.microsoft.intellij.serviceexplorer.azure.docker;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
-import com.microsoft.azure.management.Azure;
-import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardDialog;
+import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardModel;
+import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostNode;
 
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
-@Name("Delete")
-public class DeleteDockerHostAction extends NodeActionListener {
-  private static final Logger LOGGER = Logger.getInstance(DeleteDockerHostAction.class);
+
+@Name("Publish")
+public class DeployDockerContainerAction extends NodeActionListener {
+  private static final Logger LOGGER = Logger.getInstance(DeployDockerContainerAction.class);
   DockerHost dockerHost;
   AzureDockerHostsManager dockerManager;
   Project project;
   DockerHostNode dockerHostNode;
 
-  public DeleteDockerHostAction(DockerHostNode dockerHostNode) {
+  public DeployDockerContainerAction(DockerHostNode dockerHostNode) {
     this.dockerManager = dockerHostNode.getDockerManager();
     this.dockerHost = dockerHostNode.getDockerHost();
     this.project = (Project) dockerHostNode.getProject();
     this.dockerHostNode = dockerHostNode;
-
   }
 
   @Override
   public void actionPerformed(NodeActionEvent e) {
-    Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
-    int option = AzureDockerUIResources.deleteAzureDockerHostConfirmationDialog(azureClient, dockerHost);
+    AzureDockerImageInstance dockerImageDescription = new AzureDockerImageInstance();
+    dockerImageDescription.dockerImageName = AzureDockerUtils.getDefaultDockerImageName(project.getName()).toLowerCase();
+    dockerImageDescription.dockerContainerName = AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName);
+    dockerImageDescription.artifactName = AzureDockerUtils.getDefaultArtifactName(project.getName());
+    dockerImageDescription.host = dockerHost;
+    dockerImageDescription.sid = dockerHost.sid;
+    dockerImageDescription.hasNewDockerHost = false;
 
-    if (option !=1 && option != 2) {
-      if (AzureDockerUtils.DEBUG) System.out.format("User canceled delete Docker host op: %d\n", option);
-      return;
+    AzureSelectDockerWizardModel model = new AzureSelectDockerWizardModel(project, dockerManager, dockerImageDescription);
+    AzureSelectDockerWizardDialog wizard = new AzureSelectDockerWizardDialog(model);
+    wizard.setTitle("New Deployment of a Docker Container on Azure");
+    model.selectDefaultDockerHost(dockerHost);
+    wizard.show();
+
+    if (wizard.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+      try {
+        String url = wizard.deploy();
+        System.out.println("Web app published at: " + url);
+      } catch (Exception ex) {
+        PluginUtil.displayErrorDialogAndLog(message("webAppDplyErr"), ex.getMessage(), ex);
+      }
     }
-
-    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        // instruct parent node to remove this node
-        dockerHostNode.getParent().removeDirectChildNode(dockerHostNode);
-      }
-    });
-
-    AzureDockerUIResources.deleteDockerHost(project, azureClient, dockerHost, option, null);
-    DefaultLoader.getIdeHelper().runInBackground(project, "Updating Docker Hosts Details ", false, true, "Updating Docker hosts details...", new Runnable() {
-      @Override
-      public void run() {
-        dockerManager.refreshDockerHostDetails();
-      }
-    });
   }
 }
-
