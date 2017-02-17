@@ -27,11 +27,16 @@ import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.model.DockerImage;
 import com.microsoft.azure.docker.ops.AzureDockerContainerOps;
 import com.microsoft.azure.docker.ops.AzureDockerImageOps;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.AzureRefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
 
+import java.awt.*;
+import java.net.URI;
 import java.util.Map;
 
 public class DockerImageNode extends AzureRefreshableNode {
@@ -98,4 +103,37 @@ public class DockerImageNode extends AzureRefreshableNode {
     return dockerManager;
   }
 
+  @Override
+  protected void loadActions() {
+    addAction(ACTION_DELETE, new DeleteDockerImageAction());
+    super.loadActions();
+  }
+
+  public class DeleteDockerImageAction extends AzureNodeActionPromptListener {
+    public DeleteDockerImageAction() {
+      super(DockerImageNode.this,
+          String.format("This operation will remove the Docker image %s from %s. Are you sure you want to continue?",
+              dockerImage.name, dockerHost.name),
+          "Deleting Docker Image");
+    }
+
+    @Override
+    protected void azureNodeAction(NodeActionEvent e) {
+      try {
+        AzureDockerImageOps.delete(dockerImage, dockerHost.session);
+
+        DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+          @Override
+          public void run() {
+            // instruct parent node to remove this node
+            getParent().removeDirectChildNode(DockerImageNode.this);
+          }
+        });
+      } catch (Exception ex) {}
+    }
+
+    @Override
+    protected void onSubscriptionsChanged(NodeActionEvent e) throws AzureCmdException {
+    }
+  }
 }
