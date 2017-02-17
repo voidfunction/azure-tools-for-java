@@ -66,7 +66,7 @@ public class SubscriptionManager {
         notifyAllListeners();
     }
 
-    public void addListener(ISubscriptionSelectionListener l) {
+    public synchronized void addListener(ISubscriptionSelectionListener l) {
         if (!listners.contains(l)) {
             listners.add(l);
         }
@@ -78,7 +78,7 @@ public class SubscriptionManager {
         }
     }
 
-    public String getSubscriptionTenant(String sid) throws Exception {
+    public synchronized String getSubscriptionTenant(String sid) throws Exception {
         if (!sidToTid.containsKey(sid)) {
             updateSidToTidMap();
             if (!sidToTid.containsKey(sid)) {
@@ -89,7 +89,7 @@ public class SubscriptionManager {
         return tid;
     }
 
-    public Set<String> getAccountSidList() throws Exception {
+    public synchronized Set<String> getAccountSidList() throws Exception {
         System.out.println("getAccountSidList()");
         if (sidToTid.isEmpty()) {
             updateSidToTidMap();
@@ -97,7 +97,7 @@ public class SubscriptionManager {
         return sidToTid.keySet();
     }
 
-    public void cleanSubscriptions() throws Exception {
+    public synchronized void cleanSubscriptions() throws Exception {
         System.out.println("cleanSubscriptions()");
         subscriptionDetails.clear();
         sidToTid.clear();

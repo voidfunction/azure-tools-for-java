@@ -42,7 +42,7 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
     }
 
     @Override
-    public void setSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws Exception {
+    public synchronized void setSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws Exception {
         saveSubscriptions(subscriptionDetails);
         super.setSubscriptionDetails(subscriptionDetails);
     }
@@ -56,13 +56,13 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
     }
 
     @Override
-    public void cleanSubscriptions() throws Exception {
+    public synchronized void cleanSubscriptions() throws Exception {
         String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
         deleteSubscriptions(subscriptionsDetailsFileName);
         super.cleanSubscriptions();
     }
 
-    public static void deleteSubscriptions(String subscriptionsDetailsFileName) throws Exception {
+    public synchronized static void deleteSubscriptions(String subscriptionsDetailsFileName) throws Exception {
         System.out.println("cleaning " + subscriptionsDetailsFileName + " file");
         //String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
         FileStorage fs = new FileStorage(subscriptionsDetailsFileName, CommonSettings.settingsBaseDir);
@@ -70,7 +70,7 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
 
     }
 
-    public void loadSubscriptions() throws Exception {
+    private void loadSubscriptions() throws Exception {
         System.out.println("loadSubscriptions()");
         String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
         subscriptionDetails.clear();
@@ -87,7 +87,7 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
         }
     }
 
-    public void saveSubscriptions(List<SubscriptionDetail> sdl) throws Exception {
+    private void saveSubscriptions(List<SubscriptionDetail> sdl) throws Exception {
         System.out.println("saveSubscriptions()");
         String sd = JsonHelper.serialize(subscriptionDetails);
         String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
