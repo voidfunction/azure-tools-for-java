@@ -774,6 +774,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                                     resourceGroupName,
                                     createNewRadioButton.isSelected(),
                                     model.getSize(),
+                                    model.getRegion(),
                                     model.getVirtualMachineImage(),
                                     model.getKnownMachineImage(),
                                     model.isKnownMachineImage(),

@@ -202,15 +202,16 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
         final ButtonGroup imageGroup = new ButtonGroup();
         imageGroup.add(knownImageBtn);
         imageGroup.add(customImageBtn);
-        List<Object> knownImages = new ArrayList<>();
-        knownImages.addAll(Arrays.asList(KnownWindowsVirtualMachineImage.values()));
-        knownImages.addAll(Arrays.asList(KnownLinuxVirtualMachineImage.values()));
         knownImageComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 model.setKnownMachineImage(knownImageComboBox.getSelectedItem());
             }
         });
+        List<Object> knownImages = new ArrayList<>();
+        knownImages.addAll(Arrays.asList(KnownWindowsVirtualMachineImage.values()));
+        knownImages.addAll(Arrays.asList(KnownLinuxVirtualMachineImage.values()));
         knownImageComboBox.setModel(new DefaultComboBoxModel(knownImages.toArray()));
+        model.setKnownMachineImage(knownImageComboBox.getSelectedItem());
         knownImageComboBox.setRenderer(new ListCellRendererWrapper<Object>() {
             @Override
             public void customize(JList jList, Object o, int i, boolean b, boolean b1) {

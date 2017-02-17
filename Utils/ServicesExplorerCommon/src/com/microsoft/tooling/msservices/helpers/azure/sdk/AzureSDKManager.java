@@ -73,7 +73,7 @@ public class AzureSDKManager {
     }
 
     public static VirtualMachine createVirtualMachine(String subscriptionId, @NotNull String name, @NotNull String resourceGroup, boolean withNewResourceGroup,
-                                                      @NotNull String size, final VirtualMachineImage vmImage, Object knownImage, boolean isKnownImage,
+                                                      @NotNull String size, @NotNull String region, final VirtualMachineImage vmImage, Object knownImage, boolean isKnownImage,
                                                       @NotNull final StorageAccount storageAccount, @NotNull final Network network,
                                                       @NotNull String subnet, boolean withNewNetwork, @Nullable PublicIpAddress pip, boolean withNewPip,
                                                       @Nullable AvailabilitySet availabilitySet, boolean withNewAvailabilitySet,
@@ -87,7 +87,7 @@ public class AzureSDKManager {
             isWindows = vmImage.osDiskImage().operatingSystem().equals(OperatingSystemTypes.WINDOWS);
         }
         VirtualMachine.DefinitionStages.WithGroup withGroup = azure.virtualMachines().define(name)
-                .withRegion(vmImage.location());
+                .withRegion(region);
         VirtualMachine.DefinitionStages.WithNetwork withNetwork = withNewResourceGroup ?
                 withGroup.withNewResourceGroup(resourceGroup) : withGroup.withExistingResourceGroup(resourceGroup);
         VirtualMachine.DefinitionStages.WithPublicIpAddress withPublicIpAddress;
