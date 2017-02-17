@@ -107,7 +107,7 @@ public class AzureDockerUtils {
   }
 
   public static String getDefaultName(String projectName) {
-    return projectName.replaceAll(" ", "");
+    return projectName.replaceAll("[^a-z0-9]", "");
   }
 
   public static String getDefaultDockerImageName(String projectName) {

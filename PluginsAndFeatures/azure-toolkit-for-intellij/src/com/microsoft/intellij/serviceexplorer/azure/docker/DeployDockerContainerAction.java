@@ -66,7 +66,6 @@ public class DeployDockerContainerAction extends NodeActionListener {
 
     AzureSelectDockerWizardModel model = new AzureSelectDockerWizardModel(project, dockerManager, dockerImageDescription);
     AzureSelectDockerWizardDialog wizard = new AzureSelectDockerWizardDialog(model);
-    wizard.setTitle("New Deployment of a Docker Container on Azure");
     model.selectDefaultDockerHost(dockerHost);
     wizard.show();
 

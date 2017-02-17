@@ -114,11 +114,11 @@ public class AzureDockerVMOps {
         resourceGroupName = newHost.hostVM.resourceGroupName.split("@")[0];
       } else {
         // Create a new resource group
+        resourceGroupName = newHost.hostVM.resourceGroupName;
         ResourceGroup resourceGroup = azureClient.resourceGroups()
             .define(newHost.hostVM.resourceGroupName)
             .withRegion(newHost.hostVM.region)
             .create();
-        resourceGroupName = newHost.hostVM.resourceGroupName;
       }
 
       Network vnet;
@@ -132,7 +132,7 @@ public class AzureDockerVMOps {
         vnet = azureClient.networks()
             .define(newHost.hostVM.vnetName)
             .withRegion(newHost.hostVM.region)
-            .withExistingResourceGroup(newHost.hostVM.resourceGroupName)
+            .withExistingResourceGroup(resourceGroupName)
             .withAddressSpace(newHost.hostVM.vnetAddressSpace)
             .create();
       }
@@ -354,10 +354,13 @@ public class AzureDockerVMOps {
       }
       dockerHost.dockerImages = new HashMap<>();
 
-      Map<String, DockerImage> dockerImages = AzureDockerImageOps.getImages(dockerHost);
-      Map<String, DockerContainer> dockerContainers = AzureDockerContainerOps.getContainers(dockerHost);
-      AzureDockerContainerOps.setContainersAndImages(dockerContainers, dockerImages);
-      dockerHost.dockerImages = dockerImages;
+      if (dockerHost.certVault != null)
+        try { // it might throw here if the credentials are invalid
+          Map<String, DockerImage> dockerImages = AzureDockerImageOps.getImages(dockerHost);
+          Map<String, DockerContainer> dockerContainers = AzureDockerContainerOps.getContainers(dockerHost);
+          AzureDockerContainerOps.setContainersAndImages(dockerContainers, dockerImages);
+          dockerHost.dockerImages = dockerImages;
+        } catch (Exception e) {}
 
       return dockerHost;
     }

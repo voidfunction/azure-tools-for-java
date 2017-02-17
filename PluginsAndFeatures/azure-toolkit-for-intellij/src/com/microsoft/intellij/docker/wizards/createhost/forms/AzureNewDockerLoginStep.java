@@ -227,7 +227,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       @Override
       public boolean verify(JComponent input) {
         String text = new String(dockerHostFirstPwdField.getPassword());
-        if (text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostPassword(text)) {
+        if (dockerHostFirstPwdField.getPassword().length > 0 && !text.isEmpty() && !AzureDockerValidationUtils.validateDockerHostPassword(text)) {
           dockerHostFirstPwdLabel.setVisible(true);
           return false;
         } else {
@@ -368,6 +368,9 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       if (dockerHostFirstPwdField.getPassword().length > 0) {
         newHost.certVault.vmPwd = new String(dockerHostFirstPwdField.getPassword());
         newHost.hasPwdLogIn = true;
+      } else {
+        newHost.certVault.vmPwd = null;
+        newHost.hasPwdLogIn = false;
       }
 
       // SSH key auto generated
