@@ -50,7 +50,7 @@ public class SubscriptionManager {
         this.azureManager = azureManager;
     }
 
-    public List<SubscriptionDetail> getSubscriptionDetails() throws Exception {
+    public synchronized List<SubscriptionDetail> getSubscriptionDetails() throws Exception {
         System.out.println("getSubscriptionDetails()");
         if (subscriptionDetails.isEmpty()) {
             updateAccountSubscriptionList();
@@ -58,7 +58,7 @@ public class SubscriptionManager {
         return subscriptionDetails;
     }
 
-    public void setSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws Exception {
+    public synchronized void setSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws Exception {
         System.out.println("getSubscriptionDetails()");
         this.subscriptionDetails = subscriptionDetails;
 //        saveSubscriptions(subscriptionDetails);
