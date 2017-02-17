@@ -23,7 +23,10 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure;
 
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.SubscriptionManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
@@ -32,6 +35,9 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostM
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappsModule;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class AzureModule extends RefreshableNode {
     private static final String AZURE_SERVICE_MODULE_ID = AzureModule.class.getName();
@@ -65,18 +71,25 @@ public class AzureModule extends RefreshableNode {
 
     @Override
     public String getName() {
-//        try {
-           /*   List<Subscription> subscriptionList = AzureManagerImpl.getManager(getProject()).getSubscriptionList();
-            if (subscriptionList.size() > 0) {
-                return String.format("%s (%s)", BASE_MODULE_NAME, subscriptionList.size() > 1
-                        ? String.format("%s subscriptions", subscriptionList.size())
-                        : subscriptionList.get(0).getName());
-            }*/
-//        } catch (AzureCmdException e) {
-//        	String msg = "An error occurred while getting the subscription list." + "\n" + "(Message from Azure:" + e.getMessage() + ")";
-//        	DefaultLoader.getUIHelper().showException(msg, e,
-//        			"MS Services - Error Getting Subscriptions", false, true);
-//        }
+        try {
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null) {
+                return BASE_MODULE_NAME + " (Not Signed In)";
+            }
+            SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
+            List<SubscriptionDetail> subscriptionDetails = subscriptionManager.getSubscriptionDetails();
+            List<SubscriptionDetail> selectedSubscriptions = subscriptionDetails.stream().filter(SubscriptionDetail::isSelected).collect(Collectors.toList());
+            if (selectedSubscriptions.size() > 0) {
+                return String.format("%s (%s)", BASE_MODULE_NAME, selectedSubscriptions.size() > 1
+                        ? String.format("%s subscriptions", selectedSubscriptions.size())
+                        : selectedSubscriptions.get(0).getSubscriptionName());
+            }
+        } catch (Exception e) {
+        	String msg = "An error occurred while getting the subscription list." + "\n" + "(Message from Azure:" + e.getMessage() + ")";
+        	DefaultLoader.getUIHelper().showException(msg, e,
+        			"MS Services - Error Getting Subscriptions", false, true);
+        }
         return BASE_MODULE_NAME;
     }
 

@@ -320,6 +320,10 @@ public class Node {
         this.viewData = viewData;
     }
 
+    public String getToolTip() {
+        return getName();
+    }
+
     public Object getProject() {
         // delegate to parent node if there's one else return null
         if (parent != null) {

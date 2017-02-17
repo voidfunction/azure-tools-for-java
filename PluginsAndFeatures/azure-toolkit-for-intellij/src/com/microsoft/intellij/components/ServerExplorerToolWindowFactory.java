@@ -318,7 +318,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
             }
 
             // setup a tooltip
-            setToolTipText(node.getName());
+            setToolTipText(node.getToolTip());
         }
     }
 

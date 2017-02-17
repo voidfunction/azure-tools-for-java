@@ -21,7 +21,10 @@
  */
 package com.microsoft.intellij.serviceexplorer.azure.vmarm;
 
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.wizards.createarmvm.CreateVMWizard;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
@@ -37,6 +40,20 @@ public class CreateVMAction extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
+        // check if we have a valid subscription handy
+        AzureManager azureManager;
+        try {
+            azureManager = AuthMethodManager.getInstance().getAzureManager();
+        } catch (Exception e1) {
+            azureManager = null;
+        }
+        if (azureManager == null) {
+            DefaultLoader.getUIHelper().showException("No active Azure subscription was found. Please enable one more Azure " +
+                            "subscriptions by right-clicking on the \"Azure\" " +
+                            "node and selecting \"Manage subscriptions\".", null,
+                    "Azure Services Explorer - No Active Azure Subscription", false, false);
+            return;
+        }
         CreateVMWizard createVMWizard = new CreateVMWizard((VMArmModule) e.getAction().getNode());
         createVMWizard.show();
     }
