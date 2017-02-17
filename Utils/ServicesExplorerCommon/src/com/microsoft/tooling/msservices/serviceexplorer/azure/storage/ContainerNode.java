@@ -31,6 +31,7 @@ import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
 
 import java.util.Map;
@@ -70,7 +71,7 @@ public class ContainerNode extends Node {
                 StorageClientSDKManager.getManager().deleteBlobContainer(storageAccount, blobContainer);
 
                 parent.removeAllChildNodes();
-                ((BlobModule) parent).load();
+                ((RefreshableNode) parent).load();
             } catch (AzureCmdException ex) {
                 DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete blob storage", ex,
                         "MS Services - Error Deleting Blob Storage", false, true);
