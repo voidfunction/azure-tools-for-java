@@ -44,9 +44,6 @@ import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Field;
@@ -55,7 +52,6 @@ import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 
 public class AppServiceCreateDialog extends DialogWrapper {
     private static final Logger LOGGER = Logger.getInstance(AppServiceCreateDialog.class);

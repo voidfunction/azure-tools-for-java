@@ -52,6 +52,8 @@ public class SubscriptionsDialog extends JDialog {
     private List<SubscriptionDetail> sdl;
     private int result = JOptionPane.CANCEL_OPTION;
 
+    private  Project project;
+
 
     private static class SubscriptionTableModel extends DefaultTableModel {
         final Class[] columnClass = new Class[] {
@@ -76,9 +78,10 @@ public class SubscriptionsDialog extends JDialog {
         return result;
     }
 
-    public static SubscriptionsDialog go(List<SubscriptionDetail> sdl, Component parent) throws Exception {
+    public static SubscriptionsDialog go(List<SubscriptionDetail> sdl, Component parent, Project project) throws Exception {
         SubscriptionsDialog d = new SubscriptionsDialog();
         d.sdl = sdl;
+        d.project = project;
         d.pack();
         d.setLocationRelativeTo(parent);
         d.setVisible(true);
@@ -142,7 +145,7 @@ public class SubscriptionsDialog extends JDialog {
             if (manager == null) {
                 return;
             }
-            Project project = null;
+            //Project project = null;
             final SubscriptionManager subscriptionManager = manager.getSubscriptionManager();
             subscriptionManager.cleanSubscriptions();
 
@@ -155,7 +158,7 @@ public class SubscriptionsDialog extends JDialog {
             //System.out.println("refreshSubscriptions: calling getSubscriptionDetails()");
             sdl = subscriptionManager.getSubscriptionDetails();
             setSubscriptions();
-            subscriptionManager.setSubscriptionDetails(sdl);
+            //subscriptionManager.setSubscriptionDetails(sdl);
 
         } catch (Exception ex) {
             ex.printStackTrace();

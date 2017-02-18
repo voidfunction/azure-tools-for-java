@@ -88,14 +88,23 @@ $(function () {
                 }
             }
         }
-        JobUtils.openSparkUIHistory(id);
+        if(sourceType == "intellij") {
+            JobUtils.openSparkUIHistory(id);
+        } else {
+            JobUtils.openSparkUIHistory(clusterName, id);
+        }
+
     });
 
     $("#openYarnUIButton").click(function () {
-        JobUtils.openYarnUIHistory(typeof appId == 'undefined' ? "" : appId.toString());
+        if(sourceType == "intellij"){
+            JobUtils.openYarnUIHistory(typeof appId == 'undefined' ? "" : appId.toString());
+        } else {
+            JobUtils.openYarnUIHistory(clusterName, typeof appId == 'undefined' ? "" : appId.toString());
+        }
     });
 
-    $("#refreshButtion").click(function () {
+    $("#refreshButton").click(function () {
         location.reload();
         refreshGetSelectedApplication();
     });
@@ -125,7 +134,8 @@ function getProjectId() {
         queriresMap[strs[0]] = strs[1];
     }
     projectId = queriresMap["projectid"];
-
+    sourceType = queriresMap["sourcetype"] == null ? "intellij" : "eclipse";
+    clusterName = queriresMap["clustername"];
     var webType = queriresMap["engintype"];
 }
 
@@ -316,9 +326,11 @@ function setJobDetail() {
     getMessageAsync(url + "/jobs", function (s) {
         currentSelectedJobs = JSON.parse(s);
         renderJobDetails(currentSelectedJobs);
-        if(currentSelectedStages != null && !isJobGraphGenerated) {
-            setJobGraph(currentSelectedJobs);
-        }
+        // setJobGraphOnApplicationLevel(currentSelectedJobs);
+        renderJobGraphOnApplicationLevel(currentSelectedJobs);
+        // if(currentSelectedStages != null && !isJobGraphGenerated) {
+        //     setJobGraph(currentSelectedJobs);
+        // }
     });
 }
 // d3.select("#stored_rdd_details").selectAll("li")
@@ -362,6 +374,10 @@ function setJobGraph(jobs) {
         setJobGraphForOneJob(job);
     });
 }
+function setJobGraphOnApplicationLevel(jobs) {
+
+}
+
 function setJobGraphForOneJob(job) {
     var stageIds = job['stageIds'];
     var selectedStages = [];
@@ -371,7 +387,6 @@ function setJobGraphForOneJob(job) {
        }));
     });
     renderJobGraph(selectedStages);
-
 }
 
 function stagesInfo(jobs, url) {
@@ -435,8 +450,12 @@ function setTaskDetails() {
 function setExecutorsDetails() {
     var httpQuery = localhost + projectId + "/applications/" + appId + "/" + attemptId + "/executors";
     getMessageAsync(httpQuery, function (s) {
-        var executors = JSON.parse(s);
-        renderExecutors(executors);
+        try {
+            var executors = JSON.parse(s);
+            renderExecutors(executors);
+        } catch (e) {
+
+        }
     })
 }
 function setDebugInfo(s) {

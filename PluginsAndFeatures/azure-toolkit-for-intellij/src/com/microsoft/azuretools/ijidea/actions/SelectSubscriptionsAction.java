@@ -87,7 +87,7 @@ public class SelectSubscriptionsAction extends AnAction {
             }
 
             //System.out.println("onShowSubscriptions: calling getSubscriptionDetails()");
-            SubscriptionsDialog d = SubscriptionsDialog.go(subscriptionManager.getSubscriptionDetails(), frame);
+            SubscriptionsDialog d = SubscriptionsDialog.go(subscriptionManager.getSubscriptionDetails(), frame, project);
             List<SubscriptionDetail> subscriptionDetailsUpdated;
             if (d.getResult() == JOptionPane.OK_OPTION) {
                 subscriptionDetailsUpdated = d.getSubscriptionDetails();

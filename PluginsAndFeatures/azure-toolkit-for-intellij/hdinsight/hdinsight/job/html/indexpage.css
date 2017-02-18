@@ -1,16 +1,6 @@
 
 body {
-    margin: 2px;
     visibility: visible;
-    height:100%;
-    width:100%;
-    float: left;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-wrap: wrap;
-    flex-wrap: wrap;
-    -webkit-align-content: center;
-    align-content: center;
 }
 
 #htitle {
@@ -25,14 +15,12 @@ body {
     max-height: 99vh;
     min-height: 99vh;
     border-right: 2px solid #185598;
-    margin-top: 8px;
 }
-
 #rightDiv {
-    float: left;
-    margin-left: 10px;
-    max-width: 60vw;
-    height:100vh;
+    max-height: 99vh;
+    min-height: 99vh;
+    overflow-y: auto;
+    height: 100%;
 }
 
 #jobName {
@@ -209,28 +197,6 @@ body {
     background: #cab;
 }
 
-/* job summary */
-g.type-TK > rect {
-    fill: #00ffd0;
-}
-
-text {
-    font-weight: 300;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
-    font-size: 14px;
-}
-
-.node rect {
-    stroke: #999;
-    fill: #fff;
-    stroke-width: 1.5px;
-}
-
-.edgePath path {
-    stroke: #333;
-    stroke-width: 1.5px;
-}
-/* end job details*/
 ul li {
     font-size: 12px;
 }
