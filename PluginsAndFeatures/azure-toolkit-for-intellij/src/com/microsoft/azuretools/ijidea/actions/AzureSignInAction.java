@@ -48,7 +48,8 @@ public class AzureSignInAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-        onAzureSignIn(e);
+        Project project = DataKeys.PROJECT.getData(e.getDataContext());
+        onAzureSignIn(project);
     }
 
     @Override
@@ -66,8 +67,7 @@ public class AzureSignInAction extends AnAction {
         }
     }
 
-    public static void onAzureSignIn(AnActionEvent e) {
-        Project project = DataKeys.PROJECT.getData(e.getDataContext());
+    public static void onAzureSignIn(Project project) {
         JFrame frame = WindowManager.getInstance().getFrame(project);
         try {
             AuthMethodManager authMethodManager = AuthMethodManager.getInstance();

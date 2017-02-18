@@ -22,22 +22,22 @@
 package com.microsoft.intellij.serviceexplorer.azure;
 
 import com.intellij.openapi.project.Project;
-import com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction;
+import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 
-@Name("Select Subscriptions")
-public class ManageSubscriptionsAction extends NodeActionListener {
+@Name("Sign In/Out")
+public class SignInOutAction extends NodeActionListener {
     private AzureModule azureModule;
 
-    public ManageSubscriptionsAction(AzureModule azureModule) {
+    public SignInOutAction(AzureModule azureModule) {
         this.azureModule = azureModule;
     }
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        SelectSubscriptionsAction.onShowSubscriptions((Project) azureModule.getProject());
+        AzureSignInAction.onAzureSignIn((Project) azureModule.getProject());
     }
 }
