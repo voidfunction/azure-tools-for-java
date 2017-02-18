@@ -27,6 +27,7 @@ import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -42,21 +43,31 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
     }
 
     @Override
-    public synchronized void setSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws Exception {
-        saveSubscriptions(subscriptionDetails);
+    public void setSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws Exception {
+        System.out.println(Thread.currentThread().getId() + " SubscriptionManagerPersist.setSubscriptionDetails()");
+        synchronized (this) {
+            saveSubscriptions(subscriptionDetails);
+        }
         super.setSubscriptionDetails(subscriptionDetails);
     }
 
     @Override
-    protected void updateAccountSubscriptionList() throws Exception {
-        loadSubscriptions();
-        if (subscriptionDetails.isEmpty()) {
-            super.updateAccountSubscriptionList();
+    protected List<SubscriptionDetail> updateAccountSubscriptionList() throws Exception {
+        System.out.println(Thread.currentThread().getId() + " SubscriptionManagerPersist.updateAccountSubscriptionList()");
+        List<SubscriptionDetail> sdl = null;
+        synchronized (this) {
+            sdl = loadSubscriptions();
         }
+
+        if (sdl == null) {
+            return super.updateAccountSubscriptionList();
+        }
+        return sdl;
     }
 
     @Override
     public synchronized void cleanSubscriptions() throws Exception {
+        System.out.println(Thread.currentThread().getId() + " SubscriptionManagerPersist.cleanSubscriptions()");
         String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
         deleteSubscriptions(subscriptionsDetailsFileName);
         super.cleanSubscriptions();
@@ -70,8 +81,8 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
 
     }
 
-    private void loadSubscriptions() throws Exception {
-        System.out.println("loadSubscriptions()");
+    private List<SubscriptionDetail> loadSubscriptions() throws Exception {
+        System.out.println("SubscriptionManagerPersist.loadSubscriptions()");
         String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
         subscriptionDetails.clear();
         FileStorage subscriptionsDetailsFileStorage = new FileStorage(subscriptionsDetailsFileName, CommonSettings.settingsBaseDir);
@@ -79,16 +90,17 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
         String json = new String(data);
         if (json.isEmpty()) {
             System.out.println(subscriptionsDetailsFileName + " file is empty");
-            return;
+            return null;
         }
         SubscriptionDetail[] sdl = JsonHelper.deserialize(SubscriptionDetail[].class, json);
-        for(SubscriptionDetail sd : sdl) {
-            subscriptionDetails.add(sd);
-        }
+        return Arrays.asList(sdl);
+//        for(SubscriptionDetail sd : sdl) {
+//            subscriptionDetails.add(sd);
+//        }
     }
 
     private void saveSubscriptions(List<SubscriptionDetail> sdl) throws Exception {
-        System.out.println("saveSubscriptions()");
+        System.out.println("SubscriptionManagerPersist.saveSubscriptions()");
         String sd = JsonHelper.serialize(subscriptionDetails);
         String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
         FileStorage subscriptionsDetailsFileStorage = new FileStorage(subscriptionsDetailsFileName, CommonSettings.settingsBaseDir);

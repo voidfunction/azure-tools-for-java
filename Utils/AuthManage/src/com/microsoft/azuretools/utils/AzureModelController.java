@@ -36,7 +36,6 @@ import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,7 +66,7 @@ public class AzureModelController {
 
                     @Override
                     public String getName() {
-                        return "Updating Azure Local Cache...";
+                        return "Update Azure Local Cache Progress";
                     }
                 });
             } catch (Exception e) {
@@ -86,6 +85,7 @@ public class AzureModelController {
     }
 
     private static void subscriptionSelectionChanged(IProgressIndicator progressIndicator) throws Exception {
+        System.out.println("AzureModelController.subscriptionSelectionChanged: starting");
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         // not signed in
         if (azureManager == null) {
@@ -108,7 +108,7 @@ public class AzureModelController {
         Map<ResourceGroup, List<WebApp>> rgwaMap = azureModel.getResourceGroupToWebAppMap();
         Map<ResourceGroup, List<AppServicePlan>> rgspMap = azureModel.getResourceGroupToAppServicePlanMap();
 
-
+        System.out.println("AzureModelController.subscriptionSelectionChanged: getting subscription details...");
         List<SubscriptionDetail> sdl = subscriptionManager.getSubscriptionDetails();
         for (SubscriptionDetail sd : sdl) {
             if (!srgMap.containsKey(sd)) {
