@@ -51,6 +51,8 @@ import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.azuretools.utils.WebAppUtils;
+import com.microsoft.intellij.deploy.DeploymentManager;
+import com.microsoft.windowsazure.core.OperationStatus;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,9 +65,12 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.text.html.HTMLDocument;
 import java.awt.*;
 import java.net.URI;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class WebAppDeployDialog extends DialogWrapper {
     private static final Logger LOGGER = Logger.getInstance(WebAppDeployDialog.class);
@@ -493,17 +498,21 @@ public class WebAppDeployDialog extends DialogWrapper {
         WebAppDetails wad = webAppWebAppDetailsMap.get(tableModel.getValueAt(selectedRow, 0));
         WebApp webApp = wad.webApp;
         boolean isDeployToRoot = deployToRootCheckBox.isSelected();
-        ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Deploy Web App Progress", true) {
+        DeploymentManager deploymentManager = new DeploymentManager(module.getProject());
+        ProgressManager.getInstance().run(new Task.Backgroundable(module.getProject(), "Deploy Web App Progress", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
                 try {
                     progressIndicator.setIndeterminate(true);
                     PublishingProfile pp = webApp.getPublishingProfile();
+                    Date startDate = new Date();
+                    deploymentManager.notifyProgress(webApp.name(), startDate, null, 5, OperationStatus.InProgress, "Deploying Web App");
                     WebAppUtils.deployArtifact(artifact.getName(), artifact.getOutputFilePath(),
                             pp, isDeployToRoot, new UpdateProgressIndicator(progressIndicator));
                     String sitePath = buildSiteLink(wad.webApp, artifact.getName());
                     progressIndicator.setText("Checking the web app is available...");
                     progressIndicator.setText2("Link: " + sitePath);
+                    deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 45, OperationStatus.InProgress, "Checking the web app is available...");
 
                     // to make warn up cancelable
                     Thread thread = new Thread(new Runnable() {
@@ -530,6 +539,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                         if (progressIndicator.isCanceled()) return;
                         else Thread.sleep(2000);
                     }
+                    deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 50, OperationStatus.Succeeded, message("runStatus"));
                     showLink(sitePath);
                 } catch (Exception ex) {
                     ex.printStackTrace();

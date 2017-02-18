@@ -27,12 +27,17 @@ import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
 import com.microsoft.azure.hdinsight.serverexplore.action.AddNewClusterAction;
 import com.microsoft.azure.hdinsight.serverexplore.action.AddNewEmulatorAction;
 import com.microsoft.intellij.serviceexplorer.azure.ManageSubscriptionsAction;
+import com.microsoft.intellij.serviceexplorer.azure.SignInOutAction;
 import com.microsoft.intellij.serviceexplorer.azure.docker.DeleteDockerHostAction;
+import com.microsoft.intellij.serviceexplorer.azure.docker.DeployDockerContainerAction;
+import com.microsoft.intellij.serviceexplorer.azure.docker.PublishDockerContainerAction;
+import com.microsoft.intellij.serviceexplorer.azure.docker.ViewDockerHostAction;
 import com.microsoft.intellij.serviceexplorer.azure.storage.*;
 import com.microsoft.intellij.serviceexplorer.azure.webapps.OpenWebappAction;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
@@ -46,7 +51,7 @@ public class NodeActionsMap {
             new HashMap<Class<? extends Node>, ImmutableList<Class<? extends NodeActionListener>>>();
 
     static {
-        node2Actions.put(AzureModule.class, new ImmutableList.Builder().add(ManageSubscriptionsAction.class).build());
+        node2Actions.put(AzureModule.class, new ImmutableList.Builder().add(SignInOutAction.class, ManageSubscriptionsAction.class).build());
         node2Actions.put(VMArmModule.class, new ImmutableList.Builder().add(com.microsoft.intellij.serviceexplorer.azure.vmarm.CreateVMAction.class).build());
         node2Actions.put(QueueModule.class, new ImmutableList.Builder().add(CreateQueueAction.class).build());
         node2Actions.put(TableModule.class, new ImmutableList.Builder().add(com.microsoft.intellij.serviceexplorer.azure.storage.CreateTableAction.class).build());
@@ -57,6 +62,7 @@ public class NodeActionsMap {
         node2Actions.put(ExternalStorageNode.class, new ImmutableList.Builder().add(ConfirmDialogAction.class, ModifyExternalStorageAccountAction.class).build());
         node2Actions.put(WebappNode.class, new ImmutableList.Builder().add(OpenWebappAction.class).build());
         node2Actions.put(HDInsightRootModuleImpl.class, new ImmutableList.Builder().add(AddNewClusterAction.class, AddNewEmulatorAction.class).build());
-        node2Actions.put(DockerHostNode.class, new ImmutableList.Builder().add(DeleteDockerHostAction.class).build());
+        node2Actions.put(DockerHostNode.class, new ImmutableList.Builder().add(ViewDockerHostAction.class, DeployDockerContainerAction.class, DeleteDockerHostAction.class).build());
+        node2Actions.put(DockerHostModule.class, new ImmutableList.Builder().add(PublishDockerContainerAction.class).build());
     }
 }

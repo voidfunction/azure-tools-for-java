@@ -565,7 +565,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       }
 
       // Add "@resourceGroupName" to mark this as an existing virtual network
-      newHost.hostVM.vmSize = vnet.name + "@" + vnet.resourceGroup;
+      newHost.hostVM.vnetName = vnet.name + "@" + vnet.resourceGroup;
       newHost.hostVM.vnetAddressSpace = vnet.addrSpace;
       newHost.hostVM.subnetName = subnet;
     }

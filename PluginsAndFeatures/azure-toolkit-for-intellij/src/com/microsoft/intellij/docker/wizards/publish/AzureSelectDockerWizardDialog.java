@@ -41,6 +41,8 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
     this.model = model;
     model.setSelectDockerWizardDialog(this);
     onCreate = null;
+
+    setTitle("New Deployment of a Docker Container on Azure");
   }
 
   @Override

@@ -19,25 +19,27 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.intellij.serviceexplorer.azure;
+package com.microsoft.intellij.serviceexplorer.azure.docker;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction;
+import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostModule;
 
-@Name("Select Subscriptions")
-public class ManageSubscriptionsAction extends NodeActionListener {
-    private AzureModule azureModule;
+@Name("Publish")
+public class PublishDockerContainerAction extends NodeActionListener {
+  private static final Logger LOGGER = Logger.getInstance(PublishDockerContainerAction.class);
+  Project project;
 
-    public ManageSubscriptionsAction(AzureModule azureModule) {
-        this.azureModule = azureModule;
-    }
+  public PublishDockerContainerAction(DockerHostModule dockerHostModule) {
+    this.project = (Project) dockerHostModule.getProject();
+  }
 
-    @Override
-    public void actionPerformed(NodeActionEvent e) {
-        SelectSubscriptionsAction.onShowSubscriptions((Project) azureModule.getProject());
-    }
+  @Override
+  public void actionPerformed(NodeActionEvent e) {
+    AzureDockerUIResources.publish2DockerHostContainer(project);
+  }
 }

@@ -83,7 +83,6 @@ public class AzureDockerHostDeployAction extends AnAction {
         }
       }
 
-
       AzureDockerImageInstance dockerImageDescription = new AzureDockerImageInstance();
       dockerImageDescription.dockerImageName = AzureDockerUtils.getDefaultDockerImageName(project.getName()).toLowerCase();
       dockerImageDescription.dockerContainerName = AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName);
@@ -93,7 +92,6 @@ public class AzureDockerHostDeployAction extends AnAction {
 
       AzureSelectDockerWizardModel model = new AzureSelectDockerWizardModel(project, dockerManager, dockerImageDescription);
       AzureSelectDockerWizardDialog wizard = new AzureSelectDockerWizardDialog(model);
-      wizard.setTitle("New Deployment of a Docker Container on Azure");
       wizard.show();
 
       if (wizard.getExitCode() == DialogWrapper.OK_EXIT_CODE) {

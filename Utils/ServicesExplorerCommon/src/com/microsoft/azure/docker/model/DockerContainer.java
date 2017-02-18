@@ -24,5 +24,12 @@ package com.microsoft.azure.docker.model;
 public class DockerContainer {
   public String name;
   public String id;
-  public String portSettings;
+  public String status;
+  public String ports;
+  public String image;
+  public String command;
+  public String size;
+  public String dockerHostApiUrl;
+  public boolean isRunning;
+  public String url;
 }

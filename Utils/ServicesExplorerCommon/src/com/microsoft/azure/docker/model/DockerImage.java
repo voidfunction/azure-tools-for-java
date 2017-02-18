@@ -27,9 +27,11 @@ import java.util.Map;
 public class DockerImage {
   public String name;
   public String id;
+  public String size;            // size of the image
+  public String artifactFile;    // .war or .jar output file representing the application to be deployed and run
   public String repository;
   public String tag;
-  public long virtualSize;
+  public boolean isPluginImage;  // true if the image was generated via the Azure Plugin
   public String artifactPath;    // .war or .jar output file path representing the application to be deployed and run
   public String ports;           // container᾿s port or a range of ports to the dockerHost to be published (i.e. "1234-1236:1234-1236/tcp")
   public String dockerfile;      // Dockerfile input from which the image will be created
@@ -44,7 +46,7 @@ public class DockerImage {
 
   public Map<String, DockerContainer> containers; // map of all Docker containers for this image
 
-  public DockerHost dockerHost;  // parent Docker dockerHost
+  public String dockerHostApiUrl; // parent Docker dockerHost
 
   public DockerImage() {}
 
@@ -53,7 +55,7 @@ public class DockerImage {
     this.artifactPath = dockerImageInstance.artifactPath;
     this.dockerfile = dockerImageInstance.dockerfileContent;
     this.ports = dockerImageInstance.dockerPortSettings;
-    this.dockerHost = dockerImageInstance.host;
+    this.dockerHostApiUrl = dockerImageInstance.host.apiUrl;
   }
 
   public DockerImage(String name, String customContent, String ports, String artifactPath) {

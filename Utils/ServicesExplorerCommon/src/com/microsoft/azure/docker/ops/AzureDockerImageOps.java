@@ -21,63 +21,43 @@
  */
 package com.microsoft.azure.docker.ops;
 
+import com.fasterxml.jackson.databind.*;
 import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.model.AzureDockerException;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.model.DockerImage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.DEBUG;
 import static com.microsoft.azure.docker.ops.utils.AzureDockerVMSetupScriptsForUbuntu.DEFAULT_DOCKER_IMAGES_DIRECTORY;
 
 public class AzureDockerImageOps {
 
-  public static void delete(DockerImage dockerImage) {
-    try {
-    } catch (Exception e) {
-      throw new AzureDockerException(e.getMessage(), e);
-    }
-  }
-
   public static void delete(DockerImage dockerImage, Session session) {
-    if (dockerImage == null || dockerImage.dockerHost == null || (session == null && dockerImage.dockerHost.session == null)) {
-      throw new AzureDockerException("Unexpected param values; dockerImageInstance, Docker dockerHost and login session cannot be null");
+    if (dockerImage == null || session == null) {
+      throw new AzureDockerException("Unexpected param values; dockerImage and login session cannot be null");
     }
-
-    if (session == null) session = dockerImage.dockerHost.session;
 
     try {
       if (!session.isConnected()) session.connect();
 
       AzureDockerVMOps.waitForDockerDaemonStartup(session);
 
-      if (DEBUG) System.out.println("Start executing docker rmi " + dockerImage.name);
+      if (DEBUG) System.out.format("Start executing docker rmi %s\n", dockerImage.name);
       String cmdOut1 = AzureDockerSSHOps.executeCommand("docker rmi " + dockerImage.name, session, true);
       if (DEBUG) System.out.println(cmdOut1);
-      if (DEBUG) System.out.println("Done executing docker rmi " + dockerImage.name);
-    } catch (Exception e) {
-      throw new AzureDockerException(e.getMessage(), e);
-    }
-  }
-
-  public static DockerImage create(DockerImage dockerImage) {
-    try {
-      return null;
+      if (DEBUG) System.out.format("Done executing docker rmi %s\n", dockerImage.name);
     } catch (Exception e) {
       throw new AzureDockerException(e.getMessage(), e);
     }
   }
 
   public static DockerImage create(DockerImage dockerImage, Session session) {
-    if (dockerImage == null || dockerImage.dockerHost == null || (session == null && dockerImage.dockerHost.session == null)) {
-      throw new AzureDockerException("Unexpected param values; dockerImageInstance, Docker dockerHost and login session cannot be null");
+    if (dockerImage == null || session == null) {
+      throw new AzureDockerException("Unexpected param values; dockerImage and login session cannot be null");
     }
-
-    if (session == null) session = dockerImage.dockerHost.session;
 
     try {
       if (!session.isConnected()) session.connect();
@@ -86,26 +66,22 @@ public class AzureDockerImageOps {
 
       String dockerImageDir = DEFAULT_DOCKER_IMAGES_DIRECTORY + "/" + dockerImage.name;
       String cmd1 = String.format("docker build -t %s -f %s/Dockerfile %s/ \n", dockerImage.name, dockerImageDir, dockerImageDir);
-      if (DEBUG) System.out.format("Start executing: %s", cmd1);
+      if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
       String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
       if (DEBUG) System.out.println(cmdOut1);
-      if (DEBUG) System.out.format("Done executing: %s", cmd1);
+      if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
 
       // docker images ubuntu --format "{ \"id\": \"{{.ID}}\", \"name\": \"{{.Repository}} }\""
       // Getting the image ID
       String cmd2 = String.format("docker images %s --format {{.ID}} \n", dockerImage.name);
-      if (DEBUG) System.out.format("Start executing: %s", cmd2);
+      if (DEBUG) System.out.format("Start executing: %s\n", cmd2);
       String cmdOut2 = AzureDockerSSHOps.executeCommand(cmd2, session, true);
       if (DEBUG) System.out.println(cmdOut1);
-      if (DEBUG) System.out.format("Done executing: %s", cmd2);
+      if (DEBUG) System.out.format("Done executing: %s\n", cmd2);
       dockerImage.id = cmdOut2.trim();
 
-      // add the image to the Docker dockerHost list of Docker images
-      if (dockerImage.dockerHost.dockerImages == null) {
-        dockerImage.dockerHost.dockerImages = new HashMap<>();
-      }
-      dockerImage.dockerHost.dockerImages.put(dockerImage.name, dockerImage);
       dockerImage.remotePath = dockerImageDir;
+      dockerImage.isPluginImage = true;
 
       return dockerImage;
     } catch (Exception e) {
@@ -119,26 +95,22 @@ public class AzureDockerImageOps {
     }
 
     DockerImage dockerImage = AzureDockerImageOps.create(new DockerImage(dockerImageInstance), session);
+    // add the image to the Docker dockerHost list of Docker images
+    if (dockerImageInstance.host.dockerImages == null) {
+      dockerImageInstance.host.dockerImages = new HashMap<>();
+    }
+    dockerImageInstance.host.dockerImages.put(dockerImage.name, dockerImage);
+
     dockerImageInstance.id = dockerImage.id;
     dockerImageInstance.remotePath = dockerImage.remotePath;
 
     return dockerImageInstance;
   }
 
-  public static DockerImage get(DockerImage dockerImage) {
-    try {
-      return null;
-    } catch (Exception e) {
-      throw new AzureDockerException(e.getMessage(), e);
-    }
-  }
-
   public static DockerImage get(DockerImage dockerImage, Session session) {
-    if (dockerImage == null || dockerImage.dockerHost == null || (session == null && dockerImage.dockerHost.session == null)) {
-      throw new AzureDockerException("Unexpected param values; dockerImageInstance, Docker dockerHost and login session cannot be null");
+    if (dockerImage == null || session == null) {
+      throw new AzureDockerException("Unexpected param values; dockerImage and login session cannot be null");
     }
-
-    if (session == null) session = dockerImage.dockerHost.session;
 
     try {
       if (!session.isConnected()) session.connect();
@@ -149,20 +121,10 @@ public class AzureDockerImageOps {
     }
   }
 
-  public static String getDetails(DockerImage dockerImage) {
-    try {
-      return null;
-    } catch (Exception e) {
-      throw new AzureDockerException(e.getMessage(), e);
-    }
-  }
-
   public static String getDetails(DockerImage dockerImage, Session session) {
-    if (dockerImage == null || dockerImage.dockerHost == null || (session == null && dockerImage.dockerHost.session == null)) {
-      throw new AzureDockerException("Unexpected param values; dockerImageInstance, Docker dockerHost and login session cannot be null");
+    if (dockerImage == null || session == null) {
+      throw new AzureDockerException("Unexpected param values; dockerImage and login session cannot be null");
     }
-
-    if (session == null) session = dockerImage.dockerHost.session;
 
     try {
       if (!session.isConnected()) session.connect();
@@ -187,16 +149,78 @@ public class AzureDockerImageOps {
 
       AzureDockerVMOps.waitForDockerDaemonStartup(dockerHost.session);
 
-//      String cmd1 = String.format("docker inspect %s \n", dockerContainer.dockerContainerName);
-//      if (DEBUG) System.out.format("Start executing: %s", cmd1);
-//      String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, false);
-//      if (DEBUG) System.out.println(cmdOut1);
-//      if (DEBUG) System.out.format("Done executing: %s", cmd1);
+      ObjectMapper mapper = new ObjectMapper()
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+          .configure(SerializationFeature.INDENT_OUTPUT, true);
 
-      return null;
+      // list all the Docker images on the Docker host
+      String cmd1 = String.format("docker images -a --format \"{ \\\"name\\\" : \\\"{{.Repository}}\\\", \\\"id\\\" : \\\"{{.ID}}\\\", \\\"size\\\" : \\\"{{.Size}}\\\" }\"");
+      if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
+      String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, dockerHost.session, false);
+      if (DEBUG) System.out.println(cmdOut1);
+      if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
+      String jsonAllImages = cmdOut1;
+
+      // list all the Azure Plugin images
+      cmd1 = String.format("cd %s/ && ls -1 -d */ && cd ~", DEFAULT_DOCKER_IMAGES_DIRECTORY);
+      if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
+      cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, dockerHost.session, false);
+      if (DEBUG) System.out.println(cmdOut1);
+      if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
+      String pluginImages = cmdOut1;
+
+      Scanner lines = new Scanner(jsonAllImages);
+      while (lines.hasNextLine()) {
+        String currentLine = lines.nextLine();
+        try {
+          DockerImageRawInfo rawImage = mapper.readValue(currentLine, DockerImageRawInfo.class);
+          DockerImage dockerImage = new DockerImage();
+          dockerImage.name = rawImage.name;
+          dockerImage.id = rawImage.id;
+          dockerImage.size = rawImage.size;
+          dockerImage.dockerHostApiUrl = dockerHost.apiUrl;
+          dockerImage.containers = new HashMap<>();
+          dockerImageMap.put(dockerImage.name, dockerImage);
+        } catch (Exception ee){}
+      }
+      lines.close();
+
+      lines = new Scanner(pluginImages);
+      while (lines.hasNextLine()) {
+        String currentLine = lines.nextLine();
+        try {
+          DockerImage dockerImage = dockerImageMap.get(currentLine.split("/")[0]);
+          if (dockerImage != null) {
+            // found an image that was created by the Azure Plugin
+            dockerImage.remotePath = DEFAULT_DOCKER_IMAGES_DIRECTORY + "/" + dockerImage.name;
+            dockerImage.isPluginImage = true;
+            if (DEBUG) System.out.println("Start downloading the Dockerfile content");
+            dockerImage.dockerfile = AzureDockerSSHOps.download(dockerHost.session, "Dockerfile", dockerImage.remotePath.substring(2), true);
+            if (DEBUG) System.out.println("Done downloading the Dockerfile content");
+            // list the .WAR or .JAR artifact
+            cmd1 = String.format("cd %s/ && ls -1 *.?ar && cd ~", dockerImage.remotePath);
+            if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
+            cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, dockerHost.session, false);
+            if (DEBUG) System.out.println(cmdOut1);
+            if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
+            dockerImage.artifactFile = cmdOut1.trim();
+          }
+        } catch (Exception ee){}
+      }
+      lines.close();
+
+      return dockerImageMap;
     } catch (Exception e) {
       throw new AzureDockerException(e.getMessage(), e);
     }
   }
+
+  public static class DockerImageRawInfo {
+    public String name;
+    public String id;
+    public String size;
+  }
+
+
 
 }
