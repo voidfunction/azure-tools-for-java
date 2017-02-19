@@ -27,6 +27,7 @@ import com.intellij.ui.wizard.WizardStep;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.*;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.intellij.docker.utils.AzureDockerValidationUtils;
 import com.microsoft.intellij.docker.wizards.createhost.AzureNewDockerWizardModel;
@@ -108,7 +109,9 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
         AzureDockerSubscription currentSubscription = (AzureDockerSubscription) dockerSubscriptionComboBox.getSelectedItem();
         updateDockerLocationComboBox(currentSubscription);
         updateDockerHostSelectRGComboBox(currentSubscription);
-        updateDockerSelectVnetComboBox(currentSubscription, (String) dockerLocationComboBox.getSelectedItem());
+        String region = (String) dockerLocationComboBox.getSelectedItem();
+        Region regionObj = Region.findByLabelOrName(region);
+        updateDockerSelectVnetComboBox( currentSubscription, regionObj != null ? regionObj.name() : region);
         updateDockerSelectStorageComboBox(currentSubscription);
       }
     });
@@ -130,17 +133,23 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       public void actionPerformed(ActionEvent e) {
         AzureDockerSubscription currentSubscription = (AzureDockerSubscription) dockerSubscriptionComboBox.getSelectedItem();
         updateDockerHostSelectRGComboBox(currentSubscription);
-        updateDockerSelectVnetComboBox( currentSubscription, (String) dockerLocationComboBox.getSelectedItem());
+        String region = (String) dockerLocationComboBox.getSelectedItem();
+        Region regionObj = Region.findByLabelOrName(region);
+        updateDockerSelectVnetComboBox( currentSubscription, regionObj != null ? regionObj.name() : region);
       }
     });
   }
 
   private void updateDockerLocationComboBox(AzureDockerSubscription currentSubscription) {
     if (currentSubscription != null && currentSubscription.locations != null) {
-      DefaultComboBoxModel<String> dockerLocationComboModel = new DefaultComboBoxModel<>(new Vector<String>(currentSubscription.locations));
+      DefaultComboBoxModel<String> dockerLocationComboModel = new DefaultComboBoxModel<>(); //new Vector<String>(currentSubscription.locations));
+      for (String region : currentSubscription.locations) {
+        Region regionObj = Region.findByLabelOrName(region);
+        dockerLocationComboModel.addElement(regionObj != null ? regionObj.label() : region);
+      }
       dockerLocationComboBox.setModel(dockerLocationComboModel);
       try {
-        dockerLocationComboModel.setSelectedItem("centralus");
+        dockerLocationComboModel.setSelectedItem("Central US");
       } catch (Exception e) {}
     }
   }
@@ -294,20 +303,25 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
     dockerHostSelectVnetComboBox.setEnabled(false);
     dockerHostSelectSubnetComboBox.setEnabled(false);
 
-    updateDockerSelectVnetComboBox((AzureDockerSubscription) dockerSubscriptionComboBox.getSelectedItem(), (String) dockerLocationComboBox.getSelectedItem());
+    String region = (String) dockerLocationComboBox.getSelectedItem();
+    Region regionObj = Region.findByLabelOrName(region);
+    AzureDockerSubscription currentSubscription = (AzureDockerSubscription) dockerSubscriptionComboBox.getSelectedItem();
+    updateDockerSelectVnetComboBox( currentSubscription, regionObj != null ? regionObj.name() : region);
   }
 
   private void updateDockerSelectVnetComboBox(AzureDockerSubscription subscription, String region) {
     List<AzureDockerVnet> dockerVnets = dockerManager.getNetworksAndSubnets(subscription);
     DefaultComboBoxModel<AzureDockerVnet> dockerHostSelectVnetComboModel = new DefaultComboBoxModel<>();
     for (AzureDockerVnet vnet : dockerVnets) {
-      if (vnet.region.equals(region)) {
+      if (region != null && vnet.region.equals(region)) {
         dockerHostSelectVnetComboModel.addElement(vnet);
       }
     }
     dockerHostSelectVnetComboBox.setModel(dockerHostSelectVnetComboModel);
     if (dockerHostSelectVnetComboModel.getSize() > 0) {
       updateDockerSelectSubnetComboBox(dockerHostSelectVnetComboModel.getElementAt(0));
+    } else {
+      updateDockerSelectSubnetComboBox(null);
     }
   }
 

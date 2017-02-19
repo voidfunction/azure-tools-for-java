@@ -83,6 +83,11 @@ public class AzureDockerHostDeployAction extends AnAction {
         }
       }
 
+      if (dockerManager.getSubscriptionsMap().isEmpty()) {
+        PluginUtil.displayErrorDialog("Publish Docker Container", "Must select an Azure subscription first");
+        return;
+      }
+
       AzureDockerImageInstance dockerImageDescription = new AzureDockerImageInstance();
       dockerImageDescription.dockerImageName = AzureDockerUtils.getDefaultDockerImageName(project.getName()).toLowerCase();
       dockerImageDescription.dockerContainerName = AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName);
