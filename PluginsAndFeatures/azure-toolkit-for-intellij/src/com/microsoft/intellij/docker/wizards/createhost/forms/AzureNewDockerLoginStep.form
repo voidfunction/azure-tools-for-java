@@ -31,7 +31,7 @@
       </component>
       <tabbedpane id="f2c26" binding="credsTabbedPane">
         <constraints>
-          <grid row="3" column="1" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="2" use-parent-layout="false">
+          <grid row="3" column="1" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="2" use-parent-layout="false">
             <preferred-size width="200" height="200"/>
           </grid>
         </constraints>
@@ -334,6 +334,16 @@
         <properties>
           <font style="1"/>
           <foreground color="-1048576"/>
+          <text value="!"/>
+        </properties>
+      </component>
+      <component id="7f5fb" class="javax.swing.JLabel" binding="dockerHostImportKeyvaultComboLabel">
+        <constraints>
+          <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <font style="1"/>
+          <foreground color="-65536"/>
           <text value="!"/>
         </properties>
       </component>

@@ -84,13 +84,13 @@ public class AzureDockerUtils {
     return String.format("%s%d", "mydocker", new Random().nextInt(1000000));
   }
 
-  public final static int MAX_RESOURCE_LENGTH = 30;
+  public final static int MAX_RESOURCE_LENGTH = 16;
 
   public static String getDefaultRandomName(String namePrefix) {
     if (namePrefix.length() > MAX_RESOURCE_LENGTH) {
-      return String.format("%s%d", namePrefix.substring(0, MAX_RESOURCE_LENGTH), new Random().nextInt(1000000));
+      return String.format("%s%d", namePrefix.substring(0, MAX_RESOURCE_LENGTH).toLowerCase(), new Random().nextInt(1000000));
     } else {
-      return String.format("%s%d", namePrefix, new Random().nextInt(1000000));
+      return String.format("%s%d", namePrefix.toLowerCase(), new Random().nextInt(1000000));
     }
   }
 
@@ -107,7 +107,7 @@ public class AzureDockerUtils {
   }
 
   public static String getDefaultName(String projectName) {
-    return projectName.replaceAll("[^a-z0-9]", "");
+    return projectName.toLowerCase().replaceAll("[^a-z0-9]", "");
   }
 
   public static String getDefaultDockerImageName(String projectName) {
@@ -115,7 +115,7 @@ public class AzureDockerUtils {
   }
 
   public static String getDefaultDockerContainerName(String imageName) {
-    return String.format("%s-%d", imageName, new Random().nextInt(10000));
+    return String.format("%s-%d", imageName.toLowerCase(), new Random().nextInt(10000));
   }
 
   public static String getDefaultArtifactName(String projectName) {

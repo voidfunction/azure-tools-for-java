@@ -30,6 +30,7 @@ import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerCertVault;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
+import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.intellij.docker.utils.AzureDockerValidationUtils;
 import com.microsoft.intellij.docker.wizards.createhost.AzureNewDockerWizardModel;
 import com.microsoft.intellij.docker.wizards.createhost.AzureNewDockerWizardStep;
@@ -71,6 +72,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
   private JLabel dockerHostUsernameLabel;
   private JLabel dockerHostFirstPwdLabel;
   private JLabel dockerHostImportSSHBrowseLabel;
+  private JLabel dockerHostImportKeyvaultComboLabel;
 
   private AzureNewDockerWizardModel model;
   private AzureDockerHostsManager dockerManager;
@@ -185,6 +187,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
     dockerHostNewCredsRadioButton.setSelected(true);
     dockerHostImportKeyvaultComboBox.setEnabled(false);
     dockerHostImportKeyvaultComboBox.setModel(new DefaultComboBoxModel<AzureDockerCertVault>(new Vector<AzureDockerCertVault>(dockerManager.getDockerKeyVaults())));
+    dockerHostImportKeyvaultComboLabel.setVisible(false);
 
     groupSSH = new ButtonGroup();
     groupSSH.add(dockerHostNoSshRadioButton);
@@ -311,13 +314,14 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       // read key vault secrets and set the credentials for the new host
       AzureDockerCertVault certVault = (AzureDockerCertVault) dockerHostImportKeyvaultComboBox.getSelectedItem();
       if (certVault == null) {
-        ValidationInfo info = new ValidationInfo("Missing vault", model.getNewDockerWizardDialog().getContentPanel());
+        ValidationInfo info = AzureDockerUIResources.validateComponent("Missing vault", rootConfigureContainerPanel, dockerHostImportKeyvaultComboBox, dockerHostImportKeyvaultComboLabel);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
-        dockerHostImportKeyvaultComboBox.requestFocus();
         return info;
       }
+
+      dockerHostImportKeyvaultComboLabel.setVisible(false);
 
       newHost.certVault.name = certVault.name;
       newHost.certVault.resourceGroupName = certVault.resourceGroupName;
@@ -332,18 +336,16 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       newHost.certVault.hostName = null;
       newHost.hasKeyVault = true;
     } else {
+      dockerHostImportKeyvaultComboLabel.setVisible(false);
       // User name
       String vmUsername = dockerHostUsernameTextField.getText();
       if (vmUsername == null || vmUsername.isEmpty() ||
           !AzureDockerValidationUtils.validateDockerHostUserName(vmUsername))
       {
-        ValidationInfo info = new ValidationInfo("Missing username", model.getNewDockerWizardDialog().getContentPanel());
+        ValidationInfo info = AzureDockerUIResources.validateComponent("Missing username", vmCredsPanel, dockerHostUsernameTextField, dockerHostUsernameLabel);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
-        vmCredsPanel.requestFocus();
-        dockerHostUsernameTextField.requestFocus();
-        dockerHostUsernameLabel.setVisible(true);
         return info;
       }
       newHost.certVault.vmUsername = vmUsername;
@@ -356,13 +358,10 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
           (vmPwd1.isEmpty() || vmPwd2.isEmpty() || ! vmPwd1.equals(vmPwd2) ||
           !AzureDockerValidationUtils.validateDockerHostPassword(vmPwd1)))
       {
-        ValidationInfo info = new ValidationInfo("Incorrect password", model.getNewDockerWizardDialog().getContentPanel());
+        ValidationInfo info = AzureDockerUIResources.validateComponent("Incorrect password", vmCredsPanel, dockerHostFirstPwdField, dockerHostFirstPwdLabel);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
-        vmCredsPanel.requestFocus();
-        dockerHostFirstPwdField.requestFocus();
-        dockerHostFirstPwdLabel.setVisible(true);
         return info;
       }
       if (dockerHostFirstPwdField.getPassword().length > 0) {
@@ -384,13 +383,10 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       if (dockerHostImportSshRadioButton.isSelected()) {
         if (dockerHostImportSSHBrowseTextField.getText() == null || dockerHostImportSSHBrowseTextField.getText().isEmpty() ||
             !AzureDockerValidationUtils.validateDockerHostSshDirectory(dockerHostImportSSHBrowseTextField.getText())) {
-          ValidationInfo info = new ValidationInfo("SHH key files were not found in the selected directory", model.getNewDockerWizardDialog().getContentPanel());
+          ValidationInfo info = AzureDockerUIResources.validateComponent("SSH key files were not found in the selected directory", vmCredsPanel, dockerHostImportSSHBrowseTextField, dockerHostImportSSHBrowseLabel);
           if (shakeOnError) {
             model.DialogShaker(info);
           }
-          vmCredsPanel.requestFocus();
-          dockerHostImportSSHBrowseTextField.requestFocus();
-          dockerHostImportSSHBrowseLabel.setVisible(true);
           return info;
         } else {
           AzureDockerCertVault certVault = AzureDockerCertVaultOps.getSSHKeysFromLocalFile(dockerHostImportSSHBrowseTextField.getText());
@@ -415,13 +411,10 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       if (dockerHostImportTlsRadioButton.isSelected()) {
         if (dockerHostImportTLSBrowseTextField.getText() == null || dockerHostImportTLSBrowseTextField.getText().isEmpty() ||
             !AzureDockerValidationUtils.validateDockerHostTlsDirectory(dockerHostImportTLSBrowseTextField.getText())) {
-          ValidationInfo info = new ValidationInfo("SHH key files were not found in the selected directory", model.getNewDockerWizardDialog().getContentPanel());
+          ValidationInfo info = AzureDockerUIResources.validateComponent("TLS certificates files were not found in the selected directory", vmCredsPanel, dockerHostImportTLSBrowseTextField, dockerHostImportTLSBrowseLabel);
           if (shakeOnError) {
             model.DialogShaker(info);
           }
-          daemonCredsPanel.requestFocus();
-          dockerHostImportTLSBrowseTextField.requestFocus();
-          dockerHostImportTLSBrowseLabel.setVisible(true);
           return info;
         } else {
           AzureDockerCertVault certVault = AzureDockerCertVaultOps.getTLSCertsFromLocalFile(dockerHostImportTLSBrowseTextField.getText());
@@ -435,13 +428,10 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
     if (dockerDaemonPortTextField.getText() == null || dockerDaemonPortTextField.getText().isEmpty() ||
         !AzureDockerValidationUtils.validateDockerHostUserName(dockerDaemonPortTextField.getText()))
     {
-      ValidationInfo info = new ValidationInfo("Invalid Docker daemon port settings", model.getNewDockerWizardDialog().getContentPanel());
+      ValidationInfo info = AzureDockerUIResources.validateComponent("Invalid Docker daemon port settings", daemonCredsPanel, dockerDaemonPortTextField, dockerDaemonPortLabel);
       if (shakeOnError) {
         model.DialogShaker(info);
       }
-      daemonCredsPanel.requestFocus();
-      dockerDaemonPortTextField.requestFocus();
-      dockerDaemonPortLabel.setVisible(true);
       return info;
     }
     newHost.port = dockerDaemonPortTextField.getText();
@@ -450,12 +440,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
     if (dockerHostSaveCredsCheckBox.isSelected()) {
       if (dockerHostNewKeyvaultTextField.getText() == null || dockerHostNewKeyvaultTextField.getText().isEmpty() ||
           !AzureDockerValidationUtils.validateDockerHostKeyvaultName(dockerHostNewKeyvaultTextField.getText(), dockerManager)) {
-        ValidationInfo info = new ValidationInfo("Incorrect Azure Key Vault", model.getNewDockerWizardDialog().getContentPanel());
-        if (shakeOnError) {
-          model.DialogShaker(info);
-        }
-        dockerHostNewKeyvaultTextField.requestFocus();
-        dockerHostNewKeyvaultLabel.setVisible(true);
+        ValidationInfo info = AzureDockerUIResources.validateComponent("Incorrect Azure Key Vault", rootConfigureContainerPanel, dockerHostNewKeyvaultTextField, dockerHostNewKeyvaultLabel);
         return info;
       } else {
         newHost.hasKeyVault = true;

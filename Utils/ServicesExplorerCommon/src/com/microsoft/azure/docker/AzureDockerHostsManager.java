@@ -281,7 +281,7 @@ public class AzureDockerHostsManager {
     host.hostVM.vmSize = KnownDockerVirtualMachineSizes.Standard_DS2_v2.name();
     host.hostVM.region = "centralus";
     host.hostVM.resourceGroupName = name.toLowerCase() + "-rg";
-    host.hostVM.vnetName = name.toLowerCase() + "-vnet";
+    host.hostVM.vnetName = AzureDockerUtils.getDefaultRandomName(host.name, 20) + "-vnet";
     host.hostVM.vnetAddressSpace = "10.0.0.0/16";
     host.hostVM.subnetName = "subnet1";
     host.hostVM.publicIpName = name.toLowerCase() + "-pip";

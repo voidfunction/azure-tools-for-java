@@ -31,6 +31,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
@@ -286,5 +287,16 @@ public class AzureDockerUIResources {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public static ValidationInfo validateComponent(String msgErr, JPanel panel, JComponent component, JComponent componentLabel) {
+    panel.requestFocus();
+    component.requestFocus();
+    if (componentLabel != null) {
+      componentLabel.setVisible(true);
+    }
+    panel.repaint();
+    ValidationInfo info = new ValidationInfo(msgErr, component);
+    return info;
   }
 }

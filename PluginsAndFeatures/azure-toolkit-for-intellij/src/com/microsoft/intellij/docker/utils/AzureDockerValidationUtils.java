@@ -135,7 +135,7 @@ public class AzureDockerValidationUtils {
   }
 
   public static String getDockerHostStorageNameTip() {
-    return "User name should be 3 to 24 lowercase alphanumeric characters and it should be unique across all Azure domain (DNS like)";
+    return "Storage account name should be 3 to 24 lowercase alphanumeric characters and it should be unique across all Azure domain (DNS like)";
   }
 
   public static boolean validateDockerVnetName(String name) {
