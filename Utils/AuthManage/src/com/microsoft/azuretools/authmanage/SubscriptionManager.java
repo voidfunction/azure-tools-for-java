@@ -100,8 +100,10 @@ public class SubscriptionManager {
     public void cleanSubscriptions() throws Exception {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManager.cleanSubscriptions()");
         synchronized (this) {
-            subscriptionDetails.clear();
-            sidToTid.clear();
+            if (subscriptionDetails != null) {
+                subscriptionDetails.clear();
+                sidToTid.clear();
+            }
         }
         notifyAllListeners();
     }
