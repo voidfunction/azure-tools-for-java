@@ -160,6 +160,16 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
     }
 
+    protected static class NullLocationAdapter extends LocationAdapter {
+        public NullLocationAdapter() {
+            super(null);
+        }
+        @Override
+        public String toString() {
+            return "<select location>";
+        }
+    }
+
     public static AppServiceCreateDialog go(Module module){
         AppServiceCreateDialog d = new AppServiceCreateDialog(module);
         d.show();
@@ -470,6 +480,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
             List<Location> locl = sdlocMap.get(sd);
 
             DefaultComboBoxModel<LocationAdapter> cbModel = new DefaultComboBoxModel<LocationAdapter>();
+            cbModel.addElement(new NullLocationAdapter());
             for (Location l : locl) {
                 cbModel.addElement(new LocationAdapter(l));
             }
@@ -638,6 +649,12 @@ public class AppServiceCreateDialog extends DialogWrapper {
                         }
                     }
                 }
+            }
+            if (model.appServicePlanLocationCreateNew == null) {
+                return new ValidationInfo("Select a valid App Service Plan Location.", comboBoxAppServicePlanLocation);
+            }
+            if (model.appServicePricingTierCreateNew == null) {
+                return new ValidationInfo("Select a valid App Service Plan PricingTier.", comboBoxAppServicePlanPricingTier);
             }
         } else {
             if (model.appServicePlan == null ) {

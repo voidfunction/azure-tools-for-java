@@ -509,7 +509,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                     deploymentManager.notifyProgress(webApp.name(), startDate, null, 5, OperationStatus.InProgress, "Deploying Web App");
                     WebAppUtils.deployArtifact(artifact.getName(), artifact.getOutputFilePath(),
                             pp, isDeployToRoot, new UpdateProgressIndicator(progressIndicator));
-                    String sitePath = buildSiteLink(wad.webApp, artifact.getName());
+                    String sitePath = buildSiteLink(wad.webApp, isDeployToRoot ? null : artifact.getName());
                     progressIndicator.setText("Checking the web app is available...");
                     progressIndicator.setText2("Link: " + sitePath);
                     deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 45, OperationStatus.InProgress, "Checking the web app is available...");
