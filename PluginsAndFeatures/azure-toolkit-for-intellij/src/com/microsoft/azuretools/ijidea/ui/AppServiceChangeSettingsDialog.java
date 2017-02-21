@@ -104,7 +104,7 @@ public class AppServiceChangeSettingsDialog extends AppServiceCreateDialog {
 
         model.collectData();
 
-        ValidationInfo res = volidateJdkTab();
+        ValidationInfo res = validateJdkTab();
         if (res != null) return res;
 
         return super.superDoValidate();

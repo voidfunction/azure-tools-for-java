@@ -161,6 +161,10 @@ public class SignInWindow extends JDialog {
             }
         });
 
+        Font labelFont = UIManager.getFont("Label.font");
+        interactiveCommentTextPane.setFont(labelFont);
+        automatedCommentTextPane.setFont(labelFont);
+
         interactiveRadioButton.setSelected(true);
         onInteractiveRadioButton();
     }
