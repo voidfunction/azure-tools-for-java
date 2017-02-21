@@ -40,10 +40,10 @@ public class SubscriptionManager {
 
 
     // for user to select subscr to work with
-    protected List<SubscriptionDetail> subscriptionDetails = new LinkedList<>();
+    private List<SubscriptionDetail> subscriptionDetails;
 
     // to get tid for sid
-    protected Map<String, String> sidToTid = new HashMap<String, String>();
+    private Map<String, String> sidToTid = new HashMap<String, String>();
 
     public SubscriptionManager(AzureManager azureManager) {
         this.azureManager = azureManager;
@@ -51,18 +51,19 @@ public class SubscriptionManager {
 
     public synchronized List<SubscriptionDetail> getSubscriptionDetails() throws Exception {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManager.getSubscriptionDetails()");
-        if (subscriptionDetails.isEmpty()) {
+        if (subscriptionDetails == null) {
             List<SubscriptionDetail> sdl = updateAccountSubscriptionList();
-            if (sdl.isEmpty()) {
-                throw new AuthException("No subscription found in the account");
-            }
             doSetSubscriptionDetails(sdl);;
         }
         return subscriptionDetails;
     }
 
-    private synchronized void doSetSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) {
+    private synchronized void doSetSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws AuthException {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManager.doSetSubscriptionDetails()");
+        if (subscriptionDetails.isEmpty()) {
+            throw new AuthException("No subscription found in the account");
+        }
+
         this.subscriptionDetails = subscriptionDetails;
         updateSidToTidMap();
     }
@@ -87,21 +88,12 @@ public class SubscriptionManager {
 
     public synchronized String getSubscriptionTenant(String sid) throws Exception {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManager.getSubscriptionTenant()");
-//        if (!sidToTid.containsKey(sid)) {
-//            updateSidToTidMap();
-//            if (!sidToTid.containsKey(sid)) {
-//                throw new AuthException("sid was not found in the tenant: " +  sid);
-//            }
-//        }
         String tid = sidToTid.get(sid);
         return tid;
     }
 
     public synchronized Set<String> getAccountSidList() throws Exception {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManager.getAccountSidList()");
-//        if (sidToTid.isEmpty()) {
-//            updateSidToTidMap();
-//        }
         return sidToTid.keySet();
     }
 
@@ -114,7 +106,7 @@ public class SubscriptionManager {
         notifyAllListeners();
     }
 
-    protected void updateSidToTidMap() {
+    private void updateSidToTidMap() {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManager.updateSidToTidMap()");
         sidToTid.clear();
         for (SubscriptionDetail sd : subscriptionDetails) {
@@ -131,7 +123,7 @@ public class SubscriptionManager {
         }
 
         System.out.println("Getting subscription list from Azure");
-        List<SubscriptionDetail> sdl = new LinkedList<>();
+        List<SubscriptionDetail> sdl = new ArrayList<>();
         List<Pair<Subscription, Tenant>> stpl = azureManager.getSubscriptionsWithTenant();
         for (Pair<Subscription, Tenant> stp : stpl) {
             sdl.add(new SubscriptionDetail(

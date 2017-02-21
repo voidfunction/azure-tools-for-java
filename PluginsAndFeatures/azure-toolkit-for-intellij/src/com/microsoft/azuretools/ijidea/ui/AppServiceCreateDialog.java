@@ -667,7 +667,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
             }
         }
 
-        ValidationInfo res = volidateJdkTab();
+        ValidationInfo res = validateJdkTab();
         if (res != null) return res;
 
         return super.doValidate();
@@ -677,7 +677,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         return super.doValidate();
     }
 
-    protected ValidationInfo volidateJdkTab() {
+    protected ValidationInfo validateJdkTab() {
         try {
             switch (model.jdkTab) {
                 case Default:
@@ -717,8 +717,8 @@ public class AppServiceCreateDialog extends DialogWrapper {
                     break;
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            LOGGER.error("volidateJdkTab", ex);
+            //ex.printStackTrace();
+            LOGGER.error("validateJdkTab", ex);
             //ErrorWindow.show(ex.getMessage(), "Form Data Validation Error", this.contentPane);
             return new ValidationInfo("Url validation exception:" + ex.getMessage(), tabbedPaneJdk);
         }

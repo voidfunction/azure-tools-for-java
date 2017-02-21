@@ -22,6 +22,7 @@
 
 package com.microsoft.azuretools.authmanage;
 
+
 import com.microsoft.azuretools.adauth.JsonHelper;
 import com.microsoft.azuretools.adauth.StringUtils;
 import com.microsoft.azuretools.authmanage.interact.AuthMethod;
@@ -44,6 +45,7 @@ import java.util.Set;
  * Created by shch on 10/9/2016.
  */
 public class AuthMethodManager {
+
     private AuthMethodDetails authMethodDetails = null;
     private static AuthMethodManager instance = null;
     private AzureManager azureManager;
@@ -89,7 +91,8 @@ public class AuthMethodManager {
                 Path filePath = Paths.get(credFilePath);
                 if (!Files.exists(filePath)) {
                     INotification nw = CommonSettings.getUiFactory().getNotificationWindow();
-                    nw.deliver("Auth method is not set", "File doesn't exist: " + filePath.toString());
+                    nw.deliver("Credential File Error", "File doesn't exist: " + filePath.toString());
+                    cleanAll();
                     return null;
                 }
                 azureManager = new ServicePrincipalAzureManager(new File(credFilePath));
@@ -97,14 +100,18 @@ public class AuthMethodManager {
         return azureManager;
     }
 
-    public void cleanAll() throws Exception {
-        if (isSignedIn()) {
-        	azureManager.getSubscriptionManager().cleanSubscriptions();
-        	azureManager = null;
+    public void cleanAll() {
+        try {
+            if (azureManager != null) {
+                azureManager.getSubscriptionManager().cleanSubscriptions();
+                azureManager = null;
+            }
+            ServicePrincipalAzureManager.cleanPersist();
+            authMethodDetails.setAccountEmail(null);
+            authMethodDetails.setCredFilePath(null);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        ServicePrincipalAzureManager.cleanPersist();
-        authMethodDetails.setAccountEmail(null);
-        authMethodDetails.setCredFilePath(null);
     }
 
     public boolean isSignedIn() {
@@ -118,8 +125,8 @@ public class AuthMethodManager {
     public void setAuthMethodDetails(AuthMethodDetails authMethodDetails) throws Exception {
         cleanAll();
         this.authMethodDetails = authMethodDetails;
-        if (isSignedIn()) notifySignInEventListener();
         saveSettings();
+        if (isSignedIn()) notifySignInEventListener();
     }
 
     public AuthMethodDetails getAuthMethodDetails() {

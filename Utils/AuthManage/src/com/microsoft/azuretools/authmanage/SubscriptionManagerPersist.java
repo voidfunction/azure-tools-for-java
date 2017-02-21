@@ -27,6 +27,7 @@ import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,18 +36,16 @@ import java.util.List;
  */
 public class SubscriptionManagerPersist extends SubscriptionManager {
 
-//    private String subscriptionsDetailsFileName;
-
     public SubscriptionManagerPersist(AzureManager azureManager) {
         super(azureManager);
-        //this.subscriptionsDetailsFileName = subsriptionDetailsFilepath;
     }
 
     @Override
     public void setSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws Exception {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManagerPersist.setSubscriptionDetails()");
         synchronized (this) {
-            saveSubscriptions(subscriptionDetails);
+            String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
+            saveSubscriptions(subscriptionDetails, subscriptionsDetailsFileName);
         }
         super.setSubscriptionDetails(subscriptionDetails);
     }
@@ -56,7 +55,8 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManagerPersist.updateAccountSubscriptionList()");
         List<SubscriptionDetail> sdl = null;
         synchronized (this) {
-            sdl = loadSubscriptions();
+            String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
+            sdl = loadSubscriptions(subscriptionsDetailsFileName);
         }
 
         if (sdl == null) {
@@ -78,13 +78,12 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
         //String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
         FileStorage fs = new FileStorage(subscriptionsDetailsFileName, CommonSettings.settingsBaseDir);
         fs.cleanFile();
-
     }
 
-    private List<SubscriptionDetail> loadSubscriptions() throws Exception {
+    private static List<SubscriptionDetail> loadSubscriptions(String subscriptionsDetailsFileName) throws Exception {
         System.out.println("SubscriptionManagerPersist.loadSubscriptions()");
-        String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
-        subscriptionDetails.clear();
+
+        //subscriptionDetails.clear();
         FileStorage subscriptionsDetailsFileStorage = new FileStorage(subscriptionsDetailsFileName, CommonSettings.settingsBaseDir);
         byte[] data = subscriptionsDetailsFileStorage.read();
         String json = new String(data);
@@ -92,17 +91,18 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
             System.out.println(subscriptionsDetailsFileName + " file is empty");
             return null;
         }
-        SubscriptionDetail[] sdl = JsonHelper.deserialize(SubscriptionDetail[].class, json);
-        return Arrays.asList(sdl);
-//        for(SubscriptionDetail sd : sdl) {
-//            subscriptionDetails.add(sd);
-//        }
+        SubscriptionDetail[] sda = JsonHelper.deserialize(SubscriptionDetail[].class, json);
+        List<SubscriptionDetail> sdl = new ArrayList<>();
+        for (SubscriptionDetail sd : sda) {
+            sdl.add(sd);
+        }
+        return sdl;
     }
 
-    private void saveSubscriptions(List<SubscriptionDetail> sdl) throws Exception {
+    private static void saveSubscriptions(List<SubscriptionDetail> sdl, String subscriptionsDetailsFileName) throws Exception {
         System.out.println("SubscriptionManagerPersist.saveSubscriptions()");
-        String sd = JsonHelper.serialize(subscriptionDetails);
-        String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
+        String sd = JsonHelper.serialize(sdl);
+        //String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
         FileStorage subscriptionsDetailsFileStorage = new FileStorage(subscriptionsDetailsFileName, CommonSettings.settingsBaseDir);
         subscriptionsDetailsFileStorage.write(sd.getBytes(Charset.forName("utf-8")));
     }
