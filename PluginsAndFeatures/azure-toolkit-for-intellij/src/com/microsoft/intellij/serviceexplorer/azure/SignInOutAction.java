@@ -22,22 +22,33 @@
 package com.microsoft.intellij.serviceexplorer.azure;
 
 import com.intellij.openapi.project.Project;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
-import com.microsoft.tooling.msservices.helpers.Name;
+import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 
-@Name("Sign In/Out")
-public class SignInOutAction extends NodeActionListener {
-    private AzureModule azureModule;
+public class SignInOutAction extends NodeAction {
 
-    public SignInOutAction(AzureModule azureModule) {
-        this.azureModule = azureModule;
+    SignInOutAction(AzureModule azureModule) {
+        super(azureModule, "Sign In/Out");
+        addListener(new NodeActionListener() {
+            @Override
+            protected void actionPerformed(NodeActionEvent e) throws AzureCmdException {
+                AzureSignInAction.onAzureSignIn((Project) azureModule.getProject());
+            }
+        });
     }
 
-    @Override
-    public void actionPerformed(NodeActionEvent e) {
-        AzureSignInAction.onAzureSignIn((Project) azureModule.getProject());
+    public String getName() {
+        try {
+            return AuthMethodManager.getInstance().isSignedIn() ? "Sign Out" : "Sign In";
+        } catch (Exception e) {
+            AzurePlugin.log("Error signing in", e);
+            return "";
+        }
     }
 }

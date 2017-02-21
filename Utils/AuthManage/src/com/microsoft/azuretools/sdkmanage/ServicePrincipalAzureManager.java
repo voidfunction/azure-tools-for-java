@@ -188,7 +188,7 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
                     : atc;
 
             service = Executors.newFixedThreadPool(1);
-            AuthenticationContext context = new AuthenticationContext(Constants.authority, false, service);
+            AuthenticationContext context = new AuthenticationContext(String.format("%s/%s", Constants.authority, tid), false, service);
             ClientCredential clientCredential = new ClientCredential(credentials.getClientId(), credentials.getSecret());
             Future<AuthenticationResult> future = context.acquireToken(Constants.resourceARM, clientCredential, null);
             authenticationResult = future.get();

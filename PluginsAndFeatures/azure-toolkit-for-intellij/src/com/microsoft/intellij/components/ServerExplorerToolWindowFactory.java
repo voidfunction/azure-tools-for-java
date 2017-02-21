@@ -37,6 +37,7 @@ import com.microsoft.azure.hdinsight.common.HDInsightUtil;
 import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
 import com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction;
 import com.microsoft.intellij.helpers.UIHelperImpl;
+import com.microsoft.intellij.serviceexplorer.azure.AzureModuleImpl;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangeListener;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangedEvent;
 import com.microsoft.tooling.msservices.helpers.collections.ObservableList;
@@ -67,7 +68,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
         // initialize azure service module
-        AzureModule azureModule = new AzureModule(project);
+        AzureModule azureModule = new AzureModuleImpl(project);
 
         HDInsightUtil.setHDInsightRootModule(azureModule);
 
