@@ -222,7 +222,7 @@ public class ClusterManagerEx {
 
                 List<HDStorageAccount> additionalStorageAccount = clusterDetail.getAdditionalStorageAccounts();
                 if (additionalStorageAccount != null) {
-                    for (ClientStorageAccount storageAccount : additionalStorageAccount) {
+                    for (HDStorageAccount storageAccount : additionalStorageAccount) {
                         if (storageAccount.getName().equals(storageName)) {
                             return 2;
                         }

@@ -146,10 +146,11 @@ public class ClusterNode extends RefreshableNode {
 
     private static String getClusterNameWitStatus(IClusterDetail clusterDetail) {
         String state = clusterDetail.getState();
+        String sparkVersion = clusterDetail.getSparkVersion();
         if(!StringHelper.isNullOrWhiteSpace(state) && !state.equalsIgnoreCase("Running")) {
-            return String.format("%s (State:%s)", clusterDetail.getName(), state);
+            return String.format("%s (Spark:%s) (State:%s)", clusterDetail.getName(), sparkVersion, state);
         }
-        return clusterDetail.getName();
+        return String.format("%s (Spark: %s)",clusterDetail.getName(),sparkVersion);
     }
 
     private void openUrlLink(String linkUrl) {

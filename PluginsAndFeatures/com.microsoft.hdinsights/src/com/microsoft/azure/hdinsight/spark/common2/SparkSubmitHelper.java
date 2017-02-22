@@ -35,11 +35,14 @@ import com.google.common.base.Joiner;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.microsoft.azure.hdinsight.Activator;
+import com.microsoft.azure.hdinsight.common.StreamUtil;
 import com.microsoft.azure.hdinsight.common2.HDInsightUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
+import com.microsoft.azure.hdinsight.sdk.storage.IHDIStorageAccount;
+import com.microsoft.azure.hdinsight.sdk.storage.StorageAccountTypeEnum;
 import com.microsoft.azure.hdinsight.spark.common.SparkBatchSubmission;
 import com.microsoft.azure.hdinsight.spark.common.SparkJobLog;
 import com.microsoft.azure.hdinsight.spark.common.SparkSubmitResponse;
@@ -53,6 +56,7 @@ import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.sun.org.apache.regexp.internal.recompile;
 
 public class SparkSubmitHelper {
 	private static SparkSubmitHelper ourInstance = new SparkSubmitHelper();
@@ -184,38 +188,49 @@ public class SparkSubmitHelper {
         }
     }
 
-    public String uploadFileToAzureBlob(/*Project project,*/ String localFile, HDStorageAccount storageAccount, String defaultContainerName, String uniqueFolderId)
-            throws AzureCmdException, IOException, HDIException {
+    public String uploadFileToAzureBlob(/*Project project,*/ String localFile,IHDIStorageAccount storageAccount, String defaultContainerName, String uniqueFolderId)
+            throws Exception {
         final File file = new File(localFile);
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            try (BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream)) {
-                final CallableSingleArg<Void, Long> callable = new CallableSingleArg<Void, Long>() {
-                    @Override
-                    public Void call(Long uploadedBytes) throws Exception {
-                        double progress = ((double) uploadedBytes) / file.length();
-                        return null;
+        if(storageAccount.getAccountType() == StorageAccountTypeEnum.BLOB) {
+            try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                try (BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream)) {
+                    final CallableSingleArg<Void, Long> callable = new CallableSingleArg<Void, Long>() {
+                        @Override
+                        public Void call(Long uploadedBytes) throws Exception {
+                            double progress = ((double) uploadedBytes) / file.length();
+                            return null;
+                        }
+                    };
+                    
+                    HDStorageAccount blobStorageAccount = (HDStorageAccount) storageAccount;
+                    BlobContainer defaultContainer = getSparkClusterDefaultContainer(blobStorageAccount, defaultContainerName);
+                    String path = String.format("SparkSubmission/%s/%s", uniqueFolderId, file.getName());
+                    String uploadedPath = String.format("wasb://%s@%s/%s", defaultContainerName, blobStorageAccount.getFullStorageBlobName(), path);
+
+                    HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Begin uploading file %s to Azure Blob Storage Account %s ...", localFile, uploadedPath));
+                    
+                    StorageClientSDKManager.getManager().uploadBlobFileContent(
+                            blobStorageAccount.getConnectionString(),
+                            defaultContainer,
+                            path,
+                            bufferedInputStream,
+                            callable,
+                            1024 * 1024,
+                            file.length());
+
+                    HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Submit file to azure blob '%s' successfully.", uploadedPath));
+                    return uploadedPath;
                     }
-                };
-
-                BlobContainer defaultContainer = getSparkClusterDefaultContainer(storageAccount, defaultContainerName);
-                String path = String.format("SparkSubmission/%s/%s", uniqueFolderId, file.getName());
-                String uploadedPath = String.format("wasb://%s@%s/%s", defaultContainerName, storageAccount.getFullStorageBlobName(), path);
-
-                HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Begin uploading file %s to Azure Blob Storage Account %s ...", localFile, uploadedPath));
-
-                StorageClientSDKManager.getManager().uploadBlobFileContent(
-                        storageAccount.getConnectionString(),
-                        defaultContainer,
-                        path,
-                        bufferedInputStream,
-                        callable,
-                        1024 * 1024,
-                        file.length());
-
-                HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Submit file to azure blob '%s' successfully.", uploadedPath));
-                return uploadedPath;
-            }
-        }
+                }
+        } else if(storageAccount.getAccountType() == StorageAccountTypeEnum.ADLS) {
+            String uploadPath = String.format("adl://%s.azuredatalakestore.net/%s/%s", storageAccount.getName(), storageAccount.getDefaultContainerOrRootPath(), "SparkSubmission");
+            HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Begin uploading file %s to Azure Data Lake Store %s ...", localFile, uploadPath));
+            String uploadedPath = StreamUtil.uploadArtifactToADLS(file, storageAccount);
+            HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Submit file to azure blob '%s' successfully.", uploadedPath));
+            return uploadedPath;
+        } else {
+			throw new UnsupportedOperationException("unkown storage account type");
+		}
     }
 
     private int printoutJobLog(/*Project project,*/ int id, int from_index, IClusterDetail clusterDetail) throws IOException {
@@ -279,7 +294,7 @@ public class SparkSubmitHelper {
         String uniqueFolderId = UUID.randomUUID().toString();
 
         return SparkSubmitHelper.getInstance().uploadFileToAzureBlob(/*project,*/ buildJarPath,
-                selectedClusterDetail.getStorageAccount(), selectedClusterDetail.getStorageAccount().getDefaultContainer(), uniqueFolderId);
+                selectedClusterDetail.getStorageAccount(), selectedClusterDetail.getStorageAccount().getDefaultContainerOrRootPath(), uniqueFolderId);
     }
 
     public static boolean isLocalArtifactPath(String path) {

@@ -24,6 +24,7 @@ package com.microsoft.azure.hdinsight.serverexplore;
 import com.microsoft.azure.hdinsight.common.StreamUtil;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
+import com.microsoft.azure.management.storage.implementation.StorageManagementClientImpl;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
@@ -73,7 +74,7 @@ public class AddHDInsightAdditionalClusterImpl {
             throw new HDIException("Failed to get default container for storage account");
         }
 
-        HDStorageAccount account = new HDStorageAccount(storageName + BLOB_URL_SUFFIX, storageKey, true, defaultContainer);
+        HDStorageAccount account = new HDStorageAccount(null, storageName + BLOB_URL_SUFFIX, storageKey, true, defaultContainer);
 
         //getting container to check the storage key is correct or not
         try {
@@ -150,11 +151,11 @@ public class AddHDInsightAdditionalClusterImpl {
         }
 
         List<ClientStorageAccount> storageAccounts = new ArrayList<ClientStorageAccount>();
-        storageAccounts.add(new HDStorageAccount(defaultStorageName, storageKeysMap.get(defaultStorageName), false, null));
+        storageAccounts.add(new HDStorageAccount(null, defaultStorageName, storageKeysMap.get(defaultStorageName), false, null));
 
         for (String storageName : storageKeysMap.keySet()) {
             if (!storageName.equals(defaultStorageName)) {
-                storageAccounts.add(new HDStorageAccount(storageName, storageKeysMap.get(storageName), false, null));
+                storageAccounts.add(new HDStorageAccount(null, storageName, storageKeysMap.get(storageName), false, null));
             }
         }
 

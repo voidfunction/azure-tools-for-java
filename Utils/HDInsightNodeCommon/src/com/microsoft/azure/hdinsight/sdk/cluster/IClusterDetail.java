@@ -24,6 +24,7 @@ package com.microsoft.azure.hdinsight.sdk.cluster;
 
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
+import com.microsoft.azure.hdinsight.sdk.storage.IHDIStorageAccount;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.Subscription;
@@ -63,7 +64,7 @@ public interface IClusterDetail {
 
     String getResourceGroup();
 
-    HDStorageAccount getStorageAccount() throws HDIException;
+    IHDIStorageAccount getStorageAccount() throws HDIException;
 
     List<HDStorageAccount> getAdditionalStorageAccounts();
 

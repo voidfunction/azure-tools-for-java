@@ -29,6 +29,9 @@
 		</fileset>
 		<pathelement location="${path.variable.maven_repository}/com/microsoft/azuretools/azure-explorer-common/0.0.1-SNAPSHOT/azure-explorer-common-0.0.1-SNAPSHOT.jar"/>
 		<pathelement location="${path.variable.maven_repository}/com/microsoft/azuretools/auth-manage/0.0.1-SNAPSHOT/auth-manage-0.0.1-SNAPSHOT.jar"/>
+		<fileset dir="${path.variable.maven_repository}/com/microsoft/azure/azure-data-lake-store-sdk/2.1.4/">
+			<include name="*.jar"/>
+		</fileset>
 	</path>
 
 	<!-- top level targets -->
