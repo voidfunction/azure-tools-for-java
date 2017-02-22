@@ -24,166 +24,90 @@ package com.microsoft.azuretools.ijidea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.table.JBTable;
 import com.microsoft.azuretools.authmanage.srvpri.SrvPriManager;
 import com.microsoft.azuretools.authmanage.srvpri.report.IListener;
 import com.microsoft.azuretools.authmanage.srvpri.step.Status;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.awt.event.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class SrvPriCreationStatusDialog extends JDialog {
+public class SrvPriCreationStatusDialog extends DialogWrapper {
+    private static final Logger LOGGER = Logger.getInstance(SrvPriCreationStatusDialog.class);
+
     private JPanel contentPane;
-    private JButton buttonOK;
     private JTable statusTable;
-    //private JComboBox comboBoxCredFile;
-//    private WideComboBox comboBoxCredFile;
-    private JButton buttonCancel;
     private JList filesList;
-//    private JTable filesTable;
     private List<String> authFilePathList =  new LinkedList<>();
-    private int result = JOptionPane.CANCEL_OPTION;
     String destinationFolder;
     private Map<String, List<String> > tidSidsMap;
 
     private String selectedAuthFilePath;
+    private Project project;
 
     public String getSelectedAuthFilePath() {
         return selectedAuthFilePath;
-    }
-
-
-    public int getResult() {
-        return result;
     }
 
     public List<String> srvPriCreationStatusDialog() {
         return authFilePathList;
     }
 
-    DefaultTableModel statusTableModel = new DefaultTableModel() {
-        final Class[] columnClass = new Class[] {
-                String.class, String.class, String.class
-        };
-        @Override
-        public boolean isCellEditable(int row, int col) {
-            return (col == 0);
-        }
-        @Override
-        public Class<?> getColumnClass(int columnIndex)
-        {
-            return columnClass[columnIndex];
-        }
-    };
-
     DefaultListModel<String> filesListModel = new DefaultListModel<String>();
 
-    public static SrvPriCreationStatusDialog go(Map<String, List<String> > tidSidsMap, String destinationFolder, Component parent) {
-        SrvPriCreationStatusDialog d = new SrvPriCreationStatusDialog();
+    public static SrvPriCreationStatusDialog go(Map<String, List<String> > tidSidsMap, String destinationFolder, Component parent, Project project) {
+        SrvPriCreationStatusDialog d = new SrvPriCreationStatusDialog(project);
         d.tidSidsMap = tidSidsMap;
         d.destinationFolder = destinationFolder;
-        d.pack();
-        d.setLocationRelativeTo(parent);
-        d.setVisible(true);
-        return d;
+        d.show();
+        if (d.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+            return d;
+        }
+
+        return null;
     }
 
-    private SrvPriCreationStatusDialog() {
-        setContentPane(contentPane);
+    private SrvPriCreationStatusDialog(Project project) {
+        super(project, true, IdeModalityType.PROJECT);
+        this.project = project;
         setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
         setTitle("Create Service Principal Status");
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
-
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-
-            @Override
-            public void windowOpened (WindowEvent e) {
-                createServicePrincipalsAction();
-            }
-        });
-
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
+        DefaultTableModel statusTableModel = new DefaultTableModel();
         statusTableModel.addColumn("Step");
         statusTableModel.addColumn("Result");
         statusTableModel.addColumn("Details");
         statusTable.setModel(statusTableModel);
         statusTable.setAutoResizeMode( JTable.AUTO_RESIZE_LAST_COLUMN );
         TableColumn column = statusTable.getColumnModel().getColumn(0);
-        column.setMinWidth(150);
-        //column.setMaxWidth(400);
+//        column.setMinWidth(150);
+//        //column.setMaxWidth(400);
         column = statusTable.getColumnModel().getColumn(1);
         column.setMinWidth(100);
         column.setMaxWidth(100);
-        column = statusTable.getColumnModel().getColumn(2);
-        column.setMinWidth(50);
+//        column = statusTable.getColumnModel().getColumn(2);
+//        column.setMinWidth(50);
 
-//        filesTableModel.addColumn("Created authentication file(s)");
-//        filesTable.setModel(filesTableModel);
         filesList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         filesList.setLayoutOrientation(JList.VERTICAL);
         filesList.setVisibleRowCount(-1);
         filesList.setModel(filesListModel);
-    }
 
-    private void onOK() {
-        // add your code here
-//        String filepath = (String)comboBoxCredFile.getSelectedItem();
-//        if (filepath != null) {
-//            credFilePath = filepath;
-//        }
-        int rc = filesListModel.getSize();
-        if (rc > 0) {
-            selectedAuthFilePath = filesListModel.getElementAt(0);
-        }
-
-        int[] selcectedIndexes = filesList.getSelectedIndices();
-        if (selcectedIndexes.length > 0) {
-            selectedAuthFilePath =  filesListModel.getElementAt(selcectedIndexes[0]);
-        }
-
-        result = JOptionPane.OK_OPTION;
-        dispose();
-    }
-
-    private void onCancel() {
-        // Do not use created file if any
-        dispose();
+        init();
     }
 
     private void createUIComponents() {
@@ -194,8 +118,13 @@ public class SrvPriCreationStatusDialog extends JDialog {
     }
 
     private void createServicePrincipalsAction() {
-        ActionRunner task = new ActionRunner(ProjectManager.getInstance().getDefaultProject());
-        task.queue();
+        ApplicationManager.getApplication().invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                ActionRunner task = new ActionRunner(project);
+                task.queue();
+            }
+        }, ModalityState.any());
     }
 
     private class ActionRunner extends Task.Modal implements IListener<Status> {
@@ -213,7 +142,10 @@ public class SrvPriCreationStatusDialog extends JDialog {
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            statusTableModel.addRow(new Object[] {"=== Canceled by user", null, null});                        }
+                            DefaultTableModel statusTableModel = (DefaultTableModel)statusTable.getModel();
+                            statusTableModel.addRow(new Object[] {"=== Canceled by user", null, null});
+                            statusTableModel.fireTableDataChanged();
+                        }
                     }, ModalityState.any());
                     return;
                 }
@@ -223,14 +155,21 @@ public class SrvPriCreationStatusDialog extends JDialog {
                         ApplicationManager.getApplication().invokeLater(new Runnable() {
                             @Override
                             public void run() {
+                                DefaultTableModel statusTableModel = (DefaultTableModel)statusTable.getModel();
                                 statusTableModel.addRow(new Object[] {"tenant ID: " + tid + " ===", null, null});
+                                statusTableModel.fireTableDataChanged();
                             }
                         }, ModalityState.any());
                         Date now = new Date();
                         String suffix = new SimpleDateFormat("yyyyMMddHHmmss").format(now);;
                         final String authFilepath = SrvPriManager.createSp(tid, sidList, suffix, this, destinationFolder);
-                        //Thread.sleep(5000);
-                        //final String authFilepath = suffix + new Date().toString();
+//                        final String authFilepath = suffix + new Date().toString();
+//                        int steps = 15;
+//                        for (int i = 0; i < steps; ++i) {
+//                            System.out.println("sleep #" + i);
+//                            if (progressIndicator.isCanceled()) break;
+//                            Thread.sleep(1000);
+//                        }
                         if (authFilepath != null) {
                             ApplicationManager.getApplication().invokeLater(new Runnable() {
                                 @Override
@@ -241,7 +180,7 @@ public class SrvPriCreationStatusDialog extends JDialog {
                             }, ModalityState.any());
                         }
                     } catch (Exception ex) {
-                        // TODO: use logger
+                        LOGGER.error("ActionRunner", ex);
                         System.out.println("Creating Service Principal exception: " + ex.getMessage());
                     }
                 }
@@ -254,11 +193,50 @@ public class SrvPriCreationStatusDialog extends JDialog {
                 @Override
                 public void run() {
 //                    progressIndicator.setText(status.getAction());
+                    DefaultTableModel statusTableModel = (DefaultTableModel)statusTable.getModel();
                     statusTableModel.addRow(new Object[] {status.getAction(), status.getResult(), status.getDetails()});
                     statusTableModel.fireTableDataChanged();
                 }
             }, ModalityState.any());
         }
+    }
+
+    @Nullable
+    @Override
+    protected JComponent createCenterPanel() {
+        return contentPane;
+    }
+
+    @Override
+    protected void doOKAction() {
+        int rc = filesListModel.getSize();
+        if (rc > 0) {
+            selectedAuthFilePath = filesListModel.getElementAt(0);
+        }
+
+        int[] selectedIndexes = filesList.getSelectedIndices();
+        if (selectedIndexes.length > 0) {
+            selectedAuthFilePath =  filesListModel.getElementAt(selectedIndexes[0]);
+        }
+
+        super.doOKAction();
+    }
+
+//    @Override
+//    public void doCancelAction() {
+//        super.doCancelAction();
+//    }
+
+    @Nullable
+    @Override
+    protected String getDimensionServiceKey() {
+        return "SrvPriCreationStatusDialog";
+    }
+
+    @Override
+    public void show() {
+        createServicePrincipalsAction();
+        super.show();
     }
 }
 

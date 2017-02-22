@@ -90,7 +90,7 @@ public class AzureSignInAction extends AnAction {
                 }
             } else {
                 SignInWindow w = SignInWindow.go(authMethodManager.getAuthMethodDetails(), frame, project);
-                if (w.getResult() == JOptionPane.OK_OPTION) {
+                if (w != null) {
                     AuthMethodDetails authMethodDetailsUpdated = w.getAuthMethodDetails();
                     authMethodManager.setAuthMethodDetails(authMethodDetailsUpdated);
                     SelectSubscriptionsAction.onShowSubscriptions(project);

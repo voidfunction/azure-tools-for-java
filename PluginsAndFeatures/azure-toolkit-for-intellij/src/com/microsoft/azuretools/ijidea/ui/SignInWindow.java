@@ -27,6 +27,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.adauth.StringUtils;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
@@ -35,6 +36,7 @@ import com.microsoft.azuretools.authmanage.interact.AuthMethod;
 import com.microsoft.azuretools.authmanage.models.AuthMethodDetails;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AccessTokenAzureManager;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -48,7 +50,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class SignInWindow extends JDialog {
+public class SignInWindow extends DialogWrapper {
     private static final Logger LOGGER = Logger.getInstance(SignInWindow.class);
 
     private JPanel contentPane;
@@ -56,7 +58,6 @@ public class SignInWindow extends JDialog {
     private JRadioButton interactiveRadioButton;
     private JTextPane interactiveCommentTextPane;
 
-    private JPanel buttonsPanel;
     private JRadioButton automatedRadioButton;
     private JTextPane automatedCommentTextPane;
     private JLabel authFileLabel;
@@ -64,41 +65,34 @@ public class SignInWindow extends JDialog {
     private JButton browseButton;
     private JButton createNewAuthenticationFileButton;
 
-    private JButton buttonOK;
-    private JButton buttonCancel;
-
     private AuthMethodDetails authMethodDetails;
     private AuthMethodDetails authMethodDetailsResult;
 
     private String accountEmail;
-    private int result = JOptionPane.CANCEL_OPTION;
 
     final JFileChooser fileChooser;
 
     private Project project;
-
-    public int getResult() {
-        return result;
-    }
 
     public AuthMethodDetails getAuthMethodDetails() {
         return authMethodDetailsResult;
     }
 
     public static SignInWindow go(AuthMethodDetails authMethodDetails, Component parent, Project project) {
-        SignInWindow d = new SignInWindow(authMethodDetails);
-        d.project = project;
-        d.pack();
-        d.setLocationRelativeTo(parent);
-        d.setVisible(true);
-        return d;
+        SignInWindow d = new SignInWindow(authMethodDetails, project);
+        d.show();
+        if (d.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+            return d;
+        }
+
+        return null;
     }
 
-    private SignInWindow(AuthMethodDetails authMethodDetails) {
-        setContentPane(contentPane);
+    private SignInWindow(AuthMethodDetails authMethodDetails, Project project) {
+        super(project, true, IdeModalityType.PROJECT);
         setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
         setTitle("Azure Sign In");
+        setOKButtonText("Sign in");
 
         fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -110,32 +104,6 @@ public class SignInWindow extends JDialog {
 
         this.authMethodDetails = authMethodDetails;
         authFileTextField.setText(authMethodDetails.getCredFilePath());
-
-
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
-
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         interactiveRadioButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -167,41 +135,8 @@ public class SignInWindow extends JDialog {
 
         interactiveRadioButton.setSelected(true);
         onInteractiveRadioButton();
-    }
 
-    private void onOK() {
-        authMethodDetailsResult = new AuthMethodDetails();
-        if (interactiveRadioButton.isSelected()) {
-            doSignIn();
-            if (StringUtils.isNullOrEmpty(accountEmail)) {
-                System.out.println("Canceled by the user.");
-                return;
-            }
-            authMethodDetailsResult.setAuthMethod(AuthMethod.AD);
-            authMethodDetailsResult.setAccountEmail(accountEmail);
-        } else { // automated
-            String authPath = authFileTextField.getText();
-            if (StringUtils.isNullOrWhiteSpace(authPath)) {
-                JOptionPane.showMessageDialog(this,
-                        "Please select authentication file",
-                        "Sing in dialog info",
-                        JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-
-            authMethodDetailsResult.setAuthMethod(AuthMethod.SP);
-            // TODO: check field is empty, check file is valid
-            authMethodDetailsResult.setCredFilePath(authPath);
-
-        }
-        result = JOptionPane.OK_OPTION;
-        dispose();
-    }
-
-    private void onCancel() {
-        // use initial
-        authMethodDetailsResult = authMethodDetails;
-        dispose();
+        init();
     }
 
     private void onInteractiveRadioButton() {
@@ -222,7 +157,7 @@ public class SignInWindow extends JDialog {
     }
 
     private void doSelectCredFilepath() {
-        int returnVal = fileChooser.showOpenDialog(SignInWindow.this);
+        int returnVal = fileChooser.showOpenDialog(contentPane);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             try {
@@ -232,7 +167,7 @@ public class SignInWindow extends JDialog {
             } catch (IOException ex) {
                 ex.printStackTrace();
                 LOGGER.error("doSelectCredFilepath", ex);
-                ErrorWindow.show(ex.getMessage(), "File Path Error", this);
+                ErrorWindow.show(ex.getMessage(), "File Path Error", contentPane);
             }
         }
     }
@@ -248,7 +183,7 @@ public class SignInWindow extends JDialog {
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("doSignIn", ex);
-            ErrorWindow.show(ex.getMessage(), "Sign In Error", this);
+            ErrorWindow.show(ex.getMessage(), "Sign In Error", contentPane);
         }
     }
 
@@ -267,7 +202,7 @@ public class SignInWindow extends JDialog {
                         ex.printStackTrace();
                         LOGGER.error("signInAsync", ex);
                         try {
-                            ErrorWindow.show(ex.getMessage(), "Sign In Error", SignInWindow.this);
+                            ErrorWindow.show(ex.getMessage(), "Sign In Error", contentPane);
                         } catch (Exception e) {
                             ex.printStackTrace();
                         }
@@ -284,7 +219,7 @@ public class SignInWindow extends JDialog {
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("doSingOut", ex);
-            ErrorWindow.show(ex.getMessage(), "Sign Out Error", this);
+            ErrorWindow.show(ex.getMessage(), "Sign Out Error", contentPane);
         }
     }
 
@@ -317,13 +252,13 @@ public class SignInWindow extends JDialog {
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         LOGGER.error("doCreateServicePrincipal::Task.Modal", ex);
-                        ErrorWindow.show(ex.getMessage(), "Load Subscription Error", SignInWindow.this);
+                        ErrorWindow.show(ex.getMessage(), "Load Subscription Error", contentPane);
 
                     }
                 }
             });
 
-            SrvPriSettingsDialog d = SrvPriSettingsDialog.go(subscriptionManager.getSubscriptionDetails(), this);
+            SrvPriSettingsDialog d = SrvPriSettingsDialog.go(subscriptionManager.getSubscriptionDetails(), contentPane);
             List<SubscriptionDetail> subscriptionDetailsUpdated;
             String destinationFolder;
             if (d.getResult() == JOptionPane.OK_OPTION) {
@@ -350,8 +285,8 @@ public class SignInWindow extends JDialog {
                 }
             }
 
-            SrvPriCreationStatusDialog  d1 = SrvPriCreationStatusDialog.go(tidSidsMap, destinationFolder, this);
-            if (d1.getResult() != JOptionPane.OK_OPTION) {
+            SrvPriCreationStatusDialog  d1 = SrvPriCreationStatusDialog.go(tidSidsMap, destinationFolder, contentPane, project);
+            if (d1 == null) {
                 System.out.println(">> Canceled by the user");
                 return;
             }
@@ -369,7 +304,7 @@ public class SignInWindow extends JDialog {
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("doCreateServicePrincipal", ex);
-            ErrorWindow.show(ex.getMessage(), "Get Subscription Error", SignInWindow.this);
+            ErrorWindow.show(ex.getMessage(), "Get Subscription Error", contentPane);
 
         } finally {
             if (adAuthManager != null) {
@@ -381,5 +316,52 @@ public class SignInWindow extends JDialog {
                 }
             }
         }
+    }
+
+    @Nullable
+    @Override
+    protected JComponent createCenterPanel() {
+        return contentPane;
+    }
+
+    @Override
+    protected void doOKAction() {
+        authMethodDetailsResult = new AuthMethodDetails();
+        if (interactiveRadioButton.isSelected()) {
+            doSignIn();
+            if (StringUtils.isNullOrEmpty(accountEmail)) {
+                System.out.println("Canceled by the user.");
+                return;
+            }
+            authMethodDetailsResult.setAuthMethod(AuthMethod.AD);
+            authMethodDetailsResult.setAccountEmail(accountEmail);
+        } else { // automated
+            String authPath = authFileTextField.getText();
+            if (StringUtils.isNullOrWhiteSpace(authPath)) {
+                JOptionPane.showMessageDialog(contentPane,
+                        "Please select authentication file",
+                        "Sing in dialog info",
+                        JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            authMethodDetailsResult.setAuthMethod(AuthMethod.SP);
+            // TODO: check field is empty, check file is valid
+            authMethodDetailsResult.setCredFilePath(authPath);
+        }
+
+        super.doOKAction();
+    }
+
+    @Override
+    public void doCancelAction() {
+        authMethodDetailsResult = authMethodDetails;
+        super.doCancelAction();
+    }
+
+    @Nullable
+    @Override
+    protected String getDimensionServiceKey() {
+        return "SignInWindow";
     }
 }
