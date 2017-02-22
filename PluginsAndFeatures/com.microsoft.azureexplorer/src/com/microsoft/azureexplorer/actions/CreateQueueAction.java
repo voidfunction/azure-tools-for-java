@@ -37,7 +37,7 @@ public class CreateQueueAction  extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        CreateQueueForm form = new CreateQueueForm(PluginUtil.getParentShell(), queueModule.getStorageAccount());
+        /*CreateQueueForm form = new CreateQueueForm(PluginUtil.getParentShell(), queueModule.getStorageAccount());
 
         form.setOnCreate(new Runnable() {
             @Override
@@ -46,6 +46,6 @@ public class CreateQueueAction  extends NodeActionListener {
                 ((ClientStorageNode) queueModule.getParent()).load();
             }
         });
-        form.open();
+        form.open();*/
     }
 }

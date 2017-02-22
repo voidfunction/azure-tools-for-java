@@ -121,7 +121,7 @@ public class CreateTableForm extends Dialog {
         }
         DefaultLoader.getIdeHelper().runInBackground(null, "Creating table...", false, true, "Creating table...", new Runnable() {
             public void run() {
-                try {
+                /*try {
                     for (com.microsoft.tooling.msservices.model.storage.Table table : StorageClientSDKManager.getManager().getTables(storageAccount)) {
                         if (table.getName().equals(name)) {
                             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
@@ -143,7 +143,7 @@ public class CreateTableForm extends Dialog {
                     }
                 } catch (AzureCmdException e) {
                     DefaultLoader.getUIHelper().showException("Error creating table", e, "Service explorer", false, true);
-                }
+                }*/
             }
         });
         super.okPressed();

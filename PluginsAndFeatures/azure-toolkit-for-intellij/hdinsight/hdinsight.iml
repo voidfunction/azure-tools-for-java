@@ -22,7 +22,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="hdinsight-node-common" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -38,6 +37,8 @@
     <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="com.microsoft.azuretools:azure-explorer-common:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:18.0" level="project" />
+    <orderEntry type="library" name="com.microsoft.azuretools:hdinsight-node-common:0.0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="com.microsoft.azure:azure-data-lake-store-sdk:2.1.4" level="project" />
   </component>
   <component name="POM File Configuration" pomFile="" />
 </module>

@@ -174,7 +174,7 @@ public class SelectImageStep extends WizardPage {
 
 	private void selectRegion() {
 		fillPublishers();
-		wizard.setRegion((Region) regionComboBox.getData(regionComboBox.getText()));
+		wizard.setRegion(regionComboBox.getText());
 	}
 
 	private void fillPublishers() {

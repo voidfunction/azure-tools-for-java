@@ -85,6 +85,9 @@ public final class Messages extends NLS {
 	public static String telemetryDenyAction;
 	public static String telemetryAcceptAction;
 	
+	public static String strAccDlgImg;
+	public static String lclDlgImgErr;
+	
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

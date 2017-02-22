@@ -40,12 +40,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.microsoft.azure.management.websites.models.SkuOptions;
-import com.microsoft.azure.management.websites.models.WorkerSizeOptions;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.vm.Location;
-import com.microsoft.tooling.msservices.model.ws.WebHostingPlanCache;
 import com.microsoft.webapp.activator.Activator;
 import com.microsoft.webapp.util.WebAppUtils;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
@@ -214,7 +210,7 @@ public class CreateAppServicePlanDialog extends TitleAreaDialog {
 	}
 
 	private void fillGeoRegions() {
-		try {
+		/*try {
 			List<Location> locationList = AzureManagerImpl.getManager().getLocations(subscriptionId);
 			if (locationList.size() > 0) {
 				List<String> locationNameList = new ArrayList<String>();
@@ -229,12 +225,12 @@ public class CreateAppServicePlanDialog extends TitleAreaDialog {
 			}
 		} catch (AzureCmdException e) {
 			Activator.getDefault().log(Messages.errTtl, e);
-		}
+		}*/
 	}
 
 	private void fillPricingComboBox() {
 		List<String> skuOptions = new ArrayList<String>();
-		for (SkuOptions sku : SkuOptions.values()) {
+		/*for (SkuOptions sku : SkuOptions.values()) {
 			skuOptions.add(sku.toString());
 		}
 		if (skuOptions.size() > 0) {
@@ -244,18 +240,18 @@ public class CreateAppServicePlanDialog extends TitleAreaDialog {
 			fillWorkerSize(skuArray[0]);
 		} else {
 			pricingCombo.removeAll();
-		}
+		}*/
 	}
 
 	private void fillWorkerSize(String price) {
 		List<String> sizeList = new ArrayList<String>();
-		if (price.equalsIgnoreCase(SkuOptions.Free.name()) || price.equalsIgnoreCase(SkuOptions.Shared.name())) {
+		/*if (price.equalsIgnoreCase(SkuOptions.Free.name()) || price.equalsIgnoreCase(SkuOptions.Shared.name())) {
 			sizeList.add(WorkerSizeOptions.Small.name());
 		} else {
 			for (WorkerSizeOptions size : WorkerSizeOptions.values()) {
 				sizeList.add(size.toString());
 			}
-		}
+		}*/
 		if (sizeList.size() > 0) {
 			String[] sizeArray = sizeList.toArray(new String[sizeList.size()]);
 			workerCombo.setItems(sizeArray);
@@ -272,7 +268,7 @@ public class CreateAppServicePlanDialog extends TitleAreaDialog {
 	@Override
 	protected void okPressed() {
 		boolean isValid = false;
-		try {
+		/*try {
 			PluginUtil.showBusy(true, getShell());
 			WebHostingPlanCache plan = new WebHostingPlanCache(txtName.getText().trim(), resourceGroup,
 					subscriptionId, locCombo.getText(),
@@ -291,7 +287,7 @@ public class CreateAppServicePlanDialog extends TitleAreaDialog {
 			}
 			msg = msg + "\n" + String.format(Messages.webappExpMsg, ex.getMessage());
 			PluginUtil.displayErrorDialogAndLog(getShell(), Messages.errTtl, msg, ex);
-		}
+		}*/
 		if (isValid) {
 			PluginUtil.showBusy(false, getShell());
 			super.okPressed();

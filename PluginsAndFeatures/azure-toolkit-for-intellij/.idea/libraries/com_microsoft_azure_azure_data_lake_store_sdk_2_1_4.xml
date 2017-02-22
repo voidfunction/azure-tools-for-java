@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="com.microsoft.azure:azure-data-lake-store-sdk:2.1.4" type="repository">
+    <properties maven-id="com.microsoft.azure:azure-data-lake-store-sdk:2.1.4" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/microsoft/azure/azure-data-lake-store-sdk/2.1.4/azure-data-lake-store-sdk-2.1.4.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-core/2.7.4/jackson-core-2.7.4.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.21/slf4j-api-1.7.21.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

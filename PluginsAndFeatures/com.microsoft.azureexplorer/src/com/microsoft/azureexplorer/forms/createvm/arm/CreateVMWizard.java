@@ -66,11 +66,14 @@ public class CreateVMWizard extends Wizard {
 	protected String subnet;
 	protected VirtualMachineSize size;
     
-    private Region region;
+    private String region;
     private Network virtualNetwork;
+    private boolean isNewNetwork;
     private String resourceGroupName;
     private boolean isNewResourceGroup;
 	private VirtualMachineImage virtualMachineImage;
+	private Object knownMachineImage;
+	private boolean isKnownMachineImage;
 	private StorageAccount storageAccount;
     private PublicIpAddress publicIpAddress;
     private boolean withNewPip;
@@ -130,11 +133,16 @@ public class CreateVMWizard extends Wizard {
                     VirtualMachine vm = AzureSDKManager.createVirtualMachine(subscription.getSubscriptionId(),
                             name,
                             resourceGroupName,
+                            isNewResourceGroup,
                             size.name(),
+                            region,
                             virtualMachineImage,
+                            knownMachineImage,
+                            isKnownMachineImage,
                             storageAccount,
                             virtualNetwork,
                             subnet,
+                            isNewNetwork,
                             publicIpAddress,
                             withNewPip,
                             availabilitySet,
@@ -285,11 +293,11 @@ public class CreateVMWizard extends Wizard {
 	    this.subnet = subnet;
 	}
     
-    public Region getRegion() {
+    public String getRegion() {
 		return region;
 	}
 
-	public void setRegion(Region region) {
+	public void setRegion(String region) {
 		this.region = region;
 	}
 
@@ -323,6 +331,22 @@ public class CreateVMWizard extends Wizard {
 
 	public void setVirtualMachineImage(VirtualMachineImage virtualMachineImage) {
 	    this.virtualMachineImage = virtualMachineImage;
+	}
+
+	public Object getKnownMachineImage() {
+		return knownMachineImage;
+	}
+
+	public void setKnownMachineImage(Object knownMachineImage) {
+		this.knownMachineImage = knownMachineImage;
+	}
+
+	public boolean isKnownMachineImage() {
+		return isKnownMachineImage;
+	}
+
+	public void setKnownMachineImage(boolean isKnownMachineImage) {
+		this.isKnownMachineImage = isKnownMachineImage;
 	}
 
 	public StorageAccount getStorageAccount() {

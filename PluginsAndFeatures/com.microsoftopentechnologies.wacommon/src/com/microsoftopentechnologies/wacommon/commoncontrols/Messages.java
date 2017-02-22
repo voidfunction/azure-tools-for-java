@@ -54,6 +54,7 @@ public final class Messages extends NLS {
     public static String newCertDlgImg;
     public static String imgErr;
     public static String newCertDlgPwLength;
+    public static String newCertMsg;
     /* New Certificate Dialog messages - end*/
     public static String impSubDlgTtl;
     public static String dwnlPubSetFile;
@@ -77,6 +78,8 @@ public final class Messages extends NLS {
 	public static String failedToParse;
     public static String importDlgMsgJavaVersion;
     public static String loadingAccountError;
+    public static String azureSamplesPageLinkMS;
+    public static String azureSamplesDlgErMsg;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

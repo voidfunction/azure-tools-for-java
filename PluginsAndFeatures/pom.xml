@@ -7,8 +7,8 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-<!--    <module>AddLibrary/AppInsights/com.microsoft.applicationinsights.feature</module>
-	<module>AddLibrary/AppInsights/com.microsoft.applicationinsights.ui</module>-->
+    <module>AddLibrary/AppInsights/com.microsoft.applicationinsights.feature</module>
+	<module>AddLibrary/AppInsights/com.microsoft.applicationinsights.ui</module>
 	<module>AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk</module>
     <module>AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.sdk.feature</module>
 	<module>AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.wasdkjava.ui</module>
@@ -25,12 +25,10 @@
     <module>AddLibrary/QpidLibraries/com.microsoftopentechnologies.qpid.ui</module>
     <module>com.microsoft.azureexplorer</module>
     <module>com.microsoft.azureexplorer.feature</module>
-<!--    <module>com.microsoft.webapp</module>
-    <module>com.microsoft.webapp.feature</module>-->
+    <module>com.microsoft.webapp</module>
+    <module>com.microsoft.webapp.feature</module>
    <module>com.microsoft.hdinsights</module>
     <module>com.microsoft.hdinsights.feature</module>
-    <module>com.persistent.winazure.eclipseplugin</module>
-	<module>com.persistent.winazure.eclipseplugin.feature</module>   
 	<module>WindowsAzurePlugin4EJ</module>   
   </modules>
   <properties>

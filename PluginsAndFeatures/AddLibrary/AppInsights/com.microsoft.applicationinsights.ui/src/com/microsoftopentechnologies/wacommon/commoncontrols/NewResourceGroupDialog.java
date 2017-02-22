@@ -48,6 +48,7 @@ import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.tooling.msservices.model.vm.Location;
 import com.microsoftopentechnologies.wacommon.Activator;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 /**
  * Class creates new resource group.
@@ -65,11 +66,11 @@ public class NewResourceGroupDialog extends TitleAreaDialog {
 	public NewResourceGroupDialog(Shell parentShell, String subscription) {
 		super(parentShell);
 		this.subscription = subscription;
-		AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-        // not signed in
-        if (azureManager == null) {
-            return;
-        }
+//		AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+//        // not signed in
+//        if (azureManager == null) {
+//            return;
+//        }
 	}
 
 	@Override
@@ -109,7 +110,7 @@ public class NewResourceGroupDialog extends TitleAreaDialog {
 	}
 
 	private void populateValues() {
-		try {
+		/*try {
 			if (manager != null) {
 				List<Subscription> subList = manager.getSubscriptionList();
 				// check at least single subscription is associated with the account
@@ -121,11 +122,11 @@ public class NewResourceGroupDialog extends TitleAreaDialog {
 					String[] subNameArray = values.toArray(new String[values.size()]);
 
 					subscriptionCombo.setItems(subNameArray);
-					/*
+					
 					 * If subscription name is there,
 					 * dialog invoked from application insights/websites dialog,
 					 * hence disable subscription combo.
-					 */
+					 
 					if (subscription != null && !subscription.isEmpty()) {
 						subscriptionCombo.setEnabled(false);
 						subscriptionCombo.setText(subscription);
@@ -138,11 +139,11 @@ public class NewResourceGroupDialog extends TitleAreaDialog {
 			enableOkBtn();
 		} catch (Exception ex) {
 			Activator.getDefault().log(Messages.getValuesErrMsg, ex);
-		}
+		}*/
 	}
 
 	private void populateLocations() {
-		try {
+		/*try {
 			// Get list of locations available for subscription.
 			List<Location> locationList = manager.getLocations(findKeyAsPerValue(subscriptionCombo.getText()));
 			List<String> locationNameList = new ArrayList<String>();
@@ -154,7 +155,7 @@ public class NewResourceGroupDialog extends TitleAreaDialog {
 			locationCombo.setText(regionArray[0]);
 		} catch (Exception ex) {
 			Activator.getDefault().log(Messages.getValuesErrMsg, ex);
-		}
+		}*/
 	}
 
 	private void createNameCmpnt(Composite container) {

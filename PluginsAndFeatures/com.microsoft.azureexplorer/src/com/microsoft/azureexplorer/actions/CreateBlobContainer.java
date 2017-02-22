@@ -7,10 +7,8 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.BlobModule;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.ClientStorageNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageNode;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
-import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 
 @Name("Create blob container")
 public class CreateBlobContainer extends NodeActionListener {
@@ -28,7 +26,7 @@ public class CreateBlobContainer extends NodeActionListener {
     public void actionPerformed(NodeActionEvent e) {
     	String connectionString;
     	if (parent instanceof BlobModule) {
-    		connectionString = (((BlobModule) parent).getStorageAccount()).getConnectionString();
+    		connectionString = StorageClientSDKManager.getConnectionString(((BlobModule) parent).getStorageAccount());
     	} else {
     		connectionString = StorageClientSDKManager.getConnectionString(((StorageNode) parent).getStorageAccount());
     	}

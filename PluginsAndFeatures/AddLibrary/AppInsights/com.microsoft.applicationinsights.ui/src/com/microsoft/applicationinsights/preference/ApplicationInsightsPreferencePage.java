@@ -46,15 +46,12 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import com.gigaspaces.azure.wizards.WizardCacheManager;
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.ui.config.AIResourceChangeListener;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
 import com.microsoft.wacommon.applicationinsights.ApplicationInsightsResourceRegistryEclipse;
-import com.microsoftopentechnologies.wacommon.commoncontrols.ManageSubscriptionDialog;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 /**
@@ -309,7 +306,7 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 	 * Method imports existing application insights data from azure.
 	 */
 	protected void importButtonListener() {
-		try {
+		/*try {
 			AzureManager manager = AzureManagerImpl.getManager();
 			List<Subscription> subList = manager.getSubscriptionList();
 			if (subList.size() > 0) {
@@ -326,14 +323,14 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 			}
 		} catch(Exception ex) {
 			Activator.getDefault().log(Messages.importErrMsg, ex);
-		}
+		}*/
 	}
 
 	/**
 	 * Method opens dialog to create new application insights resource.
 	 */
 	protected void newButtonListener() {
-		try {
+		/*try {
 			AzureManager manager = AzureManagerImpl.getManager();
 			List<Subscription> subList = manager.getSubscriptionList();
 			if (subList.size() > 0) {
@@ -349,7 +346,7 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 			createNewDilaog();
 		} catch(Exception ex) {
 			Activator.getDefault().log(Messages.importErrMsg, ex);
-		}
+		}*/
 	}
 
 	public void createNewDilaog() {
@@ -460,7 +457,7 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 	}
 
 	private void loadInfoFirstTime() {
-		try {
+		/*try {
 			AzureManager manager = AzureManagerImpl.getManager();
 			List<Subscription> subList = manager.getSubscriptionList();
 			if (subList.size() > 0) {
@@ -482,11 +479,11 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 			}
 		} catch(Exception ex) {
 			Activator.getDefault().log(Messages.importErrMsg, ex);
-		}
+		}*/
 	}
 
 	private void createSubscriptionDialog(boolean invokeSignIn) {
-		try {
+		/*try {
 			ManageSubscriptionDialog dialog = new ManageSubscriptionDialog(getShell(), false, invokeSignIn);
 			dialog.create();
 			dialog.open();
@@ -499,6 +496,6 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 			tableViewer.refresh();
 		} catch(Exception ex) {
 			PluginUtil.displayErrorDialogWithAzureMsg(getShell(), Messages.appTtl, Messages.importErrMsg, ex);
-		}
+		}*/
 	}
 }

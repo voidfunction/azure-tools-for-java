@@ -261,15 +261,16 @@ public class ExternalStorageAccountForm extends Dialog {
         }
         populateStorageAccount();
         populateFullStorageAccount();
-        try {
+//        try {
             //Validate querystring by making a request
-            StorageClientSDKManager.getManager().getTables(StorageClientSDKManager.getManager().getStorageAccount(getFullStorageAccount().getConnectionString()));
+        	// TODO
+//            StorageClientSDKManager.getManager().getgetTables(StorageClientSDKManager.getManager().getStorageAccount(getFullStorageAccount().getConnectionString()));
 
-        } catch (AzureCmdException e) {
-            DefaultLoader.getUIHelper().showError(
-                    "The storage account contains invalid values. More information:\n" + e.getCause().getMessage(), "Azure Explorer");
-            return;
-        }
+//        } catch (AzureCmdException e) {
+//            DefaultLoader.getUIHelper().showError(
+//                    "The storage account contains invalid values. More information:\n" + e.getCause().getMessage(), "Azure Explorer");
+//            return;
+//        }
         if (onFinish != null) {
             onFinish.run();
         }

@@ -1,5 +1,6 @@
 package com.microsoft.azureexplorer.forms;
 
+import java.io.FileInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.List;
@@ -7,10 +8,12 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -20,6 +23,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -92,10 +96,10 @@ public class CreateArmStorageAccountForm extends Dialog {
 
     private Runnable onCreate;
     private SubscriptionDetail subscription;
-    private Region region;
+    private String region;
     private StorageAccount storageAccount;
 
-    public CreateArmStorageAccountForm(Shell parentShell, SubscriptionDetail subscription, Region region) {
+    public CreateArmStorageAccountForm(Shell parentShell, SubscriptionDetail subscription, String region) {
         super(parentShell);
         this.subscription = subscription;
         this.region = region;
@@ -334,7 +338,7 @@ public class CreateArmStorageAccountForm extends Dialog {
 			final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getText();
 			String replication = replicationComboBox.getData(replicationComboBox.getText()).toString();
 			// TODO: encriptionCombo
-			storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), nameTextField.getText(), (Region) regionComboBox.getData(regionComboBox.getText()), 
+			storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), nameTextField.getText(), regionComboBox.getText(), 
 					isNewResourceGroup, resourceGroupName, (Kind) kindCombo.getData(kindCombo.getText()), (AccessTier)accessTierComboBox.getData(accessTierComboBox.getText()),
 					false, replication);
 			

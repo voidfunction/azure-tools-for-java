@@ -94,7 +94,7 @@ public class TableFileEditor extends EditorPart {
     public void init(IEditorSite site, IEditorInput input) throws PartInitException {
         setSite(site);
         setInput(input);
-        storageAccount = ((StorageEditorInput) input).getStorageAccount();
+//        storageAccount = ((StorageEditorInput) input).getStorageAccount();
         table = (Table) ((StorageEditorInput) input).getItem();
         setPartName(table.getName() + " [Table]");
     }
@@ -226,13 +226,13 @@ public class TableFileEditor extends EditorPart {
 
         DefaultLoader.getIdeHelper().runInBackground(null, "Loading entities", false, true, "Loading entities", new Runnable() {
             public void run() {
-                try {
+                /*try {
                     tableEntities = StorageClientSDKManager.getManager().getTableEntities(storageAccount, table, queryText);
 
                     refreshGrid();
                 } catch (AzureCmdException e) {
                     DefaultLoader.getUIHelper().showException("Error querying entities", e, "Service Explorer", false, true);
-                }
+                }*/
             }
         });
     }
@@ -298,12 +298,12 @@ public class TableFileEditor extends EditorPart {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
                 monitor.beginTask("Deleting entities", IProgressMonitor.UNKNOWN);
-                try {
+//                try {
                     if (selectedEntities != null) {
                         for (int i = 0; i < selectedEntities.length; i++) {
                             monitor.worked(i * 100 / selectedEntities.length);
 
-                            StorageClientSDKManager.getManager().deleteTableEntity(storageAccount, selectedEntities[i]);
+//                            StorageClientSDKManager.getManager().deleteTableEntity(storageAccount, selectedEntities[i]);
                         }
                         DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                             @Override
@@ -315,10 +315,10 @@ public class TableFileEditor extends EditorPart {
                         });
                     }
                     return Status.OK_STATUS;
-                } catch (AzureCmdException ex) {
-                    DefaultLoader.getUIHelper().showException("Error deleting entities", ex, "Service Explorer", false, true);
-                    return Status.CANCEL_STATUS;
-                }
+//                } catch (AzureCmdException ex) {
+//                    DefaultLoader.getUIHelper().showException("Error deleting entities", ex, "Service Explorer", false, true);
+//                    return Status.CANCEL_STATUS;
+//                }
             }
         };
         job.schedule();

@@ -33,7 +33,6 @@ import org.eclipse.debug.ui.ILaunchGroup;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.graphics.Image;
 
-import com.microsoft.tooling.msservices.model.ws.WebAppsContainers;
 import com.microsoft.webapp.activator.Activator;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
@@ -146,7 +145,7 @@ public class WebAppUtils {
 
      public static String generateServerFolderName(String server, String version) {
           String serverFolder = "";
-          if (server.equalsIgnoreCase("TOMCAT")) {
+          /*if (server.equalsIgnoreCase("TOMCAT")) {
                if (version.equalsIgnoreCase(WebAppsContainers.TOMCAT_8.getValue())) {
                     version = WebAppsContainers.TOMCAT_8.getCurrentVersion();
                } else if (version.equalsIgnoreCase(WebAppsContainers.TOMCAT_7.getValue())) {
@@ -160,7 +159,7 @@ public class WebAppUtils {
                String version1 = version.substring(0, version.lastIndexOf('.') + 1);
                String version2 = version.substring(version.lastIndexOf('.') + 1, version.length());
                serverFolder = String.format("%s%s%s%s%s", "jetty-distribution", "-", version1, "v", version2);
-          }
+          }*/
           return serverFolder;
      }
 }

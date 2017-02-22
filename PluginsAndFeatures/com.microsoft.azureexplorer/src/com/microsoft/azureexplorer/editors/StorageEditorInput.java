@@ -19,6 +19,7 @@
  */
 package com.microsoft.azureexplorer.editors;
 
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.StorageServiceTreeItem;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -26,16 +27,17 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
 public class StorageEditorInput implements IEditorInput {
-    private ClientStorageAccount storageAccount;
+    private ClientStorageAccount clientStorageAccount;
+    private StorageAccount storageAccount;
     private StorageServiceTreeItem item;
 
-    public StorageEditorInput(ClientStorageAccount storageAccount, StorageServiceTreeItem item) {
+    public StorageEditorInput(StorageAccount storageAccount, ClientStorageAccount clientStorageAccount, StorageServiceTreeItem item) {
         this.storageAccount = storageAccount;
         this.item = item;
     }
 
-    public ClientStorageAccount getStorageAccount() {
-        return storageAccount;
+    public ClientStorageAccount getClientStorageAccount() {
+        return clientStorageAccount;
     }
 
     public StorageServiceTreeItem getItem() {
@@ -79,13 +81,16 @@ public class StorageEditorInput implements IEditorInput {
 
         StorageEditorInput that = (StorageEditorInput) o;
 
-        if (!storageAccount.getPrimaryKey().equals(that.storageAccount.getPrimaryKey())) return false;
+        if (clientStorageAccount != null && !clientStorageAccount.getPrimaryKey().equals(that.clientStorageAccount.getPrimaryKey()) || 
+        		storageAccount != null && !storageAccount.getKeys().get(0).value().equals(that.storageAccount.getKeys().get(0).value())) 
+        	return false;
         return item.getName().equals(that.item.getName());
     }
 
     @Override
     public int hashCode() {
-        int result = storageAccount.getPrimaryKey().hashCode();
+        int result = clientStorageAccount == null ? 
+        		storageAccount.getKeys().get(0).value().hashCode() : clientStorageAccount.getPrimaryKey().hashCode();
         result = 31 * result + item.getName().hashCode();
         return result;
     }

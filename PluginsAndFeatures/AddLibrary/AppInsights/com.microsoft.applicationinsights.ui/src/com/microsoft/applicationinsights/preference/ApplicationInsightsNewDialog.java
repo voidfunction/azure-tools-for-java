@@ -52,9 +52,6 @@ import com.microsoft.applicationinsights.util.AILibraryUtil;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
-import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoftopentechnologies.wacommon.commoncontrols.NewResourceGroupDialog;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 /**
@@ -120,7 +117,7 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 	}
 
 	private void populateValues() {
-		try {
+		/*try {
 			AzureManager manager = AzureManagerImpl.getManager();
 			List<Subscription> subList = manager.getSubscriptionList();
 			// check at least single subscription is associated with the account
@@ -147,7 +144,7 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 			enableOkBtn();
 		} catch (Exception ex) {
 			Activator.getDefault().log(Messages.getValuesErrMsg, ex);
-		}
+		}*/
 	}
 
 	private void populateResourceGroupValues(String subId, String valtoSet) {
@@ -349,7 +346,7 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 	@Override
 	protected void okPressed() {
 		boolean isValid = false;
-		try {
+		/*try {
 			PluginUtil.showBusy(true, getShell());
 			String subId = findKeyAsPerValue(subscription.getText());
 			Resource resource = AzureManagerImpl.getManager().createApplicationInsightsResource(
@@ -364,7 +361,7 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 			PluginUtil.showBusy(false, getShell());
 			PluginUtil.displayErrorDialogAndLog(getShell(),
 					Messages.appTtl, Messages.resCreateErrMsg, ex);
-		}
+		}*/
 		if (isValid) {
 			PluginUtil.showBusy(false, getShell());
 			super.okPressed();

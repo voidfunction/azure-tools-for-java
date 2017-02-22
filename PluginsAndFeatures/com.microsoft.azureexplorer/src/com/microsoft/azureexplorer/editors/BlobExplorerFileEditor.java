@@ -120,7 +120,7 @@ public class BlobExplorerFileEditor extends EditorPart {
     public void init(IEditorSite site, IEditorInput input) throws PartInitException {
         setSite(site);
         setInput(input);
-        storageAccount = ((StorageEditorInput) input).getStorageAccount();
+//        storageAccount = ((StorageEditorInput) input).getStorageAccount();
         blobContainer = (BlobContainer) ((StorageEditorInput) input).getItem();
         setPartName(blobContainer.getName() + " [Container]");
 //        fillGrid();

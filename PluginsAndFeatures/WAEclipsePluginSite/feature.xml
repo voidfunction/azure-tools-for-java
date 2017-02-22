@@ -29,18 +29,15 @@
          version="0.0.0"/>
 
    <includes
-         id="com.microsoftopentechnologies.wacommon.feature"
-         version="0.0.0"/>
-
-   <includes
          id="com.microsoftopentechnologies.windowsazure.tools.sdk.feature"
          version="0.0.0"/>
 
    <includes
-         id="com.persistent.winazure.eclipseplugin.feature"
+         id="com.microsoft.azureexplorer.feature"
          version="0.0.0"/>
 
-    <includes
-            id="com.microsoft.azureexplorer.feature"
-            version="0.0.0"/>
+   <includes
+         id="com.microsoft.azurecore.feature"
+         version="0.0.0"/>
+
 </feature>

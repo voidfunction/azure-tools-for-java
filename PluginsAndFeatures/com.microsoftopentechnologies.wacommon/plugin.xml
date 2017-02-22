@@ -57,6 +57,21 @@
          <toolbar id="com.persistent.ui.toolbar">
             <command commandId="com.microsoft.ui.dropdown.command" id="com.microsoft.ui.dropdown.toolbar.command"
             style="pulldown" tooltip="Publish"/>
+            
+            <command
+				commandId="com.microsoft.azuretools.eclipse.ui.WANewCertificate"
+				icon="icons/small/newCert.png"
+                label="New Self Signed Certificate"
+				tooltip="New Self Signed Certificate"
+				style="push">
+			</command>
+			<command
+                commandId="com.microsoft.azuretools.eclipse.ui.AzureSamplesCmd"
+                icon="icons/small/CodeSamples_16.png"
+                label="Azure Code Samples"
+                tooltip="Azure Code Samples"
+                style="push">
+			</command>
          </toolbar>
       </menuContribution>
    </extension>
@@ -100,6 +115,14 @@
             <enabledWhen>
                 <reference definitionId="when.is.signed.in"/>
             </enabledWhen>
+        </handler>
+        <handler
+            class="com.microsoft.azuretools.eclipse.ui.WANewCertificate"
+            commandId="com.microsoft.azuretools.eclipse.ui.WANewCertificate">
+        </handler>
+	    <handler
+            class="com.microsoft.azuretools.eclipse.ui.AzureSamples"
+            commandId="com.microsoft.azuretools.eclipse.ui.AzureSamplesCmd">
         </handler>
     </extension>
 <!--   

@@ -36,6 +36,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import com.google.common.collect.ImmutableMap;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.azureexplorer.editors.BlobExplorerFileEditor;
 import com.microsoft.azureexplorer.editors.QueueFileEditor;
@@ -115,7 +116,7 @@ public class UIHelperImpl implements UIHelper {
     }
 
     @Override
-    public <T extends StorageServiceTreeItem> void openItem(Object projectObject, final ClientStorageAccount storageAccount, final T item, String itemType, String itemName, String iconName) {
+    public <T extends StorageServiceTreeItem> void openItem(Object projectObject, final ClientStorageAccount clientStorageAccount, final T item, String itemType, String itemName, String iconName) {
 //        Display.getDefault().syncExec(new Runnable() {
 //            @Override
 //            public void run() {
@@ -133,7 +134,32 @@ public class UIHelperImpl implements UIHelper {
         IEditorDescriptor editorDescriptor=workbench.getEditorRegistry().findEditor(type2Editor.get(item.getClass()));
         try {
             IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-            IEditorPart newEditor = page.openEditor(new StorageEditorInput(storageAccount, item), editorDescriptor.getId());
+            IEditorPart newEditor = page.openEditor(new StorageEditorInput(null, clientStorageAccount, item), editorDescriptor.getId());
+        } catch (PartInitException e) {
+            Activator.getDefault().log("Error opening " + item.getName(), e);
+        }
+    }
+    
+    @Override
+    public <T extends StorageServiceTreeItem> void openItem(Object projectObject, final StorageAccount storageAccount, final T item, String itemType, String itemName, String iconName) {
+//        Display.getDefault().syncExec(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    BlobExplorerView view = (BlobExplorerView) PlatformUI
+//                            .getWorkbench().getActiveWorkbenchWindow()
+//                            .getActivePage().showView("com.microsoft.azureexplorer.views.BlobExplorerView");
+//                    view.init(storageAccount, (BlobContainer) blobContainer);
+//                } catch (PartInitException e) {
+//                    Activator.getDefault().log("Error opening container", e);
+//                }
+//            }
+//        });
+        IWorkbench workbench=PlatformUI.getWorkbench();
+        IEditorDescriptor editorDescriptor=workbench.getEditorRegistry().findEditor(type2Editor.get(item.getClass()));
+        try {
+            IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+            IEditorPart newEditor = page.openEditor(new StorageEditorInput(storageAccount, null, item), editorDescriptor.getId());
         } catch (PartInitException e) {
             Activator.getDefault().log("Error opening " + item.getName(), e);
         }
@@ -144,19 +170,20 @@ public class UIHelperImpl implements UIHelper {
     }
 
     @Override
-    public void refreshQueue(Object projectObject, final ClientStorageAccount storageAccount, final Queue queue) {
+    public void refreshQueue(Object projectObject, final StorageAccount storageAccount, final Queue queue) {
         IWorkbench workbench=PlatformUI.getWorkbench();
         final IEditorDescriptor editorDescriptor=workbench.getEditorRegistry()
                 .findEditor("com.microsoft.azureexplorer.editors.QueueFileEditor");
         DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
             public void run() {
-                try {
-                    IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-                    QueueFileEditor newEditor = (QueueFileEditor) page.openEditor(new StorageEditorInput(storageAccount, queue), editorDescriptor.getId());
-                    newEditor.fillGrid();
-                } catch (PartInitException e) {
-                    Activator.getDefault().log("Error opening container", e);
-                }
+            	// TODO
+//                try {
+//                    IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+//                    QueueFileEditor newEditor = (QueueFileEditor) page.openEditor(new StorageEditorInput(storageAccount, queue), editorDescriptor.getId());
+//                    newEditor.fillGrid();
+//                } catch (PartInitException e) {
+//                    Activator.getDefault().log("Error opening container", e);
+//                }
             }
         });
     }
@@ -181,19 +208,20 @@ public class UIHelperImpl implements UIHelper {
     }
 
     @Override
-    public void refreshTable(Object projectObject, final ClientStorageAccount storageAccount, final Table table) {
+    public void refreshTable(Object projectObject, final StorageAccount storageAccount, final Table table) {
         IWorkbench workbench=PlatformUI.getWorkbench();
         final IEditorDescriptor editorDescriptor=workbench.getEditorRegistry()
                 .findEditor("com.microsoft.azureexplorer.editors.TableFileEditor");
         DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
             public void run() {
-                try {
+            	// TODO
+                /*try {
                     IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
                     TableFileEditor newEditor = (TableFileEditor) page.openEditor(new StorageEditorInput(storageAccount, table), editorDescriptor.getId());
                     newEditor.fillGrid();
                 } catch (PartInitException e) {
                     Activator.getDefault().log("Error opening container", e);
-                }
+                }*/
             }
         });
     }

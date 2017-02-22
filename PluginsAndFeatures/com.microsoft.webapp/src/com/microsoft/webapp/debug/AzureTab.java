@@ -44,13 +44,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
-import com.gigaspaces.azure.util.PreferenceWebAppUtil;
+//import com.gigaspaces.azure.util.PreferenceWebAppUtil;
 import com.microsoft.azureexplorer.helpers.PreferenceUtil;
-import com.microsoft.tooling.msservices.model.ws.WebSite;
-import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoft.webapp.activator.Activator;
 import com.microsoft.webapp.config.Messages;
-import com.microsoft.webapp.config.WebAppDeployDialog;
+//import com.microsoft.webapp.config.WebAppDeployDialog;
 import com.microsoft.webapp.util.WebAppUtils;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
@@ -58,8 +56,8 @@ import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class AzureTab extends AbstractLaunchConfigurationTab {
 	Combo txtName;
-	Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
-	List<WebSite> webSiteList = new ArrayList<WebSite>();
+//	Map<WebSite, WebSiteConfiguration> webSiteConfigMap = new HashMap<WebSite, WebSiteConfiguration>();
+//	List<WebSite> webSiteList = new ArrayList<WebSite>();
 	Link lnkWebApp;
 
 	@Override
@@ -110,9 +108,9 @@ public class AzureTab extends AbstractLaunchConfigurationTab {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				String prevSelection = txtName.getText();
-				WebAppDeployDialog dialog = new WebAppDeployDialog(getShell());
-				dialog.create();
-				dialog.open();
+//				WebAppDeployDialog dialog = new WebAppDeployDialog(getShell());
+//				dialog.create();
+//				dialog.open();
 				List<String> listToDisplay = loadWebApps();
 				if (!listToDisplay.isEmpty()) {
 					if (!prevSelection.isEmpty() && listToDisplay.contains(prevSelection)) {
@@ -145,13 +143,13 @@ public class AzureTab extends AbstractLaunchConfigurationTab {
 							String.format(Messages.webappKey, PluginUtil.getSelectedProject().getName()));
 					int index = 0;
 					if (publishedTo != null && !publishedTo.isEmpty()) {
-						for (int i = 0; i < webSiteList.size(); i++) {
+						/*for (int i = 0; i < webSiteList.size(); i++) {
 							WebSite websiteTemp = webSiteList.get(i);
 							if (websiteTemp.getName().equalsIgnoreCase(publishedTo)) {
 								index = i;
 								break;
 							}
-						}
+						}*/
 					}
 					txtName.setText(listToDisplay.get(index));
 				}
@@ -163,7 +161,7 @@ public class AzureTab extends AbstractLaunchConfigurationTab {
 
 	private List<String> loadWebApps() {
 		List<String> listToDisplay = new ArrayList<>();
-		try {
+		/*try {
 			webSiteConfigMap = PreferenceWebAppUtil.load();
 			if (webSiteConfigMap != null) {
 				// filter out Java Web Apps
@@ -194,7 +192,7 @@ public class AzureTab extends AbstractLaunchConfigurationTab {
 			}
 		} catch (Exception e) {
 			Activator.getDefault().log(e.getMessage(), e);
-		}
+		}*/
 		return listToDisplay;
 	}
 

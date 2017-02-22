@@ -69,7 +69,6 @@ import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceR
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.util.AILibraryUtil;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.wacommon.applicationinsights.AILibraryHandler;
 import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
@@ -167,7 +166,7 @@ public class AIProjConfigWizardDialog extends TitleAreaDialog {
 	}
 	
 	private void setData() {
-		try {
+		/*try {
 			AzureManager manager = AzureManagerImpl.getManager();
 			List<Subscription> subList = manager.getSubscriptionList();
 			if (subList.size() > 0 && !ApplicationInsightsPreferences.isLoaded()) {
@@ -188,7 +187,7 @@ public class AIProjConfigWizardDialog extends TitleAreaDialog {
 		if (array.length > 0) {
 			comboInstrumentationKey.setItems(array);
 			comboInstrumentationKey.setText(array[0]);
-		}
+		}*/
 	}
 
 	private void populateData() {

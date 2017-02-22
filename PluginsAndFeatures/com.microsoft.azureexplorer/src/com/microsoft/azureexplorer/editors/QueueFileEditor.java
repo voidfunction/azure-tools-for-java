@@ -84,11 +84,11 @@ public class QueueFileEditor extends EditorPart {
 
     @Override
     public void init(IEditorSite site, IEditorInput input) throws PartInitException {
-        setSite(site);
+/*        setSite(site);
         setInput(input);
         storageAccount = ((StorageEditorInput) input).getStorageAccount();
         queue = (Queue) ((StorageEditorInput) input).getItem();
-        setPartName(queue.getName() + " [Queue]");
+        setPartName(queue.getName() + " [Queue]");*/
     }
 
     @Override
@@ -183,7 +183,7 @@ public class QueueFileEditor extends EditorPart {
                 if (optionDialog) {
                     DefaultLoader.getIdeHelper().runInBackground(null, "Clearing queue messages", false, true, "Clearing queue messages", new Runnable() {
                         public void run() {
-                            try {
+                            /*try {
 
                                 StorageClientSDKManager.getManager().clearQueue(storageAccount, queue);
 
@@ -195,7 +195,7 @@ public class QueueFileEditor extends EditorPart {
                                 });
                             } catch (AzureCmdException e) {
                                 DefaultLoader.getUIHelper().showException("Error clearing queue messages", e, "Service Explorer", false, true);
-                            }
+                            }*/
                         }
                     });
                 }
@@ -276,7 +276,7 @@ public class QueueFileEditor extends EditorPart {
     public void fillGrid() {
         DefaultLoader.getIdeHelper().runInBackground(null, "Loading queue messages", false, true, "Loading queue messages", new Runnable() {
             public void run() {
-                try {
+                /*try {
                     queueMessages = StorageClientSDKManager.getManager().getQueueMessages(storageAccount, queue);
 
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
@@ -290,7 +290,7 @@ public class QueueFileEditor extends EditorPart {
 
                 } catch (AzureCmdException e) {
                     DefaultLoader.getUIHelper().showException("Error getting queue messages", e, "Service Explorer", false, true);
-                }
+                }*/
             }
         });
     }
@@ -302,7 +302,7 @@ public class QueueFileEditor extends EditorPart {
                 new String[] {"Yes", "No"}, null)) {
             DefaultLoader.getIdeHelper().runInBackground(null, "Dequeuing message", false, true, "Dequeuing message", new Runnable() {
                 public void run() {
-                    try {
+                    /*try {
                         StorageClientSDKManager.getManager().dequeueFirstQueueMessage(storageAccount, queue);
 
                         DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
@@ -313,7 +313,7 @@ public class QueueFileEditor extends EditorPart {
                         });
                     } catch (AzureCmdException e) {
                         DefaultLoader.getUIHelper().showException("Error dequeuing messages", e, "Service Explorer", false, true);
-                    }
+                    }*/
                 }
             });
         }

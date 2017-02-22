@@ -112,7 +112,7 @@ public class QueueMessageForm extends Dialog {
         }
         DefaultLoader.getIdeHelper().runInBackground(null, "Adding queue message", false, true, "Adding queue message", new Runnable() {
             public void run() {
-                try {
+        /*        try {
                     QueueMessage queueMessage = new QueueMessage(
                             "",
                             queue.getName(),
@@ -128,7 +128,7 @@ public class QueueMessageForm extends Dialog {
                     }
                 } catch (AzureCmdException e) {
                     DefaultLoader.getUIHelper().showException("Error adding queue message", e, "Service Explorer", false, true);
-                }
+                }*/
             }
         });
         super.okPressed();

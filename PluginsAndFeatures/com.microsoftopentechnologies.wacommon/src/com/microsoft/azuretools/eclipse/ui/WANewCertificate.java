@@ -17,20 +17,39 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoft.webapp.config;
+package com.microsoft.azuretools.eclipse.ui;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.PlatformUI;
 
-public class WebAppCommandHandler extends AbstractHandler {
+import com.microsoftopentechnologies.wacommon.Activator;
+import com.microsoftopentechnologies.wacommon.commoncontrols.Messages;
+import com.microsoftopentechnologies.wacommon.commoncontrols.NewCertificateDialog;
+import com.microsoftopentechnologies.wacommon.commoncontrols.NewCertificateDialogData;
+import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
-	@Override
-	public Object execute(ExecutionEvent arg0) throws ExecutionException {
-		/*WebAppDeployDialog dialog = new WebAppDeployDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
-		dialog.create();
-		dialog.open();*/
+/**
+ * This class creates new self signed certificates.
+ */
+public class WANewCertificate extends AbstractHandler {
+
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		try {
+			NewCertificateDialogData data = new NewCertificateDialogData();
+			/*
+			 * third parameter is jdkPath
+			 * as its toolbar button, do not refer any project for JDK path
+			 * just pass empty string.
+			 */
+			NewCertificateDialog dialog = new NewCertificateDialog(PluginUtil.getParentShell(), data, "");
+			// Open the dialog
+			dialog.open();
+		} catch (Exception e) {
+			PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(), Messages.newCertDlgCrtErTtl,
+												Messages.newCertMsg, e);
+			Activator.getDefault().log(Messages.newCertMsg, e);
+		}
 		return null;
 	}
 }

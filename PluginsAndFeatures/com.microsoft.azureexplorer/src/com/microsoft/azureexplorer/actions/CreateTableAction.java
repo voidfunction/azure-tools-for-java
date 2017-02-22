@@ -37,7 +37,7 @@ public class CreateTableAction extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        CreateTableForm form = new CreateTableForm(PluginUtil.getParentShell(), tableModule.getStorageAccount());
+        /*CreateTableForm form = new CreateTableForm(PluginUtil.getParentShell(), tableModule.getStorageAccount());
 
         form.setOnCreate(new Runnable() {
             @Override
@@ -46,6 +46,6 @@ public class CreateTableAction extends NodeActionListener {
                 ((ClientStorageNode) tableModule.getParent()).load();
             }
         });
-        form.open();
+        form.open();*/
     }
 }

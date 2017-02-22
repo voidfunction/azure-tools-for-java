@@ -18,7 +18,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: com.microsoft.azure.hdinsight.common2,
  com.microsoft.azure.hdinsight.spark.common2,
- com.persistent.ui.propertypage,
  org.eclipse.core.expressions,
  org.eclipse.core.internal.resources,
  org.eclipse.core.resources,
@@ -40,4 +39,4 @@ Export-Package: com.microsoft.azure.hdinsight,
  com.microsoft.azure.hdinsight.spark.common2,
  com.microsoft.azure.hdinsight.spark.ui
 Bundle-ClassPath: .,
- resources/hdinsight-node-common.jar
+ resources/hdinsight-node-common-0.0.1-SNAPSHOT.jar

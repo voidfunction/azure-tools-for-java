@@ -52,6 +52,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -733,29 +734,34 @@ public class StorageClientSDKManager {
     }
 
     @NotNull
+    public static CloudStorageAccount getCloudStorageAccount(@NotNull String connectionString) throws URISyntaxException, InvalidKeyException {
+        return CloudStorageAccount.parse(connectionString);
+    }
+
+    @NotNull
     private static CloudBlobClient getCloudBlobClient(@NotNull ClientStorageAccount storageAccount)
             throws Exception {
-        CloudStorageAccount csa = AzureSDKHelper.getCloudStorageAccount(storageAccount.getConnectionString());
+        CloudStorageAccount csa = getCloudStorageAccount(storageAccount.getConnectionString());
 
         return csa.createCloudBlobClient();
     }
 
     @NotNull
     private static CloudBlobClient getCloudBlobClient(@NotNull StorageAccount storageAccount) throws Exception {
-        CloudStorageAccount csa = AzureSDKHelper.getCloudStorageAccount(getConnectionString(storageAccount));
+        CloudStorageAccount csa = getCloudStorageAccount(getConnectionString(storageAccount));
         return csa.createCloudBlobClient();
     }
 
     @NotNull
     private static CloudBlobClient getCloudBlobClient(@NotNull String connectionString) throws Exception {
-        CloudStorageAccount csa = AzureSDKHelper.getCloudStorageAccount(connectionString);
+        CloudStorageAccount csa = getCloudStorageAccount(connectionString);
         return csa.createCloudBlobClient();
     }
 
     @NotNull
     private static CloudQueueClient getCloudQueueClient(@NotNull StorageAccount storageAccount)
             throws Exception {
-        CloudStorageAccount csa = AzureSDKHelper.getCloudStorageAccount(getConnectionString(storageAccount));
+        CloudStorageAccount csa = getCloudStorageAccount(getConnectionString(storageAccount));
 
         return csa.createCloudQueueClient();
     }
@@ -763,7 +769,7 @@ public class StorageClientSDKManager {
     @NotNull
     private static CloudTableClient getCloudTableClient(@NotNull StorageAccount storageAccount)
             throws Exception {
-        CloudStorageAccount csa = AzureSDKHelper.getCloudStorageAccount(getConnectionString(storageAccount));
+        CloudStorageAccount csa = getCloudStorageAccount(getConnectionString(storageAccount));
 
         return csa.createCloudTableClient();
     }
