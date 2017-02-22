@@ -22,52 +22,49 @@
 package com.microsoft.azure.hdinsight.sdk.storage;
 
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
-import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
+import com.microsoft.tooling.msservices.model.ServiceTreeItem;
 
-public class HDStorageAccount extends ClientStorageAccount implements IHDIStorageAccount {
-    private String fullStorageBlobName;
+public class ADLSStorageAccount implements IHDIStorageAccount, ServiceTreeItem {
+    private String name;
     private boolean isDefaultStorageAccount;
-    private String defaultContainer;
+    private String defaultRootFolderPath;
     private IClusterDetail clusterDetail;
 
-    public HDStorageAccount(IClusterDetail clusterDetail, String name, String key, boolean isDefault, String defaultContainer) {
-        super(name.replace(".blob.core.windows.net", ""));
-        this.setPrimaryKey(key);
-        this.fullStorageBlobName = name;
-        this.isDefaultStorageAccount = isDefault;
-        this.defaultContainer = defaultContainer;
-        this.clusterDetail = clusterDetail;
+    @Override
+    public boolean isLoading() {
+        return false;
+    }
+
+    @Override
+    public void setLoading(boolean loading) {
+
     }
 
     @Override
     public String getSubscriptionId() {
-        return this.clusterDetail == null ? "" : this.clusterDetail.getSubscription().getSubscriptionId();
+        return this.clusterDetail.getSubscription().getSubscriptionId();
     }
 
     @Override
     public String getName() {
-        return super.getName();
+        return name;
     }
 
     @Override
     public StorageAccountTypeEnum getAccountType() {
-        return StorageAccountTypeEnum.BLOB;
+        return StorageAccountTypeEnum.ADLS;
     }
 
     @Override
     public String getDefaultContainerOrRootPath() {
-        return defaultContainer;
+        return defaultRootFolderPath;
     }
 
-    public String getFullStorageBlobName() {
-        return fullStorageBlobName;
-    }
-
-    public boolean isDefaultStorageAccount() {
-        return isDefaultStorageAccount;
-    }
-
-    public String getDefaultContainer() {
-        return defaultContainer;
+    public ADLSStorageAccount(IClusterDetail clusterDetail, String name, boolean isDefault, String defaultRootPath) {
+//        super(name.replace(".blob.core.windows.net", ""));
+        this.name = name;
+        this.isDefaultStorageAccount = isDefault;
+        this.defaultRootFolderPath = defaultRootPath;
+        this.clusterDetail = clusterDetail;
     }
 }

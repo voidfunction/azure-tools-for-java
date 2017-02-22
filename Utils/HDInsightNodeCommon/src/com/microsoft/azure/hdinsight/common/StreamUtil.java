@@ -21,7 +21,14 @@
  */
 package com.microsoft.azure.hdinsight.common;
 
+import com.microsoft.azure.datalake.store.ADLStoreClient;
+import com.microsoft.azure.datalake.store.ADLStoreOptions;
+import com.microsoft.azure.datalake.store.IfExists;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
+import com.microsoft.azure.hdinsight.sdk.storage.IHDIStorageAccount;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.tooling.msservices.helpers.NotNull;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 
@@ -31,6 +38,7 @@ import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class StreamUtil {
 
@@ -110,4 +118,19 @@ public class StreamUtil {
 
     private static StreamUtil streamUtil = new StreamUtil();
     private static ClassLoader classLoader = streamUtil.getClass().getClassLoader();
+    private static final String SPARK_SUBMISSION_FOLDER = "SparkSubmission";
+
+    public static String uploadArtifactToADLS(@NotNull File localFile, IHDIStorageAccount storageAccount) throws Exception {
+        com.microsoft.azuretools.sdkmanage.AzureManager manager = AuthMethodManager.getInstance().getAzureManager();
+        String tid = manager.getSubscriptionManager().getSubscriptionTenant(storageAccount.getSubscriptionId());
+        String accessToken = manager.getAccessToken(tid);
+        ADLStoreClient client = ADLStoreClient.createClient(String.format("%s.azuredatalakestore.net", storageAccount.getName()), accessToken);
+        ADLStoreOptions options = new ADLStoreOptions();
+        client.setOptions(options);
+        final String rootPath = storageAccount.getDefaultContainerOrRootPath();
+        final String uuid = UUID.randomUUID().toString();
+        final String filePath = String.format("%s/%s/%s/%s", rootPath, SPARK_SUBMISSION_FOLDER, uuid, localFile.getName());
+        client.createFile(filePath, IfExists.OVERWRITE).write(FileUtils.readFileToByteArray(localFile));
+        return String.format("adl://%s.azuredatalakestore.net/%s", storageAccount.getName(), filePath);
+    }
 }

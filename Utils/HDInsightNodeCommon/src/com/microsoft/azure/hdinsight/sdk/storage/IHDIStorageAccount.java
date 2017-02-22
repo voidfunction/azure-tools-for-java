@@ -19,37 +19,13 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.common;
+package com.microsoft.azure.hdinsight.sdk.storage;
 
-
-import com.google.common.util.concurrent.FutureCallback;
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.sun.net.httpserver.HttpExchange;
-
-import java.io.OutputStream;
-
-public abstract class  HttpFutureCallback implements FutureCallback<String> {
-    private final HttpExchange httpExchange;
-
-    public HttpFutureCallback(@NotNull HttpExchange httpExchange) {
-        this.httpExchange = httpExchange;
-    }
-
-    @Override
-    public void onFailure(Throwable t) {
-        dealWithFailure(t,httpExchange);
-    }
-
-    private static void dealWithFailure(@NotNull Throwable throwable,@NotNull final HttpExchange httpExchange) {
-        httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-        try {
-            String str = throwable.getMessage();
-            httpExchange.sendResponseHeaders(200, str.length());
-            OutputStream stream = httpExchange.getResponseBody();
-            stream.write(str.getBytes());
-            stream.close();
-        }catch (Exception e) {
-            //LOGGER.error("Get job history error", e);
-        }
-    }
+public interface IHDIStorageAccount {
+    String getName();
+    StorageAccountTypeEnum getAccountType();
+    String getDefaultContainerOrRootPath();
+    String getSubscriptionId();
 }
+
+

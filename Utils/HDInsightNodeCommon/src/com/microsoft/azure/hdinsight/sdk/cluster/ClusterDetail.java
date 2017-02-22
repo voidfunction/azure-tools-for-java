@@ -23,7 +23,9 @@ package com.microsoft.azure.hdinsight.sdk.cluster;
 
 import com.microsoft.azure.hdinsight.sdk.common.CommonConstant;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
+import com.microsoft.azure.hdinsight.sdk.storage.ADLSStorageAccount;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
+import com.microsoft.azure.hdinsight.sdk.storage.IHDIStorageAccount;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.Subscription;
@@ -36,12 +38,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ClusterDetail implements IClusterDetail {
+
+    private static final String ADL_HOME_PREFIX = "adl://home";
+    private static final String ADLS_HOME_HOST_NAME = "dfs.adls.home.hostname";
+    private static final String ADLS_HOME_MOUNTPOINT = "dfs.adls.home.mountpoint";
+
     private final String WorkerNodeName = "workernode";
     private final String DefaultFS = "fs.defaultFS";
     private final String FSDefaultName = "fs.default.name";
     private final String StorageAccountKeyPrefix = "fs.azure.account.key.";
     private final String StorageAccountNamePattern = "^wasb://(.*)@(.*)$";
-
     private final String ResourceGroupStartTag = "resourceGroups/";
     private final String ResourceGroupEndTag = "/providers/";
 
@@ -51,7 +57,7 @@ public class ClusterDetail implements IClusterDetail {
     private int dataNodes;
     private String userName;
     private String passWord;
-    private HDStorageAccount defaultStorageAccount;
+    private IHDIStorageAccount defaultStorageAccount;
     private List<HDStorageAccount> additionalStorageAccounts;
 
     private boolean isConfigInfoAvailable = false;
@@ -165,7 +171,7 @@ public class ClusterDetail implements IClusterDetail {
         return clusterProperties == null ? null : clusterProperties.getOsType();
     }
 
-    public HDStorageAccount getStorageAccount() throws HDIException{
+    public IHDIStorageAccount getStorageAccount() throws HDIException{
         if(defaultStorageAccount == null){
             throw new HDIException("default storage account is null, please call getConfigurationInfo first");
         }
@@ -209,7 +215,7 @@ public class ClusterDetail implements IClusterDetail {
         isConfigInfoAvailable = true;
     }
 
-    private HDStorageAccount getDefaultStorageAccount(Map<String, String> coresiteMap) throws HDIException{
+    private IHDIStorageAccount getDefaultStorageAccount(Map<String, String> coresiteMap) throws HDIException{
         String containerAddress = null;
         if(coresiteMap.containsKey(DefaultFS)){
             containerAddress = coresiteMap.get(DefaultFS);
@@ -221,24 +227,37 @@ public class ClusterDetail implements IClusterDetail {
             throw new HDIException("Failed to get default storage account");
         }
 
-        String storageAccountName = getStorageAccountName(containerAddress);
-        if(storageAccountName == null){
-            throw new HDIException("Failed to get default storage account name");
-        }
+        //for adls
+        if(ADL_HOME_PREFIX.equalsIgnoreCase(containerAddress)) {
+            String accountName = "";
+            String defaultRootPath = "";
+            if(coresiteMap.containsKey(ADLS_HOME_HOST_NAME)) {
+                accountName = coresiteMap.get(ADLS_HOME_HOST_NAME).split("\\.")[0];
+            }
+            if(coresiteMap.containsKey(ADLS_HOME_MOUNTPOINT)) {
+                defaultRootPath = coresiteMap.get(ADLS_HOME_MOUNTPOINT);
+            }
+            return new ADLSStorageAccount(this, accountName, true, defaultRootPath);
+        } else {
+            String storageAccountName = getStorageAccountName(containerAddress);
+            if(storageAccountName == null){
+                throw new HDIException("Failed to get default storage account name");
+            }
 
-        String defaultContainerName = getDefaultContainerName(containerAddress);
+            String defaultContainerName = getDefaultContainerName(containerAddress);
 
-        String keyNameOfDefaultStorageAccountKey = StorageAccountKeyPrefix + storageAccountName;
-        String storageAccountKey = null;
-        if(coresiteMap.containsKey(keyNameOfDefaultStorageAccountKey)){
-            storageAccountKey = coresiteMap.get(keyNameOfDefaultStorageAccountKey);
-        }
+            String keyNameOfDefaultStorageAccountKey = StorageAccountKeyPrefix + storageAccountName;
+            String storageAccountKey = null;
+            if(coresiteMap.containsKey(keyNameOfDefaultStorageAccountKey)){
+                storageAccountKey = coresiteMap.get(keyNameOfDefaultStorageAccountKey);
+            }
 
-        if(storageAccountKey == null){
-            throw new HDIException("Failed to get default storage account key");
+            if(storageAccountKey == null){
+                throw new HDIException("Failed to get default storage account key");
+            }
+
+            return new HDStorageAccount(this, storageAccountName, storageAccountKey,true, defaultContainerName);
         }
-        
-        return new HDStorageAccount(storageAccountName, storageAccountKey,true, defaultContainerName);
     }
 
     private List<HDStorageAccount> getAdditionalStorageAccounts(Map<String, String> coresiteMap){
@@ -255,7 +274,7 @@ public class ClusterDetail implements IClusterDetail {
 
             if(entry.getKey().contains(StorageAccountKeyPrefix)){
                 HDStorageAccount account =
-                        new HDStorageAccount(entry.getKey().substring(StorageAccountKeyPrefix.length()), entry.getValue(), false, null);
+                        new HDStorageAccount(this, entry.getKey().substring(StorageAccountKeyPrefix.length()), entry.getValue(), false, null);
                 storageAccounts.add(account);
             }
         }
