@@ -24,9 +24,8 @@ import java.util.HashMap;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
+import com.microsoftopentechnologies.azurecommons.util.ParserXMLUtility;
 import org.w3c.dom.Document;
-
-import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 
 public class DataOperations {
 	public static final String PROPERTY = "/data/property[@name='%s']";
@@ -34,7 +33,7 @@ public class DataOperations {
 
 	/**
 	 * Method updates or creates property element.
-	 * @param dataFile
+	 * @param doc
 	 * @param propertyName
 	 * @param value
 	 */
