@@ -21,7 +21,6 @@
  */
 package com.microsoft.intellij.docker.wizards.createhost.forms;
 
-import a.e.S;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
