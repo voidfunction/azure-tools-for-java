@@ -302,7 +302,13 @@ public class CreateArmStorageAccountForm extends Dialog {
                     "can contain only lowercase letters and numbers.", "Azure Explorer");
             return;
 		}
-
+        String name = nameTextField.getText();
+        String region = regionComboBox.getText();
+        final boolean isNewResourceGroup = createNewRadioButton.getSelection();
+		final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getText();
+		String replication = replicationComboBox.getData(replicationComboBox.getText()).toString();
+		Kind kind = (Kind) kindCombo.getData(kindCombo.getText());
+		AccessTier accessTier = (AccessTier)accessTierComboBox.getData(accessTierComboBox.getText());	
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(PluginUtil.getParentShell());
 		try {
 			dialog.run(true, false, new IRunnableWithProgress() {
@@ -310,15 +316,31 @@ public class CreateArmStorageAccountForm extends Dialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask("Creating storage account...", IProgressMonitor.UNKNOWN);
-					boolean success = createStorageAccount();
-					monitor.done();
-					if (success) {
+					try {
+						storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), name, region, 
+							isNewResourceGroup, resourceGroupName, kind, accessTier,
+							false, replication);
+					
+						// AzureManagerImpl.getManager().refreshStorageAccountInformation(storageAccount);
+						if (onCreate != null) {
+							onCreate.run();
+						}
+						monitor.done();
 						Display.getDefault().asyncExec(new Runnable() {
 							@Override
 							public void run() {
 								closeDialog();
 							}
 	                	});
+					} catch (Exception e) {
+						storageAccount = null;
+						DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), Messages.err,
+									"An error occurred while creating the storage account: " + e.getCause());
+							}
+						});
 					}
 				}
 			});
@@ -331,34 +353,6 @@ public class CreateArmStorageAccountForm extends Dialog {
     private void closeDialog() {
     	super.okPressed();
     }
-    
-    private boolean createStorageAccount() {
-		try {
-			final boolean isNewResourceGroup = createNewRadioButton.getSelection();
-			final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getText();
-			String replication = replicationComboBox.getData(replicationComboBox.getText()).toString();
-			// TODO: encriptionCombo
-			storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), nameTextField.getText(), regionComboBox.getText(), 
-					isNewResourceGroup, resourceGroupName, (Kind) kindCombo.getData(kindCombo.getText()), (AccessTier)accessTierComboBox.getData(accessTierComboBox.getText()),
-					false, replication);
-			
-			// AzureManagerImpl.getManager().refreshStorageAccountInformation(storageAccount);
-			if (onCreate != null) {
-				onCreate.run();
-			}
-			return true;
-		} catch (Exception e) {
-			storageAccount = null;
-			DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), Messages.err,
-							"An error occurred while creating the storage account: " + e.getCause());
-				}
-			});
-		}
-		return false;
-	}
 
     public void fillFields() {
         if (subscription == null) {
