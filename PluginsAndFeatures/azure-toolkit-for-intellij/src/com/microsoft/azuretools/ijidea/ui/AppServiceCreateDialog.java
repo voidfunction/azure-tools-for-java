@@ -31,14 +31,14 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
-import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.appservice.*;
+import com.microsoft.azure.management.appservice.AppServicePlan;
+import com.microsoft.azure.management.appservice.AppServicePricingTier;
+import com.microsoft.azure.management.appservice.WebApp;
+import com.microsoft.azure.management.appservice.WebContainer;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.ijidea.utility.UpdateProgressIndicator;
-import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.utils.*;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.Nullable;
@@ -535,33 +535,8 @@ public class AppServiceCreateDialog extends DialogWrapper {
         return cbModel;
     }
 
-    public enum JdkTab {
-        Default,
-        ThirdParty,
-        Own;
-    }
-
-    protected class Model {
-        public String webAppName;
-        public WebContainer webContainer;
-        public SubscriptionDetail subscriptionDetail;
-
-        public boolean isResourceGroupCreateNew;
-        public ResourceGroup resourceGroup;
-        public String resourceGroupNameCreateNew;
-
-        public boolean isAppServicePlanCreateNew;
-        public AppServicePlan appServicePlan;
-        public String appServicePlanNameCreateNew;
-        public Location appServicePlanLocationCreateNew;
-        public AppServicePricingTier appServicePricingTierCreateNew;
-
-        public String jdk3PartyUrl;
-        public String jdkOwnUrl;
-        public String storageAccountKey;
-        public JdkTab jdkTab;
-        public String jdkDownloadUrl;
-
+    protected class Model extends WebAppUtils.CreateAppServiceModel {
+        @Override
         public void collectData() {
             webAppName = textFieldWebappName.getText().trim();
             webContainer = (WebContainer)comboBoxWebContainer.getSelectedItem();
@@ -603,8 +578,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
     }
 
-    protected Model model = new Model();
-
+    protected WebAppUtils.CreateAppServiceModel model = new Model();
 
     @Nullable
     @Override
@@ -742,65 +716,6 @@ public class AppServiceCreateDialog extends DialogWrapper {
         return null;
     }
 
-    protected WebApp createAppService(IProgressIndicator progressIndicator) throws Exception {
-
-        AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-        // not signed in
-        if (azureManager == null) { return null; }
-
-        Azure azure = azureManager.getAzure(model.subscriptionDetail.getSubscriptionId());
-        WebApp.DefinitionStages.Blank definitionStages = azure.webApps().define(model.webAppName);
-        WebApp.DefinitionStages.WithAppServicePlan ds1;
-
-        if (model.isResourceGroupCreateNew) {
-            ds1 = definitionStages.withNewResourceGroup(model.resourceGroupNameCreateNew);
-        } else {
-            ds1 = definitionStages.withExistingResourceGroup(model.resourceGroup);
-        }
-
-        WebAppBase.DefinitionStages.WithCreate<WebApp> ds2;
-        if (model.isAppServicePlanCreateNew) {
-            ds2 = ds1.withNewAppServicePlan(model.appServicePlanNameCreateNew)
-                    .withRegion(model.appServicePlanLocationCreateNew.name())
-                    .withPricingTier(model.appServicePricingTierCreateNew);
-        } else {
-            ds2 = ds1.withExistingAppServicePlan(model.appServicePlan);
-        }
-
-        if (model.jdkDownloadUrl == null) { // no custom jdk
-            ds2 = ds2.withJavaVersion(JavaVersion.JAVA_8_NEWEST).withWebContainer(model.webContainer);
-        }
-
-        WebApp myWebApp = ds2.create();
-
-        if (model.jdkDownloadUrl != null ) {
-            progressIndicator.setText("Deploying custom jdk...");
-            WebAppUtils.deployCustomJdk(myWebApp, model.jdkDownloadUrl, model.webContainer, progressIndicator);
-        }
-
-        // update cache
-        AzureModel azureModel = AzureModel.getInstance();
-
-        if (model.isResourceGroupCreateNew) {
-            ResourceGroup rg = azure.resourceGroups().getByName(model.resourceGroupNameCreateNew);
-            AzureModelController.addNewResourceGroup(model.subscriptionDetail, rg);
-            if (model.isAppServicePlanCreateNew) {
-                AppServicePlan asp = azure.appServices().appServicePlans().getById(myWebApp.appServicePlanId());
-                AzureModelController.addNewAppServicePlanToJustCreatedResourceGroup(rg, asp);
-                AzureModelController.addNewWebAppToJustCreatedResourceGroup(rg, myWebApp);
-            }
-        } else {
-            ResourceGroup rg = model.resourceGroup;
-            AzureModelController.addNewWebAppToExistingResourceGroup(rg, myWebApp);
-            if (model.isAppServicePlanCreateNew) {
-                AppServicePlan asp = azure.appServices().appServicePlans().getById(myWebApp.appServicePlanId());
-                AzureModelController.addNewAppServicePlanToExistingResourceGroup(rg, asp);
-            }
-        }
-
-        return myWebApp;
-    }
-
     protected WebApp webApp;
 
     public WebApp getWebApp() {
@@ -819,7 +734,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
                 try {
                     progressIndicator.setIndeterminate(true);
                     progressIndicator.setText("Creating Web App Service...");
-                    webApp = createAppService(new UpdateProgressIndicator(progressIndicator));
+                    webApp = WebAppUtils.createAppService(new UpdateProgressIndicator(progressIndicator), model);
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
                         @Override
                         public void run() {

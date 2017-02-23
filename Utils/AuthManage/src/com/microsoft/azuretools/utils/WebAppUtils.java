@@ -23,10 +23,13 @@
 package com.microsoft.azuretools.utils;
 
 
-import com.microsoft.azure.management.appservice.JavaVersion;
-import com.microsoft.azure.management.appservice.PublishingProfile;
-import com.microsoft.azure.management.appservice.WebApp;
-import com.microsoft.azure.management.appservice.WebContainer;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.appservice.*;
+import com.microsoft.azure.management.resources.Location;
+import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -201,11 +204,11 @@ public class WebAppUtils {
 
     private static class WebAppException extends Exception {
         /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1352713295336034845L;
+         * 
+         */
+        private static final long serialVersionUID = 1352713295336034845L;
 
-		WebAppException(String message) {
+        WebAppException(String message) {
             super(message);
         }
     }
@@ -511,5 +514,95 @@ public class WebAppUtils {
         sb.append("    </system.web>\n");
         sb.append("</configuration>\n");
         return sb.toString().getBytes();
+    }
+
+
+    public static abstract class CreateAppServiceModel {
+        public enum JdkTab {
+            Default,
+            ThirdParty,
+            Own;
+        }
+        public String webAppName;
+        public WebContainer webContainer;
+        public SubscriptionDetail subscriptionDetail;
+
+        public boolean isResourceGroupCreateNew;
+        public ResourceGroup resourceGroup;
+        public String resourceGroupNameCreateNew;
+
+        public boolean isAppServicePlanCreateNew;
+        public AppServicePlan appServicePlan;
+        public String appServicePlanNameCreateNew;
+        public Location appServicePlanLocationCreateNew;
+        public AppServicePricingTier appServicePricingTierCreateNew;
+
+        public String jdk3PartyUrl;
+        public String jdkOwnUrl;
+        public String storageAccountKey;
+        public JdkTab jdkTab;
+        public String jdkDownloadUrl;
+
+        public abstract void collectData();
+
+    }
+
+    public static WebApp createAppService(IProgressIndicator progressIndicator, CreateAppServiceModel model) throws Exception {
+
+        AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+        // not signed in
+        if (azureManager == null) { return null; }
+
+        Azure azure = azureManager.getAzure(model.subscriptionDetail.getSubscriptionId());
+        WebApp.DefinitionStages.Blank definitionStages = azure.webApps().define(model.webAppName);
+        WebApp.DefinitionStages.WithAppServicePlan ds1;
+
+        if (model.isResourceGroupCreateNew) {
+            ds1 = definitionStages.withNewResourceGroup(model.resourceGroupNameCreateNew);
+        } else {
+            ds1 = definitionStages.withExistingResourceGroup(model.resourceGroup);
+        }
+
+        WebAppBase.DefinitionStages.WithCreate<WebApp> ds2;
+        if (model.isAppServicePlanCreateNew) {
+            ds2 = ds1.withNewAppServicePlan(model.appServicePlanNameCreateNew)
+                    .withRegion(model.appServicePlanLocationCreateNew.name())
+                    .withPricingTier(model.appServicePricingTierCreateNew);
+        } else {
+            ds2 = ds1.withExistingAppServicePlan(model.appServicePlan);
+        }
+
+        if (model.jdkDownloadUrl == null) { // no custom jdk
+            ds2 = ds2.withJavaVersion(JavaVersion.JAVA_8_NEWEST).withWebContainer(model.webContainer);
+        }
+
+        WebApp myWebApp = ds2.create();
+
+        if (model.jdkDownloadUrl != null ) {
+            progressIndicator.setText("Deploying custom jdk...");
+            WebAppUtils.deployCustomJdk(myWebApp, model.jdkDownloadUrl, model.webContainer, progressIndicator);
+        }
+
+        // update cache
+        AzureModel azureModel = AzureModel.getInstance();
+
+        if (model.isResourceGroupCreateNew) {
+            ResourceGroup rg = azure.resourceGroups().getByName(model.resourceGroupNameCreateNew);
+            AzureModelController.addNewResourceGroup(model.subscriptionDetail, rg);
+            if (model.isAppServicePlanCreateNew) {
+                AppServicePlan asp = azure.appServices().appServicePlans().getById(myWebApp.appServicePlanId());
+                AzureModelController.addNewAppServicePlanToJustCreatedResourceGroup(rg, asp);
+                AzureModelController.addNewWebAppToJustCreatedResourceGroup(rg, myWebApp);
+            }
+        } else {
+            ResourceGroup rg = model.resourceGroup;
+            AzureModelController.addNewWebAppToExistingResourceGroup(rg, myWebApp);
+            if (model.isAppServicePlanCreateNew) {
+                AppServicePlan asp = azure.appServices().appServicePlans().getById(myWebApp.appServicePlanId());
+                AzureModelController.addNewAppServicePlanToExistingResourceGroup(rg, asp);
+            }
+        }
+
+        return myWebApp;
     }
 }
