@@ -102,6 +102,7 @@ public class SubscriptionManager {
         synchronized (this) {
             if (subscriptionDetails != null) {
                 subscriptionDetails.clear();
+                subscriptionDetails = null;
                 sidToTid.clear();
             }
         }
