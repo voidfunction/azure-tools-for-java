@@ -120,7 +120,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       }
     });
 
-    DefaultComboBoxModel<AzureDockerSubscription> dockerSubscriptionComboModel = new DefaultComboBoxModel<AzureDockerSubscription>(new Vector<AzureDockerSubscription>(dockerManager.getSubscriptionsList()));
+    DefaultComboBoxModel<AzureDockerSubscription> dockerSubscriptionComboModel = new DefaultComboBoxModel<>(new Vector<>(dockerManager.getSubscriptionsList()));
     dockerSubscriptionComboBox.setModel(dockerSubscriptionComboModel);
     dockerSubscriptionComboBox.addActionListener(new ActionListener() {
       @Override
@@ -166,6 +166,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
         } else {
           updateDockerSelectVnetComboBox(currentSubscription, null);
         }
+        updateDockerHostVMSizeComboBox(dockerHostVMPrefferedSizesCheckBox.isSelected());
       }
     });
   }
@@ -191,6 +192,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
         }
       }
       dockerLocationComboBox.setModel(dockerLocationComboModel);
+      updateDockerHostVMSizeComboBox(dockerHostVMPrefferedSizesCheckBox.isSelected());
     }
   }
 
@@ -208,7 +210,6 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
     dockerHostVMPrefferedSizesCheckBox.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        // TODO: update list of vm sizes with full list of VM sizes
         updateDockerHostVMSizeComboBox(dockerHostVMPrefferedSizesCheckBox.isSelected());
       }
     });
@@ -223,7 +224,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
   }
 
   private void updateDockerHostVMSizeComboBox(boolean prefferedSizesOnly) {
-    DefaultComboBoxModel<String> dockerHostVMSizeComboModel = new DefaultComboBoxModel<String>();
+    DefaultComboBoxModel<String> dockerHostVMSizeComboModel = new DefaultComboBoxModel<>();
     if (prefferedSizesOnly) {
       for (KnownDockerVirtualMachineSizes knownDockerVirtualMachineSize : KnownDockerVirtualMachineSizes.values()) {
         dockerHostVMSizeComboModel.addElement(knownDockerVirtualMachineSize.name());
@@ -276,6 +277,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       });
     }
     dockerHostVMSizeComboBox.setModel(dockerHostVMSizeComboModel);
+    updateDockerSelectStorageComboBox((AzureDockerSubscription) dockerSubscriptionComboBox.getSelectedItem());
   }
 
   private void updateDockerHostRGGroup() {
@@ -324,7 +326,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
   }
 
   private void updateDockerHostSelectRGComboBox(AzureDockerSubscription subscription) {
-    DefaultComboBoxModel<String> dockerHostSelectRGComboModel = new DefaultComboBoxModel<>(new Vector<String>(dockerManager.getResourceGroups(subscription)));
+    DefaultComboBoxModel<String> dockerHostSelectRGComboModel = new DefaultComboBoxModel<>(new Vector<>(dockerManager.getResourceGroups(subscription)));
     dockerHostSelectRGComboBox.setModel(dockerHostSelectRGComboModel);
   }
 
@@ -426,7 +428,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
 
   private void updateDockerSelectSubnetComboBox(AzureDockerVnet vnet) {
     DefaultComboBoxModel<String> dockerHostSelectSubnetComboModel = (vnet != null) ?
-        new DefaultComboBoxModel<>(new Vector<String>(vnet.subnets)) :
+        new DefaultComboBoxModel<>(new Vector<>(vnet.subnets)) :
         new DefaultComboBoxModel<>();
     dockerHostSelectSubnetComboBox.setModel(dockerHostSelectSubnetComboModel);
   }
@@ -478,11 +480,14 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
 
   private void updateDockerSelectStorageComboBox(AzureDockerSubscription subscription) {
     String vmImageSize = (String) dockerHostVMSizeComboBox.getSelectedItem();
+    DefaultComboBoxModel<String> dockerHostStorageComboModel;
     if (vmImageSize != null) {
       String vmImageType = vmImageSize.contains("_DS") ? "Premium_LRS" : "Standard_LRS";
-      DefaultComboBoxModel<String> dockerHostStorageComboModel = new DefaultComboBoxModel<>(new Vector<String>(dockerManager.getAvailableStorageAccounts(subscription.id, vmImageType)));
-      dockerSelectStorageComboBox.setModel(dockerHostStorageComboModel);
+      dockerHostStorageComboModel = new DefaultComboBoxModel<>(new Vector<>(dockerManager.getAvailableStorageAccounts(subscription.id, vmImageType)));
+    } else {
+      dockerHostStorageComboModel = new DefaultComboBoxModel<>();
     }
+    dockerSelectStorageComboBox.setModel(dockerHostStorageComboModel);
   }
 
   public DockerHost getDockerHost() {
