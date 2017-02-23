@@ -80,7 +80,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
 
   public AzureNewDockerLoginStep(String title, AzureNewDockerWizardModel model) {
     // TODO: The message should go into the plugin property file that handles the various dialog titles
-    super(title, "Configure the new Docker virtual machine log in credentials and port settings");
+    super(title, "Configure log in credentials and port settings");
     this.model = model;
     this.dockerManager = model.getDockerManager();
     this.newHost = model.getDockerHost();

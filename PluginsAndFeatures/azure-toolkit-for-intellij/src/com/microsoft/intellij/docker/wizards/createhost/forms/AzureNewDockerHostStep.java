@@ -21,21 +21,33 @@
  */
 package com.microsoft.intellij.docker.wizards.createhost.forms;
 
+import a.e.S;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
+import com.microsoft.azure.PagedList;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.*;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.intellij.docker.utils.AzureDockerValidationUtils;
 import com.microsoft.intellij.docker.wizards.createhost.AzureNewDockerWizardModel;
 import com.microsoft.intellij.docker.wizards.createhost.AzureNewDockerWizardStep;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
@@ -73,6 +85,11 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
   private JPanel rgPanel;
   private JPanel networkPanel;
   private JPanel storagePanel;
+  private JLabel dockerLocationLabel;
+  private JCheckBox dockerHostVMPrefferedSizesCheckBox;
+
+  private String prefferedLocation;
+  private final String SELECT_REGION = "<select region>";
 
   private AzureNewDockerWizardModel model;
   private AzureDockerHostsManager dockerManager;
@@ -80,10 +97,12 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
 
   public AzureNewDockerHostStep(String title, AzureNewDockerWizardModel model) {
     // TODO: The message should go into the plugin property file that handles the various dialog titles
-    super(title, "Configure the Docker virtual machine to be created");
+    super(title, "Configure the new virtual machine");
     this.model = model;
     this.dockerManager = model.getDockerManager();
     this.newHost = model.getDockerHost();
+
+    prefferedLocation = null;
 
     dockerHostNameLabel.setVisible(false);
     dockerHostNameTextField.setText(newHost.name);
@@ -118,7 +137,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
 
     updateDockerLocationGroup();
     updateDockerHostOSTypeComboBox();
-    updateDockerHostVMSizeComboBox();
+    updateDockerHostVMSize();
     updateDockerHostRGGroup();
     updateDockerHostVnetGroup();
     updateDockerHostStorageGroup();
@@ -132,10 +151,21 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       @Override
       public void actionPerformed(ActionEvent e) {
         AzureDockerSubscription currentSubscription = (AzureDockerSubscription) dockerSubscriptionComboBox.getSelectedItem();
-        updateDockerHostSelectRGComboBox(currentSubscription);
+//        updateDockerHostSelectRGComboBox(currentSubscription);
         String region = (String) dockerLocationComboBox.getSelectedItem();
-        Region regionObj = Region.findByLabelOrName(region);
-        updateDockerSelectVnetComboBox( currentSubscription, regionObj != null ? regionObj.name() : region);
+        if (!region.equals(SELECT_REGION)) {
+          Region regionObj = Region.findByLabelOrName(region);
+          String selectedRegion = regionObj != null ? regionObj.name() : region;
+          if (prefferedLocation == null && selectedRegion != null) {
+            // remove the SELECT_REGION entry (first entry in the list)
+            dockerLocationComboBox.removeItemAt(0);
+            dockerLocationLabel.setVisible(false);
+          }
+          prefferedLocation = selectedRegion;
+          updateDockerSelectVnetComboBox(currentSubscription, selectedRegion);
+        } else {
+          updateDockerSelectVnetComboBox(currentSubscription, null);
+        }
       }
     });
   }
@@ -143,14 +173,24 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
   private void updateDockerLocationComboBox(AzureDockerSubscription currentSubscription) {
     if (currentSubscription != null && currentSubscription.locations != null) {
       DefaultComboBoxModel<String> dockerLocationComboModel = new DefaultComboBoxModel<>(); //new Vector<String>(currentSubscription.locations));
-      for (String region : currentSubscription.locations) {
-        Region regionObj = Region.findByLabelOrName(region);
-        dockerLocationComboModel.addElement(regionObj != null ? regionObj.label() : region);
+      if (currentSubscription.locations.size() > 0) {
+        String previousSelection = prefferedLocation;
+        prefferedLocation = null;
+        for (String region : currentSubscription.locations) {
+          Region regionObj = Region.findByLabelOrName(region);
+          dockerLocationComboModel.addElement(regionObj != null ? regionObj.label() : region);
+          if (previousSelection != null && region.equals(previousSelection)) {
+            prefferedLocation = region;
+            dockerLocationComboModel.setSelectedItem(regionObj != null ? regionObj.label() : region);
+          }
+        }
+        if (prefferedLocation == null) {
+          dockerLocationComboModel.insertElementAt(SELECT_REGION, 0);
+          dockerLocationComboModel.setSelectedItem(SELECT_REGION);
+          dockerLocationLabel.setVisible(true);
+        }
       }
       dockerLocationComboBox.setModel(dockerLocationComboModel);
-      try {
-        dockerLocationComboModel.setSelectedItem("Central US");
-      } catch (Exception e) {}
     }
   }
 
@@ -162,21 +202,80 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
     dockerHostOSTypeComboBox.setModel(dockerHostOSTypeComboModel);
   }
 
-  private void updateDockerHostVMSizeComboBox() {
-    DefaultComboBoxModel<String> dockerHostVMSizeComboModel = new DefaultComboBoxModel<String>();
-    for (KnownDockerVirtualMachineSizes knownDockerVirtualMachineSize : KnownDockerVirtualMachineSizes.values()) {
-      dockerHostVMSizeComboModel.addElement(knownDockerVirtualMachineSize.name());
-    }
-    dockerHostVMSizeComboBox.setModel(dockerHostVMSizeComboModel);
-    if (dockerHostVMSizeComboModel.getSize() > 0) {
-      dockerHostVMSizeComboModel.setSelectedItem(dockerHostVMSizeComboModel.getElementAt(0));
-    }
+  private void updateDockerHostVMSize() {
+    dockerHostVMPrefferedSizesCheckBox.setSelected(true);
+//    dockerHostVMPrefferedSizesCheckBox.setEnabled(false);
+    dockerHostVMPrefferedSizesCheckBox.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        // TODO: update list of vm sizes with full list of VM sizes
+        updateDockerHostVMSizeComboBox(dockerHostVMPrefferedSizesCheckBox.isSelected());
+      }
+    });
+
     dockerHostVMSizeComboBox.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         updateDockerSelectStorageComboBox((AzureDockerSubscription) dockerSubscriptionComboBox.getSelectedItem());
       }
     });
+    updateDockerHostVMSizeComboBox(true);
+  }
+
+  private void updateDockerHostVMSizeComboBox(boolean prefferedSizesOnly) {
+    DefaultComboBoxModel<String> dockerHostVMSizeComboModel = new DefaultComboBoxModel<String>();
+    if (prefferedSizesOnly) {
+      for (KnownDockerVirtualMachineSizes knownDockerVirtualMachineSize : KnownDockerVirtualMachineSizes.values()) {
+        dockerHostVMSizeComboModel.addElement(knownDockerVirtualMachineSize.name());
+      }
+      if (dockerHostVMSizeComboModel.getSize() > 0) {
+        dockerHostVMSizeComboModel.setSelectedItem(dockerHostVMSizeComboModel.getElementAt(0));
+      }
+    } else {
+      dockerHostVMSizeComboModel.addElement("<Loading...>");
+      ProgressManager.getInstance().run(new Task.Backgroundable(model.getProject(), "Loading VM Sizes...", false) {
+        @Override
+        public void run(@NotNull ProgressIndicator progressIndicator) {
+          progressIndicator.setIndeterminate(true);
+
+          Azure azureClient = ((AzureDockerSubscription) dockerSubscriptionComboBox.getSelectedItem()).azureClient;
+
+          PagedList<VirtualMachineSize> sizes = azureClient.virtualMachines().sizes().listByRegion(prefferedLocation);
+          Collections.sort(sizes, new Comparator<VirtualMachineSize>() {
+            @Override
+            public int compare(VirtualMachineSize t0, VirtualMachineSize t1) {
+              if (t0.name().contains("Basic") && t1.name().contains("Basic")) {
+                return t0.name().compareTo(t1.name());
+              } else if (t0.name().contains("Basic")) {
+                return -1;
+              } else if (t1.name().contains("Basic")) {
+                return 1;
+              }
+
+              int coreCompare = Integer.valueOf(t0.numberOfCores()).compareTo(t1.numberOfCores());
+
+              if (coreCompare == 0) {
+                return Integer.valueOf(t0.memoryInMB()).compareTo(t1.memoryInMB());
+              } else {
+                return coreCompare;
+              }
+            }
+          });
+
+          ApplicationManager.getApplication().invokeAndWait(new Runnable() {
+            @Override
+            public void run() {
+              dockerHostVMSizeComboModel.removeAllElements();
+              for (VirtualMachineSize vmSize : sizes) {
+                dockerHostVMSizeComboModel.addElement(vmSize.name());
+              }
+              dockerHostVMSizeComboBox.repaint();
+            }
+          }, ModalityState.any());
+        }
+      });
+    }
+    dockerHostVMSizeComboBox.setModel(dockerHostVMSizeComboModel);
   }
 
   private void updateDockerHostRGGroup() {
@@ -434,14 +533,14 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
   private ValidationInfo validateDockerLocation(boolean shakeOnError) {
     // Location/region
     String region = (String) dockerLocationComboBox.getSelectedItem();
-    if (region == null || region.isEmpty()) {
+    if (prefferedLocation == null || region == null || region.isEmpty()) {
       ValidationInfo info = AzureDockerUIResources.validateComponent("Location not found", rootConfigureContainerPanel, dockerLocationComboBox, null);
       if (shakeOnError) {
         model.DialogShaker(info);
       }
       return info;
     }
-    newHost.hostVM.region = region;
+    newHost.hostVM.region = prefferedLocation;
     newHost.hostVM.dnsName = String.format("%s.%s.cloudapp.azure.com", newHost.hostVM.name, newHost.hostVM.region);
     newHost.apiUrl = newHost.hostVM.dnsName;
 

@@ -84,7 +84,7 @@ public class AzureDockerHostDeployAction extends AnAction {
       }
 
       if (dockerManager.getSubscriptionsMap().isEmpty()) {
-        PluginUtil.displayErrorDialog("Publish Docker Container", "Must select an Azure subscription first");
+        PluginUtil.displayErrorDialog("Publish Docker Container", "Please select a subscription first");
         return;
       }
 

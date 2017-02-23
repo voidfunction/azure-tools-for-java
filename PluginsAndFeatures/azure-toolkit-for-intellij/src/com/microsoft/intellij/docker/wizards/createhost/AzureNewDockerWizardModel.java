@@ -42,7 +42,8 @@ public class AzureNewDockerWizardModel extends WizardModel {
   public boolean finishedOK;
 
   public AzureNewDockerWizardModel(final Project project, AzureDockerHostsManager dockerManager) {
-    super("Create a virtual machine as a Docker host");
+//    super("Create a virtual machine as a Docker host");
+    super("");
     this.project = project;
     this.dockerManager = dockerManager;
     this.finishedOK = true;

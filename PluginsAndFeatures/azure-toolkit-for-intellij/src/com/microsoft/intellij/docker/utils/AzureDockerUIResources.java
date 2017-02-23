@@ -46,10 +46,8 @@ import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.*;
 
-import static com.intellij.projectImport.ProjectImportBuilder.getCurrentProject;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class AzureDockerUIResources {
@@ -265,10 +263,6 @@ public class AzureDockerUIResources {
         }
       }
 
-      if (dockerManager.getSubscriptionsMap().isEmpty()) {
-        PluginUtil.displayErrorDialog("Publish Docker Container", "Must select an Azure subscription first");
-        return;
-      }
 
       AzureDockerImageInstance dockerImageDescription = new AzureDockerImageInstance();
       dockerImageDescription.dockerImageName = AzureDockerUtils.getDefaultDockerImageName(project.getName()).toLowerCase();

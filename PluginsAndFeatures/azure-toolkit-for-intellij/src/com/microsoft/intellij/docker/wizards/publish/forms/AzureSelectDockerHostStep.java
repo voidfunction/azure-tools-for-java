@@ -85,7 +85,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
 
   public AzureSelectDockerHostStep(String title, AzureSelectDockerWizardModel model, AzureDockerHostsManager dockerManager, AzureDockerImageInstance dockerImageInstance) {
     // TODO: The message should go into the plugin property file that handles the various dialog titles
-    super(title, "Type an image name, select the artifact path and check a Docker to be used");
+    super(title, "Type an image name, select the artifact's path and check a Docker host to be used");
     this.model = model;
     this.dockerManager = dockerManager;
     this.dockerImageDescription = dockerImageInstance;
@@ -308,7 +308,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
   private void onAddNewDockerHostAction() {
     AzureNewDockerWizardModel newDockerHostModel = new AzureNewDockerWizardModel(model.getProject(), dockerManager);
     AzureNewDockerWizardDialog wizard = new AzureNewDockerWizardDialog(newDockerHostModel);
-    wizard.setTitle("Create a Docker Host");
+    wizard.setTitle("Create Docker Host");
     wizard.show();
 
     if (wizard.getExitCode() == 0) {

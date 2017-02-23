@@ -42,7 +42,7 @@ public class AzureSelectDockerWizardModel extends WizardModel {
   public boolean finishedOK;
 
   public AzureSelectDockerWizardModel(final Project project, AzureDockerHostsManager uiManager, AzureDockerImageInstance dockerImageInstance) {
-    super("Docker on Azure Deployment");
+    super("");
     this.project = project;
     this.dockerManager = uiManager;
     this.dockerImageDescription = dockerImageInstance;
