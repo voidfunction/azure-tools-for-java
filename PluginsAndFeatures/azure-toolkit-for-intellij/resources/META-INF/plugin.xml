@@ -31,16 +31,10 @@
             canCloseContents="true"
             icon="/icons/RoleFolder.gif"
             conditionClass="com.microsoft.intellij.activitylog.ActivityLogToolWindowFactoryCondition"/>
-    <moduleType id="AZURE_MODULE"
-                implementationClass="com.microsoft.intellij.module.AzureModuleType"/>
-    <moduleConfigurationEditorProvider
-            implementation="com.microsoft.intellij.module.AzureModuleConfigurationEditorProvider"/>
     <projectConfigurable groupId="root"
                          id="com.microsoft.intellij.AzureConfigurable"
                          provider="com.microsoft.intellij.AzureConfigurableProvider"
                          dynamic="true"/>
-    <iconProvider implementation="com.microsoft.intellij.AzureIconProvider"
-                  order="before javaDirectory"/>
     <projectService serviceInterface="com.microsoft.intellij.AzureSettings"
                     serviceImplementation="com.microsoft.intellij.AzureSettings"/>
     <applicationService serviceInterface="com.microsoft.intellij.ApplicationSettings"
@@ -87,41 +81,9 @@
       <implementation-class>com.microsoft.intellij.AzurePlugin</implementation-class>
       <loadForDefaultProject/>
     </component>
-    <component>
-      <implementation-class>com.microsoft.intellij.components.MSToolsApplication</implementation-class>
-    </component>
   </project-components>
 
   <actions>
-    <action id="Actions.RunInEmulatorAction"
-            class="com.microsoft.intellij.actions.RunInEmulatorAction" text="Run in Azure Emulator"
-            description="Run in Azure Emulator" icon="/icons/RunEmulatorIcon.png"/>
-    <action id="Actions.ResetEmulatorAction"
-            class="com.microsoft.intellij.actions.ResetEmulatorAction" text="Reset Azure Emulator"
-            description="Reset Azure Emulator" icon="/icons/ResetEmulatorIcon.png"/>
-    <action id="Actions.PackageAction" class="com.microsoft.intellij.actions.PackageAction"
-            text="New Azure Deployment Project"
-            description="New Azure Deployment Project" icon="/icons/small/cloudService.png"/>
-    <action id="Actions.DeployAction" class="com.microsoft.intellij.actions.DeployAction"
-            text="Publish as Azure Cloud Service..."
-            description="Publish as Azure Cloud Service" icon="/icons/publish.png"/>
-    <action id="Actions.UnpublishAction" class="com.microsoft.intellij.actions.UnpublishAction"
-            text="Unpublish"
-            description="Unpublish" icon="/icons/unpublish.png"/>
-    <action id="Actions.BuildPackageAction"
-            class="com.microsoft.intellij.actions.BuildPackageAction"
-            text="Build Cloud Package for Azure"
-            description="Build Cloud Package for Azure" icon="/icons/BuildToCloudIcon.png"/>
-    <action id="Actions.RolePropertiesAction"
-            class="com.microsoft.intellij.actions.RolePropertiesAction" text="Role Properties"
-            description="Role Properties"/>
-    <action id="Actions.ModulePropertiesAction"
-            class="com.microsoft.intellij.actions.ModulePropertiesAction" text="Properties..."
-            description="Properties..." icon="/icons/small/cloudService.png"/>
-    <action id="Actions.AddRoleAction"
-            class="com.microsoft.intellij.actions.AddRoleAction"
-            text="Add Role..."
-            description="Add Role..." icon="/icons/RoleFolder.gif"/>
     <action id="Actions.LibraryConfigurationAction"
             class="com.microsoft.intellij.actions.LibraryConfigurationAction" text="Libraries Configuration"
             description="Libraries Configuration"/>
@@ -158,13 +120,6 @@
       <separator/>
       <reference ref="Actions.ApplicationInsightsAction"/>
       <separator/>
-      <reference ref="Actions.DeployAction"/>
-      <reference ref="Actions.UnpublishAction"/>
-      <reference ref="Actions.RolePropertiesAction"/>
-      <separator/>
-      <reference id="Actions.AddRoleAction"/>
-      <separator/>
-      <reference ref="Actions.ModulePropertiesAction"/>
       <reference ref="Actions.LibraryConfigurationAction"/>
     </group>
 
@@ -172,13 +127,7 @@
       <group id="PublishToAzureGroup" text="Publish Group" description="Publish Group" popup="true" icon="/icons/publish.png">
         <reference ref="Actions.AzureWebDeploy"/>
         <reference ref="Actions.AzureDockerHostDeploy"/>
-        <reference ref="Actions.DeployAction"/>
       </group>
-      <reference ref="Actions.RunInEmulatorAction"/>
-      <reference ref="Actions.ResetEmulatorAction"/>
-      <reference ref="Actions.BuildPackageAction"/>
-      <reference ref="Actions.PackageAction"/>
-      <reference ref="Actions.UnpublishAction"/>
       <reference ref="Actions.AzureCodeSamples"/>
     </group>
 
