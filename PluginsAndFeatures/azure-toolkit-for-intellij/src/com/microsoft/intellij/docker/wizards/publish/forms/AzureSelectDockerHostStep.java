@@ -39,6 +39,7 @@ import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.model.EditableDockerHost;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
@@ -315,9 +316,19 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       dockerHostsTable.setEnabled(false);
 
       DockerHost host = newDockerHostModel.getDockerHost();
+
       dockerImageDescription.host = host;
       dockerImageDescription.hasNewDockerHost = true;
       dockerImageDescription.sid = host.sid;
+
+      AzureDockerPreferredSettings dockerPrefferedSettings = dockerManager.getDockerPreferredSettings();
+      if (dockerPrefferedSettings == null) {
+        dockerPrefferedSettings = new AzureDockerPreferredSettings();
+      }
+      dockerPrefferedSettings.region = host.hostVM.region;
+      dockerPrefferedSettings.vmSize = host.hostVM.vmSize;
+      dockerPrefferedSettings.vmOS = host.hostOSType.name();
+      dockerManager.setDockerPreferredSettings(dockerPrefferedSettings);
 
       final DefaultTableModel tableModel = (DefaultTableModel) dockerHostsTable.getModel();
 

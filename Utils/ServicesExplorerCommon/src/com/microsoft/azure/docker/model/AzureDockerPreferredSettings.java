@@ -21,23 +21,11 @@
  */
 package com.microsoft.azure.docker.model;
 
-import com.microsoft.azure.keyvault.KeyVaultClient;
-import com.microsoft.azure.management.Azure;
+public class AzureDockerPreferredSettings {
+  public String region;
+  public String vmOS;
+  public String vmSize;
+  public String dockerApiName;
+  public String dockerfileOption;
 
-import java.util.List;
-
-public class AzureDockerSubscription {
-  public String name;
-  public String id;
-  public String tid;
-  public Azure azureClient;
-  public KeyVaultClient keyVaultClient;
-  public List<String> locations;
-  public boolean isSelected;
-  public String userId;
-  public String servicePrincipalId;
-
-  public String toString() {
-    return name;
-  }
 }

@@ -23,17 +23,10 @@ package com.microsoft.azure.docker;
 
 import com.microsoft.azure.docker.model.*;
 import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
-import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.keyvault.KeyVaultClient;
-import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.keyvault.Vault;
-import com.microsoft.azure.management.resources.Location;
-import com.microsoft.azure.management.resources.Subscription;
-import com.microsoft.azuretools.authmanage.SubscriptionManager;
-import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
-import com.microsoft.azuretools.sdkmanage.ServicePrincipalAzureManager;
 import com.microsoft.azuretools.utils.Pair;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
@@ -55,6 +48,13 @@ public class AzureDockerHostsManager {
   private Map<String, List<AzureDockerVnet>> dockerNetworkMap;
   private Map<String, List<AzureDockerStorageAccount>> dockerStorageAccountMap;
   private String userId;
+  private AzureDockerPreferredSettings dockerPreferredSettings;
+
+  public AzureDockerPreferredSettings getDockerPreferredSettings() { return dockerPreferredSettings; }
+
+  public void setDockerPreferredSettings(AzureDockerPreferredSettings dockerPreferredSettings) {
+    this.dockerPreferredSettings = dockerPreferredSettings;
+  }
 
   public static AzureDockerHostsManager getAzureDockerHostsManager(AzureManager azureAuthManager) throws Exception {
     if (instance == null) {
@@ -275,11 +275,11 @@ public class AzureDockerHostsManager {
     host.apiUrl = "http://" + name.toLowerCase() + ".centralus.cloudapp.azure.com";
     host.port = "2376"; /* Default Docker dockerHost port when TLS is enabled, "2375" otherwise */
     host.state = DockerHost.DockerHostVMState.STARTING;
-    host.hostOSType = DockerHost.DockerHostOSType.UBUNTU_SERVER_16_04_LTS;
+    host.hostOSType = (dockerPreferredSettings != null && dockerPreferredSettings.vmOS != null) ? DockerHost.DockerHostOSType.valueOf(dockerPreferredSettings.vmOS) : DockerHost.DockerHostOSType.UBUNTU_SERVER_16_04_LTS;
     host.hostVM = new AzureDockerVM();
     host.hostVM.name = host.name;
-    host.hostVM.vmSize = KnownDockerVirtualMachineSizes.Standard_DS2_v2.name();
-    host.hostVM.region = "centralus";
+    host.hostVM.vmSize = (dockerPreferredSettings != null && dockerPreferredSettings.vmSize != null) ? dockerPreferredSettings.vmSize : KnownDockerVirtualMachineSizes.Standard_DS2_v2.name();
+    host.hostVM.region = (dockerPreferredSettings != null && dockerPreferredSettings.region != null)? dockerPreferredSettings.region : null;
     host.hostVM.resourceGroupName = name.toLowerCase() + "-rg";
     host.hostVM.vnetName = AzureDockerUtils.getDefaultRandomName(host.name, 20) + "-vnet";
     host.hostVM.vnetAddressSpace = "10.0.0.0/16";

@@ -38,7 +38,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <grid id="affef" binding="vmCredsPanel" layout-manager="GridLayoutManager" row-count="11" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="affef" binding="vmCredsPanel" layout-manager="GridLayoutManager" row-count="11" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="VM Credentials"/>
@@ -56,7 +56,7 @@
               </component>
               <component id="21b56" class="javax.swing.JRadioButton" binding="dockerHostAutoSshRadioButton">
                 <constraints>
-                  <grid row="7" column="0" row-span="1" col-span="6" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+                  <grid row="7" column="0" row-span="1" col-span="7" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="Auto-generate"/>
@@ -123,7 +123,7 @@
               </component>
               <component id="5453e" class="javax.swing.JSeparator">
                 <constraints>
-                  <grid row="5" column="1" row-span="1" col-span="5" vsize-policy="6" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="5" column="1" row-span="1" col-span="6" vsize-policy="6" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
@@ -137,7 +137,7 @@
               </component>
               <component id="67556" class="javax.swing.JPasswordField" binding="dockerHostFirstPwdField">
                 <constraints>
-                  <grid row="2" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                  <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
                   </grid>
                 </constraints>
@@ -145,7 +145,7 @@
               </component>
               <component id="7dc36" class="javax.swing.JPasswordField" binding="dockerHostSecondPwdField">
                 <constraints>
-                  <grid row="3" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                  <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
                   </grid>
                 </constraints>
@@ -153,22 +153,12 @@
               </component>
               <hspacer id="c4099">
                 <constraints>
-                  <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="5" row-span="1" col-span="2" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
               </hspacer>
               <component id="e5ae0" class="javax.swing.JLabel" binding="dockerHostUsernameLabel">
                 <constraints>
                   <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font style="1"/>
-                  <foreground color="-65536"/>
-                  <text value="!"/>
-                </properties>
-              </component>
-              <component id="72aad" class="javax.swing.JLabel" binding="dockerHostFirstPwdLabel">
-                <constraints>
-                  <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <font style="1"/>
@@ -186,9 +176,27 @@
                   <text value="!"/>
                 </properties>
               </component>
+              <component id="f6803" class="javax.swing.JLabel" binding="dockerHostFirstPwdLabel">
+                <constraints>
+                  <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <foreground color="-65536"/>
+                  <text value="!"/>
+                </properties>
+              </component>
+              <component id="55d26" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="(Optional)"/>
+                </properties>
+              </component>
             </children>
           </grid>
-          <grid id="fb169" binding="daemonCredsPanel" layout-manager="GridLayoutManager" row-count="8" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="fb169" binding="daemonCredsPanel" layout-manager="GridLayoutManager" row-count="8" column-count="8" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="Docker Daemon Access"/>
@@ -198,7 +206,7 @@
             <children>
               <component id="5b66d" class="javax.swing.JRadioButton" binding="dockerHostAutoTlsRadioButton">
                 <constraints>
-                  <grid row="4" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+                  <grid row="4" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="Auto-generate"/>
@@ -206,7 +214,7 @@
               </component>
               <component id="6fd59" class="javax.swing.JRadioButton" binding="dockerHostImportTlsRadioButton">
                 <constraints>
-                  <grid row="5" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+                  <grid row="5" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="Import from directory:"/>
@@ -214,7 +222,7 @@
               </component>
               <vspacer id="4f10d">
                 <constraints>
-                  <grid row="7" column="0" row-span="1" col-span="4" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <grid row="7" column="0" row-span="1" col-span="5" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                 </constraints>
               </vspacer>
               <component id="6433" class="javax.swing.JLabel">
@@ -227,7 +235,7 @@
               </component>
               <component id="40f7a" class="javax.swing.JRadioButton" binding="dockerHostNoTlsRadioButton">
                 <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+                  <grid row="3" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="None"/>
@@ -235,13 +243,13 @@
               </component>
               <component id="3ef1b" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="dockerHostImportTLSBrowseTextField">
                 <constraints>
-                  <grid row="6" column="0" row-span="1" col-span="5" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="4" use-parent-layout="false"/>
+                  <grid row="6" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="4" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="5bd67" class="javax.swing.JTextField" binding="dockerDaemonPortTextField">
                 <constraints>
-                  <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="7" anchor="4" fill="0" indent="0" use-parent-layout="false">
+                  <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="1" use-parent-layout="false">
                     <minimum-size width="100" height="-1"/>
                     <preferred-size width="100" height="-1"/>
                     <maximum-size width="100" height="-1"/>
@@ -253,28 +261,17 @@
               </component>
               <hspacer id="8578f">
                 <constraints>
-                  <grid row="1" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="7" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
               </hspacer>
               <hspacer id="9960">
                 <constraints>
-                  <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
               </hspacer>
-              <component id="992c1" class="javax.swing.JLabel" binding="dockerDaemonPortLabel">
-                <constraints>
-                  <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font style="1"/>
-                  <foreground color="-65536"/>
-                  <opaque value="true"/>
-                  <text value="!"/>
-                </properties>
-              </component>
               <component id="a4e3e" class="javax.swing.JLabel" binding="dockerHostImportTLSBrowseLabel">
                 <constraints>
-                  <grid row="6" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="6" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <font style="1"/>
@@ -292,9 +289,25 @@
               </component>
               <component id="b4a26" class="javax.swing.JSeparator">
                 <constraints>
-                  <grid row="2" column="1" row-span="1" col-span="6" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="1" row-span="1" col-span="7" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
+              </component>
+              <hspacer id="4a857">
+                <constraints>
+                  <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </hspacer>
+              <component id="f2380" class="javax.swing.JLabel" binding="dockerDaemonPortLabel">
+                <constraints>
+                  <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <foreground color="-65536"/>
+                  <opaque value="true"/>
+                  <text value="!"/>
+                </properties>
               </component>
             </children>
           </grid>
