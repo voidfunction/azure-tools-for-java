@@ -279,6 +279,58 @@ public class PluginUtil {
 	}
 
 	/**
+	 * Method opens property dialog with only desired property page.
+	 *
+	 * @param nodeId
+	 *            : Node ID of property page
+	 * @param nodeLbl
+	 *            : Property page name
+	 * @param classObj
+	 *            : Class object of property page
+	 * @return
+	 */
+	public static int openPropertyPageDialog(String nodeId, String nodeLbl,
+			Object classObj) {
+		int retVal = Window.CANCEL; // value corresponding to cancel
+		// Node creation
+		try {
+			PreferenceNode nodePropPg = new PreferenceNode(nodeId, nodeLbl,
+					null, classObj.getClass().toString());
+			nodePropPg.setPage((IPreferencePage) classObj);
+			nodePropPg.getPage().setTitle(nodeLbl);
+
+			PreferenceManager mgr = new PreferenceManager();
+			mgr.addToRoot(nodePropPg);
+			// Dialog creation
+			PreferenceDialog dialog = new PreferenceDialog(PlatformUI
+					.getWorkbench().getDisplay().getActiveShell(), mgr);
+			// make desired property page active.
+			dialog.setSelectedNode(nodeLbl);
+			dialog.create();
+			/*
+			 * If showing storage accounts preference page, don't show
+			 * properties for title as its common repository.
+			 */
+			String dlgTitle = "";
+			if (nodeLbl.equals(Messages.cmhLblStrgAcc)
+					|| nodeLbl.equals(Messages.aiTxt)) {
+				dlgTitle = nodeLbl;
+			} else {
+				dlgTitle = String.format(Messages.cmhPropFor,
+						getSelectedProject().getName());
+			}
+			dialog.getShell().setText(dlgTitle);
+			dialog.open();
+			// return whether user has pressed OK or Cancel button
+			retVal = dialog.getReturnCode();
+		} catch (Exception e) {
+			PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(),
+					Messages.rolsDlgErr, Messages.projDlgErrMsg, e);
+		}
+		return retVal;
+	}
+
+	/**
 	 * Method will change cursor type whenever required.
 	 * @param busy
 	 * true : Wait cursor
