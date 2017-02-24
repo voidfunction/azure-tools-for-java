@@ -4,6 +4,9 @@
     <groupId>com.microsoft.azuretools</groupId>
     <artifactId>azure-explorer-common</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <properties>
+        <artifict.name>${artifactId}-${version}.jar</artifict.name>
+    </properties>
     <build>
         <sourceDirectory>src</sourceDirectory>
         <plugins>
@@ -14,6 +17,24 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <!--... phase=package, goal=run-->
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <copy file="${basedir}/target/${artifict.name}" tofile="${basedir}/../../PluginsAndFeatures/com.microsoftopentechnologies.wacommon/resources/${artifict.name}" overwrite="true" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
