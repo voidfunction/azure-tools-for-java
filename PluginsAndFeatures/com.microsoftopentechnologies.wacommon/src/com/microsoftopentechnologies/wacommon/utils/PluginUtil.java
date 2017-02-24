@@ -62,7 +62,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.service.prefs.Preferences;
 
-import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
@@ -281,7 +280,7 @@ public class PluginUtil {
 
 	/**
 	 * Method opens property dialog with only desired property page.
-	 * 
+	 *
 	 * @param nodeId
 	 *            : Node ID of property page
 	 * @param nodeLbl

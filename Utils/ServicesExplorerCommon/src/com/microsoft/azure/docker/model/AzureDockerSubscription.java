@@ -38,6 +38,6 @@ public class AzureDockerSubscription {
   public String servicePrincipalId;
 
   public String toString() {
-    return name + " (" + id + ")";
+    return name;
   }
 }

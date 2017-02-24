@@ -15,7 +15,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
- resources/hdinsight-node-common.jar
+ resources/hdinsight-node-common-0.0.1-SNAPSHOT.jar
 Import-Package: com.microsoft.azuretools.authmanage,
  com.microsoft.azuretools.sdkmanage,
  org.eclipse.core.resources,

@@ -264,15 +264,14 @@ public class AzureDockerUIResources {
       }
 
 
-      AzureDockerImageInstance dockerImageDescription = new AzureDockerImageInstance();
-      dockerImageDescription.dockerImageName = AzureDockerUtils.getDefaultDockerImageName(project.getName()).toLowerCase();
-      dockerImageDescription.dockerContainerName = AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName);
-      dockerImageDescription.artifactName = AzureDockerUtils.getDefaultArtifactName(project.getName());
-      dockerImageDescription.host = dockerManager.createNewDockerHostDescription(AzureDockerUtils.getDefaultRandomName(AzureDockerUtils.getDefaultName(project.getName())));
-      dockerImageDescription.hasNewDockerHost = false;
+      DockerHost dockerHost = (dockerManager.getDockerPreferredSettings() != null) ? dockerManager.getDockerHostForURL(dockerManager.getDockerPreferredSettings().dockerApiName) : null;
+      AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
 
       AzureSelectDockerWizardModel model = new AzureSelectDockerWizardModel(project, dockerManager, dockerImageDescription);
       AzureSelectDockerWizardDialog wizard = new AzureSelectDockerWizardDialog(model);
+      if (dockerHost != null) {
+        model.selectDefaultDockerHost(dockerHost, true);
+      }
       wizard.show();
 
       if (wizard.getExitCode() == DialogWrapper.OK_EXIT_CODE) {

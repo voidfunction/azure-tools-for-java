@@ -19,33 +19,13 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.intellij.runnable;
+package com.microsoft.azure.docker.model;
 
-import com.intellij.openapi.project.Project;
-import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.intellij.wizards.WizardCacheManager;
-import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
+public class AzureDockerPreferredSettings {
+  public String region;
+  public String vmOS;
+  public String vmSize;
+  public String dockerApiName;
+  public String dockerfileOption;
 
-import java.io.File;
-
-public class CacheAccountWithProgressBar extends AccountActionRunnable {
-    private final File publishSettingsFile;
-    private String message;
-    private Project project;
-
-    public CacheAccountWithProgressBar(File publishSettingsFile, PublishData data, String message, Project project) {
-        super(data);
-        this.message = message;
-        this.publishSettingsFile = publishSettingsFile;
-        this.project = project;
-    }
-
-    @Override
-    public void doTask() {
-        try {
-            WizardCacheManager.cachePublishData(publishSettingsFile, data, this, project);
-        } catch (Exception e) {
-            PluginUtil.displayErrorDialogInAWTAndLog(message, e.getMessage(), e);
-        }
-    }
 }

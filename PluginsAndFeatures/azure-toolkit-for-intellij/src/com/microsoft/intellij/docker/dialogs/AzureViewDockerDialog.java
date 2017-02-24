@@ -40,9 +40,6 @@ public class AzureViewDockerDialog extends DialogWrapper {
   public static final int UPDATE_EXIT_CODE = 3;
   private JPanel mainPanel;
   private JTabbedPane tabbedPane1;
-  private JLabel dockerHostPwdLoginLabel;
-  private JLabel dockerHostSshLoginLabel;
-  private JLabel dockerHostTlsAuthLabel;
   private JXHyperlink dockerHostAuthUpdateHyperlink;
   private JXHyperlink dockerHostSshExportHyperlink;
   private JXHyperlink dockerHostTlsExportHyperlink;
@@ -59,6 +56,9 @@ public class AzureViewDockerDialog extends DialogWrapper {
   private JTextField dockerHostSubnetNameAddrTextField;
   private JTextField dockerHostStorageNameTypeTextField;
   private JTextField dockerHostPortTextField;
+  private JTextField dockerHostPwdLoginTextField;
+  private JTextField dockerHostSshLoginTextField;
+  private JTextField dockerHostTlsAuthTextField;
 
   private Action myClickApplyAction;
   private Project project;
@@ -94,18 +94,18 @@ public class AzureViewDockerDialog extends DialogWrapper {
         dockerHost.certVault.vmUsername + updating :
         dockerHost.certVault.vmUsername
     );
-    dockerHostPwdLoginLabel.setText((updating != null) ?
+    setTextField(dockerHostPwdLoginTextField, (updating != null) ?
         (dockerHost.hasPwdLogIn ? "Yes" : "No") + updating :
         (dockerHost.hasPwdLogIn ? "Yes" : "No")
     );
-    dockerHostSshLoginLabel.setText((updating != null) ?
+    setTextField(dockerHostSshLoginTextField, (updating != null) ?
         (dockerHost.hasSSHLogIn ? "Yes" : "No") + updating :
         (dockerHost.hasSSHLogIn ? "Yes" : "No")
     );
     dockerHostSshExportHyperlink.setEnabled(!dockerHost.isUpdating && dockerHost.hasSSHLogIn);
 
     // Docker Daemon settings
-    dockerHostTlsAuthLabel.setText((updating != null) ?
+    setTextField(dockerHostTlsAuthTextField, (updating != null) ?
         (dockerHost.hasSSHLogIn ? "Using TLS certificates" : "Open/unsecured access") + updating :
         (dockerHost.hasSSHLogIn ? "Using TLS certificates" : "Open/unsecured access")
     );

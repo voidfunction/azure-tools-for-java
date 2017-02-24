@@ -34,4 +34,5 @@ public class AzureDockerImageInstance {
   public String dockerPortSettings;
   public String dockerfileContent;
   public boolean isHttpsWebApp;
+  public String predefinedDockerfile;
 }

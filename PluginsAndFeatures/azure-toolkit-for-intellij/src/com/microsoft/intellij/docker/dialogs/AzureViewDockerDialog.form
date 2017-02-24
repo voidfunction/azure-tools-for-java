@@ -3,7 +3,7 @@
   <grid id="cbd77" binding="mainPanel" layout-manager="GridLayoutManager" row-count="7" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="48" y="54" width="602" height="591"/>
+      <xy x="48" y="54" width="756" height="659"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -46,7 +46,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <grid id="d7ba2" layout-manager="GridLayoutManager" row-count="12" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="d7ba2" layout-manager="GridLayoutManager" row-count="12" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="Login Settings"/>
@@ -101,7 +101,7 @@
               </component>
               <hspacer id="66690">
                 <constraints>
-                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
               </hspacer>
               <component id="3af4b" class="javax.swing.JLabel">
@@ -114,7 +114,7 @@
               </component>
               <component id="7b749" class="org.jdesktop.swingx.JXHyperlink" binding="dockerHostAuthUpdateHyperlink">
                 <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="Update..."/>
@@ -144,27 +144,9 @@
                   <text value="Log in using SSH keys:"/>
                 </properties>
               </component>
-              <component id="10d66" class="javax.swing.JLabel" binding="dockerHostPwdLoginLabel">
-                <constraints>
-                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font style="1"/>
-                  <text value="dockerHostPwdLoginLabel"/>
-                </properties>
-              </component>
-              <component id="7cf26" class="javax.swing.JLabel" binding="dockerHostSshLoginLabel">
-                <constraints>
-                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font style="1"/>
-                  <text value="dockerHostSshLoginLabel"/>
-                </properties>
-              </component>
               <component id="fbbcc" class="org.jdesktop.swingx.JXHyperlink" binding="dockerHostSshExportHyperlink">
                 <constraints>
-                  <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="Export SSH keys..."/>
@@ -186,18 +168,9 @@
                   <text value="Port settings:"/>
                 </properties>
               </component>
-              <component id="e20f6" class="javax.swing.JLabel" binding="dockerHostTlsAuthLabel">
-                <constraints>
-                  <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font style="1"/>
-                  <text value="dockerHostTlsAuthLabel"/>
-                </properties>
-              </component>
               <component id="47903" class="org.jdesktop.swingx.JXHyperlink" binding="dockerHostTlsExportHyperlink">
                 <constraints>
-                  <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="6" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="Export TLS certs..."/>
@@ -217,7 +190,7 @@
               </component>
               <component id="a7d59" class="javax.swing.JTextField" binding="dockerHostKeyvaultTextField">
                 <constraints>
-                  <grid row="10" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                  <grid row="10" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
                   </grid>
                 </constraints>
@@ -237,6 +210,39 @@
                   <background color="-1250068"/>
                   <editable value="false"/>
                   <font style="1"/>
+                </properties>
+              </component>
+              <component id="a16c8" class="javax.swing.JTextField" binding="dockerHostPwdLoginTextField">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <background color="-1250068"/>
+                  <editable value="false"/>
+                </properties>
+              </component>
+              <component id="3a939" class="javax.swing.JTextField" binding="dockerHostSshLoginTextField">
+                <constraints>
+                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <background color="-1250068"/>
+                  <editable value="false"/>
+                </properties>
+              </component>
+              <component id="4de80" class="javax.swing.JTextField" binding="dockerHostTlsAuthTextField">
+                <constraints>
+                  <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <background color="-1250068"/>
+                  <editable value="false"/>
                 </properties>
               </component>
             </children>

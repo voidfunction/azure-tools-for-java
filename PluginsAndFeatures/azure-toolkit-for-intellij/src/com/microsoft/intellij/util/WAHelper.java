@@ -22,8 +22,6 @@
 package com.microsoft.intellij.util;
 
 import com.intellij.openapi.module.Module;
-import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
-import com.interopbridges.tools.windowsazure.WindowsAzureRole;
 import com.microsoft.intellij.AzurePlugin;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -130,48 +128,6 @@ public class WAHelper {
             ex.printStackTrace();
             throw ex;
         }
-    }
-
-    /**
-     * Returns path of deploy folder.
-     *
-     * @param waProjMngr
-     * @param module
-     * @return
-     */
-    public static String getDeployFolderPath(WindowsAzureProjectManager waProjMngr, Module module) {
-        String dplyFolderPath = "";
-        try {
-            String dplyFldrName = waProjMngr.getPackageDir();
-            String modulePath = PluginUtil.getModulePath(module);
-
-            if (dplyFldrName.startsWith(".")) {
-                dplyFldrName = dplyFldrName.substring(1);
-            }
-            dplyFolderPath = String.format("%s%s", modulePath, dplyFldrName);
-        } catch (Exception e) {
-            AzurePlugin.log(e.getMessage(), e);
-        }
-        return dplyFolderPath;
-    }
-
-    public static WindowsAzureRole prepareRoleToAdd(WindowsAzureProjectManager waProjManager) {
-        WindowsAzureRole windowsAzureRole = null;
-        try {
-            StringBuffer strBfr = new StringBuffer(message("dlgWorkerRole1"));
-            int roleNo = 2;
-            while (!waProjManager.isAvailableRoleName(strBfr.toString())) {
-                strBfr.delete(10, strBfr.length());
-                strBfr.append(roleNo++);
-            }
-            String strKitLoc = WAHelper.getTemplateFile(message("pWizStarterKit"));
-            windowsAzureRole = waProjManager.addRole(strBfr.toString(), strKitLoc);
-            windowsAzureRole.setInstances(message("rolsNoOfInst"));
-            windowsAzureRole.setVMSize(message("rolsVMSmall"));
-        } catch (Exception e) {
-            log(e.getMessage());
-        }
-        return windowsAzureRole;
     }
 
     // HTTP GET request

@@ -20,7 +20,6 @@
 
 package com.microsoftopentechnologies.azurecommons.deploy;
 
-import com.microsoft.windowsazure.core.OperationStatus;
 import com.microsoftopentechnologies.azurecommons.messagehandler.PropUtil;
 
 import java.text.SimpleDateFormat;

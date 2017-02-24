@@ -29,8 +29,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IStartup;
 import org.w3c.dom.Document;
 
-import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoftopentechnologies.azurecommons.util.ParserXMLUtility;
 import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
 import com.microsoftopentechnologies.wacommon.Activator;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;

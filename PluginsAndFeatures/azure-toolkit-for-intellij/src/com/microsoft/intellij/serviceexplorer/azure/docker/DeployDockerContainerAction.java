@@ -61,17 +61,11 @@ public class DeployDockerContainerAction extends NodeActionListener {
       return;
     }
 
-    AzureDockerImageInstance dockerImageDescription = new AzureDockerImageInstance();
-    dockerImageDescription.dockerImageName = AzureDockerUtils.getDefaultDockerImageName(project.getName()).toLowerCase();
-    dockerImageDescription.dockerContainerName = AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName);
-    dockerImageDescription.artifactName = AzureDockerUtils.getDefaultArtifactName(project.getName());
-    dockerImageDescription.host = dockerHost;
-    dockerImageDescription.sid = dockerHost.sid;
-    dockerImageDescription.hasNewDockerHost = false;
+    AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
 
     AzureSelectDockerWizardModel model = new AzureSelectDockerWizardModel(project, dockerManager, dockerImageDescription);
     AzureSelectDockerWizardDialog wizard = new AzureSelectDockerWizardDialog(model);
-    model.selectDefaultDockerHost(dockerHost);
+    model.selectDefaultDockerHost(dockerHost, false);
     wizard.show();
 
     if (wizard.getExitCode() == DialogWrapper.OK_EXIT_CODE) {

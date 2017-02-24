@@ -27,23 +27,13 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.interopbridges.tools.windowsazure.WARoleComponentCloudUploadMode;
-import com.interopbridges.tools.windowsazure.WindowsAzureEndpoint;
-import com.interopbridges.tools.windowsazure.WindowsAzureEndpointType;
-import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
-import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
-import com.interopbridges.tools.windowsazure.WindowsAzureRole;
-import com.interopbridges.tools.windowsazure.WindowsAzureRoleComponent;
 import com.microsoftopentechnologies.azurecommons.messagehandler.PropUtil;
 
 public class WAEclipseHelperMethods {
@@ -100,7 +90,7 @@ public class WAEclipseHelperMethods {
 	 * Looks for a pattern in a text file
 	 * 
 	 * @param file
-	 * @param pattern
+	 * @param patternText
 	 * @return True if a pattern is found, else false
 	 * @throws FileNotFoundException
 	 */
@@ -130,131 +120,6 @@ public class WAEclipseHelperMethods {
 				fileScanner.close();
 			}
 		}
-	}
-
-	/**
-	 * Returns the server name whose detection patterns is matched under path.
-	 * 
-	 * @param serverDetectors
-	 * @param path
-	 * @return
-	 */
-	public static String detectServer(File path, String templateFilePath) {
-		final Map<String, String> serverDetectors;
-		final Map<String, String> serverPatterns;
-
-		if (templateFilePath == null || path == null || !path.isDirectory()
-				|| !path.exists()) {
-			return null;
-		}
-
-		// Get the server detectors from the templates
-		final File templateFile = new File(templateFilePath);
-		try {
-			if (null == (serverDetectors = WindowsAzureProjectManager
-					.getServerTemplateDetectors(templateFile))) {
-				return null;
-			} else if (null == (serverPatterns = WindowsAzureProjectManager
-					.getServerTemplatePatterns(templateFile))) {
-				return null;
-			}
-		} catch (WindowsAzureInvalidProjectOperationException e) {
-			return null;
-		}
-
-		// Check each path
-		boolean foundSoFar = false;
-		String serverName = null;
-		File basePathFile = null;
-		for (Map.Entry<String, String> entry : serverDetectors.entrySet()) {
-			serverName = entry.getKey();
-			String pathPatternText = entry.getValue();
-			String textPatternText = serverPatterns.get(serverName);
-			if (pathPatternText == null || pathPatternText.isEmpty()) {
-				continue;
-			}
-
-			// Fast path: Check the pattern directly (like, if it has no wild
-			// cards)
-			basePathFile = new File(path, pathPatternText);
-			if (basePathFile.exists()) {
-				// Check for the required pattern inside (if any)
-				if (basePathFile.isDirectory() || textPatternText == null
-						|| isPatternInFile(basePathFile, textPatternText)) {
-					return serverName;
-				} else {
-					continue;
-				}
-			}
-
-			// Split pattern path into parts and check for existence of each
-			// part
-			basePathFile = path;
-			String[] pathParts = pathPatternText.split("/");
-			foundSoFar = false;
-			for (int i = 0; i < pathParts.length; i++) {
-				String pathPart = pathParts[i];
-
-				// Try direct match first
-				File pathPartFile = new File(basePathFile, pathPart);
-				if (pathPartFile.exists()) {
-					foundSoFar = true;
-
-					// Check for wildcards
-				} else if (!pathPart.contains("*") && !pathPart.contains("?")) {
-					foundSoFar = false;
-
-					// Wildcards present, so check pattern
-				} else {
-					String[] fileNames = basePathFile.list();
-					String pathPatternRegex = "^"
-							+ windowsPathToRegex(pathPart) + "$";
-					Pattern pathPattern = Pattern.compile(pathPatternRegex);
-					Matcher matcher = pathPattern.matcher("");
-					foundSoFar = false;
-					for (String fileName : fileNames) {
-						matcher.reset(fileName);
-						if (matcher.find()) {
-							File file;
-							foundSoFar = true;
-
-							if (textPatternText == null) {
-								// No text pattern to look for inside, so allow
-								// for the match to proceed
-								break;
-							} else if (i != pathParts.length - 1) {
-								// Path part not terminal, so allow the match to
-								// proceed
-								break;
-							} else if (!(file = new File(basePathFile, fileName))
-									.isFile()) {
-								// Terminal path not a file so don't proceed
-								// with this file
-								continue;
-							} else if (isPatternInFile(file, textPatternText)) {
-								// Internal text pattern matched, so success
-								return serverName;
-							}
-						}
-					}
-				}
-
-				// If this path part worked so far, expand the base path and dig
-				// deeper
-				if (foundSoFar) {
-					basePathFile = new File(basePathFile, pathPart);
-				} else {
-					break;
-				}
-			}
-
-			// If matched a full path, then success
-			if (foundSoFar) {
-				return serverName;
-			}
-		}
-
-		return null;
 	}
 
 	/**
@@ -416,8 +281,8 @@ public class WAEclipseHelperMethods {
 	/**
 	 * Copy file from source to destination.
 	 * 
-	 * @param source
-	 * @param destination
+	 * @param f1 source
+	 * @param f2 destination
 	 * @throws Exception
 	 */
 	public static void copyFile(File f1, File f2)
@@ -531,141 +396,6 @@ public class WAEclipseHelperMethods {
 		return hostName;
 	}
 
-	public static WindowsAzureEndpoint findEndpointWithPubPort(int pubPort,
-			WindowsAzureRole role)
-					throws WindowsAzureInvalidProjectOperationException {
-		WindowsAzureEndpoint endpt = null;
-		for (WindowsAzureEndpoint endpoint : role.getEndpoints()) {
-			if (endpoint.getEndPointType().equals(
-					WindowsAzureEndpointType.Input)
-					&& endpoint.getPort().equalsIgnoreCase(
-							String.valueOf(pubPort))
-							&& endpoint.getPrivatePort() != null
-							&& !endpoint.equals(role.getDebuggingEndpoint())) {
-				endpt = endpoint;
-				break;
-			}
-		}
-		return endpt;
-	}
-
-	public static WindowsAzureEndpoint findEndpointWithPubPortWithAuto(
-			int pubPort, WindowsAzureRole role)
-					throws WindowsAzureInvalidProjectOperationException {
-		WindowsAzureEndpoint endpt = null;
-		for (WindowsAzureEndpoint endpoint : role.getEndpoints()) {
-			if (endpoint.getEndPointType().equals(
-					WindowsAzureEndpointType.Input)
-					&& endpoint.getPort().equalsIgnoreCase(
-							String.valueOf(pubPort))
-							&& !endpoint.equals(role.getDebuggingEndpoint())) {
-				endpt = endpoint;
-				break;
-			}
-		}
-		return endpt;
-	}
-
-	public static WindowsAzureRole findRoleWithEndpntPubPort(int pubPortToChk,
-			WindowsAzureProjectManager waProjManager)
-					throws WindowsAzureInvalidProjectOperationException {
-		WindowsAzureRole roleWithHTTPS = null;
-		for (WindowsAzureRole role : waProjManager.getRoles()) {
-			for (WindowsAzureEndpoint endpoint : role.getEndpoints()) {
-				if (endpoint.getEndPointType().equals(
-						WindowsAzureEndpointType.Input)
-						|| endpoint.getEndPointType().equals(
-								WindowsAzureEndpointType.InstanceInput)) {
-					String pubPort = endpoint.getPort();
-					if (pubPort.contains("-")) {
-						String[] rang = pubPort.split("-");
-						Integer min = Integer.valueOf(rang[0]);
-						Integer max = Integer.valueOf(rang[1]);
-						if (min == pubPortToChk || max == pubPortToChk
-								|| (min < pubPortToChk && max > pubPortToChk)) {
-							roleWithHTTPS = role;
-							break;
-						}
-					} else if (pubPort.equalsIgnoreCase(String
-							.valueOf(pubPortToChk))) {
-						roleWithHTTPS = role;
-						break;
-					}
-				}
-			}
-		}
-		return roleWithHTTPS;
-	}
-
-	public static String findJdkPathFromRole(WindowsAzureProjectManager waProjManager) {
-		String jdkPath = "";
-		try {
-			// get number of roles in one project
-			List<WindowsAzureRole> roleList = waProjManager.getRoles();
-			for (int i = 0; i < roleList.size(); i++) {
-				String path = roleList.get(i).getJDKSourcePath();
-				if (path != null) {
-					jdkPath = path;
-					break;
-				}
-			}
-		} catch (Exception e) {
-			jdkPath = "";
-		}
-		return jdkPath;
-	}
-
-	public static boolean isAutoPresentForRole(WindowsAzureRole role)
-			throws WindowsAzureInvalidProjectOperationException {
-		// check for caching storage account name
-		String name = role.getCacheStorageAccountName();
-		if (name != null && !name.isEmpty() && name.equals("-auto")) {
-			return true;
-		}
-		List<WindowsAzureRoleComponent> cmpnntsList = role.getComponents();
-		for (int j = 0; j < cmpnntsList.size(); j++) {
-			WindowsAzureRoleComponent component = cmpnntsList.get(j);
-			String cmpntType = component.getType();
-			WARoleComponentCloudUploadMode mode = component.getCloudUploadMode();
-			if (((cmpntType.equals(PropUtil.getValueFromFile("typeJdkDply"))
-					|| cmpntType.equals(PropUtil.getValueFromFile("typeSrvDply")))
-					&& mode != null && mode.equals(WARoleComponentCloudUploadMode.auto))
-					|| (cmpntType.equals(PropUtil.getValueFromFile("typeSrvApp"))
-							&& mode != null && mode.equals(WARoleComponentCloudUploadMode.always))) {
-				if (component.getCloudDownloadURL().equalsIgnoreCase("auto")) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	public static boolean isFirstPackageWithAuto(WindowsAzureProjectManager projMngr)
-			throws WindowsAzureInvalidProjectOperationException {
-		boolean retVal = true;
-		List<WindowsAzureRole> roleList = projMngr.getRoles();
-		boolean isAuto = false;
-		for (int i = 0; i < roleList.size(); i++) {
-			if (isAutoPresentForRole(roleList.get(i))) {
-				isAuto = true;
-				break;
-			}
-		}
-		if (isAuto) {
-			// Check global properties exist in package.xml
-			String pubFileLoc = projMngr.getPublishSettingsPath();
-			String subId = projMngr.getPublishSubscriptionId();
-			String storageAccName = projMngr.getPublishStorageAccountName();
-			String region = projMngr.getPublishRegion();
-			if (pubFileLoc == null || pubFileLoc.isEmpty()
-					|| subId == null || subId.isEmpty()
-					|| storageAccName == null || storageAccName.isEmpty()
-					|| region == null || region.isEmpty()) {
-				retVal = false;
-			}
-		}
-		return retVal;
-	}
 	/*
 	public static List<String> prepareListToDisplay(Map<WebSite, WebSiteConfiguration> webSiteConfigMap, List<WebSite> webSiteList) {
 		// prepare list to display
