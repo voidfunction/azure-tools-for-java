@@ -88,7 +88,13 @@ public class WebAppDeployDialog extends DialogWrapper {
     private final Artifact artifact;
 
     private void createUIComponents() {
-        DefaultTableModel tableModel = new DefaultTableModel();
+        DefaultTableModel tableModel = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
         tableModel.addColumn("Name");
         tableModel.addColumn("JDK");
         tableModel.addColumn("Web Container");
