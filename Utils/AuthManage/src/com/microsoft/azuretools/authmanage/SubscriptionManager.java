@@ -82,7 +82,7 @@ public class SubscriptionManager {
 
     private void notifyAllListeners() {
         for (ISubscriptionSelectionListener l : listners) {
-            l.update(subscriptionDetails.isEmpty());
+            l.update(subscriptionDetails == null);
         }
     }
 

@@ -32,6 +32,7 @@ import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by vlashch on 1/6/17.
@@ -42,7 +43,6 @@ public class AzureModel {
     private Map<ResourceGroup, List<WebApp>> resourceGroupToWebAppMap = null;
     private Map<ResourceGroup, List<AppServicePlan>> resourceGroupToAppServicePlanMap = null;
     private Map<String, Subscription> sidToSubscriptionMap = null;
-
 
 
     private static AzureModel instance = null;
@@ -107,7 +107,7 @@ public class AzureModel {
     }
 
     public synchronized Map<ResourceGroup, List<WebApp>> createResourceGroupToWebAppMap() {
-        return new HashMap<ResourceGroup, List<WebApp>>();
+        return new ConcurrentHashMap<ResourceGroup, List<WebApp>>();
     }
 
     // == resourceGroupToAppServicePlanMap
@@ -121,7 +121,7 @@ public class AzureModel {
     }
 
     public synchronized Map<ResourceGroup, List<AppServicePlan>> createResourceGroupToAppServicePlanMap() {
-        return new HashMap<ResourceGroup, List<AppServicePlan>>();
+        return new ConcurrentHashMap<ResourceGroup, List<AppServicePlan>>();
     }
 
 }
