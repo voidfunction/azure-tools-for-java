@@ -128,7 +128,6 @@ public class AzurePlugin extends AbstractProjectComponent {
             LOG.info("Starting Azure Plugin");
             try {
                 initAuthManage();
-                azureSettings.loadStorage();
                 //this code is for copying componentset.xml in plugins folder
                 copyPluginComponents();
                 initializeTelemetry();

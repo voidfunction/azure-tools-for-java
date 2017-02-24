@@ -33,10 +33,6 @@ import com.intellij.util.Consumer;
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.intellij.wizards.WizardCacheManager;
-import com.microsoftopentechnologies.azurecommons.deploy.util.PublishData;
-import com.microsoftopentechnologies.azurecommons.roleoperations.JdkSrvConfigUtilMethods;
-import com.microsoftopentechnologies.azurecommons.storageregistry.StorageRegistryUtilMethods;
 import com.microsoftopentechnologies.azuremanagementutil.model.Subscription;
 import org.jetbrains.annotations.Nullable;
 
@@ -155,86 +151,6 @@ public class UIUtils {
         } catch (WindowsAzureInvalidProjectOperationException e1) {
             PluginUtil.displayErrorDialogAndLog(message("remAccErrTitle"), message("remAccErPwd"), e1);
         }
-    }
-
-    /**
-     * Method extracts data from publish settings file
-     * and create Publish data object.
-     *
-     * @param file
-     * @return
-     */
-    public static PublishData createPublishDataObj(File file) {
-        PublishData data;
-        try {
-            data = com.microsoftopentechnologies.azurecommons.deploy.util.UIUtils.parse(file);
-        } catch (JAXBException e) {
-            PluginUtil.displayErrorDialogAndLog(message("importDlgTitle"), String.format(message("importDlgMsg"), file.getName(), message("failedToParse")), e);
-            return null;
-        }
-        String subscriptionId = data.getSubscriptionIds().get(0);
-        if (WizardCacheManager.findPublishDataBySubscriptionId(subscriptionId) != null) {
-            PluginUtil.displayInfoDialog(message("loadingCred"), message("credentialsExist"));
-        }
-        data.setCurrentSubscription(data.getPublishProfile().getSubscriptions().get(0));
-        return data;
-    }
-
-    /**
-     * Method populates subscription names into subscription
-     * combo box.
-     *
-     * @param combo
-     * @return
-     */
-    public static JComboBox populateSubscriptionCombo(JComboBox combo) {
-        ElementWrapper<?> currentSelection = (ElementWrapper<?>) combo.getSelectedItem();
-        combo.removeAllItems();
-        Collection<PublishData> publishes = WizardCacheManager.getPublishDatas();
-        if (publishes.size() > 0) {
-            for (PublishData pd : publishes) {
-                for (Subscription sub : pd.getPublishProfile().getSubscriptions()) {
-                    combo.addItem(new ElementWrapper<PublishData>(sub.getName(), pd));
-                }
-            }
-            if (currentSelection != null) {
-                selectByText(combo, currentSelection.getKey());
-            }
-        }
-        return combo;
-    }
-
-    /**
-     * Set current subscription and publish data
-     * as per subscription selected in combo box.
-     *
-     * @param combo
-     * @return
-     */
-    public static PublishData changeCurrentSubAsPerCombo(JComboBox combo) {
-        PublishData publishData = null;
-        ElementWrapper<PublishData> currentEntry = (ElementWrapper<PublishData>) combo.getSelectedItem();
-        String subscriptionName = currentEntry == null ? null : currentEntry.getKey();
-        if (subscriptionName != null && !subscriptionName.isEmpty()) {
-            publishData = currentEntry.getValue();
-            Subscription sub = WizardCacheManager.findSubscriptionByName(subscriptionName);
-            if (publishData != null) {
-                publishData.setCurrentSubscription(sub);
-                WizardCacheManager.setCurrentPublishData(publishData);
-            }
-        }
-        return publishData;
-    }
-
-    /**
-     * Method populates storage account name associated
-     * with the component's access key.
-     *
-     * @param key
-     * @param combo
-     */
-    public static void populateStrgNameAsPerKey(String key, JComboBox combo) {
-        combo.setSelectedItem(JdkSrvConfigUtilMethods.getNameToSetAsPerKey(key, StorageRegistryUtilMethods.getStorageAccountNames(false)));
     }
 
     /**

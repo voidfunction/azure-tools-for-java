@@ -29,10 +29,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.microsoft.azure.management.network.Network;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
-import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
