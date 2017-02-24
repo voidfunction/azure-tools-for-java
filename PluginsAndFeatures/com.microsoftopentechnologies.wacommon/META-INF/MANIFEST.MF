@@ -19,12 +19,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Microsoft Corp.
 Bundle-ClassPath: .,
  resources/AzureCommons.jar,
- resources/ProjectManagerLibrary.jar,
  resources/.cspack.jar,
  resources/auth-manage-0.0.1-SNAPSHOT.jar,
  resources/azure-explorer-common-0.0.1-SNAPSHOT.jar
 Export-Package: com.gigaspaces.azure.views,
- com.interopbridges.tools.windowsazure,
  com.microsoft.applicationinsights.preference,
  com.microsoft.azure.docker,
  com.microsoft.azure.docker.model,
