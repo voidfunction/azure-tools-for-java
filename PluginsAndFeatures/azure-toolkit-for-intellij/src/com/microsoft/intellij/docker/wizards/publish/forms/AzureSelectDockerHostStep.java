@@ -351,8 +351,8 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     }
   }
 
-  public void selectDefaultDockerHost(DockerHost dockerHost) {
-    dockerHostsTable.setEnabled(false);
+  public void selectDefaultDockerHost(DockerHost dockerHost, boolean selectOtherHosts) {
+    dockerHostsTable.setEnabled(selectOtherHosts);
 
     dockerImageDescription.host = dockerHost;
     dockerImageDescription.hasNewDockerHost = false;

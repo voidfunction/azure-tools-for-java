@@ -322,17 +322,20 @@ public class AzureDockerHostsManager {
 
   public AzureDockerImageInstance getDefaultDockerImageDescription(String projectName, DockerHost dockerHost) {
     AzureDockerImageInstance dockerImageDescription = new AzureDockerImageInstance();
-    dockerImageDescription.dockerImageName = AzureDockerUtils.getDefaultDockerImageName(projectName);
+    dockerImageDescription.dockerImageName = AzureDockerUtils.getDefaultDockerImageName(projectName).toLowerCase();
     dockerImageDescription.dockerContainerName = AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName);
-    dockerImageDescription.artifactName = AzureDockerUtils.getDefaultArtifactName(projectName);
+    dockerImageDescription.artifactName = AzureDockerUtils.getDefaultArtifactName(projectName).toLowerCase();
     dockerImageDescription.isHttpsWebApp = false;
+    dockerImageDescription.hasNewDockerHost = false;
     if (dockerHost != null) {
       dockerImageDescription.host = dockerHost;
-      dockerImageDescription.hasNewDockerHost = false;
       dockerImageDescription.sid = dockerHost.sid;
     } else {
       dockerImageDescription.host = createNewDockerHostDescription(AzureDockerUtils.getDefaultRandomName(AzureDockerUtils.getDefaultName(projectName)));
-      dockerImageDescription.hasNewDockerHost = true;
+//      dockerImageDescription.hasNewDockerHost = true;
+    }
+    if (dockerPreferredSettings != null) {
+      dockerImageDescription.predefinedDockerfile = dockerPreferredSettings.dockerfileOption;
     }
 
     return dockerImageDescription;

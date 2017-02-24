@@ -104,6 +104,10 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       dockerfileComboBox.addItem(image);
     }
 
+    if (dockerImageDescription.predefinedDockerfile != null) {
+      dockerfileComboBox.setSelectedItem(KnownDockerImages.valueOf(dockerImageDescription.predefinedDockerfile));
+    }
+
     customDockerfileBrowseButton.setEnabled(false);
     customDockerfileBrowseButton.addActionListener(UIUtils.createFileChooserListener(customDockerfileBrowseButton, model.getProject(),
         FileChooserDescriptorFactory.createSingleLocalFileDescriptor()));
@@ -195,6 +199,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
         if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
         return info;
       }
+      dockerImageDescription.predefinedDockerfile = dockerfileImage.name();
       if (dockerImageDescription.artifactPath != null) {
         dockerImageDescription.dockerfileContent = dockerfileImage.getDockerfileContent()
             .replace(KnownDockerImages.DOCKER_ARTIFACT_FILENAME, new File(dockerImageDescription.artifactPath).getName());
@@ -210,6 +215,8 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
         if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
         return info;
       }
+      dockerImageDescription.predefinedDockerfile = null;
+
       try {
         model.getDockerImageDescription().dockerfileContent = new String(Files.readAllBytes(Paths.get(customDockerfileBrowseButton.getText())));
       } catch (Exception e) {

@@ -24,6 +24,7 @@ package com.microsoft.intellij.docker.wizards.publish;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.wizard.WizardDialog;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tasks.DockerContainerDeployTask;
@@ -90,6 +91,14 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
 
   public String deploy() {
     AzureDockerImageInstance dockerImageInstance = model.getDockerImageDescription();
+    AzureDockerPreferredSettings dockerPreferredSettings = model.getDockerHostsManager().getDockerPreferredSettings();
+
+    if (dockerPreferredSettings == null) {
+      dockerPreferredSettings = new AzureDockerPreferredSettings();
+    }
+    dockerPreferredSettings.dockerApiName = dockerImageInstance.host.apiUrl;
+    dockerPreferredSettings.dockerfileOption = dockerImageInstance.predefinedDockerfile;
+    model.getDockerHostsManager().setDockerPreferredSettings(dockerPreferredSettings);
 
     performFinish();
 
