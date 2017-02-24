@@ -58,7 +58,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
   private JTextField dockerSubscriptionIdTextField;
   private JLabel dockerSubscriptionIdLabel;
   private JComboBox<String> dockerLocationComboBox;
-  private JTabbedPane tabbedPane1;
+  private JTabbedPane hostDetailsTabbedPane;
   private JComboBox<KnownDockerVirtualMachineImage> dockerHostOSTypeComboBox;
   private JComboBox<String> dockerHostVMSizeComboBox;
   private ButtonGroup dockerHostRGGroup;
@@ -572,6 +572,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
     KnownDockerVirtualMachineImage osType = (KnownDockerVirtualMachineImage) dockerHostOSTypeComboBox.getSelectedItem();
     if (osType == null) {
       ValidationInfo info = AzureDockerUIResources.validateComponent("OS type not found", vmKindPanel, dockerHostOSTypeComboBox, null);
+      hostDetailsTabbedPane.setSelectedComponent(vmKindPanel);
       if (shakeOnError) {
         model.DialogShaker(info);
       }
@@ -588,6 +589,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
     String vmSize = (String) dockerHostVMSizeComboBox.getSelectedItem();
     if (vmSize == null || vmSize.isEmpty()) {
       ValidationInfo info = AzureDockerUIResources.validateComponent("Virtual machine size not found", vmKindPanel, dockerHostVMSizeComboBox, null);
+      hostDetailsTabbedPane.setSelectedComponent(vmKindPanel);
       if (shakeOnError) {
         model.DialogShaker(info);
       }
@@ -606,6 +608,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       if (rgName == null || rgName.isEmpty() ||
           !AzureDockerValidationUtils.validateDockerHostResourceGroupName(rgName)) {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Missing resource group name", rgPanel, dockerHostRGTextField, dockerHostRGLabel);
+        hostDetailsTabbedPane.setSelectedComponent(rgPanel);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
@@ -618,6 +621,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       String rgName = (String) dockerHostSelectRGComboBox.getSelectedItem();
       if (rgName == null || rgName.isEmpty()) {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Missing resource group name", rgPanel, dockerHostVMSizeComboBox, null);
+        hostDetailsTabbedPane.setSelectedComponent(rgPanel);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
@@ -638,6 +642,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       if (vnetName == null || vnetName.isEmpty() ||
           !AzureDockerValidationUtils.validateDockerVnetName(vnetName)) {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Missing virtual network name", networkPanel, dockerHostNewVNetNameTextField, dockerHostNewVNetNameLabel);
+        hostDetailsTabbedPane.setSelectedComponent(networkPanel);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
@@ -647,6 +652,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       if (vnetAddrSpace == null || vnetAddrSpace.isEmpty() ||
           !AzureDockerValidationUtils.validateDockerVnetAddrSpace(vnetAddrSpace)) {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Missing virtual network address space", networkPanel, dockerHostNewVNetAddrSpaceTextField, dockerHostNewVNetAddrSpaceLabel);
+        hostDetailsTabbedPane.setSelectedComponent(networkPanel);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
@@ -661,6 +667,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       AzureDockerVnet vnet = (AzureDockerVnet) dockerHostSelectVnetComboBox.getSelectedItem();
       if (vnet == null || vnet.name == null || vnet.name.isEmpty()) {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Missing virtual network selection", networkPanel, dockerHostSelectVnetComboBox, null);
+        hostDetailsTabbedPane.setSelectedComponent(networkPanel);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
@@ -668,6 +675,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       }
       String subnet = (String) dockerHostSelectSubnetComboBox.getSelectedItem();
       if (subnet == null || subnet.isEmpty()) {
+        hostDetailsTabbedPane.setSelectedComponent(networkPanel);
         ValidationInfo info = AzureDockerUIResources.validateComponent("Missing subnet selection", networkPanel, dockerHostSelectSubnetComboBox, null);
         if (shakeOnError) {
           model.DialogShaker(info);
@@ -694,6 +702,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       if (storageName == null || storageName.isEmpty() || vmSize == null || vmSize.isEmpty() ||
           !AzureDockerValidationUtils.validateDockerHostStorageName(storageName, (AzureDockerSubscription) dockerSubscriptionComboBox.getSelectedItem())) {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Missing storage account name", storagePanel, dockerNewStorageTextField, dockerNewStorageLabel);
+        hostDetailsTabbedPane.setSelectedComponent(storagePanel);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
@@ -707,6 +716,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       storageName = (String) dockerSelectStorageComboBox.getSelectedItem();
       if (storageName == null || storageName.isEmpty() || vmSize == null || vmSize.isEmpty()) {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Missing storage account selection", storagePanel, dockerSelectStorageComboBox, null);
+        hostDetailsTabbedPane.setSelectedComponent(storagePanel);
         if (shakeOnError) {
           model.DialogShaker(info);
         }

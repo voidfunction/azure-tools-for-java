@@ -343,6 +343,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
           !AzureDockerValidationUtils.validateDockerHostUserName(vmUsername))
       {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Missing username", vmCredsPanel, dockerHostUsernameTextField, dockerHostUsernameLabel);
+        credsTabbedPane.setSelectedComponent(vmCredsPanel);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
@@ -359,6 +360,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
           !AzureDockerValidationUtils.validateDockerHostPassword(vmPwd1)))
       {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Incorrect password", vmCredsPanel, dockerHostFirstPwdField, dockerHostFirstPwdLabel);
+        credsTabbedPane.setSelectedComponent(vmCredsPanel);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
@@ -384,6 +386,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
         if (dockerHostImportSSHBrowseTextField.getText() == null || dockerHostImportSSHBrowseTextField.getText().isEmpty() ||
             !AzureDockerValidationUtils.validateDockerHostSshDirectory(dockerHostImportSSHBrowseTextField.getText())) {
           ValidationInfo info = AzureDockerUIResources.validateComponent("SSH key files were not found in the selected directory", vmCredsPanel, dockerHostImportSSHBrowseTextField, dockerHostImportSSHBrowseLabel);
+          credsTabbedPane.setSelectedComponent(vmCredsPanel);
           if (shakeOnError) {
             model.DialogShaker(info);
           }
@@ -412,6 +415,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
         if (dockerHostImportTLSBrowseTextField.getText() == null || dockerHostImportTLSBrowseTextField.getText().isEmpty() ||
             !AzureDockerValidationUtils.validateDockerHostTlsDirectory(dockerHostImportTLSBrowseTextField.getText())) {
           ValidationInfo info = AzureDockerUIResources.validateComponent("TLS certificates files were not found in the selected directory", vmCredsPanel, dockerHostImportTLSBrowseTextField, dockerHostImportTLSBrowseLabel);
+          credsTabbedPane.setSelectedComponent(vmCredsPanel);
           if (shakeOnError) {
             model.DialogShaker(info);
           }
@@ -429,6 +433,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
         !AzureDockerValidationUtils.validateDockerHostUserName(dockerDaemonPortTextField.getText()))
     {
       ValidationInfo info = AzureDockerUIResources.validateComponent("Invalid Docker daemon port settings", daemonCredsPanel, dockerDaemonPortTextField, dockerDaemonPortLabel);
+      credsTabbedPane.setSelectedComponent(daemonCredsPanel);
       if (shakeOnError) {
         model.DialogShaker(info);
       }
