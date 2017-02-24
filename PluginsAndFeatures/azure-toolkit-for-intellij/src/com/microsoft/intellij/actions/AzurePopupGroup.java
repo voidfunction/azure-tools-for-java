@@ -29,7 +29,6 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleTypeId;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.microsoft.intellij.module.AzureModuleType;
 import com.microsoft.intellij.util.PluginUtil;
 
 public class AzurePopupGroup extends DefaultActionGroup implements DumbAware {
@@ -41,9 +40,7 @@ public class AzurePopupGroup extends DefaultActionGroup implements DumbAware {
         } else {
             VirtualFile selectedFile = CommonDataKeys.VIRTUAL_FILE.getData(e.getDataContext());
             e.getPresentation().setEnabledAndVisible(PluginUtil.isModuleRoot(selectedFile, module)
-                    && (AzureModuleType.AZURE_MODULE.equals(module.getOptionValue(Module.ELEMENT_TYPE))
-                    || ModuleTypeId.JAVA_MODULE.equals(module.getOptionValue(Module.ELEMENT_TYPE)))
-                    || PluginUtil.isRoleFolder(selectedFile, module));
+                    && ModuleTypeId.JAVA_MODULE.equals(module.getOptionValue(Module.ELEMENT_TYPE)));
         }
     }
 }
