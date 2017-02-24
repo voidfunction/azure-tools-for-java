@@ -29,8 +29,6 @@ import com.intellij.ide.projectView.impl.ProjectRootsUtil;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.module.Module;
@@ -43,10 +41,6 @@ import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.IdeFocusManager;
-import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
-import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
-import com.interopbridges.tools.windowsazure.WindowsAzureRole;
-import com.interopbridges.tools.windowsazure.WindowsAzureRoleComponentImportMethod;
 import com.microsoft.intellij.IToolWindowProcessor;
 import com.microsoft.intellij.ToolWindowKey;
 import com.microsoft.intellij.common.CommonConst;
@@ -54,7 +48,6 @@ import com.microsoft.intellij.common.CommonConst;
 import javax.swing.*;
 import java.io.File;
 import java.util.HashMap;
-import java.util.Map;
 
 
 public class PluginUtil {
@@ -146,26 +139,6 @@ public class PluginUtil {
         });
     }
 
-
-    /**
-     * Determines whether a folder is a role folder or not.
-     *
-     * @return true if the folder is a role folder else false.
-     */
-    public static boolean isRoleFolder(VirtualFile vFile, Module module) {
-        boolean retVal = false;
-        try {
-            WindowsAzureProjectManager projMngr = WindowsAzureProjectManager.load(new File(getModulePath(module)));
-            WindowsAzureRole role = projMngr.roleFromPath(new File(vFile.getPath()));
-            if (role != null) {
-                retVal = true;
-            }
-        } catch (WindowsAzureInvalidProjectOperationException e) {
-//            not a role folder - silently ignore
-        }
-        return retVal;
-    }
-
     /**
      * This method find the absolute path from
      * relative path.
@@ -183,35 +156,6 @@ public class PluginUtil {
             newPath = path;
         }
         return newPath;
-    }
-
-    /**
-     * This method returns the deployment name of any component
-     * it also prepares the name if name is not specified.
-     *
-     * @param path
-     * @param method
-     * @param asName
-     * @return
-     */
-    public static String getAsName(Project project, String path,
-                                   WindowsAzureRoleComponentImportMethod method,
-                                   String asName) {
-        String name;
-        if (asName.isEmpty()) {
-            name = new File(path).getName();
-            if (method == WindowsAzureRoleComponentImportMethod.auto) {
-//                ProjExportType type = ProjectNatureHelper.getProjectNature(PluginUtil.findModule(project, convertPath(project, path)));
-                // todo!!!
-                ProjExportType type = ProjExportType.WAR;
-                name = String.format("%s%s%s", name, ".", type.name().toLowerCase());
-            } else if (method == WindowsAzureRoleComponentImportMethod.zip) {
-                name = String.format("%s%s", name, ".zip");
-            }
-        } else {
-            name = asName;
-        }
-        return name;
     }
 
     public static Module findModule(Project project, String path) {

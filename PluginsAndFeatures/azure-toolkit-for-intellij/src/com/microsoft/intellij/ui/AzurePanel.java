@@ -24,11 +24,11 @@ package com.microsoft.intellij.ui;
 
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
-import com.interopbridges.tools.windowsazure.ParserXMLUtility;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.util.WAHelper;
+import com.microsoftopentechnologies.azurecommons.util.ParserXMLUtility;
 import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
 
 import javax.swing.*;

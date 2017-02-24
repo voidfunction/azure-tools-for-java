@@ -13,7 +13,6 @@
     <orderEntry type="library" name="AzureCommons" level="project" />
     <orderEntry type="library" name=".cspack" level="project" />
     <orderEntry type="library" name="azure-sdk" level="project" />
-    <orderEntry type="library" name="ProjectManagerLibrary" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="antIntegration" level="project" />
     <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="com.microsoft.azure:azure-storage:4.0.0" level="project" />
@@ -22,15 +21,6 @@
     <orderEntry type="library" exported="" name="com.microsoft.azuretools:azure-explorer-common:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" exported="" name="com.microsoft.azuretools:auth-manage:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.microsoft.azure:azure-mgmt-compute:1.0.0-beta4.1" level="project" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/CloudServicesCommons.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="module-library">
       <library>
         <CLASSES>

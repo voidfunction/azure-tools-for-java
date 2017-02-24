@@ -30,23 +30,13 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Consumer;
-import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
-import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
-import com.microsoft.intellij.util.PluginUtil;
-import com.microsoftopentechnologies.azuremanagementutil.model.Subscription;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.xml.bind.JAXBException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.Collection;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class UIUtils {
 
@@ -100,57 +90,6 @@ public class UIUtils {
                         parent.getText().isEmpty() ? null : LocalFileSystem.getInstance().findFileByPath(parent.getText()), consumer);
             }
         };
-    }
-
-    /**
-     * Method validates remote access password.
-     *
-     * @param isPwdChanged       : flag to monitor whether password is changed or not
-     * @param txtPassword        : Object of password text box
-     * @param waProjManager      : WindowsAzureProjectManager object
-     * @param isRAPropPage       : flag to monitor who has called this method Encryption link
-     *                           or normal property page call.
-     * @param txtConfirmPassword : Object of confirm password text box
-     */
-    public static void checkRdpPwd(boolean isPwdChanged, JPasswordField txtPassword,
-                                   WindowsAzureProjectManager waProjManager, boolean isRAPropPage,
-                                   JPasswordField txtConfirmPassword) {
-        Pattern pattern = Pattern
-                .compile("(?=^.{6,}$)(?=.*\\d)(?=.*[A-Z])(?!.*\\s)(?=.*[a-z]).*$|"
-                        + "(?=^.{6,}$)(?=.*\\d)(?!.*\\s)(?=.*[a-z])(?=.*\\p{Punct}).*$|"
-                        + "(?=^.{6,}$)(?=.*\\d)(?!.*\\s)(?=.*[A-Z])(?=.*\\p{Punct}).*$|"
-                        + "(?=^.{6,}$)(?=.*[A-Z])(?=.*[a-z])(?!.*\\s)(?=.*\\p{Punct}).*$");
-        Matcher match = pattern.matcher(String.valueOf(txtPassword.getPassword()));
-        try {
-            /*
-             * checking if user has changed the password and that field is not
-			 * blank then check for strong password else set the old password.
-			 */
-            if (isPwdChanged) {
-                if (!(txtPassword.getPassword().length == 0) && !match.find()) {
-                    PluginUtil.displayErrorDialog(message("remAccErPwdNtStrg"), message("remAccPwdNotStrg"));
-                    txtConfirmPassword.setText("");
-                    txtPassword.requestFocusInWindow();
-                }
-            } else {
-                String pwd = waProjManager.getRemoteAccessEncryptedPassword();
-                /*
-				 * Remote access property page accessed via context menu
-				 */
-                if (isRAPropPage) {
-                    txtPassword.setText(pwd);
-                } else {
-					/*
-					 * Remote access property page accessed via encryption link
-					 */
-                    if (!pwd.equals(message("remAccDummyPwd"))) {
-                        txtPassword.setText(pwd);
-                    }
-                }
-            }
-        } catch (WindowsAzureInvalidProjectOperationException e1) {
-            PluginUtil.displayErrorDialogAndLog(message("remAccErrTitle"), message("remAccErPwd"), e1);
-        }
     }
 
     /**

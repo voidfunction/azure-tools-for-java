@@ -33,8 +33,6 @@ import com.intellij.openapi.startup.StartupManager;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.util.PlatformUtils;
 import com.intellij.util.containers.HashSet;
-import com.interopbridges.tools.windowsazure.ParserXMLUtility;
-import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.azuretools.authmanage.CommonSettings;
@@ -47,9 +45,9 @@ import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.util.WAHelper;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;
-import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureToolkitFilter;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
+import com.microsoftopentechnologies.azurecommons.util.ParserXMLUtility;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.FileUtil;
 import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
@@ -300,28 +298,13 @@ public class AzurePlugin extends AbstractProjectComponent {
      */
     private void copyPluginComponents() {
         try {
-            String cmpntFile = String.format("%s%s%s", pluginFolder,
-                    File.separator, AzureBundle.message("cmpntFileName"));
-            String starterKit = String.format("%s%s%s", pluginFolder,
-                    File.separator, AzureBundle.message("starterKitFileName"));
             String enctFile = String.format("%s%s%s", pluginFolder,
                     File.separator, message("encFileName"));
-            String prefFile = String.format("%s%s%s", pluginFolder,
-                    File.separator, AzureBundle.message("prefFileName"));
 
-            // upgrade component sets and preference sets
-            upgradePluginComponent(cmpntFile, AzureBundle.message("cmpntFileEntry"), AzureBundle.message("oldCmpntFileEntry"), COMPONENTSETS_TYPE);
-            upgradePluginComponent(prefFile, AzureBundle.message("prefFileEntry"), AzureBundle.message("oldPrefFileEntry"), PREFERENCESETS_TYPE);
-
-            // Check for WAStarterKitForJava.zip
-            if (new File(starterKit).exists()) {
-                new File(starterKit).delete();
-            }
             // Check for encutil.exe
             if (new File(enctFile).exists()) {
                 new File(enctFile).delete();
             }
-            copyResourceFile(message("starterKitEntry"), starterKit);
             copyResourceFile(message("encFileName"), enctFile);
             for (AzureLibrary azureLibrary : AzureLibrary.LIBRARIES) {
                 if (!new File(pluginFolder + File.separator + azureLibrary.getLocation()).exists()) {
@@ -350,62 +333,6 @@ public class AzurePlugin extends AbstractProjectComponent {
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Checks for pluginComponent file.
-     * If exists checks its version.
-     * If it has latest version then no upgrade action is needed,
-     * else checks with older componentsets.xml,
-     * if identical then deletes existing and copies new one
-     * else renames existing and copies new one.
-     *
-     * @param pluginComponentPath
-     * @param resource
-     * @param componentType
-     * @throws Exception
-     */
-    private void upgradePluginComponent(String pluginComponentPath, String resource,
-                                        String oldResource, String componentType) throws Exception {
-        File pluginComponentFile = new File(pluginComponentPath);
-        if (pluginComponentFile.exists()) {
-            String pluginComponentVersion = null;
-            String resourceFileVersion = null;
-//        	File resourceFile = new File(((PluginClassLoader)AzurePlugin.class.getClassLoader()).findResource(resource).toURI());
-            try {
-                if (COMPONENTSETS_TYPE.equals(componentType)) {
-                    pluginComponentVersion = WindowsAzureProjectManager.getComponentSetsVersion(pluginComponentFile);
-                    resourceFileVersion = COMPONENTSETS_VERSION; //WindowsAzureProjectManager.getComponentSetsVersion(resourceFile);
-                } else {
-                    pluginComponentVersion = WindowsAzureProjectManager.getPreferenceSetsVersion(pluginComponentFile);
-                    resourceFileVersion = PREFERENCESETS_VERSION; //WindowsAzureProjectManager.getPreferenceSetsVersion(resourceFile);
-                }
-            } catch (Exception e) {
-                LOG.error("Error occured while getting version of plugin component " + componentType + ", considering version as null");
-            }
-            if ((pluginComponentVersion != null
-                    && !pluginComponentVersion.isEmpty())
-                    && pluginComponentVersion.equals(resourceFileVersion)) {
-                // Do not do anything
-            } else {
-                // Check with old plugin component for upgrade scenarios
-                URL oldPluginComponentUrl = ((PluginClassLoader) AzurePlugin.class.getClassLoader()).findResource(oldResource);
-//                InputStream oldPluginComponentIs = AzurePlugin.class.getResourceAsStream(oldResourceFile);
-                boolean isIdenticalWithOld = WAHelper.isFilesIdentical(oldPluginComponentUrl, pluginComponentFile);
-                if (isIdenticalWithOld) {
-                    // Delete old one
-                    pluginComponentFile.delete();
-                } else {
-                    // Rename old one
-                    DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-                    Date date = new Date();
-                    WAHelper.copyFile(pluginComponentPath, pluginComponentPath + ".old" + dateFormat.format(date));
-                }
-                copyResourceFile(resource, pluginComponentPath);
-            }
-        } else {
-            copyResourceFile(resource, pluginComponentPath);
         }
     }
 

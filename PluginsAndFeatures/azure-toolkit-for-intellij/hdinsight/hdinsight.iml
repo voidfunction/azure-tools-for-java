@@ -12,7 +12,6 @@
     <orderEntry type="library" name="azure-sdk" level="project" />
     <orderEntry type="library" name=".cspack" level="project" />
     <orderEntry type="library" name="antIntegration" level="project" />
-    <orderEntry type="library" name="ProjectManagerLibrary" level="project" />
     <orderEntry type="module-library" scope="PROVIDED">
       <library>
         <CLASSES>
