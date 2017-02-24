@@ -138,7 +138,7 @@ public class SrvPriManager {
             statusReporter.report(new Status(
                     overallStatusText,
                     Status.Result.FAILED,
-                    "Can't create a service principal for the subscription"
+                    "Can't create a service principal."
             ));
         }
         

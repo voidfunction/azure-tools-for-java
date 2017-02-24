@@ -87,18 +87,24 @@ public class SrvPriCreationStatusDialog extends DialogWrapper {
         setModal(true);
         setTitle("Create Service Principal Status");
 
-        DefaultTableModel statusTableModel = new DefaultTableModel();
+        DefaultTableModel statusTableModel = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         statusTableModel.addColumn("Step");
         statusTableModel.addColumn("Result");
         statusTableModel.addColumn("Details");
+
         statusTable.setModel(statusTableModel);
         statusTable.setAutoResizeMode( JTable.AUTO_RESIZE_LAST_COLUMN );
         TableColumn column = statusTable.getColumnModel().getColumn(0);
 //        column.setMinWidth(150);
 //        //column.setMaxWidth(400);
         column = statusTable.getColumnModel().getColumn(1);
-        column.setMinWidth(100);
-        column.setMaxWidth(100);
+        column.setMinWidth(110);
+        column.setMaxWidth(110);
 //        column = statusTable.getColumnModel().getColumn(2);
 //        column.setMinWidth(50);
 

@@ -79,9 +79,7 @@ public class WebAppDeployDialog extends DialogWrapper {
     private JTable table;
     private JCheckBox deployToRootCheckBox;
     private JEditorPane editorPaneAppServiceDetails;
-    private JButton editButton;
     private JLabel labelDescription;
-    private JScrollPane scrollPane;
     private JPanel panelTable;
 
     private final Module module;
@@ -97,8 +95,8 @@ public class WebAppDeployDialog extends DialogWrapper {
 
         tableModel.addColumn("Name");
         tableModel.addColumn("JDK");
-        tableModel.addColumn("Web Container");
-        tableModel.addColumn("Resource Group");
+        tableModel.addColumn("Web container");
+        tableModel.addColumn("Resource group");
 
         table = new JBTable(tableModel);
         table.setRowSelectionAllowed(true);
@@ -381,7 +379,7 @@ public class WebAppDeployDialog extends DialogWrapper {
 
             int choice = JOptionPane.showOptionDialog(WebAppDeployDialog.this.getContentPane(),
                     "Do you really want to delete the App Service '" + appServiceName + "'?",
-                    "Detete App Service",
+                    "Delete App Service",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE,
                     null, null, null);

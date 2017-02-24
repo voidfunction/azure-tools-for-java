@@ -23,41 +23,32 @@
 package com.microsoft.azuretools.ijidea.ui;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.table.JBTable;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import java.awt.*;
-import java.awt.event.*;
 import java.util.List;
 
-public class SrvPriSettingsDialog extends JDialog {
+public class SrvPriSettingsDialog extends DialogWrapper {
     private JPanel contentPane;
-    private JButton buttonOK;
-    private JButton buttonCancel;
     private JTable table;
     private JTextPane selectSubscriptionCommentTextPane;
     private TextFieldWithBrowseButton destinationFolderTextField;
     private List<SubscriptionDetail> sdl;
-    private int result = JOptionPane.CANCEL_OPTION;
+    private  Project project;
 
     public String getDestinationFolder() {
         return destinationFolderTextField.getText();
     }
 
-    public void setDestinationFolderTextField(TextFieldWithBrowseButton destinationFolderTextField) {
-        this.destinationFolderTextField = destinationFolderTextField;
-    }
-
     public List<SubscriptionDetail> getSubscriptionDetails() {
         return sdl;
-    }
-
-    public int getResult() {
-        return result;
     }
 
     DefaultTableModel model = new DefaultTableModel() {
@@ -75,57 +66,28 @@ public class SrvPriSettingsDialog extends JDialog {
         }
     };
 
-    public static SrvPriSettingsDialog go(List<SubscriptionDetail> sdl, Component parent) throws Exception {
-        SrvPriSettingsDialog d = new SrvPriSettingsDialog();
-        d.sdl = sdl;
-        d.pack();
-        d.setLocationRelativeTo(parent);
-        d.setVisible(true);
-        return d;
+    public static SrvPriSettingsDialog go(List<SubscriptionDetail> sdl, Project project) throws Exception {
+        SrvPriSettingsDialog d = new SrvPriSettingsDialog(sdl, project);
+        d.show();
+        if (d.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+            return d;
+        }
+
+        return null;
     }
 
-    private SrvPriSettingsDialog() {
-        setContentPane(contentPane);
+    private SrvPriSettingsDialog(List<SubscriptionDetail> sdl, Project project) {
+        super(project, true, IdeModalityType.PROJECT);
+        this.sdl = sdl;
+        this.project = project;
+
         setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
         setTitle("Create Authentication Files");
-
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
-
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-
-            @Override
-            public void windowOpened (WindowEvent e) {
-                setSubscriptions();
-            }
-        });
-
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        setOKButtonText("Start");
 
         model.addColumn("");
-        model.addColumn("Subscription Name");
-        model.addColumn("Subscription ID");
+        model.addColumn("Subscription name");
+        model.addColumn("Subscription id");
 
         table.setModel(model);
 
@@ -139,6 +101,10 @@ public class SrvPriSettingsDialog extends JDialog {
         destinationFolderTextField.setText(System.getProperty("user.home"));
         destinationFolderTextField.addBrowseFolderListener("Choose Destination Folder", "", null,
                 FileChooserDescriptorFactory.createSingleFolderDescriptor());
+
+        setSubscriptions();
+
+        init();
     }
 
     private void setSubscriptions() {
@@ -148,7 +114,18 @@ public class SrvPriSettingsDialog extends JDialog {
         }
     }
 
-    private void onOK() {
+    private void createUIComponents() {
+        table = new JBTable();
+    }
+
+    @Nullable
+    @Override
+    protected JComponent createCenterPanel() {
+        return contentPane;
+    }
+
+    @Override
+    protected void doOKAction() {
         int rc = model.getRowCount();
         int unselectedCount = 0;
         for (int ri = 0; ri < rc; ++ri) {
@@ -157,7 +134,7 @@ public class SrvPriSettingsDialog extends JDialog {
         }
 
         if (unselectedCount == rc) {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(contentPane,
                     "Please select at least one subscription",
                     "Subscription Dialog Status",
                     JOptionPane.INFORMATION_MESSAGE);
@@ -168,18 +145,14 @@ public class SrvPriSettingsDialog extends JDialog {
             boolean selected = (boolean)model.getValueAt(ri, 0);
             this.sdl.get(ri).setSelected(selected);
         }
-        result = JOptionPane.OK_OPTION;
-        dispose();
+
+        super.doOKAction();
     }
 
-    private void onCancel() {
-        // add your code here if necessary
-        dispose();
-    }
-
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
-        table = new JBTable();
+    @Nullable
+    @Override
+    protected String getDimensionServiceKey() {
+        return "SrvPriSettingsDialog";
     }
 
 }

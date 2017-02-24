@@ -103,7 +103,7 @@ public class SubscriptionsDialog extends DialogWrapper {
         DefaultTableModel model = new SubscriptionTableModel();
         model.addColumn("");
         model.addColumn("Subscription name");
-        model.addColumn("Subscription ID");
+        model.addColumn("Subscription id");
         table.setModel(model);
         TableColumn column = table.getColumnModel().getColumn(0);
         column.setMinWidth(23);

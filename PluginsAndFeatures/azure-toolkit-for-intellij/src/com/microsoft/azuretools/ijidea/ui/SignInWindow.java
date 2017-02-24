@@ -259,10 +259,10 @@ public class SignInWindow extends DialogWrapper {
                 }
             });
 
-            SrvPriSettingsDialog d = SrvPriSettingsDialog.go(subscriptionManager.getSubscriptionDetails(), contentPane);
+            SrvPriSettingsDialog d = SrvPriSettingsDialog.go(subscriptionManager.getSubscriptionDetails(), project);
             List<SubscriptionDetail> subscriptionDetailsUpdated;
             String destinationFolder;
-            if (d.getResult() == JOptionPane.OK_OPTION) {
+            if (d != null) {
                 subscriptionDetailsUpdated = d.getSubscriptionDetails();
                 destinationFolder = d.getDestinationFolder();
             } else {
