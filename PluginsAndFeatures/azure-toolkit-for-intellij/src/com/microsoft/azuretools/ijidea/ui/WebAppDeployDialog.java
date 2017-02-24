@@ -185,17 +185,6 @@ public class WebAppDeployDialog extends DialogWrapper {
         setTitle("Deploy Web App");
         setOKButtonText("Deploy");
 
-
-//        class DisabledItemSelectionModel extends DefaultListSelectionModel {
-//            @Override
-//            public void setSelectionInterval(int index0, int index1) {
-//                super.setSelectionInterval(-1, -1);
-//            }
-//        }
-
-//        listWebAppDetails.setSelectionModel(new DisabledItemSelectionModel());
-//        listWebAppDetails.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
         editorPaneAppServiceDetails.addHyperlinkListener(new HyperlinkListener() {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -284,8 +273,6 @@ public class WebAppDeployDialog extends DialogWrapper {
 
         cleanTable();
         DefaultTableModel tableModel = (DefaultTableModel)table.getModel();
-//        tableModel.getDataVector().removeAllElements();
-//        webAppWebAppDetailsMap.clear();
 
         for (SubscriptionDetail sd : srgMap.keySet()) {
             if (!sd.isSelected()) continue;

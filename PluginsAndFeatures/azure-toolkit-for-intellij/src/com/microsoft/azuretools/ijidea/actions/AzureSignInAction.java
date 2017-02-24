@@ -89,7 +89,7 @@ public class AzureSignInAction extends AnAction {
                     authMethodManager.cleanAll();
                 }
             } else {
-                SignInWindow w = SignInWindow.go(authMethodManager.getAuthMethodDetails(), frame, project);
+                SignInWindow w = SignInWindow.go(authMethodManager.getAuthMethodDetails(), project);
                 if (w != null) {
                     AuthMethodDetails authMethodDetailsUpdated = w.getAuthMethodDetails();
                     authMethodManager.setAuthMethodDetails(authMethodDetailsUpdated);
@@ -100,7 +100,6 @@ public class AzureSignInAction extends AnAction {
             ex.printStackTrace();
             LOGGER.error("onAzureSignIn", ex);
             ErrorWindow.show(ex.getMessage(), "AzureSignIn Action Error", frame);
-
         }
     }
 }

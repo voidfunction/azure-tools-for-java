@@ -78,7 +78,7 @@ public class SignInWindow extends DialogWrapper {
         return authMethodDetailsResult;
     }
 
-    public static SignInWindow go(AuthMethodDetails authMethodDetails, Component parent, Project project) {
+    public static SignInWindow go(AuthMethodDetails authMethodDetails, Project project) {
         SignInWindow d = new SignInWindow(authMethodDetails, project);
         d.show();
         if (d.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
@@ -90,6 +90,7 @@ public class SignInWindow extends DialogWrapper {
 
     private SignInWindow(AuthMethodDetails authMethodDetails, Project project) {
         super(project, true, IdeModalityType.PROJECT);
+        this.project = project;
         setModal(true);
         setTitle("Azure Sign In");
         setOKButtonText("Sign in");
@@ -285,7 +286,7 @@ public class SignInWindow extends DialogWrapper {
                 }
             }
 
-            SrvPriCreationStatusDialog  d1 = SrvPriCreationStatusDialog.go(tidSidsMap, destinationFolder, contentPane, project);
+            SrvPriCreationStatusDialog  d1 = SrvPriCreationStatusDialog.go(tidSidsMap, destinationFolder, project);
             if (d1 == null) {
                 System.out.println(">> Canceled by the user");
                 return;

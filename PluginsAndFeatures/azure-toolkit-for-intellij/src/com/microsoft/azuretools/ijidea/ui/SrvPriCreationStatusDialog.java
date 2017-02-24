@@ -69,7 +69,7 @@ public class SrvPriCreationStatusDialog extends DialogWrapper {
 
     DefaultListModel<String> filesListModel = new DefaultListModel<String>();
 
-    public static SrvPriCreationStatusDialog go(Map<String, List<String> > tidSidsMap, String destinationFolder, Component parent, Project project) {
+    public static SrvPriCreationStatusDialog go(Map<String, List<String> > tidSidsMap, String destinationFolder, Project project) {
         SrvPriCreationStatusDialog d = new SrvPriCreationStatusDialog(project);
         d.tidSidsMap = tidSidsMap;
         d.destinationFolder = destinationFolder;

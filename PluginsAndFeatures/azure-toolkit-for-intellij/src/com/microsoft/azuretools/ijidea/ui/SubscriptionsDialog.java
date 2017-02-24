@@ -22,14 +22,25 @@
 
 package com.microsoft.azuretools.ijidea.ui;
 
+import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.ui.AnActionButton;
+import com.intellij.ui.AnActionButtonRunnable;
+import com.intellij.ui.AnActionButtonUpdater;
+import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.table.JBTable;
+import com.microsoft.azuretools.adauth.StringUtils;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
+import com.microsoft.azuretools.authmanage.interact.AuthMethod;
+import com.microsoft.azuretools.authmanage.models.AuthMethodDetails;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -41,16 +52,13 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
 
-public class SubscriptionsDialog extends JDialog {
+public class SubscriptionsDialog extends DialogWrapper {
     private static final Logger LOGGER = Logger.getInstance(SubscriptionsDialog.class);
 
     private JPanel contentPane;
-    private JButton buttonOK;
-    private JButton buttonCancel;
+    private JPanel panelTable;
     private JTable table;
-    private JButton refreshButton;
     private List<SubscriptionDetail> sdl;
-    private int result = JOptionPane.CANCEL_OPTION;
 
     private  Project project;
 
@@ -74,51 +82,23 @@ public class SubscriptionsDialog extends JDialog {
         return sdl;
     }
 
-    public int getResult() {
-        return result;
+    public static SubscriptionsDialog go(List<SubscriptionDetail> sdl, Project project) throws Exception {
+        SubscriptionsDialog d = new SubscriptionsDialog(sdl, project);
+        d.show();
+        if (d.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+            return d;
+        }
+
+        return null;
     }
 
-    public static SubscriptionsDialog go(List<SubscriptionDetail> sdl, Component parent, Project project) throws Exception {
-        SubscriptionsDialog d = new SubscriptionsDialog();
-        d.sdl = sdl;
-        d.project = project;
-        d.pack();
-        d.setLocationRelativeTo(parent);
-        d.setVisible(true);
-        return d;
-    }
-
-    private SubscriptionsDialog() {
-        setContentPane(contentPane);
+    private SubscriptionsDialog(List<SubscriptionDetail> sdl, Project project) {
+        super(project, true, IdeModalityType.PROJECT);
+        this.sdl = sdl;
+        this.project = project;
         setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
         setTitle("Select Subscriptions");
-
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
-
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-
-            @Override
-            public void windowOpened (WindowEvent e) {
-                setSubscriptions();
-            }
-        });
+        setOKButtonText("Select");
 
         DefaultTableModel model = new SubscriptionTableModel();
         model.addColumn("");
@@ -131,12 +111,9 @@ public class SubscriptionsDialog extends JDialog {
         table.setRowSelectionAllowed(false);
         table.setCellSelectionEnabled(false);
 
-        refreshButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                refreshSubscriptions();
-            }
-        });
+        setSubscriptions();
+
+        init();
     }
 
     private void refreshSubscriptions() {
@@ -145,7 +122,6 @@ public class SubscriptionsDialog extends JDialog {
             if (manager == null) {
                 return;
             }
-            //Project project = null;
             final SubscriptionManager subscriptionManager = manager.getSubscriptionManager();
             subscriptionManager.cleanSubscriptions();
 
@@ -163,7 +139,7 @@ public class SubscriptionsDialog extends JDialog {
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("refreshSubscriptions", ex);
-            ErrorWindow.show(ex.getMessage(), "Refresh Subscriptions Error", SubscriptionsDialog.this);
+            ErrorWindow.show(ex.getMessage(), "Refresh Subscriptions Error", contentPane);
         }
     }
 
@@ -171,11 +147,47 @@ public class SubscriptionsDialog extends JDialog {
         DefaultTableModel model = (DefaultTableModel)table.getModel();
         for (SubscriptionDetail sd : sdl) {
             model.addRow(new Object[] {sd.isSelected(), sd.getSubscriptionName(), sd.getSubscriptionId()});
-            model.fireTableDataChanged();
         }
+        model.fireTableDataChanged();
     }
 
-    private void onOK() {
+    private void createUIComponents() {
+        DefaultTableModel model = new SubscriptionTableModel();
+        model.addColumn("");
+        model.addColumn("Subscription name");
+        model.addColumn("Subscription ID");
+
+        table = new JBTable();
+        table.setModel(model);
+        TableColumn column = table.getColumnModel().getColumn(0);
+        column.setMinWidth(23);
+        column.setMaxWidth(23);
+        table.setRowSelectionAllowed(false);
+        table.setCellSelectionEnabled(false);
+
+        AnActionButton refreshAction = new AnActionButton("Refresh", AllIcons.Actions.Refresh) {
+            @Override
+            public void actionPerformed(AnActionEvent anActionEvent) {
+                refreshSubscriptions();
+            }
+        };
+
+        ToolbarDecorator tableToolbarDecorator =
+            ToolbarDecorator.createDecorator(table)
+                .disableUpDownActions()
+                .addExtraActions(refreshAction);
+
+        panelTable = tableToolbarDecorator.createPanel();
+    }
+
+    @Nullable
+    @Override
+    protected JComponent createCenterPanel() {
+        return contentPane;
+    }
+
+    @Override
+    protected void doOKAction() {
         DefaultTableModel model = (DefaultTableModel)table.getModel();
         int rc = model.getRowCount();
         int unselectedCount = 0;
@@ -185,7 +197,7 @@ public class SubscriptionsDialog extends JDialog {
         }
 
         if (unselectedCount == rc) {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(contentPane,
                     "Please select at least one subscription",
                     "Subscription dialog info",
                     JOptionPane.INFORMATION_MESSAGE);
@@ -196,18 +208,13 @@ public class SubscriptionsDialog extends JDialog {
             boolean selected = (boolean)model.getValueAt(ri, 0);
             this.sdl.get(ri).setSelected(selected);
         }
-
-        result = JOptionPane.OK_OPTION;
-
-        dispose();
+        super.doOKAction();
     }
 
-    private void onCancel() {
-        dispose();
+    @Nullable
+    @Override
+    protected String getDimensionServiceKey() {
+        return "SubscriptionsDialog";
     }
 
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
-        table = new JBTable();
-    }
 }
