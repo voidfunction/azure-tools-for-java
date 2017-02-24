@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry including="**/*.java" kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="libs/activation-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/adal4j-1.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/adapter-rxjava-2.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/api-annotations-0.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/auth-manage-0.0.1-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-client-authentication-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-client-runtime-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-appservice-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-batch-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-cdn-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-compute-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-dns-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-graph-rbac-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-keyvault-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-network-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-redis-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-resources-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-sql-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-storage-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-mgmt-trafficmanager-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/azure-storage-4.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/bcprov-jdk15on-1.51.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/client-runtime-1.0.0-beta4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/commons-codec-1.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/commons-lang3-3.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/commons-net-3.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/converter-jackson-2.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/gson-2.2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/guava-18.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jackson-annotations-2.7.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jackson-core-2.6.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jackson-core-asl-1.9.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jackson-databind-2.7.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jackson-datatype-joda-2.7.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jackson-mapper-asl-1.9.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jcip-annotations-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/joda-time-2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/json-smart-1.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/lang-tag-1.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/logging-interceptor-3.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/mail-1.4.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/nimbus-jose-jwt-3.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/oauth2-oidc-sdk-4.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/okhttp-3.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/okhttp-urlconnection-3.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/okio-1.8.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/retrofit-2.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/rxjava-1.1.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/slf4j-api-1.7.12.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

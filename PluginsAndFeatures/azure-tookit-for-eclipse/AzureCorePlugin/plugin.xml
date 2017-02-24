@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+    <extension
+         point="org.eclipse.ui.commands">
+        <category
+            name="Microsoft Azure"
+            id="AzureManagePlugin.commands.MicrosoftAzureCategory">
+        </category>
+        <command
+            name="Sign In..."
+            categoryId="AzureManagePlugin.commands.MicrosoftAzureCategory"
+            id="AzureManagePlugin.commands.signInCommand">
+        </command>
+        <command
+            name="Sign Out..."
+            categoryId="AzureManagePlugin.commands.MicrosoftAzureCategory"
+            id="AzureManagePlugin.commands.signOutCommand">
+        </command>      
+        <command
+            name="Select Subsriptions"
+            categoryId="AzureManagePlugin.commands.MicrosoftAzureCategory"
+            id="AzureManagePlugin.commands.selectSubsriptionsCommand">
+        </command>
+    </extension>
+   
+    <extension
+         point="org.eclipse.ui.handlers">
+        <handler
+            commandId="AzureManagePlugin.commands.signInCommand"
+            class="com.microsoft.azuretools.eclipse.handlers.SignInCommandHandler">
+        </handler>
+        <handler
+            commandId="AzureManagePlugin.commands.signOutCommand"
+            class="com.microsoft.azuretools.eclipse.handlers.SignOutCommandHandler">
+        </handler>
+        <handler
+            commandId="AzureManagePlugin.commands.selectSubsriptionsCommand"
+            class="com.microsoft.azuretools.eclipse.handlers.SelectSubsriptionsCommandHandler">
+            <enabledWhen>
+                <reference definitionId="when.is.signed.in"/>
+            </enabledWhen>
+        </handler>
+    </extension>
+<!--   
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="AzureManagePlugin.commands.azureCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+   </extension>
+-->   
+    <extension
+        point="org.eclipse.ui.menus">
+        <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+            <menu
+                label="Tools"
+                mnemonic="t"
+                id="AzureManagePlugin.menus.tools"/>
+        </menuContribution>
+        <menuContribution
+            locationURI="menu:AzureManagePlugin.menus.tools">
+            <menu
+                label="Azure"
+                mnemonic="A"
+                id="AzureManagePlugin.menus.microsoftAzureMenu">
+                <command
+                    commandId="AzureManagePlugin.commands.selectSubsriptionsCommand"
+                    mnemonic="S"
+                    id="AzureManagePlugin.menus.selectSubsriptionsMenu">
+                </command>
+                <separator visible="true" name="signIn"/>
+                <command
+                      commandId="AzureManagePlugin.commands.signInCommand"
+                      mnemonic="S"
+                      id="AzureManagePlugin.menus.signInMenu">
+                      <visibleWhen>
+                        <not>
+                            <reference definitionId="when.is.signed.in"/>
+                        </not>
+                      </visibleWhen>
+                </command>
+                <command
+                    commandId="AzureManagePlugin.commands.signOutCommand"
+                    mnemonic="S"
+                    id="AzureManagePlugin.menus.signOutMenu">
+                   <visibleWhen>
+                        <reference definitionId="when.is.signed.in"/>
+                    </visibleWhen>
+                </command>
+            </menu>
+        </menuContribution>
+        <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+            <toolbar
+                id="AzureManagePlugin.toolbars.azureToolbar">
+                <command
+                    commandId="AzureManagePlugin.commands.azureeCommand"
+                        icon="icons/sample.gif"
+                        tooltip="Say hello world"
+                        id="AzureManagePlugin.toolbars.azureCommand">
+                </command>
+            </toolbar>
+        </menuContribution>
+    </extension>
+    <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+         <propertyTester
+            class="com.microsoft.azuretools.eclipse.testers.AuthPropertyTester"
+            id="com.microsoft.azuretools.eclipse.testers.propertyTester"
+            namespace="com.microsoft.azuretools.eclipse.testers"
+            properties="isSignedIn"
+            type="java.lang.Object">
+        </propertyTester>
+    </extension>
+    <extension 
+        point="org.eclipse.core.expressions.definitions">
+        <definition id="when.is.signed.in">
+            <test
+                property="com.microsoft.azuretools.eclipse.testers.isSignedIn"
+                forcePluginActivation="true">
+            </test>
+        </definition>
+    </extension>
+</plugin>
