@@ -90,9 +90,9 @@ public class AuthMethodManager {
                 }
                 Path filePath = Paths.get(credFilePath);
                 if (!Files.exists(filePath)) {
+                    cleanAll();
                     INotification nw = CommonSettings.getUiFactory().getNotificationWindow();
                     nw.deliver("Credential File Error", "File doesn't exist: " + filePath.toString());
-                    cleanAll();
                     return null;
                 }
                 azureManager = new ServicePrincipalAzureManager(new File(credFilePath));
