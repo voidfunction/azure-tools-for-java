@@ -114,14 +114,16 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
     customDockerfileBrowseButton.getTextField().setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {
-        if (AzureDockerValidationUtils.validateDockerfilePath(customDockerfileBrowseButton.getText())) {
-          customDockerfileBrowseLabel.setVisible(false);
-          setFinishButtonState(doValidate(false) == null);
-          return true;
-        } else {
+        if (customDockerfileRadioButton.isSelected() && !AzureDockerValidationUtils.validateDockerfilePath(customDockerfileBrowseButton.getText())) {
           customDockerfileBrowseLabel.setVisible(true);
           setFinishButtonState(false);
+          setPreviousButtonState(false);
           return false;
+        } else {
+          customDockerfileBrowseLabel.setVisible(false);
+          setFinishButtonState(doValidate(false) == null);
+          setPreviousButtonState(doValidate(false) == null);
+          return true;
         }
       }
     });
@@ -135,6 +137,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
         customDockerfileBrowseLabel.setVisible(false);
         customDockerfileBrowseButton.setEnabled(false);
         setFinishButtonState(doValidate(false) == null);
+        setPreviousButtonState(doValidate(false) == null);
       }
     });
 
@@ -146,14 +149,16 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
         if (AzureDockerValidationUtils.validateDockerfilePath(customDockerfileBrowseButton.getText())) {
           customDockerfileBrowseLabel.setVisible(false);
           setFinishButtonState(doValidate(false) == null);
+          setPreviousButtonState(doValidate(false) == null);
         } else {
           customDockerfileBrowseLabel.setVisible(true);
           setFinishButtonState(false);
+          setPreviousButtonState(false);
         }
       }
     });
 
-    dockerContainerPortSettings.setText(String.format("2%4d:", new Random().nextInt(10000)) + // default to host port 2xxxx
+    dockerContainerPortSettings.setText(String.format("2%04d:", new Random().nextInt(10000)) + // default to host port 2xxxx
         (dockerManager.getDefaultDockerImages().isEmpty() ?
             "8080" :
             ((KnownDockerImages) dockerfileComboBox.getSelectedItem()).getPortSettings()));
@@ -163,10 +168,12 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
         if (AzureDockerValidationUtils.validateDockerPortSettings(dockerContainerPortSettings.getText())) {
           dockerContainerPortSettingsLabel.setVisible(false);
           setFinishButtonState(doValidate(false) == null);
+          setPreviousButtonState(doValidate(false) == null);
           return true;
         } else {
           dockerContainerPortSettingsLabel.setVisible(true);
           setFinishButtonState(false);
+          setPreviousButtonState(false);
           return false;
         }
       }
@@ -185,6 +192,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       ValidationInfo info = new ValidationInfo("Please name your Docker container", dockerContainerNameTextField);
       dockerContainerNameLabel.setVisible(true);
       setFinishButtonState(false);
+      setPreviousButtonState(false);
       if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
@@ -196,6 +204,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       if (dockerfileImage == null) {
         ValidationInfo info = new ValidationInfo("Please select a Docker image type form the list", dockerfileComboBox);
         setFinishButtonState(true);
+        setPreviousButtonState(true);
         if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
         return info;
       }
@@ -211,7 +220,8 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       if (dockerfileName == null || dockerfileName.equals("") || Files.notExists(Paths.get(dockerfileName))) {
         ValidationInfo info = new ValidationInfo("Dockerfile not found", customDockerfileBrowseButton);
         customDockerfileBrowseLabel.setVisible(true);
-        setFinishButtonState(true);
+        setFinishButtonState(false);
+        setPreviousButtonState(false);
         if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
         return info;
       }
@@ -222,6 +232,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       } catch (Exception e) {
         customDockerfileBrowseLabel.setVisible(true);
         setFinishButtonState(false);
+        setPreviousButtonState(false);
 
         String errTitle = "Error reading Dockerfile content";
         String msg = "An error occurred while attempting to get the content of " + customDockerfileBrowseButton.getText() + "\n" + e.getMessage();
@@ -239,6 +250,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
       dockerContainerPortSettingsLabel.setVisible(true);
       setFinishButtonState(false);
+      setPreviousButtonState(false);
       return info;
     }
     dockerImageDescription.dockerPortSettings = dockerContainerPortSettings.getText();
@@ -250,10 +262,16 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
     model.getCurrentNavigationState().FINISH.setEnabled(finishButtonState);
   }
 
+  private void setPreviousButtonState(boolean previousButtonState) {
+    model.getCurrentNavigationState().PREVIOUS.setEnabled(previousButtonState);
+  }
+
+
   @Override
   public JComponent prepare(final WizardNavigationState state) {
     rootConfigureContainerPanel.revalidate();
     setFinishButtonState(true);
+    setPreviousButtonState(true);
 
     return rootConfigureContainerPanel;
   }
