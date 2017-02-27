@@ -14,9 +14,6 @@
 	<module>AddLibrary/AzureLibraries/com.microsoftopentechnologies.windowsazure.tools.wasdkjava.ui</module>
     <module>com.microsoftopentechnologies.wacommon</module>
 	<module>com.microsoftopentechnologies.wacommon.feature</module>   
-    <module>AddLibrary/ACSLibrary/com.microsoftopentechnologies.acsfilter</module>
-    <module>AddLibrary/ACSLibrary/com.microsoftopentechnologies.acsfilter.feature</module>
-    <module>AddLibrary/ACSLibrary/com.microsoftopentechnologies.acsfilter.ui</module>
     <module>AddLibrary/JDBCLibrary/JavaEE6/com.microsoft.sqljdbc4</module>
 	<module>AddLibrary/JDBCLibrary/JavaEE6/com.microsoft.sqljdbc4.feature</module>
     <module>AddLibrary/JDBCLibrary/JavaEE6/com.microsoft.sqljdbc4.ui</module>
