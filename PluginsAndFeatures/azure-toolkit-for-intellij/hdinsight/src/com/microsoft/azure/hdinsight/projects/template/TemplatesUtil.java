@@ -24,9 +24,9 @@ package com.microsoft.azure.hdinsight.projects.template;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.util.io.FileUtil;
 import com.microsoft.azure.hdinsight.projects.samples.ProjectSampleUtil;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -119,9 +119,6 @@ public class TemplatesUtil {
 
     private static CustomTemplateInfo getTemplateInfo(File file) {
         File templateInfoFile = new File(StringHelper.concat(file.getAbsolutePath(), File.separator, XML_FILE_NAME));
-        if (templateInfoFile == null) {
-            return null;
-        }
 
         CustomTemplateInfo info = null;
         try {

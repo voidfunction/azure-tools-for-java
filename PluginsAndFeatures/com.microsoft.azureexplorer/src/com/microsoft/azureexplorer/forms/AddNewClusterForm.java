@@ -18,7 +18,7 @@ import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
 import com.microsoft.azure.hdinsight.serverexplore.AddHDInsightAdditionalClusterImpl;
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 
 public class AddNewClusterForm extends TitleAreaDialog {

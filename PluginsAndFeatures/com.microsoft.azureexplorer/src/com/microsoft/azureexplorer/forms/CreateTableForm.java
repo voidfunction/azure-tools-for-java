@@ -21,7 +21,7 @@ package com.microsoft.azureexplorer.forms;
 
 import com.microsoft.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.*;
 import org.eclipse.jface.dialogs.Dialog;

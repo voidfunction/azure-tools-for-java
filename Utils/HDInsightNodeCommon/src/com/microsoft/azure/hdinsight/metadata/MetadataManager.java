@@ -21,7 +21,7 @@
  */
 package com.microsoft.azure.hdinsight.metadata;
 
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;

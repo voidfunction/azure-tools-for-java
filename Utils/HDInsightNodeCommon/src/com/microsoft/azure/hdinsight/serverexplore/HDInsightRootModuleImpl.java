@@ -26,9 +26,12 @@ import com.microsoft.azure.hdinsight.common.CommonConst;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.ClusterNode;
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 
 import java.util.List;
 

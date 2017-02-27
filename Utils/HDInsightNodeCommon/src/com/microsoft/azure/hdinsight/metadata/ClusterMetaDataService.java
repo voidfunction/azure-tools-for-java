@@ -22,7 +22,7 @@
 package com.microsoft.azure.hdinsight.metadata;
 
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;

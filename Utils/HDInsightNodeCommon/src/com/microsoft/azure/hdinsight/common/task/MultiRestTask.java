@@ -25,7 +25,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.microsoft.azure.hdinsight.common.HttpResponseWithoutHeader;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;

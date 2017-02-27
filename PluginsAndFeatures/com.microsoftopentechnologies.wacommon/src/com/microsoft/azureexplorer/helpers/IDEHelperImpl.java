@@ -30,9 +30,9 @@ import org.eclipse.swt.widgets.Display;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.Nullable;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.Nullable;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
 import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;

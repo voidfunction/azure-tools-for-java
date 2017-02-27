@@ -21,7 +21,7 @@
  */
 package com.microsoft.azure.hdinsight.sdk.common;
 
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 
 public abstract class CommonRunnable<T,E extends Exception> implements Runnable {
     private final T parameter;

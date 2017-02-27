@@ -44,7 +44,7 @@ import com.microsoft.azureexplorer.editors.StorageEditorInput;
 import com.microsoft.azureexplorer.editors.TableFileEditor;
 import com.microsoft.azureexplorer.forms.OpenSSLFinderForm;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.UIHelper;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;

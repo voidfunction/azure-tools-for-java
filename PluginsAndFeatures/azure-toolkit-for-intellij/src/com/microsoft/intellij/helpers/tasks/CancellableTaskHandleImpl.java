@@ -1,11 +1,11 @@
 package com.microsoft.intellij.helpers.tasks;
 
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.Nullable;
-import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.Nullable;
+import com.microsoft.azuretools.azurecommons.tasks.CancellableTask;
 
-public class CancellableTaskHandleImpl implements CancellableTaskHandle {
+public class CancellableTaskHandleImpl implements CancellableTask.CancellableTaskHandle {
     private ProgressIndicator progressIndicator;
     private Throwable exception;
 

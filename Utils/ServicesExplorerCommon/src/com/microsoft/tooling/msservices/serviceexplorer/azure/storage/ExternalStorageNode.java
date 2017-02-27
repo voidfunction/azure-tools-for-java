@@ -22,7 +22,7 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
 import com.microsoft.tooling.msservices.helpers.ExternalStorageHelper;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;

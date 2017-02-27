@@ -44,16 +44,15 @@ import com.intellij.packaging.artifacts.Artifact;
 import com.intellij.packaging.impl.artifacts.ArtifactUtil;
 import com.intellij.packaging.impl.compiler.ArtifactCompileScope;
 import com.intellij.packaging.impl.compiler.ArtifactsWorkspaceSettings;
+import com.microsoft.azuretools.azurecommons.tasks.CancellableTask;
 import com.microsoft.intellij.ApplicationSettings;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.helpers.tasks.CancellableTaskHandleImpl;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.Nullable;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
-import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.Nullable;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -171,10 +170,10 @@ public class IDEHelperImpl implements IDEHelper {
 
     @NotNull
     @Override
-    public CancellableTaskHandle runInBackground(@NotNull ProjectDescriptor projectDescriptor,
-                                                 @NotNull final String name,
-                                                 @Nullable final String indicatorText,
-                                                 @NotNull final CancellableTask cancellableTask)
+    public CancellableTask.CancellableTaskHandle runInBackground(@NotNull ProjectDescriptor projectDescriptor,
+                                                                 @NotNull final String name,
+                                                                 @Nullable final String indicatorText,
+                                                                 @NotNull final CancellableTask cancellableTask)
             throws AzureCmdException {
         final CancellableTaskHandleImpl handle = new CancellableTaskHandleImpl();
         final Project project = findOpenProject(projectDescriptor);

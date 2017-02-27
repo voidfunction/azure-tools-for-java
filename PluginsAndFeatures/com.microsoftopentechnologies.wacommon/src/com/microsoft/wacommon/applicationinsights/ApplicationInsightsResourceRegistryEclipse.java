@@ -33,7 +33,7 @@ import com.microsoft.applicationinsights.management.rest.client.RestOperationExc
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;

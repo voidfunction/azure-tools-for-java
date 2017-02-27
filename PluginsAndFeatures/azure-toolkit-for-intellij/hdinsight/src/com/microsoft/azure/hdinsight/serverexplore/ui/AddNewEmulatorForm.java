@@ -11,7 +11,7 @@ import com.microsoft.azure.hdinsight.sdk.cluster.EmulatorClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
 import com.microsoft.azure.hdinsight.spark.common.SparkBatchSubmission;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import com.jcraft.jsch.*;

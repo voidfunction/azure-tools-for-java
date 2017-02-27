@@ -26,7 +26,7 @@ import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
@@ -108,5 +108,11 @@ public class StorageNode extends RefreshableNode {
 
     public StorageAccount getStorageAccount() {
         return storageAccount;
+    }
+
+    @Override
+    public String getToolTip() {
+        return storageAccount.name() + "\n" + storageAccount.regionName()
+                + "<br>" + storageAccount.resourceGroupName();
     }
 }

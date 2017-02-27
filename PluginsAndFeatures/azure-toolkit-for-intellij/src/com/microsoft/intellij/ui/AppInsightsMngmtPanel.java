@@ -39,7 +39,7 @@ import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.ui.components.DefaultDialogWrapper;
 import com.microsoft.intellij.util.MethodUtils;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 import com.microsoft.applicationinsights.management.rest.client.RestOperationException;
 import org.jetbrains.annotations.Nullable;

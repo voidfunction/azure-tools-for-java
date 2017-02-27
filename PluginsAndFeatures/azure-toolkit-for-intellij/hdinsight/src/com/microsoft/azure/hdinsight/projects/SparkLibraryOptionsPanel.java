@@ -49,9 +49,9 @@ import com.intellij.util.PlatformIcons;
 import com.intellij.util.containers.hash.HashMap;
 import com.microsoft.azure.hdinsight.common.CommonConst;
 import com.microsoft.azure.hdinsight.common.HDInsightUtil;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

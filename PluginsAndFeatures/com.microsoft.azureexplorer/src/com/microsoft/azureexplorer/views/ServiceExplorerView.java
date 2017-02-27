@@ -57,7 +57,7 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
 import com.microsoft.azureexplorer.Activator;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangeListener;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangedEvent;
 import com.microsoft.tooling.msservices.helpers.collections.ObservableList;

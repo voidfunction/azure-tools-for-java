@@ -23,8 +23,7 @@ package com.microsoft.azure.hdinsight.sdk.cluster;
 
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 
 import java.io.IOException;
 import java.util.List;

@@ -23,7 +23,7 @@ package com.microsoft.tooling.msservices.serviceexplorer;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 
 import java.util.EventListener;
 

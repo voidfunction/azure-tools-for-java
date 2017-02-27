@@ -21,7 +21,7 @@
  */
 package com.microsoft.azure.hdinsight.common;
 
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 
 public interface HDInsightHelper {
     void openJobViewEditor(@NotNull Object projectObject, @NotNull String uuid);

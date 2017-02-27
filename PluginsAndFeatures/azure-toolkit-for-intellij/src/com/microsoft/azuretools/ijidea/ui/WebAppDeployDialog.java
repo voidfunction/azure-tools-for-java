@@ -52,7 +52,6 @@ import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.azuretools.utils.WebAppUtils;
 import com.microsoft.intellij.deploy.DeploymentManager;
-import com.microsoft.windowsazure.core.OperationStatus;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.Nullable;
 
@@ -497,13 +496,13 @@ public class WebAppDeployDialog extends DialogWrapper {
                     progressIndicator.setIndeterminate(true);
                     PublishingProfile pp = webApp.getPublishingProfile();
                     Date startDate = new Date();
-                    deploymentManager.notifyProgress(webApp.name(), startDate, null, 5, OperationStatus.InProgress, "Deploying Web App");
+                    deploymentManager.notifyProgress(webApp.name(), startDate, null, 5, "Deploying Web App");
                     WebAppUtils.deployArtifact(artifact.getName(), artifact.getOutputFilePath(),
                             pp, isDeployToRoot, new UpdateProgressIndicator(progressIndicator));
                     String sitePath = buildSiteLink(wad.webApp, isDeployToRoot ? null : artifact.getName());
                     progressIndicator.setText("Checking the web app is available...");
                     progressIndicator.setText2("Link: " + sitePath);
-                    deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 45, OperationStatus.InProgress, "Checking the web app is available...");
+                    deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 45, "Checking the web app is available...");
 
                     // to make warn up cancelable
                     Thread thread = new Thread(new Runnable() {
@@ -530,7 +529,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                         if (progressIndicator.isCanceled()) return;
                         else Thread.sleep(2000);
                     }
-                    deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 50, OperationStatus.Succeeded, message("runStatus"));
+                    deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 50, message("runStatus"));
                     showLink(sitePath);
                 } catch (Exception ex) {
                     ex.printStackTrace();

@@ -40,7 +40,7 @@ import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.util.WAHelper;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.Utils;
 import org.apache.commons.net.ftp.FTP;

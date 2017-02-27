@@ -23,7 +23,7 @@ package com.microsoft.intellij.forms;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;

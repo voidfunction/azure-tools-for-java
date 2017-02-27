@@ -36,7 +36,6 @@ import com.microsoft.intellij.hdinsight.messages.HDInsightBundle;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;

@@ -21,7 +21,7 @@ package com.microsoft.azure.hdinsight.projects;
 
 import java.util.jar.JarFile;
 
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 
 public class SparkLibraryInfo {
     private String localPath;

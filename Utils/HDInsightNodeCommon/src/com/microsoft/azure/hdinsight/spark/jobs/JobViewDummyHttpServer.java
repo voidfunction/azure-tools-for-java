@@ -27,7 +27,7 @@ import com.microsoft.azure.hdinsight.common.MultiHttpFutureCallback;
 import com.microsoft.azure.hdinsight.common.task.*;
 import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;

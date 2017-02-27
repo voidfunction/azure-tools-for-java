@@ -1,6 +1,6 @@
 package com.microsoft.azureexplorer.actions;
 
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;

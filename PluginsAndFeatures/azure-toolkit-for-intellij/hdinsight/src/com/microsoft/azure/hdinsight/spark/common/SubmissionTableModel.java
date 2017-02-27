@@ -22,7 +22,7 @@
 package com.microsoft.azure.hdinsight.spark.common;
 
 import com.microsoft.azure.hdinsight.spark.uihelper.InteractiveTableModel;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

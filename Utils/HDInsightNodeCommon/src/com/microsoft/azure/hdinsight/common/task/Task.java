@@ -22,7 +22,7 @@
 package com.microsoft.azure.hdinsight.common.task;
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.microsoft.tooling.msservices.helpers.Nullable;
+import com.microsoft.azuretools.azurecommons.helpers.Nullable;
 
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;

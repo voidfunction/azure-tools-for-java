@@ -25,7 +25,7 @@ import com.microsoft.azure.hdinsight.sdk.common.AggregatedException;
 import com.microsoft.azure.hdinsight.sdk.common.CommonRunnable;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 
 import java.io.IOException;
 import java.util.ArrayList;

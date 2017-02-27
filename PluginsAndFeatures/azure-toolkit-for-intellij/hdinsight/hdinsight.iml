@@ -10,7 +10,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="library" name="AzureCommons" level="project" />
     <orderEntry type="library" name="azure-sdk" level="project" />
-    <orderEntry type="library" name=".cspack" level="project" />
     <orderEntry type="library" name="antIntegration" level="project" />
     <orderEntry type="module-library" scope="PROVIDED">
       <library>
@@ -39,6 +38,15 @@
     <orderEntry type="library" name="com.microsoft.azuretools:hdinsight-node-common:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="com.microsoft.azure:azure-data-lake-store-sdk:2.1.4" level="project" />
     <orderEntry type="library" name="com.microsoft.azuretools:auth-manage:0.0.1-SNAPSHOT" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../lib/AzureCommons.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
   <component name="POM File Configuration" pomFile="" />
 </module>

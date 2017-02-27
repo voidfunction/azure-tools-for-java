@@ -38,7 +38,7 @@ import com.microsoft.intellij.AzureSettings;
 //import com.microsoft.intellij.forms.WebSiteDeployForm;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tasks.WebSiteDeployTask;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 //import com.microsoft.tooling.msservices.model.ws.WebSite;
 //import com.microsoft.tooling.msservices.model.ws.WebSiteConfiguration;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;

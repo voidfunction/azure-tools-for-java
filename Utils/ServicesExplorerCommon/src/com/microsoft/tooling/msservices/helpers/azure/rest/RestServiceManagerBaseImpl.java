@@ -24,9 +24,9 @@ package com.microsoft.tooling.msservices.helpers.azure.rest;
 import com.google.common.base.Strings;
 import com.google.common.io.CharStreams;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.Nullable;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.Nullable;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;

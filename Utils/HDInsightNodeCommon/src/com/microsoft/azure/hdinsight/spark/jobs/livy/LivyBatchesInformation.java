@@ -21,8 +21,8 @@
  */
 package com.microsoft.azure.hdinsight.spark.jobs.livy;
 
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.Nullable;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.Nullable;
 
 import java.util.List;
 

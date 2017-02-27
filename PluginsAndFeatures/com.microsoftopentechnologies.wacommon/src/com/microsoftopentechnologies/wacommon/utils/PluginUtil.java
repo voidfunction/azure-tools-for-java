@@ -62,7 +62,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.service.prefs.Preferences;
 
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.wacommon.Activator;

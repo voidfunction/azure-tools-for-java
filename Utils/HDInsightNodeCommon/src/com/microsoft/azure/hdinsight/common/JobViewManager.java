@@ -24,8 +24,8 @@ package com.microsoft.azure.hdinsight.common;
 import com.microsoft.azure.hdinsight.spark.jobs.SparkJobInfo;
 import com.microsoft.azure.hdinsight.spark.jobs.framework.JobViewPanel;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.Nullable;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.Nullable;
 import javafx.util.Pair;
 
 import java.util.HashMap;

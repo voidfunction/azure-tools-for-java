@@ -21,9 +21,9 @@
  */
 package com.microsoft.azure.hdinsight.spark.common;
 
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 

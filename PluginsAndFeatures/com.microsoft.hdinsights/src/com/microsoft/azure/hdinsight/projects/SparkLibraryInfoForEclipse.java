@@ -23,7 +23,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import com.microsoft.auth.StringUtils;
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 
 public class SparkLibraryInfoForEclipse {

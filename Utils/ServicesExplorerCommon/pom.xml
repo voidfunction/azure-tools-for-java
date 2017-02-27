@@ -57,10 +57,10 @@
         </dependency>
         <dependency>
             <groupId>com.microsoft.azuretools</groupId>
-            <artifactId>cspack</artifactId>
+            <artifactId>azure-commons</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/.cspack.jar</systemPath>
+            <systemPath>${project.basedir}/lib/AzureCommons.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azuretools</groupId>

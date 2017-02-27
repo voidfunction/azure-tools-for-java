@@ -29,10 +29,10 @@ import com.microsoft.azure.hdinsight.common.*;
 import com.microsoft.azure.hdinsight.projects.HDInsightModuleBuilder;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.spark.ui.SparkSubmissionExDialog;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.intellij.hdinsight.messages.HDInsightBundle;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
 
 import java.util.HashSet;
 import java.util.List;

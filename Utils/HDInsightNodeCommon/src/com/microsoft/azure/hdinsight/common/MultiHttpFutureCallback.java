@@ -22,7 +22,7 @@
 package com.microsoft.azure.hdinsight.common;
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.OutputStream;

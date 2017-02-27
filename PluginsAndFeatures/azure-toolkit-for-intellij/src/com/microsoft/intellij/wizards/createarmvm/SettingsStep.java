@@ -48,9 +48,8 @@ import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
 import com.microsoft.intellij.forms.CreateVirtualNetworkForm;
 import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
-import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import org.jetbrains.annotations.NotNull;
 

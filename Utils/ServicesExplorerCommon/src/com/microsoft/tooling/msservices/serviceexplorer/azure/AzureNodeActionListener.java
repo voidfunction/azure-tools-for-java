@@ -21,11 +21,11 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure;
 
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListenerAsync;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 
 import java.util.concurrent.Callable;
 

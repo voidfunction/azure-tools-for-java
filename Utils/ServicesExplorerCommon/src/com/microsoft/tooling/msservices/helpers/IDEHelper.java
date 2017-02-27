@@ -24,9 +24,10 @@ package com.microsoft.tooling.msservices.helpers;
 import java.util.List;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
-import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.Nullable;
+import com.microsoft.azuretools.azurecommons.tasks.CancellableTask;
 
 public interface IDEHelper {
     class ProjectDescriptor {
@@ -88,10 +89,10 @@ public interface IDEHelper {
                          Runnable runnable);
 
     @NotNull
-    CancellableTaskHandle runInBackground(@NotNull ProjectDescriptor projectDescriptor,
-                                          @NotNull String name,
-                                          @Nullable String indicatorText,
-                                          @NotNull CancellableTask cancellableTask) throws AzureCmdException;
+    CancellableTask.CancellableTaskHandle runInBackground(@NotNull ProjectDescriptor projectDescriptor,
+                                                          @NotNull String name,
+                                                          @Nullable String indicatorText,
+                                                          @NotNull CancellableTask cancellableTask) throws AzureCmdException;
 
     @Nullable
     String getProperty(@NotNull String name);

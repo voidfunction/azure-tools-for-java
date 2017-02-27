@@ -33,8 +33,8 @@ import com.microsoft.intellij.ui.NewCertificateDialog;
 import com.microsoft.intellij.ui.util.UIUtils;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.wacommon.commoncontrols.NewCertificateDialogData;
+import com.microsoftopentechnologies.azurecommons.util.Base64;
 import com.microsoftopentechnologies.azurecommons.wacommonutil.CerPfxUtil;
-import com.microsoftopentechnologies.azuremanagementutil.util.Base64;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;

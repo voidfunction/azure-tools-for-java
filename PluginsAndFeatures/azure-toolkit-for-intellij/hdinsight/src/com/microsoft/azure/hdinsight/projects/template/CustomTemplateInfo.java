@@ -21,7 +21,7 @@
  */
 package com.microsoft.azure.hdinsight.projects.template;
 
-import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;

@@ -25,7 +25,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.microsoft.azure.hdinsight.Activator;
 import com.microsoft.azure.hdinsight.SparkSubmissionToolWindowView;
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 
 import com.microsoft.azure.hdinsight.common.MessageInfoType;
 import static com.microsoft.azure.hdinsight.common.MessageInfoType.*;

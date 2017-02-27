@@ -22,7 +22,7 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure;
 
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 
 import java.util.concurrent.Callable;

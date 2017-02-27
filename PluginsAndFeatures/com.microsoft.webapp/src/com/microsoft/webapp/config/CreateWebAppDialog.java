@@ -66,7 +66,7 @@ import org.eclipse.ui.PlatformUI;
 import com.interopbridges.tools.windowsazure.WindowsAzureInvalidProjectOperationException;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 //import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;
 import com.microsoft.tooling.msservices.model.Subscription;

@@ -55,7 +55,7 @@ import com.microsoft.azureexplorer.forms.QueueMessageForm;
 import com.microsoft.azureexplorer.forms.ViewMessageForm;
 import com.microsoft.azureexplorer.helpers.UIHelperImpl;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;

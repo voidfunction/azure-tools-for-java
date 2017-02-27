@@ -227,7 +227,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         ProgressManager.getInstance().run(
             new Task.Modal(project, "Creating storage account", true) {
                 @Override
-                public void run(@com.microsoft.tooling.msservices.helpers.NotNull ProgressIndicator indicator) {
+                public void run(@NotNull ProgressIndicator indicator) {
                     indicator.setIndeterminate(true);
                     boolean success = createStorageAccount();
                     if (success) {

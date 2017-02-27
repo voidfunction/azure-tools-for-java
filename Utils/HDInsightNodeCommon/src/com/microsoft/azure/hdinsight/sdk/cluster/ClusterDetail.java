@@ -27,8 +27,7 @@ import com.microsoft.azure.hdinsight.sdk.storage.ADLSStorageAccount;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
 import com.microsoft.azure.hdinsight.sdk.storage.IHDIStorageAccount;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-import com.microsoft.tooling.msservices.model.Subscription;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 
 import java.io.IOException;
 import java.util.ArrayList;

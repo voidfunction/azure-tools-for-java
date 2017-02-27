@@ -21,7 +21,7 @@
  */
 package com.microsoft.azure.hdinsight.spark.uihelper;
 
-import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;

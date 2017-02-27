@@ -29,12 +29,12 @@ import com.microsoft.azure.hdinsight.sdk.cluster.*;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azure.hdinsight.sdk.common.AggregatedException;
 import com.microsoft.azure.hdinsight.sdk.common.AuthenticationErrorHandler;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 
 import java.util.ArrayList;

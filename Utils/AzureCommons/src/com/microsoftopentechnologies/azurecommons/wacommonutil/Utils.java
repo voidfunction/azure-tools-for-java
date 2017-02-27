@@ -24,9 +24,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.JarURLConnection;
 import java.net.Socket;
+import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class Utils {
 
@@ -126,5 +133,25 @@ public class Utils {
 				}
 			}
 		}
+	}
+
+	public static List<String> getJarEntries(String jarName, String entryName) throws IOException {
+		List<String> files = new ArrayList<String>();
+		System.out.println("entryName = " + entryName);
+		JarURLConnection urlConnection = (JarURLConnection) new URL("jar:file:" + jarName + "!/" + entryName).openConnection();
+//        URLConnection urlConnection = originUrl.openConnection();
+		JarURLConnection jarConnection = ((JarURLConnection)urlConnection);
+		JarFile jarFile = jarConnection.getJarFile();
+		Enumeration<JarEntry> entries = jarFile.entries();
+
+		while (entries.hasMoreElements()) {
+			JarEntry entry = entries.nextElement();
+			if (entry.getName().startsWith(jarConnection.getEntryName())) {
+				if (!entry.isDirectory()) {
+					files.add(entry.getName());
+				}
+			}
+		}
+		return files;
 	}
 }

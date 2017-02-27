@@ -22,7 +22,7 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage;
 
 import com.microsoft.azure.management.storage.StorageAccount;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Table;

@@ -75,7 +75,7 @@ import com.gigaspaces.azure.views.WindowsAzureActivityLogView;
 import com.gigaspaces.azure.wizards.WizardCacheManager;
 import com.interopbridges.tools.windowsazure.WindowsAzureProjectManager;
 import com.microsoft.azureexplorer.helpers.PreferenceUtil;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
 import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKHelper;

@@ -28,7 +28,7 @@ import com.microsoft.azure.docker.model.DockerImage;
 import com.microsoft.azure.docker.ops.AzureDockerContainerOps;
 import com.microsoft.azure.docker.ops.AzureDockerImageOps;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.AzureRefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;

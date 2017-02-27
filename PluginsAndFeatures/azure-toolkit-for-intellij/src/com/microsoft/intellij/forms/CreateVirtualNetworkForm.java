@@ -29,6 +29,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.microsoft.azure.management.network.Network;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import org.jetbrains.annotations.Nullable;
 
@@ -104,7 +105,7 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
         ProgressManager.getInstance().run(
                 new Task.Modal(project, "Creating virtual network", true) {
                     @Override
-                    public void run(@com.microsoft.tooling.msservices.helpers.NotNull ProgressIndicator indicator) {
+                    public void run(@NotNull ProgressIndicator indicator) {
                         indicator.setIndeterminate(true);
                         boolean success = createVirtualNetwork();
                         if (success) {

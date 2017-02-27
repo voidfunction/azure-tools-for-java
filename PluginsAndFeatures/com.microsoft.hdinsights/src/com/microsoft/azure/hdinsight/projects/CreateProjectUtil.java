@@ -38,7 +38,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import com.microsoft.azure.hdinsight.util.Messages;
-import com.microsoft.tooling.msservices.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.tooling.msservices.helpers.StringHelper;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 

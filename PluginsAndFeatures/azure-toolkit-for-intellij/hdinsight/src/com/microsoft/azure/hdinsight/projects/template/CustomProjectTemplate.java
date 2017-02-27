@@ -25,7 +25,7 @@ import com.intellij.ide.util.projectWizard.AbstractModuleBuilder;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.platform.ProjectTemplate;
 import com.microsoft.azure.hdinsight.projects.HDInsightModuleBuilder;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

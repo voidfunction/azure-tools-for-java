@@ -23,15 +23,14 @@ package com.microsoft.tooling.msservices.serviceexplorer.azure.storage.asm;
 
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.azure.AzureCmdException;
-//import com.microsoft.tooling.msservices.helpers.azure.AzureManagerImpl;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.ClientStorageNode;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 
 import java.util.Map;
 
