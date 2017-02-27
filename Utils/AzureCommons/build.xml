@@ -17,9 +17,6 @@
 				<include name="*.jar"/>			
 				<include name="dependencies/*.jar"/>
 			</fileset>
-		<fileset dir="${cloudservices.lib.dir}">
-			<include name="*.jar"/>
-		</fileset>
 		<pathelement location="${path.variable.maven_repository}/com/microsoft/azuretools/azure-explorer-common/0.0.1-SNAPSHOT/azure-explorer-common-0.0.1-SNAPSHOT.jar"/>
 	</path>
 
