@@ -39,7 +39,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import com.microsoft.azure.hdinsight.util.Messages;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 
 public class CreateProjectUtil {

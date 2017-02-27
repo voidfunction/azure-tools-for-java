@@ -49,7 +49,7 @@ import com.microsoft.azure.hdinsight.spark.common.SparkSubmitResponse;
 import com.microsoft.azure.hdinsight.util.Messages;
 import com.microsoft.tooling.msservices.helpers.CallableSingleArg;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;

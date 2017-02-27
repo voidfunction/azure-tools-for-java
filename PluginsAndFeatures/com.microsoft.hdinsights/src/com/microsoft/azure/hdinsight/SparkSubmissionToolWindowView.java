@@ -46,7 +46,7 @@ import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import com.microsoft.azure.hdinsight.spark.common.SparkBatchSubmission;
 import com.microsoft.azure.hdinsight.util.Messages;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 
 public class SparkSubmissionToolWindowView extends ViewPart {

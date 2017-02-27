@@ -44,8 +44,6 @@ import org.eclipse.swt.widgets.Text;
 
 import com.microsoft.azure.management.resources.ResourceGroup;
 //import com.microsoft.azure.management.resources.models.ResourceGroupExtended;
-import com.microsoft.tooling.msservices.model.Subscription;
-import com.microsoft.tooling.msservices.model.vm.Location;
 import com.microsoftopentechnologies.wacommon.Activator;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;

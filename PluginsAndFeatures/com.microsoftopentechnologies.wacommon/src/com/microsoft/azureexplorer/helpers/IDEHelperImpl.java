@@ -32,9 +32,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.Nullable;
+import com.microsoft.azuretools.azurecommons.tasks.CancellableTask;
+import com.microsoft.azuretools.azurecommons.tasks.CancellableTask.CancellableTaskHandle;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
-import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask;
-import com.microsoft.tooling.msservices.helpers.tasks.CancellableTask.CancellableTaskHandle;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 import com.microsoftopentechnologies.wacommon.utils.Messages;
 

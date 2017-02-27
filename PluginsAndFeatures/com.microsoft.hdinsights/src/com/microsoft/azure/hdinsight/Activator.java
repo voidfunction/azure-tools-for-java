@@ -28,7 +28,7 @@ import org.osgi.framework.BundleContext;
 import com.microsoft.azure.hdinsight.util.HDInsightJobViewUtils;
 import com.microsoft.azure.hdinsight.util.Messages;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.helpers.StringHelper;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
 
 /**

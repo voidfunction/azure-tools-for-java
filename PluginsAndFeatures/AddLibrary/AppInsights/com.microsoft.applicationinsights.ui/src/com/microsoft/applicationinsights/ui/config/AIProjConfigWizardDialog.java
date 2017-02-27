@@ -68,8 +68,6 @@ import com.microsoft.applicationinsights.preference.ApplicationInsightsPreferenc
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.util.AILibraryUtil;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.wacommon.applicationinsights.AILibraryHandler;
 import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
 import com.microsoft.wacommon.applicationinsights.ApplicationInsightsResourceRegistryEclipse;

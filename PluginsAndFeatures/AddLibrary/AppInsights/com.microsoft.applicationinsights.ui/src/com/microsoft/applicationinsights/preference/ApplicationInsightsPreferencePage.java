@@ -48,8 +48,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.ui.config.AIResourceChangeListener;
-import com.microsoft.tooling.msservices.helpers.azure.AzureManager;
-import com.microsoft.tooling.msservices.model.Subscription;
 import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
 import com.microsoft.wacommon.applicationinsights.ApplicationInsightsResourceRegistryEclipse;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
