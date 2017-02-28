@@ -185,7 +185,7 @@ public class DockerHostNode extends AzureRefreshableNode {
   public class ShutdownDockerHostAction extends AzureNodeActionPromptListener {
     public ShutdownDockerHostAction() {
       super(DockerHostNode.this, String.format(
-          "This operation will result in losing the VIP that was assigned to this virtual machine. " +
+          "This operation will result in losing the virtual IP address that was assigned to this virtual machine. " +
               "Are you sure that you want to shut down virtual machine %s?", dockerHost.name),
           "Shutting Down Docker Host");
     }

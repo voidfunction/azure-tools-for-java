@@ -101,7 +101,7 @@ public class VMNode extends RefreshableNode {
     public class ShutdownVMAction extends AzureNodeActionPromptListener {
         public ShutdownVMAction() {
             super(VMNode.this, String.format(
-                    "This operation will result in losing the VIP that was assigned to this virtual machine. " +
+                    "This operation will result in losing the virtual IP address that was assigned to this virtual machine. " +
                             "Are you sure that you want to shut down virtual machine %s?", virtualMachine.name()),
                     "Shutting down VM");
         }
