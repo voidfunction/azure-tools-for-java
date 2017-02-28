@@ -48,12 +48,7 @@ public class LibraryPropertiesStep extends WizardStep<AddLibraryWizardModel> imp
 
     @Override
     public ValidationInfo doValidate() {
-        if (myModel.getSelectedLibrary() == AzureLibrary.ACS_FILTER) {
-            ValidationInfo result = libraryPropertiesPanel.doValidate();
-            myModel.getCurrentNavigationState().FINISH.setEnabled(result == null);
-        }
         return null;
-//        return libraryPropertiesPanel.doValidate();
     }
 
     @Override

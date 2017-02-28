@@ -143,8 +143,11 @@ public class LibrariesConfigurationDialog extends DialogWrapper {
                     }
                 }
                 Library.ModifiableModel newLibraryModel = newLibrary.getModifiableModel();
-                File file = new File(String.format("%s%s%s", AzurePlugin.pluginFolder, File.separator, azureLibrary.getLocation()));
-                AddLibraryUtility.addLibraryRoot(file, newLibraryModel);
+                // if there is separate srosources folder
+                if (azureLibrary.getLocation() != null) {
+                    File file = new File(String.format("%s%s%s", AzurePlugin.pluginFolder, File.separator, azureLibrary.getLocation()));
+                    AddLibraryUtility.addLibraryRoot(file, newLibraryModel);
+                }
                 // if some files already contained in plugin dependencies, take them from there - true for azure sdk library
                 if (azureLibrary.getFiles().length > 0) {
                     AddLibraryUtility.addLibraryFiles(new File(PluginHelper.getAzureLibLocation()), newLibraryModel, azureLibrary.getFiles());

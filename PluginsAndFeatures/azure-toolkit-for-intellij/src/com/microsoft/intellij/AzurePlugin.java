@@ -296,19 +296,13 @@ public class AzurePlugin extends AbstractProjectComponent {
      */
     private void copyPluginComponents() {
         try {
-            String enctFile = String.format("%s%s%s", pluginFolder,
-                    File.separator, message("encFileName"));
-
-            // Check for encutil.exe
-            if (new File(enctFile).exists()) {
-                new File(enctFile).delete();
-            }
-            copyResourceFile(message("encFileName"), enctFile);
             for (AzureLibrary azureLibrary : AzureLibrary.LIBRARIES) {
-                if (!new File(pluginFolder + File.separator + azureLibrary.getLocation()).exists()) {
-                    for (String entryName : Utils.getJarEntries(pluginFolder + File.separator + "lib" + File.separator + CommonConst.PLUGIN_NAME + ".jar", azureLibrary.getLocation())) {
-                        new File(pluginFolder + File.separator + entryName).getParentFile().mkdirs();
-                        copyResourceFile(entryName, pluginFolder + File.separator + entryName);
+                if (azureLibrary.getLocation() != null) {
+                    if (!new File(pluginFolder + File.separator + azureLibrary.getLocation()).exists()) {
+                        for (String entryName : Utils.getJarEntries(pluginFolder + File.separator + "lib" + File.separator + CommonConst.PLUGIN_NAME + ".jar", azureLibrary.getLocation())) {
+                            new File(pluginFolder + File.separator + entryName).getParentFile().mkdirs();
+                            copyResourceFile(entryName, pluginFolder + File.separator + entryName);
+                        }
                     }
                 }
             }
