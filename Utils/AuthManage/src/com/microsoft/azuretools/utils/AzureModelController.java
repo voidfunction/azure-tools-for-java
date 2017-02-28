@@ -37,6 +37,7 @@ import com.microsoft.azuretools.sdkmanage.AzureManager;
 import rx.*;
 import rx.Observable;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 import java.util.*;
@@ -165,19 +166,22 @@ public class AzureModelController {
             Map<ResourceGroup, List<WebApp>> rgwaMap,
             Map<ResourceGroup, List<AppServicePlan>> rgspMap) {
 
-        if (progressIndicator != null) progressIndicator.setText("Reading resource groups...");
+        if (progressIndicator != null) progressIndicator.setText("Reading App Services...");
         int tasksSize = rgList.size();
-        Observable.from(rgList).flatMap(rg -> {
-            return Observable.create(new Observable.OnSubscribe<RgDepParams>() {
-                @Override
-                public void call(Subscriber<? super RgDepParams> subscriber) {
-                    List<WebApp> wal = azure.webApps().listByGroup(rg.name());
-                    List<AppServicePlan> aspl = azure.appServices().appServicePlans().listByGroup(rg.name());
-                    subscriber.onNext(new RgDepParams(rg, wal, aspl));
-                    subscriber.onCompleted();
-                }
-            }).subscribeOn(Schedulers.io())
-                    ;
+        if (tasksSize == 0) return;
+        Observable.from(rgList).flatMap(new Func1<ResourceGroup, Observable<? extends RgDepParams>>() {
+            @Override
+            public Observable<? extends RgDepParams> call(ResourceGroup rg) {
+                return Observable.create(new Observable.OnSubscribe<RgDepParams>() {
+                    @Override
+                    public void call(Subscriber<? super RgDepParams> subscriber) {
+                        List<WebApp> wal = azure.webApps().listByGroup(rg.name());
+                        List<AppServicePlan> aspl = azure.appServices().appServicePlans().listByGroup(rg.name());
+                        subscriber.onNext(new RgDepParams(rg, wal, aspl));
+                        subscriber.onCompleted();
+                    }
+                }).subscribeOn(Schedulers.io());
+            }
         }, tasksSize)
         .subscribeOn(Schedulers.newThread())
         .toBlocking()
@@ -215,7 +219,7 @@ public class AzureModelController {
         AzureModel azureModel = AzureModel.getInstance();
 
         // to get regions we nees subscription objects
-        if (progressIndicator != null) progressIndicator.setText("Getting subscription list...");
+        if (progressIndicator != null) progressIndicator.setText("Reading subscription list...");
         List<Subscription> sl = azureManager.getSubscriptions();
         // convert to map to easier find by sid
         Map <String, Subscription> sidToSubscriptionMap = azureModel.createSidToSubscriptionMap();
@@ -269,8 +273,12 @@ public class AzureModelController {
                 clearAll();
                 return;
             }
-            Azure azure = azureManager.getAzure(sd.getSubscriptionId());
             List<ResourceGroup> rgList = azureModel.getSubscriptionToResourceGroupMap().get(sd);
+            if (rgList.size() == 0)  {
+                System.out.println("no resource groups found!");
+                continue;
+            }
+            Azure azure = azureManager.getAzure(sd.getSubscriptionId());
             updateResGrDependency(azure, rgList, progressIndicator, rgwaMap, rgspMap);
         }
         azureModel.setResourceGroupToWebAppMap(rgwaMap);
