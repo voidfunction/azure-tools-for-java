@@ -21,21 +21,39 @@
  */
 package com.microsoft.intellij.docker.wizards.createhost;
 
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.wizard.WizardDialog;
+import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
+import com.microsoft.azure.docker.ops.AzureDockerSSHOps;
+import com.microsoft.azure.docker.ops.AzureDockerVMOps;
+import com.microsoft.azure.keyvault.KeyVaultClient;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
 import java.awt.*;
+import java.util.Date;
 
 public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizardModel> {
+  private static final Logger LOGGER = Logger.getInstance(AzureNewDockerWizardDialog.class);
   private AzureNewDockerWizardModel model;
+  private Runnable onCreate;
 
   public AzureNewDockerWizardDialog(AzureNewDockerWizardModel model) {
     super(model.getProject(), true, model);
     this.model = model;
     model.setNewDockerWizardDialog(this);
+    this.onCreate = null;
   }
 
   public void DialogShaker(ValidationInfo info) {
@@ -69,48 +87,140 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
 
   @Override
   protected void doOKAction() {
-//        validateInput();
-    if (isOKActionEnabled() && performFinish()) {
+    if (isOKActionEnabled()) {
       super.doOKAction();
     }
   }
 
-  /**
-   * This method gets called when wizard's finish button is clicked.
-   *
-   * @return True, if project gets created successfully; else false.
-   */
-  private boolean performFinish() {
-    Runnable runnable = new Runnable() {
+  public void create() {
+    DockerHost dockerHost = model.getDockerHost();
+
+
+    ProgressManager.getInstance().run(new Task.Backgroundable(model.getProject(), "Creating Docker Host on Azure...", true) {
+      @Override
+      public void run(ProgressIndicator progressIndicator) {
+        try {
+          progressIndicator.setFraction(.05);
+          progressIndicator.setText2(String.format("Create Docker Host %s ...", dockerHost.apiUrl));
+          AzureDockerHostsManager dockerManager = model.getDockerManager();
+          Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
+          KeyVaultClient keyVaultClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).keyVaultClient;
+          if (progressIndicator.isCanceled()) {
+            if (displayWarningOnCreateCancelAction() == 1) {
+              return;
+            }
+          }
+
+          progressIndicator.setFraction(.25);
+          progressIndicator.setText2(String.format("Creating new virtual machine %s ...", dockerHost.name));
+          System.out.println("Creating new virtual machine: " + new Date().toString());
+          AzureDockerVMOps.createDockerHostVM(azureClient, dockerHost);
+          System.out.println("Done creating new virtual machine: " + new Date().toString());
+          if (progressIndicator.isCanceled()) {
+            if (displayWarningOnCreateCancelAction() == 1) {
+              return;
+            }
+          }
+
+          progressIndicator.setFraction(.55);
+          progressIndicator.setText2(String.format("Waiting for virtual machine %s to be up...", dockerHost.name));
+          System.out.println("Waiting for virtual machine to be up: " + new Date().toString());
+          AzureDockerVMOps.waitForVirtualMachineStartup(azureClient, dockerHost);
+          System.out.println("Done Waiting for virtual machine to be up: " + new Date().toString());
+          if (progressIndicator.isCanceled()) {
+            if (displayWarningOnCreateCancelAction() == 1) {
+              return;
+            }
+          }
+
+          progressIndicator.setFraction(.65);
+          progressIndicator.setText2(String.format("Configuring Docker service for %s ...", dockerHost.apiUrl));
+          System.out.println("Configuring Docker host: " + new Date().toString());
+          AzureDockerVMOps.installDocker(dockerHost);
+          System.out.println("Done configuring Docker host: " + new Date().toString());
+          System.out.println("Finished setting up Docker host");
+          if (progressIndicator.isCanceled()) {
+            if (displayWarningOnCreateCancelAction() == 1) {
+              return;
+            }
+          }
+
+          if (dockerHost.certVault.hostName != null) {
+            progressIndicator.setFraction(.75);
+            progressIndicator.setText2(String.format("Creating new key vault %s ...", dockerHost.certVault.name));
+            System.out.println("Creating new Docker key vault: " + new Date().toString());
+            AzureDockerCertVaultOps.createOrUpdateVault(azureClient, dockerHost.certVault, keyVaultClient);
+            System.out.println("Done creating new key vault: " + new Date().toString());
+            if (progressIndicator.isCanceled()) {
+              if (displayWarningOnCreateCancelAction() == 1) {
+                return;
+              }
+            }
+
+            progressIndicator.setFraction(.90);
+            progressIndicator.setText2("Updating key vaults ...");
+            System.out.println("Refreshing key vaults: " + new Date().toString());
+            dockerManager.refreshDockerVaults();
+            dockerManager.refreshDockerVaultDetails();
+            System.out.println("Done refreshing key vaults: " + new Date().toString());
+            if (progressIndicator.isCanceled()) {
+              if (displayWarningOnCreateCancelAction() == 1) {
+                return;
+              }
+            }
+          }
+
+          progressIndicator.setIndeterminate(true);
+          progressIndicator.setText2("Refreshing the Docker virtual machines details...");
+          System.out.println("Refreshing Docker hosts details: " + new Date().toString());
+          dockerManager.refreshDockerHostDetails();
+          System.out.println("Done refreshing Docker hosts details: " + new Date().toString());
+          if (progressIndicator.isCanceled()) {
+            if (displayWarningOnCreateCancelAction() == 1) {
+              return;
+            }
+          }
+          progressIndicator.setIndeterminate(true);
+
+        } catch (Exception e) {
+          String msg = "An error occurred while attempting to create Docker host." + "\n" + e.getMessage();
+          PluginUtil.displayErrorDialogInAWTAndLog("Failed to Create Docker Host", msg, e);
+        }
+      }
+    });
+
+    //    performFinish(newHost);
+    DefaultLoader.getIdeHelper().runInBackground(model.getProject(), "Creating Docker Host on Azure", true, true, "Deploying Web app to a Docker host on Azure...", new Runnable() {
       @Override
       public void run() {
-        // Do the heavy workload in a background thread
-        doFinish();
+        try {
+          DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+            @Override
+            public void run() {
+
+              // Update caches here
+              if (onCreate != null) {
+                onCreate.run();
+              }
+            }
+          });
+        } catch (Exception e) {
+          String msg = "An error occurred while attempting to deploy to the selected Docker host." + "\n" + e.getMessage();
+          PluginUtil.displayErrorDialogInAWTAndLog("Failed to Deploy Web App as Docker Container", msg, e);
+        }
       }
-    };
-
-    ProgressManager progressManager = null;
-    try {
-      progressManager = ProgressManager.getInstance();
-    } catch (Exception e) {
-      progressManager = null;
-    }
-
-    if (progressManager != null) {
-      progressManager.runProcessWithProgressSynchronously(runnable, "Deploying...", true, model.getProject());
-    } else {
-      doFinish();
-    }
-
-    return true;
+    });
   }
 
-  private void doFinish() {
-    try {
-      // do something interesting here
-    } catch (Exception e) {
-      // TODO: These strings should be retrieved from AzureBundle
-      PluginUtil.displayErrorDialogAndLog("Error", "Error deploying to Docker", e);
-    }
+  private int displayWarningOnCreateCancelAction(){
+    return JOptionPane.showOptionDialog(null,
+        "This action can result the Docker host virtual machine in an partial setup state and can not be later use for container deployment!\n\n Are you sure you want this?",
+        "Stop Create Docker Host",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.QUESTION_MESSAGE,
+        PluginUtil.getIcon("/icons/logwarn.png"),
+        new String[]{"Cancel", "OK"},
+        null);
   }
+
 }

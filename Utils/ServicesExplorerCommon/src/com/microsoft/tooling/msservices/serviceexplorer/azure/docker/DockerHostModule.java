@@ -36,25 +36,20 @@ public class DockerHostModule extends AzureRefreshableNode {
   private static final String DOCKER_HOST_ICON = "virtualmachines.png";
   private static final String BASE_MODULE_NAME = "Docker Hosts";
 
-  private boolean isLoaded;
   AzureDockerHostsManager dockerManager;
 
   public DockerHostModule(Node parent) {
     super(DOCKER_HOST_MODULE_ID, BASE_MODULE_NAME, parent, DOCKER_HOST_ICON);
-    isLoaded = false;
     dockerManager = null;
   }
 
   @Override
   protected void onNodeClick(NodeActionEvent e) {
-    if (!isLoaded || dockerManager == null) {
-      this.load();
-    }
+    super.onNodeClick(e);
   }
 
   @Override
   protected void refreshItems() throws AzureCmdException {
-    isLoaded = false;
     // remove all child nodes
     removeAllChildNodes();
 
@@ -72,8 +67,6 @@ public class DockerHostModule extends AzureRefreshableNode {
       for (DockerHost host : dockerManager.getDockerHostsList()) {
         addChildNode(new DockerHostNode(this, dockerManager, host));
       }
-
-      isLoaded = true;
     } catch (Exception ex) {
       DefaultLoader.getUIHelper().showException("An error occurred while attempting to load the Docker virtual machines from Azure", ex,
           "Azure Services Explorer - Error Deleting Web App", false, true);

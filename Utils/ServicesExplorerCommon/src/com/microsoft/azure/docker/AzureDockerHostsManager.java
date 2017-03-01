@@ -175,6 +175,10 @@ public class AzureDockerHostsManager {
       for (List<DockerHost> dockerHostList : AzureDockerUtils.refreshDockerHostDetails(subscriptionsList, dockerVaultsMap).values()) {
         for (DockerHost dockerHost : dockerHostList) {
           localDockerHostsMap.put(dockerHost.apiUrl, dockerHost);
+          if (dockerHost.certVault == null && dockerHostsMap != null) {
+            DockerHost oldHost = dockerHostsMap.get(dockerHost.apiUrl);
+            dockerHost.certVault = oldHost != null ? oldHost.certVault : null;
+          }
         }
       }
 

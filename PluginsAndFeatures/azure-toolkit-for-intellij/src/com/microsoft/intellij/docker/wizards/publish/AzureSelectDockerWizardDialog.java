@@ -120,7 +120,7 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
    */
   private void performFinish() {
 
-    DefaultLoader.getIdeHelper().runInBackground(model.getProject(), "Deploying Web App to a Docker Host on Azure", false, true, "Deploying Web app to a Docker host on Azure...", new Runnable() {
+    DefaultLoader.getIdeHelper().runInBackground(model.getProject(), "Deploying Docker Container on Azure", false, true, "Deploying Web app to a Docker host on Azure...", new Runnable() {
       @Override
       public void run() {
         try {
@@ -129,6 +129,7 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
             public void run() {
               doFinish();
 
+              // Update caches here
               if (onCreate != null) {
                 onCreate.run();
               }
@@ -136,7 +137,7 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
           });
         } catch (Exception e) {
           String msg = "An error occurred while attempting to deploy to the selected Docker host." + "\n" + e.getMessage();
-          PluginUtil.displayErrorDialogInAWTAndLog("Failed to deploy Web app to the selected Docker host", msg, e);
+          PluginUtil.displayErrorDialogInAWTAndLog("Failed to Deploy Web App as Docker Container", msg, e);
         }
       }
     });

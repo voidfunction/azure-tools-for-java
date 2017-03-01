@@ -84,13 +84,16 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       public boolean verify(JComponent input) {
         if (AzureDockerValidationUtils.validateDockerImageName(((JTextField) input).getText())) {
           dockerContainerNameLabel.setVisible(false);
+          setDialogButtonsState(doValidate(false) == null);
           return true;
         } else {
           dockerContainerNameLabel.setVisible(true);
+          setDialogButtonsState(false);
           return false;
         }
       }
     });
+    dockerContainerNameTextField.getDocument().addDocumentListener(resetDialogButtonsState(null));
     dockerContainerNameLabel.setVisible(false);
 
     selectContainerButtonGroup = new ButtonGroup();
@@ -116,17 +119,16 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       public boolean verify(JComponent input) {
         if (customDockerfileRadioButton.isSelected() && !AzureDockerValidationUtils.validateDockerfilePath(customDockerfileBrowseButton.getText())) {
           customDockerfileBrowseLabel.setVisible(true);
-          setFinishButtonState(false);
-          setPreviousButtonState(false);
+          setDialogButtonsState(false);
           return false;
         } else {
           customDockerfileBrowseLabel.setVisible(false);
-          setFinishButtonState(doValidate(false) == null);
-          setPreviousButtonState(doValidate(false) == null);
+          setDialogButtonsState(doValidate(false) == null);
           return true;
         }
       }
     });
+    customDockerfileBrowseButton.getTextField().getDocument().addDocumentListener(resetDialogButtonsState(null));
     customDockerfileBrowseLabel.setVisible(false);
     customDockerfileBrowseButton.setText("");
 
@@ -136,8 +138,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
         dockerfileComboBox.setEnabled(true);
         customDockerfileBrowseLabel.setVisible(false);
         customDockerfileBrowseButton.setEnabled(false);
-        setFinishButtonState(doValidate(false) == null);
-        setPreviousButtonState(doValidate(false) == null);
+        setDialogButtonsState(doValidate(false) == null);
       }
     });
 
@@ -148,12 +149,10 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
         customDockerfileBrowseButton.setEnabled(true);
         if (AzureDockerValidationUtils.validateDockerfilePath(customDockerfileBrowseButton.getText())) {
           customDockerfileBrowseLabel.setVisible(false);
-          setFinishButtonState(doValidate(false) == null);
-          setPreviousButtonState(doValidate(false) == null);
+          setDialogButtonsState(doValidate(false) == null);
         } else {
           customDockerfileBrowseLabel.setVisible(true);
-          setFinishButtonState(false);
-          setPreviousButtonState(false);
+          setDialogButtonsState(false);
         }
       }
     });
@@ -167,17 +166,16 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       public boolean verify(JComponent input) {
         if (AzureDockerValidationUtils.validateDockerPortSettings(dockerContainerPortSettings.getText())) {
           dockerContainerPortSettingsLabel.setVisible(false);
-          setFinishButtonState(doValidate(false) == null);
-          setPreviousButtonState(doValidate(false) == null);
+          setDialogButtonsState(doValidate(false) == null);
           return true;
         } else {
           dockerContainerPortSettingsLabel.setVisible(true);
-          setFinishButtonState(false);
-          setPreviousButtonState(false);
+          setDialogButtonsState(false);
           return false;
         }
       }
     });
+    dockerContainerPortSettings.getDocument().addDocumentListener(resetDialogButtonsState(null));
     dockerContainerPortSettingsLabel.setVisible(false);
 
   }
@@ -191,8 +189,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
     if (dockerContainerNameTextField.getText() == null || dockerContainerNameTextField.getText().equals("")){
       ValidationInfo info = new ValidationInfo("Please name your Docker container", dockerContainerNameTextField);
       dockerContainerNameLabel.setVisible(true);
-      setFinishButtonState(false);
-      setPreviousButtonState(false);
+      setDialogButtonsState(false);
       if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
@@ -203,8 +200,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       KnownDockerImages dockerfileImage = (KnownDockerImages) dockerfileComboBox.getSelectedItem();
       if (dockerfileImage == null) {
         ValidationInfo info = new ValidationInfo("Please select a Docker image type form the list", dockerfileComboBox);
-        setFinishButtonState(true);
-        setPreviousButtonState(true);
+        setDialogButtonsState(false);
         if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
         return info;
       }
@@ -220,8 +216,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       if (dockerfileName == null || dockerfileName.equals("") || Files.notExists(Paths.get(dockerfileName))) {
         ValidationInfo info = new ValidationInfo("Dockerfile not found", customDockerfileBrowseButton);
         customDockerfileBrowseLabel.setVisible(true);
-        setFinishButtonState(false);
-        setPreviousButtonState(false);
+        setDialogButtonsState(false);
         if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
         return info;
       }
@@ -231,8 +226,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
         model.getDockerImageDescription().dockerfileContent = new String(Files.readAllBytes(Paths.get(customDockerfileBrowseButton.getText())));
       } catch (Exception e) {
         customDockerfileBrowseLabel.setVisible(true);
-        setFinishButtonState(false);
-        setPreviousButtonState(false);
+        setDialogButtonsState(false);
 
         String errTitle = "Error reading Dockerfile content";
         String msg = "An error occurred while attempting to get the content of " + customDockerfileBrowseButton.getText() + "\n" + e.getMessage();
@@ -249,11 +243,12 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       ValidationInfo info = new ValidationInfo("Invalid port settings", dockerContainerPortSettings);
       if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
       dockerContainerPortSettingsLabel.setVisible(true);
-      setFinishButtonState(false);
-      setPreviousButtonState(false);
+      setDialogButtonsState(false);
       return info;
     }
     dockerImageDescription.dockerPortSettings = dockerContainerPortSettings.getText();
+
+    setDialogButtonsState(true);
 
     return null;
   }
@@ -266,14 +261,27 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
     model.getCurrentNavigationState().PREVIOUS.setEnabled(previousButtonState);
   }
 
+  @Override
+  protected void setDialogButtonsState(boolean buttonsState) {
+    setFinishButtonState(buttonsState);
+    setPreviousButtonState(buttonsState);
+  }
 
   @Override
   public JComponent prepare(final WizardNavigationState state) {
     rootConfigureContainerPanel.revalidate();
-    setFinishButtonState(true);
-    setPreviousButtonState(true);
+    setDialogButtonsState(true);
 
     return rootConfigureContainerPanel;
+  }
+
+  @Override
+  public WizardStep onPrevious(final AzureSelectDockerWizardModel model) {
+    if (doValidate() == null) {
+      return super.onPrevious(model);
+    } else {
+      return this;
+    }
   }
 
   @Override
@@ -287,6 +295,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
 
   @Override
   public boolean onFinish() {
+    setFinishButtonState(false);
     return doValidate(false) == null  && super.onFinish();
   }
 

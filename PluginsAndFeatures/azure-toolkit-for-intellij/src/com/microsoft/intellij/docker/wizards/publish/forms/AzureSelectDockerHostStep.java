@@ -57,10 +57,14 @@ import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -98,17 +102,16 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       public boolean verify(JComponent input) {
         if (AzureDockerValidationUtils.validateDockerImageName(((JTextField) input).getText())) {
           dockerImageNameLabel.setVisible(false);
-          setFinishButtonState(doValidate(false) == null);
-          setNextButtonState(doValidate(false) == null);
+          setDialogButtonsState(doValidate(false) == null);
           return true;
         } else {
           dockerImageNameLabel.setVisible(true);
-          setFinishButtonState(false);
-          setNextButtonState(false);
+          setDialogButtonsState(false);
           return false;
         }
       }
     });
+    dockerImageNameTextField.getDocument().addDocumentListener(resetDialogButtonsState(null));
     dockerImageNameLabel.setVisible(false);
 
     dockerArtifactPath.addActionListener(UIUtils.createFileChooserListener(dockerArtifactPath, model.getProject(),
@@ -133,17 +136,16 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       public boolean verify(JComponent input) {
         if (AzureDockerValidationUtils.validateDockerArtifactPath(dockerArtifactPath.getText())) {
           dockerArtifactPathLabel.setVisible(false);
-          setFinishButtonState(doValidate(false) == null);
-          setNextButtonState(doValidate(false) == null);
+          setDialogButtonsState(doValidate(false) == null);
           return true;
         } else {
           dockerArtifactPathLabel.setVisible(true);
-          setFinishButtonState(false);
-          setNextButtonState(false);
+          setDialogButtonsState(false);
           return false;
         }
       }
     });
+    dockerArtifactPath.getTextField().getDocument().addDocumentListener(resetDialogButtonsState(null));
     dockerArtifactPathLabel.setVisible(false);
 
     refreshDockerHostsTable();
@@ -157,7 +159,6 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       dockerHostsTableSelection.host = dockerManager.getDockerHostForURL((String) tableModel.getValueAt(0, 4));
       dockerHostsTable.repaint();
     }
-
   }
 
   private void createUIComponents() {
@@ -384,6 +385,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
         forceRefreshDockerHostsTable();
       }
     } catch (Exception e) {
+      setDialogButtonsState(false);
       String msg = "An error occurred while attempting to edit the selected Docker host.\n" + e.getMessage();
       if (AzureDockerUtils.DEBUG) e.printStackTrace();
       LOGGER.error("onEditDockerHostAction", e);
@@ -401,6 +403,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
 
     if (option !=1 && option != 2) {
       if (AzureDockerUtils.DEBUG) System.out.format("User canceled delete Docker host op: %d\n", option);
+      return;
     }
 
     tableModel.removeRow(dockerHostsTable.getSelectedRow());
@@ -462,6 +465,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
         }
       }
     } catch (Exception e) {
+      setDialogButtonsState(false);
       String msg = "An error occurred while attempting to get the list of recognizable Docker hosts.\n" + e.getMessage();
       if (AzureDockerUtils.DEBUG) e.printStackTrace();
       LOGGER.error("refreshDockerHostsTable", e);
@@ -487,6 +491,12 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     model.getCurrentNavigationState().NEXT.setEnabled(nextButtonState);
   }
 
+  @Override
+  protected void setDialogButtonsState(boolean buttonsState) {
+    setFinishButtonState(buttonsState);
+    setNextButtonState(buttonsState);
+  }
+
   public Artifact getArtifact() {
     return artifact;
   }
@@ -494,7 +504,8 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
   public ValidationInfo doValidate(boolean shakeOnError) {
     if (dockerImageNameTextField.getText() == null || dockerImageNameTextField.getText().equals("")){
       ValidationInfo info = new ValidationInfo("Missing Docker image name", dockerImageNameTextField);
-      dockerImageNameLabel.setVisible(false);
+      dockerImageNameLabel.setVisible(true);
+      setDialogButtonsState(false);
       model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
@@ -503,13 +514,15 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     if (dockerArtifactPath.getText() == null || !Files.isRegularFile(Paths.get(dockerArtifactPath.getText()))) {
       ValidationInfo info = new ValidationInfo("Missing the artifact to be published", dockerArtifactPath);
       dockerArtifactPathLabel.setVisible(true);
+      setDialogButtonsState(false);
       model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
     dockerImageDescription.artifactPath = dockerArtifactPath.getText();
 
     if (dockerHostsTableSelection == null && !dockerImageDescription.hasNewDockerHost){
-      ValidationInfo info = new ValidationInfo("No Docker host has been selected", dockerHostsTable);
+      ValidationInfo info = new ValidationInfo("Please check a Docker host or create a new", dockerHostsTable);
+      setDialogButtonsState(false);
       model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
@@ -517,6 +530,8 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       dockerImageDescription.host = dockerHostsTableSelection.host;
       dockerImageDescription.sid = dockerImageDescription.host.sid;
     }
+
+    setDialogButtonsState(true);
 
     return null;
   }
@@ -536,6 +551,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
 
   @Override
   public boolean onFinish() {
+    setFinishButtonState(false);
     return model.doValidate() == null && super.onFinish();
   }
 

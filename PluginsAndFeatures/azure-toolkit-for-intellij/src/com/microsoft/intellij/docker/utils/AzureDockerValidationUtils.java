@@ -143,7 +143,7 @@ public class AzureDockerValidationUtils {
   }
 
   public static String getDockerVnetNameTip() {
-    return "Virtual network name must be between 2 and 64 chars, begin with a letter or number, end with a letter, number or underscore and may contain only letters, numbers, underscores, periods or hyphens.";
+    return "Virtual network name must be between 2 and 26 chars, begin with a letter or number, end with a letter, number or underscore and may contain only letters, numbers, underscores, periods or hyphens.";
   }
 
   public static boolean validateDockerVnetAddrSpace(String name) {

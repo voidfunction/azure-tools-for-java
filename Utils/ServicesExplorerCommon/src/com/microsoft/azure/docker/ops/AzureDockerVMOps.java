@@ -155,7 +155,7 @@ public class AzureDockerVMOps {
             .withSsh(newHost.certVault.sshPubKey);
       } else {
         defStage2 = (newHost.hasSSHLogIn) ?
-            defStage1.withRootPassword(newHost.certVault.sshPubKey) :
+            defStage1.withSsh(newHost.certVault.sshPubKey) :
             defStage1.withRootPassword(newHost.certVault.vmPwd);
       }
 

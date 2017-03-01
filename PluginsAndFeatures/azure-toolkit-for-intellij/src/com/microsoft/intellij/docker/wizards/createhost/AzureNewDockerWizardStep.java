@@ -24,6 +24,10 @@ package com.microsoft.intellij.docker.wizards.createhost;
 import com.intellij.ui.wizard.WizardStep;
 import com.microsoft.intellij.docker.wizards.AzureDockerValidatable;
 
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 public abstract class AzureNewDockerWizardStep extends WizardStep<AzureNewDockerWizardModel> implements AzureDockerValidatable {
 
   protected AzureNewDockerWizardStep(String title, String explanation) {
@@ -33,4 +37,30 @@ public abstract class AzureNewDockerWizardStep extends WizardStep<AzureNewDocker
   public String getHelpId() {
     return "azure_docker_project";
   }
+
+  protected DocumentListener resetDialogButtonsState(JComponent componentLabel) {
+    return new DocumentListener() {
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        setDialogButtonsState(true);
+        if (componentLabel != null) {
+          componentLabel.setVisible(false);
+        }
+      }
+
+      @Override
+      public void removeUpdate(DocumentEvent e) {
+      }
+
+      @Override
+      public void changedUpdate(DocumentEvent e) {
+        setDialogButtonsState(true);
+        if (componentLabel != null) {
+          componentLabel.setVisible(false);
+        }
+      }
+    };
+  }
+
+  protected abstract void setDialogButtonsState(boolean buttonsState);
 }

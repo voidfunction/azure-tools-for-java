@@ -55,7 +55,6 @@ public class DockerContainerNode extends AzureRefreshableNode {
   DockerContainer dockerContainer;
   DockerHost dockerHost;
   AzureDockerHostsManager dockerManager;
-  private boolean isLoaded;
 
   public DockerContainerNode(Node parent, AzureDockerHostsManager dockerManager, DockerHost dockerHost, DockerContainer dockerContainer)
       throws AzureCmdException {
@@ -64,7 +63,6 @@ public class DockerContainerNode extends AzureRefreshableNode {
     this.dockerManager = dockerManager;
     this.dockerHost = dockerHost;
     this.dockerContainer = dockerContainer;
-    isLoaded = true; // Docker hosts are loaded by the parent node
     if (dockerContainer.isRunning) {
       setIconPath(DOCKER_CONTAINER_WEB_RUN_ICON);
     }
@@ -74,14 +72,11 @@ public class DockerContainerNode extends AzureRefreshableNode {
 
   @Override
   protected void onNodeClick(NodeActionEvent e) {
-    if (!isLoaded || dockerManager == null) {
-      this.load();
-    }
+    super.onNodeClick(e);
   }
 
   @Override
   protected void refreshItems() throws AzureCmdException {
-    isLoaded = false;
     // remove all child nodes
     removeAllChildNodes();
 
@@ -95,11 +90,8 @@ public class DockerContainerNode extends AzureRefreshableNode {
         if (updatedDockerContainer != null) {
           dockerContainer = updatedDockerContainer;
           setDockerContainerIconPath();
-          isLoaded = true;
         }
       }
-
-      isLoaded = true;
     } catch (Exception e) {}
   }
 

@@ -137,6 +137,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       public void actionPerformed(ActionEvent e) {
         dockerHostImportSSHBrowseTextField.setEnabled(false);
         dockerHostImportSSHBrowseLabel.setVisible(false);
+        setDialogButtonsState(doValidate(false) == null);
       }
     });
     dockerHostAutoSshRadioButton.addActionListener(new ActionListener() {
@@ -144,6 +145,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       public void actionPerformed(ActionEvent e) {
         dockerHostImportSSHBrowseTextField.setEnabled(false);
         dockerHostImportSSHBrowseLabel.setVisible(false);
+        setDialogButtonsState(doValidate(false) == null);
       }
     });
     dockerHostImportSshRadioButton.addActionListener(new ActionListener() {
@@ -160,6 +162,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       public void actionPerformed(ActionEvent e) {
         dockerHostImportTLSBrowseTextField.setEnabled(false);
         dockerHostImportTLSBrowseLabel.setVisible(false);
+        setDialogButtonsState(doValidate(false) == null);
       }
     });
     dockerHostAutoTlsRadioButton.addActionListener(new ActionListener() {
@@ -167,6 +170,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       public void actionPerformed(ActionEvent e) {
         dockerHostImportTLSBrowseTextField.setEnabled(false);
         dockerHostImportTLSBrowseLabel.setVisible(false);
+        setDialogButtonsState(doValidate(false) == null);
       }
     });
     dockerHostImportTlsRadioButton.addActionListener(new ActionListener() {
@@ -203,13 +207,16 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
         String text = dockerHostImportSSHBrowseTextField.getText();
         if (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostSshDirectory(text)) {
           dockerHostImportSSHBrowseLabel.setVisible(true);
+          setDialogButtonsState(false);
           return false;
         } else {
           dockerHostImportSSHBrowseLabel.setVisible(false);
+          setDialogButtonsState(doValidate(false) == null);
           return true;
         }
       }
     });
+    dockerHostImportSSHBrowseTextField.getTextField().getDocument().addDocumentListener(resetDialogButtonsState(null));
     dockerHostUsernameLabel.setVisible(false);
     dockerHostUsernameTextField.setText(newHost.certVault.vmUsername);
     dockerHostUsernameTextField.setToolTipText(AzureDockerValidationUtils.getDockerHostUserNameTip());
@@ -219,28 +226,51 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
         String text = dockerHostUsernameTextField.getText();
         if (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostUserName(text)) {
           dockerHostUsernameLabel.setVisible(true);
+          setDialogButtonsState(false);
           return false;
         } else {
           dockerHostUsernameLabel.setVisible(false);
+          setDialogButtonsState(doValidate(false) == null);
           return true;
         }
       }
     });
+    dockerHostUsernameTextField.getDocument().addDocumentListener(resetDialogButtonsState(null));
     dockerHostFirstPwdField.setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {
         String text = new String(dockerHostFirstPwdField.getPassword());
         if (dockerHostFirstPwdField.getPassword().length > 0 && !text.isEmpty() && !AzureDockerValidationUtils.validateDockerHostPassword(text)) {
           dockerHostFirstPwdLabel.setVisible(true);
+          setDialogButtonsState(false);
           return false;
         } else {
           dockerHostFirstPwdLabel.setVisible(false);
+          setDialogButtonsState(doValidate(false) == null);
           return true;
         }
       }
     });
+    dockerHostFirstPwdField.getDocument().addDocumentListener(resetDialogButtonsState(null));
     dockerHostFirstPwdLabel.setVisible(false);
     dockerHostFirstPwdField.setToolTipText(AzureDockerValidationUtils.getDockerHostPasswordTip());
+    dockerHostSecondPwdField.setInputVerifier(new InputVerifier() {
+      @Override
+      public boolean verify(JComponent input) {
+        String pwd1 = new String(dockerHostFirstPwdField.getPassword());
+        String pwd2 = new String(dockerHostSecondPwdField.getPassword());
+        if (dockerHostSecondPwdField.getPassword().length > 0 && !pwd2.isEmpty() && !pwd2.equals(pwd1)) {
+          dockerHostFirstPwdLabel.setVisible(true);
+          setDialogButtonsState(false);
+          return false;
+        } else {
+          dockerHostFirstPwdLabel.setVisible(false);
+          setDialogButtonsState(doValidate(false) == null);
+          return true;
+        }
+      }
+    });
+    dockerHostSecondPwdField.getDocument().addDocumentListener(resetDialogButtonsState(null));
     dockerHostSecondPwdField.setToolTipText(AzureDockerValidationUtils.getDockerHostPasswordTip());
 
     dockerDaemonPortLabel.setVisible(false);
@@ -252,13 +282,16 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
         String text = dockerDaemonPortTextField.getText();
         if (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostPort(text)) {
           dockerDaemonPortLabel.setVisible(true);
+          setDialogButtonsState(false);
           return false;
         } else {
           dockerDaemonPortLabel.setVisible(false);
+          setDialogButtonsState(doValidate(false) == null);
           return true;
         }
       }
     });
+    dockerDaemonPortTextField.getDocument().addDocumentListener(resetDialogButtonsState(null));
     groupTLS = new ButtonGroup();
     groupTLS.add(dockerHostNoTlsRadioButton);
     groupTLS.add(dockerHostAutoTlsRadioButton);
@@ -273,13 +306,16 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
         String text = dockerHostImportTLSBrowseTextField.getText();
         if (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostTlsDirectory(text)) {
           dockerHostImportTLSBrowseLabel.setVisible(true);
+          setDialogButtonsState(false);
           return false;
         } else {
           dockerHostImportTLSBrowseLabel.setVisible(false);
+          setDialogButtonsState(doValidate(false) == null);
           return true;
         }
       }
     });
+    dockerHostImportTLSBrowseTextField.getTextField().getDocument().addDocumentListener(resetDialogButtonsState(null));
 
     dockerHostSaveCredsCheckBox.setSelected(true);
     dockerHostNewKeyvaultLabel.setVisible(false);
@@ -291,13 +327,16 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
         String text = dockerHostNewKeyvaultTextField.getText();
         if (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostKeyvaultName(text, dockerManager)) {
           dockerHostNewKeyvaultLabel.setVisible(true);
+          setDialogButtonsState(false);
           return false;
         } else {
           dockerHostNewKeyvaultLabel.setVisible(false);
+          setDialogButtonsState(doValidate(false) == null);
           return true;
         }
       }
     });
+    dockerHostNewKeyvaultTextField.getDocument().addDocumentListener(resetDialogButtonsState(null));
   }
 
   public DockerHost getDockerHost() {
@@ -315,6 +354,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       AzureDockerCertVault certVault = (AzureDockerCertVault) dockerHostImportKeyvaultComboBox.getSelectedItem();
       if (certVault == null) {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Missing vault", rootConfigureContainerPanel, dockerHostImportKeyvaultComboBox, dockerHostImportKeyvaultComboLabel);
+        setDialogButtonsState(false);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
@@ -344,6 +384,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Missing username", vmCredsPanel, dockerHostUsernameTextField, dockerHostUsernameLabel);
         credsTabbedPane.setSelectedComponent(vmCredsPanel);
+        setDialogButtonsState(false);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
@@ -361,6 +402,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Incorrect password", vmCredsPanel, dockerHostFirstPwdField, dockerHostFirstPwdLabel);
         credsTabbedPane.setSelectedComponent(vmCredsPanel);
+        setDialogButtonsState(false);
         if (shakeOnError) {
           model.DialogShaker(info);
         }
@@ -387,6 +429,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
             !AzureDockerValidationUtils.validateDockerHostSshDirectory(dockerHostImportSSHBrowseTextField.getText())) {
           ValidationInfo info = AzureDockerUIResources.validateComponent("SSH key files were not found in the selected directory", vmCredsPanel, dockerHostImportSSHBrowseTextField, dockerHostImportSSHBrowseLabel);
           credsTabbedPane.setSelectedComponent(vmCredsPanel);
+          setDialogButtonsState(false);
           if (shakeOnError) {
             model.DialogShaker(info);
           }
@@ -416,6 +459,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
             !AzureDockerValidationUtils.validateDockerHostTlsDirectory(dockerHostImportTLSBrowseTextField.getText())) {
           ValidationInfo info = AzureDockerUIResources.validateComponent("TLS certificates files were not found in the selected directory", vmCredsPanel, dockerHostImportTLSBrowseTextField, dockerHostImportTLSBrowseLabel);
           credsTabbedPane.setSelectedComponent(vmCredsPanel);
+          setDialogButtonsState(false);
           if (shakeOnError) {
             model.DialogShaker(info);
           }
@@ -434,6 +478,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
     {
       ValidationInfo info = AzureDockerUIResources.validateComponent("Invalid Docker daemon port settings", daemonCredsPanel, dockerDaemonPortTextField, dockerDaemonPortLabel);
       credsTabbedPane.setSelectedComponent(daemonCredsPanel);
+      setDialogButtonsState(false);
       if (shakeOnError) {
         model.DialogShaker(info);
       }
@@ -446,6 +491,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       if (dockerHostNewKeyvaultTextField.getText() == null || dockerHostNewKeyvaultTextField.getText().isEmpty() ||
           !AzureDockerValidationUtils.validateDockerHostKeyvaultName(dockerHostNewKeyvaultTextField.getText(), dockerManager)) {
         ValidationInfo info = AzureDockerUIResources.validateComponent("Incorrect Azure Key Vault", rootConfigureContainerPanel, dockerHostNewKeyvaultTextField, dockerHostNewKeyvaultLabel);
+        setDialogButtonsState(false);
         return info;
       } else {
         newHost.hasKeyVault = true;
@@ -461,17 +507,29 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       newHost.certVault.hostName = null;
     }
 
+    setDialogButtonsState(true);
+
     return null;
   }
 
-  private void setFinishButtonState() {
-    model.getCurrentNavigationState().FINISH.setEnabled(true);
+  private void setFinishButtonState(boolean finishButtonState) {
+    model.getCurrentNavigationState().FINISH.setEnabled(finishButtonState);
+  }
+
+  private void setPreviousButtonState(boolean previousButtonState) {
+    model.getCurrentNavigationState().PREVIOUS.setEnabled(previousButtonState);
+  }
+
+  @Override
+  protected void setDialogButtonsState(boolean buttonsState) {
+    setFinishButtonState(buttonsState);
+    setPreviousButtonState(buttonsState);
   }
 
   @Override
   public JComponent prepare(final WizardNavigationState state) {
     rootConfigureContainerPanel.revalidate();
-    setFinishButtonState();
+    setDialogButtonsState(true);
 
     return rootConfigureContainerPanel;
   }

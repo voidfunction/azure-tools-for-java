@@ -47,10 +47,10 @@ public class DockerContainerDeployTask extends Task.Backgroundable {
   AzureDockerImageInstance dockerImageInstance;
   Azure azureClient;
 
-  static final Logger LOG = Logger.getInstance("#com.microsoft.intellij.AzurePlugin");
+  static final Logger LOG = Logger.getInstance(DockerContainerDeployTask.class);
 
   public DockerContainerDeployTask(Project project, Azure azureClient, AzureDockerImageInstance dockerImageInstance) {
-    super(project, "Deploying to a Docker container hosted on Azure", true, Backgroundable.DEAF);
+    super(project, "Deploying Docker Container on Azure", true, Backgroundable.DEAF);
     this.project = project;
     this.dockerImageInstance = dockerImageInstance;
     this.azureClient = azureClient;
