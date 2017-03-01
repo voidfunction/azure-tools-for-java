@@ -43,6 +43,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPro
 
 public class VMNode extends RefreshableNode {
     private static String RUNNING_STATUS = "PowerState/running";
+    private static String STOPPED = "stopped";
 
     public class DeleteVMAction extends AzureNodeActionPromptListener {
         public DeleteVMAction() {
@@ -90,7 +91,26 @@ public class VMNode extends RefreshableNode {
         protected void azureNodeAction(NodeActionEvent e)
                 throws AzureCmdException {
             virtualMachine.restart();
-//            refreshItemsInternal();
+            refreshItems();
+        }
+
+        @Override
+        protected void onSubscriptionsChanged(NodeActionEvent e) throws AzureCmdException {
+        }
+    }
+
+    public class StartVMAction extends AzureNodeActionPromptListener {
+        public StartVMAction() {
+            super(VMNode.this,
+                    String.format("Are you sure you want to start the virtual machine %s?", virtualMachine.computerName()),
+                    "Starting VM");
+        }
+
+        @Override
+        protected void azureNodeAction(NodeActionEvent e)
+                throws AzureCmdException {
+            virtualMachine.start();
+            refreshItems();
         }
 
         @Override
@@ -110,7 +130,7 @@ public class VMNode extends RefreshableNode {
         protected void azureNodeAction(NodeActionEvent e)
                 throws AzureCmdException {
             virtualMachine.powerOff();
-            refreshItemsInternal();
+            refreshItems();
         }
 
         @Override
@@ -118,28 +138,17 @@ public class VMNode extends RefreshableNode {
         }
     }
 
-//    public class RestartVMAction extends VMNodeActionPromptListener {
-//        public RestartVMAction() {
-//            super(VMNode.this,
-//                    "Are you sure you want to restart the virtual machine %s?",
-//                    "Restarting VM");
-//        }
-//
-//        @Override
-//        protected void azureNodeAction(NodeActionEvent e, @NotNull EventStateHandle stateHandle)
-//                throws AzureCmdException {
-//            AzureManagerImpl.getManager().restartVirtualMachineArm(virtualMachine);
-//        }
-//    }
-
     private static final String WAIT_ICON_PATH = "virtualmachinewait.png";
     private static final String STOP_ICON_PATH = "virtualmachinestop.png";
     private static final String RUN_ICON_PATH = "virtualmachinerun.png";
-    public static final String ACTION_DELETE = "Delete";
+    private static final String ACTION_DELETE = "Delete";
     public static final String ACTION_DOWNLOAD_RDP_FILE = "Connect Remote Desktop";
-    public static final String ACTION_SHUTDOWN = "Shutdown";
-    public static final String ACTION_START = "Start";
-    public static final String ACTION_RESTART = "Restart";
+    private static final String ACTION_SHUTDOWN = "Shutdown";
+    private static final String ACTION_START = "Start";
+    private static final String ACTION_RESTART = "Restart";
+    private static final String ACTION_SHUTDOWN_ICON = "Stop.png";
+    private static final String ACTION_START_ICON = "storagequery.png";
+    private static final String ACTION_DELETE_ICON = "Delete.png";
     public static final int REMOTE_DESKTOP_PORT = 3389;
 
     private VirtualMachine virtualMachine;
@@ -162,7 +171,7 @@ public class VMNode extends RefreshableNode {
                 if (RUNNING_STATUS.equalsIgnoreCase(status.code())) {
                     return RUN_ICON_PATH;
                 }
-                if (status.code().toLowerCase().contains("stopped")) {
+                if (status.code().toLowerCase().contains(STOPPED)) {
                     return STOP_ICON_PATH;
                 }
             }
@@ -183,41 +192,28 @@ public class VMNode extends RefreshableNode {
         // update vm name and status icon
         setName(virtualMachine.name());
         setIconPath(getVMIconPath());
-//
-//        // load up the endpoint nodes
-//        removeAllChildNodes();
-//
-//        for (Endpoint endpoint : virtualMachine.getEndpoints()) {
-//            VMEndpointNode vmEndPoint = new VMEndpointNode(this, endpoint);
-//            addChildNode(vmEndPoint);
-//        }
     }
 
     @Override
-    protected Map<String, Class<? extends NodeActionListener>> initActions() {
-        Map<String, Class<? extends NodeActionListener>> actionMap =
-                new HashMap<String, Class<? extends NodeActionListener>>();
-
-        actionMap.put(ACTION_DELETE, DeleteVMAction.class);
-//        actionMap.put(ACTION_DOWNLOAD_RDP_FILE, DownloadRDPAction.class);
-        actionMap.put(ACTION_SHUTDOWN, ShutdownVMAction.class);
-//        actionMap.put(ACTION_START, StartVMAction.class);
-        actionMap.put(ACTION_RESTART, RestartVMAction.class);
-
-        return ImmutableMap.copyOf(actionMap);
+    protected void loadActions() {
+        super.loadActions();
+        addAction(ACTION_START, ACTION_START_ICON, new StartVMAction());
+        addAction(ACTION_RESTART, new RestartVMAction());
+        addAction(ACTION_SHUTDOWN, ACTION_SHUTDOWN_ICON, new ShutdownVMAction());
+        addAction(ACTION_DELETE, ACTION_DELETE_ICON, new DeleteVMAction());
     }
 
     @Override
     public List<NodeAction> getNodeActions() {
 //        // enable/disable menu items according to VM status
-//        boolean started = virtualMachine.getStatus().equals(VirtualMachine.Status.Ready);
+        boolean started = isRunning();
 //        boolean stopped = virtualMachine.getStatus().equals(VirtualMachine.Status.Stopped) ||
 //                virtualMachine.getStatus().equals(VirtualMachine.Status.StoppedDeallocated);
 //
 //        getNodeActionByName(ACTION_DOWNLOAD_RDP_FILE).setEnabled(!stopped && hasRDPPort(virtualMachine));
-//        getNodeActionByName(ACTION_SHUTDOWN).setEnabled(started);
-//        getNodeActionByName(ACTION_START).setEnabled(stopped);
-//        getNodeActionByName(ACTION_RESTART).setEnabled(started);
+        getNodeActionByName(ACTION_SHUTDOWN).setEnabled(started);
+        getNodeActionByName(ACTION_START).setEnabled(!started);
+        getNodeActionByName(ACTION_RESTART).setEnabled(started);
 
         return super.getNodeActions();
     }
@@ -229,6 +225,22 @@ public class VMNode extends RefreshableNode {
 //            }
 //        }
 
+        return false;
+    }
+
+    private boolean isRunning() {
+        try {
+            for (InstanceViewStatus status : virtualMachine.instanceView().statuses()) {
+                if (RUNNING_STATUS.equalsIgnoreCase(status.code())) {
+                    return true;
+                }
+                if (status.code().toLowerCase().contains(STOPPED)) {
+                    return false;
+                }
+            }
+        } catch (CloudException e) {
+            DefaultLoader.getUIHelper().logError(e.getMessage(), e);
+        }
         return false;
     }
 }
