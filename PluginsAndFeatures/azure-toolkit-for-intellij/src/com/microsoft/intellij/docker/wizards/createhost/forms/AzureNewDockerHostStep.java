@@ -145,9 +145,9 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       }
     });
 
+    updateDockerHostVMSize();
     updateDockerLocationGroup();
     updateDockerHostOSTypeComboBox();
-    updateDockerHostVMSize();
     updateDockerHostRGGroup();
     updateDockerHostVnetGroup();
     updateDockerHostStorageGroup();
@@ -254,34 +254,40 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
 
           Azure azureClient = ((AzureDockerSubscription) dockerSubscriptionComboBox.getSelectedItem()).azureClient;
 
-          PagedList<VirtualMachineSize> sizes = azureClient.virtualMachines().sizes().listByRegion(prefferedLocation);
-          Collections.sort(sizes, new Comparator<VirtualMachineSize>() {
-            @Override
-            public int compare(VirtualMachineSize t0, VirtualMachineSize t1) {
-              if (t0.name().contains("Basic") && t1.name().contains("Basic")) {
-                return t0.name().compareTo(t1.name());
-              } else if (t0.name().contains("Basic")) {
-                return -1;
-              } else if (t1.name().contains("Basic")) {
-                return 1;
-              }
+          PagedList<VirtualMachineSize> sizes = null;
+          try {
+            sizes = azureClient.virtualMachines().sizes().listByRegion(prefferedLocation);
+            Collections.sort(sizes, new Comparator<VirtualMachineSize>() {
+              @Override
+              public int compare(VirtualMachineSize size1, VirtualMachineSize size2) {
+                if (size1.name().contains("Basic") && size2.name().contains("Basic")) {
+                  return size1.name().compareTo(size2.name());
+                } else if (size1.name().contains("Basic")) {
+                  return -1;
+                } else if (size2.name().contains("Basic")) {
+                  return 1;
+                }
 
-              int coreCompare = Integer.valueOf(t0.numberOfCores()).compareTo(t1.numberOfCores());
+                int coreCompare = Integer.valueOf(size1.numberOfCores()).compareTo(size2.numberOfCores());
 
-              if (coreCompare == 0) {
-                return Integer.valueOf(t0.memoryInMB()).compareTo(t1.memoryInMB());
-              } else {
-                return coreCompare;
+                if (coreCompare == 0) {
+                  return Integer.valueOf(size1.memoryInMB()).compareTo(size2.memoryInMB());
+                } else {
+                  return coreCompare;
+                }
               }
-            }
-          });
+            });
+          } catch (Exception notHandled) {}
+          PagedList<VirtualMachineSize> sortedSizes = sizes;
 
           ApplicationManager.getApplication().invokeAndWait(new Runnable() {
             @Override
             public void run() {
               dockerHostVMSizeComboModel.removeAllElements();
-              for (VirtualMachineSize vmSize : sizes) {
-                dockerHostVMSizeComboModel.addElement(vmSize.name());
+              if (sortedSizes != null) {
+                for (VirtualMachineSize vmSize : sortedSizes) {
+                  dockerHostVMSizeComboModel.addElement(vmSize.name());
+                }
               }
               dockerHostVMSizeComboBox.repaint();
             }
