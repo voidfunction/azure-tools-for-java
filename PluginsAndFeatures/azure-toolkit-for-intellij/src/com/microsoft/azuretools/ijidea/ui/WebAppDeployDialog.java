@@ -31,6 +31,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.packaging.artifacts.Artifact;
@@ -81,7 +82,7 @@ public class WebAppDeployDialog extends DialogWrapper {
     private JLabel labelDescription;
     private JPanel panelTable;
 
-    private final Module module;
+    private final Project project;
     private final Artifact artifact;
 
     private void createUIComponents() {
@@ -163,8 +164,8 @@ public class WebAppDeployDialog extends DialogWrapper {
 
     private Map<String, WebAppDetails> webAppWebAppDetailsMap = new HashMap<>();
 
-    public static WebAppDeployDialog go(Module module, Artifact artifact) {
-        WebAppDeployDialog d = new WebAppDeployDialog(module, artifact);
+    public static WebAppDeployDialog go(Project project, Artifact artifact) {
+        WebAppDeployDialog d = new WebAppDeployDialog(project, artifact);
         d.show();
         if (d.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
             return d;
@@ -179,9 +180,9 @@ public class WebAppDeployDialog extends DialogWrapper {
         super.show();
     }
 
-    protected WebAppDeployDialog(Module module, Artifact artifact) {
-        super(module.getProject(), true, IdeModalityType.PROJECT);
-        this.module = module;
+    protected WebAppDeployDialog(Project project, Artifact artifact) {
+        super(project, true, IdeModalityType.PROJECT);
+        this.project = project;
         this.artifact = artifact;
 
         setModal(true);
@@ -237,7 +238,7 @@ public class WebAppDeployDialog extends DialogWrapper {
     }
 
     private void updateAndFillTable() {
-        ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Update Azure Local Cache Progress", true) {
+        ProgressManager.getInstance().run(new Task.Modal(project, "Update Azure Local Cache Progress", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
 
@@ -320,7 +321,7 @@ public class WebAppDeployDialog extends DialogWrapper {
     }
 
     private void createAppService() {
-        AppServiceCreateDialog d = AppServiceCreateDialog.go(this.module);
+        AppServiceCreateDialog d = AppServiceCreateDialog.go(project);
         if (d == null) {
             // something went wrong - report an error!
             return;
@@ -346,7 +347,7 @@ public class WebAppDeployDialog extends DialogWrapper {
             String appServiceName = (String) tableModel.getValueAt(selectedRow, 0);
             WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
 
-            AppServiceChangeSettingsDialog d = AppServiceChangeSettingsDialog.go(wad, this.module);
+            AppServiceChangeSettingsDialog d = AppServiceChangeSettingsDialog.go(wad, project);
             if (d == null) {
                 // something went wrong - report an error!
                 return;
@@ -392,7 +393,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                 if (manager == null) {
                     return;
                 }
-                ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Delete App Service Progress", true) {
+                ProgressManager.getInstance().run(new Task.Modal(project, "Delete App Service Progress", true) {
                     @Override
                     public void run(ProgressIndicator progressIndicator) {
                         try {
@@ -488,8 +489,8 @@ public class WebAppDeployDialog extends DialogWrapper {
         WebAppDetails wad = webAppWebAppDetailsMap.get(tableModel.getValueAt(selectedRow, 0));
         WebApp webApp = wad.webApp;
         boolean isDeployToRoot = deployToRootCheckBox.isSelected();
-        DeploymentManager deploymentManager = new DeploymentManager(module.getProject());
-        ProgressManager.getInstance().run(new Task.Backgroundable(module.getProject(), "Deploy Web App Progress", true) {
+        DeploymentManager deploymentManager = new DeploymentManager(project);
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Deploy Web App Progress", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
                 try {

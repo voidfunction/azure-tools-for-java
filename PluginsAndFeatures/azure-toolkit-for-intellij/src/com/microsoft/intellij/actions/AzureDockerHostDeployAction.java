@@ -23,6 +23,7 @@ package com.microsoft.intellij.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
@@ -37,6 +38,7 @@ import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardDialog;
@@ -55,29 +57,30 @@ public class AzureDockerHostDeployAction extends AnAction {
 
   public void actionPerformed(AnActionEvent actionEvent) {
     try {
-      AzureDockerUIResources.CANCELED = false;
+        Project project = getCurrentProject();
+        if (!AzureSignInAction.doSignIn( AuthMethodManager.getInstance(), project)) return;
+        AzureDockerUIResources.CANCELED = false;
 
-      Project project = getCurrentProject();
-      Module module = PluginUtil.getSelectedModule();
-      List<Module> modules = Arrays.asList(ModuleManager.getInstance(project).getModules());
+        Module module = PluginUtil.getSelectedModule();
+        List<Module> modules = Arrays.asList(ModuleManager.getInstance(project).getModules());
 
-      if (module == null && modules.isEmpty()) {
+        if (module == null && modules.isEmpty()) {
         Messages.showErrorDialog(message("noModule"), message("error"));
-      } else if (module == null) {
+        } else if (module == null) {
         module = modules.iterator().next();
-      }
+        }
 
-      AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
-      // not signed in
-      if (azureAuthManager == null) {
+        AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
+        // not signed in
+        if (azureAuthManager == null) {
         System.out.println("ERROR! Not signed in!");
         return;
-      }
+        }
 
 
-      AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(azureAuthManager);
+        AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(azureAuthManager);
 
-      if (!dockerManager.isInitialized()) {
+        if (!dockerManager.isInitialized()) {
         AzureDockerUIResources.updateAzureResourcesWithProgressDialog(project);
         if (AzureDockerUIResources.CANCELED) {
           return;
@@ -120,13 +123,13 @@ public class AzureDockerHostDeployAction extends AnAction {
       return;
     }
 
-    try {
-      boolean isSignIn = AuthMethodManager.getInstance().isSignedIn();
-      boolean isEnabled = isSignIn & module != null && ModuleTypeId.JAVA_MODULE.equals(module.getOptionValue(Module.ELEMENT_TYPE));
-      actionEvent.getPresentation().setEnabled(isEnabled);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+//    try {
+//      boolean isSignIn = AuthMethodManager.getInstance().isSignedIn();
+//      boolean isEnabled = isSignIn & module != null && ModuleTypeId.JAVA_MODULE.equals(module.getOptionValue(Module.ELEMENT_TYPE));
+//      actionEvent.getPresentation().setEnabled(isEnabled);
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
   }
 
 }

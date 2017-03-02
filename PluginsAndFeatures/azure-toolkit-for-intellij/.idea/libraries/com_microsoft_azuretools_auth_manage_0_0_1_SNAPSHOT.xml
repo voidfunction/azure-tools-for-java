@@ -49,8 +49,14 @@
       <root url="jar://$MAVEN_REPOSITORY$/com/microsoft/azure/azure-mgmt-sql/1.0.0-beta4/azure-mgmt-sql-1.0.0-beta4.jar!/" />
       <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/jackson/jackson-mapper-asl/1.9.13/jackson-mapper-asl-1.9.13.jar!/" />
       <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/jackson/jackson-core-asl/1.9.13/jackson-core-asl-1.9.13.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/microsoft/azuretools/auth-manage/0.0.1-SNAPSHOT/auth-manage-0.0.1-SNAPSHOT.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/microsoft/azuretools/auth-manage/0.0.1-SNAPSHOT/auth-manage-0.0.1-SNAPSHOT.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/microsoft/azuretools/auth-manage/0.0.1-SNAPSHOT/auth-manage-0.0.1-SNAPSHOT.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/microsoft/azuretools/auth-manage/0.0.1-SNAPSHOT/auth-manage-0.0.1-SNAPSHOT.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/microsoft/azuretools/auth-manage/0.0.1-SNAPSHOT/auth-manage-0.0.1-SNAPSHOT.jar!/" />
+    </SOURCES>
   </library>
 </component>

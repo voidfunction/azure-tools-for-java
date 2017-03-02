@@ -23,6 +23,7 @@ package com.microsoft.intellij.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
@@ -35,6 +36,7 @@ import com.intellij.packaging.artifacts.ArtifactType;
 import com.intellij.packaging.artifacts.ModifiableArtifactModel;
 import com.intellij.util.PlatformUtils;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
 import com.microsoft.azuretools.ijidea.ui.ArtifactValidationWindow;
 import com.microsoft.azuretools.ijidea.ui.ErrorWindow;
 import com.microsoft.azuretools.ijidea.ui.WarSelectDialog;
@@ -53,15 +55,17 @@ public class AzureWebDeployAction extends AnAction {
     private static final Logger LOGGER = Logger.getInstance(AzureWebDeployAction.class);
 
     public void actionPerformed(AnActionEvent e) {
-        Module module = LangDataKeys.MODULE.getData(e.getDataContext());
-        Module module1 = e.getData(LangDataKeys.MODULE);
-        JFrame frame = WindowManager.getInstance().getFrame(module.getProject());
+//        Module module = LangDataKeys.MODULE.getData(e.getDataContext());
+//        Module module1 = e.getData(LangDataKeys.MODULE);
+        Project project = DataKeys.PROJECT.getData(e.getDataContext());
+        JFrame frame = WindowManager.getInstance().getFrame(project);
 
 
 
         try {
+            if (!AzureSignInAction.doSignIn( AuthMethodManager.getInstance(), project)) return;
 
-            Project project = module.getProject();
+            //Project project = module.getProject();
             ModifiableArtifactModel artifactModel =
                     ProjectStructureConfigurable.getInstance(project).getArtifactsStructureConfigurable().getModifiableArtifactModel();
 
@@ -101,7 +105,7 @@ public class AzureWebDeployAction extends AnAction {
                 return;
             }
 
-            WebAppDeployDialog d = WebAppDeployDialog.go(module, artifactToDeploy);
+            WebAppDeployDialog d = WebAppDeployDialog.go(project, artifactToDeploy);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -132,12 +136,12 @@ public class AzureWebDeployAction extends AnAction {
             return;
         }
 
-        try {
-            boolean isSignIn = AuthMethodManager.getInstance().isSignedIn();
-            boolean isEnabled = isSignIn & module != null && ModuleTypeId.JAVA_MODULE.equals(module.getOptionValue(Module.ELEMENT_TYPE));
-            e.getPresentation().setEnabled(isEnabled);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+//        try {
+//            boolean isSignIn = AuthMethodManager.getInstance().isSignedIn();
+//            boolean isEnabled = isSignIn & module != null && ModuleTypeId.JAVA_MODULE.equals(module.getOptionValue(Module.ELEMENT_TYPE));
+//            e.getPresentation().setEnabled(isEnabled);
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
     }
 }

@@ -69,17 +69,6 @@ public class SelectSubscriptionsAction extends AnAction {
 
             final SubscriptionManager subscriptionManager = manager.getSubscriptionManager();
 
-//            ProgressManager.getInstance().run(new Task.Modal(project, "Loading Subscriptions...", true) {
-//                @Override
-//                public void run(ProgressIndicator progressIndicator) {
-//                    try {
-//                        progressIndicator.setIndeterminate(true);
-//                        subscriptionManager.getSubscriptionDetails();
-//                    } catch (Exception ex) {
-//                        ex.printStackTrace();
-//                    }
-//                }
-//            });
             updateSubscriptionWithProgressDialog(subscriptionManager, project);
             List<SubscriptionDetail> sdl = subscriptionManager.getSubscriptionDetails();
             for (SubscriptionDetail sd : sdl) {
@@ -125,7 +114,5 @@ public class SelectSubscriptionsAction extends AnAction {
                 }
             }
         });
-
     }
-
 }

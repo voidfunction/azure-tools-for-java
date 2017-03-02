@@ -89,17 +89,30 @@ public class AzureSignInAction extends AnAction {
                     authMethodManager.cleanAll();
                 }
             } else {
-                SignInWindow w = SignInWindow.go(authMethodManager.getAuthMethodDetails(), project);
-                if (w != null) {
-                    AuthMethodDetails authMethodDetailsUpdated = w.getAuthMethodDetails();
-                    authMethodManager.setAuthMethodDetails(authMethodDetailsUpdated);
-                    SelectSubscriptionsAction.onShowSubscriptions(project);
-                }
+//                SignInWindow w = SignInWindow.go(authMethodManager.getAuthMethodDetails(), project);
+//                if (w != null) {
+//                    AuthMethodDetails authMethodDetailsUpdated = w.getAuthMethodDetails();
+//                    authMethodManager.setAuthMethodDetails(authMethodDetailsUpdated);
+//                    SelectSubscriptionsAction.onShowSubscriptions(project);
+//                }
+                doSignIn(authMethodManager, project);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("onAzureSignIn", ex);
             ErrorWindow.show(ex.getMessage(), "AzureSignIn Action Error", frame);
         }
+    }
+
+    public static boolean doSignIn(AuthMethodManager authMethodManager, Project project) throws Exception {
+        boolean isSignIn = authMethodManager.isSignedIn();
+        if (isSignIn) return true;
+        SignInWindow w = SignInWindow.go(authMethodManager.getAuthMethodDetails(), project);
+        if (w != null) {
+            AuthMethodDetails authMethodDetailsUpdated = w.getAuthMethodDetails();
+            authMethodManager.setAuthMethodDetails(authMethodDetailsUpdated);
+            SelectSubscriptionsAction.onShowSubscriptions(project);
+        }
+        return authMethodManager.isSignedIn();
     }
 }
