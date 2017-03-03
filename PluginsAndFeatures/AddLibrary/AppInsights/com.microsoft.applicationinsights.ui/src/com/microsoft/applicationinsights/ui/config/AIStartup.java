@@ -28,7 +28,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.IStartup;
 
 import com.microsoft.applicationinsights.ui.activator.Activator;
-import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
+import com.microsoft.azuretools.core.applicationinsights.ApplicationInsightsPreferences;
 
 public class AIStartup implements IStartup {
 

@@ -52,8 +52,8 @@ import com.microsoft.applicationinsights.util.AILibraryUtil;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoftopentechnologies.wacommon.commoncontrols.NewResourceGroupDialog;
-import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 /**
  * Class is intended for creating new application insights resources
  * remotely in the cloud.

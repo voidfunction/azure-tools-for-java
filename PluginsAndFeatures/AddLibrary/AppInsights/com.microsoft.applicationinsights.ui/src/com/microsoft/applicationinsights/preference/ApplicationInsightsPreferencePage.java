@@ -48,9 +48,9 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.ui.config.AIResourceChangeListener;
-import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
-import com.microsoft.wacommon.applicationinsights.ApplicationInsightsResourceRegistryEclipse;
-import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.core.applicationinsights.ApplicationInsightsPreferences;
+import com.microsoft.azuretools.core.applicationinsights.ApplicationInsightsResourceRegistryEclipse;
 
 /**
  * Class for Application Insights preference page.

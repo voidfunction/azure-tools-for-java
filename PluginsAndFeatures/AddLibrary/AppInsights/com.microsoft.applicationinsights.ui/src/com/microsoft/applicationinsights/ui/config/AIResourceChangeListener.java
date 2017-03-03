@@ -40,9 +40,9 @@ import org.eclipse.core.runtime.Status;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.applicationinsights.ui.activator.Activator;
-import com.microsoft.wacommon.applicationinsights.AILibraryHandler;
-import com.microsoft.wacommon.applicationinsights.WebPropertyTester;
-import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.core.applicationinsights.AILibraryHandler;
+import com.microsoft.azuretools.core.applicationinsights.WebPropertyTester;
 
 public class AIResourceChangeListener implements IResourceChangeListener {
 

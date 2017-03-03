@@ -13,10 +13,7 @@
    <feature url="features/com.microsoft.applicationinsights.feature_1.0.3.qualifier.jar" id="com.microsoft.applicationinsights.feature" version="1.0.3.qualifier">
       <category name="com.persistent.winazure.eclipseplugin.category"/>
    </feature>
-   <feature url="features/com.microsoftopentechnologies.windowsazure.tools.sdk.feature_0.9.2.qualifier.jar" id="com.microsoftopentechnologies.windowsazure.tools.sdk.feature" version="0.9.2.qualifier">
-      <category name="com.persistent.winazure.eclipseplugin.category"/>
-   </feature>
-   <feature url="features/com.microsoft.webapp.feature_1.0.0.qualifier.jar" id="com.microsoft.webapp.feature" version="1.0.0.qualifier">
+   <feature url="features/com.microsoftazuretools.sdk.feature_3.0.0.qualifier.jar" id="com.microsoft.azuretools.sdk.feature" version="3.0.0.qualifier">
       <category name="com.persistent.winazure.eclipseplugin.category"/>
    </feature>
    <feature url="features/com.microsoft.hdinsights.feature_1.0.0.qualifier.jar" id="com.microsoft.hdinsights.feature" version="1.0.0.qualifier">

@@ -7,13 +7,13 @@
          </contexts>
    </extension>
    <extension point="org.eclipse.ui.startup">
-     <startup class="com.microsoftopentechnologies.wacommon.startup.WACPStartUp"/>
+     <startup class="com.microsoft.azuretools.core.ui.startup.WACPStartUp"/>
    </extension>
     <!-- Azure preference page -->
    <extension point = "org.eclipse.ui.preferencePages">
     <page
        	id="com.persistent.ui.preferencepage.windowsazure"
-       	class="com.microsoftopentechnologies.wacommon.preference.WindowsAzurePreferencePage"
+       	class="com.microsoft.azuretools.core.ui.WindowsAzurePreferencePage"
        	name="Azure">
     </page>
    </extension>
@@ -22,14 +22,14 @@
  <extension
        point="org.eclipse.ui.views">
     <category
-          id="com.gigaspaces.azure"
+          id="com.microsoft.azuretools"
           name="Azure">
     </category>
     <view
-          category="com.gigaspaces.azure"
-          class="com.gigaspaces.azure.views.WindowsAzureActivityLogView"
+          category="com.microsoft.azuretools"
+          class="com.microsoft.azuretools.core.ui.views.WindowsAzureActivityLogView"
           icon="icons/RoleFolder.gif"
-          id="com.gigaspaces.azure.views.WindowsAzureActivityLogView"
+          id="com.microsoft.azuretools.core.ui.views.WindowsAzureActivityLogView"
           name="Azure Activity Log">
     </view>
  </extension>
@@ -49,7 +49,7 @@
    
    <!-- Handlers for dropdown -->
    <extension point="org.eclipse.ui.handlers">
-      <handler commandId="com.microsoft.ui.dropdown.command" class="com.persistent.util.DropDownHandler"></handler>
+      <handler commandId="com.microsoft.ui.dropdown.command" class="com.microsoft.azuretools.core.ui.commoncontrols.DropDownHandler"></handler>
    </extension>
    
    <extension point="org.eclipse.ui.menus">
@@ -103,26 +103,26 @@
          point="org.eclipse.ui.handlers">
         <handler
             commandId="AzureManagePlugin.commands.signInCommand"
-            class="com.microsoft.azuretools.eclipse.handlers.SignInCommandHandler">
+            class="com.microsoft.azuretools.core.handlers.SignInCommandHandler">
         </handler>
         <handler
             commandId="AzureManagePlugin.commands.signOutCommand"
-            class="com.microsoft.azuretools.eclipse.handlers.SignOutCommandHandler">
+            class="com.microsoft.azuretools.core.handlers.SignOutCommandHandler">
         </handler>
         <handler
             commandId="AzureManagePlugin.commands.selectSubsriptionsCommand"
-            class="com.microsoft.azuretools.eclipse.handlers.SelectSubsriptionsCommandHandler">
+            class="com.microsoft.azuretools.core.handlers.SelectSubsriptionsCommandHandler">
             <enabledWhen>
                 <reference definitionId="when.is.signed.in"/>
             </enabledWhen>
         </handler>
         <handler
             class="com.microsoft.azuretools.eclipse.ui.WANewCertificate"
-            commandId="com.microsoft.azuretools.eclipse.ui.WANewCertificate">
+            commandId="com.microsoft.azuretools.core.ui.WANewCertificate">
         </handler>
 	    <handler
             class="com.microsoft.azuretools.eclipse.ui.AzureSamples"
-            commandId="com.microsoft.azuretools.eclipse.ui.AzureSamplesCmd">
+            commandId="com.microsoft.azuretools.core.ui.AzureSamplesCmd">
         </handler>
     </extension>
 <!--   
@@ -181,7 +181,7 @@
     <extension
          point="org.eclipse.core.expressions.propertyTesters">
          <propertyTester
-            class="com.microsoft.azuretools.eclipse.testers.AuthPropertyTester"
+            class="com.microsoft.azuretools.core.testers.AuthPropertyTester"
             id="com.microsoft.azuretools.eclipse.testers.propertyTester"
             namespace="com.microsoft.azuretools.eclipse.testers"
             properties="isSignedIn"

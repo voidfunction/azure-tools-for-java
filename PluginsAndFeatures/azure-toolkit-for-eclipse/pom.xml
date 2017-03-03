@@ -20,8 +20,8 @@
 	<module>../AddLibrary/QpidLibraries/com.microsoftopentechnologies.qpid</module>
 	<module>../AddLibrary/QpidLibraries/com.microsoftopentechnologies.qpid.feature</module>
     <module>../AddLibrary/QpidLibraries/com.microsoftopentechnologies.qpid.ui</module>
-    <module>com.microsoft.azureexplorer</module>
-    <module>com.microsoft.azureexplorer.feature</module>
+    <module>com.microsoft.azuretools.azureexplorer</module>
+    <module>com.microsoft.azuretools.azureexplorer.feature</module>
     <module>com.microsoft.hdinsights</module>
     <module>com.microsoft.hdinsights.feature</module>
 	<module>WindowsAzurePlugin4EJ</module>   

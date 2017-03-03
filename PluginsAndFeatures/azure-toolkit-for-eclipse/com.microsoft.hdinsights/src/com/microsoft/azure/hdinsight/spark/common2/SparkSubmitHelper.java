@@ -54,8 +54,8 @@ import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
-import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
+import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.sun.org.apache.regexp.internal.recompile;
 
 public class SparkSubmitHelper {

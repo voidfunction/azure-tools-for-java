@@ -17,7 +17,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoftopentechnologies.wacommon.utils;
+package com.microsoft.azuretools.core.utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,8 +64,8 @@ import org.osgi.service.prefs.Preferences;
 
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.azuretools.azurecommons.util.WAEclipseHelperMethods;
-import com.microsoftopentechnologies.wacommon.Activator;
-import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
+import com.microsoft.azuretools.core.Activator;
+import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
 
 
 public class PluginUtil {

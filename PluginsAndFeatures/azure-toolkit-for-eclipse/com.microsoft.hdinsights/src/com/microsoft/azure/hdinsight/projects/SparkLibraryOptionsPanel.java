@@ -42,7 +42,7 @@ import com.microsoft.azure.hdinsight.Activator;
 import com.microsoft.azure.hdinsight.common.CommonConst;
 import com.microsoft.azure.hdinsight.util.Messages;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
+import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
 
 public class SparkLibraryOptionsPanel extends Composite {
 	private Combo comboBox;

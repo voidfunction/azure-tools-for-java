@@ -24,7 +24,7 @@ import org.eclipse.core.resources.IProject;
 
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.ui.config.Messages;
-import com.microsoft.wacommon.applicationinsights.WebPropertyTester;
+import com.microsoft.azuretools.core.applicationinsights.WebPropertyTester;
 
 public class WAPropertyTester extends PropertyTester {
 

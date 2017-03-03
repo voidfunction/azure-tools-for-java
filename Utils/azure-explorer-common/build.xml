@@ -1,4 +1,4 @@
-<project name="ServicesExplorerCommon" default="dist" basedir=".">
+<project name="AzureExplorerCommon" default="dist" basedir=".">
     <description>
     	HDInsight Node Common project
     </description>

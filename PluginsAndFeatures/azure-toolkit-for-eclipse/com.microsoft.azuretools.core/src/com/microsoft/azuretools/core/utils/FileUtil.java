@@ -17,7 +17,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoftopentechnologies.wacommon.utils;
+package com.microsoft.azuretools.core.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,7 +27,7 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
 
-import com.microsoftopentechnologies.wacommon.Activator;
+import com.microsoft.azuretools.core.Activator;
 
 
 public class FileUtil {	
@@ -48,7 +48,7 @@ public class FileUtil {
 	        FileInputStream fis = new FileInputStream(file);
 	        File outputFile = new File(destFile);
 	        FileOutputStream fos = new FileOutputStream(outputFile);
-	        com.microsoftopentechnologies.azurecommons.wacommonutil.FileUtil.writeFile(fis , fos);
+	        com.microsoft.azuretools.azurecommons.util.FileUtil.writeFile(fis , fos);
 		} catch (IOException e) {
 			Activator.getDefault().log(e.getMessage(), e);
 		}

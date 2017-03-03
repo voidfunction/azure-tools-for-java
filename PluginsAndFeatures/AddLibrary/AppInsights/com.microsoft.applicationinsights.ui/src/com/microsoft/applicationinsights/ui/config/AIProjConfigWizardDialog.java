@@ -68,11 +68,11 @@ import com.microsoft.applicationinsights.preference.ApplicationInsightsPreferenc
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.util.AILibraryUtil;
-import com.microsoft.wacommon.applicationinsights.AILibraryHandler;
-import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
-import com.microsoft.wacommon.applicationinsights.ApplicationInsightsResourceRegistryEclipse;
-import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
-import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
+import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.core.applicationinsights.AILibraryHandler;
+import com.microsoft.azuretools.core.applicationinsights.ApplicationInsightsPreferences;
+import com.microsoft.azuretools.core.applicationinsights.ApplicationInsightsResourceRegistryEclipse;
 
 public class AIProjConfigWizardDialog extends TitleAreaDialog {
 	private Button aiCheck;

@@ -30,10 +30,10 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
 
 import com.microsoft.azure.hdinsight.spark.jobs.JobViewDummyHttpServer;
-import com.microsoft.azureexplorer.Activator;
+import com.microsoft.azuretools.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
-import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.microsoft.azuretools.core.utils.PluginUtil;
 
 public class HDInsightJobViewUtils {
     private static final int BUFFER_SIZE = 4096;

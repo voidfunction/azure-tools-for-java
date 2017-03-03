@@ -4,15 +4,15 @@
    <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">
      <classpathContainerPage
-       id="com.microsoftopentechnologies.windowsazure.tools.SDK_CONTAINER"
+       id="com.microsoft.azuretools.SDK_CONTAINER"
        name="%page.name"
-       class="com.microsoftopentechnologies.windowsazure.tools.wasdkjava.ui.classpath.ClasspathContainerPage"/>
+       class="com.microsoft.azuretools.wasdkjava.ui.classpath.ClasspathContainerPage"/>
    </extension>
    <extension
          point="org.eclipse.jdt.core.classpathContainerInitializer">
      <classpathContainerInitializer
-       id="com.microsoftopentechnologies.windowsazure.tools.SDK_CONTAINER"
-       class="com.microsoftopentechnologies.windowsazure.tools.wasdkjava.ui.classpath.ContainerInitializer"/>
+       id="com.microsoft.azuretools.SDK_CONTAINER"
+       class="com.microsoft.azuretools.wasdkjava.ui.classpath.ContainerInitializer"/>
    </extension>
 
 </plugin>

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Package for Apache Qpid Client Libraries for JMS UI
-Bundle-SymbolicName: com.microsoftopentechnologies.qpid.ui;singleton:=true
+Bundle-SymbolicName: com.microsoft.azuretools.qpid.ui;singleton:=true
 Bundle-Version: 0.19.0.qualifier
 Bundle-Activator: com.microsoftopentechnologies.waqpidjava.ui.Activator
 Bundle-Vendor: Microsoft Corp.
@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.core;bundle-version="3.10.0",
  org.eclipse.jdt.ui;bundle-version="3.10.0",
  org.eclipse.core.resources;bundle-version="3.9.0",
- com.microsoft.azurecore;bundle-version="2.9.6"
+ com.microsoft.azuretools.core;bundle-version="3.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

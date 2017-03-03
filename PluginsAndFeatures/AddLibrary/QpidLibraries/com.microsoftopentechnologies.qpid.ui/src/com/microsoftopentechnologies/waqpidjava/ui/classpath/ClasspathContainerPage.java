@@ -53,8 +53,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
 
-import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
-import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
+import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoftopentechnologies.waqpidjava.ui.Activator;
 /**
  * Qpid library's UI components and respective handlers.

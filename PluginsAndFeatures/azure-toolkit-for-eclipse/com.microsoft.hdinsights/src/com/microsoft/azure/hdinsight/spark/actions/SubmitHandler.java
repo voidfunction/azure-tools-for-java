@@ -36,8 +36,8 @@ import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
 import com.microsoft.azure.hdinsight.common2.HDInsightUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
-import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
+import com.microsoft.azuretools.core.utils.PluginUtil;
 
 public class SubmitHandler extends AbstractHandler {
     private List<IClusterDetail> cachedClusterDetails = null;

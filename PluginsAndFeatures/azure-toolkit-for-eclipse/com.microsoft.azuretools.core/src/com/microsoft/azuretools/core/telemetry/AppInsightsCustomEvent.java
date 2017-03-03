@@ -17,7 +17,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoftopentechnologies.wacommon.telemetry;
+package com.microsoft.azuretools.core.telemetry;
 
 import java.io.File;
 import java.util.HashMap;
@@ -25,8 +25,8 @@ import java.util.Map;
 
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.azuretools.azurecommons.xmlhandling.DataOperations;
-import com.microsoftopentechnologies.wacommon.utils.Messages;
-import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
+import com.microsoft.azuretools.core.utils.Messages;
+import com.microsoft.azuretools.core.utils.PluginUtil;
 
 public class AppInsightsCustomEvent {
 	static String pluginInstLoc = String.format("%s%s%s",

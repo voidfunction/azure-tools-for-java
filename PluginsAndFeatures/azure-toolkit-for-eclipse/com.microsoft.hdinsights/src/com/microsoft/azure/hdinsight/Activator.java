@@ -29,7 +29,7 @@ import com.microsoft.azure.hdinsight.util.HDInsightJobViewUtils;
 import com.microsoft.azure.hdinsight.util.Messages;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
-import com.microsoftopentechnologies.wacommon.telemetry.AppInsightsCustomEvent;
+import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
 
 /**
  * The activator class controls the plug-in life cycle

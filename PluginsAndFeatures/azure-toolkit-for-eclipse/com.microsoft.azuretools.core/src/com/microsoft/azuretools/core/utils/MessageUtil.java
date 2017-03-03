@@ -17,12 +17,12 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.persistent.util;
+package com.microsoft.azuretools.core.utils;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
-import com.microsoftopentechnologies.wacommon.Activator;
+import com.microsoft.azuretools.core.Activator;
 
 /**
  * Class has methods to display and log the error.

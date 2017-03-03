@@ -7,13 +7,13 @@ Bundle-Activator: com.microsoft.azure.hdinsight.Activator
 Bundle-Vendor: Microsoft Corp.
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- com.microsoft.azureexplorer;bundle-version="1.0.0",
- com.microsoftopentechnologies.windowsazure.tools.sdk;bundle-version="0.9.2",
+ com.microsoft.azuretools.azureexplorer;bundle-version="3.0.0",
+ com.microsoft.azuretools.sdk;bundle-version="3.0.0",
  org.eclipse.swt,
  org.eclipse.ui.workbench,
  org.scala-ide.sdt.core;resolution:=optional,
  org.eclipse.jface,
- com.microsoft.azurecore;bundle-version="2.9.6"
+ com.microsoft.azuretools.core;bundle-version="3.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: com.microsoft.azure.hdinsight.common2,
@@ -39,4 +39,4 @@ Export-Package: com.microsoft.azure.hdinsight,
  com.microsoft.azure.hdinsight.spark.common2,
  com.microsoft.azure.hdinsight.spark.ui
 Bundle-ClassPath: .,
- resources/hdinsight-node-common-0.0.1-SNAPSHOT.jar
+ resources/hdinsight-node-common-3.0.0-SNAPSHOT.jar

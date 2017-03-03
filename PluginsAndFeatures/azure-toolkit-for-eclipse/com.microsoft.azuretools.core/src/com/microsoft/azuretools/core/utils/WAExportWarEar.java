@@ -17,7 +17,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoftopentechnologies.wacommon.utils;
+package com.microsoft.azuretools.core.utils;
 
 import java.util.concurrent.ExecutionException;
 
@@ -28,7 +28,7 @@ import org.eclipse.jst.j2ee.web.datamodel.properties.IWebComponentExportDataMode
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 
-import com.microsoftopentechnologies.wacommon.Activator;
+import com.microsoft.azuretools.core.Activator;
 
 
 /**

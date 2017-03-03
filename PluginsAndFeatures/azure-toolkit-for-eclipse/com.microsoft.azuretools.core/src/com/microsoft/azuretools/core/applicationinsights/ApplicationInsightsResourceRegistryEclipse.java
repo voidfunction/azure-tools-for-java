@@ -17,7 +17,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoft.wacommon.applicationinsights;
+package com.microsoft.azuretools.core.applicationinsights;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,8 +34,8 @@ import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
-import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
-import com.microsoftopentechnologies.wacommon.Activator;
+import com.microsoft.azuretools.core.Activator;
+import com.microsoft.azuretools.core.applicationinsights.ApplicationInsightsPreferences;
 
 
 public class ApplicationInsightsResourceRegistryEclipse {

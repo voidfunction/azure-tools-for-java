@@ -10,12 +10,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.ui;bundle-version="3.10.0",
  org.eclipse.jdt.core;bundle-version="3.10.0",
  org.eclipse.core.resources;bundle-version="3.9.0",
- com.microsoftopentechnologies.windowsazure.tools.sdk;bundle-version="0.9.2",
- com.microsoftopentechnologies.windowsazure.tools.wasdkjava.ui;bundle-version="0.9.2",
- com.microsoft.azurecore;bundle-version="2.9.6"
+ com.microsoft.azuretools.sdk;bundle-version="3.0.0",
+ com.microsoft.azuretools.wasdkjava.ui;bundle-version="3.0.0",
+ com.microsoft.azuretools.core;bundle-version="3.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin
-Import-Package: com.microsoft.azuretools.authmanage,
- com.microsoft.azuretools.sdkmanage,
+Import-Package: com.microsoft.azuretools.core,
  org.eclipse.core.expressions

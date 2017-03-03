@@ -1,9 +1,9 @@
-package com.microsoft.wacommon.applicationinsights;
+package com.microsoft.azuretools.core.applicationinsights;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
-import com.microsoftopentechnologies.wacommon.Activator;
+import com.microsoft.azuretools.core.Activator;
 
 
 public class WebPropertyTester {

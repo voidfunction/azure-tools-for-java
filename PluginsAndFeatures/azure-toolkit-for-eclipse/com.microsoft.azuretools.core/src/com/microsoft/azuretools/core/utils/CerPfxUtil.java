@@ -17,7 +17,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoftopentechnologies.wacommon.utils;
+package com.microsoft.azuretools.core.utils;
 
 import java.io.File;
 import java.security.cert.X509Certificate;
@@ -66,7 +66,7 @@ public class CerPfxUtil {
 	 * @return
 	 */
 	public static X509Certificate getCert(String certURL, String password) {
-		return com.microsoftopentechnologies.azurecommons.wacommonutil.CerPfxUtil.getCert(certURL, password);
+		return com.microsoft.azuretools.azurecommons.util.CerPfxUtil.getCert(certURL, password);
 	}
 
 	/**
@@ -77,6 +77,6 @@ public class CerPfxUtil {
 	 * @return
 	 */
 	public static String getCertificatePath(String rawPath) {
-		return com.microsoftopentechnologies.azurecommons.wacommonutil.CerPfxUtil.getCertificatePath(rawPath);
+		return com.microsoft.azuretools.azurecommons.util.CerPfxUtil.getCertificatePath(rawPath);
 	}
 }
