@@ -28,8 +28,8 @@ import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.util.WAHelper;
-import com.microsoftopentechnologies.azurecommons.util.ParserXMLUtility;
-import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
+import com.microsoft.azuretools.azurecommons.util.ParserXMLUtility;
+import com.microsoft.azuretools.azurecommons.xmlhandling.DataOperations;
 
 import javax.swing.*;
 import java.io.File;

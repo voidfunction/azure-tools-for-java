@@ -1,7 +1,0 @@
-C:\gitbuild\wap4ej\Utils\ARRConfigurationAgent\ARRConfigurationAgent\bin\Release\SessionAffinityAgent.exe.config
-C:\gitbuild\wap4ej\Utils\ARRConfigurationAgent\ARRConfigurationAgent\bin\Release\SessionAffinityAgent.exe
-C:\gitbuild\wap4ej\Utils\ARRConfigurationAgent\ARRConfigurationAgent\bin\Release\SessionAffinityAgent.pdb
-C:\gitbuild\wap4ej\Utils\ARRConfigurationAgent\ARRConfigurationAgent\bin\Release\SessionAffinityAgent.exe.CodeAnalysisLog.xml
-C:\gitbuild\wap4ej\Utils\ARRConfigurationAgent\ARRConfigurationAgent\bin\Release\SessionAffinityAgent.exe.lastcodeanalysissucceeded
-C:\gitbuild\wap4ej\Utils\ARRConfigurationAgent\ARRConfigurationAgent\obj\x86\Release\SessionAffinityAgent.exe
-C:\gitbuild\wap4ej\Utils\ARRConfigurationAgent\ARRConfigurationAgent\obj\x86\Release\SessionAffinityAgent.pdb

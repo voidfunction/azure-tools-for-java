@@ -33,8 +33,8 @@ import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
 import com.microsoft.intellij.components.ServerExplorerToolWindowFactory;
 import com.microsoft.intellij.deploy.DeploymentManager;
 import com.microsoft.intellij.util.WAHelper;
-import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
-import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
+import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
+import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
 import org.jetbrains.annotations.NotNull;
 
 

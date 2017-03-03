@@ -28,7 +28,7 @@ import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
+import com.microsoft.azuretools.azurecommons.util.WAEclipseHelperMethods;
 
 import javax.swing.*;
 

@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.microsoft.applicationinsights.util.AILibraryUtil;
 import com.microsoft.wacommon.applicationinsights.ApplicationInsightsPreferences;
-import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
+import com.microsoft.azuretools.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoftopentechnologies.wacommon.utils.PluginUtil;
 /**
  * Class registers existing application insights instrumentation keys in local cache,

@@ -34,9 +34,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.wacommon.commoncontrols.NewCertificateDialogData;
-import com.microsoftopentechnologies.azurecommons.util.WAEclipseHelperMethods;
-import com.microsoftopentechnologies.azurecommons.wacommonutil.CerPfxUtil;
-import com.microsoftopentechnologies.azurecommons.wacommonutil.Utils;
+import com.microsoft.azuretools.azurecommons.util.WAEclipseHelperMethods;
+import com.microsoft.azuretools.azurecommons.util.CerPfxUtil;
+import com.microsoft.azuretools.azurecommons.util.Utils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;

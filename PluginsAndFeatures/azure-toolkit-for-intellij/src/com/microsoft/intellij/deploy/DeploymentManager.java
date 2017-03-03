@@ -41,7 +41,7 @@ import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.wacommon.utils.WACommonException;
-import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
+import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;

@@ -36,8 +36,8 @@ import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.PlatformColors;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventArgs;
-import com.microsoftopentechnologies.azurecommons.deploy.DeploymentEventListener;
+import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
+import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

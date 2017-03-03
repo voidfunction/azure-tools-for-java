@@ -11,7 +11,7 @@ import com.microsoft.intellij.common.CommonConst;
 import com.microsoft.intellij.ui.messages.AzureBundle;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.Nullable;
-import com.microsoftopentechnologies.azurecommons.xmlhandling.DataOperations;
+import com.microsoft.azuretools.azurecommons.xmlhandling.DataOperations;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
