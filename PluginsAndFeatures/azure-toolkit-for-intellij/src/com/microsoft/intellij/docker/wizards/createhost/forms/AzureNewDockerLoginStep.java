@@ -200,7 +200,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
     dockerHostAutoSshRadioButton.setSelected(true);
     dockerHostImportSSHBrowseLabel.setVisible(false);
     dockerHostImportSSHBrowseTextField.setEnabled(false);
-    dockerHostImportSSHBrowseTextField.setToolTipText(AzureDockerValidationUtils.getDockerHostSshDirectoryTip());
+    dockerHostImportSSHBrowseTextField.getTextField().setToolTipText(AzureDockerValidationUtils.getDockerHostSshDirectoryTip());
     dockerHostImportSSHBrowseTextField.getTextField().setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {
@@ -299,7 +299,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
     dockerHostAutoTlsRadioButton.setSelected(true);
     dockerHostImportTLSBrowseLabel.setVisible(false);
     dockerHostImportTLSBrowseTextField.setEnabled(false);
-    dockerHostImportTLSBrowseTextField.setToolTipText(AzureDockerValidationUtils.getDockerHostTlsDirectoryTip());
+    dockerHostImportTLSBrowseTextField.getTextField().setToolTipText(AzureDockerValidationUtils.getDockerHostTlsDirectoryTip());
     dockerHostImportTLSBrowseTextField.getTextField().setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {

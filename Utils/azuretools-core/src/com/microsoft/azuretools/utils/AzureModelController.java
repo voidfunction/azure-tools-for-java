@@ -124,7 +124,6 @@ public class AzureModelController {
             if (!srgMap.containsKey(sd)) {
                 if (!sd.isSelected()) continue;
 
-
                 Azure azure = azureManager.getAzure(sd.getSubscriptionId());
                 // subscription locations
                 List<Subscription> sl = azureManager.getSubscriptions();
@@ -214,7 +213,7 @@ public class AzureModelController {
 
         if (progressIndicator != null && progressIndicator.isCanceled()) {
             clearAll();
-            return;
+            throw new CanceledByUserException();
         }
         AzureModel azureModel = AzureModel.getInstance();
 
@@ -240,7 +239,7 @@ public class AzureModelController {
             if (!sd.isSelected()) continue;
             if (progressIndicator != null && progressIndicator.isCanceled()) {
                 clearAll();
-                return;
+                throw new CanceledByUserException();
             }
 
             System.out.println("sn : " + sd.getSubscriptionName());
@@ -271,7 +270,7 @@ public class AzureModelController {
         for (SubscriptionDetail sd : azureModel.getSubscriptionToResourceGroupMap().keySet()) {
             if (progressIndicator != null && progressIndicator.isCanceled()) {
                 clearAll();
-                return;
+                throw new CanceledByUserException();
             }
             List<ResourceGroup> rgList = azureModel.getSubscriptionToResourceGroupMap().get(sd);
             if (rgList.size() == 0)  {

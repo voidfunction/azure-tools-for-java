@@ -367,7 +367,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
                     }
 
                     AzureModelController.updateSubscriptionMaps(new UpdateProgressIndicator(progressIndicator));
-                    AzureModel.getInstance().setResourceGroupToWebAppMap(null);
+                    //AzureModel.getInstance().setResourceGroupToWebAppMap(null);
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
                         @Override
                         public void run() {

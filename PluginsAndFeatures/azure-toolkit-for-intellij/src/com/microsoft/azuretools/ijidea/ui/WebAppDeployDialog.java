@@ -51,6 +51,7 @@ import com.microsoft.azuretools.ijidea.utility.UpdateProgressIndicator;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
+import com.microsoft.azuretools.utils.CanceledByUserException;
 import com.microsoft.azuretools.utils.WebAppUtils;
 import com.microsoft.intellij.deploy.DeploymentManager;
 import org.jdesktop.swingx.JXHyperlink;
@@ -176,9 +177,19 @@ public class WebAppDeployDialog extends DialogWrapper {
 
     @Override
     public void show() {
-        fillTable();
+        fillTableAsync();
         super.show();
     }
+
+    private void fillTableAsync() {
+        ApplicationManager.getApplication().invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                fillTable();
+            }
+        }, ModalityState.any());
+    }
+
 
     protected WebAppDeployDialog(Project project, Artifact artifact) {
         super(project, true, IdeModalityType.PROJECT);
@@ -245,13 +256,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                 progressIndicator.setIndeterminate(true);
                 try {
                     if (progressIndicator.isCanceled()) {
-                        AzureModel.getInstance().setResourceGroupToWebAppMap(null);
-                        ApplicationManager.getApplication().invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                doCancelAction();
-                            }
-                        }, ModalityState.any());
+                        throw new CanceledByUserException();
                     }
 
                     AzureModelController.updateResourceGroupMaps(new UpdateProgressIndicator(progressIndicator));
@@ -262,6 +267,16 @@ public class WebAppDeployDialog extends DialogWrapper {
                             doFillTable();
                         }
                     }, ModalityState.any());
+                } catch (CanceledByUserException ex) {
+                    //AzureModel.getInstance().setResourceGroupToWebAppMap(null);
+                    ApplicationManager.getApplication().invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            System.out.println("updateAndFillTable(): Canceled by user");
+                            doCancelAction();
+                        }
+                    }, ModalityState.any());
+
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     LOGGER.debug("updateAndFillTable", ex);

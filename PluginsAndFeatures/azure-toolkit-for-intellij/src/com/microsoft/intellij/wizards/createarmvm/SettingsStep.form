@@ -134,7 +134,7 @@
                   <forms/>
                 </constraints>
                 <properties>
-                  <editable value="true"/>
+                  <editable value="false"/>
                   <enabled value="true"/>
                 </properties>
               </component>

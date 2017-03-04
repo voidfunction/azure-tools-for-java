@@ -54,7 +54,7 @@ public class AuthMethodManager {
     
     public void addSignInEventListener(Runnable l) {
         if (!signInEventListeners.contains(l)) {
-        	signInEventListeners.add(l);
+            signInEventListeners.add(l);
         }
     }
 
@@ -76,13 +76,14 @@ public class AuthMethodManager {
     }
 
     private AzureManager getAzureManager(AuthMethod authMethod) {
-    	if (azureManager != null) return azureManager;
+        if (azureManager != null) return azureManager;
         switch (authMethod) {
             case AD:
                 if (StringUtils.isNullOrEmpty(authMethodDetails.getAccountEmail())) {
                     return null;
                 }
                 azureManager = new AccessTokenAzureManager();
+                break;
             case SP:
                 String credFilePath = authMethodDetails.getCredFilePath();
                 if (StringUtils.isNullOrEmpty(credFilePath)) {

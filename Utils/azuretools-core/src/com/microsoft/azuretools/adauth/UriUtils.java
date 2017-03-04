@@ -48,9 +48,9 @@ public class UriUtils {
         String[] pairs = query.split("&");
         for (String pair : pairs) {
             int idx = pair.indexOf("=");
-            map.put(
-                urlDecodeUTF8(pair.substring(0, idx)), 
-                urlDecodeUTF8(pair.substring(idx + 1)));
+            String key = pair.substring(0, idx);
+            String val = pair.substring(idx + 1);
+            map.put(key, urlDecodeUTF8(val));
         }
 
         return map;

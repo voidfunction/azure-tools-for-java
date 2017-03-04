@@ -20,13 +20,10 @@
  *  SOFTWARE.
  */
 
-package com.microsoft.azuretools.adauth;
+package com.microsoft.azuretools.utils;
 
-public class StringUtils {
-    public static boolean isNullOrWhiteSpace(final String str) {
-        return str == null || str.trim().length() == 0;
-    }
-    public static boolean isNullOrEmpty(final String str) {
-        return str == null || str.length() == 0;
-    }
+/**
+ * Created by vlashch on 3/3/2017.
+ */
+public class CanceledByUserException extends Exception {
 }
