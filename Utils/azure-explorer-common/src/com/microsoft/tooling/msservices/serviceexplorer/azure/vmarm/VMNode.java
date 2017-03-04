@@ -22,11 +22,8 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm;
 
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.compute.InstanceViewStatus;
 import com.microsoft.azure.management.compute.VirtualMachine;
@@ -48,8 +45,8 @@ public class VMNode extends RefreshableNode {
     public class DeleteVMAction extends AzureNodeActionPromptListener {
         public DeleteVMAction() {
             super(VMNode.this,
-                    String.format("This operation will delete virtual machine %s. The associated disks will not be deleted " +
-                            "from your storage account. Are you sure you want to continue?", virtualMachine.name()),
+                    String.format("<html>This operation will delete virtual machine <b>%s</b>.<br>The associated disks will not be deleted " +
+                            "from your storage account.<br><br>Are you sure you want to continue?</html>", virtualMachine.name()),
                     "Deleting VM");
         }
 
@@ -83,7 +80,7 @@ public class VMNode extends RefreshableNode {
     public class RestartVMAction extends AzureNodeActionPromptListener {
         public RestartVMAction() {
             super(VMNode.this,
-                    String.format("Are you sure you want to restart the virtual machine %s?", virtualMachine.computerName()),
+                    String.format("<html>Are you sure you want to restart the virtual machine <b>%s</b>?</html>", virtualMachine.computerName()),
                     "Restarting VM");
         }
 
@@ -121,8 +118,8 @@ public class VMNode extends RefreshableNode {
     public class ShutdownVMAction extends AzureNodeActionPromptListener {
         public ShutdownVMAction() {
             super(VMNode.this, String.format(
-                    "This operation will result in losing the virtual IP address that was assigned to this virtual machine. " +
-                            "Are you sure that you want to shut down virtual machine %s?", virtualMachine.name()),
+                    "<html>This operation will result in losing the virtual IP address<br>that was assigned to this virtual machine.<br><br>" +
+                            "Are you sure that you want to shut down virtual machine <b>%s</b>?</html>", virtualMachine.name()),
                     "Shutting down VM");
         }
 
