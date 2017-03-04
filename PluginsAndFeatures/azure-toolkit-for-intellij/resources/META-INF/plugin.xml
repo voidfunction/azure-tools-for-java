@@ -121,6 +121,8 @@
       <reference ref="Actions.ApplicationInsightsAction"/>
       <separator/>
       <reference ref="Actions.LibraryConfigurationAction"/>
+      <separator/>
+      <reference ref="AzureToolkit.AzureSignIn"/>
     </group>
 
     <group id="AzureToolbarGroup" text="Azure" description="Azure">

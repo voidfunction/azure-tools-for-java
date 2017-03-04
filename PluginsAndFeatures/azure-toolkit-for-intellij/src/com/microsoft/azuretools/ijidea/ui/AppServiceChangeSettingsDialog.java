@@ -29,6 +29,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.azure.management.appservice.JavaVersion;
@@ -49,8 +50,8 @@ import java.awt.*;
 public class AppServiceChangeSettingsDialog extends AppServiceCreateDialog {
     private static final Logger LOGGER = Logger.getInstance(AppServiceChangeSettingsDialog.class);
 
-    public static AppServiceChangeSettingsDialog go(WebAppDeployDialog.WebAppDetails wad, Module module){
-        AppServiceChangeSettingsDialog d = new AppServiceChangeSettingsDialog(module, wad);
+    public static AppServiceChangeSettingsDialog go(WebAppDeployDialog.WebAppDetails wad, Project project){
+        AppServiceChangeSettingsDialog d = new AppServiceChangeSettingsDialog(project, wad);
         d.show();
         if (d.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
             return d;
@@ -58,8 +59,8 @@ public class AppServiceChangeSettingsDialog extends AppServiceCreateDialog {
         return null;
     }
 
-    protected AppServiceChangeSettingsDialog(Module module, WebAppDeployDialog.WebAppDetails wad) {
-        super(module);
+    protected AppServiceChangeSettingsDialog(Project project, WebAppDeployDialog.WebAppDetails wad) {
+        super(project);
 
         setTitle("Change App Service Settings");
 

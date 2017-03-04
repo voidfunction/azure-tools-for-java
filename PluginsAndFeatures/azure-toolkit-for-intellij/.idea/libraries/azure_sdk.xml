@@ -21,19 +21,6 @@
       <root url="jar://$PROJECT_DIR$/lib/azure-sdk/commons-codec-1.10.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/azure-sdk/httpcore-4.3.3.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/azure-sdk/commons-lang-2.6.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-core-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-media-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-servicebus-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-serviceruntime-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-svc-mgmt-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-svc-mgmt-compute-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-svc-mgmt-media-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-svc-mgmt-network-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-svc-mgmt-scheduler-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-svc-mgmt-sql-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-svc-mgmt-storage-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-svc-mgmt-websites-0.9.2.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/azure-sdk/azure-tracing-util-0.9.2.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/azure-sdk/applicationinsights-management-1.0.3.jar!/" />
     </CLASSES>
     <JAVADOC />

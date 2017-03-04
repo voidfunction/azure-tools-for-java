@@ -29,6 +29,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.azure.management.appservice.AppServicePlan;
@@ -102,7 +103,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
     private JLabel labelAppServicePlanLocation;
     private JLabel labelAppServicePlanPricingTier;
 
-    protected Module module;
+    protected Project project;
 
     protected static final String textNotAvailable = "N/A";
 
@@ -170,8 +171,8 @@ public class AppServiceCreateDialog extends DialogWrapper {
         }
     }
 
-    public static AppServiceCreateDialog go(Module module){
-        AppServiceCreateDialog d = new AppServiceCreateDialog(module);
+    public static AppServiceCreateDialog go(Project project){
+        AppServiceCreateDialog d = new AppServiceCreateDialog(project);
         d.show();
         if (d.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
             return d;
@@ -179,9 +180,9 @@ public class AppServiceCreateDialog extends DialogWrapper {
         return null;
     }
 
-    protected AppServiceCreateDialog(Module module) {
-        super(module.getProject(), true, IdeModalityType.PROJECT);
-        this.module =  module;
+    protected AppServiceCreateDialog(Project project) {
+        super(project, true, IdeModalityType.PROJECT);
+        this.project =  project;
         setModal(true);
         setTitle("Create App Service");
 
@@ -349,7 +350,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
     }
 
     protected void updateAndFillSubscriptions() {
-        ProgressManager.getInstance().run(new Task.Modal(module.getProject(), "Update Azure Local Cache Progress", true) {
+        ProgressManager.getInstance().run(new Task.Modal(project, "Update Azure Local Cache Progress", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
 
