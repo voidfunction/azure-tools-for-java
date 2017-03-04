@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.microsoftopentechnologies.qpid.feature"
+      id="com.microsoft.azuretools.qpid.feature"
       label="Package for Apache Qpid Client Libraries for JMS"
       version="0.19.0.qualifier"
       provider-name="Microsoft Corp.">
@@ -65,13 +65,13 @@ This limitation applies to (a) anything related to the software, services, conte
 It also applies even if Microsoft knew or should have known about the possibility of the damages. The above limitation or exclusion may not apply to you because your country may not allow the exclusion or limitation of incidental, consequential, or other damages.</license>
 
    <plugin
-         id="com.microsoftopentechnologies.qpid"
+         id="com.microsoft.azuretools.qpid"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="com.microsoftopentechnologies.qpid.ui"
+         id="com.microsoft.azuretools.qpid.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"

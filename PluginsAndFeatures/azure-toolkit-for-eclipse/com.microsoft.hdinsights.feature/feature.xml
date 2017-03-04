@@ -2,7 +2,7 @@
 <feature
       id="com.microsoft.hdinsights.feature"
       label="Azure HDInsight plugin for Java"
-      version="3.0.0.qualifier"
+      version="1.0.0.qualifier"
       provider-name="Microsoft Corp.">
 
    <description>
@@ -74,7 +74,7 @@ It also applies even if Microsoft knew or should have known about the possibilit
          id="com.microsoft.hdinsights"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.0.0"
          unpack="false"/>
 
 </feature>

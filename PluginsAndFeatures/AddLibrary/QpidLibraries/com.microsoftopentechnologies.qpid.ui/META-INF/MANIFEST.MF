@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Package for Apache Qpid Client Libraries for JMS UI
 Bundle-SymbolicName: com.microsoft.azuretools.qpid.ui;singleton:=true
 Bundle-Version: 0.19.0.qualifier
-Bundle-Activator: com.microsoftopentechnologies.waqpidjava.ui.Activator
+Bundle-Activator: com.microsoft.azuretools.waqpidjava.ui.Activator
 Bundle-Vendor: Microsoft Corp.
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
