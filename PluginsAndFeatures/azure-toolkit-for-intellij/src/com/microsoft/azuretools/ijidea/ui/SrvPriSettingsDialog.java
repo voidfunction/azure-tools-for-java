@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import java.awt.*;
 import java.util.List;
 
 public class SrvPriSettingsDialog extends DialogWrapper {
@@ -41,7 +42,7 @@ public class SrvPriSettingsDialog extends DialogWrapper {
     private JTextPane selectSubscriptionCommentTextPane;
     private TextFieldWithBrowseButton destinationFolderTextField;
     private List<SubscriptionDetail> sdl;
-    private  Project project;
+    private Project project;
 
     public String getDestinationFolder() {
         return destinationFolderTextField.getText();
@@ -101,6 +102,9 @@ public class SrvPriSettingsDialog extends DialogWrapper {
         destinationFolderTextField.setText(System.getProperty("user.home"));
         destinationFolderTextField.addBrowseFolderListener("Choose Destination Folder", "", null,
                 FileChooserDescriptorFactory.createSingleFolderDescriptor());
+
+        Font labelFont = UIManager.getFont("Label.font");
+        selectSubscriptionCommentTextPane.setFont(labelFont);
 
         setSubscriptions();
 
