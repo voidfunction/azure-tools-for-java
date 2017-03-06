@@ -7,6 +7,46 @@
     <properties>
         <artifict.name>${artifactId}-${version}.jar</artifict.name>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>2.7.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.7.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.7.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.retrofit2</groupId>
+                <artifactId>retrofit</artifactId>
+                <version>2.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>io.reactivex</groupId>
+                <artifactId>rxjava</artifactId>
+                <version>1.2.7</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-core</artifactId>
+                <version>2.2.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <build>
         <sourceDirectory>src</sourceDirectory>
         <plugins>
@@ -27,7 +67,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <copy file="${basedir}/target/${artifict.name}" tofile="${basedir}/../../PluginsAndFeatures/com.microsoft.azuretools.core/resources/${artifict.name}" overwrite="true" />
+                                <copy file="${basedir}/target/${artifict.name}" tofile="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-eclipse/com.microsoft.azuretools.core/resources/${artifict.name}" overwrite="true" />
                             </target>
                         </configuration>
                         <goals>
@@ -42,7 +82,7 @@
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure</artifactId>
-            <version>1.0.0-beta4</version>
+            <version>1.0.0-beta4.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -54,6 +94,16 @@
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-storage</artifactId>
             <version>4.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml</groupId>
+                    <artifactId>jackson.core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azuretools</groupId>
@@ -61,23 +111,23 @@
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>0.1.54</version>
-        </dependency>
-        <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-keyvault-webkey</artifactId>
             <version>1.0.0-beta5-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/azure-keyvault-webkey-1.0.0-beta5-SNAPSHOT.jar</systemPath>
+            <systemPath>${project.basedir}/../azuretools-core/lib/azure-keyvault-webkey-1.0.0-beta5-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-keyvault</artifactId>
             <version>1.0.0-beta5-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/azure-keyvault-1.0.0-beta5-SNAPSHOT.jar</systemPath>
+            <systemPath>${project.basedir}/../azuretools-core/lib/azure-keyvault-1.0.0-beta5-SNAPSHOT.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.54</version>
         </dependency>
     </dependencies>
 </project>

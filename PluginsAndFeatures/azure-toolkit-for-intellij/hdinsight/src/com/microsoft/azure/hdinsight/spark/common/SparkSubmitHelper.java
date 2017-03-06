@@ -26,9 +26,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.intellij.openapi.project.Project;
 import com.jcraft.jsch.*;
-import com.microsoft.azure.datalake.store.ADLStoreClient;
-import com.microsoft.azure.datalake.store.ADLStoreOptions;
-import com.microsoft.azure.datalake.store.IfExists;
 import com.microsoft.azure.hdinsight.common.HDInsightUtil;
 import com.microsoft.azure.hdinsight.common.StreamUtil;
 import com.microsoft.azure.hdinsight.sdk.cluster.EmulatorClusterDetail;
@@ -266,12 +263,12 @@ public class SparkSubmitHelper {
                 }
             }
         } else if(storageAccount.getAccountType() == StorageAccountTypeEnum.ADLS) {
-            String uploadPath = String.format("adl://%s.azuredatalakestore.net/%s/%s", storageAccount.getName(), storageAccount.getDefaultContainerOrRootPath(), "SparkSubmission");
+            String uploadPath = String.format("adl://%s.azuredatalakestore.net%s%s", storageAccount.getName(), storageAccount.getDefaultContainerOrRootPath(), "SparkSubmission");
             HDInsightUtil.showInfoOnSubmissionMessageWindow(project,
-                    String.format("Info : Begin uploading file %s to Azure Data Lake Store %s ...", localFile, uploadPath));
+                    String.format("Info : Begin uploading file %s to Azure Datalake store %s ...", localFile, uploadPath));
             String uploadedPath = StreamUtil.uploadArtifactToADLS(file, storageAccount);
             HDInsightUtil.showInfoOnSubmissionMessageWindow(project,
-                    String.format("Info : Submit file to azure blob '%s' successfully.", uploadedPath));
+                    String.format("Info : Submit file to Azure Datalake store '%s' successfully.", uploadedPath));
             return uploadedPath;
         } else {
             throw new UnsupportedOperationException("unknown storage account type");
