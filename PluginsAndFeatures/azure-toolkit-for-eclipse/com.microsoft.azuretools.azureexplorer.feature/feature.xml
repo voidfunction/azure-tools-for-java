@@ -70,7 +70,7 @@ It also applies even if Microsoft knew or should have known about the possibilit
          id="com.microsoft.azuretools.azureexplorer"
          download-size="0"
          install-size="0"
-         version="3.0.0"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>

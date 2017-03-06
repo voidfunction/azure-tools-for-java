@@ -74,7 +74,7 @@ It also applies even if Microsoft knew or should have known about the possibilit
          id="com.microsoft.hdinsights"
          download-size="0"
          install-size="0"
-         version="1.0.0"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>
