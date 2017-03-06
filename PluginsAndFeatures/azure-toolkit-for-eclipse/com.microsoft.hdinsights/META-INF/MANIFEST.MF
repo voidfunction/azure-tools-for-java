@@ -7,13 +7,13 @@ Bundle-Activator: com.microsoft.azure.hdinsight.Activator
 Bundle-Vendor: Microsoft Corp.
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
+ com.microsoft.azuretools.core;bundle-version="3.0.0",
  com.microsoft.azuretools.azureexplorer;bundle-version="3.0.0",
  com.microsoft.azuretools.sdk;bundle-version="3.0.0",
  org.eclipse.swt,
  org.eclipse.ui.workbench,
  org.scala-ide.sdt.core;resolution:=optional,
- org.eclipse.jface,
- com.microsoft.azuretools.core;bundle-version="3.0.0"
+ org.eclipse.jface
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: com.microsoft.azure.hdinsight.common2,
