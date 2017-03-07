@@ -86,14 +86,15 @@ public class WebappsModule extends AzureRefreshableNode {
 	private void fillWebappsNodes() {
 		Map<SubscriptionDetail, List<ResourceGroup>> srgMap = AzureModel.getInstance().getSubscriptionToResourceGroupMap();
 		Map<ResourceGroup, List<WebApp>> rgwaMap = AzureModel.getInstance().getResourceGroupToWebAppMap();
+		if (srgMap != null) {
+			for (SubscriptionDetail sd : srgMap.keySet()) {
+				if (!sd.isSelected()) continue;
 
-		for (SubscriptionDetail sd : srgMap.keySet()) {
-			if (!sd.isSelected()) continue;
-
-			for (ResourceGroup rg : srgMap.get(sd)) {
-				for (WebApp webApp : rgwaMap.get(rg)) {
+				for (ResourceGroup rg : srgMap.get(sd)) {
+					for (WebApp webApp : rgwaMap.get(rg)) {
 						addChildNode(new WebappNode(this, sd.getSubscriptionId(), webApp, rg,
 								RUN_STATUS.equalsIgnoreCase(webApp.inner().state()) ? WEB_RUN_ICON : WEB_STOP_ICON));
+					}
 				}
 			}
 		}
