@@ -22,7 +22,9 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure;
 
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
+import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.ISubscriptionSelectionListener;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
@@ -59,18 +61,25 @@ public class AzureModule extends RefreshableNode {
         //hdInsightModule = new HDInsightRootModule(this);
         vmArmServiceModule = new VMArmModule(this);
         dockerHostModule = new DockerHostModule(this);
+        try {
+            AuthMethodManager.getInstance().addSignInEventListener(new SubscriptionListener());
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().logError(ex.getMessage(), ex);
+        }
     }
 
     public AzureModule(Node parent, String iconPath, Object data) {
-        super(AZURE_SERVICE_MODULE_ID, BASE_MODULE_NAME, parent, iconPath);
+        super(AZURE_SERVICE_MODULE_ID, composeName(false), parent, iconPath);
     }
 
     public void setHdInsightModule(@NotNull HDInsightRootModule rootModule) {
         this.hdInsightModule = rootModule;
     }
 
-    @Override
-    public String getName() {
+    private static String composeName(boolean isSignedOut) {
+        if (isSignedOut) {
+            return BASE_MODULE_NAME + " (Not Signed In)";
+        }
         try {
             AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
             // not signed in
@@ -140,5 +149,34 @@ public class AzureModule extends RefreshableNode {
     @Override
     public Object getProject() {
         return project;
+    }
+
+    private class SubscriptionListener implements Runnable {
+        @Override
+        public void run() {
+            handleSubscriptionChange(false);
+            try {
+                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                // not signed in
+                if (azureManager == null) {
+                    return;
+                }
+                azureManager.getSubscriptionManager().addListener(new ISubscriptionSelectionListener() {
+                    @Override
+                    public void update(boolean isSignedOut) {
+                        handleSubscriptionChange(isSignedOut);
+                    }
+                });
+            } catch (Exception ex) {
+                DefaultLoader.getUIHelper().logError(ex.getMessage(), ex);
+            }
+        }
+    }
+
+    private void handleSubscriptionChange(boolean isSignedOut) {
+        setName(composeName(isSignedOut));
+        for (Node child : getChildNodes()) {
+            child.removeAllChildNodes();
+        }
     }
 }

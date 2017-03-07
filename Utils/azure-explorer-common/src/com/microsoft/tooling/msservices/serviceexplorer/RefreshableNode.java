@@ -31,7 +31,7 @@ import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import java.util.List;
 
 public abstract class RefreshableNode extends Node {
-    private boolean initialized;
+    protected boolean initialized;
 
     public RefreshableNode(String id, String name, Node parent, String iconPath) {
         super(id, name, parent, iconPath);
@@ -56,8 +56,8 @@ public abstract class RefreshableNode extends Node {
     @Override
     protected void onNodeClick(NodeActionEvent e) {
         if (!initialized) {
-            initialized = true;
             this.load();
+            initialized = true;
         }
     }
 
