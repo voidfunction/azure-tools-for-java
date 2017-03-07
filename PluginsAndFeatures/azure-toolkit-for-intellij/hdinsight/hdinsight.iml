@@ -8,9 +8,6 @@
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
-    <orderEntry type="library" name="AzureCommons" level="project" />
-    <orderEntry type="library" name="azure-sdk" level="project" />
-    <orderEntry type="library" name="antIntegration" level="project" />
     <orderEntry type="module-library" scope="PROVIDED">
       <library>
         <CLASSES>
@@ -20,33 +17,8 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/java-json.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../lib/java-json.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
     <orderEntry type="module" module-name="common" />
-    <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="project" />
-    <orderEntry type="library" name="com.microsoft.azuretools:azure-explorer-common:0.0.1-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: com.google.guava:guava:18.0" level="project" />
-    <orderEntry type="library" name="com.microsoft.azuretools:hdinsight-node-common:0.0.1-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="com.microsoft.azure:azure-data-lake-store-sdk:2.1.4" level="project" />
-    <orderEntry type="library" name="com.microsoft.azuretools:auth-manage:0.0.1-SNAPSHOT" level="project" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/AzureCommons.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
+    <orderEntry type="module" module-name="hdinsight-node-common" exported="" />
   </component>
   <component name="POM File Configuration" pomFile="" />
 </module>

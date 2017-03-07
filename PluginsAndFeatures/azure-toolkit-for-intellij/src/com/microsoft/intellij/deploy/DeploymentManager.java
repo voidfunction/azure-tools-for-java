@@ -22,40 +22,22 @@
 package com.microsoft.intellij.deploy;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.PathManager;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
-import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.*;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.appservice.WebApp;
-import com.microsoft.intellij.AzurePlugin;
-import com.microsoft.intellij.AzureSettings;
-import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
-import com.microsoft.intellij.util.AppInsightsCustomEvent;
-import com.microsoft.intellij.util.PluginUtil;
-import com.wacommon.utils.WACommonException;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
+import com.microsoft.intellij.AzurePlugin;
+import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
-import static com.microsoft.intellij.AzurePlugin.log;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public final class DeploymentManager {
@@ -141,10 +123,6 @@ public final class DeploymentManager {
     public void deployToDockerContainer(AzureDockerImageInstance dockerImageInstance, String url) {
         Date startDate = new Date();
         try {
-            ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
-
             String msg = String.format("Deploying application to Docker host %s ...", dockerImageInstance.host.name);
             notifyProgress(dockerImageInstance.host.name, startDate, null, 5, msg);
             AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
@@ -175,7 +153,6 @@ public final class DeploymentManager {
                 msg = String.format("Using virtual machine %s ...", dockerImageInstance.host.name);
                 notifyProgress(dockerImageInstance.host.name, startDate, null, 45, msg);
             }
-            System.out.println(mapper.writeValueAsString(dockerImageInstance.host));
 
             if (dockerImageInstance.host.session == null) {
                 System.out.println("Opening a remote connection to the Docker host: " + new Date().toString());

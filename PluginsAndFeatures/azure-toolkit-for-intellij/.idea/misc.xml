@@ -4,6 +4,9 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/../../Utils/AuthManage/pom.xml" />
+        <option value="$PROJECT_DIR$/../../Utils/azuretools-core/pom.xml" />
+        <option value="$PROJECT_DIR$/../../Utils/azure-explorer-common/pom.xml" />
+        <option value="$PROJECT_DIR$/../../Utils/hdinsight-node-common/pom.xml" />
       </list>
     </option>
   </component>
