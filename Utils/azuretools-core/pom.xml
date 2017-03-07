@@ -162,5 +162,12 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/../../PluginsAndFeatures/AddLibrary/AzureLibraries/com.microsoft.azuretools.sdk/dependencies/applicationinsights-web-1.0.3.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>annotation-detector</artifactId>
+            <version>3.0.4</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../PluginsAndFeatures/AddLibrary/AzureLibraries/com.microsoft.azuretools.sdk/dependencies/annotation-detector-3.0.4.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

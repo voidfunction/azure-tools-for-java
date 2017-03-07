@@ -86,6 +86,15 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library">
+      <library name="Maven: com.microsoft.azure:annotation-detector:3.0.4">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../PluginsAndFeatures/AddLibrary/AzureLibraries/com.microsoft.azuretools.sdk/dependencies/annotation-detector-3.0.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
       <library name="Maven: com.microsoft.azure:azure-keyvault-webkey:1.0.0-beta5-SNAPSHOT">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../azuretools-core/lib/azure-keyvault-webkey-1.0.0-beta5-SNAPSHOT.jar!/" />
