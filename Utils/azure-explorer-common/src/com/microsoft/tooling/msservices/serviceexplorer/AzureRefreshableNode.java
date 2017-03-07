@@ -43,4 +43,13 @@ public abstract class AzureRefreshableNode extends RefreshableNode {
             DefaultLoader.getUIHelper().logError("Error loading webapps", ex);
         }
     }
+
+    @Override
+    public void removeAllChildNodes() {
+        super.removeAllChildNodes();
+        // removed everything as a result of subscription change, not during refresh
+        if (!loading) {
+            initialized = false;
+        }
+    }
 }
