@@ -71,7 +71,7 @@ public class AzureDockerHostsManager {
     if (instance == null) {
       instance = new AzureDockerHostsManager(azureAuthManager);
     } else {
-      if (instance.azureAuthManager != azureAuthManager) {
+      if (azureAuthManager != null && instance.azureAuthManager != azureAuthManager) {
         instance.azureAuthManager = azureAuthManager;
         instance.userId = azureAuthManager.getCurrentUserId();
         instance.forceRefreshSubscriptions();

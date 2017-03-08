@@ -25,6 +25,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.EditableDockerHost;
 import com.microsoft.intellij.docker.dialogs.AzureSelectKeyVault;
@@ -32,21 +33,25 @@ import com.microsoft.intellij.docker.utils.AzureDockerValidationUtils;
 import com.microsoft.intellij.ui.util.UIUtils;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class AzureDockerHostUpdateLoginPanel {
   private JPanel contentPane;
   private JPanel mainPanel;
-  private JRadioButton dockerHostAutoSshRadioButton;
-  private JRadioButton dockerHostImportSshRadioButton;
-  private JTextField dockerHostUsernameTextField;
-  private JPasswordField dockerHostFirstPwdField;
-  private JPasswordField dockerHostSecondPwdField;
-  private TextFieldWithBrowseButton dockerHostImportSSHBrowseTextField;
-  private JRadioButton dockerHostKeepSshRadioButton;
   private JButton copyFromAzureKeyButton;
-  private JRadioButton dockerHostNoSshRadioButton;
+  public JTextField dockerHostUsernameTextField;
+  public JLabel dockerHostUsernameLabel;
+  public JPasswordField dockerHostFirstPwdField;
+  public JLabel dockerHostFirstPwdLabel;
+  public JPasswordField dockerHostSecondPwdField;
+  public JRadioButton dockerHostKeepSshRadioButton;
+  public JRadioButton dockerHostAutoSshRadioButton;
+  public JRadioButton dockerHostImportSshRadioButton;
+  public TextFieldWithBrowseButton dockerHostImportSSHBrowseTextField;
+  public JLabel dockerHostImportSSHBrowseLabel;
   private ButtonGroup authSelectionGroup;
 
 
@@ -60,7 +65,6 @@ public class AzureDockerHostUpdateLoginPanel {
     this.dockerManager = dockerUIManager;
 
     authSelectionGroup = new ButtonGroup();
-    authSelectionGroup.add(dockerHostNoSshRadioButton);
     authSelectionGroup.add(dockerHostKeepSshRadioButton);
     authSelectionGroup.add(dockerHostAutoSshRadioButton);
     authSelectionGroup.add(dockerHostImportSshRadioButton);
@@ -78,12 +82,65 @@ public class AzureDockerHostUpdateLoginPanel {
         }
       }
     });
-    dockerHostNoSshRadioButton.addActionListener(new ActionListener() {
+
+    dockerHostUsernameLabel.setVisible(editableHost.originalDockerHost.certVault == null || editableHost.originalDockerHost.certVault.vmUsername == null);
+    dockerHostUsernameTextField.setText((editableHost.originalDockerHost.certVault != null && editableHost.originalDockerHost.certVault.vmUsername != null) ?
+        editableHost.originalDockerHost.certVault.vmUsername : "");
+    dockerHostUsernameTextField.setToolTipText(AzureDockerValidationUtils.getDockerHostUserNameTip());
+    dockerHostUsernameTextField.setInputVerifier(new InputVerifier() {
       @Override
-      public void actionPerformed(ActionEvent e) {
-        dockerHostImportSshRadioButton.setEnabled(false);
+      public boolean verify(JComponent input) {
+        String text = dockerHostUsernameTextField.getText();
+        if (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostUserName(text)) {
+          dockerHostUsernameLabel.setVisible(true);
+          setDialogButtonsState(false);
+          return false;
+        } else {
+          dockerHostUsernameLabel.setVisible(false);
+          setDialogButtonsState(doValidate(false) == null);
+          return true;
+        }
       }
     });
+    dockerHostUsernameTextField.getDocument().addDocumentListener(resetDialogButtonsState(null));
+    dockerHostFirstPwdField.setInputVerifier(new InputVerifier() {
+      @Override
+      public boolean verify(JComponent input) {
+        String text = new String(dockerHostFirstPwdField.getPassword());
+        if (dockerHostFirstPwdField.getPassword().length > 0 && !text.isEmpty() && !AzureDockerValidationUtils.validateDockerHostPassword(text)) {
+          dockerHostFirstPwdLabel.setVisible(true);
+          setDialogButtonsState(false);
+          return false;
+        } else {
+          dockerHostFirstPwdLabel.setVisible(false);
+          setDialogButtonsState(doValidate(false) == null);
+          return true;
+        }
+      }
+    });
+    dockerHostFirstPwdField.getDocument().addDocumentListener(resetDialogButtonsState(null));
+    dockerHostFirstPwdLabel.setVisible(false);
+    dockerHostFirstPwdField.setToolTipText(AzureDockerValidationUtils.getDockerHostPasswordTip());
+    dockerHostSecondPwdField.setInputVerifier(new InputVerifier() {
+      @Override
+      public boolean verify(JComponent input) {
+        String pwd1 = new String(dockerHostFirstPwdField.getPassword());
+        String pwd2 = new String(dockerHostSecondPwdField.getPassword());
+        if (dockerHostSecondPwdField.getPassword().length > 0 && !pwd2.isEmpty() && !pwd2.equals(pwd1)) {
+          dockerHostFirstPwdLabel.setVisible(true);
+          setDialogButtonsState(false);
+          return false;
+        } else {
+          dockerHostFirstPwdLabel.setVisible(false);
+          setDialogButtonsState(doValidate(false) == null);
+          return true;
+        }
+      }
+    });
+    dockerHostSecondPwdField.getDocument().addDocumentListener(resetDialogButtonsState(null));
+    dockerHostSecondPwdField.setToolTipText(AzureDockerValidationUtils.getDockerHostPasswordTip());
+
+    dockerHostKeepSshRadioButton.setText(editableHost.originalDockerHost.hasSSHLogIn ? "Use current keys" : "None");
     dockerHostKeepSshRadioButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -105,10 +162,20 @@ public class AzureDockerHostUpdateLoginPanel {
 
     dockerHostImportSSHBrowseTextField.addActionListener(UIUtils.createFileChooserListener(dockerHostImportSSHBrowseTextField, project,
         FileChooserDescriptorFactory.createSingleFolderDescriptor()));
+    dockerHostImportSSHBrowseTextField.getTextField().setToolTipText(AzureDockerValidationUtils.getDockerHostSshDirectoryTip());
     dockerHostImportSSHBrowseTextField.getTextField().setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {
-        return AzureDockerValidationUtils.validateDockerHostSshDirectory(dockerHostImportSSHBrowseTextField.getText());
+        String text = dockerHostImportSSHBrowseTextField.getText();
+        if (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostSshDirectory(text)) {
+          dockerHostImportSSHBrowseLabel.setVisible(true);
+          setDialogButtonsState(false);
+          return false;
+        } else {
+          dockerHostImportSSHBrowseLabel.setVisible(false);
+          setDialogButtonsState(doValidate(false) == null);
+          return true;
+        }
       }
     });
 
@@ -124,14 +191,13 @@ public class AzureDockerHostUpdateLoginPanel {
     if (editableHost.originalDockerHost.hasSSHLogIn) {
       dockerHostKeepSshRadioButton.setSelected(true);
     } else {
-      dockerHostNoSshRadioButton.setSelected(true);
+      dockerHostAutoSshRadioButton.setSelected(true);
     }
     if (editableHost.isUpdated) {
       currentUserAuth += " (updating...)";
       dockerHostFirstPwdField.setEnabled(false);
       dockerHostSecondPwdField.setEnabled(false);
       dockerHostUsernameTextField.setEnabled(false);
-      dockerHostNoSshRadioButton.setEnabled(false);
       dockerHostKeepSshRadioButton.setEnabled(false);
       dockerHostAutoSshRadioButton.setEnabled(false);
       dockerHostImportSshRadioButton.setEnabled(false);
@@ -147,4 +213,34 @@ public class AzureDockerHostUpdateLoginPanel {
   public JPanel getMainPanel() {
     return mainPanel;
   }
+
+  private void setDialogButtonsState(boolean buttonsState) {
+  }
+
+  public ValidationInfo doValidate(boolean shakeOnError) { return null;}
+
+  public DocumentListener resetDialogButtonsState(JComponent componentLabel) {
+    return new DocumentListener() {
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        setDialogButtonsState(true);
+        if (componentLabel != null) {
+          componentLabel.setVisible(false);
+        }
+      }
+
+      @Override
+      public void removeUpdate(DocumentEvent e) {
+      }
+
+      @Override
+      public void changedUpdate(DocumentEvent e) {
+        setDialogButtonsState(true);
+        if (componentLabel != null) {
+          componentLabel.setVisible(false);
+        }
+      }
+    };
+  }
+
 }

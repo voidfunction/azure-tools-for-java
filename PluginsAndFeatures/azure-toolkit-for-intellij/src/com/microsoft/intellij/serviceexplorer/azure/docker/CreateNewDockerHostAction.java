@@ -69,6 +69,7 @@ public class CreateNewDockerHostAction extends NodeActionListener {
         if (AzureDockerUIResources.CANCELED) {
           return;
         }
+        dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
       }
 
       if (dockerManager.getSubscriptionsMap().isEmpty()) {
