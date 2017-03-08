@@ -284,10 +284,10 @@ public class UIHelperImpl implements UIHelper {
         for (VirtualFile editedFile : fileEditorManager.getOpenFiles()) {
             T editedItem = editedFile.getUserData((Key<T>) name2Key.get(item.getClass()));
             StorageAccount editedStorageAccount = editedFile.getUserData(STORAGE_KEY);
-
-            if (editedStorageAccount != null
+            ClientStorageAccount editedClientStorageAccount = editedFile.getUserData(CLIENT_STORAGE_KEY);
+            if (((editedStorageAccount != null && editedStorageAccount.name().equals(accountName)) ||
+                    (editedClientStorageAccount != null && editedClientStorageAccount.getName().equals(accountName)))
                     && editedItem != null
-                    && editedStorageAccount.name().equals(accountName)
                     && editedItem.getName().equals(item.getName())) {
                 return editedFile;
             }
