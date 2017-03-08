@@ -74,12 +74,10 @@ public class DockerImageNode extends AzureRefreshableNode {
     removeAllChildNodes();
 
     try {
-      Map<String, DockerImage> dockerImages = AzureDockerImageOps.getImages(dockerHost);
       Map<String, DockerContainer> dockerContainers = AzureDockerContainerOps.getContainers(dockerHost);
-      AzureDockerContainerOps.setContainersAndImages(dockerContainers, dockerImages);
-      dockerHost.dockerImages = dockerImages;
-      if (dockerImages != null) {
-        dockerImage = dockerImages.get(dockerImage.name);
+      AzureDockerContainerOps.setContainersAndImages(dockerContainers, dockerHost.dockerImages);
+      if (dockerHost.dockerImages != null) {
+        dockerImage = dockerHost.dockerImages.get(dockerImage.name);
         if (dockerImage != null) {
           for (DockerContainer dockerContainer : dockerImage.containers.values()) {
             addChildNode(new DockerContainerNode(this, dockerManager, dockerHost, dockerContainer));

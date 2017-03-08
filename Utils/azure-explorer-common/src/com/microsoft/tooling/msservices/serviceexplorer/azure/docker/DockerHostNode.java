@@ -22,8 +22,11 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure.docker;
 
 import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.DockerContainer;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.model.DockerImage;
+import com.microsoft.azure.docker.ops.AzureDockerContainerOps;
+import com.microsoft.azure.docker.ops.AzureDockerImageOps;
 import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
@@ -37,6 +40,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.microsoft.azure.docker.model.DockerHost.DockerHostVMState.RUNNING;
 
@@ -93,6 +97,16 @@ public class DockerHostNode extends AzureRefreshableNode {
           dockerHost = updatedDockerHost;
           setName(dockerHost.name);
           setIconPath(getDockerHostIcon());
+
+          if (dockerHost.certVault != null) {
+            try { // it might throw here if the credentials are invalid
+              Map<String, DockerImage> dockerImages = AzureDockerImageOps.getImages(dockerHost);
+              Map<String, DockerContainer> dockerContainers = AzureDockerContainerOps.getContainers(dockerHost);
+              AzureDockerContainerOps.setContainersAndImages(dockerContainers, dockerImages);
+              dockerHost.dockerImages = dockerImages;
+            } catch (Exception e) {
+            }
+          }
 
           for (DockerImage dockerImage : updatedDockerHost.dockerImages.values()) {
             addChildNode(new DockerImageNode(this, dockerManager, updatedDockerHost, dockerImage));

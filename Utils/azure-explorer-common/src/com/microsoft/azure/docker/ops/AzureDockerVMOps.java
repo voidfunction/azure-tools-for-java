@@ -354,13 +354,13 @@ public class AzureDockerVMOps {
       }
       dockerHost.dockerImages = new HashMap<>();
 
-      if (dockerHost.certVault != null)
-        try { // it might throw here if the credentials are invalid
-          Map<String, DockerImage> dockerImages = AzureDockerImageOps.getImages(dockerHost);
-          Map<String, DockerContainer> dockerContainers = AzureDockerContainerOps.getContainers(dockerHost);
-          AzureDockerContainerOps.setContainersAndImages(dockerContainers, dockerImages);
-          dockerHost.dockerImages = dockerImages;
-        } catch (Exception e) {}
+//      if (dockerHost.certVault != null)
+//        try { // it might throw here if the credentials are invalid
+//          Map<String, DockerImage> dockerImages = AzureDockerImageOps.getImages(dockerHost);
+//          Map<String, DockerContainer> dockerContainers = AzureDockerContainerOps.getContainers(dockerHost);
+//          AzureDockerContainerOps.setContainersAndImages(dockerContainers, dockerImages);
+//          dockerHost.dockerImages = dockerImages;
+//        } catch (Exception e) {}
 
       return dockerHost;
     }
