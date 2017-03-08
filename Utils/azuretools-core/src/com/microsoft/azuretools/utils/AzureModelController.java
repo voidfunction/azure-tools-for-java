@@ -124,11 +124,20 @@ public class AzureModelController {
             if (!srgMap.containsKey(sd)) {
                 if (!sd.isSelected()) continue;
 
+                if(progressIndicator != null && progressIndicator.isCanceled()) {
+                    progressIndicator.setText("Cancelling...");
+                    clearAll();
+                    return;
+                    // FIXME: throw exception?
+                }
+
                 Azure azure = azureManager.getAzure(sd.getSubscriptionId());
                 // subscription locations
                 List<Subscription> sl = azureManager.getSubscriptions();
                 System.out.println("Updating subscription locations");
-                List<Location> locl = sidToSubscriptionMap.get(sd.getSubscriptionId()).listLocations();
+                Subscription subscription = sidToSubscriptionMap.get(sd.getSubscriptionId());
+                if(progressIndicator != null) progressIndicator.setText(String.format("Updating subscription '%s' locations...", subscription.displayName()));
+                List<Location> locl = subscription.listLocations();
                 Map<SubscriptionDetail, List<Location>> sdlocMap = azureModel.getSubscriptionToLocationMap();
                 sdlocMap.put(sd, locl);
 
