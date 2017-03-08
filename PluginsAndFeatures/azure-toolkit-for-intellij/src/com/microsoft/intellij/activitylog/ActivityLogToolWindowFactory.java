@@ -107,7 +107,7 @@ public class ActivityLogToolWindowFactory implements ToolWindowFactory {
                             ApplicationManager.getApplication().invokeLater(new Runnable() {
                                 @Override
                                 public void run() {
-                                    item.progress += args.getDeployCompleteness();
+                                    item.progress = args.getDeployCompleteness();
                                     if (args.getDeployMessage().equalsIgnoreCase(message("runStatus"))) {
                                         String html = String.format("%s%s%s%s", "  ", "<html><a href=\"" + args.getDeploymentURL() + "\">", message("runStatusVisible"), "</a></html>");
                                         item.description = message("runStatusVisible");

@@ -504,21 +504,24 @@ public class WebAppDeployDialog extends DialogWrapper {
         WebAppDetails wad = webAppWebAppDetailsMap.get(tableModel.getValueAt(selectedRow, 0));
         WebApp webApp = wad.webApp;
         boolean isDeployToRoot = deployToRootCheckBox.isSelected();
-        DeploymentManager deploymentManager = new DeploymentManager(project);
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Deploy Web App Progress", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
+                DeploymentManager deploymentManager = new DeploymentManager(project);
                 try {
                     progressIndicator.setIndeterminate(true);
                     PublishingProfile pp = webApp.getPublishingProfile();
+
                     Date startDate = new Date();
-                    deploymentManager.notifyProgress(webApp.name(), startDate, null, 5, "Deploying Web App");
+                    deploymentManager.notifyProgress(webApp.name(), startDate, null, 5, "Deploying Web App...");
+
                     WebAppUtils.deployArtifact(artifact.getName(), artifact.getOutputFilePath(),
                             pp, isDeployToRoot, new UpdateProgressIndicator(progressIndicator));
                     String sitePath = buildSiteLink(wad.webApp, isDeployToRoot ? null : artifact.getName());
-                    progressIndicator.setText("Checking the web app is available...");
+                    progressIndicator.setText("Checking Web App availability...");
                     progressIndicator.setText2("Link: " + sitePath);
-                    deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 45, "Checking the web app is available...");
+
+                    deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 75, "Checking Web App availability...");
 
                     // to make warn up cancelable
                     Thread thread = new Thread(new Runnable() {
@@ -545,7 +548,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                         if (progressIndicator.isCanceled()) return;
                         else Thread.sleep(2000);
                     }
-                    deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 50, message("runStatus"));
+                    deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 100, message("runStatus"));
                     showLink(sitePath);
                 } catch (Exception ex) {
                     ex.printStackTrace();
