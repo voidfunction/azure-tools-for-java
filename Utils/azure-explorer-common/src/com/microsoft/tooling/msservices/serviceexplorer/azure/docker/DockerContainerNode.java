@@ -92,7 +92,9 @@ public class DockerContainerNode extends AzureRefreshableNode {
           setDockerContainerIconPath();
         }
       }
-    } catch (Exception e) {}
+    } catch (Exception e) {
+      DefaultLoader.getUIHelper().logError(e.getMessage(), e);
+    }
   }
 
   public DockerHost getDockerHost() {
@@ -126,7 +128,9 @@ public class DockerContainerNode extends AzureRefreshableNode {
             if(dockerContainer.url != null && dockerContainer.isRunning && dockerHost.dockerImages.get(dockerContainer.image).isPluginImage) {
               try {
                 Desktop.getDesktop().browse(URI.create(dockerContainer.url));
-              } catch (Exception ee) {}
+              } catch (Exception ee) {
+                DefaultLoader.getUIHelper().logError(ee.getMessage(), ee);
+              }
             }
           }
         });
@@ -197,7 +201,9 @@ public class DockerContainerNode extends AzureRefreshableNode {
             getParent().removeDirectChildNode(DockerContainerNode.this);
           }
         });
-      } catch (Exception ex) {}
+      } catch (Exception ex) {
+        DefaultLoader.getUIHelper().logError(ex.getMessage(), ex);
+      }
     }
 
     @Override

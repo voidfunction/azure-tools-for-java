@@ -30,7 +30,9 @@ import com.microsoft.azure.docker.ops.*;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.appservice.WebApp;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
 
@@ -125,7 +127,13 @@ public final class DeploymentManager {
         try {
             String msg = String.format("Deploying application to Docker host %s ...", dockerImageInstance.host.name);
             notifyProgress(dockerImageInstance.host.name, startDate, null, 5, msg);
-            AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
+
+            AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureAuthManager == null) {
+                throw new RuntimeException("User not signed in");
+            }
+            AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(azureAuthManager);
             Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerImageInstance.sid).azureClient;
             KeyVaultClient keyVaultClient = dockerManager.getSubscriptionsMap().get(dockerImageInstance.sid).keyVaultClient;
 
@@ -210,7 +218,7 @@ public final class DeploymentManager {
         } catch (InterruptedException e) {
             notifyProgress(dockerImageInstance.host.name, startDate, url, 100, message("runStatus"), dockerImageInstance.host.name);
         } catch (Exception ee) {
-            notifyProgress(dockerImageInstance.host.name, startDate, url, 100, ee.getMessage(), dockerImageInstance.host.name);
+            notifyProgress(dockerImageInstance.host.name, startDate, url, 100, "Error: %s", ee.getMessage());
         }
     }
 }

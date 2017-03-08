@@ -57,11 +57,8 @@ public class AzureDockerHostsManager {
   }
 
   public static AzureDockerHostsManager getAzureDockerHostsManager(AzureManager azureAuthManager) throws Exception {
-    if (instance == null) {
+    if (instance == null || instance.azureAuthManager != azureAuthManager) {
       instance = new AzureDockerHostsManager(azureAuthManager);
-    } else {
-      instance.azureAuthManager = azureAuthManager;
-      instance.userId = azureAuthManager.getCurrentUserId();
     }
 
     // read docker hosts, key vaults and subscriptions here.
@@ -74,8 +71,11 @@ public class AzureDockerHostsManager {
     if (instance == null) {
       instance = new AzureDockerHostsManager(azureAuthManager);
     } else {
-      instance.azureAuthManager = azureAuthManager;
-      instance.userId = azureAuthManager.getCurrentUserId();
+      if (instance.azureAuthManager != azureAuthManager) {
+        instance.azureAuthManager = azureAuthManager;
+        instance.userId = azureAuthManager.getCurrentUserId();
+        instance.forceRefreshSubscriptions();
+      }
     }
 
     return instance;

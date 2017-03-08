@@ -94,9 +94,9 @@ public class DockerHostNode extends AzureRefreshableNode {
       if (vm != null) {
         DockerHost updatedDockerHost = AzureDockerVMOps.getDockerHost(vm, dockerManager.getDockerVaultsMap());
         if (updatedDockerHost != null) {
+          updatedDockerHost.sid = dockerHost.sid;
+          updatedDockerHost.hostVM.sid = dockerHost.hostVM.sid;
           dockerHost = updatedDockerHost;
-          setName(dockerHost.name);
-          setIconPath(getDockerHostIcon());
 
           if (dockerHost.certVault != null) {
             try { // it might throw here if the credentials are invalid
@@ -105,15 +105,19 @@ public class DockerHostNode extends AzureRefreshableNode {
               AzureDockerContainerOps.setContainersAndImages(dockerContainers, dockerImages);
               dockerHost.dockerImages = dockerImages;
             } catch (Exception e) {
+              DefaultLoader.getUIHelper().logError(e.getMessage(), e);
             }
           }
+          setIconPath(getDockerHostIcon());
 
           for (DockerImage dockerImage : updatedDockerHost.dockerImages.values()) {
             addChildNode(new DockerImageNode(this, dockerManager, updatedDockerHost, dockerImage));
           }
         }
       }
-    } catch (Exception e) {}
+    } catch (Exception e) {
+      DefaultLoader.getUIHelper().logError(e.getMessage(), e);
+    }
   }
 
   private String getDockerHostIcon() {
@@ -162,7 +166,9 @@ public class DockerHostNode extends AzureRefreshableNode {
                 setIconPath(DOCKERHOST_RUN_ICON_PATH);
                 refreshItems();
               }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+              DefaultLoader.getUIHelper().logError(e.getMessage(), e);
+            }
           }
         });
       }
@@ -202,7 +208,9 @@ public class DockerHostNode extends AzureRefreshableNode {
           vm.restart();
           setIconPath(DOCKERHOST_RUN_ICON_PATH);
         }
-      } catch (Exception ee) {}
+      } catch (Exception ee) {
+        DefaultLoader.getUIHelper().logError(ee.getMessage(), ee);
+      }
     }
 
     @Override
@@ -230,7 +238,9 @@ public class DockerHostNode extends AzureRefreshableNode {
         if (vm != null) {
           vm.powerOff();
         }
-      } catch (Exception ee) {}
+      } catch (Exception ee) {
+        DefaultLoader.getUIHelper().logError(ee.getMessage(), ee);
+      }
     }
 
     @Override

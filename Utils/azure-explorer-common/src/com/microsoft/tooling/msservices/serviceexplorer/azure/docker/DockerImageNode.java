@@ -84,7 +84,9 @@ public class DockerImageNode extends AzureRefreshableNode {
           }
         }
       }
-    } catch (Exception e) {}
+    } catch (Exception e) {
+      DefaultLoader.getUIHelper().logError(e.getMessage(), e);
+    }
   }
 
   public DockerHost getDockerHost() {
@@ -121,7 +123,9 @@ public class DockerImageNode extends AzureRefreshableNode {
             getParent().removeDirectChildNode(DockerImageNode.this);
           }
         });
-      } catch (Exception ex) {}
+      } catch (Exception ex) {
+        DefaultLoader.getUIHelper().logError(ex.getMessage(), ex);
+      }
     }
 
     @Override
