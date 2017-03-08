@@ -31,7 +31,6 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.microsoft.azure.management.storage.StorageAccount;
-import com.microsoft.intellij.helpers.IDEHelperImpl;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
@@ -62,8 +61,10 @@ public class BlobExplorerFileEditorProvider implements FileEditorProvider, DumbA
         blobExplorerFileEditor.setBlobContainer(blobContainer);
         if (storageAccount != null) {
             blobExplorerFileEditor.setConnectionString(StorageClientSDKManager.getConnectionString(storageAccount));
+            blobExplorerFileEditor.setStorageAccount(storageAccount.name());
         } else {
             blobExplorerFileEditor.setConnectionString(virtualFile.getUserData(UIHelperImpl.CLIENT_STORAGE_KEY).getConnectionString());
+            blobExplorerFileEditor.setStorageAccount(virtualFile.getUserData(UIHelperImpl.CLIENT_STORAGE_KEY).getName());
         }
 
         blobExplorerFileEditor.fillGrid();

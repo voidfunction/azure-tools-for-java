@@ -80,6 +80,10 @@ public class SubscriptionManager {
         }
     }
 
+    public synchronized void removeListener(ISubscriptionSelectionListener l) {
+        listners.remove(l);
+    }
+
     private void notifyAllListeners() {
         for (ISubscriptionSelectionListener l : listners) {
             l.update(subscriptionDetails == null);

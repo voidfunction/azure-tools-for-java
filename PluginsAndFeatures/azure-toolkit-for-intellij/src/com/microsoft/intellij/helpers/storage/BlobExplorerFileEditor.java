@@ -34,6 +34,9 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.microsoft.azure.management.storage.StorageAccount;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.ISubscriptionSelectionListener;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.forms.UploadBlobFileForm;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.intellij.util.PluginUtil;
@@ -88,10 +91,13 @@ public class BlobExplorerFileEditor implements FileEditor {
 
     private String connectionString;
     private BlobContainer blobContainer;
+    private String storageAccount;
     private Project project;
 
     private LinkedList<BlobDirectory> directoryQueue = new LinkedList<BlobDirectory>();
     private List<BlobItem> blobItems;
+
+    private ISubscriptionSelectionListener subscriptionListener;
 
     public BlobExplorerFileEditor(Project project) {
         this.project = project;
@@ -287,6 +293,8 @@ public class BlobExplorerFileEditor implements FileEditor {
                 uploadFile();
             }
         });
+
+        addSubscriptionSelectionListener();
     }
 
     public void fillGrid() {
@@ -844,8 +852,13 @@ public class BlobExplorerFileEditor implements FileEditor {
     @Override
     public void dispose() {
         try {
-            unregisterSubscriptionsChanged();
-        } catch (AzureCmdException ignored) {
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null || subscriptionListener == null) {
+                return;
+            }
+            azureManager.getSubscriptionManager().removeListener(subscriptionListener);
+        } catch (Exception ignored) {
         }
     }
 
@@ -867,47 +880,32 @@ public class BlobExplorerFileEditor implements FileEditor {
         this.blobContainer = blobContainer;
     }
 
-//    private void registerSubscriptionsChanged()
-//            throws AzureCmdException {
-//        synchronized (subscriptionsChangedSync) {
-//            if (subscriptionsChanged == null) {
-//                subscriptionsChanged = AzureManagerImpl.getManager(project).registerSubscriptionsChanged();
-//            }
-//
-//            registeredSubscriptionsChanged = true;
-//
-//            DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        subscriptionsChanged.waitEvent(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                if (registeredSubscriptionsChanged) {
-//                                    Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(project, storageAccount.getName(), blobContainer);
-//
-//                                    if (openedFile != null) {
-//                                        DefaultLoader.getIdeHelper().closeFile(project, openedFile);
-//                                    }
-//                                }
-//                            }
-//                        });
-//                    } catch (AzureCmdException ignored) {
-//                    }
-//                }
-//            });
-//        }
-//    }
+    public void setStorageAccount(String storageAccountName) {
+        this.storageAccount = storageAccountName;
+    }
 
-    private void unregisterSubscriptionsChanged()
-            throws AzureCmdException {
-//        synchronized (subscriptionsChangedSync) {
-//            registeredSubscriptionsChanged = false;
-//
-//            if (subscriptionsChanged != null) {
-//                AzureManagerImpl.getManager(project).unregisterSubscriptionsChanged(subscriptionsChanged);
-//                subscriptionsChanged = null;
-//            }
-//        }
+    private void addSubscriptionSelectionListener() {
+        try {
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null) {
+                return;
+            }
+
+            azureManager.getSubscriptionManager().addListener(new ISubscriptionSelectionListener() {
+                @Override
+                public void update(boolean isSignedOut) {
+                    if (isSignedOut) {
+                        Object openedFile = DefaultLoader.getUIHelper().getOpenedFile(project, storageAccount, blobContainer);
+
+                        if (openedFile != null) {
+                            DefaultLoader.getIdeHelper().closeFile(project, openedFile);
+                        }
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().logError(ex.getMessage(), ex);
+        }
     }
 }
