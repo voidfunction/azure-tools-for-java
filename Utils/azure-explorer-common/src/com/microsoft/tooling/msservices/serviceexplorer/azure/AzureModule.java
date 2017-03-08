@@ -66,6 +66,8 @@ public class AzureModule extends RefreshableNode {
         } catch (Exception ex) {
             DefaultLoader.getUIHelper().logError(ex.getMessage(), ex);
         }
+        // in case we already signed in with service principal between restarts, sign in event was not fired
+        addSubscriptionSelectionListener();
     }
 
     public AzureModule(Node parent, String iconPath, Object data) {
@@ -155,21 +157,25 @@ public class AzureModule extends RefreshableNode {
         @Override
         public void run() {
             handleSubscriptionChange(false);
-            try {
-                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-                // not signed in
-                if (azureManager == null) {
-                    return;
-                }
-                azureManager.getSubscriptionManager().addListener(new ISubscriptionSelectionListener() {
-                    @Override
-                    public void update(boolean isSignedOut) {
-                        handleSubscriptionChange(isSignedOut);
-                    }
-                });
-            } catch (Exception ex) {
-                DefaultLoader.getUIHelper().logError(ex.getMessage(), ex);
+            addSubscriptionSelectionListener();
+        }
+    }
+
+    private void addSubscriptionSelectionListener() {
+        try {
+            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null) {
+                return;
             }
+            azureManager.getSubscriptionManager().addListener(new ISubscriptionSelectionListener() {
+                @Override
+                public void update(boolean isSignedOut) {
+                    handleSubscriptionChange(isSignedOut);
+                }
+            });
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().logError(ex.getMessage(), ex);
         }
     }
 
