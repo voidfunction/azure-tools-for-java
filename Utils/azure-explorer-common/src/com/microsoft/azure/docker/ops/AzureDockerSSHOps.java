@@ -37,13 +37,13 @@ public class AzureDockerSSHOps {
       try {
         JSch jsch = new JSch();
         jsch.setKnownHosts(System.getProperty("user.home")+"/.ssh/known_hosts");
-        if (dockerHost.certVault.vmPwd != null && !dockerHost.certVault.vmPwd.isEmpty()) {
+        if (dockerHost.certVault.sshKey != null && !dockerHost.certVault.sshKey.isEmpty()) {
           jsch.addIdentity(dockerHost.certVault.hostName, dockerHost.certVault.sshKey.getBytes(), dockerHost.certVault.sshPubKey.getBytes(), (byte[]) null);
         }
 
         Session session = jsch.getSession(dockerHost.certVault.vmUsername, dockerHost.hostVM.dnsName);
 
-        if (dockerHost.certVault.sshPubKey != null && !dockerHost.certVault.sshPubKey.isEmpty()) {
+        if (dockerHost.certVault.vmPwd != null && !dockerHost.certVault.vmPwd.isEmpty()) {
           session.setPassword(dockerHost.certVault.vmPwd);
         }
         session.setConfig("StrictHostKeyChecking", "no");
@@ -52,7 +52,7 @@ public class AzureDockerSSHOps {
 
         return session;
       } catch (Exception e) {
-        throw new AzureDockerException(e.getMessage(), e);
+        throw new AzureDockerException("Create Log In Instance: " + e.getMessage(), e);
       }
     } else {
       throw new AzureDockerException("Unexpected param values; dockerHost cannot be null");

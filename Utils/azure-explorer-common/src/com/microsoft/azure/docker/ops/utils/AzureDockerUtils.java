@@ -37,6 +37,7 @@ import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.sdkmanage.ServicePrincipalAzureManager;
+import com.microsoft.azuretools.utils.AzureRegisterProviderNamespaces;
 import com.microsoft.azuretools.utils.Pair;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import rx.Observable;
@@ -49,6 +50,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 public class AzureDockerUtils {
@@ -262,28 +264,78 @@ public class AzureDockerUtils {
       if (DEBUG) System.out.format("Get AzureDockerHostsManage subscription details: %s\n", new Date().toString());
       SubscriptionManager subscriptionManager = azureAuthManager.getSubscriptionManager();
       List<SubscriptionDetail> subscriptions = subscriptionManager.getSubscriptionDetails();
-      if (DEBUG) System.out.format("Get AzureDockerHostsManage Docker subscription details: %s\n", new Date().toString());
-      for (SubscriptionDetail subscriptionDetail : subscriptions ) {
-        if(subscriptionDetail.isSelected()) {
-          AzureDockerSubscription dockerSubscription = new AzureDockerSubscription();
-          dockerSubscription.id = subscriptionDetail.getSubscriptionId();
-          if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker subscription: %s at %s\n", dockerSubscription.id, new Date().toString());
-          dockerSubscription.tid = subscriptionDetail.getTenantId();
-          dockerSubscription.name = subscriptionDetail.getSubscriptionName();
-          dockerSubscription.azureClient = azureAuthManager.getAzure(dockerSubscription.id);
-          dockerSubscription.keyVaultClient = azureAuthManager.getKeyVaultClient(subscriptionDetail.getTenantId());
-          dockerSubscription.isSelected = true;
-          if (AzureDockerUtils.hasServicePrincipalAzureManager(azureAuthManager)) {
-            dockerSubscription.userId = null;
-            dockerSubscription.servicePrincipalId = azureAuthManager.getCurrentUserId();
-          } else {
-            dockerSubscription.userId = azureAuthManager.getCurrentUserId();
-            dockerSubscription.servicePrincipalId = null;
-          }
 
-          subsMap.put(dockerSubscription.id, dockerSubscription);
-        }
+      if (subscriptions != null) {
+        if (DEBUG) System.out.format("Get AzureDockerHostsManage Docker subscription details: %s\n", new Date().toString());
+
+        Observable.from(subscriptions).flatMap(subscriptionDetail -> {
+          return Observable.create(new Observable.OnSubscribe<AzureDockerSubscription>() {
+            @Override
+            public void call(Subscriber<? super AzureDockerSubscription> dockerSubscriptionSubscriber) {
+              if(subscriptionDetail.isSelected()) {
+                AzureDockerSubscription dockerSubscription = new AzureDockerSubscription();
+                dockerSubscription.id = subscriptionDetail.getSubscriptionId();
+                try {
+                  if (DEBUG)
+                    System.out.format("\tGet AzureDockerHostsManage Docker subscription: %s at %s\n", dockerSubscription.id, new Date().toString());
+                  dockerSubscription.tid = subscriptionDetail.getTenantId();
+                  dockerSubscription.name = subscriptionDetail.getSubscriptionName();
+                  dockerSubscription.azureClient = azureAuthManager.getAzure(dockerSubscription.id);
+                  // TODO: temporary work around for registering the namespaces
+                  AzureRegisterProviderNamespaces.registerAzureNamespaces(dockerSubscription.azureClient);
+
+                  dockerSubscription.keyVaultClient = azureAuthManager.getKeyVaultClient(subscriptionDetail.getTenantId());
+                  dockerSubscription.isSelected = true;
+                  if (AzureDockerUtils.hasServicePrincipalAzureManager(azureAuthManager)) {
+                    dockerSubscription.userId = null;
+                    dockerSubscription.servicePrincipalId = azureAuthManager.getCurrentUserId();
+                  } else {
+                    dockerSubscription.userId = azureAuthManager.getCurrentUserId();
+                    dockerSubscription.servicePrincipalId = null;
+                  }
+
+                  dockerSubscriptionSubscriber.onNext(dockerSubscription);
+                } catch (Exception e) {
+                  e.printStackTrace();
+                  DefaultLoader.getUIHelper().showError(e.getMessage(), "Error Loading Subscription Details for " + dockerSubscription.id);
+                }
+              }
+              dockerSubscriptionSubscriber.onCompleted();
+            }
+          }).subscribeOn(Schedulers.io());
+        }).subscribeOn(Schedulers.io())
+            .toBlocking().subscribe(new Action1<AzureDockerSubscription>() {
+          @Override
+          public void call(AzureDockerSubscription dockerSubscription) {
+            subsMap.put(dockerSubscription.id, dockerSubscription);
+          }
+        });
       }
+
+//      for (SubscriptionDetail subscriptionDetail : subscriptions ) {
+//        if(subscriptionDetail.isSelected()) {
+//          AzureDockerSubscription dockerSubscription = new AzureDockerSubscription();
+//          dockerSubscription.id = subscriptionDetail.getSubscriptionId();
+//          if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker subscription: %s at %s\n", dockerSubscription.id, new Date().toString());
+//          dockerSubscription.tid = subscriptionDetail.getTenantId();
+//          dockerSubscription.name = subscriptionDetail.getSubscriptionName();
+//          dockerSubscription.azureClient = azureAuthManager.getAzure(dockerSubscription.id);
+//          // TODO: temporary work around for registering the namespaces
+//          AzureRegisterProviderNamespaces.registerAzureNamespaces(dockerSubscription.azureClient);
+//
+//          dockerSubscription.keyVaultClient = azureAuthManager.getKeyVaultClient(subscriptionDetail.getTenantId());
+//          dockerSubscription.isSelected = true;
+//          if (AzureDockerUtils.hasServicePrincipalAzureManager(azureAuthManager)) {
+//            dockerSubscription.userId = null;
+//            dockerSubscription.servicePrincipalId = azureAuthManager.getCurrentUserId();
+//          } else {
+//            dockerSubscription.userId = azureAuthManager.getCurrentUserId();
+//            dockerSubscription.servicePrincipalId = null;
+//          }
+//
+//          subsMap.put(dockerSubscription.id, dockerSubscription);
+//        }
+//      }
 
       if (DEBUG) System.out.format("Get AzureDockerHostsManage locations: %s\n", new Date().toString());
       List<Subscription> azureSubscriptionList = azureAuthManager.getSubscriptions();
