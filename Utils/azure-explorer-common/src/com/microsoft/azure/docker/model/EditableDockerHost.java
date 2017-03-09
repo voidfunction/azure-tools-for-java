@@ -35,6 +35,13 @@ public class EditableDockerHost {
     originalDockerHost = host;
     isUpdated = false;
     updatedDockerHost = (host != null) ? new DockerHost(host) : null;
+    if (updatedDockerHost != null && updatedDockerHost.certVault == null) {
+      updatedDockerHost.certVault = new AzureDockerCertVault();
+      updatedDockerHost.certVault.hostName = host.hostVM.name;
+      updatedDockerHost.certVault.region = host.hostVM.region;
+      updatedDockerHost.certVault.resourceGroupName = host.hostVM.resourceGroupName;
+      updatedDockerHost.certVault.sid = host.sid;
+    }
     this.hasNewLoginCreds = false;
     this.hasNewDockerdCreds = false;
     this.hasNewDockerdPort = false;
