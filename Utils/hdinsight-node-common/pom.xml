@@ -74,8 +74,6 @@
                         <phase>install</phase>
                         <configuration>
                             <target>
-                                <delete dir="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-intellij/hdinsight/hdinsight"/>
-                                <copydir src="${basedir}/resources/htmlResources" dest="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-intellij/hdinsight/resources" forceoverwrite="true"/>
                                 <copy todir="${basedir}/build">
                                     <fileset dir="${basedir}/resources">
                                         <exclude name="/htmlResources/**"/>
@@ -84,8 +82,8 @@
                                 </copy>
                                 <zip destfile="${project.basedir}/build/hdinsight_jobview_html.zip" basedir="${basedir}/resources/htmlResources" />
                                 <copy file="${project.basedir}/build/hdinsight_jobview_html.zip" tofile="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-eclipse/com.microsoft.hdinsights/resources/hdinsight_jobview_html.zip" overwrite="true" />
+                                <copy file="${project.basedir}/build/hdinsight_jobview_html.zip" tofile="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-intellij/hdinsight/resources/hdinsight_jobview_html.zip" overwrite="true" />
                                 <copy file="${project.basedir}/target/${artifict.name}" tofile="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-eclipse/com.microsoft.azuretools.core/resources/${artifict.name}" overwrite="true" />
-                                <!--<copy file="${project.basedir}/target/${artifict.name}" tofile="${project.basedir}/../../PluginsAndFeatures/azure-toolkit-for-intellij/lib/${artifict.name}" overwrite="true" />-->
                                 <copy file="${project.basedir}/target/${artifict.name}" tofile="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-eclipse/com.microsoft.azuretools.azureexplorer/resources/${artifict.name}" overwrite="true" />
                                 <copy file="${project.basedir}/target/${artifict.name}" tofile="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-eclipse/com.microsoft.hdinsights/resources/${artifict.name}" overwrite="true" />
                             </target>

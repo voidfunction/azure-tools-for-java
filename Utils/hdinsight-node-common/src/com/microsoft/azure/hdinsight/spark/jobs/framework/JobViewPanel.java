@@ -53,7 +53,7 @@ public final class JobViewPanel extends JFXPanel {
 
     private void init(final JFXPanel panel) {
         String value = System.getProperty("my.debug");
-        String url = rootPath + "/hdinsight/job/html/index.html";
+        String url = rootPath + "/com.microsoft.hdinsight/hdinsight/job/html/index.html";
         if(!StringHelper.isNullOrWhiteSpace(value)) {
             url = "C:/Users/ltian/project/toolkit-branch2/Utils/HDInsightNodeCommon/resources/htmlResources/hdinsight/job/html/index.html";
         }

@@ -36,6 +36,7 @@ import com.intellij.util.containers.HashSet;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.azuretools.authmanage.CommonSettings;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.azuretools.ijidea.ui.UIFactory;
 import com.microsoft.intellij.common.CommonConst;
 import com.microsoft.intellij.ui.libraries.AILibraryHandler;
@@ -51,13 +52,11 @@ import com.microsoft.azuretools.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoft.azuretools.azurecommons.util.FileUtil;
 import com.microsoft.azuretools.azurecommons.util.Utils;
 import com.microsoft.azuretools.azurecommons.xmlhandling.DataOperations;
+import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 
 import javax.swing.event.EventListenerList;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,6 +67,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
@@ -290,22 +291,30 @@ public class AzurePlugin extends AbstractProjectComponent {
         return "MSOpenTechTools.AzurePlugin";
     }
 
+    // plugin will be installed into plugins-sandbox in debug model
+    private boolean isDebugModel() {
+        return PluginUtil.getPluginRootDirectory().contains("plugins-sandbox");
+    }
+
     /**
      * Copies Azure Toolkit for IntelliJ
      * related files in azure-toolkit-for-intellij plugin folder at startup.
      */
     private void copyPluginComponents() {
         try {
-            for (AzureLibrary azureLibrary : AzureLibrary.LIBRARIES) {
-                if (azureLibrary.getLocation() != null) {
-                    if (!new File(pluginFolder + File.separator + azureLibrary.getLocation()).exists()) {
-                        for (String entryName : Utils.getJarEntries(pluginFolder + File.separator + "lib" + File.separator + CommonConst.PLUGIN_NAME + ".jar", azureLibrary.getLocation())) {
-                            new File(pluginFolder + File.separator + entryName).getParentFile().mkdirs();
-                            copyResourceFile(entryName, pluginFolder + File.separator + entryName);
+            if (!isDebugModel()) {
+                for (AzureLibrary azureLibrary : AzureLibrary.LIBRARIES) {
+                    if (azureLibrary.getLocation() != null) {
+                        if (!new File(pluginFolder + File.separator + azureLibrary.getLocation()).exists()) {
+                            for (String entryName : Utils.getJarEntries(pluginFolder + File.separator + "lib" + File.separator + CommonConst.PLUGIN_NAME + ".jar", azureLibrary.getLocation())) {
+                                new File(pluginFolder + File.separator + entryName).getParentFile().mkdirs();
+                                copyResourceFile(entryName, pluginFolder + File.separator + entryName);
+                            }
                         }
                     }
                 }
             }
+
             // copy remote debugging files
             File remoteDebugFolder = new File(WAHelper.getTemplateFile("remotedebug"));
             if (!remoteDebugFolder.exists()) {
@@ -323,6 +332,7 @@ public class AzurePlugin extends AbstractProjectComponent {
             if (!new File(debugConfig).exists()) {
                 copyResourceFile(message("debugConfig"), debugConfig);
             }
+            extractJobViewResource();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
@@ -378,4 +388,74 @@ public class AzurePlugin extends AbstractProjectComponent {
     public static void log(String message) {
         LOG.info(message);
     }
+    private static final String HTML_ZIP_FILE_NAME = "/hdinsight_jobview_html.zip";
+
+    private boolean isFirstInstallationByVersion() {
+        if (new File(dataFile).exists()) {
+            String version = DataOperations.getProperty(dataFile, message("pluginVersion"));
+            if(!StringHelper.isNullOrWhiteSpace(version) && version.equals(PLUGIN_VERSION)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void extractJobViewResource() {
+        File indexRootFile = new File(PluginUtil.getPluginRootDirectory() + File.separator + "com.microsoft.hdinsight");
+
+        if(isFirstInstallationByVersion() || isDebugModel()) {
+            if(indexRootFile.exists()) {
+                try {
+                    FileUtils.deleteDirectory(indexRootFile);
+                } catch (IOException e) {
+                    LOG.error("delete HDInsight job view folder error", e);
+                }
+            }
+        }
+
+        URL url = AzurePlugin.class.getResource(HTML_ZIP_FILE_NAME);
+        if(url != null) {
+            File toFile = new File(indexRootFile.getAbsolutePath(), HTML_ZIP_FILE_NAME);
+            try {
+                FileUtils.copyURLToFile(url, toFile);
+                unzip(toFile.getAbsolutePath(), toFile.getParent());
+            } catch (IOException e) {
+                LOG.error("Extract Job View Folder", e);
+            }
+        } else {
+            LOG.error("Can't find HDInsight job view zip package");
+        }
+    }
+
+    private static void unzip(String zipFilePath, String destDirectory) throws IOException {
+        File destDir = new File(destDirectory);
+        if (!destDir.exists()) {
+            destDir.mkdir();
+        }
+        ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
+        ZipEntry entry = zipIn.getNextEntry();
+        while (entry != null) {
+            String filePath = destDirectory + File.separator + entry.getName();
+            if (!entry.isDirectory()) {
+                extractFile(zipIn, filePath);
+            } else {
+                File dir = new File(filePath);
+                dir.mkdir();
+            }
+            zipIn.closeEntry();
+            entry = zipIn.getNextEntry();
+        }
+        zipIn.close();
+    }
+
+    private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
+        BufferedOutputStream bos = new BufferedOutputStream(new java.io.FileOutputStream(filePath));
+        byte[] bytesIn = new byte[1024 * 10];
+        int read = 0;
+        while ((read = zipIn.read(bytesIn)) != -1) {
+            bos.write(bytesIn, 0, read);
+        }
+        bos.close();
+    }
+
 }
