@@ -27,10 +27,14 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerCertVault;
 import com.microsoft.azure.docker.model.EditableDockerHost;
+import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
 import com.microsoft.intellij.docker.dialogs.AzureSelectKeyVault;
+import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.intellij.docker.utils.AzureDockerValidationUtils;
 import com.microsoft.intellij.ui.util.UIUtils;
+import com.microsoft.intellij.util.PluginUtil;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -58,11 +62,13 @@ public class AzureDockerHostUpdateLoginPanel {
   private Project project;
   private EditableDockerHost editableHost;
   private AzureDockerHostsManager dockerManager;
+  private DialogWrapper dialogWrapperParent;
 
-  public AzureDockerHostUpdateLoginPanel(Project project, EditableDockerHost editableHost, AzureDockerHostsManager dockerUIManager) {
+  public AzureDockerHostUpdateLoginPanel(Project project, EditableDockerHost editableHost, AzureDockerHostsManager dockerUIManager, DialogWrapper dialogWrapper) {
     this.project = project;
     this.editableHost = editableHost;
     this.dockerManager = dockerUIManager;
+    this.dialogWrapperParent = dialogWrapper;
 
     authSelectionGroup = new ButtonGroup();
     authSelectionGroup.add(dockerHostKeepSshRadioButton);
@@ -217,7 +223,75 @@ public class AzureDockerHostUpdateLoginPanel {
   private void setDialogButtonsState(boolean buttonsState) {
   }
 
-  public ValidationInfo doValidate(boolean shakeOnError) { return null;}
+  public void DialogShaker(ValidationInfo info) {
+    PluginUtil.dialogShaker(info, dialogWrapperParent);
+  }
+
+
+  public ValidationInfo doValidate(boolean shakeOnError) {
+    // User name
+    String vmUsername = dockerHostUsernameTextField.getText();
+    if (vmUsername == null || vmUsername.isEmpty() ||
+        !AzureDockerValidationUtils.validateDockerHostUserName(vmUsername))
+    {
+      ValidationInfo info = AzureDockerUIResources.validateComponent("Missing username", mainPanel, dockerHostUsernameTextField, dockerHostUsernameLabel);
+      setDialogButtonsState(false);
+      if (shakeOnError) {
+        DialogShaker(info);
+      }
+      return info;
+    }
+    editableHost.updatedDockerHost.certVault.vmUsername = vmUsername;
+
+    // Password login
+    String vmPwd1 = new String(dockerHostFirstPwdField.getPassword());
+    String vmPwd2 = new String(dockerHostSecondPwdField.getPassword());
+    if (((dockerHostKeepSshRadioButton.isSelected() && editableHost.originalDockerHost.hasSSHLogIn) ||
+        dockerHostFirstPwdField.getPassword().length > 0 ||
+        dockerHostSecondPwdField.getPassword().length > 0) &&
+        (vmPwd1.isEmpty() || vmPwd2.isEmpty() || ! vmPwd1.equals(vmPwd2) ||
+            !AzureDockerValidationUtils.validateDockerHostPassword(vmPwd1)))
+    {
+      ValidationInfo info = AzureDockerUIResources.validateComponent("Incorrect password", mainPanel, dockerHostFirstPwdField, dockerHostFirstPwdLabel);
+      setDialogButtonsState(false);
+      if (shakeOnError) {
+        DialogShaker(info);
+      }
+      return info;
+    }
+    if (dockerHostFirstPwdField.getPassword().length > 0) {
+      editableHost.updatedDockerHost.certVault.vmPwd = new String(dockerHostFirstPwdField.getPassword());
+      editableHost.updatedDockerHost.hasPwdLogIn = true;
+    } else {
+      editableHost.updatedDockerHost.certVault.vmPwd = null;
+      editableHost.updatedDockerHost.hasPwdLogIn = false;
+    }
+
+    // SSH key auto generated
+    if (dockerHostAutoSshRadioButton.isSelected()) {
+      AzureDockerCertVault certVault = AzureDockerCertVaultOps.generateSSHKeys(null, "SSH keys for " + editableHost.updatedDockerHost.name);
+      AzureDockerCertVaultOps.copyVaultSshKeys(editableHost.updatedDockerHost.certVault, certVault);
+      editableHost.updatedDockerHost.hasSSHLogIn = true;
+    }
+
+    // SSH key imported from local file directory
+    if (dockerHostImportSshRadioButton.isSelected()) {
+      if (dockerHostImportSSHBrowseTextField.getText() == null || dockerHostImportSSHBrowseTextField.getText().isEmpty() ||
+          !AzureDockerValidationUtils.validateDockerHostSshDirectory(dockerHostImportSSHBrowseTextField.getText())) {
+        ValidationInfo info = AzureDockerUIResources.validateComponent("SSH key files were not found in the selected directory", mainPanel, dockerHostImportSSHBrowseTextField, dockerHostImportSSHBrowseLabel);
+        setDialogButtonsState(false);
+        if (shakeOnError) {
+          DialogShaker(info);
+        }
+        return info;
+      } else {
+        AzureDockerCertVault certVault = AzureDockerCertVaultOps.getSSHKeysFromLocalFile(dockerHostImportSSHBrowseTextField.getText());
+        AzureDockerCertVaultOps.copyVaultSshKeys(editableHost.updatedDockerHost.certVault, certVault);
+        editableHost.updatedDockerHost.hasSSHLogIn = true;
+      }
+    }
+    return null;
+  }
 
   public DocumentListener resetDialogButtonsState(JComponent componentLabel) {
     return new DocumentListener() {

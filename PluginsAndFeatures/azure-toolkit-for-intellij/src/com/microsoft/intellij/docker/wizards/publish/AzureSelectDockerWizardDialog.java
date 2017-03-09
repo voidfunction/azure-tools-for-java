@@ -21,11 +21,18 @@
  */
 package com.microsoft.intellij.docker.wizards.publish;
 
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.wizard.WizardDialog;
+import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
+import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.model.EditableDockerHost;
+import com.microsoft.azure.docker.ops.AzureDockerSSHOps;
+import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.intellij.docker.dialogs.AzureInputDockerLoginCredsDialog;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tasks.DockerContainerDeployTask;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -119,7 +126,6 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
    * @return True, if project gets created successfully; else false.
    */
   private void performFinish() {
-
     DefaultLoader.getIdeHelper().runInBackground(model.getProject(), "Deploying Docker Container on Azure", false, true, "Deploying Web app to a Docker host on Azure...", new Runnable() {
       @Override
       public void run() {
@@ -127,6 +133,39 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
           DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
             @Override
             public void run() {
+              AzureDockerImageInstance dockerImageInstance = model.getDockerImageDescription();
+              if (!dockerImageInstance.hasNewDockerHost) {
+                Session session = null;
+
+                do {
+                  try {
+                    // check if the Docker host is accessible
+                    session = AzureDockerSSHOps.createLoginInstance(dockerImageInstance.host);
+                  } catch (Exception e) {
+                    session = null;
+                  }
+
+                  if (session == null) {
+                    EditableDockerHost editableDockerHost = new EditableDockerHost(dockerImageInstance.host);
+                    AzureInputDockerLoginCredsDialog loginCredsDialog = new AzureInputDockerLoginCredsDialog(model.getProject(), editableDockerHost, model.getDockerHostsManager());
+                    loginCredsDialog.show();
+
+                    if (loginCredsDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+                      // Update Docker host log in credentials
+                      try {
+                        AzureDockerVMOps.updateDockerHostVM(model.getDockerHostsManager().getSubscriptionsMap().get(model.getDockerImageDescription().sid).azureClient, editableDockerHost.updatedDockerHost);
+                        dockerImageInstance.host.certVault = editableDockerHost.updatedDockerHost.certVault;
+                        dockerImageInstance.host.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
+                        dockerImageInstance.host.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
+                      } catch (Exception ignored) {
+                      }
+                    } else {
+                      return;
+                    }
+                  }
+                } while (session == null);
+              }
+
               doFinish();
 
               // Update caches here

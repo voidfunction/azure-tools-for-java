@@ -147,7 +147,7 @@ public class AzureEditDockerLoginCredsDialog extends DialogWrapper {
 
   private void createUIComponents() {
     editPanels = new DockerHostEditPanel[] {
-        new DockerHostEditPanel("Log in credentials", new AzureDockerHostUpdateLoginPanel(project, editableHost, dockerManager).getMainPanel()),
+        new DockerHostEditPanel("Log in credentials", new AzureDockerHostUpdateLoginPanel(project, editableHost, dockerManager, this).getMainPanel()),
         new DockerHostEditPanel("Docker daemon settings", new AzureDockerHostUpdateDaemonPanel(project, editableHost, dockerManager).getMainPanel()),
 //        new DockerHostEditPanel("Key vault settings", new AzureDockerHostUpdateKeyvaultPanel(project, editableHost, dockerManager).getMainPanel()),
         new DockerHostEditPanel("Virtual machine state", new AzureDockerHostUpdateState(project, editableHost, dockerManager).getMainPanel()),

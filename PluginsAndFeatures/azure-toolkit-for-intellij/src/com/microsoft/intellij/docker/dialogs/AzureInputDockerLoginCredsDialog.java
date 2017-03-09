@@ -4,7 +4,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.EditableDockerHost;
-import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
 import com.microsoft.intellij.docker.forms.AzureDockerHostUpdateLoginPanel;
 import com.microsoft.intellij.util.PluginUtil;
 import org.jetbrains.annotations.Nullable;
@@ -19,17 +18,17 @@ public class AzureInputDockerLoginCredsDialog extends DialogWrapper {
   private AzureDockerHostsManager dockerManager;
   private AzureDockerHostUpdateLoginPanel loginPanel;
 
-  public AzureInputDockerLoginCredsDialog(Project project, EditableDockerHost editableHost, AzureDockerHostsManager dockerUIManager) {
+  public AzureInputDockerLoginCredsDialog(Project project, EditableDockerHost editableHost, AzureDockerHostsManager dockerManager) {
     super(project, true);
 
     this.project = project;
     this.editableHost = editableHost;
-    this.dockerManager = dockerUIManager;
+    this.dockerManager = dockerManager;
 
-    loginPanel = new AzureDockerHostUpdateLoginPanel(project, editableHost, dockerManager);
+    loginPanel = new AzureDockerHostUpdateLoginPanel(project, editableHost, dockerManager, this);
 
     init();
-    setTitle("Invalid Login Credentials");
+    setTitle("Update Login Credentials");
   }
 
   @Nullable
@@ -57,7 +56,9 @@ public class AzureInputDockerLoginCredsDialog extends DialogWrapper {
   @Override
   protected void doOKAction() {
     try {
-      //super.doOKAction();
+      if (loginPanel.doValidate(true) == null) {
+        super.doOKAction();
+      }
     }
     catch (Exception e){
       String msg = "An error occurred while attempting to use the updated log in credentials.\n" + e.getMessage();
