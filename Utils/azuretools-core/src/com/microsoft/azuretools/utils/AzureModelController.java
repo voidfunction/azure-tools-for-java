@@ -300,7 +300,9 @@ public class AzureModelController {
 
     public static void addNewWebAppToJustCreatedResourceGroup(ResourceGroup rg, WebApp webApp) {
         // presume addNewResourceGroup goes first
-        AzureModel.getInstance().getResourceGroupToWebAppMap().put(rg, Arrays.asList(webApp));
+        List<WebApp> l = new LinkedList<>();
+        l.add(webApp);
+        AzureModel.getInstance().getResourceGroupToWebAppMap().put(rg, l);
         // TODO:notify subscribers
     }
 
@@ -309,7 +311,7 @@ public class AzureModelController {
         // TODO:notify subscribers
     }
 
-    public static void removeWebAppFromExistingResourceGroup(ResourceGroup rg, WebApp webApp) {
+    public static void removeWebAppFromResourceGroup(ResourceGroup rg, WebApp webApp) {
 //        String waName = webApp.name().toLowerCase();
 //        List<WebApp> wal = AzureModel.getInstance().getResourceGroupToWebAppMap().get(rg);
 //        for (int i = 0; i < wal.size(); ++i) {
@@ -324,7 +326,9 @@ public class AzureModelController {
 
     public static void addNewAppServicePlanToJustCreatedResourceGroup(ResourceGroup rg, AppServicePlan appServicePlan) {
         // presume addNewResourceGroup call goes first
-        AzureModel.getInstance().getResourceGroupToAppServicePlanMap().put(rg, Arrays.asList(appServicePlan));
+        List<AppServicePlan> l = new LinkedList<>();
+        l.add(appServicePlan);
+        AzureModel.getInstance().getResourceGroupToAppServicePlanMap().put(rg, l);
         // TODO:notify subscribers
     }
 

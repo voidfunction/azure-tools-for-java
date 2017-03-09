@@ -125,7 +125,7 @@ public class WebappNode extends Node {
 					return;
 				}
 				azureManager.getAzure(subscriptionId).webApps().deleteByGroup(webApp.inner().resourceGroup(), webApp.name());
-				AzureModelController.removeWebAppFromExistingResourceGroup(resourceGroup, webApp);
+				AzureModelController.removeWebAppFromResourceGroup(resourceGroup, webApp);
 
 				DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 					@Override

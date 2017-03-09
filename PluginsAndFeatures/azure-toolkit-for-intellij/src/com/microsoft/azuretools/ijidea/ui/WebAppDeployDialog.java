@@ -421,7 +421,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                                     tableModel.removeRow(selectedRow);
                                     tableModel.fireTableDataChanged();
                                     // update cache
-                                    AzureModelController.removeWebAppFromExistingResourceGroup(wad.resourceGroup, wad.webApp);
+                                    AzureModelController.removeWebAppFromResourceGroup(wad.resourceGroup, wad.webApp);
                                     editorPaneAppServiceDetails.setText("");
                                 }
                             }, ModalityState.any());
