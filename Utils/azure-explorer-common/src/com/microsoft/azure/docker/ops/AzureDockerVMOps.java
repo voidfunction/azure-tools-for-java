@@ -28,6 +28,7 @@ import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.ImageReference;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.compute.VirtualMachineExtension;
 import com.microsoft.azure.management.compute.VirtualMachineSizeTypes;
 import com.microsoft.azure.management.keyvault.Vault;
 import com.microsoft.azure.management.network.*;
@@ -51,6 +52,20 @@ public class AzureDockerVMOps {
   public static VirtualMachine updateDockerHostVM(Azure azureClient, DockerHost dockerHost) throws AzureDockerException {
     try {
       VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
+//      VirtualMachineExtension.UpdateDefinitionStages.WithAttach<VirtualMachine.Update> defStage1;
+//      HashMap<String, Object> protectedSettings = new HashMap<>();
+//      if (vm.extensions().get("VMAccessForLinux") != null) {
+//        vm.update()
+//            .updateExtension("VMAccessForLinux")
+//            .withProtectedSettings(protectedSettings);
+//      } else {
+//        vm.update()
+//            .defineNewExtension("VMAccessForLinux")
+//            .withPublisher("Microsoft.OSTCExtensions")
+//            .withType("VMAccessForLinux")
+//            .withVersion("1.4");
+//
+//      }
 //      vm.update()
 //
 //      VirtualMachine.DefinitionStages.WithLinuxRootPasswordOrPublicKey defStage1 = azureClient.virtualMachines()

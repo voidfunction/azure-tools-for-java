@@ -366,6 +366,9 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       if (dockerHost.apiUrl.equals(apiURL)) {
         tableModel.setValueAt(true, i, 0);
         dockerHostsTable.setRowSelectionInterval(i, i);
+        dockerHostsTableSelection.host = dockerHost;
+        dockerHostsTableSelection.row = i;
+        dockerHostsTableSelection.column = 0;
         break;
       }
     }

@@ -215,6 +215,18 @@ public class AzureDockerUIResources {
           } else {
             AzureDockerVMOps.deleteDockerHost(azureClient, dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
           }
+          DefaultLoader.getIdeHelper().runInBackground(project, "Updating Docker Hosts Details ", false, true, "Updating Docker hosts details...", new Runnable() {
+            @Override
+            public void run() {
+              try {
+                AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
+                dockerManager.refreshDockerHostDetails();
+              } catch (Exception ee) {
+                if (AzureDockerUtils.DEBUG) ee.printStackTrace();
+                LOGGER.error("onRemoveDockerHostAction", ee);
+              }
+            }
+          });
         } catch (Exception e) {
           ApplicationManager.getApplication().invokeLater(new Runnable() {
             @Override

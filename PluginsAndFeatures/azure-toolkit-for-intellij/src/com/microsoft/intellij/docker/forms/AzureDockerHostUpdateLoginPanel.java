@@ -147,6 +147,7 @@ public class AzureDockerHostUpdateLoginPanel {
     dockerHostSecondPwdField.setToolTipText(AzureDockerValidationUtils.getDockerHostPasswordTip());
 
     dockerHostKeepSshRadioButton.setText(editableHost.originalDockerHost.hasSSHLogIn ? "Use current keys" : "None");
+    dockerHostKeepSshRadioButton.setSelected(true);
     dockerHostKeepSshRadioButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -189,27 +190,6 @@ public class AzureDockerHostUpdateLoginPanel {
   }
 
   private void initDefaultUI() {
-    String currentUserAuth = editableHost.originalDockerHost.certVault.vmUsername;
-    if (editableHost.originalDockerHost.hasPwdLogIn) {
-      dockerHostFirstPwdField.setText(editableHost.originalDockerHost.certVault.vmPwd);
-      dockerHostSecondPwdField.setText(editableHost.originalDockerHost.certVault.vmPwd);
-    }
-    if (editableHost.originalDockerHost.hasSSHLogIn) {
-      dockerHostKeepSshRadioButton.setSelected(true);
-    } else {
-      dockerHostAutoSshRadioButton.setSelected(true);
-    }
-    if (editableHost.isUpdated) {
-      currentUserAuth += " (updating...)";
-      dockerHostFirstPwdField.setEnabled(false);
-      dockerHostSecondPwdField.setEnabled(false);
-      dockerHostUsernameTextField.setEnabled(false);
-      dockerHostKeepSshRadioButton.setEnabled(false);
-      dockerHostAutoSshRadioButton.setEnabled(false);
-      dockerHostImportSshRadioButton.setEnabled(false);
-    }
-    dockerHostUsernameTextField.setText(currentUserAuth);
-    dockerHostImportSSHBrowseTextField.setEnabled(false);
   }
 
   private void updateUIWithKeyvault(String keyvault) {
