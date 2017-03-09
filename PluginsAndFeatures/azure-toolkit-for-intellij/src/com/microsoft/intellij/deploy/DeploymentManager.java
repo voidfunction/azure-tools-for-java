@@ -26,6 +26,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.*;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
@@ -213,6 +214,13 @@ public final class DeploymentManager {
             dockerManager.refreshDockerHostDetails();
             System.out.println("Done refreshing Docker hosts: " + new Date().toString());
             System.out.println("Done refreshing key vaults: " + new Date().toString());
+            DockerHost updatedHost = dockerManager.getDockerHostForURL(dockerImageInstance.host.apiUrl);
+            if (updatedHost.certVault == null) {
+                updatedHost.certVault = dockerImageInstance.host.certVault;
+                updatedHost.hasPwdLogIn = dockerImageInstance.host.hasPwdLogIn;
+                updatedHost.hasSSHLogIn = dockerImageInstance.host.hasSSHLogIn;
+                updatedHost.isTLSSecured = dockerImageInstance.host.isTLSSecured;
+            }
 
             notifyProgress(dockerImageInstance.host.name, startDate, url, 100, message("runStatus"), dockerImageInstance.host.name);
         } catch (InterruptedException e) {

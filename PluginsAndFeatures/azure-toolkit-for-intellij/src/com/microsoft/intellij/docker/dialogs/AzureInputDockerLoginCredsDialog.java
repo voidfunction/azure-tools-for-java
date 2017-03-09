@@ -26,6 +26,7 @@ public class AzureInputDockerLoginCredsDialog extends DialogWrapper {
     this.dockerManager = dockerManager;
 
     loginPanel = new AzureDockerHostUpdateLoginPanel(project, editableHost, dockerManager, this);
+    loginPanel.dockerHostAutoSshRadioButton.setVisible(false);
 
     init();
     setTitle("Update Login Credentials");

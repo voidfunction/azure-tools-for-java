@@ -195,6 +195,13 @@ public class AzureDockerHostUpdateLoginPanel {
 
   private void updateUIWithKeyvault(String keyvault) {
     // TODO: call into dockerManager to retrieve the keyvault secrets
+    AzureDockerCertVault certVault = dockerManager.getDockerVault(keyvault);
+    if (certVault != null) {
+      editableHost.updatedDockerHost.certVault = certVault;
+      dockerHostUsernameTextField.setText((certVault.vmUsername != null) ? certVault.vmUsername : "");
+      dockerHostFirstPwdField.setText((certVault.vmPwd != null) ? certVault.vmPwd : "");
+      dockerHostSecondPwdField.setText((certVault.vmPwd != null) ? certVault.vmPwd : "");
+    }
   }
 
   public JPanel getMainPanel() {

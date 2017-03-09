@@ -174,6 +174,13 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
           progressIndicator.setText2("Refreshing the Docker virtual machines details...");
           System.out.println("Refreshing Docker hosts details: " + new Date().toString());
           dockerManager.refreshDockerHostDetails();
+          DockerHost updatedHost = dockerManager.getDockerHostForURL(dockerHost.apiUrl);
+          if (updatedHost.certVault == null) {
+            updatedHost.certVault = dockerHost.certVault;
+            updatedHost.hasPwdLogIn = dockerHost.hasPwdLogIn;
+            updatedHost.hasSSHLogIn = dockerHost.hasSSHLogIn;
+            updatedHost.isTLSSecured = dockerHost.isTLSSecured;
+          }
           System.out.println("Done refreshing Docker hosts details: " + new Date().toString());
           if (progressIndicator.isCanceled()) {
             if (displayWarningOnCreateCancelAction() == 1) {
