@@ -55,7 +55,6 @@ public class HDInsightRootModuleImpl extends HDInsightRootModule {
     @Override
     protected void refreshItems() throws AzureCmdException {
         synchronized (this) { //todo???
-            removeAllChildNodes();
 //            TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerHDInsightNodeExpand, null, null);
 
             clusterDetailList = ClusterManagerEx.getInstance().getClusterDetails(getProject());

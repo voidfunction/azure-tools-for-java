@@ -65,7 +65,7 @@ public class CreateStorageAccountAction extends NodeActionListener {
         createStorageAccountForm.setOnCreate(new Runnable() {
             @Override
             public void run() {
-                storageModule.load();
+                storageModule.load(false);
             }
         });
         createStorageAccountForm.show();

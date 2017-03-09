@@ -52,7 +52,6 @@ public class StorageModule extends AzureRefreshableNode {
     @Override
     protected void refreshItems()
             throws AzureCmdException {
-        removeAllChildNodes();
         List<Pair<String, String>> failedSubscriptions = new ArrayList<>();
 
         try {

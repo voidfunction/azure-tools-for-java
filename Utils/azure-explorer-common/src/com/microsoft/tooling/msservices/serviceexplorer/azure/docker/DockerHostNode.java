@@ -85,9 +85,6 @@ public class DockerHostNode extends AzureRefreshableNode {
 
   @Override
   protected void refreshItems() throws AzureCmdException {
-    // remove all child nodes
-    removeAllChildNodes();
-
     try {
       Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
       VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);

@@ -70,7 +70,7 @@ public class TableNode extends Node {
                 StorageClientSDKManager.getManager().deleteTable(storageAccount, table);
 
                 parent.removeAllChildNodes();
-                ((TableModule) parent).load();
+                ((TableModule) parent).load(false);
             } catch (AzureCmdException ex) {
                 DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete table.", ex,
                         "MS Services - Error Deleting Table", false, true);

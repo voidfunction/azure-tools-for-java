@@ -48,8 +48,6 @@ public class VMArmModule extends AzureRefreshableNode {
 
     @Override
     protected void refreshItems() throws AzureCmdException {
-        // remove all child nodes
-        removeAllChildNodes();
         List<Pair<String, String>> failedSubscriptions = new ArrayList<>();
         try {
             AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();

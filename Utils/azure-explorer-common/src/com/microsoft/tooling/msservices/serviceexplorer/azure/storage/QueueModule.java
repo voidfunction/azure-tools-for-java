@@ -43,8 +43,6 @@ public class QueueModule extends RefreshableNode {
     @Override
     protected void refreshItems()
             throws AzureCmdException {
-        removeAllChildNodes();
-
         final List<Queue> queues = StorageClientSDKManager.getManager().getQueues(storageAccount);
 
         for (Queue queue : queues) {

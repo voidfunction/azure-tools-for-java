@@ -45,13 +45,12 @@ public class StorageAccountNode extends RefreshableNode {
     public StorageAccountNode(Node parent, IHDIStorageAccount storageAccount, boolean isDefaultStorageAccount) {
        super(STORAGE_ACCOUNT_MODULE_ID, isDefaultStorageAccount ? storageAccount.getName() + DEFAULT_STORAGE_FLAG : storageAccount.getName(), parent, getIconPath(storageAccount));
         this.storageAccount = storageAccount;
-        load();
+        load(false);
     }
 
     @Override
     protected void refreshItems()
             throws AzureCmdException {
-        removeAllChildNodes();
         //TelemetryManager.postEvent(TelemetryCommon.HDInsightExplorerStorageAccountExpand, null, null);
         if(storageAccount.getAccountType() == StorageAccountTypeEnum.BLOB) {
             HDStorageAccount blobStorageAccount = (HDStorageAccount)storageAccount;

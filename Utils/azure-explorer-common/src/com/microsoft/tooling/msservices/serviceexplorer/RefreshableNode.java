@@ -46,7 +46,7 @@ public abstract class RefreshableNode extends Node {
         addAction("Refresh", new NodeActionListener() {
             @Override
             public void actionPerformed(NodeActionEvent e) {
-                load();
+                load(true);
             }
         });
 
@@ -56,7 +56,7 @@ public abstract class RefreshableNode extends Node {
     @Override
     protected void onNodeClick(NodeActionEvent e) {
         if (!initialized) {
-            this.load();
+            this.load(false);
             initialized = true;
         }
     }
@@ -69,10 +69,14 @@ public abstract class RefreshableNode extends Node {
     // to refresh items asynchronously. The default implementation simply
     // delegates to "refreshItems" *synchronously* and completes the Future
     // with the result of calling getChildNodes.
-    protected void refreshItems(SettableFuture<List<Node>> future) {
+    protected void refreshItems(SettableFuture<List<Node>> future, boolean forceRefresh) {
         if (!loading) {
             setLoading(true);
             try {
+                removeAllChildNodes();
+                if (forceRefresh) {
+                    refreshFromAzure();
+                }
                 refreshItems();
                 future.set(getChildNodes());
             } catch (Exception e) {
@@ -83,7 +87,10 @@ public abstract class RefreshableNode extends Node {
         }
     }
 
-    public ListenableFuture<List<Node>> load() {
+    protected void refreshFromAzure() throws Exception {
+    }
+
+    public ListenableFuture<List<Node>> load(boolean forceRefresh) {
         final RefreshableNode node = this;
         final SettableFuture<List<Node>> future = SettableFuture.create();
 
@@ -106,8 +113,7 @@ public abstract class RefreshableNode extends Node {
                                 updateName(nodeName, throwable);
                             }
                         });
-
-                        node.refreshItems(future);
+                        node.refreshItems(future, forceRefresh);
                     }
 
                     private void updateName(String name, final Throwable throwable) {
@@ -131,5 +137,14 @@ public abstract class RefreshableNode extends Node {
         );
 
         return future;
+    }
+
+    public Runnable getRefreshHandler() {
+        return new Runnable() {
+            @Override
+            public void run() {
+                load(false);
+            }
+        };
     }
 }

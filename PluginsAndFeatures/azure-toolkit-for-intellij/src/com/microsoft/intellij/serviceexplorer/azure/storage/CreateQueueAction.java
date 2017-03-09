@@ -46,7 +46,7 @@ public class CreateQueueAction extends NodeActionListener {
             @Override
             public void run() {
                 queueModule.getParent().removeAllChildNodes();
-                ((ClientStorageNode) queueModule.getParent()).load();
+                ((ClientStorageNode) queueModule.getParent()).load(false);
             }
         });
 

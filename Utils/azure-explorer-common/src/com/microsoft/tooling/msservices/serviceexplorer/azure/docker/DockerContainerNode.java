@@ -77,9 +77,6 @@ public class DockerContainerNode extends AzureRefreshableNode {
 
   @Override
   protected void refreshItems() throws AzureCmdException {
-    // remove all child nodes
-    removeAllChildNodes();
-
     try {
       Map<String, DockerImage> dockerImages = AzureDockerImageOps.getImages(dockerHost);
       Map<String, DockerContainer> dockerContainers = AzureDockerContainerOps.getContainers(dockerHost);

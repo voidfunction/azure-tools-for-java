@@ -69,7 +69,7 @@ public class QueueNode extends Node {
                 StorageClientSDKManager.getManager().deleteQueue(storageAccount, queue);
 
                 parent.removeAllChildNodes();
-                ((QueueModule) parent).load();
+                ((QueueModule) parent).load(false);
             } catch (AzureCmdException ex) {
                 DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete queue", ex,
                         "MS Services - Error Deleting Queue", false, true);

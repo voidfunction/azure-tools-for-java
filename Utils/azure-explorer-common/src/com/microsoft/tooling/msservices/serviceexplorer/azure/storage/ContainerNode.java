@@ -71,7 +71,7 @@ public class ContainerNode extends Node {
                 StorageClientSDKManager.getManager().deleteBlobContainer(storageAccount, blobContainer);
 
                 parent.removeAllChildNodes();
-                ((RefreshableNode) parent).load();
+                ((RefreshableNode) parent).load(false);
             } catch (AzureCmdException ex) {
                 DefaultLoader.getUIHelper().showException("An error occurred while attempting to delete blob storage", ex,
                         "MS Services - Error Deleting Blob Storage", false, true);

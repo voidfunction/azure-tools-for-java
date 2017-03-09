@@ -50,9 +50,6 @@ public class DockerHostModule extends AzureRefreshableNode {
 
   @Override
   protected void refreshItems() throws AzureCmdException {
-    // remove all child nodes
-    removeAllChildNodes();
-
     try {
       AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
       // not signed in

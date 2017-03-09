@@ -112,7 +112,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
 //        if (AzureSettings.getSafeInstance(project).iswebAppLoaded()) {
 //            azureModule.webSiteConfigMap = AzureSettings.getSafeInstance(project).loadWebApps();
 //        }
-        azureModule.load();
+        azureModule.load(false);
 
         return root;
     }
@@ -281,8 +281,9 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                     }
                     break;
             }
-
-            treeModelMap.get(project).reload(treeNode);
+            if (treeModelMap.get(project)!= null) {
+                treeModelMap.get(project).reload(treeNode);
+            }
         }
     }
 
@@ -331,7 +332,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
                     new AnAction("Refresh", "Refresh Service List", UIHelperImpl.loadIcon("refresh.png")) {
                         @Override
                         public void actionPerformed(AnActionEvent event) {
-                            azureModule.load();
+                            azureModule.load(true);
                         }
                     },
                     new AzureSignInAction(UIHelperImpl.loadIcon("azure.png")),

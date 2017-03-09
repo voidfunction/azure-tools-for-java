@@ -83,8 +83,6 @@ public class StorageNode extends ClientStorageNode {
     @Override
     protected void refreshItems()
             throws AzureCmdException {
-        removeAllChildNodes();
-
         fillChildren();
     }
 

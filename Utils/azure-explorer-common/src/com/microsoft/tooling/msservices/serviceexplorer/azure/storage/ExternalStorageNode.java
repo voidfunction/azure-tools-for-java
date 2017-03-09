@@ -66,8 +66,6 @@ public class ExternalStorageNode extends ClientStorageNode {
     @Override
     protected void refreshItems()
             throws AzureCmdException {
-        removeAllChildNodes();
-
         if (storageAccount.getPrimaryKey().isEmpty()) {
             try {
                 NodeActionListener listener = node2Actions.get(this.getClass()).get(0).getConstructor().newInstance();

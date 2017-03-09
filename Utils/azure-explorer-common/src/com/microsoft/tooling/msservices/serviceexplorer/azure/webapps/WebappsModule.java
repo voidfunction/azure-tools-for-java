@@ -47,7 +47,6 @@ public class WebappsModule extends AzureRefreshableNode {
 
 	@Override
 	protected void refreshItems() throws AzureCmdException {
-		removeAllChildNodes();
 		if (AzureModel.getInstance().getResourceGroupToWebAppMap() == null) {
 			try {
 				AzureModelController.updateResourceGroupMaps(null);
@@ -63,24 +62,11 @@ public class WebappsModule extends AzureRefreshableNode {
 		} else {
 			fillWebappsNodes();
 		}
+	}
 
-//			if (webSiteConfigMapTemp != null && !webSiteConfigMapTemp.isEmpty()) {
-//				List<WebSite> webSiteList = new ArrayList<WebSite>(webSiteConfigMapTemp.keySet());
-//				Collections.sort(webSiteList, new Comparator<WebSite>() {
-//					@Override
-//					public int compare(WebSite ws1, WebSite ws2) {
-//						return ws1.getName().compareTo(ws2.getName());
-//					}
-//				});
-//				for (WebSite webSite : webSiteList) {
-//					if (webSite.getStatus().equalsIgnoreCase(runStatus)) {
-//						addChildNode(new WebappNode(this, webSite, WEB_RUN_ICON));
-//					} else {
-//						addChildNode(new WebappNode(this, webSite, WEB_STOP_ICON));
-//					}
-//				}
-//			}
-//		}
+	@Override
+	protected void refreshFromAzure() throws Exception {
+		AzureModelController.updateResourceGroupMaps(null);
 	}
 
 	private void fillWebappsNodes() {

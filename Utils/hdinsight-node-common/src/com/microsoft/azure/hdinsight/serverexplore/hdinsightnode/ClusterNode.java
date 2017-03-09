@@ -47,7 +47,7 @@ public class ClusterNode extends RefreshableNode {
         super(CLUSTER_MODULE_ID, getClusterNameWitStatus(clusterDetail), parent, ICON_PATH, true);
         this.clusterDetail = clusterDetail;
         this.loadActions();
-        this.load();
+        this.load(false);
     }
 
     @Override
@@ -130,9 +130,7 @@ public class ClusterNode extends RefreshableNode {
     }
 
     @Override
-    protected void refreshItems()
-            {
-        removeAllChildNodes();
+    protected void refreshItems() {
         if(!clusterDetail.isEmulator()) {
             final String uuid = UUID.randomUUID().toString();
             JobViewManager.registerJovViewNode(uuid, clusterDetail);

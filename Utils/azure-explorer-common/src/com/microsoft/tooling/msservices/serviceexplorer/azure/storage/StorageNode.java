@@ -91,8 +91,6 @@ public class StorageNode extends RefreshableNode {
 
     @Override
     protected void refreshItems() throws AzureCmdException {
-        removeAllChildNodes();
-
         List<BlobContainer> containerList = StorageClientSDKManager.getManager()
                 .getBlobContainers(StorageClientSDKManager.getConnectionString(storageAccount));
         for (BlobContainer blobContainer : containerList) {

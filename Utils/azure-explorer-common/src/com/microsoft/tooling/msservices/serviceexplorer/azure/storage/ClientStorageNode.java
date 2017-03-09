@@ -41,18 +41,13 @@ public abstract class ClientStorageNode extends RefreshableNode {
         this.storageAccount = sm;
     }
 
-    @Override
-    protected void onNodeClick(NodeActionEvent e) {
-        this.load();
-    }
-
     public ClientStorageAccount getClientStorageAccount() {
         return storageAccount;
     }
 
     protected void fillChildren() {
         ClientBlobModule blobsNode = new ClientBlobModule(this, storageAccount);
-        blobsNode.load();
+        blobsNode.load(false);
 
         addChildNode(blobsNode);
 

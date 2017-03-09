@@ -47,7 +47,7 @@ public class CreateTableAction extends NodeActionListener {
             @Override
             public void run() {
                 tableModule.getParent().removeAllChildNodes();
-                ((ClientStorageNode) tableModule.getParent()).load();
+                ((ClientStorageNode) tableModule.getParent()).load(false);
             }
         });
 

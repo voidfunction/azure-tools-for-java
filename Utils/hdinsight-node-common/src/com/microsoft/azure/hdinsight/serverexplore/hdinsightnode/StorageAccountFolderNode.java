@@ -41,13 +41,12 @@ public class StorageAccountFolderNode extends RefreshableNode {
     public StorageAccountFolderNode(Node parent, IClusterDetail clusterDetail) {
         super(STORAGE_ACCOUNT_FOLDER_MODULE_ID, STORAGE_ACCOUNT_NAME, parent, ICON_PATH);
         this.clusterDetail = clusterDetail;
-        load();
+        load(false);
     }
 
     @Override
     protected void refreshItems()
             throws AzureCmdException {
-        removeAllChildNodes();
         if (clusterDetail != null && !clusterDetail.isEmulator()) {
             try {
                 clusterDetail.getConfigurationInfo(getProject());

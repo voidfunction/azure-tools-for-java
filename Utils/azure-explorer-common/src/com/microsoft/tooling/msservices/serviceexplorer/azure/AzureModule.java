@@ -22,7 +22,6 @@
 package com.microsoft.tooling.msservices.serviceexplorer.azure;
 
 import com.microsoft.azure.hdinsight.serverexplore.hdinsightnode.HDInsightRootModule;
-import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.ISubscriptionSelectionListener;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
@@ -31,8 +30,9 @@ import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
+import com.microsoft.tooling.msservices.serviceexplorer.AzureRefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
+import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
@@ -41,7 +41,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappsMod
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AzureModule extends RefreshableNode {
+public class AzureModule extends AzureRefreshableNode {
     private static final String AZURE_SERVICE_MODULE_ID = AzureModule.class.getName();
     private static final String ICON_PATH = "azure_explorer.png";
     private static final String BASE_MODULE_NAME = "Azure";
@@ -125,23 +125,21 @@ public class AzureModule extends RefreshableNode {
         if (!isDirectChild(dockerHostModule)) {
             addChildNode(dockerHostModule);
         }
+    }
+
+    @Override
+    protected void onNodeClick(NodeActionEvent e) {
+    }
+
+    @Override
+    protected void refreshFromAzure() throws AzureCmdException {
         try {
             if (AuthMethodManager.getInstance().isSignedIn()) {
-                if (!vmArmServiceModule.isLoading()) {
-                    vmArmServiceModule.load();
-                }
-                if (!storageModule.isLoading()) {
-                    storageModule.load();
-                }
-                if (!webappsModule.isLoading()) {
-                    webappsModule.load();
-                }
-                if (hdInsightModule != null && !hdInsightModule.isLoading()) {
-                    hdInsightModule.load();
-                }
-                if (!dockerHostModule.isLoading()) {
-                    dockerHostModule.load();
-                }
+                vmArmServiceModule.load(true);
+                storageModule.load(true);
+                webappsModule.load(true);
+                hdInsightModule.load(true);
+                dockerHostModule.load(true);
             }
         } catch (Exception e) {
             throw new AzureCmdException("Error loading Azure Explorer modules", e);

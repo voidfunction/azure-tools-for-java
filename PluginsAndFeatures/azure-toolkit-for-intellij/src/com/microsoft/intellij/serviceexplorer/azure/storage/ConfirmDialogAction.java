@@ -49,7 +49,7 @@ public class ConfirmDialogAction extends NodeActionListener {
                 node.getClientStorageAccount().setQueuesUri(clientStorageAccount.getQueuesUri());
                 node.getClientStorageAccount().setTablesUri(clientStorageAccount.getTablesUri());
 
-                node.load();
+                node.load(false);
             }
         });
 
