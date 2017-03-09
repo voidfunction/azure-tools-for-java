@@ -90,24 +90,26 @@ public class AzureViewDockerDialog extends DialogWrapper {
 
     // Docker VM log in settings
     dockerHostAuthUpdateHyperlink.setEnabled(!dockerHost.isUpdating);
+    String username = (dockerHost.certVault != null && dockerHost.certVault.vmUsername != null) ?
+        dockerHost.certVault.vmUsername : "-unknown-";
     setTextField(dockerHostUsernameTextField, (updating != null) ?
-        dockerHost.certVault.vmUsername + updating :
-        dockerHost.certVault.vmUsername
+        username + updating :
+        username
     );
     setTextField(dockerHostPwdLoginTextField, (updating != null) ?
-        (dockerHost.hasPwdLogIn ? "Yes" : "No") + updating :
-        (dockerHost.hasPwdLogIn ? "Yes" : "No")
+        (dockerHost.hasPwdLogIn ? "Yes" : (dockerHost.certVault == null) ? "-unknown- " : "No") + updating :
+        (dockerHost.hasPwdLogIn ? "Yes" : (dockerHost.certVault == null) ? "-unknown- " : "No")
     );
     setTextField(dockerHostSshLoginTextField, (updating != null) ?
-        (dockerHost.hasSSHLogIn ? "Yes" : "No") + updating :
-        (dockerHost.hasSSHLogIn ? "Yes" : "No")
+        (dockerHost.hasSSHLogIn ? "Yes" : (dockerHost.certVault == null) ? "-unknown- " : "No") + updating :
+        (dockerHost.hasSSHLogIn ? "Yes" : (dockerHost.certVault == null) ? "-unknown- " : "No")
     );
     dockerHostSshExportHyperlink.setEnabled(!dockerHost.isUpdating && dockerHost.hasSSHLogIn);
 
     // Docker Daemon settings
     setTextField(dockerHostTlsAuthTextField, (updating != null) ?
-        (dockerHost.hasSSHLogIn ? "Using TLS certificates" : "Open/unsecured access") + updating :
-        (dockerHost.hasSSHLogIn ? "Using TLS certificates" : "Open/unsecured access")
+        (dockerHost.isTLSSecured ? "Using TLS certificates" : (dockerHost.certVault == null) ? "-unknown- " : "Open/unsecured access") + updating :
+        (dockerHost.isTLSSecured ? "Using TLS certificates" : (dockerHost.certVault == null) ? "-unknown- " : "Open/unsecured access")
     );
     dockerHostTlsExportHyperlink.setEnabled(!dockerHost.isUpdating && dockerHost.isTLSSecured);
 

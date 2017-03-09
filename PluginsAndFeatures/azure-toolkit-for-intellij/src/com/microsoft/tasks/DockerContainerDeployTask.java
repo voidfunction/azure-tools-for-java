@@ -69,7 +69,7 @@ public class DockerContainerDeployTask extends Task.Backgroundable {
     DeploymentEventListener deployListnr = new DeploymentEventListener() {
       @Override
       public void onDeploymentStep(DeploymentEventArgs args) {
-        indicator.setFraction(indicator.getFraction() + args.getDeployCompleteness() / 100.0);
+        indicator.setFraction(args.getDeployCompleteness() / 100.0);
         indicator.setText(AzureBundle.message("deployingToAzure"));
         indicator.setText2(args.toString());
       }

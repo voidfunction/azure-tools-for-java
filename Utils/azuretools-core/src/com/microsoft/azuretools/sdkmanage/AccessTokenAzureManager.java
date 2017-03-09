@@ -36,6 +36,7 @@ import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.CommonSettings;
 import com.microsoft.azuretools.authmanage.RefreshableTokenCredentials;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
+import com.microsoft.azuretools.utils.AzureRegisterProviderNamespaces;
 import com.microsoft.azuretools.utils.Pair;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
 
@@ -72,6 +73,8 @@ public class AccessTokenAzureManager extends AzureManagerBase {
         }
         String tid = subscriptionManager.getSubscriptionTenant(sid);
         Azure azure = authTid(tid).withSubscription(sid);
+        // TODO: remove this call after Azure SDK properly implements handling of unregistered provider namespaces
+        AzureRegisterProviderNamespaces.registerAzureNamespaces(azure);
         sidToAzureMap.put(sid, azure);
         return azure;
     }

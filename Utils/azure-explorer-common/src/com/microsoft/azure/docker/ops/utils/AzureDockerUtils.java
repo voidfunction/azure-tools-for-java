@@ -281,8 +281,8 @@ public class AzureDockerUtils {
                   dockerSubscription.tid = subscriptionDetail.getTenantId();
                   dockerSubscription.name = subscriptionDetail.getSubscriptionName();
                   dockerSubscription.azureClient = azureAuthManager.getAzure(dockerSubscription.id);
-                  // TODO: temporary work around for registering the namespaces
-                  AzureRegisterProviderNamespaces.registerAzureNamespaces(dockerSubscription.azureClient);
+//                  // TODO: temporary work around for registering the namespaces
+//                  AzureRegisterProviderNamespaces.registerAzureNamespaces(dockerSubscription.azureClient);
 
                   dockerSubscription.keyVaultClient = azureAuthManager.getKeyVaultClient(subscriptionDetail.getTenantId());
                   dockerSubscription.isSelected = true;

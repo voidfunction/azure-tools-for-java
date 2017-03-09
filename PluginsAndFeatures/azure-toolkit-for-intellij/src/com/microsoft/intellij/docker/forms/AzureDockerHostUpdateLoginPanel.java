@@ -167,6 +167,7 @@ public class AzureDockerHostUpdateLoginPanel {
       }
     });
 
+    dockerHostImportSSHBrowseLabel.setVisible(false);
     dockerHostImportSSHBrowseTextField.addActionListener(UIUtils.createFileChooserListener(dockerHostImportSSHBrowseTextField, project,
         FileChooserDescriptorFactory.createSingleFolderDescriptor()));
     dockerHostImportSSHBrowseTextField.getTextField().setToolTipText(AzureDockerValidationUtils.getDockerHostSshDirectoryTip());
