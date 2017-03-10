@@ -35,9 +35,8 @@ import java.util.*;
  * Created by shch on 10/3/2016.
  */
 public class SubscriptionManager {
-    private Set<ISubscriptionSelectionListener> listners = new HashSet<>();
+    private Set<ISubscriptionSelectionListener> listeners = new HashSet<>();
     protected AzureManager azureManager;
-
 
     // for user to select subscr to work with
     private List<SubscriptionDetail> subscriptionDetails;
@@ -58,6 +57,27 @@ public class SubscriptionManager {
         return subscriptionDetails;
     }
 
+    protected List<SubscriptionDetail> updateAccountSubscriptionList() throws Exception {
+        System.out.println(Thread.currentThread().getId() + " SubscriptionManager.updateAccountSubscriptionList()");
+
+        if (azureManager == null) {
+            throw new IllegalArgumentException("azureManager is null");
+        }
+
+        System.out.println("Getting subscription list from Azure");
+        List<SubscriptionDetail> sdl = new ArrayList<>();
+        List<Pair<Subscription, Tenant>> stpl = azureManager.getSubscriptionsWithTenant();
+        for (Pair<Subscription, Tenant> stp : stpl) {
+            sdl.add(new SubscriptionDetail(
+                    stp.first().subscriptionId(),
+                    stp.first().displayName(),
+                    stp.second().tenantId(),
+                    true));
+        }
+
+        return sdl;
+    }
+
     private synchronized void doSetSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws AuthException {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManager.doSetSubscriptionDetails()");
         if (subscriptionDetails.isEmpty()) {
@@ -75,17 +95,17 @@ public class SubscriptionManager {
     }
 
     public synchronized void addListener(ISubscriptionSelectionListener l) {
-        if (!listners.contains(l)) {
-            listners.add(l);
+        if (!listeners.contains(l)) {
+            listeners.add(l);
         }
     }
 
     public synchronized void removeListener(ISubscriptionSelectionListener l) {
-        listners.remove(l);
+        listeners.remove(l);
     }
 
     private void notifyAllListeners() {
-        for (ISubscriptionSelectionListener l : listners) {
+        for (ISubscriptionSelectionListener l : listeners) {
             l.update(subscriptionDetails == null);
         }
     }
@@ -120,26 +140,5 @@ public class SubscriptionManager {
             if (sd.isSelected())
                 sidToTid.put(sd.getSubscriptionId(), sd.getTenantId());
         }
-    }
-
-    protected List<SubscriptionDetail> updateAccountSubscriptionList() throws Exception {
-        System.out.println(Thread.currentThread().getId() + " SubscriptionManager.updateAccountSubscriptionList()");
-
-        if (azureManager == null) {
-            throw new IllegalArgumentException("azureManager is null");
-        }
-
-        System.out.println("Getting subscription list from Azure");
-        List<SubscriptionDetail> sdl = new ArrayList<>();
-        List<Pair<Subscription, Tenant>> stpl = azureManager.getSubscriptionsWithTenant();
-        for (Pair<Subscription, Tenant> stp : stpl) {
-            sdl.add(new SubscriptionDetail(
-                    stp.first().subscriptionId(),
-                    stp.first().displayName(),
-                    stp.second().tenantId(),
-                    true));
-        }
-
-        return sdl;
     }
 }

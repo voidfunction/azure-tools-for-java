@@ -134,7 +134,8 @@ public class SubscriptionsDialog extends DialogWrapper {
             //System.out.println("refreshSubscriptions: calling getSubscriptionDetails()");
             sdl = subscriptionManager.getSubscriptionDetails();
             setSubscriptions();
-            //subscriptionManager.setSubscriptionDetails(sdl);
+            // to notify subscribers
+            subscriptionManager.setSubscriptionDetails(sdl);
 
         } catch (Exception ex) {
             ex.printStackTrace();
