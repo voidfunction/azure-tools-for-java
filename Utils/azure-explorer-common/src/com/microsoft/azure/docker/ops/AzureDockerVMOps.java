@@ -334,6 +334,7 @@ public class AzureDockerVMOps {
       dockerHost.isTLSSecured = false;
       String dockerVaultName = vm.tags().get("dockervault");
       if (dockerVaultName != null && dockerVaultsMap != null) {
+        dockerHost.hostVM.vaultName = dockerVaultName;
         AzureDockerCertVault certVault = dockerVaultsMap.get(dockerVaultName);
         if (certVault != null) {
           dockerHost.hasKeyVault = true;

@@ -45,4 +45,5 @@ public class AzureDockerVM {
   public String state;
   public Map<String, String> tags;
   public String sid;
+  public String vaultName;
 }

@@ -93,6 +93,12 @@ public class DockerHostNode extends AzureRefreshableNode {
         if (updatedDockerHost != null) {
           updatedDockerHost.sid = dockerHost.sid;
           updatedDockerHost.hostVM.sid = dockerHost.hostVM.sid;
+          if (updatedDockerHost.certVault == null) {
+            updatedDockerHost.certVault = dockerHost.certVault;
+            updatedDockerHost.hasPwdLogIn = dockerHost.hasPwdLogIn;
+            updatedDockerHost.hasSSHLogIn = dockerHost.hasSSHLogIn;
+            updatedDockerHost.isTLSSecured = dockerHost.isTLSSecured;
+          }
           dockerHost = updatedDockerHost;
 
           if (dockerHost.certVault != null) {

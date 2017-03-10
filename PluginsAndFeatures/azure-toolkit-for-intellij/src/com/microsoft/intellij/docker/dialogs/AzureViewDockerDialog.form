@@ -40,13 +40,14 @@
       <tabbedpane id="c83c2" binding="tabbedPane1" default-binding="true">
         <constraints>
           <grid row="5" column="1" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
-            <preferred-size width="200" height="200"/>
+            <minimum-size width="650" height="-1"/>
+            <preferred-size width="650" height="200"/>
           </grid>
         </constraints>
         <properties/>
         <border type="none"/>
         <children>
-          <grid id="d7ba2" layout-manager="GridLayoutManager" row-count="12" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="d7ba2" layout-manager="GridLayoutManager" row-count="13" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="Login Settings"/>
@@ -56,7 +57,7 @@
             <children>
               <vspacer id="b77ec">
                 <constraints>
-                  <grid row="11" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <grid row="12" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                 </constraints>
               </vspacer>
               <component id="a45cf" class="javax.swing.JLabel">
@@ -190,7 +191,7 @@
               </component>
               <component id="a7d59" class="javax.swing.JTextField" binding="dockerHostKeyvaultTextField">
                 <constraints>
-                  <grid row="10" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                  <grid row="10" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
                   </grid>
                 </constraints>
@@ -243,6 +244,16 @@
                 <properties>
                   <background color="-1250068"/>
                   <editable value="false"/>
+                </properties>
+              </component>
+              <component id="93acd" class="javax.swing.JTextPane" binding="dockerHostKeyvaultTextPane">
+                <constraints>
+                  <grid row="11" column="1" row-span="1" col-span="4" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="50"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <text value="Go to Azure Portal and change the Key Vault permissons in order to access it from your current sign-in credentials!"/>
                 </properties>
               </component>
             </children>

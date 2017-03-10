@@ -59,6 +59,7 @@ public class AzureViewDockerDialog extends DialogWrapper {
   private JTextField dockerHostPwdLoginTextField;
   private JTextField dockerHostSshLoginTextField;
   private JTextField dockerHostTlsAuthTextField;
+  private JTextPane dockerHostKeyvaultTextPane;
 
   private Action myClickApplyAction;
   private Project project;
@@ -119,10 +120,19 @@ public class AzureViewDockerDialog extends DialogWrapper {
     );
 
     // Docker Keyvault settings
-    setTextField(dockerHostKeyvaultTextField, (updating != null) ?
-        (dockerHost.hasKeyVault ? dockerHost.certVault.uri : "Not using Key Vault") + updating :
-        (dockerHost.hasKeyVault ? dockerHost.certVault.uri : "Not using Key Vault")
-    );
+    if (dockerHost.certVault != null &&  dockerHost.certVault.uri != null && !dockerHost.certVault.uri.isEmpty()) {
+      setTextField(dockerHostKeyvaultTextField, (updating != null) ?
+          dockerHost.certVault.uri  + updating :
+          dockerHost.certVault.uri);
+      dockerHostKeyvaultTextPane.setVisible(false);
+    } else if (dockerHost.hostVM.vaultName != null && !dockerHost.hostVM.vaultName.isEmpty()) {
+      String defaultVaultName;
+      setTextField(dockerHostKeyvaultTextField, String.format("Error reading http://%s.vault.azure.net", dockerHost.hostVM.vaultName));
+      dockerHostKeyvaultTextPane.setVisible(true);
+    } else {
+      setTextField(dockerHostKeyvaultTextField, "Not using Key Vault");
+      dockerHostKeyvaultTextPane.setVisible(false);
+    }
 
     exitCode = CLOSE_EXIT_CODE;
 
