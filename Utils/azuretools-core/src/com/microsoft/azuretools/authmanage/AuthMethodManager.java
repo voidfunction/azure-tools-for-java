@@ -51,15 +51,28 @@ public class AuthMethodManager {
     private AzureManager azureManager;
     
     private Set<Runnable> signInEventListeners = new HashSet<>();
-    
+    private Set<Runnable> signOutEventListeners = new HashSet<>();
+
     public void addSignInEventListener(Runnable l) {
         if (!signInEventListeners.contains(l)) {
             signInEventListeners.add(l);
         }
     }
 
+    public void addSignOutEventListener(Runnable l) {
+        if (!signOutEventListeners.contains(l)) {
+            signOutEventListeners.add(l);
+        }
+    }
+
     private void notifySignInEventListener() {
         for (Runnable l : signInEventListeners) {
+            l.run();
+        }
+    }
+
+    private void notifySignOutEventListener() {
+        for (Runnable l : signOutEventListeners) {
             l.run();
         }
     }
@@ -101,7 +114,12 @@ public class AuthMethodManager {
         return azureManager;
     }
 
-    public void cleanAll() {
+    public void signOut() {
+        cleanAll();
+        notifySignOutEventListener();
+    }
+
+    private void cleanAll() {
         try {
             if (azureManager != null) {
                 azureManager.getSubscriptionManager().cleanSubscriptions();

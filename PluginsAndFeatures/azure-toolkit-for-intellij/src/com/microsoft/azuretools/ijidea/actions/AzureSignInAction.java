@@ -86,7 +86,7 @@ public class AzureSignInAction extends AnAction {
                     AdAuthManager adAuthManager = AdAuthManager.getInstance();
                     if (adAuthManager.isSignedIn())
                         adAuthManager.signOut();
-                    authMethodManager.cleanAll();
+                    authMethodManager.signOut();
                 }
             } else {
 //                SignInWindow w = SignInWindow.go(authMethodManager.getAuthMethodDetails(), project);

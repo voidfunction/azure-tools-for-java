@@ -49,9 +49,9 @@ public class AzureModelController {
 
     private static ISubscriptionSelectionListener subscriptionSelectionListener = new ISubscriptionSelectionListener() {
         @Override
-        public void update(boolean isSignedOut) {
+        public void update(boolean isRefresh) {
             try {
-                if (isSignedOut) {
+                if (isRefresh) {
                     clearAll();
                     return;
                 }
