@@ -54,17 +54,12 @@ import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardMode
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardStep;
 import com.microsoft.intellij.ui.util.UIUtils;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -337,10 +332,10 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
         tableModel.setValueAt(false, dockerHostsTableSelection.row, 0);
       }
 
-      Vector<Object> row = new Vector<Object>();
+      Vector<Object> row = new Vector<>();
       row.add(false);
       row.add(host.name);
-      row.add("NEW-AZURE-VM");
+      row.add("TO_BE_CREATED");
       row.add(host.hostOSType.toString());
       row.add(host.apiUrl);
       tableModel.insertRow(0, row);
@@ -426,20 +421,10 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     });
   }
 
-  private void refreshDockerHostsAndUI() {
-    dockerManager.refreshDockerHostDetails();
-    ApplicationManager.getApplication().invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        refreshDockerHostsTable();
-      }
-    });
-  }
-
   /* Force a refresh of the docker hosts entries in the select host table
  *   This call will retrieve the latest list of VMs from Azure suitable to be a Docker Host
  */
-  void forceRefreshDockerHostsTable() {
+  private void forceRefreshDockerHostsTable() {
     dockerManager.forceRefreshDockerHosts();
     refreshDockerHostsTable();
   }
@@ -447,7 +432,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
   /* Refresh the docker hosts entries in the select host table
    *
    */
-  void refreshDockerHostsTable() {
+  private void refreshDockerHostsTable() {
     final DefaultTableModel tableModel = (DefaultTableModel) dockerHostsTable.getModel();
 
     while (tableModel.getRowCount() > 0) {
@@ -458,7 +443,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       List<DockerHost> dockerHosts = dockerManager.getDockerHostsList();
       if (dockerHosts != null) {
         for (DockerHost host : dockerHosts) {
-          Vector<Object> row = new Vector<Object>();
+          Vector<Object> row = new Vector<>();
           row.add(false);
           row.add(host.name);
           row.add(host.state.toString());
@@ -509,7 +494,8 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       ValidationInfo info = new ValidationInfo("Missing Docker image name", dockerImageNameTextField);
       dockerImageNameLabel.setVisible(true);
       setDialogButtonsState(false);
-      model.getSelectDockerWizardDialog().DialogShaker(info);
+      if (shakeOnError)
+        model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
     dockerImageDescription.dockerImageName = dockerImageNameTextField.getText();
@@ -518,7 +504,8 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       ValidationInfo info = new ValidationInfo("Missing the artifact to be published", dockerArtifactPath);
       dockerArtifactPathLabel.setVisible(true);
       setDialogButtonsState(false);
-      model.getSelectDockerWizardDialog().DialogShaker(info);
+      if (shakeOnError)
+        model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
     dockerImageDescription.artifactPath = dockerArtifactPath.getText();
@@ -526,7 +513,8 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     if (dockerHostsTableSelection == null && !dockerImageDescription.hasNewDockerHost){
       ValidationInfo info = new ValidationInfo("Please check a Docker host or create a new", dockerHostsTable);
       setDialogButtonsState(false);
-      model.getSelectDockerWizardDialog().DialogShaker(info);
+      if (shakeOnError)
+        model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
     if (!dockerImageDescription.hasNewDockerHost) {
