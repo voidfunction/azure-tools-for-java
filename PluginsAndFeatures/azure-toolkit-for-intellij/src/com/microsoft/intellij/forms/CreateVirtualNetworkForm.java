@@ -24,11 +24,10 @@ package com.microsoft.intellij.forms;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.network.Network;
-import com.microsoft.azure.management.resources.fluentcore.model.Creatable;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -45,19 +44,18 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
     private JTextField regionField;
 
     private Runnable onCreate;
-    private Creatable<Network> network;
+    private VirtualNetwork network;
     private String subscriptionId;
     private String region;
-    private String resourceGroup;
     private Project project;
 
-    public CreateVirtualNetworkForm(Project project, String subscriptionId, String region, String resourceGroup) {
+    public CreateVirtualNetworkForm(Project project, String subscriptionId, String region, String vmName) {
         super(project, true);
 
         this.project = project;
         this.subscriptionId = subscriptionId;
         this.region = region;
-        this.resourceGroup = resourceGroup;
+        nameField.setText(vmName + "-vnet");
 
         setModal(true);
         setTitle("Create Virtual Network");
@@ -85,8 +83,6 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
         subnetAddressRangeField.getDocument().addDocumentListener(docListener);
 
         regionField.setText(region.toString());
-// TODO
-//            userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
 
         validateFields();
         init();
@@ -107,11 +103,8 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
                 return;
             }
             Azure azure = azureManager.getAzure(subscriptionId);
-            network = azure.networks().define(nameField.getText().trim())
-                        .withRegion(region)
-                        .withNewResourceGroup(resourceGroup)
-                        .withAddressSpace(addressSpaceField.getText().trim())
-                        .withSubnet(subnetNameField.getText().trim(), subnetAddressRangeField.getText().trim());
+            network = new VirtualNetwork(nameField.getText().trim(), addressSpaceField.getText().trim(), subnetNameField.getText().trim(),
+                    subnetAddressRangeField.getText().trim());
             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                 @Override
                 public void run() {
@@ -144,6 +137,19 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
 //        );
     }
 
+    @Override
+    public void doCancelAction() {
+        DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                if (onCreate != null) {
+                    onCreate.run();
+                }
+            }
+        });
+        super.doCancelAction();
+    }
+
     private void validateFields() {
         boolean allFieldsCompleted = !(
                 nameField.getText().isEmpty() || addressSpaceField.getText().isEmpty()
@@ -155,7 +161,7 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
         this.onCreate = onCreate;
     }
 
-    public Creatable<Network> getNetwork() {
+    public VirtualNetwork getNetwork() {
         return network;
     }
 }
