@@ -32,6 +32,7 @@ import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azure.management.resources.fluentcore.model.Creatable;
 import com.microsoft.azure.management.storage.AccessTier;
 import com.microsoft.azure.management.storage.Encryption;
 import com.microsoft.azure.management.storage.Kind;
@@ -74,8 +75,8 @@ public class AzureSDKManager {
 
     public static VirtualMachine createVirtualMachine(String subscriptionId, @NotNull String name, @NotNull String resourceGroup, boolean withNewResourceGroup,
                                                       @NotNull String size, @NotNull String region, final VirtualMachineImage vmImage, Object knownImage, boolean isKnownImage,
-                                                      @NotNull final StorageAccount storageAccount, @NotNull final Network network,
-                                                      @NotNull String subnet, boolean withNewNetwork, @Nullable PublicIpAddress pip, boolean withNewPip,
+                                                      @NotNull final StorageAccount storageAccount, @NotNull final Network network, Creatable<Network> newNetwork, boolean withNewNetwork,
+                                                      @NotNull String subnet, @Nullable PublicIpAddress pip, boolean withNewPip,
                                                       @Nullable AvailabilitySet availabilitySet, boolean withNewAvailabilitySet,
                                                       @NotNull final String username, @Nullable final String password, @Nullable String publicKey) throws Exception {
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
@@ -92,8 +93,9 @@ public class AzureSDKManager {
                 withGroup.withNewResourceGroup(resourceGroup) : withGroup.withExistingResourceGroup(resourceGroup);
         VirtualMachine.DefinitionStages.WithPublicIpAddress withPublicIpAddress;
         if (withNewNetwork) {
-            withPublicIpAddress = withNetwork.withNewPrimaryNetwork("10.0.0.0/28")
-                    .withPrimaryPrivateIpAddressDynamic();
+            withPublicIpAddress = withNetwork.withNewPrimaryNetwork(newNetwork).withPrimaryPrivateIpAddressDynamic();
+//            withPublicIpAddress = withNetwork.withNewPrimaryNetwork("10.0.0.0/28").
+//                    .withPrimaryPrivateIpAddressDynamic();
         } else {
             withPublicIpAddress = withNetwork.withExistingPrimaryNetwork(network)
                     .withSubnet(subnet)

@@ -36,6 +36,7 @@ import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.resources.fluentcore.model.Creatable;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
@@ -232,10 +233,10 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                                               public void setSelectedItem(Object o) {
                                                   super.setSelectedItem(o);
                                                   if (CREATE_NEW.equals(o)) {
-//                                                      showNewVirtualNetworkForm();
-                                                      model.setWithNewNetwork(true);
-                                                      model.setVirtualNetwork(null);
-                                                      model.setSubnet(null);
+                                                      showNewVirtualNetworkForm();
+//                                                      model.setWithNewNetwork(true);
+//                                                      model.setVirtualNetwork(null);
+//                                                      model.setSubnet(null);
                                                   } else {
 //                                                      super.setSelectedItem(o);
                                                       model.setVirtualNetwork((Network) o);
@@ -258,10 +259,10 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
             public void setSelectedItem(final Object o) {
                 super.setSelectedItem(o);
                 if (CREATE_NEW.equals(o)) {
-//                    showNewVirtualNetworkForm();
-                    model.setWithNewNetwork(true);
-                    model.setVirtualNetwork(null);
-                    model.setSubnet(null);
+                    showNewVirtualNetworkForm();
+//                    model.setWithNewNetwork(true);
+//                    model.setVirtualNetwork(null);
+//                    model.setSubnet(null);
                 } else {
 //                    super.setSelectedItem(o);
                     model.setWithNewNetwork(false);
@@ -670,21 +671,18 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
     }
 
     private void showNewVirtualNetworkForm() {
-        final CreateVirtualNetworkForm form = new CreateVirtualNetworkForm(project, model.getSubscription().getSubscriptionId(), model.getRegion());
+        final String resourceGroupName = createNewRadioButton.isSelected() ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
+
+        final CreateVirtualNetworkForm form = new CreateVirtualNetworkForm(project, model.getSubscription().getSubscriptionId(), model.getRegion(), resourceGroupName);
         form.setOnCreate(new Runnable() {
             @Override
             public void run() {
-                ApplicationManager.getApplication().invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        Network newVirtualNetwork = form.getNetwork();
+                Creatable<Network> newVirtualNetwork = form.getNetwork();
 
-                        if (newVirtualNetwork != null) {
-                            model.setVirtualNetwork(newVirtualNetwork);
-                            fillStorage();
-                        }
-                    }
-                });
+                if (newVirtualNetwork != null) {
+                    model.setNewNetwork(newVirtualNetwork);
+                    model.setWithNewNetwork(true);
+                }
             }
         });
         form.show();
@@ -779,8 +777,9 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                                     model.isKnownMachineImage(),
                                     storageAccount,
                                     model.getVirtualNetwork(),
-                                    model.getSubnet(),
+                                    model.getNewNetwork(),
                                     model.isWithNewNetwork(),
+                                    model.getSubnet(),
                                     model.getPublicIpAddress(),
                                     model.isWithNewPip(),
                                     model.getAvailabilitySet(),

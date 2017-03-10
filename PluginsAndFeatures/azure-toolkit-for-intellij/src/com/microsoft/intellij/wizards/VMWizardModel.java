@@ -29,6 +29,7 @@ import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.resources.fluentcore.model.Creatable;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.intellij.wizards.createarmvm.MachineSettingsStep;
@@ -49,6 +50,7 @@ public class VMWizardModel extends WizardModel {
     private boolean isKnownMachineImage;
     private Object knownMachineImage;
     private Network virtualNetwork;
+    private Creatable<Network> newNetwork;
     private boolean withNewNetwork;
     private StorageAccount storageAccount;
     //    private String availabilitySet;
@@ -200,6 +202,14 @@ public class VMWizardModel extends WizardModel {
 
     public void setVirtualNetwork(Network virtualNetwork) {
         this.virtualNetwork = virtualNetwork;
+    }
+
+    public Creatable<Network> getNewNetwork() {
+        return newNetwork;
+    }
+
+    public void setNewNetwork(Creatable<Network> newNetwork) {
+        this.newNetwork = newNetwork;
     }
 
     public boolean isWithNewNetwork() {
