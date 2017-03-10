@@ -110,7 +110,7 @@ public class SubscriptionManager {
                 sidToTid.clear();
             }
         }
-        //notifyAllListeners();
+        notifyAllListeners();
     }
 
     private void updateSidToTidMap() {
