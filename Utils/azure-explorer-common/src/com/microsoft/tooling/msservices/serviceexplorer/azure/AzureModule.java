@@ -62,7 +62,9 @@ public class AzureModule extends AzureRefreshableNode {
         vmArmServiceModule = new VMArmModule(this);
         dockerHostModule = new DockerHostModule(this);
         try {
-            AuthMethodManager.getInstance().addSignInEventListener(new SubscriptionListener());
+            SignInOutListener signInOutListener = new SignInOutListener();
+            AuthMethodManager.getInstance().addSignInEventListener(signInOutListener);
+            AuthMethodManager.getInstance().addSignOutEventListener(signInOutListener);
         } catch (Exception ex) {
             DefaultLoader.getUIHelper().logError(ex.getMessage(), ex);
         }
@@ -71,17 +73,14 @@ public class AzureModule extends AzureRefreshableNode {
     }
 
     public AzureModule(Node parent, String iconPath, Object data) {
-        super(AZURE_SERVICE_MODULE_ID, composeName(false), parent, iconPath);
+        super(AZURE_SERVICE_MODULE_ID, composeName(), parent, iconPath);
     }
 
     public void setHdInsightModule(@NotNull HDInsightRootModule rootModule) {
         this.hdInsightModule = rootModule;
     }
 
-    private static String composeName(boolean isSignedOut) {
-        if (isSignedOut) {
-            return BASE_MODULE_NAME + " (Not Signed In)";
-        }
+    private static String composeName() {
         try {
             AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
             // not signed in
@@ -151,10 +150,10 @@ public class AzureModule extends AzureRefreshableNode {
         return project;
     }
 
-    private class SubscriptionListener implements Runnable {
+    private class SignInOutListener implements Runnable {
         @Override
         public void run() {
-            handleSubscriptionChange(false);
+            handleSubscriptionChange();
             addSubscriptionSelectionListener();
         }
     }
@@ -168,8 +167,10 @@ public class AzureModule extends AzureRefreshableNode {
             }
             azureManager.getSubscriptionManager().addListener(new ISubscriptionSelectionListener() {
                 @Override
-                public void update(boolean isSignedOut) {
-                    handleSubscriptionChange(isSignedOut);
+                public void update(boolean isRefresh) {
+                    if (!isRefresh) {
+                        handleSubscriptionChange();
+                    }
                 }
             });
         } catch (Exception ex) {
@@ -177,8 +178,8 @@ public class AzureModule extends AzureRefreshableNode {
         }
     }
 
-    private void handleSubscriptionChange(boolean isSignedOut) {
-        setName(composeName(isSignedOut));
+    private void handleSubscriptionChange() {
+        setName(composeName());
         for (Node child : getChildNodes()) {
             child.removeAllChildNodes();
         }
