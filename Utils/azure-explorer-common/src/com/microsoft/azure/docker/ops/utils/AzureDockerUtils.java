@@ -312,31 +312,6 @@ public class AzureDockerUtils {
         });
       }
 
-//      for (SubscriptionDetail subscriptionDetail : subscriptions ) {
-//        if(subscriptionDetail.isSelected()) {
-//          AzureDockerSubscription dockerSubscription = new AzureDockerSubscription();
-//          dockerSubscription.id = subscriptionDetail.getSubscriptionId();
-//          if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker subscription: %s at %s\n", dockerSubscription.id, new Date().toString());
-//          dockerSubscription.tid = subscriptionDetail.getTenantId();
-//          dockerSubscription.name = subscriptionDetail.getSubscriptionName();
-//          dockerSubscription.azureClient = azureAuthManager.getAzure(dockerSubscription.id);
-//          // TODO: temporary work around for registering the namespaces
-//          AzureRegisterProviderNamespaces.registerAzureNamespaces(dockerSubscription.azureClient);
-//
-//          dockerSubscription.keyVaultClient = azureAuthManager.getKeyVaultClient(subscriptionDetail.getTenantId());
-//          dockerSubscription.isSelected = true;
-//          if (AzureDockerUtils.hasServicePrincipalAzureManager(azureAuthManager)) {
-//            dockerSubscription.userId = null;
-//            dockerSubscription.servicePrincipalId = azureAuthManager.getCurrentUserId();
-//          } else {
-//            dockerSubscription.userId = azureAuthManager.getCurrentUserId();
-//            dockerSubscription.servicePrincipalId = null;
-//          }
-//
-//          subsMap.put(dockerSubscription.id, dockerSubscription);
-//        }
-//      }
-
       if (DEBUG) System.out.format("Get AzureDockerHostsManage locations: %s\n", new Date().toString());
       List<Subscription> azureSubscriptionList = azureAuthManager.getSubscriptions();
       for (Subscription subscription : azureSubscriptionList) {
@@ -408,7 +383,16 @@ public class AzureDockerUtils {
                       certVault.servicePrincipalId = dockerSubscription.servicePrincipalId;
                       certVault.region = vaultWithInner.regionName();
                       certVault.uri = vaultWithInner.vaultUri();
-                      certVault = AzureDockerCertVaultOps.getVault(certVault, dockerSubscription.keyVaultClient);
+                      AzureDockerCertVault certVaultTemp = AzureDockerCertVaultOps.getVault(certVault, dockerSubscription.keyVaultClient);
+                      if (certVaultTemp == null) {
+                        try {
+                          // try to assign read permissions to the key vault in case it was created with a different service principal
+                          AzureDockerCertVaultOps.setVaultPermissionsRead(dockerSubscription.azureClient, certVault);
+                          certVault = AzureDockerCertVaultOps.getVault(certVault, dockerSubscription.keyVaultClient);
+                        } catch (Exception ignored) {}
+                      } else {
+                        certVault = certVaultTemp;
+                      }
 
                       if (certVault != null && certVault.hostName != null) {
                         vaultSubscriber.onNext(certVault);

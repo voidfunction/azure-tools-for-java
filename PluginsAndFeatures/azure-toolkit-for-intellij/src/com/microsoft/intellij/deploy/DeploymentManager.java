@@ -31,16 +31,19 @@ import com.microsoft.azure.docker.ops.*;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.appservice.WebApp;
+import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
+import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 
+import static com.intellij.projectImport.ProjectImportBuilder.getCurrentProject;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public final class DeploymentManager {
@@ -169,19 +172,10 @@ public final class DeploymentManager {
                 System.out.println("Done opening a remote connection to the Docker host: " + new Date().toString());
             }
 
-            if (dockerImageInstance.hasNewDockerHost && dockerImageInstance.host.certVault.hostName != null) {
-                msg = String.format("Creating new key vault %s ...", dockerImageInstance.host.certVault.name);
-                notifyProgress(dockerImageInstance.host.name, startDate, null, 50, msg);
-                System.out.println("Creating new Docker key vault: " + new Date().toString());
-                AzureDockerCertVaultOps.createOrUpdateVault(azureClient, dockerImageInstance.host.certVault, keyVaultClient);
-                System.out.println("Done creating new key vault: " + new Date().toString());
-
-                msg = String.format("Updating key vaults ...");
-                notifyProgress(dockerImageInstance.host.name, startDate, null, 55, msg);
-                System.out.println("Refreshing key vaults: " + new Date().toString());
-                dockerManager.refreshDockerVaults();
-                dockerManager.refreshDockerVaultDetails();
-                System.out.println("Done refreshing key vaults: " + new Date().toString());
+            if (dockerImageInstance.hasNewDockerHost) {
+                if (dockerImageInstance.host.certVault != null && dockerImageInstance.host.certVault.hostName != null) {
+                    AzureDockerUIResources.createDockerKeyVault(null, dockerImageInstance.host, dockerManager);
+                }
             }
 
             msg = String.format("Uploading Dockerfile and artifact %s on %s ...", dockerImageInstance.artifactName, dockerImageInstance.host.name);
@@ -211,16 +205,24 @@ public final class DeploymentManager {
             msg = String.format("Updating Docker hosts ...");
             notifyProgress(dockerImageInstance.host.name, startDate, null, 95, msg);
             System.out.println("Refreshing docker hosts: " + new Date().toString());
-            dockerManager.refreshDockerHostDetails();
+//            dockerManager.refreshDockerHostDetails();
+            VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerImageInstance.host.hostVM.resourceGroupName, dockerImageInstance.host.hostVM.name);
+            if (vm != null) {
+                DockerHost updatedHost = AzureDockerVMOps.getDockerHost(vm, dockerManager.getDockerVaultsMap());
+                if (updatedHost != null) {
+                    updatedHost.sid = dockerImageInstance.host.sid;
+                    updatedHost.hostVM.sid = dockerImageInstance.host.hostVM.sid;
+                    if (updatedHost.certVault == null) {
+                        updatedHost.certVault = dockerImageInstance.host.certVault;
+                        updatedHost.hasPwdLogIn = dockerImageInstance.host.hasPwdLogIn;
+                        updatedHost.hasSSHLogIn = dockerImageInstance.host.hasSSHLogIn;
+                        updatedHost.isTLSSecured = dockerImageInstance.host.isTLSSecured;
+                    }
+                    dockerManager.addDockerHostDetails(dockerImageInstance.host);
+                }
+            }
             System.out.println("Done refreshing Docker hosts: " + new Date().toString());
             System.out.println("Done refreshing key vaults: " + new Date().toString());
-            DockerHost updatedHost = dockerManager.getDockerHostForURL(dockerImageInstance.host.apiUrl);
-            if (updatedHost.certVault == null) {
-                updatedHost.certVault = dockerImageInstance.host.certVault;
-                updatedHost.hasPwdLogIn = dockerImageInstance.host.hasPwdLogIn;
-                updatedHost.hasSSHLogIn = dockerImageInstance.host.hasSSHLogIn;
-                updatedHost.isTLSSecured = dockerImageInstance.host.isTLSSecured;
-            }
 
             notifyProgress(dockerImageInstance.host.name, startDate, url, 100, message("runStatus"), dockerImageInstance.host.name);
         } catch (InterruptedException e) {

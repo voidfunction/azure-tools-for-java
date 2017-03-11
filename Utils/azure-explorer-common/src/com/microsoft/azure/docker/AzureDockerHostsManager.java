@@ -175,6 +175,14 @@ public class AzureDockerHostsManager {
     return dockerStorageAccountMap;
   }
 
+
+  public Map<String, DockerHost> addDockerHostDetails(DockerHost dockerHost) {
+    dockerHostsMap.put(dockerHost.apiUrl, dockerHost);
+    dockerHostsList = new ArrayList<>(dockerHostsMap.values());
+
+    return dockerHostsMap;
+  }
+
   public Map<String, DockerHost> refreshDockerHostDetails() {
     try {
       Map<String, DockerHost> localDockerHostsMap = new HashMap<>();
@@ -183,7 +191,12 @@ public class AzureDockerHostsManager {
           localDockerHostsMap.put(dockerHost.apiUrl, dockerHost);
           if (dockerHost.certVault == null && dockerHostsMap != null) {
             DockerHost oldHost = dockerHostsMap.get(dockerHost.apiUrl);
-            dockerHost.certVault = oldHost != null ? oldHost.certVault : null;
+            if (oldHost != null) {
+              dockerHost.certVault = oldHost.certVault;
+              dockerHost.hasPwdLogIn = oldHost.certVault.vmPwd != null && !oldHost.certVault.vmPwd.isEmpty();
+              dockerHost.hasSSHLogIn = oldHost.certVault.sshPubKey != null && !oldHost.certVault.sshPubKey.isEmpty();
+              dockerHost.isTLSSecured = oldHost.certVault.tlsServerCert != null && !oldHost.certVault.tlsServerCert.isEmpty();
+            }
           }
         }
       }

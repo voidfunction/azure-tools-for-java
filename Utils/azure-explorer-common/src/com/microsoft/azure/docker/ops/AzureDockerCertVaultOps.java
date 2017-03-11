@@ -35,6 +35,7 @@ import com.microsoft.azure.management.keyvault.SecretPermissions;
 import com.microsoft.azure.management.keyvault.Vault;
 import com.microsoft.azuretools.utils.Pair;
 import com.microsoft.rest.ServiceCallback;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
@@ -147,7 +148,8 @@ public class AzureDockerCertVaultOps {
         // If original owner is an AD user, we might fail to set vault permissions
         try {
           setVaultPermissionsAll(azureClient, certVault);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+          DefaultLoader.getUIHelper().logError(String.format("WARN: Can't set permissions to %s: %s\n", vault.vaultUri(), e.getMessage()), e);
         }
       }
 
@@ -163,6 +165,7 @@ public class AzureDockerCertVaultOps {
           try {
             if (DEBUG) System.out.format("WARN: can't find %s (sleepMs: %d)\n", vaultUri, sleepMs);
             if (DEBUG) System.out.println(e.getMessage());
+//            DefaultLoader.getUIHelper().logError(String.format("WARN: Can't connect to %s: %s (sleepMs: %d)\n", vaultUri, e.getMessage(), sleepMs), e);
             Thread.sleep(5000);
           } catch (Exception ignored) {
           }
@@ -170,56 +173,56 @@ public class AzureDockerCertVaultOps {
       }
 
       Map<String, String> secretsMap = getSecretsMap(certVault);
-//      boolean storeDockerHostNames = false;
 
-      //Execute Key Vault Secret Update in parallel
-      Observable.from(DOCKERHOST_SECRETS).flatMap( secretName -> {
-            return Observable.create(new Observable.OnSubscribe<SecretBundle>() {
-              @Override
-              public void call(Subscriber<? super SecretBundle> subscriber) {
-                String secretValue = secretsMap.get(secretName);
-                if (secretValue != null && !secretValue.isEmpty()) {
-                  keyVaultClient.setSecretAsync(new SetSecretRequest.Builder(vaultUri, secretName, secretValue).build(),
-                      new ServiceCallback<SecretBundle>() {
-                        @Override
-                        public void failure(Throwable throwable) {
-                          subscriber.onError(throwable);
-                        }
-
-                        @Override
-                        public void success(SecretBundle secretBundle) {
-                          subscriber.onNext(secretBundle);
-                          subscriber.onCompleted();
-                        }
-                      }
-                  );
-                }
-              }
-            }).subscribeOn(Schedulers.io());
-          }
-      ).toBlocking().subscribe();
+//      //Execute Key Vault Secret Update in parallel
+//      Observable.from(DOCKERHOST_SECRETS).flatMap( secretName -> {
+//            return Observable.create(new Observable.OnSubscribe<SecretBundle>() {
+//              @Override
+//              public void call(Subscriber<? super SecretBundle> subscriber) {
+//                String secretValue = secretsMap.get(secretName);
+//                if (secretValue != null && !secretValue.isEmpty()) {
+//                  keyVaultClient.setSecretAsync(new SetSecretRequest.Builder(vaultUri, secretName, secretValue).build(),
+//                      new ServiceCallback<SecretBundle>() {
+//                        @Override
+//                        public void failure(Throwable throwable) {
+//                          subscriber.onError(throwable);
+//                        }
+//
+//                        @Override
+//                        public void success(SecretBundle secretBundle) {
+//                          subscriber.onNext(secretBundle);
+//                          subscriber.onCompleted();
+//                        }
+//                      }
+//                  );
+//                }
+//              }
+//            }).subscribeOn(Schedulers.io());
+//          }
+//      ).toBlocking().subscribe();
 
       // TODO: remove this after enabling parallel secrets write from above
-//      for( Map.Entry<String, String> entry : secretsMap.entrySet()) {
-//        try {
-//          if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-//            keyVaultClient.setSecret(new SetSecretRequest.Builder(vaultUri, entry.getKey(), entry.getValue()).build());
-//            storeDockerHostNames = true;
-//          }
-//        } catch (Exception e) {
-//          System.out.format("ERROR: can't write %s secret %s: %s\n", vaultUri, entry.getKey(), entry.getValue());
-//          System.out.println(e.getMessage());
-//        }
-//      }
+      for( Map.Entry<String, String> entry : secretsMap.entrySet()) {
+        try {
+          if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+            keyVaultClient.setSecret(new SetSecretRequest.Builder(vaultUri, entry.getKey(), entry.getValue()).build());
+          }
+        } catch (Exception e) {
+          DefaultLoader.getUIHelper().logError(String.format("WARN: Unexpected error writing to %s: %s\n", vaultUri, e.getMessage()), e);
+          System.out.format("ERROR: can't write %s secret %s: %s\n", vaultUri, entry.getKey(), entry.getValue());
+          System.out.println(e.getMessage());
+        }
+      }
 
       if (keyVaultClient.listSecrets(vaultUri).size() > 0 && certVault.hostName != null && !certVault.hostName.isEmpty()) {
         keyVaultClient.setSecret(new SetSecretRequest.Builder(vaultUri, SECRETENTRY_DOCKERHOSTNAMES, certVault.hostName).build());
       } else {
         // something unexpected went wrong... delete the vault
         if (DEBUG) System.out.println("ERROR: something went wrong");
-        //if (isNewVault) azureClient.vaults().deleteById(vault.id());
+        throw  new RuntimeException("Key vault has no secrets");
       }
     } catch(Exception e) {
+      DefaultLoader.getUIHelper().logError(String.format("WARN: Unexpected error creating Azure Key Vault %s - %s\n", certVault.name, e.getMessage()), e);
       throw new AzureDockerException(e.getMessage());
     }
   }
@@ -417,56 +420,6 @@ public class AzureDockerCertVaultOps {
     if (currentSecretValue != null && !currentSecretValue.isEmpty()) {
       certVault.tlsServerKey = currentSecretValue;
     }
-
-//    try {
-//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "vmUsername");
-//      certVault.vmUsername = (secret != null) ? secret.value() : null;
-//    } catch (Exception e){}
-//
-//    try {
-//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "vmPwd");
-//      certVault.vmPwd = (secret != null) ? secret.value() : null;
-//    } catch (Exception e){}
-//
-//    try {
-//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "sshKey");
-//      certVault.sshKey = (secret != null) ? secret.value() : null;
-//    } catch (Exception e){}
-//
-//    try {
-//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "sshPubKey");
-//      certVault.sshPubKey = (secret != null) ? secret.value() : null;
-//    } catch (Exception e){}
-//
-//    try {
-//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsCACert");
-//      certVault.tlsCACert = (secret != null) ? secret.value() : null;
-//    } catch (Exception e){}
-//
-//    try {
-//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsCAKey");
-//      certVault.tlsCAKey = (secret != null) ? secret.value() : null;
-//    } catch (Exception e){}
-//
-//    try {
-//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsClientCert");
-//      certVault.tlsClientCert = (secret != null) ? secret.value() : null;
-//    } catch (Exception e){}
-//
-//    try {
-//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsClientKey");
-//      certVault.tlsClientKey = (secret != null) ? secret.value() : null;
-//    } catch (Exception e){}
-//
-//    try {
-//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsServerCert");
-//      certVault.tlsServerCert = (secret != null) ? secret.value() : null;
-//    } catch (Exception e){}
-//
-//    try {
-//      SecretBundle secret = keyVaultClient.getSecret(vaultUri, "tlsServerKey");
-//      certVault.tlsServerKey = (secret != null) ? secret.value() : null;
-//    } catch (Exception e){}
 
     return certVault;
   }
