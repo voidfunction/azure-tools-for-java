@@ -61,7 +61,7 @@ public class CreateArmStorageAccountAction extends NodeActionListener {
         createStorageAccountForm.setOnCreate(new Runnable() {
             @Override
             public void run() {
-                storageModule.load();
+                storageModule.load(false);
             }
         });
         createStorageAccountForm.open();

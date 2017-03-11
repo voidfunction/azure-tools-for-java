@@ -135,7 +135,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
             invisibleRoot = new TreeNode(null);
             invisibleRoot.add(createTreeNode(azureModule));
 
-            azureModule.load();
+            azureModule.load(false);
         }
     }
 
@@ -371,7 +371,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
     private void makeActions() {
         refreshAction = new Action("Refresh", Activator.getImageDescriptor("icons/refresh.png")) {
             public void run() {
-                azureModule.load();
+                azureModule.load(true);
             }
         };
         refreshAction.setToolTipText("Refresh");
@@ -380,7 +380,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
             public void run() {
 //                ManageSubscriptionDialog subscriptionDialog = new ManageSubscriptionDialog(PluginUtil.getParentShell(), true, false);
 //                subscriptionDialog.open();
-                azureModule.load();
+                azureModule.load(false);
 
             }
         };

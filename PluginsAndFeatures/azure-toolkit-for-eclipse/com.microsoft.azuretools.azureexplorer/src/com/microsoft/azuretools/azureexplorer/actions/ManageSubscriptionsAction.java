@@ -40,6 +40,6 @@ public class ManageSubscriptionsAction  extends NodeActionListener {
 //        Dialog subscriptionsDialog = new ManageSubscriptionDialog(PluginUtil.getParentShell(), true, false);
 //        subscriptionsDialog.open();
 
-        azureServiceModule.load();
+//        azureServiceModule.load();
     }
 }

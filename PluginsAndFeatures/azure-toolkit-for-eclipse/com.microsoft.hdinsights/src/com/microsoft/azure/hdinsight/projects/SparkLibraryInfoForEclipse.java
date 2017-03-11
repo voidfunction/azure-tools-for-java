@@ -22,7 +22,6 @@ package com.microsoft.azure.hdinsight.projects;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-import com.microsoft.auth.StringUtils;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 

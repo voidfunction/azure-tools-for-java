@@ -55,8 +55,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
-import com.microsoft.auth.StringUtils;
 import com.microsoft.azure.hdinsight.Activator;
+import com.microsoft.azuretools.adauth.StringUtils;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 public class HDInsightsJavaProjectWizard extends JavaProjectWizard implements IExecutableExtension {

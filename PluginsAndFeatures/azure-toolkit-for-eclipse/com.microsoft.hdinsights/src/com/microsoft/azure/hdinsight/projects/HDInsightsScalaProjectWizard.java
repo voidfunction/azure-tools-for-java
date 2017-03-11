@@ -53,8 +53,8 @@ import org.scalaide.core.SdtConstants;
 import org.scalaide.ui.ScalaImages;
 import org.scalaide.ui.internal.wizards.NewScalaProjectWizardPageOne;
 
-import com.microsoft.auth.StringUtils;
 import com.microsoft.azure.hdinsight.Activator;
+import com.microsoft.azuretools.adauth.StringUtils;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 public class HDInsightsScalaProjectWizard extends JavaProjectWizard implements IExecutableExtension {

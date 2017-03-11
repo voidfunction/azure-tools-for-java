@@ -57,7 +57,7 @@ public class SignOutCommandHandler extends AbstractHandler {
                 if (adAuthManager.isSignedIn()) {
                     adAuthManager.signOut();
                 }
-                authMethodManager.cleanAll();
+                authMethodManager.signOut();
             }
         } catch (Exception e) {
             e.printStackTrace();
