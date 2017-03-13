@@ -191,7 +191,7 @@ public class AzureDockerHostsManager {
           localDockerHostsMap.put(dockerHost.apiUrl, dockerHost);
           if (dockerHost.certVault == null && dockerHostsMap != null) {
             DockerHost oldHost = dockerHostsMap.get(dockerHost.apiUrl);
-            if (oldHost != null) {
+            if (oldHost != null && oldHost.certVault != null) {
               dockerHost.certVault = oldHost.certVault;
               dockerHost.hasPwdLogIn = oldHost.certVault.vmPwd != null && !oldHost.certVault.vmPwd.isEmpty();
               dockerHost.hasSSHLogIn = oldHost.certVault.sshPubKey != null && !oldHost.certVault.sshPubKey.isEmpty();

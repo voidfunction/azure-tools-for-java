@@ -46,6 +46,7 @@ import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.DEBUG;
@@ -110,10 +111,15 @@ public class AzureDockerCertVaultOps {
     }
 
     try {
-      Vault vault;
+      Vault vault = null;
 
       try {
-        vault = azureClient.vaults().getByGroup(certVault.resourceGroupName, certVault.name);
+        for (Vault vaultItem : azureClient.vaults().list()) {
+          if (vaultItem.name().equals(certVault.name)) {
+            vault = azureClient.vaults().getByGroup(vaultItem.resourceGroupName(), certVault.name);
+            break;
+          }
+        }
       } catch (CloudException e) {
         if (e.getBody().getCode().equals("ResourceNotFound") || e.getBody().getCode().equals("ResourceGroupNotFound")) {
           vault = null; // Vault does no exist
@@ -157,7 +163,7 @@ public class AzureDockerCertVaultOps {
       String vaultUri = vault.vaultUri();
       // vault is not immediately available so the next operation could fail
       // add a retry policy to make sure it got created and it is readable
-      for (int sleepMs = 5000; sleepMs <= 200000; sleepMs += 5000 ) {
+      for (int sleepMs = 5000; sleepMs <= 2000000; sleepMs += 5000 ) {
         try {
           keyVaultClient.listSecrets(vaultUri);
           break;
@@ -166,6 +172,12 @@ public class AzureDockerCertVaultOps {
             if (DEBUG) System.out.format("WARN: can't find %s (sleepMs: %d)\n", vaultUri, sleepMs);
             if (DEBUG) System.out.println(e.getMessage());
 //            DefaultLoader.getUIHelper().logError(String.format("WARN: Can't connect to %s: %s (sleepMs: %d)\n", vaultUri, e.getMessage(), sleepMs), e);
+            try {
+              // Windows only - flush local DNS to reflect the new Key Vault URI
+              if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                Process p = Runtime.getRuntime().exec("cmd /c ipconfig /flushdns");
+              }
+            } catch (Exception ignored) {}
             Thread.sleep(5000);
           } catch (Exception ignored) {
           }
