@@ -17,9 +17,6 @@
     <module>../AddLibrary/JDBCLibrary/JavaEE6/com.microsoft.sqljdbc4</module>
 	<module>../AddLibrary/JDBCLibrary/JavaEE6/com.microsoft.sqljdbc4.feature</module>
     <module>../AddLibrary/JDBCLibrary/JavaEE6/com.microsoft.sqljdbc4.ui</module>
-	<module>../AddLibrary/QpidLibraries/com.microsoftopentechnologies.qpid</module>
-	<module>../AddLibrary/QpidLibraries/com.microsoftopentechnologies.qpid.feature</module>
-    <module>../AddLibrary/QpidLibraries/com.microsoftopentechnologies.qpid.ui</module>
     <module>com.microsoft.azuretools.azureexplorer</module>
     <module>com.microsoft.azuretools.azureexplorer.feature</module>
     <module>com.microsoft.hdinsights</module>

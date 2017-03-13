@@ -9,12 +9,6 @@
    <bundle id="com.microsoft.azuretools.core" version="3.0.0.qualifier">
       <category name="com.persistent.azuretools.eclipseplugin.category"/>
    </bundle>
-   <bundle id="com.microsoft.azuretools.qpid" version="0.19.0.qualifier">
-      <category name="com.persistent.azuretools.eclipseplugin.category"/>
-   </bundle>
-   <bundle id="com.microsoft.azuretools.qpid.ui" version="0.19.0.qualifier">
-      <category name="com.persistent.azuretools.eclipseplugin.category"/>
-   </bundle>
    <bundle id="com.microsoft.azuretools.sdk" version="3.0.0.qualifier">
       <category name="com.persistent.azuretools.eclipseplugin.category"/>
    </bundle>
