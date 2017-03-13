@@ -56,8 +56,12 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.azuretools.azureexplorer.Activator;
+import com.microsoft.azuretools.core.handlers.SelectSubsriptionsCommandHandler;
+import com.microsoft.azuretools.core.handlers.SignInCommandHandler;
+import com.microsoft.azuretools.core.handlers.SignOutCommandHandler;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangeListener;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangedEvent;
@@ -76,6 +80,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
 
     private TreeViewer viewer;
     private Action refreshAction;
+    private Action signInOutAction;
     private Action manageSubscriptionAction;
     private Action doubleClickAction;
 
@@ -313,7 +318,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
         viewer.setInput(getViewSite());
 
         // Create the help context id for the viewer's control
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "com.microsoft.azureexplorer.viewer");
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "com.microsoft.azuretools.azureexplorer.viewer");
         makeActions();
         hookContextMenu();
         hookMouseActions();
@@ -359,11 +364,13 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
     private void fillLocalPullDown(IMenuManager manager) {
         manager.add(refreshAction);
         manager.add(new Separator());
+        manager.add(signInOutAction);
         manager.add(manageSubscriptionAction);
     }
 
     private void fillLocalToolBar(IToolBarManager manager) {
         manager.add(refreshAction);
+        manager.add(signInOutAction);
         manager.add(manageSubscriptionAction);
         manager.add(new Separator());
     }
@@ -375,13 +382,25 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
             }
         };
         refreshAction.setToolTipText("Refresh");
-
+        signInOutAction = new Action("Sign In/Sign Out", Activator.getImageDescriptor("icons/azure_explorer.png")) {
+            public void run() {
+            	try {
+            		AuthMethodManager authMethodManager = AuthMethodManager.getInstance();
+            		boolean isSignedIn = authMethodManager.isSignedIn();
+            		if (isSignedIn) {
+            			SignOutCommandHandler.doSignOut(PluginUtil.getParentShell());
+            		} else {
+            			SignInCommandHandler.doSignIn(PluginUtil.getParentShell());
+            		}
+            	} catch (Exception ex) {
+            		Activator.getDefault().log(ex.getMessage(), ex);
+            	}
+            }	
+		};
         manageSubscriptionAction = new Action("Manage Subscriptions", Activator.getImageDescriptor("icons/azure_explorer.png")) {
             public void run() {
-//                ManageSubscriptionDialog subscriptionDialog = new ManageSubscriptionDialog(PluginUtil.getParentShell(), true, false);
-//                subscriptionDialog.open();
+            	SelectSubsriptionsCommandHandler.onSelectSubscriptions(PluginUtil.getParentShell());
                 azureModule.load(false);
-
             }
         };
         manageSubscriptionAction.setToolTipText("Manage Subscriptions");

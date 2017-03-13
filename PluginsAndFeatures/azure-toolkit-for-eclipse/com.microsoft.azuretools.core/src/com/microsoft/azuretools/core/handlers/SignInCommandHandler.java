@@ -24,6 +24,7 @@ package com.microsoft.azuretools.core.handlers;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
@@ -31,29 +32,27 @@ import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.AuthMethodDetails;
 import com.microsoft.azuretools.core.ui.SingInDialog;
 
-
-/**
- * Our sample handler extends AbstractHandler, an IHandler base class.
- * @see org.eclipse.core.commands.IHandler
- * @see org.eclipse.core.commands.AbstractHandler
- */
 public class SignInCommandHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+		doSignIn(window.getShell());
+
+		return null;
+	}
+
+	public static void doSignIn(Shell shell) {
 		try {
 			AuthMethodManager authMethodManager = AuthMethodManager.getInstance();
-			SingInDialog d = SingInDialog.go(window.getShell(), authMethodManager.getAuthMethodDetails());
+			SingInDialog d = SingInDialog.go(shell, authMethodManager.getAuthMethodDetails());
 			if (null != d) {
                 AuthMethodDetails authMethodDetailsUpdated = d.getAuthMethodDetails();
                 authMethodManager.setAuthMethodDetails(authMethodDetailsUpdated);
-                SelectSubsriptionsCommandHandler.onSelectSubscriptions(window.getShell());;
+                SelectSubsriptionsCommandHandler.onSelectSubscriptions(shell);;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		return null;
 	}
 }
