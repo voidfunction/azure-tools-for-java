@@ -106,7 +106,7 @@
   	
   	<extension point="org.eclipse.ui.views">
       <view
-            category="com.gigaspaces.azure"
+            category="com.microsoft.azuretools"
             class="com.microsoft.azure.hdinsight.SparkSubmissionToolWindowView"
             id="com.microsoft.azure.hdinsight.sparksubmissiontoolwindowview"
             name="Spark Submision"

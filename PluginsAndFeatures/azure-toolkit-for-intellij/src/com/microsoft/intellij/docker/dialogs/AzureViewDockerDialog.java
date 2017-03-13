@@ -60,6 +60,7 @@ public class AzureViewDockerDialog extends DialogWrapper {
   private JTextField dockerHostSshLoginTextField;
   private JTextField dockerHostTlsAuthTextField;
   private JTextPane dockerHostKeyvaultTextPane;
+  private JTextField dockerHostSidTextField;
 
   private Action myClickApplyAction;
   private Project project;
@@ -71,6 +72,7 @@ public class AzureViewDockerDialog extends DialogWrapper {
     // Docker VM info
     setTextField(dockerHostNameTextField, dockerHost.name);
     setTextField(dockerHostUrlTextField, dockerHost.apiUrl);
+    setTextField(dockerHostSidTextField, dockerHost.sid);
     setTextField(dockerHostLocationTextField, dockerHost.hostVM.region);
     setTextField(dockerHostStatusTextField, (updating != null) ?
         dockerHost.state.toString() + updating :
@@ -140,7 +142,7 @@ public class AzureViewDockerDialog extends DialogWrapper {
   }
 
   private void setTextField(JTextField textField, String text) {
-    textField.setText(text);
+    textField.setText(text != null ? text : "-unknown-");
     textField.setEditable(false);
     textField.setBackground(null);
     textField.setBorder(null);

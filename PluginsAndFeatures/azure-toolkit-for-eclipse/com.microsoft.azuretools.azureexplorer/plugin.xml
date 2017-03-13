@@ -5,7 +5,7 @@
         <perspectiveExtension targetID="*">
             <view
                     closeable="true"
-                    id="com.microsoft.azureexplorer.views.ServiceExplorerView"
+                    id="com.microsoft.azuretools.azureexplorer.views.ServiceExplorerView"
                     minimized="false"
                     moveable="true"
                     ratio="0.3"
@@ -22,34 +22,34 @@
        <view
                name="Azure Explorer"
                icon="icons/azure_explorer.png"
-               category="com.gigaspaces.azure"
-               class="com.microsoft.azureexplorer.views.ServiceExplorerView"
-               id="com.microsoft.azureexplorer.views.ServiceExplorerView"
+               category="com.microsoft.azuretools"
+               class="com.microsoft.azuretools.azureexplorer.views.ServiceExplorerView"
+               id="com.microsoft.azuretools.azureexplorer.views.ServiceExplorerView"
                restorable="true">
        </view>
    </extension>
    <extension
             point="org.eclipse.ui.editors">
        <editor
-               class="com.microsoft.azureexplorer.editors.BlobExplorerFileEditor"
+               class="com.microsoft.azuretools.azureexplorer.editors.BlobExplorerFileEditor"
                icon="icons/storage.png"
                name="[Container]"
                extensions="mtl"
-               id="com.microsoft.azureexplorer.editors.BlobExplorerFileEditor"/>
+               id="com.microsoft.azuretools.azureexplorer.editors.BlobExplorerFileEditor"/>
        <editor
-               class="com.microsoft.azureexplorer.editors.TableFileEditor"
+               class="com.microsoft.azuretools.azureexplorer.editors.TableFileEditor"
                icon="icons/storage.png"
                name="[Table]"
                extensions="mtl"
-               id="com.microsoft.azureexplorer.editors.TableFileEditor"/>
+               id="com.microsoft.azuretools.azureexplorer.editors.TableFileEditor"/>
        <editor
-               class="com.microsoft.azureexplorer.editors.QueueFileEditor"
+               class="com.microsoft.azuretools.azureexplorer.editors.QueueFileEditor"
                icon="icons/storage.png"
                name="[Queue]"
                extensions="mtl"
-               id="com.microsoft.azureexplorer.editors.QueueFileEditor"/>
+               id="com.microsoft.azuretools.azureexplorer.editors.QueueFileEditor"/>
        <editor
-               class="com.microsoft.azureexplorer.editors.JobViewEditor"
+               class="com.microsoft.azuretools.azureexplorer.editors.JobViewEditor"
                icon="icons/JobViewTitle.png"
                name="Spark JobView"
                id="com.microsoft.azure.hdinsight.jobview"/>        

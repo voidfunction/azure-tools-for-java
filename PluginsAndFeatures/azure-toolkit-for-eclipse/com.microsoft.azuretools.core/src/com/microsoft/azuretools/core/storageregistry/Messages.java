@@ -22,7 +22,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class Messages extends NLS {
 	private static final String BUNDLE_NAME =
-    		"com.microsoftopentechnologies.wacommon.storageregistry.messages";
+    		"com.microsoft.azuretools.core.storageregistry.messages";
 	
 	public static String http;
 	public static String https;

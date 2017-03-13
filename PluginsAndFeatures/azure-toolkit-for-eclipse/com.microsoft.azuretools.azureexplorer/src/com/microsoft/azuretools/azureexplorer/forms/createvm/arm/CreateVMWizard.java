@@ -40,6 +40,7 @@ import com.microsoft.azuretools.azureexplorer.forms.createvm.SubscriptionStep;
 import com.microsoft.azuretools.core.utils.Messages;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
+import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 
@@ -68,6 +69,7 @@ public class CreateVMWizard extends Wizard {
     
     private String region;
     private Network virtualNetwork;
+    private VirtualNetwork newNetwork;
     private boolean isNewNetwork;
     private String resourceGroupName;
     private boolean isNewResourceGroup;
@@ -141,8 +143,9 @@ public class CreateVMWizard extends Wizard {
                             isKnownMachineImage,
                             storageAccount,
                             virtualNetwork,
-                            subnet,
+                            newNetwork,
                             isNewNetwork,
+                            subnet,
                             publicIpAddress,
                             withNewPip,
                             availabilitySet,

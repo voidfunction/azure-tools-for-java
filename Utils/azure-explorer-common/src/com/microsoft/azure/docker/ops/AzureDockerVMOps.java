@@ -305,7 +305,11 @@ public class AzureDockerVMOps {
   public static DockerHost getDockerHost(VirtualMachine vm, Map<String, AzureDockerCertVault> dockerVaultsMap) {
     if (vm.tags().get("dockerhost") != null) {
       DockerHost dockerHost = new DockerHost();
-      dockerHost.hostVM = getDockerVM(vm);
+      try {
+        dockerHost.hostVM = getDockerVM(vm);
+      } catch (Exception e) {
+        return null;
+      }
       dockerHost.name = dockerHost.hostVM.name;
       dockerHost.apiUrl = dockerHost.hostVM.dnsName;
       dockerHost.port = vm.tags().get("dockerhost");
@@ -402,7 +406,16 @@ public class AzureDockerVMOps {
       certVault.region = vault.regionName();
       certVault.uri = vault.vaultUri();
       certVault.sid = azureClient.subscriptionId();
-      certVault = AzureDockerCertVaultOps.getVault(certVault, keyVaultClient);
+      AzureDockerCertVault certVaultTemp = AzureDockerCertVaultOps.getVault(certVault, keyVaultClient);
+      if (certVaultTemp == null) {
+        try {
+          // try to assign read permissions to the key vault in case it was created with a different service principal
+          AzureDockerCertVaultOps.setVaultPermissionsRead(azureClient, certVault);
+          certVault = AzureDockerCertVaultOps.getVault(certVault, keyVaultClient);
+        } catch (Exception ignored) {}
+      } else {
+        certVault = certVaultTemp;
+      }
       if (certVault != null && certVault.hostName != null) {
         // Key vault names are unique, DNS like across the cloud
         dockerVaultsMap.put(vault.name(), certVault);

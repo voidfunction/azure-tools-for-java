@@ -22,7 +22,7 @@ package com.microsoft.azuretools.core.applicationinsights;
 import org.eclipse.osgi.util.NLS;
 
 public final class Messages extends NLS {
-	private static final String BUNDLE_NAME = "com.microsoft.wacommon.applicationinsights.messages";
+	private static final String BUNDLE_NAME = "com.microsoft.azuretools.core.applicationinsights.messages";
 	public static String natJavaEMF;
 	public static String natMdCore;
 	public static String natFctCore;

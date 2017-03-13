@@ -21,10 +21,12 @@
  */
 package com.microsoft.intellij.docker.wizards.publish;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.wizard.WizardDialog;
 import com.jcraft.jsch.Session;
+import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.docker.model.DockerHost;
@@ -33,6 +35,7 @@ import com.microsoft.azure.docker.ops.AzureDockerSSHOps;
 import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.intellij.docker.dialogs.AzureInputDockerLoginCredsDialog;
+import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tasks.DockerContainerDeployTask;
 import com.microsoft.tooling.msservices.components.DefaultLoader;

@@ -33,10 +33,13 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerCertVault;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
 import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
+import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
@@ -308,5 +311,78 @@ public class AzureDockerUIResources {
     panel.repaint();
     ValidationInfo info = new ValidationInfo(msgErr, component);
     return info;
+  }
+
+  public static void createDockerKeyVault(Project project, DockerHost dockerHost, AzureDockerHostsManager dockerManager) {
+    if (dockerHost.certVault.hostName != null) {
+      ProgressManager.getInstance().run(new Task.Backgroundable(project, String.format("Creating Key Vault for %s...", dockerHost.name), true) {
+        @Override
+        public void run(ProgressIndicator progressIndicator) {
+          try {
+            progressIndicator.setFraction(.05);
+            progressIndicator.setText2(String.format("Reading subscription details for Docker host %s ...", dockerHost.apiUrl));
+            Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
+            KeyVaultClient keyVaultClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).keyVaultClient;
+            if (progressIndicator.isCanceled()) {
+              if (displayWarningOnCreateKeyVaultCancelAction() == 1) {
+                return;
+              }
+            }
+
+            String retryMsg = "Create";
+            int retries = 0;
+            AzureDockerCertVault certVault = null;
+            do {
+              progressIndicator.setFraction(.15 + .15 * retries);
+              progressIndicator.setText2(String.format("%s new key vault %s ...", retryMsg, dockerHost.certVault.name));
+              System.out.println(retryMsg + " new Docker key vault: " + new Date().toString());
+              AzureDockerCertVaultOps.createOrUpdateVault(azureClient, dockerHost.certVault, keyVaultClient);
+              System.out.println("Done creating new key vault: " + new Date().toString());
+              if (progressIndicator.isCanceled()) {
+                if (displayWarningOnCreateKeyVaultCancelAction() == 1) {
+                  return;
+                }
+              }
+              certVault = AzureDockerCertVaultOps.getVault(azureClient, dockerHost.certVault.name, dockerHost.certVault.resourceGroupName, keyVaultClient);
+              retries--;
+              retryMsg = "Retry creating";
+            } while (retries < 5 && (certVault == null || certVault.vmUsername == null)); // Retry couple times
+
+            progressIndicator.setFraction(.90);
+            progressIndicator.setText2("Updating key vaults ...");
+            System.out.println("Refreshing key vaults: " + new Date().toString());
+            dockerManager.refreshDockerVaults();
+            dockerManager.refreshDockerVaultDetails();
+
+            System.out.println("Done refreshing key vaults: " + new Date().toString());
+            if (progressIndicator.isCanceled()) {
+              if (displayWarningOnCreateKeyVaultCancelAction() == 1) {
+                return;
+              }
+            }
+
+            progressIndicator.setFraction(.90);
+            progressIndicator.setIndeterminate(true);
+
+          } catch (Exception e) {
+            String msg = "An error occurred while attempting to create Azure Key Vault for Docker host." + "\n" + e.getMessage();
+            LOGGER.error("Failed to Create Azure Key Vault", e);
+            PluginUtil.displayErrorDialogInAWTAndLog("Failed to Create Azure Key Vault", msg, e);
+          }
+        }
+      });
+
+    }
+  }
+
+  private static int displayWarningOnCreateKeyVaultCancelAction(){
+    return JOptionPane.showOptionDialog(null,
+        "This action can set the Docker host in an partial setup state and can not be later use for Docker container deployment!\n\n Are you sure you want this?",
+        "Stop Create Azure Key Vault",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.QUESTION_MESSAGE,
+        PluginUtil.getIcon("/icons/logwarn.png"),
+        new String[]{"Cancel", "OK"},
+        null);
   }
 }

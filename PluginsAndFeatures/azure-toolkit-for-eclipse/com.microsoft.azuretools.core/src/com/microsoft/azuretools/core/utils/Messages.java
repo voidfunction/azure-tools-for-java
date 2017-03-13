@@ -24,7 +24,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class Messages extends NLS {
     private static final String BUNDLE_NAME =
-    		"com.microsoftopentechnologies.wacommon.utils.messages";
+    		"com.microsoft.azuretools.core.utils.messages";
     
     /* Common messages - start */
 	public static String pluginFolder;

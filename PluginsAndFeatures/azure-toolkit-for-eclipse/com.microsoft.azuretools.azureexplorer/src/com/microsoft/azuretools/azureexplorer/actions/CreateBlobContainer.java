@@ -36,7 +36,7 @@ public class CreateBlobContainer extends NodeActionListener {
             @Override
             public void run() {
                 parent.removeAllChildNodes();
-                parent.load();
+                parent.load(false);
             }
         });
         form.open();

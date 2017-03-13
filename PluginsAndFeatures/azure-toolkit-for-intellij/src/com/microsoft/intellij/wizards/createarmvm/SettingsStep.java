@@ -51,6 +51,7 @@ import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
+import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import org.jetbrains.annotations.NotNull;
 
@@ -265,9 +266,14 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
 //                    model.setSubnet(null);
                 } else {
 //                    super.setSelectedItem(o);
-                    model.setWithNewNetwork(false);
                     if (o instanceof Network) {
+                        if (((DefaultComboBoxModel) networkComboBox.getModel()).getIndexOf(CREATE_NEW) > 0) {
+                            // new virtual network name at 0 position
+                            ((DefaultComboBoxModel) networkComboBox.getModel()).removeElementAt(0);
+                        }
+                        model.setWithNewNetwork(false);
                         model.setVirtualNetwork((Network) o);
+                        model.setNewNetwork(null);
                         ApplicationManager.getApplication().invokeAndWait(new Runnable() {
                             @Override
                             public void run() {
@@ -289,6 +295,16 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                                 subnetComboBox.setEnabled(true);
                             }
                         }, ModalityState.any());
+                    } else if (o instanceof String) {
+                        // new virtual network
+                        if (model.getNewNetwork() != null) {
+                            subnetComboBox.setEnabled(false);
+                            subnetComboBox.removeAllItems();
+                            subnetComboBox.addItem(model.getNewNetwork().subnet.name);
+                            subnetComboBox.setSelectedIndex(0);
+                            model.setSubnet(model.getNewNetwork().subnet.name);
+                        }
+
                     } else {
                         model.setVirtualNetwork(null);
 
@@ -673,15 +689,20 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
     private void showNewVirtualNetworkForm() {
         final String resourceGroupName = createNewRadioButton.isSelected() ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
 
-        final CreateVirtualNetworkForm form = new CreateVirtualNetworkForm(project, model.getSubscription().getSubscriptionId(), model.getRegion(), resourceGroupName);
+        final CreateVirtualNetworkForm form = new CreateVirtualNetworkForm(project, model.getSubscription().getSubscriptionId(), model.getRegion(),
+                model.getName());
         form.setOnCreate(new Runnable() {
             @Override
             public void run() {
-                Creatable<Network> newVirtualNetwork = form.getNetwork();
+                VirtualNetwork newVirtualNetwork = form.getNetwork();
 
                 if (newVirtualNetwork != null) {
                     model.setNewNetwork(newVirtualNetwork);
                     model.setWithNewNetwork(true);
+                    ((DefaultComboBoxModel)networkComboBox.getModel()).insertElementAt(newVirtualNetwork.name + " (New)", 0);
+                    networkComboBox.setSelectedIndex(0);
+                } else {
+                    networkComboBox.setSelectedItem(null);
                 }
             }
         });

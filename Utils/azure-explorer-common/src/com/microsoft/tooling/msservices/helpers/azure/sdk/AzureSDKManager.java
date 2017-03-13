@@ -28,10 +28,9 @@ import com.microsoft.azure.management.compute.KnownWindowsVirtualMachineImage;
 import com.microsoft.azure.management.compute.OperatingSystemTypes;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
-import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.PublicIpAddress;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.model.Creatable;
 import com.microsoft.azure.management.storage.AccessTier;
 import com.microsoft.azure.management.storage.Encryption;
@@ -42,6 +41,7 @@ import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.Nullable;
+import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 
 public class AzureSDKManager {
     public static Azure createAzure(String subscriptionId) throws Exception {
@@ -75,7 +75,7 @@ public class AzureSDKManager {
 
     public static VirtualMachine createVirtualMachine(String subscriptionId, @NotNull String name, @NotNull String resourceGroup, boolean withNewResourceGroup,
                                                       @NotNull String size, @NotNull String region, final VirtualMachineImage vmImage, Object knownImage, boolean isKnownImage,
-                                                      @NotNull final StorageAccount storageAccount, @NotNull final Network network, Creatable<Network> newNetwork, boolean withNewNetwork,
+                                                      @NotNull final StorageAccount storageAccount, @NotNull final Network network, VirtualNetwork newNetwork, boolean withNewNetwork,
                                                       @NotNull String subnet, @Nullable PublicIpAddress pip, boolean withNewPip,
                                                       @Nullable AvailabilitySet availabilitySet, boolean withNewAvailabilitySet,
                                                       @NotNull final String username, @Nullable final String password, @Nullable String publicKey) throws Exception {
@@ -89,11 +89,28 @@ public class AzureSDKManager {
         }
         VirtualMachine.DefinitionStages.WithGroup withGroup = azure.virtualMachines().define(name)
                 .withRegion(region);
-        VirtualMachine.DefinitionStages.WithNetwork withNetwork = withNewResourceGroup ?
-                withGroup.withNewResourceGroup(resourceGroup) : withGroup.withExistingResourceGroup(resourceGroup);
+        Creatable<ResourceGroup> newResourceGroup = null;
+        VirtualMachine.DefinitionStages.WithNetwork withNetwork;
+        if (withNewResourceGroup) {
+            newResourceGroup = azure.resourceGroups().define(resourceGroup).withRegion(region);
+            withNetwork = withGroup.withNewResourceGroup(newResourceGroup);
+        } else {
+            withNetwork = withGroup.withExistingResourceGroup(resourceGroup);
+        }
         VirtualMachine.DefinitionStages.WithPublicIpAddress withPublicIpAddress;
         if (withNewNetwork) {
-            withPublicIpAddress = withNetwork.withNewPrimaryNetwork(newNetwork).withPrimaryPrivateIpAddressDynamic();
+            Network.DefinitionStages.WithGroup networkWithGroup = azure.networks().define(newNetwork.name).withRegion(region);
+            Creatable<Network> newVirtualNetwork;
+            if (withNewResourceGroup) {
+                newVirtualNetwork = networkWithGroup.withNewResourceGroup(newResourceGroup)
+                        .withAddressSpace(newNetwork.addressSpace)
+                        .withSubnet(newNetwork.subnet.name, newNetwork.subnet.addressSpace);
+            } else {
+                newVirtualNetwork = networkWithGroup.withExistingResourceGroup(resourceGroup)
+                        .withAddressSpace(newNetwork.addressSpace)
+                        .withSubnet(newNetwork.subnet.name, newNetwork.subnet.addressSpace);
+            }
+            withPublicIpAddress = withNetwork.withNewPrimaryNetwork(newVirtualNetwork).withPrimaryPrivateIpAddressDynamic();
 //            withPublicIpAddress = withNetwork.withNewPrimaryNetwork("10.0.0.0/28").
 //                    .withPrimaryPrivateIpAddressDynamic();
         } else {

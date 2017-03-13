@@ -19,18 +19,26 @@
  */
 package com.microsoft.azuretools.azureexplorer;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.common.collect.ImmutableList;
 import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
-import com.microsoft.azuretools.azureexplorer.actions.*;
+import com.microsoft.azuretools.azureexplorer.actions.AddNewClusterAction;
+import com.microsoft.azuretools.azureexplorer.actions.AttachExternalStorageAccountAction;
+import com.microsoft.azuretools.azureexplorer.actions.CreateArmStorageAccountAction;
+import com.microsoft.azuretools.azureexplorer.actions.CreateArmVMAction;
+import com.microsoft.azuretools.azureexplorer.actions.CreateBlobContainer;
+import com.microsoft.azuretools.azureexplorer.actions.CreateQueueAction;
+import com.microsoft.azuretools.azureexplorer.actions.CreateTableAction;
+import com.microsoft.azuretools.azureexplorer.actions.ManageSubscriptionsAction;
+import com.microsoft.azuretools.azureexplorer.actions.OpenWebappAction;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappNode;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class NodeActionsMap {
     public static final Map<Class<? extends Node>, ImmutableList<Class<? extends NodeActionListener>>> node2Actions =
