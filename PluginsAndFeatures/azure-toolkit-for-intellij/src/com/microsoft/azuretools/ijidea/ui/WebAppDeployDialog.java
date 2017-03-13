@@ -55,6 +55,7 @@ import com.microsoft.azuretools.utils.CanceledByUserException;
 import com.microsoft.azuretools.utils.WebAppUtils;
 import com.microsoft.intellij.deploy.DeploymentManager;
 import org.jdesktop.swingx.JXHyperlink;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -152,7 +153,6 @@ public class WebAppDeployDialog extends DialogWrapper {
                 .disableUpDownActions()
                 .addExtraActions(refreshAction);
 
-
         panelTable = tableToolbarDecorator.createPanel();
     }
 
@@ -189,7 +189,6 @@ public class WebAppDeployDialog extends DialogWrapper {
             }
         }, ModalityState.any());
     }
-
 
     protected WebAppDeployDialog(Project project, Artifact artifact) {
         super(project, true, IdeModalityType.PROJECT);
@@ -286,9 +285,13 @@ public class WebAppDeployDialog extends DialogWrapper {
     }
 
     private void doFillTable() {
+
         Map<SubscriptionDetail, List<ResourceGroup>> srgMap = AzureModel.getInstance().getSubscriptionToResourceGroupMap();
         Map<ResourceGroup, List<WebApp>> rgwaMap = AzureModel.getInstance().getResourceGroupToWebAppMap();
         Map<ResourceGroup, List<AppServicePlan>> rgaspMap = AzureModel.getInstance().getResourceGroupToAppServicePlanMap();
+        if (srgMap == null) throw new NullPointerException("srgMap is null");
+        if (rgwaMap == null) throw new NullPointerException("rgwaMap is null");
+        if (rgaspMap == null) throw new NullPointerException("rgaspMap is null");
 
         cleanTable();
         DefaultTableModel tableModel = (DefaultTableModel)table.getModel();
@@ -297,10 +300,14 @@ public class WebAppDeployDialog extends DialogWrapper {
             if (!sd.isSelected()) continue;
 
             Map<String, AppServicePlan> aspMap = new HashMap<>();
-            for (ResourceGroup rg : srgMap.get(sd)) {
-                for (AppServicePlan asp : rgaspMap.get(rg)) {
-                    aspMap.put(asp.id(), asp);
+            try {
+                for (ResourceGroup rg : srgMap.get(sd)) {
+                    for (AppServicePlan asp : rgaspMap.get(rg)) {
+                        aspMap.put(asp.id(), asp);
+                    }
                 }
+            } catch (NullPointerException npe) {
+                LOGGER.error("NPE while initializing App Service Plan map", npe );
             }
 
             for (ResourceGroup rg : srgMap.get(sd)) {
@@ -506,7 +513,7 @@ public class WebAppDeployDialog extends DialogWrapper {
         boolean isDeployToRoot = deployToRootCheckBox.isSelected();
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Deploy Web App Progress", true) {
             @Override
-            public void run(ProgressIndicator progressIndicator) {
+            public void run(@NotNull ProgressIndicator progressIndicator) {
                 DeploymentManager deploymentManager = new DeploymentManager(project);
                 try {
                     progressIndicator.setIndeterminate(true);

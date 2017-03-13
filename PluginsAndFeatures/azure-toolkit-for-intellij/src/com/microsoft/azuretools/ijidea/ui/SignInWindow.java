@@ -198,7 +198,7 @@ public class SignInWindow extends DialogWrapper {
                     try {
                         AdAuthManager.getInstance().signIn();
                     } catch (AuthException ex) {
-                        LOGGER.error("signInAsync", ex.getMessage());
+                        LOGGER.error("signInAsync AuthException exception", ex.getMessage());
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         LOGGER.error("signInAsync", ex);
