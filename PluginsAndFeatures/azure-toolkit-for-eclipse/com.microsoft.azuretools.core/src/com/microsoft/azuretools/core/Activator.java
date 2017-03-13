@@ -108,7 +108,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
 			loadPluginSettings();
 		} catch (IOException e) {
 			DefaultLoader.getUIHelper().showException("An error occurred while attempting to load " +
-					"settings for the WACommon plugin.", e, "WACommon", false, true);
+					"settings for the Azure Core plugin.", e, "Azure Core Plugin", false, true);
 		}
 		isHDInsightEnabled = isHDInsightEnabled(context);
 		try {

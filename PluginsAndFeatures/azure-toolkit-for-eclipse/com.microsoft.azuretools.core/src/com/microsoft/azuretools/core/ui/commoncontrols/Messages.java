@@ -24,7 +24,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class Messages extends NLS {
     private static final String BUNDLE_NAME =
-    		"com.microsoftopentechnologies.wacommon.commoncontrols.messages";
+    		"com.microsoft.azuretools.core.ui.commoncontrols.messages";
     
     /* New Certificate Dialog messages - start*/
     public static String newCertDlgCertTxt;

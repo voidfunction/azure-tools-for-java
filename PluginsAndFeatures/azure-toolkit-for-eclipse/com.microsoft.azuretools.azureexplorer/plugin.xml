@@ -22,7 +22,7 @@
        <view
                name="Azure Explorer"
                icon="icons/azure_explorer.png"
-               category="com.gigaspaces.azure"
+               category="com.microsoft.azuretools"
                class="com.microsoft.azuretools.azureexplorer.views.ServiceExplorerView"
                id="com.microsoft.azuretools.azureexplorer.views.ServiceExplorerView"
                restorable="true">

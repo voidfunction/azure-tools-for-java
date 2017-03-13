@@ -48,7 +48,7 @@ public class WACPStartUp implements IStartup {
 	}
 
 	/**
-	 * Method verifies presence of com.microsoftopentechnologies.wacommon folder and data.xml file.
+	 * Method verifies presence of com.microsoft.azuretools.core folder and data.xml file.
 	 * It updates or creates property elements in data.xml as per scenarios.
 	 */
 	private void initialize() {

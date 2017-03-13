@@ -54,9 +54,9 @@ import com.microsoft.tooling.msservices.model.storage.StorageServiceTreeItem;
 import com.microsoft.tooling.msservices.model.storage.Table;
 
 public class UIHelperImpl implements UIHelper {
-    private Map<Class<? extends StorageServiceTreeItem>, String> type2Editor = ImmutableMap.of(BlobContainer.class, "com.microsoft.azureexplorer.editors.BlobExplorerFileEditor",
-            Queue.class, "com.microsoft.azureexplorer.editors.QueueFileEditor",
-            Table.class, "com.microsoft.azureexplorer.editors.TableFileEditor");
+    private Map<Class<? extends StorageServiceTreeItem>, String> type2Editor = ImmutableMap.of(BlobContainer.class, "com.microsoft.azuretools.azureexplorer.editors.BlobExplorerFileEditor",
+            Queue.class, "com.microsoft.azuretools.azureexplorer.editors.QueueFileEditor",
+            Table.class, "com.microsoft.azuretools.azureexplorer.editors.TableFileEditor");
 
     @Override
     public void showException(final String message,
@@ -173,7 +173,7 @@ public class UIHelperImpl implements UIHelper {
     public void refreshQueue(Object projectObject, final StorageAccount storageAccount, final Queue queue) {
         IWorkbench workbench=PlatformUI.getWorkbench();
         final IEditorDescriptor editorDescriptor=workbench.getEditorRegistry()
-                .findEditor("com.microsoft.azureexplorer.editors.QueueFileEditor");
+                .findEditor("com.microsoft.azuretools.azureexplorer.editors.QueueFileEditor");
         DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
             public void run() {
             	// TODO
@@ -192,7 +192,7 @@ public class UIHelperImpl implements UIHelper {
     public void refreshBlobs(Object projectObject, final String accountName, final BlobContainer container) {
         IWorkbench workbench=PlatformUI.getWorkbench();
         final IEditorDescriptor editorDescriptor=workbench.getEditorRegistry()
-                .findEditor("com.microsoft.azureexplorer.editors.BlobExplorerFileEditor");
+                .findEditor("com.microsoft.azuretools.azureexplorer.editors.BlobExplorerFileEditor");
         DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
             public void run() {
             	//TODO
@@ -211,7 +211,7 @@ public class UIHelperImpl implements UIHelper {
     public void refreshTable(Object projectObject, final StorageAccount storageAccount, final Table table) {
         IWorkbench workbench=PlatformUI.getWorkbench();
         final IEditorDescriptor editorDescriptor=workbench.getEditorRegistry()
-                .findEditor("com.microsoft.azureexplorer.editors.TableFileEditor");
+                .findEditor("com.microsoft.azuretools.azureexplorer.editors.TableFileEditor");
         DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
             public void run() {
             	// TODO
