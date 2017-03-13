@@ -29,6 +29,7 @@ import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -588,9 +589,16 @@ public class WebAppUtils {
 
         if (model.isResourceGroupCreateNew) {
             ResourceGroup rg = azure.resourceGroups().getByName(model.resourceGroupNameCreateNew);
+            if (rg == null) {
+                throw new AzureCmdException(String.format("azure.resourceGroups().getByName(%s) returned null"), model.resourceGroupNameCreateNew);
+            }
+
             AzureModelController.addNewResourceGroup(model.subscriptionDetail, rg);
             if (model.isAppServicePlanCreateNew) {
                 AppServicePlan asp = azure.appServices().appServicePlans().getById(myWebApp.appServicePlanId());
+                if (asp == null) {
+                    throw new AzureCmdException(String.format("azure.appServices().appServicePlans().getById(%s) returned null"), myWebApp.appServicePlanId());
+                }
                 AzureModelController.addNewAppServicePlanToJustCreatedResourceGroup(rg, asp);
                 AzureModelController.addNewWebAppToJustCreatedResourceGroup(rg, myWebApp);
             }
