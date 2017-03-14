@@ -240,6 +240,11 @@ public class UIHelperImpl implements UIHelper {
         return null;
     }
 
+    @Override
+    public boolean isDarkTheme() {
+        return false;
+    }
+    
     public static String readableFileSize(long size) {
         if (size <= 0) return "0";
         final String[] units = new String[]{"B", "kB", "MB", "GB", "TB"};

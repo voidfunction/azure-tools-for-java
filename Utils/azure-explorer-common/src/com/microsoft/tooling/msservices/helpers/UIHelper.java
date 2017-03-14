@@ -65,4 +65,6 @@ public interface UIHelper {
     <T extends StorageServiceTreeItem> Object getOpenedFile(@NotNull Object projectObject,
                                                             @NotNull String accountName,
                                                             @NotNull T item);
+
+    boolean isDarkTheme();
 }

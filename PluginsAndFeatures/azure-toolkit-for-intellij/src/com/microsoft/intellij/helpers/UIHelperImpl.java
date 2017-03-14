@@ -30,6 +30,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
+import com.intellij.util.ui.UIUtil;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.AzureSettings;
@@ -294,6 +295,11 @@ public class UIHelperImpl implements UIHelper {
         }
 
         return null;
+    }
+
+    @Override
+    public boolean isDarkTheme() {
+        return UIUtil.isUnderDarcula();
     }
 
     @NotNull

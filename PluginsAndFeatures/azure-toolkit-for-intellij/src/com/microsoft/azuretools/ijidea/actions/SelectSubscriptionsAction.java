@@ -36,6 +36,8 @@ import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.ijidea.ui.ErrorWindow;
 import com.microsoft.azuretools.ijidea.ui.SubscriptionsDialog;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.intellij.helpers.UIHelperImpl;
+import com.microsoft.intellij.serviceexplorer.azure.ManageSubscriptionsAction;
 
 import javax.swing.*;
 import java.util.List;
@@ -44,10 +46,6 @@ public class SelectSubscriptionsAction extends AnAction {
     private static final Logger LOGGER = Logger.getInstance(SelectSubscriptionsAction.class);
 
     public SelectSubscriptionsAction() {
-    }
-
-    public SelectSubscriptionsAction(Icon icon) {
-        super(icon);
     }
 
     @Override
@@ -94,6 +92,7 @@ public class SelectSubscriptionsAction extends AnAction {
         try {
             boolean isSignIn = AuthMethodManager.getInstance().isSignedIn();
             e.getPresentation().setEnabled(isSignIn);
+            e.getPresentation().setIcon(UIHelperImpl.loadIcon(ManageSubscriptionsAction.getIcon()));
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("update", ex);

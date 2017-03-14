@@ -26,12 +26,15 @@ import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 
 public class SignInOutAction extends NodeAction {
+    private static final String ICON_DARK = "SignOutDark_16.png";
+    private static final String ICON_LIGHT = "SignOutLight_16.png";
 
     SignInOutAction(AzureModule azureModule) {
         super(azureModule, "Sign In/Out");
@@ -43,6 +46,7 @@ public class SignInOutAction extends NodeAction {
         });
     }
 
+    @Override
     public String getName() {
         try {
             return AuthMethodManager.getInstance().isSignedIn() ? "Sign Out" : "Sign In";
@@ -50,5 +54,14 @@ public class SignInOutAction extends NodeAction {
             AzurePlugin.log("Error signing in", e);
             return "";
         }
+    }
+
+    @Override
+    public String getIconPath() {
+        return getIcon();
+    }
+
+    public static String getIcon() {
+        return DefaultLoader.getUIHelper().isDarkTheme() ? ICON_DARK : ICON_LIGHT;
     }
 }

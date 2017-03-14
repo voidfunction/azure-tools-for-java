@@ -95,7 +95,7 @@ public class UploadBlobFileForm extends Dialog {
 
         nameLabel = new Label(container, SWT.LEFT);
         nameLabel.setText("Folder (Optional)");
-        folderTextField = new Text(container, SWT.LEFT);
+        folderTextField = new Text(container, SWT.LEFT | SWT.BORDER);
         gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         gridData.horizontalSpan = 2;
         folderTextField.setLayoutData(gridData);
