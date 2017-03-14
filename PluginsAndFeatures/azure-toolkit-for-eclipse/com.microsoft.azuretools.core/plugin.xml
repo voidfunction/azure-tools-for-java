@@ -85,17 +85,20 @@
         <command
             name="Sign In..."
             categoryId="AzureManagePlugin.commands.MicrosoftAzureCategory"
-            id="AzureManagePlugin.commands.signInCommand">
+            id="AzureManagePlugin.commands.signInCommand"
+            icon="icons/SignOutLight_16.png">
         </command>
         <command
-            name="Sign Out..."
-            categoryId="AzureManagePlugin.commands.MicrosoftAzureCategory"
-            id="AzureManagePlugin.commands.signOutCommand">
+              categoryId="AzureManagePlugin.commands.MicrosoftAzureCategory"
+              icon="icons/SignOutLight_16.png"
+              id="AzureManagePlugin.commands.signOutCommand"
+              name="Sign Out...">
         </command>      
         <command
             name="Select Subsriptions"
             categoryId="AzureManagePlugin.commands.MicrosoftAzureCategory"
-            id="AzureManagePlugin.commands.selectSubsriptionsCommand">
+            id="AzureManagePlugin.commands.selectSubsriptionsCommand"
+            icon="icons/SignOutLight_16.png">
         </command>
     </extension>
    
@@ -103,7 +106,8 @@
          point="org.eclipse.ui.handlers">
         <handler
             commandId="AzureManagePlugin.commands.signInCommand"
-            class="com.microsoft.azuretools.core.handlers.SignInCommandHandler">
+            class="com.microsoft.azuretools.core.handlers.SignInCommandHandler"
+            >
         </handler>
         <handler
             commandId="AzureManagePlugin.commands.signOutCommand"

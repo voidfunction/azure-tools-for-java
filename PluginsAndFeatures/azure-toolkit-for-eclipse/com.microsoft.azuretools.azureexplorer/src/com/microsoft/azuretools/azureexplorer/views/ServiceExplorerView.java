@@ -376,13 +376,13 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
     }
 
     private void makeActions() {
-        refreshAction = new Action("Refresh", Activator.getImageDescriptor("icons/refresh.png")) {
+        refreshAction = new Action("Refresh", Activator.getImageDescriptor("icons/RefreshLight_16.png")) {
             public void run() {
                 azureModule.load(true);
             }
         };
         refreshAction.setToolTipText("Refresh");
-        signInOutAction = new Action("Sign In/Sign Out", Activator.getImageDescriptor("icons/azure_explorer.png")) {
+        signInOutAction = new Action("Sign In/Sign Out", com.microsoft.azuretools.core.Activator.getImageDescriptor("icons/SignOutLight_16.png")) {
             public void run() {
             	try {
             		AuthMethodManager authMethodManager = AuthMethodManager.getInstance();
@@ -397,7 +397,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
             	}
             }	
 		};
-        manageSubscriptionAction = new Action("Manage Subscriptions", Activator.getImageDescriptor("icons/azure_explorer.png")) {
+        manageSubscriptionAction = new Action("Manage Subscriptions", com.microsoft.azuretools.core.Activator.getImageDescriptor("icons/ConnectAccountsLight_16.png")) {
             public void run() {
             	SelectSubsriptionsCommandHandler.onSelectSubscriptions(PluginUtil.getParentShell());
                 azureModule.load(false);
