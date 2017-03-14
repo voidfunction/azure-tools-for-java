@@ -26,12 +26,8 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            commandId="WebAppPlugin.commands.sampleCommand"
-            class="com.microsoft.azuretools.eclipse.webapp.handlers.SampleHandler">
-      </handler>
-      <handler
             commandId="com.microsoft.azuretools.WebAppPlugin.commands.deployToAzure"
-            class="com.microsoft.azuretools.eclipse.webapp.handlers.DeployToAzureHandler">
+            class="com.microsoft.azuretools.webapp.handlers.DeployToAzureHandler">
       </handler>
    </extension>
    <extension

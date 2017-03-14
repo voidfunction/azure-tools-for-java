@@ -43,24 +43,18 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.osgi.service.log.LogService;
 
-import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.appservice.AppServicePlan;
 import com.microsoft.azure.management.appservice.AppServicePricingTier;
-import com.microsoft.azure.management.appservice.JavaVersion;
 import com.microsoft.azure.management.appservice.WebApp;
-import com.microsoft.azure.management.appservice.WebAppBase;
 import com.microsoft.azure.management.appservice.WebContainer;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
-import com.microsoft.azuretools.eclipse.utils.ProgressDialog;
-import com.microsoft.azuretools.eclipse.utils.UpdateProgressIndicator;
-import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.core.utils.ProgressDialog;
+import com.microsoft.azuretools.core.utils.UpdateProgressIndicator;
 import com.microsoft.azuretools.utils.AzulZuluModel;
 import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
-import com.microsoft.azuretools.utils.IProgressIndicator;
 import com.microsoft.azuretools.utils.StorageAccoutUtils;
 import com.microsoft.azuretools.utils.WebAppUtils;
 
