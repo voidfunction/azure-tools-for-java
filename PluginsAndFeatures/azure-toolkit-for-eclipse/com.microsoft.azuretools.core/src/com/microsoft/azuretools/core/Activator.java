@@ -65,7 +65,7 @@ import org.osgi.framework.FrameworkUtil;
 public class Activator extends AbstractUIPlugin implements PluginComponent {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "AzureCommon"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "com.microsoft.azuretools.core"; //$NON-NLS-1$
 
 	public static boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
 

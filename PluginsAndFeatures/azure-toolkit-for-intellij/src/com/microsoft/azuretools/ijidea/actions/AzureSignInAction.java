@@ -33,6 +33,8 @@ import com.microsoft.azuretools.authmanage.interact.AuthMethod;
 import com.microsoft.azuretools.authmanage.models.AuthMethodDetails;
 import com.microsoft.azuretools.ijidea.ui.ErrorWindow;
 import com.microsoft.azuretools.ijidea.ui.SignInWindow;
+import com.microsoft.intellij.helpers.UIHelperImpl;
+import com.microsoft.intellij.serviceexplorer.azure.SignInOutAction;
 
 import javax.swing.*;
 
@@ -61,6 +63,7 @@ public class AzureSignInAction extends AnAction {
             } else {
                 e.getPresentation().setText("Azure Sign In...");
             }
+            e.getPresentation().setIcon(UIHelperImpl.loadIcon(SignInOutAction.getIcon()));
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("update", ex);

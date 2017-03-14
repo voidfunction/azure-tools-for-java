@@ -38,11 +38,13 @@ import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
 import com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.intellij.serviceexplorer.azure.AzureModuleImpl;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangeListener;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangedEvent;
 import com.microsoft.tooling.msservices.helpers.collections.ObservableList;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeAction;
+import com.microsoft.tooling.msservices.serviceexplorer.RefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 import org.jetbrains.annotations.NotNull;
 
@@ -155,7 +157,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
 //            menuItem.setIconTextGap(16);
             menuItem.setEnabled(nodeAction.isEnabled());
             if (nodeAction.getIconPath() != null) {
-                menuItem.setIcon(loadIcon(nodeAction.getIconPath()));
+                menuItem.setIcon(UIHelperImpl.loadIcon(nodeAction.getIconPath()));
             }
             // delegate the menu item click to the node action's listeners
             menuItem.addActionListener(new ActionListener() {
@@ -316,7 +318,7 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
 
             String iconPath = node.getIconPath();
             if (iconPath != null && !iconPath.isEmpty()) {
-                setIcon(loadIcon(iconPath));
+                setIcon(UIHelperImpl.loadIcon(iconPath));
             }
 
             // setup a tooltip
@@ -327,21 +329,22 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
     private void addToolbarItems(ToolWindow toolWindow, final AzureModule azureModule) {
         if (toolWindow instanceof ToolWindowEx) {
             ToolWindowEx toolWindowEx = (ToolWindowEx) toolWindow;
-
+            boolean isDarkTheme = DefaultLoader.getUIHelper().isDarkTheme();
             toolWindowEx.setTitleActions(
-                    new AnAction("Refresh", "Refresh Service List", UIHelperImpl.loadIcon("refresh.png")) {
+                    new AnAction("Refresh", "Refresh Azure Nodes List", null) {
                         @Override
                         public void actionPerformed(AnActionEvent event) {
                             azureModule.load(true);
                         }
-                    },
-                    new AzureSignInAction(UIHelperImpl.loadIcon("azure.png")),
-                    new SelectSubscriptionsAction(AllIcons.Ide.Link));
-        }
-    }
 
-    private ImageIcon loadIcon(String iconPath) {
-        URL url = NodeTreeCellRenderer.class.getResource("/icons/" + iconPath);
-        return new ImageIcon(url);
+                        @Override
+                        public  void update(AnActionEvent e) {
+                            e.getPresentation().setIcon(UIHelperImpl.loadIcon(isDarkTheme ?
+                                    RefreshableNode.REFRESH_ICON_DARK : RefreshableNode.REFRESH_ICON_LIGHT));
+                        }
+                    },
+                    new AzureSignInAction(),
+                    new SelectSubscriptionsAction());
+        }
     }
 }

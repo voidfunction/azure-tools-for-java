@@ -190,7 +190,6 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
         if(node.hasChildNodes()) {
             for (Node childNode : node.getChildNodes()) {
                 treeNode.add(createTreeNode(childNode));
-//                treeNode.add(createTreeNode(childNode));
             }
         }
         return treeNode;
@@ -212,30 +211,10 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
 
     @Override
     public void propertyChange(final PropertyChangeEvent evt) {
-        // if we are not running on the dispatch thread then switch
-        // to dispatch thread
-//        if(!ApplicationManager.getApplication().isDispatchThread()) {
-//            ApplicationManager.getApplication().invokeAndWait(new Runnable() {
-//                @Override
-//                public void run() {
-//                    propertyChange(evt);
-//                }
-//            }, ModalityState.any());
-//
-//            return;
-//        }
-
         // this event is fired whenever a property on a node in the
         // model changes; we respond by triggering a node change
         // event in the tree's model
         final Node node = (Node) evt.getSource();
-
-        // the treeModel object can be null before it is initialized
-        // from createToolWindowContent; we ignore property change
-        // notifications till we have a valid model object
-//        if(treeModel != null) {
-//            treeModel.nodeChanged((TreeNode) node.getViewData());
-//        }
         Display.getDefault().asyncExec(new Runnable() {
             @Override
             public void run() {
@@ -376,13 +355,13 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
     }
 
     private void makeActions() {
-        refreshAction = new Action("Refresh", Activator.getImageDescriptor("icons/refresh.png")) {
+        refreshAction = new Action("Refresh", Activator.getImageDescriptor("icons/RefreshLight_16.png")) {
             public void run() {
                 azureModule.load(true);
             }
         };
         refreshAction.setToolTipText("Refresh");
-        signInOutAction = new Action("Sign In/Sign Out", Activator.getImageDescriptor("icons/azure_explorer.png")) {
+        signInOutAction = new Action("Sign In/Sign Out", com.microsoft.azuretools.core.Activator.getImageDescriptor("icons/SignOutLight_16.png")) {
             public void run() {
             	try {
             		AuthMethodManager authMethodManager = AuthMethodManager.getInstance();
@@ -397,7 +376,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
             	}
             }	
 		};
-        manageSubscriptionAction = new Action("Manage Subscriptions", Activator.getImageDescriptor("icons/azure_explorer.png")) {
+        manageSubscriptionAction = new Action("Manage Subscriptions", com.microsoft.azuretools.core.Activator.getImageDescriptor("icons/ConnectAccountsLight_16.png")) {
             public void run() {
             	SelectSubsriptionsCommandHandler.onSelectSubscriptions(PluginUtil.getParentShell());
                 azureModule.load(false);
