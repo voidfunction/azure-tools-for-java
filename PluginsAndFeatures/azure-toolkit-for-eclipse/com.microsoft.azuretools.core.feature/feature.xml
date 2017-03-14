@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.microsoft.azurecore.feature"
+      id="com.microsoft.azuretools.core.feature"
       label="Azure Common Plugin"
       version="3.0.0.qualifier"
       provider-name="Microsoft Corp.">

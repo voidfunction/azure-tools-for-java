@@ -22,7 +22,8 @@ Bundle-ClassPath: .,
  resources/azure-explorer-common-3.0.0-SNAPSHOT.jar,
  resources/azure-keyvault-1.0.0-beta5-SNAPSHOT.jar,
  resources/azure-keyvault-webkey-1.0.0-beta5-SNAPSHOT.jar,
- resources/hdinsight-node-common-3.0.0-SNAPSHOT.jar
+ resources/hdinsight-node-common-3.0.0-SNAPSHOT.jar,
+ icons/
 Export-Package: com.microsoft.applicationinsights.preference,
  com.microsoft.azure.docker,
  com.microsoft.azure.docker.model,
