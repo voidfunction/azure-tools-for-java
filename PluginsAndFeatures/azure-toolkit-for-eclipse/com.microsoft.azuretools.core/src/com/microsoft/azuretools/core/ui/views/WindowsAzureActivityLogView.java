@@ -66,7 +66,7 @@ public class WindowsAzureActivityLogView extends ViewPart {
 		.getWorkbench()
 		.getHelpSystem()
 		.setHelp(viewer.getControl(),
-				"com.gigaspaces.azrue.views.waactivitylogview");
+				"com.microsoft.azuretools.core.ui.views.WindowsAzureActivityLogView");
 
 		registerDeploymentListener();
 	}

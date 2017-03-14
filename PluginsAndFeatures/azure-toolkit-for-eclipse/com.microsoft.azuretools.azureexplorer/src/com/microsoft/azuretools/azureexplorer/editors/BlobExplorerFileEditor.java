@@ -103,8 +103,9 @@ public class BlobExplorerFileEditor extends EditorPart {
     private Table blobListTable;
     private TableViewer tableViewer;
 
-    private ClientStorageAccount storageAccount;
+    private String storageAccount;
     private BlobContainer blobContainer;
+    private String connectionString;
 
     private LinkedList<BlobDirectory> directoryQueue = new LinkedList<BlobDirectory>();
     private java.util.List<BlobItem> blobItems = new ArrayList<BlobItem>();
@@ -120,7 +121,8 @@ public class BlobExplorerFileEditor extends EditorPart {
     public void init(IEditorSite site, IEditorInput input) throws PartInitException {
         setSite(site);
         setInput(input);
-//        storageAccount = ((StorageEditorInput) input).getStorageAccount();
+        storageAccount = ((StorageEditorInput) input).getStorageAccount();
+        connectionString = ((StorageEditorInput) input).getConnectionString();
         blobContainer = (BlobContainer) ((StorageEditorInput) input).getItem();
         setPartName(blobContainer.getName() + " [Container]");
 //        fillGrid();
@@ -370,10 +372,10 @@ public class BlobExplorerFileEditor extends EditorPart {
             public void run() {
                 try {
                     if (directoryQueue.peekLast() == null) {
-                        directoryQueue.addLast(StorageClientSDKManager.getManager().getRootDirectory(storageAccount.getConnectionString(), blobContainer));
+                        directoryQueue.addLast(StorageClientSDKManager.getManager().getRootDirectory(connectionString, blobContainer));
                     }
 
-                    blobItems = StorageClientSDKManager.getManager().getBlobItems(storageAccount.getConnectionString(), directoryQueue.peekLast());
+                    blobItems = StorageClientSDKManager.getManager().getBlobItems(connectionString, directoryQueue.peekLast());
 
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                         @Override
@@ -463,11 +465,11 @@ public class BlobExplorerFileEditor extends EditorPart {
                     @Override
                     public void run() {
                         try {
-                            StorageClientSDKManager.getManager().deleteBlobFile(storageAccount.getConnectionString(), blobItem);
+                            StorageClientSDKManager.getManager().deleteBlobFile(connectionString, blobItem);
 
                             if (blobItems.size() <= 1) {
                                 directoryQueue.clear();
-                                directoryQueue.addLast(StorageClientSDKManager.getManager().getRootDirectory(storageAccount.getConnectionString(), blobContainer));
+                                directoryQueue.addLast(StorageClientSDKManager.getManager().getRootDirectory(connectionString, blobContainer));
                             }
 
                             DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
@@ -550,7 +552,7 @@ public class BlobExplorerFileEditor extends EditorPart {
 //                                @Override
 //                                public void run() {
                             try {
-                                StorageClientSDKManager.getManager().downloadBlobFileContent(storageAccount.getConnectionString(), fileSelection, bufferedOutputStream);
+                                StorageClientSDKManager.getManager().downloadBlobFileContent(connectionString, fileSelection, bufferedOutputStream);
 
                                 if (open && targetFile.exists()) {
                                     try {
@@ -568,7 +570,7 @@ public class BlobExplorerFileEditor extends EditorPart {
                                             throw new Exception(errResponse);
                                         }
                                     } catch (Exception e) {
-                                        monitor.setTaskName("Error openning file");
+                                        monitor.setTaskName("Error opening file");
                                         monitor.subTask(e.getMessage());
                                     }
 //                                            Desktop.getDesktop().open(targetFile);
@@ -579,36 +581,7 @@ public class BlobExplorerFileEditor extends EditorPart {
                                 monitor.setTaskName("Error downloading Blob");
                                 monitor.subTask((connectionFault instanceof SocketTimeoutException) ? "Connection timed out" : connectionFault.getMessage());
                                 return Status.CANCEL_STATUS;
-                            } /*catch (IOException ex) {
-                                        try {
-                                            final Process p;
-                                            Runtime runtime = Runtime.getRuntime();
-                                            p = runtime.exec(
-                                                    new String[]{"open", "-R", targetFile.getName()},
-                                                    null,
-                                                    targetFile.getParentFile());
-
-                                            InputStream errorStream = p.getErrorStream();
-                                            String errResponse = new String(IOUtils.readFully(errorStream, -1, true));
-
-                                            if (p.waitFor() != 0) {
-                                                throw new Exception(errResponse);
-                                            }
-                                        } catch (Exception e) {
-                                            monitor.setTaskName("Error openning file");
-                                            monitor.subTask(ex.getMessage());
-                                        }*/
-//                                    }
-//                                }
-//                            });
-
-//                            while (!future.isDone()) {
-////                                progressIndicator.checkCanceled();
-//
-////                                if (progressIndicator.isCanceled()) {
-////                                    future.cancel(true);
-////                                }
-//                            }
+                            } 
                         } finally {
                             bufferedOutputStream.close();
                         }
@@ -673,7 +646,7 @@ public class BlobExplorerFileEditor extends EditorPart {
                         };
                         try {
                             StorageClientSDKManager.getManager().uploadBlobFileContent(
-                                    storageAccount.getConnectionString(),
+                                    connectionString,
                                     blobContainer,
                                     path,
                                     bufferedInputStream,
@@ -696,9 +669,9 @@ public class BlobExplorerFileEditor extends EditorPart {
 //                                future.cancel(true);
                             bufferedInputStream.close();
 
-                            for (BlobItem blobItem : StorageClientSDKManager.getManager().getBlobItems(storageAccount.getConnectionString(), blobDirectory)) {
+                            for (BlobItem blobItem : StorageClientSDKManager.getManager().getBlobItems(connectionString, blobDirectory)) {
                                 if (blobItem instanceof BlobFile && blobItem.getPath().equals(path)) {
-                                    StorageClientSDKManager.getManager().deleteBlobFile(storageAccount.getConnectionString(), (BlobFile) blobItem);
+                                    StorageClientSDKManager.getManager().deleteBlobFile(connectionString, (BlobFile) blobItem);
                                 }
                             }
                         }
@@ -706,10 +679,10 @@ public class BlobExplorerFileEditor extends EditorPart {
 
                         try {
                             directoryQueue.clear();
-                            directoryQueue.addLast(StorageClientSDKManager.getManager().getRootDirectory(storageAccount.getConnectionString(), blobContainer));
+                            directoryQueue.addLast(StorageClientSDKManager.getManager().getRootDirectory(connectionString, blobContainer));
 
                             for (String pathDir : path.split("/")) {
-                                for (BlobItem blobItem : StorageClientSDKManager.getManager().getBlobItems(storageAccount.getConnectionString(), directoryQueue.getLast())) {
+                                for (BlobItem blobItem : StorageClientSDKManager.getManager().getBlobItems(connectionString, directoryQueue.getLast())) {
                                     if (blobItem instanceof BlobDirectory && blobItem.getName().equals(pathDir)) {
                                         directoryQueue.addLast((BlobDirectory) blobItem);
                                     }

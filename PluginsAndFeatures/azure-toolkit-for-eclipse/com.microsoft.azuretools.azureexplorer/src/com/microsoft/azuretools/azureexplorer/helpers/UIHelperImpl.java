@@ -47,6 +47,7 @@ import com.microsoft.azuretools.azureexplorer.editors.TableFileEditor;
 import com.microsoft.azuretools.azureexplorer.forms.OpenSSLFinderForm;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.UIHelper;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 import com.microsoft.tooling.msservices.model.storage.Queue;
@@ -134,7 +135,7 @@ public class UIHelperImpl implements UIHelper {
         IEditorDescriptor editorDescriptor=workbench.getEditorRegistry().findEditor(type2Editor.get(item.getClass()));
         try {
             IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-            IEditorPart newEditor = page.openEditor(new StorageEditorInput(null, clientStorageAccount, item), editorDescriptor.getId());
+            IEditorPart newEditor = page.openEditor(new StorageEditorInput(clientStorageAccount.getName(), clientStorageAccount.getConnectionString(), item), editorDescriptor.getId());
         } catch (PartInitException e) {
             Activator.getDefault().log("Error opening " + item.getName(), e);
         }
@@ -159,7 +160,7 @@ public class UIHelperImpl implements UIHelper {
         IEditorDescriptor editorDescriptor=workbench.getEditorRegistry().findEditor(type2Editor.get(item.getClass()));
         try {
             IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-            IEditorPart newEditor = page.openEditor(new StorageEditorInput(storageAccount, null, item), editorDescriptor.getId());
+            IEditorPart newEditor = page.openEditor(new StorageEditorInput(storageAccount.name(), StorageClientSDKManager.getConnectionString(storageAccount), item), editorDescriptor.getId());
         } catch (PartInitException e) {
             Activator.getDefault().log("Error opening " + item.getName(), e);
         }

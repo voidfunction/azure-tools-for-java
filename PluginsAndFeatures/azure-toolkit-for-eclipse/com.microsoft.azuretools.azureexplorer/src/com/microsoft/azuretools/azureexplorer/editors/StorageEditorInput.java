@@ -27,20 +27,25 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
 public class StorageEditorInput implements IEditorInput {
-    private ClientStorageAccount clientStorageAccount;
-    private StorageAccount storageAccount;
+    private String storageAccount;
+    private String connectionString;
     private StorageServiceTreeItem item;
 
-    public StorageEditorInput(StorageAccount storageAccount, ClientStorageAccount clientStorageAccount, StorageServiceTreeItem item) {
+    public StorageEditorInput(String storageAccount, String connectionString, StorageServiceTreeItem item) {
         this.storageAccount = storageAccount;
+        this.connectionString = connectionString;
         this.item = item;
     }
 
-    public ClientStorageAccount getClientStorageAccount() {
-        return clientStorageAccount;
-    }
+    public String getStorageAccount() {
+		return storageAccount;
+	}
 
-    public StorageServiceTreeItem getItem() {
+	public String getConnectionString() {
+		return connectionString;
+	}
+
+	public StorageServiceTreeItem getItem() {
         return item;
     }
 
@@ -81,16 +86,14 @@ public class StorageEditorInput implements IEditorInput {
 
         StorageEditorInput that = (StorageEditorInput) o;
 
-        if (clientStorageAccount != null && !clientStorageAccount.getPrimaryKey().equals(that.clientStorageAccount.getPrimaryKey()) || 
-        		storageAccount != null && !storageAccount.getKeys().get(0).value().equals(that.storageAccount.getKeys().get(0).value())) 
+        if (!storageAccount.equals(that.storageAccount) || !connectionString.equals(that.connectionString)) 
         	return false;
         return item.getName().equals(that.item.getName());
     }
 
     @Override
     public int hashCode() {
-        int result = clientStorageAccount == null ? 
-        		storageAccount.getKeys().get(0).value().hashCode() : clientStorageAccount.getPrimaryKey().hashCode();
+        int result = connectionString.hashCode();
         result = 31 * result + item.getName().hashCode();
         return result;
     }
