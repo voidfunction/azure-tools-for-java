@@ -594,13 +594,16 @@ public class WebAppUtils {
             }
 
             AzureModelController.addNewResourceGroup(model.subscriptionDetail, rg);
+            AzureModelController.addNewWebAppToJustCreatedResourceGroup(rg, myWebApp);
             if (model.isAppServicePlanCreateNew) {
                 AppServicePlan asp = azure.appServices().appServicePlans().getById(myWebApp.appServicePlanId());
                 if (asp == null) {
                     throw new AzureCmdException(String.format("azure.appServices().appServicePlans().getById(%s) returned null"), myWebApp.appServicePlanId());
                 }
                 AzureModelController.addNewAppServicePlanToJustCreatedResourceGroup(rg, asp);
-                AzureModelController.addNewWebAppToJustCreatedResourceGroup(rg, myWebApp);
+            } else {
+                // add empty list
+                AzureModelController.addNewAppServicePlanToJustCreatedResourceGroup(rg, null);
             }
         } else {
             ResourceGroup rg = model.resourceGroup;

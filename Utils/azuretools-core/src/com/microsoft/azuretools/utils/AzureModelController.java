@@ -327,7 +327,9 @@ public class AzureModelController {
     public static void addNewAppServicePlanToJustCreatedResourceGroup(ResourceGroup rg, AppServicePlan appServicePlan) {
         // presume addNewResourceGroup call goes first
         List<AppServicePlan> l = new LinkedList<>();
-        l.add(appServicePlan);
+        if (appServicePlan != null) {
+            l.add(appServicePlan);
+        }
         AzureModel.getInstance().getResourceGroupToAppServicePlanMap().put(rg, l);
         // TODO:notify subscribers
     }
