@@ -35,17 +35,21 @@ import com.microsoft.azuretools.ijidea.ui.ErrorWindow;
 import com.microsoft.azuretools.ijidea.ui.SignInWindow;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.intellij.serviceexplorer.azure.SignInOutAction;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
 public class AzureSignInAction extends AnAction {
     private static final Logger LOGGER = Logger.getInstance(AzureSignInAction.class);
+    private static final String SIGN_IN = "Azure Sign In...";
+    private static final String SIGN_OUT = "Azure Sign Out...";
 
-    public AzureSignInAction() {
+    public AzureSignInAction() throws Exception {
+        super(AuthMethodManager.getInstance().isSignedIn() ? SIGN_OUT : SIGN_IN);
     }
 
-    public AzureSignInAction(Icon icon) {
-        super(icon);
+    public AzureSignInAction(@Nullable String title) {
+        super(title, title, UIHelperImpl.loadIcon(SignInOutAction.getIcon()));
     }
 
     @Override
@@ -59,9 +63,11 @@ public class AzureSignInAction extends AnAction {
         try {
             boolean isSignIn = AuthMethodManager.getInstance().isSignedIn();
             if (isSignIn) {
-                e.getPresentation().setText("Azure Sign Out...");
+                e.getPresentation().setText(SIGN_OUT);
+                e.getPresentation().setDescription(SIGN_OUT);
             } else {
-                e.getPresentation().setText("Azure Sign In...");
+                e.getPresentation().setText(SIGN_IN);
+                e.getPresentation().setDescription(SIGN_IN);
             }
             e.getPresentation().setIcon(UIHelperImpl.loadIcon(SignInOutAction.getIcon()));
         } catch (Exception ex) {

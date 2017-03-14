@@ -33,8 +33,10 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 
 public class SignInOutAction extends NodeAction {
-    private static final String ICON_DARK = "SignOutDark_16.png";
-    private static final String ICON_LIGHT = "SignOutLight_16.png";
+    private static final String ICON_SIGNIN_DARK = "SignInDark_16.png";
+    private static final String ICON_SIGNIN_LIGHT = "SignInLight_16.png";
+    private static final String ICON_SIGNOUT_DARK = "SignOutDark_16.png";
+    private static final String ICON_SIGNOUT_LIGHT = "SignOutLight_16.png";
 
     SignInOutAction(AzureModule azureModule) {
         super(azureModule, "Sign In/Out");
@@ -62,6 +64,14 @@ public class SignInOutAction extends NodeAction {
     }
 
     public static String getIcon() {
-        return DefaultLoader.getUIHelper().isDarkTheme() ? ICON_DARK : ICON_LIGHT;
+        boolean isSignedIn = false;
+        try {
+            isSignedIn = AuthMethodManager.getInstance().isSignedIn();
+        } catch (Exception ex) {}
+        if (DefaultLoader.getUIHelper().isDarkTheme()) {
+            return isSignedIn ? ICON_SIGNOUT_DARK : ICON_SIGNIN_DARK;
+        } else {
+            return isSignedIn ? ICON_SIGNOUT_LIGHT : ICON_SIGNIN_LIGHT;
+        }
     }
 }

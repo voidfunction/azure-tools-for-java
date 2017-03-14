@@ -36,6 +36,7 @@ import com.intellij.ui.treeStructure.Tree;
 import com.microsoft.azure.hdinsight.common.HDInsightUtil;
 import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
 import com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.helpers.UIHelperImpl;
 import com.microsoft.intellij.serviceexplorer.azure.AzureModuleImpl;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -329,22 +330,26 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
     private void addToolbarItems(ToolWindow toolWindow, final AzureModule azureModule) {
         if (toolWindow instanceof ToolWindowEx) {
             ToolWindowEx toolWindowEx = (ToolWindowEx) toolWindow;
-            boolean isDarkTheme = DefaultLoader.getUIHelper().isDarkTheme();
-            toolWindowEx.setTitleActions(
-                    new AnAction("Refresh", "Refresh Azure Nodes List", null) {
-                        @Override
-                        public void actionPerformed(AnActionEvent event) {
-                            azureModule.load(true);
-                        }
+            try {
+                toolWindowEx.setTitleActions(
+                        new AnAction("Refresh", "Refresh Azure Nodes List", null) {
+                            @Override
+                            public void actionPerformed(AnActionEvent event) {
+                                azureModule.load(true);
+                            }
 
-                        @Override
-                        public  void update(AnActionEvent e) {
-                            e.getPresentation().setIcon(UIHelperImpl.loadIcon(isDarkTheme ?
-                                    RefreshableNode.REFRESH_ICON_DARK : RefreshableNode.REFRESH_ICON_LIGHT));
-                        }
-                    },
-                    new AzureSignInAction(),
-                    new SelectSubscriptionsAction());
+                            @Override
+                            public  void update(AnActionEvent e) {
+                                boolean isDarkTheme = DefaultLoader.getUIHelper().isDarkTheme();
+                                e.getPresentation().setIcon(UIHelperImpl.loadIcon(isDarkTheme ?
+                                        RefreshableNode.REFRESH_ICON_DARK : RefreshableNode.REFRESH_ICON_LIGHT));
+                            }
+                        },
+                        new AzureSignInAction(),
+                        new SelectSubscriptionsAction());
+            } catch (Exception e) {
+                AzurePlugin.log(e.getMessage(), e);
+            }
         }
     }
 }
