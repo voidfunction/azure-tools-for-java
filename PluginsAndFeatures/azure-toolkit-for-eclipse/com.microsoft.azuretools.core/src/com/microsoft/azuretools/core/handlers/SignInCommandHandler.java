@@ -30,7 +30,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.AuthMethodDetails;
-import com.microsoft.azuretools.core.ui.SingInDialog;
+import com.microsoft.azuretools.core.ui.SignInDialog;
 
 public class SignInCommandHandler extends AbstractHandler {
 
@@ -45,7 +45,7 @@ public class SignInCommandHandler extends AbstractHandler {
 	public static void doSignIn(Shell shell) {
 		try {
 			AuthMethodManager authMethodManager = AuthMethodManager.getInstance();
-			SingInDialog d = SingInDialog.go(shell, authMethodManager.getAuthMethodDetails());
+			SignInDialog d = SignInDialog.go(shell, authMethodManager.getAuthMethodDetails());
 			if (null != d) {
                 AuthMethodDetails authMethodDetailsUpdated = d.getAuthMethodDetails();
                 authMethodManager.setAuthMethodDetails(authMethodDetailsUpdated);

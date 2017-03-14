@@ -1,24 +1,3 @@
-/**
- * Copyright (c) Microsoft Corporation
- * <p/>
- * All rights reserved.
- * <p/>
- * MIT License
- * <p/>
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
- * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * <p/>
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
- * the Software.
- * <p/>
- * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 package com.microsoft.azuretools.core.ui;
 
 import java.lang.reflect.InvocationTargetException;
@@ -58,7 +37,7 @@ import com.microsoft.azuretools.authmanage.models.AuthMethodDetails;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AccessTokenAzureManager;
 
-public class SingInDialog extends TitleAreaDialog {
+public class SignInDialog extends TitleAreaDialog {
     private Text textAuthenticationFilePath;
     private Button rbtnInteractive;
     private Button rbtnAutomated;
@@ -80,14 +59,14 @@ public class SingInDialog extends TitleAreaDialog {
      * Create the dialog.
      * @param parentShell
      */
-    public SingInDialog(Shell parentShell) {
+    public SignInDialog(Shell parentShell) {
         super(parentShell);
         setHelpAvailable(false);
         setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
     }
     
-    public static SingInDialog go(Shell parentShell, AuthMethodDetails authMethodDetails) {
-        SingInDialog d = new SingInDialog(parentShell);
+    public static SignInDialog go(Shell parentShell, AuthMethodDetails authMethodDetails) {
+    	SignInDialog d = new SignInDialog(parentShell);
         d.authMethodDetails = authMethodDetails;
         d.create();
         if (d.open() == Window.OK) {
@@ -176,7 +155,6 @@ public class SingInDialog extends TitleAreaDialog {
         textAuthenticationFilePath.setLayoutData(gd_textAuthenticationFilePath);
         
         btnBrowse = new Button(compositeAutomated, SWT.NONE);
-        btnBrowse.setAlignment(SWT.LEFT);
         btnBrowse.setEnabled(false);
         btnBrowse.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -188,7 +166,6 @@ public class SingInDialog extends TitleAreaDialog {
         new Label(compositeAutomated, SWT.NONE);
         
         btnCreateAuthenticationFile = new Button(compositeAutomated, SWT.NONE);
-        btnCreateAuthenticationFile.setAlignment(SWT.LEFT);
         btnCreateAuthenticationFile.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -197,7 +174,7 @@ public class SingInDialog extends TitleAreaDialog {
         });
         btnCreateAuthenticationFile.setEnabled(false);
         btnCreateAuthenticationFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-        btnCreateAuthenticationFile.setText("New…");
+        btnCreateAuthenticationFile.setText("New...");
         
         fileDialog = new FileDialog(btnBrowse.getShell(), SWT.OPEN);
         fileDialog.setText("Select Authentication File");
