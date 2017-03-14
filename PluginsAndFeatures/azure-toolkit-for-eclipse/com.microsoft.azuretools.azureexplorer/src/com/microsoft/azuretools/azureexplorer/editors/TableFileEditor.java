@@ -138,7 +138,7 @@ public class TableFileEditor extends EditorPart {
         buttonsContainer.setLayout(rowLayout);
 
         queryButton = new Button(buttonsContainer, SWT.PUSH);
-        queryButton.setImage(Activator.getImageDescriptor("icons/storagequery.png").createImage());
+        queryButton.setImage(Activator.getImageDescriptor("icons/Start.png").createImage());
         queryButton.setToolTipText("Execute");
 
         refreshButton = new Button(buttonsContainer, SWT.PUSH);

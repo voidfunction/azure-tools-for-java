@@ -46,9 +46,9 @@ import static com.microsoft.azure.docker.model.DockerHost.DockerHostVMState.RUNN
 
 public class DockerHostNode extends AzureRefreshableNode {
   //TODO: Replace the icons with the real Docker host icons
-  private static final String DOCKERHOST_WAIT_ICON_PATH = "virtualmachinewait.png";
-  private static final String DOCKERHOST_STOP_ICON_PATH = "virtualmachinestop.png";
-  private static final String DOCKERHOST_RUN_ICON_PATH = "virtualmachinerun.png";
+  private static final String DOCKERHOST_WAIT_ICON_PATH = "DockerContainerUpdating_16.png";
+  private static final String DOCKERHOST_STOP_ICON_PATH = "DockerContainerStopped_16.png";
+  private static final String DOCKERHOST_RUN_ICON_PATH = "DockerContainerRunning_16.png";
 
   public static final String ACTION_START = "Start";
   public static final String ACTION_RESTART = "Restart";
@@ -58,7 +58,7 @@ public class DockerHostNode extends AzureRefreshableNode {
   public static final String ACTION_VIEW = "Details";
   public static final String ACTION_DEPLOY = "Publish";
   private static final String ACTION_SHUTDOWN_ICON = "Stop.png";
-  private static final String ACTION_START_ICON = "storagequery.png";
+  private static final String ACTION_START_ICON = "Start.png";
 
   DockerHost dockerHost;
   AzureDockerHostsManager dockerManager;

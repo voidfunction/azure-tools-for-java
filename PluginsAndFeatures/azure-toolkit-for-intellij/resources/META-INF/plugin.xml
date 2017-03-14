@@ -49,7 +49,7 @@
               factoryClass="com.microsoft.intellij.components.ServerExplorerToolWindowFactory"
               id="Azure Explorer"
               canCloseContents="false"
-              icon="/icons/azure_explorer.png"/>
+              icon="/icons/AzureExplorer_16.png"/>
 
       <projectTemplatesFactory implementation="com.microsoft.azure.hdinsight.projects.HDInsightProjectTemplatesFactory"/>
       <projectStructureDetector implementation="com.microsoft.azure.hdinsight.projects.HDInsightProjectStructureDetector"/>

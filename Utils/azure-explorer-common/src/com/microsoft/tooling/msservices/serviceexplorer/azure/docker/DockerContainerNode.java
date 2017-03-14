@@ -41,9 +41,9 @@ import java.util.Map;
 
 public class DockerContainerNode extends AzureRefreshableNode {
   //TODO: Replace the icons with the real Docker host icons
-  private static final String DOCKER_CONTAINER_ICON_PATH = "job.png";
-  private static final String DOCKER_CONTAINER_WEB_RUN_ICON = "website.png";
-  private static final String DOCKER_CONTAINER_WEB_STOP_ICON = "stopWebsite.png";
+  private static final String DOCKER_CONTAINER_ICON_PATH = "DockerInstance2_16.png";
+  private static final String DOCKER_CONTAINER_WEB_RUN_ICON = "DockerInstanceRunning2_16.png";
+  private static final String DOCKER_CONTAINER_WEB_STOP_ICON = "DockerInstanceStopped2_16.png";
 
   public static final String ACTION_START = "Start";
   public static final String ACTION_DELETE = "Delete";

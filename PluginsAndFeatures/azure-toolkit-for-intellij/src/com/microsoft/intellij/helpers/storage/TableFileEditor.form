@@ -38,7 +38,7 @@
             <properties>
               <alignmentY value="0.0"/>
               <borderPainted value="false"/>
-              <icon value="icons/storagequery.png"/>
+              <icon value="icons/Start.png"/>
               <text value=""/>
             </properties>
           </component>

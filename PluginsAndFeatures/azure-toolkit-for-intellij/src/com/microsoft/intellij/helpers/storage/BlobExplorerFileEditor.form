@@ -40,7 +40,7 @@
                   <defaultCapable value="true"/>
                   <focusPainted value="true"/>
                   <hideActionText value="false"/>
-                  <icon value="icons/storagequery.png"/>
+                  <icon value="icons/Start.png"/>
                   <iconTextGap value="0"/>
                   <inheritsPopupMenu value="true"/>
                   <margin top="2" left="2" bottom="2" right="2"/>

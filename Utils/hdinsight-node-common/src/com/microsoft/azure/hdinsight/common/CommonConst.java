@@ -29,7 +29,7 @@ public class CommonConst {
     public static final String HDInsightIConPath = "HdInsight.png";
     public static final String HDInsightGrayIconPath = "HdInsight_gray.png";
     public static final String ClusterIConPath = "Cluster.png";
-    public static final String StorageAccountIConPath = "storageaccount.png";
+    public static final String StorageAccountIConPath = "StorageAccount_16.png";
     public static final String ADLS_STORAGE_ACCOUNT_ICON_PATH = "adls_storageaccount.png";
     public static final String StorageAccountFoldIConPath = "StorageAccountFolder.png";
     public static final String BlobContainerIConPath = "container.png";

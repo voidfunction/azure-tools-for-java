@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 
 public class AzureModule extends AzureRefreshableNode {
     private static final String AZURE_SERVICE_MODULE_ID = AzureModule.class.getName();
-    private static final String ICON_PATH = "azure_explorer.png";
+    private static final String ICON_PATH = "AzureExplorer_16.png";
     private static final String BASE_MODULE_NAME = "Azure";
 
     private Object project;
