@@ -837,6 +837,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
             }
             if (model.appServicePlanLocationCreateNew == null) {
                 setError(dec_comboAppServicePlanLocation, "Select a location.");
+                return false;
             }
         } else {
             if (model.appServicePlan == null ) {

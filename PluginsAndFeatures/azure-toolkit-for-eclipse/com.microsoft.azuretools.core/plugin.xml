@@ -186,8 +186,8 @@
          point="org.eclipse.core.expressions.propertyTesters">
          <propertyTester
             class="com.microsoft.azuretools.core.testers.AuthPropertyTester"
-            id="com.microsoft.azuretools.eclipse.testers.propertyTester"
-            namespace="com.microsoft.azuretools.eclipse.testers"
+            id="com.microsoft.azuretools.core.testers.propertyTester"
+            namespace="com.microsoft.azuretools.core.testers"
             properties="isSignedIn"
             type="java.lang.Object">
         </propertyTester>

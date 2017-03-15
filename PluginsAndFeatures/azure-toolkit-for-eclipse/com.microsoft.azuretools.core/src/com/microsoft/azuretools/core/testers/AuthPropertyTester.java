@@ -26,7 +26,7 @@ import org.eclipse.core.expressions.PropertyTester;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 
 public class AuthPropertyTester extends PropertyTester {
-    public static final String PROPERTY_NAMESPACE = "com.microsoft.azuretools.eclipse.testers";
+    public static final String PROPERTY_NAMESPACE = "com.microsoft.azuretools.core.testers";
     public static final String PROPERTY_IS_SIGNED_IN = "isSignedIn";
  
     @Override
