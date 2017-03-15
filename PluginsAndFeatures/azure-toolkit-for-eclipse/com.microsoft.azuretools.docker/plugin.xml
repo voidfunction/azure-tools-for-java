@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            name="Azure Containers"
+            id="com.microsoft.azuretools.docker.commands.category">
+      </category>
+      <command
+            name="Azure Containers"
+            categoryId="com.microsoft.azuretools.docker.commands.category"
+            id="com.microsoft.azuretools.docker.commands.azurePublishDockerContainer">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            commandId="com.microsoft.azuretools.docker.commands.azurePublishDockerContainer"
+            class="com.microsoft.azuretools.docker.handlers.AzureDockerHostDeployHandler">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.microsoft.azuretools.docker.commands.azurePublishDockerContainer"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               label="Azure Containers"
+               mnemonic="D"
+               id="com.microsoft.azuretools.docker.menus.azuretoolsDockerMenu">
+            <command
+                  commandId="com.microsoft.azuretools.docker.commands.azurePublishDockerContainer"
+                  mnemonic="P"
+                  id="com.microsoft.azuretools.docker.menus.azurePublishDockerContainer">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="com.microsoft.azuretools.docker.toolbars.azuretoolsDockerToolbar">
+            <command
+                  commandId="com.microsoft.azuretools.docker.commands.azurePublishDockerContainer"
+                  icon="icons/sample.gif"
+                  tooltip="Publish to Azure Container"
+                  id="com.microsoft.azuretools.docker.toolbars.azurePublishDockerContainer">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+
+</plugin>
