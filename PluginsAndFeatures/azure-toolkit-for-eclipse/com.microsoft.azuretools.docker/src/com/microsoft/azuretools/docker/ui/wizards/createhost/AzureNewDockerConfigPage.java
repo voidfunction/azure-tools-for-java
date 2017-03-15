@@ -19,6 +19,7 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.createhost;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -32,6 +33,10 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+
+import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.DockerHost;
+
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -43,14 +48,30 @@ public class AzureNewDockerConfigPage extends WizardPage {
 	private Text dockerHostRGTextField;
 	private Text dockerHostNewVNetNameTextField;
 	private Text dockerHostNewVNetAddrSpaceTextField;
+	
+	private String prefferedLocation;
+	private final String SELECT_REGION = "<select region>";
+	
+	private AzureNewDockerWizard wizard;
+	private AzureDockerHostsManager dockerManager;
+	private DockerHost newHost;
+	private IProject project;
 
 	/**
 	 * Create the wizard.
 	 */
-	public AzureNewDockerConfigPage() {
+	public AzureNewDockerConfigPage(AzureNewDockerWizard wizard) {
 		super("Create Docker Host");
 		setTitle("Configure the new virtual machine");
 		setDescription("");
+
+		this.wizard = wizard;		
+		this.dockerManager = wizard.getDockerManager();
+		this.newHost = wizard.getDockerHost();
+		this.project = wizard.getProject();
+
+		prefferedLocation = null;
+
 	}
 
 	/**
@@ -252,5 +273,9 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		gd_dockerSelectStorageComboBox.widthHint = 220;
 		dockerSelectStorageComboBox.setLayoutData(gd_dockerSelectStorageComboBox);
 		
+	}
+
+	public boolean doValidate() {
+		return false;
 	}
 }

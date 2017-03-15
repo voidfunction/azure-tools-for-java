@@ -19,15 +19,21 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.createhost;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+
+import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.DockerHost;
+
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
@@ -48,13 +54,23 @@ public class AzureNewDockerLoginPage extends WizardPage {
 	private Text dockerDaemonPortTextField;
 	private Text dockerHostImportTLSTextField;
 
+	private AzureNewDockerWizard wizard;
+	private AzureDockerHostsManager dockerManager;
+	private DockerHost newHost;
+	private IProject project;
+
 	/**
 	 * Create the wizard.
 	 */
-	public AzureNewDockerLoginPage() {
+	public AzureNewDockerLoginPage(AzureNewDockerWizard wizard) {
 		super("Create Docker Host");
 		setTitle("Configure log in credentials and port settings");
 		setDescription("");
+
+		this.wizard = wizard;
+		this.dockerManager = wizard.getDockerManager();
+		this.newHost = wizard.getDockerHost();
+		this.project = wizard.getProject();
 	}
 
 	/**
@@ -196,11 +212,10 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		dockerHostImportSSHBrowseButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog fileDialog = new FileDialog(dockerHostImportSSHBrowseButton.getShell(), SWT.OPEN);
-				fileDialog.setText("Select Custom Dockerfile");
-				fileDialog.setFilterPath(System.getProperty("user.home"));
-				fileDialog.setFilterExtensions(new String[] { "id_rsa", "id_rsa.pub"});
-				String path = fileDialog.open();
+				DirectoryDialog directoryDialog = new DirectoryDialog(dockerHostImportSSHBrowseButton.getShell());
+				directoryDialog.setText("Select SSH Keys Directory");
+				directoryDialog.setFilterPath(System.getProperty("user.home"));
+				String path = directoryDialog.open();
 				if (path == null) {
 					return;
 				}
@@ -267,11 +282,10 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		dockerHostImportTLSBrowseButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog fileDialog = new FileDialog(dockerHostImportTLSBrowseButton.getShell(), SWT.OPEN);
-				fileDialog.setText("Select Custom Dockerfile");
-				fileDialog.setFilterPath(System.getProperty("user.home"));
-				fileDialog.setFilterExtensions(new String[] { "ca.pem", "key.pem", "*.*" });
-				String path = fileDialog.open();
+				DirectoryDialog directoryDialog = new DirectoryDialog(dockerHostImportTLSBrowseButton.getShell());
+				directoryDialog.setText("Select TLS Certificate Directory");
+				directoryDialog.setFilterPath(System.getProperty("user.home"));
+				String path = directoryDialog.open();
 				if (path == null) {
 					return;
 				}
@@ -290,6 +304,10 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		GridData gd_dockerHostNewKeyvaultTextField = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostNewKeyvaultTextField.widthHint = 210;
 		dockerHostNewKeyvaultTextField.setLayoutData(gd_dockerHostNewKeyvaultTextField);
+	}
+	
+	public boolean doValidate() {
+		return true;
 	}
 
 }

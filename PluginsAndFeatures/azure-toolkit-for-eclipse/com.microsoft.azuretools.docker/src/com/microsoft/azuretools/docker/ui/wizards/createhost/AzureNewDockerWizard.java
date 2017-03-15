@@ -19,23 +19,67 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.createhost;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.Wizard;
+
+import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 
 public class AzureNewDockerWizard extends Wizard {
 
-	public AzureNewDockerWizard() {
-		setWindowTitle("Create Docker Host");
+	
+	private AzureNewDockerConfigPage azureNewDockerConfigPage;
+	private AzureNewDockerLoginPage azureNewDockerLoginPage;
+	
+	private IProject project;
+	private AzureDockerHostsManager dockerManager;
+	private DockerHost newHost;
+
+	public AzureNewDockerWizard(final IProject project, AzureDockerHostsManager dockerManager) {
+	    this.project = project;
+	    this.dockerManager = dockerManager;
+
+	    newHost = dockerManager.createNewDockerHostDescription(AzureDockerUtils.getDefaultRandomName(AzureDockerUtils.getDefaultName(project.getName())));
+
+	    azureNewDockerConfigPage = new AzureNewDockerConfigPage(this);
+	    azureNewDockerLoginPage = new AzureNewDockerLoginPage(this);
+
+	    setWindowTitle("Create Docker Host");
 	}
 
 	@Override
 	public void addPages() {
-		addPage(new AzureNewDockerConfigPage());
-		addPage(new AzureNewDockerLoginPage());
+		addPage(azureNewDockerConfigPage);
+		addPage(azureNewDockerLoginPage);
 	}
 
 	@Override
 	public boolean performFinish() {
-		return true;
+		return doValidate();
+	}
+	
+	public boolean doValidate() {
+		return azureNewDockerConfigPage.doValidate() && azureNewDockerLoginPage.doValidate();
+	}
+
+	public void setNewDockerHost(DockerHost dockerHost) {
+		newHost = dockerHost;
+	}
+
+	public DockerHost getDockerHost() {
+		return newHost;
+	}
+
+	public IProject getProject() {
+		return project;
+	}
+
+	public AzureDockerHostsManager getDockerManager() {
+		return dockerManager;
+	}
+
+	public void create() {		
 	}
 
 }
