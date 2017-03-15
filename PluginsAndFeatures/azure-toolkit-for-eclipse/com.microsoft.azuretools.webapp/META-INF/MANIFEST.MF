@@ -28,4 +28,9 @@ Import-Package: com.microsoft.azure.management,
  com.microsoft.azuretools.authmanage.models,
  com.microsoft.azuretools.core.utils,
  com.microsoft.azuretools.sdkmanage,
- com.microsoft.azuretools.utils
+ com.microsoft.azuretools.utils,
+ org.eclipse.core.expressions
+Export-Package: com.microsoft.azuretools.webapp,
+ com.microsoft.azuretools.webapp.handlers,
+ com.microsoft.azuretools.webapp.ui,
+ com.microsoft.azuretools.webapp.util
