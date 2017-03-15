@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.microsoft.azuretools.webapp;singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.wst.common.frameworks;bundle-version="1.2.200",
+ org.eclipse.wst.common.frameworks,
  org.eclipse.jst.j2ee,
  org.eclipse.jst.j2ee.web,
  org.eclipse.core.resources,
