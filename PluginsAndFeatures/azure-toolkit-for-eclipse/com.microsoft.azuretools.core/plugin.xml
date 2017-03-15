@@ -12,9 +12,9 @@
     <!-- Azure preference page -->
    <extension point = "org.eclipse.ui.preferencePages">
     <page
-       	id="com.persistent.ui.preferencepage.windowsazure"
-       	class="com.microsoft.azuretools.core.ui.WindowsAzurePreferencePage"
-       	name="Azure">
+           id="com.persistent.ui.preferencepage.windowsazure"
+           class="com.microsoft.azuretools.core.ui.WindowsAzurePreferencePage"
+           name="Azure">
     </page>
    </extension>
 
@@ -59,19 +59,19 @@
             style="pulldown" tooltip="Publish"/>
             
             <command
-				commandId="com.microsoft.azuretools.eclipse.ui.WANewCertificate"
-				icon="icons/small/newCert.png"
+                commandId="com.microsoft.azuretools.eclipse.ui.WANewCertificate"
+                icon="icons/small/newCert.png"
                 label="New Self Signed Certificate"
-				tooltip="New Self Signed Certificate"
-				style="push">
-			</command>
-			<command
+                tooltip="New Self Signed Certificate"
+                style="push">
+            </command>
+            <command
                 commandId="com.microsoft.azuretools.eclipse.ui.AzureSamplesCmd"
                 icon="icons/small/CodeSamples_16.png"
                 label="Azure Code Samples"
                 tooltip="Azure Code Samples"
                 style="push">
-			</command>
+            </command>
          </toolbar>
       </menuContribution>
    </extension>
@@ -79,25 +79,25 @@
    <extension
          point="org.eclipse.ui.commands">
         <category
-            name="Microsoft Azure"
-            id="AzureManagePlugin.commands.MicrosoftAzureCategory">
+            name="Azure"
+            id="com.microsoft.azuretools.core.category.Azure">
         </category>
         <command
             name="Sign In..."
-            categoryId="AzureManagePlugin.commands.MicrosoftAzureCategory"
-            id="AzureManagePlugin.commands.signInCommand"
+            categoryId="com.microsoft.azuretools.core.category.Azure"
+            id="com.microsoft.azuretools.core.commands.SignIn"
             icon="icons/SignOutLight_16.png">
         </command>
         <command
               categoryId="AzureManagePlugin.commands.MicrosoftAzureCategory"
               icon="icons/SignOutLight_16.png"
-              id="AzureManagePlugin.commands.signOutCommand"
+              id="com.microsoft.azuretools.core.commands.SignOut"
               name="Sign Out...">
         </command>      
         <command
             name="Select Subsriptions"
-            categoryId="AzureManagePlugin.commands.MicrosoftAzureCategory"
-            id="AzureManagePlugin.commands.selectSubsriptionsCommand"
+            categoryId="com.microsoft.azuretools.core.category.Azure"
+            id="com.microsoft.azuretools.core.commands.SelectSubsriptions"
             icon="icons/SignOutLight_16.png">
         </command>
     </extension>
@@ -105,16 +105,16 @@
     <extension
          point="org.eclipse.ui.handlers">
         <handler
-            commandId="AzureManagePlugin.commands.signInCommand"
+            commandId="com.microsoft.azuretools.core.commands.SignIn"
             class="com.microsoft.azuretools.core.handlers.SignInCommandHandler"
             >
         </handler>
         <handler
-            commandId="AzureManagePlugin.commands.signOutCommand"
+            commandId="com.microsoft.azuretools.core.commands.SignOut"
             class="com.microsoft.azuretools.core.handlers.SignOutCommandHandler">
         </handler>
         <handler
-            commandId="AzureManagePlugin.commands.selectSubsriptionsCommand"
+            commandId="com.microsoft.azuretools.core.commands.SelectSubsriptions"
             class="com.microsoft.azuretools.core.handlers.SelectSubsriptionsCommandHandler">
             <enabledWhen>
                 <reference definitionId="when.is.signed.in"/>
@@ -124,7 +124,7 @@
             class="com.microsoft.azuretools.eclipse.ui.WANewCertificate"
             commandId="com.microsoft.azuretools.core.ui.WANewCertificate">
         </handler>
-	    <handler
+        <handler
             class="com.microsoft.azuretools.eclipse.ui.AzureSamples"
             commandId="com.microsoft.azuretools.core.ui.AzureSamplesCmd">
         </handler>
@@ -147,24 +147,24 @@
             <menu
                 label="Tools"
                 mnemonic="t"
-                id="AzureManagePlugin.menus.tools"/>
+                id="com.microsoft.azuretools.core.menus.Tools"/>
         </menuContribution>
         <menuContribution
-            locationURI="menu:AzureManagePlugin.menus.tools">
+            locationURI="menu:com.microsoft.azuretools.core.menus.Tools">
             <menu
                 label="Azure"
                 mnemonic="A"
-                id="AzureManagePlugin.menus.microsoftAzureMenu">
+                id="com.microsoft.azuretools.core.menus.Azure">
                 <command
-                    commandId="AzureManagePlugin.commands.selectSubsriptionsCommand"
+                    commandId="com.microsoft.azuretools.core.commands.SelectSubsriptions"
                     mnemonic="S"
-                    id="AzureManagePlugin.menus.selectSubsriptionsMenu">
+                    id="com.microsoft.azuretools.core.menus.SelectSubsriptions">
                 </command>
                 <separator visible="true" name="signIn"/>
                 <command
-                      commandId="AzureManagePlugin.commands.signInCommand"
+                      commandId="com.microsoft.azuretools.core.commands.SignIn"
                       mnemonic="S"
-                      id="AzureManagePlugin.menus.signInMenu">
+                      id="com.microsoft.azuretools.core.menus.SignIn">
                       <visibleWhen>
                         <not>
                             <reference definitionId="when.is.signed.in"/>
@@ -172,9 +172,9 @@
                       </visibleWhen>
                 </command>
                 <command
-                    commandId="AzureManagePlugin.commands.signOutCommand"
+                    commandId="com.microsoft.azuretools.core.commands.SignOut"
                     mnemonic="S"
-                    id="AzureManagePlugin.menus.signOutMenu">
+                    id="com.microsoft.azuretools.core.menus.SignOut">
                    <visibleWhen>
                         <reference definitionId="when.is.signed.in"/>
                     </visibleWhen>
@@ -196,7 +196,7 @@
         point="org.eclipse.core.expressions.definitions">
         <definition id="when.is.signed.in">
             <test
-                property="com.microsoft.azuretools.eclipse.testers.isSignedIn"
+                property="com.microsoft.azuretools.core.testers.isSignedIn"
                 forcePluginActivation="true">
             </test>
         </definition>
