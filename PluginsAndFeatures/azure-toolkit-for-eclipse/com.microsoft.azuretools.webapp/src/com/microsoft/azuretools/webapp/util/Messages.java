@@ -17,30 +17,26 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoft.azuretools.azureexplorer.actions;
+package com.microsoft.azuretools.webapp.util;
 
-import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.osgi.util.NLS;
 
-import com.microsoft.azuretools.azureexplorer.forms.createvm.CreateVMWizard;
-import com.microsoft.azuretools.core.utils.PluginUtil;
-import com.microsoft.tooling.msservices.helpers.Name;
-import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
-import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
+public final class Messages extends NLS {
+	private static final String BUNDLE_NAME = "com.microsoft.azuretools.webapp.util.messages";
+	public static String natJavaEMF;
+	public static String natMdCore;
+	public static String natFctCore;
+	public static String natJava;
+	public static String natJs;
+	public static String propWebProj;
+	public static String propErr;
 
-@Name("Create VM")
-public class CreateArmVMAction extends NodeActionListener {
-    public CreateArmVMAction(VMArmModule node) {
-        super(node);
-    }
+	static {
+		// initialize resource bundle
+		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
+	}
 
-    @Override
-    public void actionPerformed(NodeActionEvent e) {
-        CreateVMWizard createVMWizard = new CreateVMWizard((VMArmModule) e.getAction().getNode());
-        WizardDialog dialog = new WizardDialog(PluginUtil.getParentShell(), createVMWizard);
-        dialog.setTitle("Create new Virtual Machine");
-        dialog.setMinimumPageSize(450, 500);
-        dialog.create();
-        dialog.open();
-    }
+	private Messages() {
+		super();
+	}
 }

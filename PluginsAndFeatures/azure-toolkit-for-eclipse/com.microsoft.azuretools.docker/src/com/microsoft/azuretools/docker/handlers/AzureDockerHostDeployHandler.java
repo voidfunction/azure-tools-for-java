@@ -88,7 +88,7 @@ public class AzureDockerHostDeployHandler extends AbstractHandler {
 					}
 
 					WizardDialog createNewDockerHostDialog = new WizardDialog(shell,
-	                        new AzureNewDockerWizard());
+	                        new AzureNewDockerWizard(project, dockerManager));
 					if (createNewDockerHostDialog.open() == Window.OK) {
 						MessageDialog.openInformation(
 								shell,

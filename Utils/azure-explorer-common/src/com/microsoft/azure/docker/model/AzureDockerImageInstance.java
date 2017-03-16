@@ -35,4 +35,5 @@ public class AzureDockerImageInstance {
   public String dockerfileContent;
   public boolean isHttpsWebApp;
   public String predefinedDockerfile;
+  public boolean hasRootDeployment;
 }

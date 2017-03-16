@@ -89,7 +89,7 @@
             icon="icons/SignOutLight_16.png">
         </command>
         <command
-              categoryId="AzureManagePlugin.commands.MicrosoftAzureCategory"
+              categoryId="com.microsoft.azuretools.core.category.Azure"
               icon="icons/SignOutLight_16.png"
               id="com.microsoft.azuretools.core.commands.SignOut"
               name="Sign Out...">

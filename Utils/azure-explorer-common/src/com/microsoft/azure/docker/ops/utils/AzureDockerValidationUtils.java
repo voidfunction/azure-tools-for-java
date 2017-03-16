@@ -19,12 +19,10 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.intellij.docker.utils;
+package com.microsoft.azure.docker.ops.utils;
 
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerSubscription;
-import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
-import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -117,8 +115,26 @@ public class AzureDockerValidationUtils {
     return "User name should be 1 to 64 characters and it can only include alphanumeric characters, periods, underscores and can not end in a period.";
   }
 
-  public static boolean validateDockerHostPassword(String name) {
-    return (name != null && name.length() >= 12 && name.length() <= 72);
+  public static boolean validateDockerHostPassword(String pwd) {
+    if (pwd == null || pwd.length() < 12 || pwd.length() > 72) {
+      return false;
+    }
+
+    int specialChars = 0;
+    if (pwd.matches(".*[A-Z].*")) {
+      specialChars ++;
+    }
+    if (pwd.matches(".*[a-z].*")) {
+      specialChars ++;
+    }
+    if (pwd.matches(".*[0-9].*")) {
+      specialChars ++;
+    }
+    if (pwd.matches(".*[^A-Za-z0-9].*")) {
+      specialChars ++;
+    }
+
+    return specialChars >= 3;
   }
 
   public static String getDockerHostPasswordTip() {

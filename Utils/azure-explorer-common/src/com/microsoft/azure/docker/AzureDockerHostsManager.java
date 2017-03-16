@@ -36,6 +36,7 @@ public class AzureDockerHostsManager {
   private static boolean DEBUG = true;
 
   private static AzureDockerHostsManager instance = null;
+  private static boolean isInitialized = false;
 
   private AzureManager azureAuthManager;
 
@@ -59,11 +60,13 @@ public class AzureDockerHostsManager {
   public static AzureDockerHostsManager getAzureDockerHostsManager(AzureManager azureAuthManager) throws Exception {
     if (instance == null || instance.azureAuthManager != azureAuthManager) {
       instance = new AzureDockerHostsManager(azureAuthManager);
+      isInitialized = false;
     }
 
-    // read docker hosts, key vaults and subscriptions here.
-    if (!instance.isInitialized()) instance.forceRefreshSubscriptions();
+    return instance;
+  }
 
+  public static AzureDockerHostsManager getAzureDockerHostsManager() {
     return instance;
   }
 
@@ -98,6 +101,17 @@ public class AzureDockerHostsManager {
     return instance;
   }
 
+  public boolean isInitialized() {
+    isInitialized = subscriptionsList != null && !subscriptionsList.isEmpty() &&
+        vaultsMap != null && !vaultsMap.isEmpty() &&
+        dockerVaultsMap != null && !dockerVaultsMap.isEmpty() &&
+        dockerHostsList != null && !dockerHostsList.isEmpty() &&
+        dockerNetworkMap != null && !dockerNetworkMap.isEmpty() &&
+        dockerStorageAccountMap != null && !dockerStorageAccountMap.isEmpty();
+
+    return isInitialized;
+  }
+
   public List<AzureDockerSubscription> getSubscriptionsList() { return subscriptionsList; }
 
   public Map<String, AzureDockerSubscription> getSubscriptionsMap() { return subscriptionsMap; }
@@ -109,15 +123,6 @@ public class AzureDockerHostsManager {
   public String getUserId() { return userId; }
 
   public List<DockerHost> getDockerHostsList() { return dockerHostsList; }
-
-  public boolean isInitialized() {
-    return subscriptionsList != null && !subscriptionsList.isEmpty() &&
-        vaultsMap != null && !vaultsMap.isEmpty() &&
-        dockerVaultsMap != null && !dockerVaultsMap.isEmpty() &&
-        dockerHostsList != null && !dockerHostsList.isEmpty() &&
-        dockerNetworkMap != null && !dockerNetworkMap.isEmpty() &&
-        dockerStorageAccountMap != null && !dockerStorageAccountMap.isEmpty();
-  }
 
   public Map<String, AzureDockerSubscription> refreshDockerSubscriptions() {
     try {
@@ -230,6 +235,8 @@ public class AzureDockerHostsManager {
     refreshDockerStorageAccountDetails();
 
     refreshDockerHostDetails();
+
+    isInitialized = true;
 
   }
 

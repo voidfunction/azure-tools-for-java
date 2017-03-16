@@ -138,7 +138,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
 			String symbolicName = bundles[i].getSymbolicName().toLowerCase();
 			if(symbolicName.contains("scala-ide")) {
 				isScalaEnabled = true;
-			} else if(symbolicName.equals("com.microsoft.hdinsights")) {
+			} else if(symbolicName.equals("com.microsoft.azuretools.hdinsight")) {
 				isHDIEnabled = true;
 			}
 		}

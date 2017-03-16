@@ -17,13 +17,14 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoft.azuretools.azureexplorer.forms.createvm.arm;
+package com.microsoft.azuretools.azureexplorer.forms.createvm;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -55,6 +56,7 @@ import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.azureexplorer.forms.CreateArmStorageAccountForm;
 import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.utils.AzureModel;
 
 public class SettingsStep extends WizardPage {
     private static final String CREATE_NEW = "<< Create new >>";
@@ -138,8 +140,8 @@ public class SettingsStep extends WizardPage {
         this.setControl(container);
     }
 
-    private void createSettingsPanel(Composite container) {
-        final Composite composite = new Composite(container, SWT.NONE);
+    private void createSettingsPanel(Composite parent) {
+        final Composite composite = new Composite(parent, SWT.NONE);
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 1;
         GridData gridData = new GridData();
@@ -149,16 +151,35 @@ public class SettingsStep extends WizardPage {
         gridData.widthHint = 250;
         composite.setLayout(gridLayout);
         composite.setLayoutData(gridData);
-
+        
         resourceGrpLabel = new Label(composite, SWT.LEFT);
         resourceGrpLabel.setText("Resource group:");
-        Group group = new Group(composite, SWT.NONE);
-        group.setLayout(new RowLayout(SWT.HORIZONTAL));
-        createNewRadioButton = new Button(group, SWT.RADIO);
+        
+        final Composite container = new Composite(composite, SWT.NONE);
+        gridLayout = new GridLayout();
+        gridLayout.numColumns = 2;
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.verticalAlignment = GridData.BEGINNING;
+        // gridData.grabExcessHorizontalSpace = true;
+        gridData.widthHint = 250;
+        container.setLayout(gridLayout);
+        container.setLayoutData(gridData);
+        
+        createNewRadioButton = new Button(container, SWT.RADIO);
         createNewRadioButton.setText("Create new");
-        useExistingRadioButton = new Button(group, SWT.RADIO);
+        resourceGrpField = new Text(container, SWT.LEFT | SWT.BORDER);
+        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+        resourceGrpField.setLayoutData(gridData);
+        
+        useExistingRadioButton = new Button(container, SWT.RADIO);
         useExistingRadioButton.setText("Use existing");
-
+        resourceGrpCombo = new Combo(container, SWT.READ_ONLY);
+        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+        resourceGrpCombo.setLayoutData(gridData);
+        resourceGroupViewer = new ComboViewer(resourceGrpCombo);
+        resourceGroupViewer.setContentProvider(ArrayContentProvider.getInstance());
+        
         SelectionListener updateListener = new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent arg0) {
@@ -168,17 +189,7 @@ public class SettingsStep extends WizardPage {
         createNewRadioButton.addSelectionListener(updateListener);
         useExistingRadioButton.addSelectionListener(updateListener);
         createNewRadioButton.setSelection(true);
-        
-        resourceGrpField = new Text(composite, SWT.LEFT | SWT.BORDER);
-        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-        resourceGrpField.setLayoutData(gridData);
 
-        resourceGrpCombo = new Combo(composite, SWT.READ_ONLY);
-        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-        resourceGrpCombo.setLayoutData(gridData);
-        resourceGroupViewer = new ComboViewer(resourceGrpCombo);
-        resourceGroupViewer.setContentProvider(ArrayContentProvider.getInstance());
-        
         handleResourceGroup();
 
         storageAccountLabel = new Label(composite, SWT.LEFT);
@@ -221,9 +232,10 @@ public class SettingsStep extends WizardPage {
     
 	private void handleResourceGroup() {
 		final boolean isNewGroup = createNewRadioButton.getSelection();
-		resourceGrpField.setVisible(isNewGroup);
-		resourceGrpCombo.setVisible(!isNewGroup);
 		wizard.setNewResourceGroup(isNewGroup);
+        resourceGrpField.setEnabled(isNewGroup);
+        resourceGrpCombo.setEnabled(!isNewGroup);
+        wizard.setResourceGroupName(isNewGroup ? resourceGrpField.getText() : resourceGrpCombo.getText());
 	}
 
     @Override
@@ -249,12 +261,15 @@ public class SettingsStep extends WizardPage {
 		DefaultLoader.getIdeHelper().runInBackground(null, "Loading resource groups...", false, true, "Loading resource groups...", new Runnable() {
 					@Override
 					public void run() {
-						final List<ResourceGroup> resourceGroups = wizard.getAzure().resourceGroups().list();
+						// Resource groups already initialized in cache when loading locations on SelectImageStep
+				        List<ResourceGroup> resourceGroups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(wizard.getSubscription());
+				        List<String> filteredGroups = resourceGroups.stream().filter(group -> wizard.getRegion().equals(group.regionName()))
+				                .map(ResourceGroup::name).sorted().collect(Collectors.toList());
 						DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 							@Override
 							public void run() {
 								final Vector<Object> vector = new Vector<Object>();
-								vector.addAll(resourceGroups);
+								vector.addAll(filteredGroups);
 								resourceGroupViewer.setInput(vector);
 								// if (resourceGroups.size() > 0) {
 								// resourceGrpCombo.select(0);

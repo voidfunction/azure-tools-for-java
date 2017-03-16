@@ -47,7 +47,7 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.intellij.docker.dialogs.AzureEditDockerLoginCredsDialog;
 import com.microsoft.intellij.docker.dialogs.AzureViewDockerDialog;
 import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
-import com.microsoft.intellij.docker.utils.AzureDockerValidationUtils;
+import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
 import com.microsoft.intellij.docker.wizards.createhost.AzureNewDockerWizardDialog;
 import com.microsoft.intellij.docker.wizards.createhost.AzureNewDockerWizardModel;
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardModel;
@@ -509,6 +509,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       return info;
     }
     dockerImageDescription.artifactPath = dockerArtifactPath.getText();
+    dockerImageDescription.hasRootDeployment = dockerImageDescription.artifactPath.toLowerCase().matches(".*.jar");
 
     if (dockerHostsTableSelection == null && !dockerImageDescription.hasNewDockerHost){
       ValidationInfo info = new ValidationInfo("Please check a Docker host or create a new", dockerHostsTable);

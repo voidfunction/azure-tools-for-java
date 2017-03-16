@@ -1,53 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension
-         point="org.eclipse.ui.commands">
-      <category
-            name="Web App Category"
-            id="com.microsoft.azuretools.webapp.category.webAppCategory">
-      </category>
+   <extension point="org.eclipse.ui.commands">
        <command
-            name="Deploy to Azure App Service"
-            categoryId="com.microsoft.azuretools.webapp.category.webAppCategory"
+            name="Publish as Azure Web App..."
+            categoryId="com.microsoft.ui.dropdown.category"
             id="com.microsoft.azuretools.webapp.commands.deployToAzure">
-       </command>
-      
+            <commandParameter id="com.microsoft.ui.dropdown.msg" name="DropDown Options" optional="true"></commandParameter>
+       </command>   
    </extension>
-   <extension
-         point="org.eclipse.ui.handlers">
+   
+   <extension point="org.eclipse.ui.handlers">
       <handler
             commandId="com.microsoft.azuretools.webapp.commands.deployToAzure"
             class="com.microsoft.azuretools.webapp.handlers.DeployToAzureHandler">
+            <!--enabledWhen>
+			<with
+				variable="selection">
+				<count value="1"/>
+				<iterate
+					operator="or">
+            		<adapt type="org.eclipse.core.resources.IProject">
+        				<test property="com.microsoft.ui.webapp.property.isWebProj"/>
+            		</adapt>
+				</iterate>
+		    </with>
+		</enabledWhen-->
       </handler>
    </extension>
-   <extension
-         point="org.eclipse.ui.menus">
-           
+   
+   <extension point="org.eclipse.ui.menus">           
       <menuContribution locationURI="popup:org.eclipse.ui.popup.any?after=additions">
 	      <menu
                label="Azure"
                mnemonic="M"
-               id="com.microsoft.azuretools.webapp.menus.Azure">
+               id="com.microsoft.azuretools.webprojmenu"
+               icon="icons/windowsAzure.png">
 		      <command 
-		      		label="Publish as Azure Web App..."
 		      		commandId="com.microsoft.azuretools.webapp.commands.deployToAzure"
-		        	style="push" 
-		        	mnemonic="L">
-		      </command>
+		        	icon="icons/publishWebsite.png"/>
 		      <visibleWhen checkEnabled="false">
 			    <with 
 				variable="selection">
 				<count value="1"/> 
-					<iterate 
-						operator="or">
-						<adapt type="org.eclipse.core.resources.IProject">
-	            		</adapt>
-					</iterate> 
+				<iterate 
+					operator="or">
+					<adapt type="org.eclipse.core.resources.IProject">
+        				<test property="com.microsoft.ui.webapp.property.isWebProj"/>
+            		</adapt>
+				</iterate> 
 		    	</with>
-			    </visibleWhen>
+			  </visibleWhen>
 		  </menu>
       </menuContribution>
+      <menuContribution locationURI="menu:com.microsoft.ui.dropdown.toolbar.command">
+         <command commandId="com.microsoft.azuretools.webapp.commands.deployToAzure" label="Publish as Azure Web App..." style="push">
+            <parameter name="com.microsoft.ui.dropdown.msg" value="Web App"></parameter>
+         </command>
+      </menuContribution>
+   </extension>
+   
+   <extension point="org.eclipse.ui.commandImages">
+     <image commandId="com.microsoft.azuretools.webapp.commands.deployToAzure" icon="icons/publishWebsite.png"></image>
+   </extension>
+   
+   <extension point="org.eclipse.core.expressions.propertyTesters">
+  	 <propertyTester
+       id="com.microsoft.ui.webapp.property.testWebProj"
+       type="org.eclipse.core.resources.IProject"
+       namespace="com.microsoft.ui.webapp.property"
+       properties="isWebProj"
+       class="com.microsoft.azuretools.webapp.util.WAPropertyTester">
+     </propertyTester>
    </extension>
 
 </plugin>

@@ -59,7 +59,7 @@ public class DockerContainerDeployTask extends Task.Backgroundable {
         (dockerImageInstance.isHttpsWebApp ? "https" : "http"),
         dockerImageInstance.host.hostVM.dnsName,
         dockerImageInstance.dockerPortSettings.split(":")[0],  // "12345:80/tcp" -> "12345"
-        dockerImageInstance.artifactName);
+        dockerImageInstance.hasRootDeployment ? "" : dockerImageInstance.artifactName);
   }
 
   @Override

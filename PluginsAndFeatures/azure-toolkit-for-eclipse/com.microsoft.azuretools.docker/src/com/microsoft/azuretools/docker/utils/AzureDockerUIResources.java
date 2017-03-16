@@ -66,13 +66,16 @@ public class AzureDockerUIResources {
 							return;
 						}
 						
+						monitor.worked(10);
 						monitor.subTask("Retrieving the key vault...");
 						dockerManager.refreshDockerVaults();
+						monitor.worked(10);
 						if (monitor.isCanceled()) {
 							monitor.done();
 							return;
 						}
 						
+						monitor.worked(10);
 						monitor.subTask("Retrieving the key vault details...");
 						dockerManager.refreshDockerVaultDetails();
 						if (monitor.isCanceled()) {
@@ -81,6 +84,7 @@ public class AzureDockerUIResources {
 							return;
 						}
 						
+						monitor.worked(10);
 						monitor.subTask("Retrieving the network details...");
 						dockerManager.refreshDockerVnetDetails();
 						if (monitor.isCanceled()) {
@@ -88,6 +92,7 @@ public class AzureDockerUIResources {
 							return;
 						}
 						
+						monitor.worked(10);
 						monitor.subTask("Retrieving the storage account details...");
 						dockerManager.refreshDockerStorageAccountDetails();
 						if (monitor.isCanceled()) {

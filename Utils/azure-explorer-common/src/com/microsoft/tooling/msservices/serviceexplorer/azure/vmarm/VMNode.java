@@ -45,8 +45,8 @@ public class VMNode extends RefreshableNode {
     public class DeleteVMAction extends AzureNodeActionPromptListener {
         public DeleteVMAction() {
             super(VMNode.this,
-                    String.format("<html>This operation will delete virtual machine <b>%s</b>.<br>The associated disks will not be deleted " +
-                            "from your storage account.<br><br>Are you sure you want to continue?</html>", virtualMachine.name()),
+                    String.format("This operation will delete virtual machine %s.\nThe associated disks will not be deleted " +
+                            "from your storage account.\n\nAre you sure you want to continue?", virtualMachine.name()),
                     "Deleting VM");
         }
 
@@ -80,7 +80,7 @@ public class VMNode extends RefreshableNode {
     public class RestartVMAction extends AzureNodeActionPromptListener {
         public RestartVMAction() {
             super(VMNode.this,
-                    String.format("<html>Are you sure you want to restart the virtual machine <b>%s</b>?</html>", virtualMachine.computerName()),
+                    String.format("Are you sure you want to restart the virtual machine %s?", virtualMachine.computerName()),
                     "Restarting VM");
         }
 
@@ -118,8 +118,8 @@ public class VMNode extends RefreshableNode {
     public class ShutdownVMAction extends AzureNodeActionPromptListener {
         public ShutdownVMAction() {
             super(VMNode.this, String.format(
-                    "<html>This operation will result in losing the virtual IP address<br>that was assigned to this virtual machine.<br><br>" +
-                            "Are you sure that you want to shut down virtual machine <b>%s</b>?</html>", virtualMachine.name()),
+                    "This operation will result in losing the virtual IP address\nthat was assigned to this virtual machine.\n" +
+                            "Are you sure that you want to shut down virtual machine %s?", virtualMachine.name()),
                     "Shutting down VM");
         }
 

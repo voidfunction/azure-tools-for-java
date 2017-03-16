@@ -376,7 +376,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
             	}
             }	
 		};
-        manageSubscriptionAction = new Action("Manage Subscriptions", com.microsoft.azuretools.core.Activator.getImageDescriptor("icons/ConnectAccountsLight_16.png")) {
+        manageSubscriptionAction = new Action("Select Subscriptions", com.microsoft.azuretools.core.Activator.getImageDescriptor("icons/ConnectAccountsLight_16.png")) {
             public void run() {
             	SelectSubsriptionsCommandHandler.onSelectSubscriptions(PluginUtil.getParentShell());
                 azureModule.load(false);

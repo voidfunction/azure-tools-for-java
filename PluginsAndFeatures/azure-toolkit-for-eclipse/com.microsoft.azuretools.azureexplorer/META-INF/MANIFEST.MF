@@ -14,33 +14,15 @@ Require-Bundle: org.eclipse.ui,
  com.microsoft.azuretools.core;bundle-version="3.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: .,
- resources/hdinsight-node-common-3.0.0-SNAPSHOT.jar
+Bundle-ClassPath: .
 Import-Package: com.microsoft.tooling.msservices.serviceexplorer.azure,
  org.eclipse.core.resources,
  org.eclipse.jface.text.revisions
-Export-Package: com.microsoft.azure.hdinsight.common,
- com.microsoft.azure.hdinsight.common.task,
- com.microsoft.azure.hdinsight.metadata,
- com.microsoft.azure.hdinsight.projects,
- com.microsoft.azure.hdinsight.sdk.cluster,
- com.microsoft.azure.hdinsight.sdk.common,
- com.microsoft.azure.hdinsight.sdk.storage,
- com.microsoft.azure.hdinsight.sdk.storage.adls,
- com.microsoft.azure.hdinsight.serverexplore,
- com.microsoft.azure.hdinsight.serverexplore.hdinsightnode,
- com.microsoft.azure.hdinsight.spark.common,
- com.microsoft.azure.hdinsight.spark.jobs,
- com.microsoft.azure.hdinsight.spark.jobs.framework,
- com.microsoft.azure.hdinsight.spark.jobs.livy,
- com.microsoft.azure.hdinsight.spark.jobs.structure,
- com.microsoft.azure.hdinsight.spark.jobs.structure.yarn,
- com.microsoft.azuretools.azureexplorer,
+Export-Package: com.microsoft.azuretools.azureexplorer,
  com.microsoft.azuretools.azureexplorer.actions,
  com.microsoft.azuretools.azureexplorer.editors,
  com.microsoft.azuretools.azureexplorer.forms,
  com.microsoft.azuretools.azureexplorer.forms.createvm,
- com.microsoft.azuretools.azureexplorer.forms.createvm.arm,
  com.microsoft.azuretools.azureexplorer.hdinsight,
  com.microsoft.azuretools.azureexplorer.helpers,
  com.microsoft.azuretools.azureexplorer.views

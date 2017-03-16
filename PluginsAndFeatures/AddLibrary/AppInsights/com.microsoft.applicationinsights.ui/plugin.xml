@@ -21,7 +21,7 @@
 	
 	<extension point="org.eclipse.ui.menus">
   		<menuContribution locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-	  		<menu label="Azure" icon="icons/small/windowsAzure.png" id="com.microsoftopentechnologies.ui.common.webprojmenu">
+	  		<menu label="Azure" icon="icons/small/windowsAzure.png" id="com.microsoft.azuretools.webprojmenu">
 		   		<command icon="icons/small/applicationInsights.png"
 		           commandId="com.microsoft.ui.ai.config">
 			     </command>

@@ -5,11 +5,11 @@
    <extension
          point="org.eclipse.ui.commands">
       <category
-            name="Azure Containers"
+            name="Publish to Azure Docker Container"
             id="com.microsoft.azuretools.docker.commands.category">
       </category>
       <command
-            name="Azure Containers"
+            name="Publish as Docker Container..."
             categoryId="com.microsoft.azuretools.docker.commands.category"
             id="com.microsoft.azuretools.docker.commands.azurePublishDockerContainer">
       </command>
@@ -35,10 +35,11 @@
       <menuContribution
             locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
-               label="Azure Containers"
+               label="Azure Docker Containers"
                mnemonic="D"
                id="com.microsoft.azuretools.docker.menus.azuretoolsDockerMenu">
             <command
+                  name="Publish as Docker Container..."
                   commandId="com.microsoft.azuretools.docker.commands.azurePublishDockerContainer"
                   mnemonic="P"
                   id="com.microsoft.azuretools.docker.menus.azurePublishDockerContainer">
@@ -52,7 +53,7 @@
             <command
                   commandId="com.microsoft.azuretools.docker.commands.azurePublishDockerContainer"
                   icon="icons/sample.gif"
-                  tooltip="Publish to Azure Container"
+                  tooltip="Publish to Azure Docker Container"
                   id="com.microsoft.azuretools.docker.toolbars.azurePublishDockerContainer">
             </command>
          </toolbar>

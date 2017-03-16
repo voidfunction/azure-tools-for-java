@@ -8,5 +8,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="resources/azure-explorer-common-3.0.0-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="resources/azuretools-core-3.0.0-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="resources/hdinsight-node-common-3.0.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

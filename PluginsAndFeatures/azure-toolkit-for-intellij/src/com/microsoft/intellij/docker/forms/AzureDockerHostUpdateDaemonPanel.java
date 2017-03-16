@@ -28,7 +28,7 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.EditableDockerHost;
 import com.microsoft.intellij.docker.dialogs.AzureSelectKeyVault;
-import com.microsoft.intellij.docker.utils.AzureDockerValidationUtils;
+import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
 import com.microsoft.intellij.ui.util.UIUtils;
 
 import javax.swing.*;
