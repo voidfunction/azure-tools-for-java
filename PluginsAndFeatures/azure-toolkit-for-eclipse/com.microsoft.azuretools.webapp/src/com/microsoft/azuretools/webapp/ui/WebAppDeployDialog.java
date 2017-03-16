@@ -68,7 +68,7 @@ import com.microsoft.azuretools.utils.WebAppUtils;
 
 public class WebAppDeployDialog extends TitleAreaDialog {
     @Inject
-    private LogService LOGGER;
+    private static LogService LOGGER;
     
     private Table table;
     private Browser browserAppServiceDetailes;
@@ -196,7 +196,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                     event.doit = false;
                     PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(event.location));
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
+                    LOGGER.log(LogService.LOG_ERROR,"LocationListener.changing", e);
                     e.printStackTrace();
                 }       
             }
@@ -223,10 +223,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         super.create();
         Display.getDefault().asyncExec(new Runnable() {
             public void run() {
-              System.out.println("fillTable() async");
-              fillTable();
+                System.out.println("fillTable() async");
+                fillTable();
             }
-          });
+        });
     } 
 
     
@@ -276,7 +276,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         return new Point(800, 550);
     }
     
-//    private void collectProjectDate() throws Exception {
+//    private void collectProjectData() throws Exception {
 //        IProject project = null;
 //        ISelectionService selectionService = 
 //                PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
@@ -335,7 +335,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             export(projectName, destinationPath);
             deploy(projectName, destinationPath);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
+            LOGGER.log(LogService.LOG_ERROR,"okPressed::run", e);
             e.printStackTrace();
         };
         super.okPressed();
