@@ -34,25 +34,30 @@ import com.microsoft.azuretools.core.ui.SignInDialog;
 
 public class SignInCommandHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		doSignIn(window.getShell());
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+        doSignIn(window.getShell());
 
-		return null;
-	}
+        return null;
+    }
 
-	public static void doSignIn(Shell shell) {
-		try {
-			AuthMethodManager authMethodManager = AuthMethodManager.getInstance();
-			SignInDialog d = SignInDialog.go(shell, authMethodManager.getAuthMethodDetails());
-			if (null != d) {
+    public static boolean doSignIn(Shell shell) {
+        try {
+            AuthMethodManager authMethodManager = AuthMethodManager.getInstance();
+            boolean isSignIn = authMethodManager.isSignedIn();
+            if (isSignIn) return true;
+            SignInDialog d = SignInDialog.go(shell, authMethodManager.getAuthMethodDetails());
+            if (null != d) {
                 AuthMethodDetails authMethodDetailsUpdated = d.getAuthMethodDetails();
                 authMethodManager.setAuthMethodDetails(authMethodDetailsUpdated);
-                SelectSubsriptionsCommandHandler.onSelectSubscriptions(shell);;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+                SelectSubsriptionsCommandHandler.onSelectSubscriptions(shell);
+                authMethodManager.notifySignInEventListener();
+            }
+            return authMethodManager.isSignedIn();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

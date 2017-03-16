@@ -74,6 +74,14 @@ public class SignInDialog extends TitleAreaDialog {
         }
         return null;
     }
+    
+    @Override
+    protected void createButtonsForButtonBar(Composite parent) {
+        super.createButtonsForButtonBar(parent);
+        Button okButton = getButton(IDialogConstants.OK_ID);
+        okButton.setText("Sign in");
+    }
+
 
     /**
      * Create contents of the dialog.
@@ -186,6 +194,7 @@ public class SignInDialog extends TitleAreaDialog {
     
     private void enableAutomatedAuthControls(boolean enabled) {
         lblInteractiveInfo.setEnabled(!enabled);
+        lblAutomatedInfo.setEnabled(enabled);
         lblAuthenticationFile.setEnabled(enabled);
         lblAuthenticationFile.setEnabled(enabled);
         textAuthenticationFilePath.setEnabled(enabled);
@@ -197,23 +206,23 @@ public class SignInDialog extends TitleAreaDialog {
      * Create contents of the button bar.
      * @param parent
      */
-    @Override
-    protected void createButtonsForButtonBar(Composite parent) {
-        Button btnOk = createButton(parent, IDialogConstants.FINISH_ID, "Sign In", true);
-        btnOk.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                onOK();
-                
-            }
-        });
-        Button btnCancel = createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-        btnCancel.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-            }
-        });
-    }
+//    @Override
+//    protected void createButtonsForButtonBar(Composite parent) {
+//        Button btnOk = createButton(parent, IDialogConstants.FINISH_ID, "Sign In", true);
+//        btnOk.addSelectionListener(new SelectionAdapter() {
+//            @Override
+//            public void widgetSelected(SelectionEvent e) {
+//                onOK();
+//                
+//            }
+//        });
+//        Button btnCancel = createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+//        btnCancel.addSelectionListener(new SelectionAdapter() {
+//            @Override
+//            public void widgetSelected(SelectionEvent e) {
+//            }
+//        });
+//    }
 
     /**
      * Return the initial size of the dialog.
@@ -223,7 +232,8 @@ public class SignInDialog extends TitleAreaDialog {
         return new Point(622, 451);
     }
     
-    private void onOK() {
+    @Override
+    public void okPressed() {
 //      dropCurrentAzureManager();
         AuthMethodDetails authMethodDetailsResult = new AuthMethodDetails();
       if (rbtnInteractive.getSelection()) {

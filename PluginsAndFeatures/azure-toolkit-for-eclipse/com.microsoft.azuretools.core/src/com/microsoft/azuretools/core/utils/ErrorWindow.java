@@ -1,4 +1,4 @@
-package com.microsoft.azuretools.webapp.ui;
+package com.microsoft.azuretools.core.utils;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;

@@ -21,22 +21,15 @@
  */
 package com.microsoft.azuretools.core.handlers;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
-import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.core.ui.SubscriptionsDialog;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 
@@ -57,25 +50,7 @@ public class SelectSubsriptionsCommandHandler extends AbstractHandler {
             }
             
             SubscriptionManager sm = manager.getSubscriptionManager();
-            IRunnableWithProgress op = new IRunnableWithProgress() {
-                @Override
-                public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-                    monitor.beginTask("Getting Subscription List...", IProgressMonitor.UNKNOWN);
-                    try {
-                        sm.getSubscriptionDetails();
-                    } catch (Exception ex) {
-                        System.out.println("onSelectSubscriptions ex: " + ex.getMessage());
-                    }
-                }
-            };
-            new ProgressMonitorDialog(parentShell.getShell()).run(true, false, op);
-
-            
-            SubscriptionsDialog d = SubscriptionsDialog.go(parentShell, sm.getSubscriptionDetails());
-            if (d != null) {
-                List<SubscriptionDetail> sdlUpdated = d.getSubscriptionDetails();
-                sm.setSubscriptionDetails(sdlUpdated);
-            }
+            SubscriptionsDialog.go(parentShell, sm);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

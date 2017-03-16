@@ -21,52 +21,63 @@
  */
 package com.microsoft.azuretools.core.ui;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.osgi.service.log.LogService;
 
+import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
-
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import com.microsoft.azuretools.core.utils.ProgressDialog;
 
 public class SubscriptionsDialog extends TitleAreaDialog {
+
+    @Inject
+    private static LogService LOGGER;
+    
     private Table table;
     
+    private SubscriptionManager subscriptionManager;
     private List<SubscriptionDetail> sdl;
 
-    public List<SubscriptionDetail> getSubscriptionDetails() {
-        return sdl;
-    }
+//    public List<SubscriptionDetail> getSubscriptionDetails() {
+//        return sdl;
+//    }
     
     /**
      * Create the dialog.
      * @param parentShell
      */
-    private SubscriptionsDialog(Shell parentShell) {
+    private SubscriptionsDialog(Shell parentShell, SubscriptionManager subscriptionManage) {
         super(parentShell);
         setHelpAvailable(false);
         setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
+        this.subscriptionManager = subscriptionManage;
     }    
     
-    public static SubscriptionsDialog go(Shell parentShell, List<SubscriptionDetail> sdl) {
-        SubscriptionsDialog d = new SubscriptionsDialog(parentShell);
-        d.sdl = sdl;
-        d.create();
-
+    public static SubscriptionsDialog go(Shell parentShell, SubscriptionManager subscriptionManager) {
+        SubscriptionsDialog d = new SubscriptionsDialog(parentShell, subscriptionManager);
         if (d.open() == Window.OK) {
             return d;
         }
@@ -83,10 +94,11 @@ public class SubscriptionsDialog extends TitleAreaDialog {
         setTitle("Your Subscriptions");
         Composite area = (Composite) super.createDialogArea(parent);
         Composite container = new Composite(area, SWT.NONE);
-        container.setLayout(new FillLayout(SWT.HORIZONTAL));
+        container.setLayout(new GridLayout(1, false));
         container.setLayoutData(new GridData(GridData.FILL_BOTH));
         
         table = new Table(container, SWT.BORDER | SWT.CHECK);
+        table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
         
@@ -98,13 +110,80 @@ public class SubscriptionsDialog extends TitleAreaDialog {
         tblclmnNewColumn_1.setWidth(300);
         tblclmnNewColumn_1.setText("Subscription ID");
         
-        for (SubscriptionDetail sd : sdl) {
-            TableItem item = new TableItem(table, SWT.NULL);
-            item.setText(new String[] {sd.getSubscriptionName(), sd.getSubscriptionId()});
-            item.setChecked(sd.isSelected());
-        }    
+        Button btnRefresh = new Button(container, SWT.NONE);
+        btnRefresh.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                refreshSubscriptions();
+            }
+        });
+        GridData gd_btnRefresh = new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1);
+        gd_btnRefresh.widthHint = 78;
+        btnRefresh.setLayoutData(gd_btnRefresh);
+        btnRefresh.setText("Refresh...");
 
         return area;
+    }
+    
+    @Override
+    public void create() {
+        super.create();
+        Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+              System.out.println("refreshSubscriptionsAsync");
+              refreshSubscriptionsAsync();
+              setSubscriptionDetails();
+            }
+          });
+    } 
+
+    public void refreshSubscriptionsAsync() {
+        try {
+            ProgressDialog.get(getShell(), "Update Azure Local Cache Progress").run(true, false, new IRunnableWithProgress() {
+                @Override
+                public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+                    monitor.beginTask("Reading subscriptions...", IProgressMonitor.UNKNOWN);
+                    try {
+                        subscriptionManager.getSubscriptionDetails();
+                    } catch (Exception e) {
+                        LOGGER.log(LogService.LOG_ERROR,"refreshSubscriptionsAsync::ProgressDialog", e);
+                        e.printStackTrace();
+                    }
+                    monitor.done();
+                }
+            });
+        } catch (Exception e) {
+            LOGGER.log(LogService.LOG_ERROR,"refreshSubscriptionsAsync", e);
+            e.printStackTrace();
+        }
+    }
+    
+    private void setSubscriptionDetails() {
+        try {
+            sdl = subscriptionManager.getSubscriptionDetails();
+            for (SubscriptionDetail sd : sdl) {
+                TableItem item = new TableItem(table, SWT.NULL);
+                item.setText(new String[] {sd.getSubscriptionName(), sd.getSubscriptionId()});
+                item.setChecked(sd.isSelected());
+            }
+        } catch (Exception e) {
+            LOGGER.log(LogService.LOG_ERROR,"subscriptionManager.getSubscriptionDetails", e);
+            e.printStackTrace();
+        }
+    }
+    
+    private void refreshSubscriptions() {
+        try {
+            System.out.println("refreshSubscriptions");
+            table.removeAll();
+            subscriptionManager.cleanSubscriptions();
+            refreshSubscriptionsAsync();
+            setSubscriptionDetails();
+            subscriptionManager.setSubscriptionDetails(sdl);
+        } catch (Exception e) {
+            LOGGER.log(LogService.LOG_ERROR,"subscriptionManager.setSubscriptionDetails", e);
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -113,30 +192,21 @@ public class SubscriptionsDialog extends TitleAreaDialog {
      */
     @Override
     protected void createButtonsForButtonBar(Composite parent) {
-        Button btnOk = createButton(parent, IDialogConstants.FINISH_ID, IDialogConstants.OK_LABEL, true);
-        btnOk.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                onOk();
-            }
-        });
-        Button btnCancel = createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-        btnCancel.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-            }
-        });
+        super.createButtonsForButtonBar(parent);
+        Button okButton = getButton(IDialogConstants.OK_ID);
+        okButton.setText("Select");
     }
-
+    
     /**
      * Return the initial size of the dialog.
      */
     @Override
     protected Point getInitialSize() {
-        return new Point(582, 367);
+        return new Point(668, 410);
     }
     
-    private void onOk() {
+    @Override
+    public void okPressed() {
         TableItem[] tia = table.getItems();
         int chekedCount = 0;
         for (TableItem ti : tia) {
@@ -152,6 +222,13 @@ public class SubscriptionsDialog extends TitleAreaDialog {
         
         for (int i = 0; i < tia.length; ++i) {
             this.sdl.get(i).setSelected(tia[i].getChecked());
+        }
+        
+        try {
+            subscriptionManager.setSubscriptionDetails(sdl);
+        } catch (Exception e) {
+            LOGGER.log(LogService.LOG_ERROR,"subscriptionManager.setSubscriptionDetails", e);
+            e.printStackTrace();
         }
         
         super.okPressed();

@@ -6,6 +6,7 @@ import org.eclipse.swt.widgets.Shell;
 import com.microsoft.azuretools.adauth.IWebUi;
 import com.microsoft.azuretools.authmanage.interact.INotification;
 import com.microsoft.azuretools.authmanage.interact.IUIFactory;
+import com.microsoft.azuretools.core.utils.Notification;
 import com.microsoft.azuretools.core.utils.ProgressTaskModal;
 import com.microsoft.azuretools.utils.IProgressTaskImpl;
 
@@ -13,7 +14,7 @@ public class UIFactory implements IUIFactory {
 
     @Override
     public INotification getNotificationWindow() {
-        return null;
+       return new Notification();
     }
 
     @Override

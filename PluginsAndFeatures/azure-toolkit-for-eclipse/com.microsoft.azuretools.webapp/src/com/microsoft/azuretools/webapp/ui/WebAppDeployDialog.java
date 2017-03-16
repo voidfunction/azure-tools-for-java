@@ -1,7 +1,6 @@
 package com.microsoft.azuretools.webapp.ui;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -10,10 +9,6 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -21,8 +16,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jst.j2ee.datamodel.properties.IJ2EEComponentExportDataModelProperties;
 import org.eclipse.jst.j2ee.internal.web.archive.operations.WebComponentExportDataModelProvider;
@@ -51,7 +44,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
@@ -64,11 +56,13 @@ import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.core.utils.ErrorWindow;
 import com.microsoft.azuretools.core.utils.ProgressDialog;
 import com.microsoft.azuretools.core.utils.UpdateProgressIndicator;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
+import com.microsoft.azuretools.utils.CanceledByUserException;
 import com.microsoft.azuretools.utils.WebAppUtils;
 
 
@@ -157,7 +151,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         btnRefresh.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                table.clearAll();
+                table.removeAll();
                 browserAppServiceDetailes.setText("");
                 AzureModel.getInstance().setResourceGroupToWebAppMap(null);
                 fillTable();
@@ -197,7 +191,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         browserAppServiceDetailes.addLocationListener(new LocationListener() {
             public void changing(LocationEvent event) {
                 try {
-                    System.out.println("LocationEvent.location: " + event.location);
+                    //System.out.println("LocationEvent.location: " + event.location);
                     if (!event.location.contains("http")) return;
                     event.doit = false;
                     PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(event.location));
@@ -206,7 +200,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                     e.printStackTrace();
                 }       
             }
-
             public void changed(LocationEvent event) {}
         });
         new Label(container, SWT.NONE);
@@ -222,10 +215,20 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             }
         });
         
-        fillTable();
-        
         return area;
     }
+    
+    @Override
+    public void create() {
+        super.create();
+        Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+              System.out.println("fillTable() async");
+              fillTable();
+            }
+          });
+    } 
+
     
     @Override
     protected void createButtonsForButtonBar(Composite parent) {
@@ -273,42 +276,59 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         return new Point(800, 550);
     }
     
-    private void collectProjectDate() throws Exception {
-        IProject project = null;
-        ISelectionService selectionService = 
-                PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
-        ISelection selection = selectionService.getSelection();
-
-        if(selection instanceof IStructuredSelection) {
-            Object element = ((IStructuredSelection)selection).getFirstElement();
+//    private void collectProjectDate() throws Exception {
+//        IProject project = null;
+//        ISelectionService selectionService = 
+//                PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
+//        ISelection selection = selectionService.getSelection();
+//
+//        if(selection instanceof IStructuredSelection) {
+//            Object element = ((IStructuredSelection)selection).getFirstElement();
+//        }
+//        
+//        IWorkspace ws = ResourcesPlugin.getWorkspace();
+//        IWorkspaceRoot weRoot = ws.getRoot();
+//        //weRoot.get
+//        
+//        IWorkspaceDescription wsd =  ws.getDescription();
+//        //wsd.
+//        
+//        IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+//        for (IProject p : projects) {
+//            System.out.println(p.getName() + " : " + p.getFullPath());
+//            System.out.println(p.getFolder( p.getFullPath()));
+//            System.out.println(p.getFolder( p.getLocation()));
+//            System.out.println(p.getType());
+//            IProjectDescription dp = p.getDescription(); 
+//            System.out.println(dp.getName());
+//            System.out.println(dp.getLocationURI());
+//            
+//            System.out.println(String.join("\n", dp.getNatureIds()));
+//            
+//            System.out.println("\n");
+//        }
+//    }
+    
+    private boolean validated() {
+        setErrorMessage(null);
+        int selectedRow = table.getSelectionIndex();
+        if (selectedRow < 0) {
+            setErrorMessage("Please select App Service to deploy to");
+            return false;
         }
         
-        IWorkspace ws = ResourcesPlugin.getWorkspace();
-        IWorkspaceRoot weRoot = ws.getRoot();
-        //weRoot.get
-        
-        IWorkspaceDescription wsd =  ws.getDescription();
-        //wsd.
-        
-        IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-        for (IProject p : projects) {
-            System.out.println(p.getName() + " : " + p.getFullPath());
-            System.out.println(p.getFolder( p.getFullPath()));
-            System.out.println(p.getFolder( p.getLocation()));
-            System.out.println(p.getType());
-            IProjectDescription dp = p.getDescription(); 
-            System.out.println(dp.getName());
-            System.out.println(dp.getLocationURI());
-            
-            System.out.println(String.join("\n", dp.getNatureIds()));
-            
-            System.out.println("\n");
+        String appServiceName = table.getItems()[selectedRow].getText(0);
+        WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
+        if (wad.webApp.javaVersion()  == JavaVersion.OFF ) {
+            setErrorMessage("Please select java based App Service");
+            return false;
         }
+        return true; 
     }
     
     @Override
     protected void okPressed () {
-        //super.okPressed();
+        if (!validated()) return;
         try {
             String projectName = project.getName();
             String destinationPath = project.getLocation() + "/" + projectName + ".war";
@@ -346,25 +366,41 @@ public class WebAppDeployDialog extends TitleAreaDialog {
     
     private void updateAndFillTable() {
         try {
-            ProgressDialog.get(this.getShell(), "Getting App Services...").run(true, true, new IRunnableWithProgress() {
+            ProgressDialog.get(getShell(), "Update Azure Local Cache Progress").run(true, true, new IRunnableWithProgress() {
                 @Override
                 public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
                     monitor.beginTask("Updating Azure local cache...", IProgressMonitor.UNKNOWN);
                     try {
+                        if (monitor.isCanceled()) {
+                            throw new CanceledByUserException();
+                        }
+                        
                         AzureModelController.updateResourceGroupMaps(new UpdateProgressIndicator(monitor)); 
+                        
                         Display.getDefault().asyncExec(new Runnable() {
                             @Override
                             public void run() {
                                 doFillTable();
                             }
                         });
+                    } catch (CanceledByUserException ex) {
+                        Display.getDefault().asyncExec(new Runnable() {
+                            @Override
+                            public void run() {
+                                System.out.println("updateAndFillTable(): Canceled by user");
+                                cancelPressed();
+                            }
+                        });
+
                     } catch (Exception ex) {
+                        LOGGER.log(LogService.LOG_ERROR,"updateAndFillTable::run", ex);
                         ex.printStackTrace();
                     }
                     monitor.done();
                 }
             });
         } catch (InvocationTargetException | InterruptedException e) {
+            LOGGER.log(LogService.LOG_ERROR,"updateAndFillTable::run", e);
             e.printStackTrace();
         }
     }
@@ -440,13 +476,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
     }
     
     private void deploy(String artifactName, String artifactPath) {
-        setErrorMessage(null);
         int selectedRow = table.getSelectionIndex();
-        if (selectedRow < 0) {
-            setErrorMessage("Please select App Service to deploy to");
-            return;
-        }
-        
         String appServiceName = table.getItems()[selectedRow].getText(0);
         WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
         WebApp webApp = wad.webApp;
@@ -528,7 +558,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             try {
                 PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(link));
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 LOGGER.log(LogService.LOG_ERROR,"showLink", e);
                 e.printStackTrace();
             }
