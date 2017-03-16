@@ -23,6 +23,8 @@
     <module>com.microsoft.azuretools.hdinsight.feature</module>
     <module>com.microsoft.azuretools.webapp</module>
     <module>com.microsoft.azuretools.webapp.feature</module>
+    <module>com.microsoft.azuretools.docker</module>
+    <module>com.microsoft.azuretools.docker.feature</module>
 	<module>WindowsAzurePlugin4EJ</module>   
   </modules>
   <properties>
