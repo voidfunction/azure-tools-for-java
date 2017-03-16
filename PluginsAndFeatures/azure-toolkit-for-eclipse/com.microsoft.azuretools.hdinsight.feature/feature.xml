@@ -71,7 +71,7 @@ It also applies even if Microsoft knew or should have known about the possibilit
    </url>
 
    <plugin
-         id="com.microsoft.hdinsights"
+         id="com.microsoft.azuretools.hdinsight"
          download-size="0"
          install-size="0"
          version="0.0.0"

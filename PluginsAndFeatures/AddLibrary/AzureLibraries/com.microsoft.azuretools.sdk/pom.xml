@@ -11,5 +11,4 @@
   <groupId>com.microsoft.azuretools.wap4ej.build</groupId>
   <artifactId>com.microsoft.azuretools.sdk</artifactId>
   <version>3.0.0-SNAPSHOT</version>
-  <packaging>eclipse-plugin</packaging>
 </project>

@@ -41,7 +41,7 @@ import com.microsoft.azuretools.core.utils.Messages;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 
 public class HDInsightHelperImpl implements HDInsightHelper {
-	private static final String HDINSIHGT_BUNDLE_ID = "com.microsoft.hdinsights";
+	private static final String HDINSIHGT_BUNDLE_ID = "com.microsoft.azuretools.hdinsight";
 	private static String instID = "";
 
 	static {
@@ -55,7 +55,7 @@ public class HDInsightHelperImpl implements HDInsightHelper {
 		try {
 			loadHDInsightPlugin();
 		} catch (BundleException bundleException) {
-			Activator.getDefault().log("Error loading plugin com.microsoft.hdinsights", bundleException);
+			Activator.getDefault().log("Error loading plugin " + HDINSIHGT_BUNDLE_ID, bundleException);
 		}
 
 		IClusterDetail clusterDetail = JobViewManager.getCluster(uuid);
