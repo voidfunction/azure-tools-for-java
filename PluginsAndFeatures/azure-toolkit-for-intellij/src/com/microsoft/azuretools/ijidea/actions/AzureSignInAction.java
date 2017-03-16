@@ -121,6 +121,7 @@ public class AzureSignInAction extends AnAction {
             AuthMethodDetails authMethodDetailsUpdated = w.getAuthMethodDetails();
             authMethodManager.setAuthMethodDetails(authMethodDetailsUpdated);
             SelectSubscriptionsAction.onShowSubscriptions(project);
+            authMethodManager.notifySignInEventListener();
         }
         return authMethodManager.isSignedIn();
     }

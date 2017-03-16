@@ -65,7 +65,7 @@ public class AuthMethodManager {
         }
     }
 
-    private void notifySignInEventListener() {
+    public void notifySignInEventListener() {
         for (Runnable l : signInEventListeners) {
             l.run();
         }
@@ -145,7 +145,7 @@ public class AuthMethodManager {
         cleanAll();
         this.authMethodDetails = authMethodDetails;
         saveSettings();
-        if (isSignedIn()) notifySignInEventListener();
+        //if (isSignedIn()) notifySignInEventListener();
     }
 
     public AuthMethodDetails getAuthMethodDetails() {
