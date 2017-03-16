@@ -201,4 +201,14 @@
             </test>
         </definition>
     </extension>
+    
+   <extension point="org.eclipse.core.expressions.propertyTesters">
+  	 <propertyTester
+       id="com.microsoft.ui.webapp.property.testWebProj"
+       type="org.eclipse.core.resources.IProject"
+       namespace="com.microsoft.ui.webapp.property"
+       properties="isWebProj"
+       class="com.microsoft.azuretools.core.utils.WAPropertyTester">
+     </propertyTester>
+   </extension>
 </plugin>

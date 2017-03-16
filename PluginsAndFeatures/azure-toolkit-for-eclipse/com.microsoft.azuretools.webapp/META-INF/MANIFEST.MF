@@ -33,5 +33,4 @@ Import-Package: com.microsoft.azure.management,
  org.eclipse.core.expressions
 Export-Package: com.microsoft.azuretools.webapp,
  com.microsoft.azuretools.webapp.handlers,
- com.microsoft.azuretools.webapp.ui,
- com.microsoft.azuretools.webapp.util
+ com.microsoft.azuretools.webapp.ui

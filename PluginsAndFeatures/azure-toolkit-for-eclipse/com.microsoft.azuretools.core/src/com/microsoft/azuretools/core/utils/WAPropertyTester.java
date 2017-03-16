@@ -18,13 +18,13 @@
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.microsoft.azuretools.webapp.util;
+package com.microsoft.azuretools.core.utils;
 
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
-import com.microsoft.azuretools.webapp.Activator;
+import com.microsoft.azuretools.core.Activator;
 
 
 public class WAPropertyTester extends PropertyTester {

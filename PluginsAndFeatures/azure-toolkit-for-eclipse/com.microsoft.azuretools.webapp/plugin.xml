@@ -5,7 +5,8 @@
        <command
             name="Publish as Azure Web App..."
             categoryId="com.microsoft.ui.dropdown.category"
-            id="com.microsoft.azuretools.webapp.commands.deployToAzure">
+            id="com.microsoft.azuretools.webapp.commands.deployToAzure"
+            icon="icons/publishWebsite.png">
             <commandParameter id="com.microsoft.ui.dropdown.msg" name="DropDown Options" optional="true"></commandParameter>
        </command>   
    </extension>
@@ -14,18 +15,6 @@
       <handler
             commandId="com.microsoft.azuretools.webapp.commands.deployToAzure"
             class="com.microsoft.azuretools.webapp.handlers.DeployToAzureHandler">
-            <!--enabledWhen>
-			<with
-				variable="selection">
-				<count value="1"/>
-				<iterate
-					operator="or">
-            		<adapt type="org.eclipse.core.resources.IProject">
-        				<test property="com.microsoft.ui.webapp.property.isWebProj"/>
-            		</adapt>
-				</iterate>
-		    </with>
-		</enabledWhen-->
       </handler>
    </extension>
    
@@ -33,12 +22,10 @@
       <menuContribution locationURI="popup:org.eclipse.ui.popup.any?after=additions">
 	      <menu
                label="Azure"
-               mnemonic="M"
                id="com.microsoft.azuretools.webprojmenu"
                icon="icons/windowsAzure.png">
 		      <command 
-		      		commandId="com.microsoft.azuretools.webapp.commands.deployToAzure"
-		        	icon="icons/publishWebsite.png"/>
+		      		commandId="com.microsoft.azuretools.webapp.commands.deployToAzure"/>
 		      <visibleWhen checkEnabled="false">
 			    <with 
 				variable="selection">
@@ -62,16 +49,6 @@
    
    <extension point="org.eclipse.ui.commandImages">
      <image commandId="com.microsoft.azuretools.webapp.commands.deployToAzure" icon="icons/publishWebsite.png"></image>
-   </extension>
-   
-   <extension point="org.eclipse.core.expressions.propertyTesters">
-  	 <propertyTester
-       id="com.microsoft.ui.webapp.property.testWebProj"
-       type="org.eclipse.core.resources.IProject"
-       namespace="com.microsoft.ui.webapp.property"
-       properties="isWebProj"
-       class="com.microsoft.azuretools.webapp.util.WAPropertyTester">
-     </propertyTester>
    </extension>
 
 </plugin>

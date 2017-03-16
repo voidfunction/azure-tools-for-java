@@ -22,6 +22,10 @@
 package com.microsoft.azuretools.azureexplorer.forms.createvm;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -35,7 +39,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.List;
 import org.eclipse.ui.PlatformUI;
 
 import com.microsoft.azure.management.compute.KnownLinuxVirtualMachineImage;
@@ -44,9 +47,13 @@ import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachineOffer;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.compute.VirtualMachineSku;
+import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.core.utils.Messages;
 import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.utils.AzureModel;
+import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 public class SelectImageStep extends WizardPage {
@@ -66,7 +73,7 @@ public class SelectImageStep extends WizardPage {
 	private Label skuLabel;
 	private Combo skuComboBox;
 	private Label versionLabel;
-	private List imageLabelList;
+	private org.eclipse.swt.widgets.List imageLabelList;
 	// private JPanel imageInfoPanel;
 
 	private java.util.List<VirtualMachineImage> virtualMachineImages;
@@ -207,7 +214,7 @@ public class SelectImageStep extends WizardPage {
 
 		versionLabel = new Label(composite, SWT.LEFT);
 		versionLabel.setText("Version #:");
-		imageLabelList = new List(composite, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL);
+		imageLabelList = new org.eclipse.swt.widgets.List(composite, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL);
 		// gridData = new GridData();
 		// gridData.widthHint = 300;
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -219,6 +226,32 @@ public class SelectImageStep extends WizardPage {
         if (virtualMachineImages == null && wizard.getSubscription() != null) {
 //            imageTypeComboBox.setEnabled(false);
             setPageComplete(false);
+         // will set to null if selected subscription changes
+            if (wizard.getRegion() == null) {
+                Map<SubscriptionDetail, List<Location>> subscription2Location = AzureModel.getInstance().getSubscriptionToLocationMap();
+                if (subscription2Location == null || subscription2Location.get(wizard.getSubscription()) == null) {
+                	DefaultLoader.getIdeHelper().runInBackground(null, "Loading Available Locations...", true, true, "", new Runnable() {
+            			@Override
+            			public void run() {
+                            try {
+                                AzureModelController.updateSubscriptionMaps(null);
+                                DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+        							@Override
+        							public void run() {
+                                        fillRegions();
+                                    }
+                                });
+                            } catch (Exception ex) {
+                            	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, "Error loading locations", ex);
+                            }
+                        }
+                    });
+                } else {
+                    fillRegions();
+                }
+            }
+            
+            
             for (Region region : Region.values()) {
             	regionComboBox.add(region.toString());
             	regionComboBox.setData(region.toString(), region);
@@ -228,6 +261,15 @@ public class SelectImageStep extends WizardPage {
             enableControls(customImageBtn.getSelection());
         }
         return super.getTitle();
+    }
+	
+	private void fillRegions() {
+        List<String> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(wizard.getSubscription())
+                .stream().map(Location::name).sorted().collect(Collectors.toList());
+        regionComboBox.setItems((String[])locations.toArray(new String[locations.size()]));
+        if (locations.size() > 0) {
+            selectRegion();
+        }
     }
 	
 	private void enableControls(boolean customImage) {

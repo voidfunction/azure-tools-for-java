@@ -88,6 +88,14 @@ public final class Messages extends NLS {
 	public static String strAccDlgImg;
 	public static String lclDlgImgErr;
 	
+	public static String natJavaEMF;
+	public static String natMdCore;
+	public static String natFctCore;
+	public static String natJava;
+	public static String natJs;
+	public static String propWebProj;
+	public static String propErr;
+	
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);
