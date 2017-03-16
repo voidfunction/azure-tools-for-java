@@ -8,6 +8,7 @@
             categoryId="com.microsoft.ui.dropdown.category"
             id="com.microsoft.azuretools.docker.commands.azurePublishDockerContainer"
             icon="icons/publishContainer.png">
+            <commandParameter id="com.microsoft.ui.dropdown.msg" name="DropDown Options" optional="true"></commandParameter>
       </command>
    </extension>
    
