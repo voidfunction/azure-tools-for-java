@@ -114,7 +114,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
 		try {
             if (CommonSettings.getUiFactory() == null)
                 CommonSettings.setUiFactory(new UIFactory());
-            String wd = "EclipseActionWorkingDir";
+            String wd = "AzureToolsForEclipse";
             Path dirPath = Paths.get(System.getProperty("user.home"), wd);
             if (!Files.exists(dirPath)) {
                     Files.createDirectory(dirPath);
