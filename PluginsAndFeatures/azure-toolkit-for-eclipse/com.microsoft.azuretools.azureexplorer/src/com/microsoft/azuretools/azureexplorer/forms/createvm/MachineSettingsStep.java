@@ -20,11 +20,11 @@
 package com.microsoft.azuretools.azureexplorer.forms.createvm;
 
 import com.microsoft.azure.PagedList;
+import com.microsoft.azure.management.compute.KnownLinuxVirtualMachineImage;
 import com.microsoft.azure.management.compute.OperatingSystemTypes;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
-import com.microsoft.azuretools.azureexplorer.forms.createvm.arm.CreateVMWizard;
 import com.microsoft.azuretools.core.utils.Messages;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 
@@ -214,7 +214,12 @@ public class MachineSettingsStep extends WizardPage {
 
     @Override
     public String getTitle() {
-    	boolean isLinux = ((com.microsoft.azuretools.azureexplorer.forms.createvm.arm.CreateVMWizard) wizard).getVirtualMachineImage().osDiskImage().operatingSystem().equals(OperatingSystemTypes.LINUX);
+        boolean isLinux;
+        if (wizard.isKnownMachineImage()) {
+            isLinux = wizard.getKnownMachineImage() instanceof KnownLinuxVirtualMachineImage;
+        } else {
+            isLinux = wizard.getVirtualMachineImage().osDiskImage().operatingSystem().equals(OperatingSystemTypes.LINUX);
+        }
     	
         if (isLinux) {
             certificateCheckBox.setEnabled(true);
@@ -264,7 +269,7 @@ public class MachineSettingsStep extends WizardPage {
 						public void run() {
 							vmSizeComboBox.removeAll();
 							for (VirtualMachineSize size : sizes) {
-								vmSizeComboBox.add(size.toString());
+								vmSizeComboBox.add(size.name());
 								vmSizeComboBox.setData(size.toString(), size);
 							}
 							selectDefaultSize();

@@ -21,7 +21,7 @@ package com.microsoft.azuretools.azureexplorer.actions;
 
 import org.eclipse.jface.wizard.WizardDialog;
 
-import com.microsoft.azuretools.azureexplorer.forms.createvm.arm.CreateVMWizard;
+import com.microsoft.azuretools.azureexplorer.forms.createvm.CreateVMWizard;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;

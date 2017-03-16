@@ -19,20 +19,27 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azuretools.azureexplorer.forms.createvm.arm;
+package com.microsoft.azuretools.azureexplorer.forms.createvm;
 
 import java.util.ArrayList;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.ui.PlatformUI;
 
+import com.microsoft.azure.management.compute.KnownLinuxVirtualMachineImage;
+import com.microsoft.azure.management.compute.KnownWindowsVirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachineOffer;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
@@ -47,6 +54,9 @@ public class SelectImageStep extends WizardPage {
 //	private JList createVmStepsList;
 
 //	private JEditorPane imageDescriptionTextPane;
+    private Button knownImageBtn;
+    private Button customImageBtn;
+    private Combo knownImageComboBox;
 	private Label regionLabel;
 	private Combo regionComboBox;
 	private Label publisherLabel;
@@ -55,7 +65,7 @@ public class SelectImageStep extends WizardPage {
 	private Combo offerComboBox;
 	private Label skuLabel;
 	private Combo skuComboBox;
-	private Label imageListLabel;
+	private Label versionLabel;
 	private List imageLabelList;
 	// private JPanel imageInfoPanel;
 
@@ -76,13 +86,33 @@ public class SelectImageStep extends WizardPage {
 		container.setLayoutData(gridData);
 
 		wizard.configStepList(container, 1);
-		createImagePanel(container);
+		createSettingsPanel(container);
 		regionComboBox.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				selectRegion();
 			}
 		});
+		
+		SelectionListener updateListener = new SelectionAdapter() {
+        	@Override
+            public void widgetSelected(SelectionEvent e) {
+        		enableControls(!knownImageBtn.getSelection());
+        	}
+        };
+        knownImageBtn.addSelectionListener(updateListener);
+        customImageBtn.addSelectionListener(updateListener);
+		
+        customImageBtn.addSelectionListener(new SelectionAdapter() {
+        	@Override
+            public void widgetSelected(SelectionEvent e) {
+        		if (customImageBtn.getSelection()) {
+        			fillPublishers();
+        		}
+        	}	
+		});
+        knownImageBtn.setSelection(true);
+		
 		publisherComboBox.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
@@ -111,7 +141,7 @@ public class SelectImageStep extends WizardPage {
 		this.setControl(container);
 	}
 
-	private void createImagePanel(Composite container) {
+	private void createSettingsPanel(Composite container) {
 		final Composite composite = new Composite(container, SWT.NONE);
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 1;
@@ -128,6 +158,34 @@ public class SelectImageStep extends WizardPage {
 		regionComboBox = new Combo(composite, SWT.READ_ONLY);
 		gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
 		regionComboBox.setLayoutData(gridData);
+		
+//		Group group = new Group(composite, SWT.NONE);
+//        group.setLayout(new RowLayout(SWT.VERTICAL));
+//        group.setBackground(PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.TRANSPARENT));
+        knownImageBtn = new Button(composite, SWT.RADIO);
+        knownImageBtn.setText("Recommended image:");
+        knownImageComboBox = new Combo(composite, SWT.READ_ONLY);
+		gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+		knownImageComboBox.setLayoutData(gridData);
+		for (KnownWindowsVirtualMachineImage image : KnownWindowsVirtualMachineImage.values()) {
+			knownImageComboBox.add(image.offer() + " - " + image.sku());
+			knownImageComboBox.setData(image.offer() + " - " + image.sku(), image);
+		}
+		for (KnownLinuxVirtualMachineImage image : KnownLinuxVirtualMachineImage.values()) {
+			knownImageComboBox.add(image.offer() + " - " + image.sku());
+			knownImageComboBox.setData(image.offer() + " - " + image.sku(), image);
+		}
+		knownImageComboBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent selectionEvent) {
+				wizard.setKnownMachineImage(knownImageComboBox.getData(knownImageComboBox.getText()));
+				setPageComplete(true);
+			}
+		});
+		knownImageComboBox.select(0);		
+		
+        customImageBtn = new Button(composite, SWT.RADIO);
+        customImageBtn.setText("Custom image:");
 
 		publisherLabel = new Label(composite, SWT.LEFT);
 		publisherLabel.setText("Publisher:");
@@ -147,8 +205,8 @@ public class SelectImageStep extends WizardPage {
 		gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
 		skuComboBox.setLayoutData(gridData);
 
-		imageListLabel = new Label(composite, SWT.LEFT);
-		imageListLabel.setText("Image label:");
+		versionLabel = new Label(composite, SWT.LEFT);
+		versionLabel.setText("Version #:");
 		imageLabelList = new List(composite, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL);
 		// gridData = new GridData();
 		// gridData.widthHint = 300;
@@ -167,9 +225,24 @@ public class SelectImageStep extends WizardPage {
             }
             regionComboBox.select(0);
             selectRegion();
-            imageLabelList.setEnabled(false);
+            enableControls(customImageBtn.getSelection());
         }
         return super.getTitle();
+    }
+	
+	private void enableControls(boolean customImage) {
+        wizard.setKnownMachineImage(!customImage);
+        knownImageComboBox.setEnabled(!customImage);
+        setPageComplete(!customImage);
+//        model.getCurrentNavigationState().NEXT.setEnabled(!customImage || !imageLabelList.isSelectionEmpty());
+        imageLabelList.setEnabled(customImage);
+        publisherComboBox.setEnabled(customImage);
+        offerComboBox.setEnabled(customImage);
+        skuComboBox.setEnabled(customImage);
+        publisherLabel.setEnabled(customImage);
+        offerLabel.setEnabled(customImage);
+        skuLabel.setEnabled(customImage);
+        versionLabel.setEnabled(customImage);
     }
 
 	private void selectRegion() {
