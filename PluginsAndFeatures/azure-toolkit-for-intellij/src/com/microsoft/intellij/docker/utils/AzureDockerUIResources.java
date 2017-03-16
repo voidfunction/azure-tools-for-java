@@ -59,7 +59,7 @@ public class AzureDockerUIResources {
 
 
   public static void updateAzureResourcesWithProgressDialog(Project project) {
-    ProgressManager.getInstance().run(new Task.Modal(project, "Loading Azure Resources...", true) {
+    ProgressManager.getInstance().run(new Task.Modal(project, "Loading Azure Resources", true) {
       @Override
       public void run(ProgressIndicator progressIndicator) {
         try {
@@ -123,6 +123,7 @@ public class AzureDockerUIResources {
             return;
           }
 
+          CANCELED = false;
           progressIndicator.setIndeterminate(true);
 
         } catch (Exception ex) {

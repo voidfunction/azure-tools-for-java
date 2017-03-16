@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.microsoft.azuretools.docker.feature"
-      label="Azure Explorer for Eclipse"
+      label="Azure Containers for Eclipse"
       version="3.0.0.qualifier"
       provider-name="Microsoft Corp.">
 
    <description>
-      Enables you to explore and manage your Azure storage accounts and their contents.
+      Enables you to deploy a .WAR or .JAR artifact as a Docker container to an Azure virtual machine.
    </description>
 
    <copyright>

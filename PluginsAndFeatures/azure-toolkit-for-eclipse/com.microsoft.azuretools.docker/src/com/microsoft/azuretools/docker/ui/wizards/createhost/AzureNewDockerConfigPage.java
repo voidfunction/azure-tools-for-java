@@ -21,8 +21,15 @@ package com.microsoft.azuretools.docker.ui.wizards.createhost;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Label;
@@ -30,20 +37,23 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.widgets.Form;
+import org.eclipse.ui.forms.HyperlinkSettings;
+import org.eclipse.ui.forms.IMessageManager;
+import org.eclipse.ui.forms.ManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.ScrolledForm;
 
 import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerSubscription;
 import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
 
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Display;
 
 public class AzureNewDockerConfigPage extends WizardPage {
 	private Text dockerHostNameTextField;
-	private Text dockerSubscriptionIdTextField;
 	private Text dockerNewStorageTextField;
 	private Text dockerHostRGTextField;
 	private Text dockerHostNewVNetNameTextField;
@@ -56,6 +66,12 @@ public class AzureNewDockerConfigPage extends WizardPage {
 	private AzureDockerHostsManager dockerManager;
 	private DockerHost newHost;
 	private IProject project;
+	
+	private final FormToolkit formToolkit = new FormToolkit(Display.getDefault());
+	private ManagedForm managedForm;
+	private ScrolledForm errMsgForm;
+	private IMessageManager errDispatcher;
+	private Text dockerSubscriptionIdTextField;
 
 	/**
 	 * Create the wizard.
@@ -71,7 +87,6 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		this.project = wizard.getProject();
 
 		prefferedLocation = null;
-
 	}
 
 	/**
@@ -80,14 +95,6 @@ public class AzureNewDockerConfigPage extends WizardPage {
 	 */
 	public void createControl(Composite parent) {
 		Composite mainContainer = new Composite(parent, SWT.NO_BACKGROUND);
-		
-//		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-//		Form form = toolkit.createForm(parent);
-//		form.setBackground(mainContainer.getBackground());
-//		form.addMessageHyperlinkListener(new HyperlinkAdapter());
-//		form.setMessage("This is an error message", IMessageProvider.ERROR);
-//		form.setVisible(false);
-
 		setControl(mainContainer);
 		mainContainer.setLayout(new GridLayout(3, false));
 		
@@ -102,16 +109,49 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		gd_dockerHostNameTextField.horizontalIndent = 3;
 		gd_dockerHostNameTextField.widthHint = 200;
 		dockerHostNameTextField.setLayoutData(gd_dockerHostNameTextField);
+		dockerHostNameTextField.setText(newHost.name);
+		dockerHostNameTextField.setToolTipText(AzureDockerValidationUtils.getDockerHostNameTip());
+		dockerHostNameTextField.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent event) {
+				if (AzureDockerValidationUtils.validateDockerHostName(((Text) event.getSource()).getText())) {
+					errDispatcher.removeMessage("dockerHostNameTextField", dockerHostNameTextField);
+				} else {
+					errDispatcher.addMessage("dockerHostNameTextField", AzureDockerValidationUtils.getDockerHostNameTip(), null, IMessageProvider.ERROR, dockerHostNameTextField);
+				}
+			}
+		});
 		
 		Label lblNewLabel = new Label(mainContainer, SWT.NONE);
-		GridData gd_lblNewLabel = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		GridData gd_lblNewLabel = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1);
 		gd_lblNewLabel.horizontalIndent = 5;
 		lblNewLabel.setLayoutData(gd_lblNewLabel);
 		lblNewLabel.setText("Subscription:");
 		
-		Combo dockerSubscriptionComboBox = new Combo(mainContainer, SWT.READ_ONLY);
-		dockerSubscriptionComboBox.setItems(new String[] {});
-		dockerSubscriptionComboBox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		ComboViewer dockerSubscriptionComboViewer = new ComboViewer(mainContainer, SWT.READ_ONLY);
+		Combo dockerSubscriptionCombo = dockerSubscriptionComboViewer.getCombo();
+//		formToolkit.paintBordersFor(dockerSubscriptionCombo);
+		dockerSubscriptionComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+                if (selection.size() > 0){
+                	AzureDockerSubscription currentSubscription = (AzureDockerSubscription) selection.getFirstElement();
+                    dockerSubscriptionIdTextField.setText(currentSubscription != null ? currentSubscription.id : "");
+					errDispatcher.removeMessage("dockerSubscriptionCombo", dockerSubscriptionCombo);
+                } else {
+					errDispatcher.addMessage("dockerSubscriptionCombo", "No active subscriptions found", null, IMessageProvider.ERROR, dockerSubscriptionCombo);
+                }
+			}
+		});
+		dockerSubscriptionComboViewer.setContentProvider(ArrayContentProvider.getInstance());
+		dockerSubscriptionComboViewer.setInput(dockerManager.getSubscriptionsList());
+		if (dockerManager.getSubscriptionsList() != null && !dockerManager.getSubscriptionsList().isEmpty()) {
+			dockerSubscriptionCombo.select(0);
+		}
+		dockerSubscriptionCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		new Label(mainContainer, SWT.NONE);
+		
 		
 		Label lblId = new Label(mainContainer, SWT.NONE);
 		GridData gd_lblId = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -119,12 +159,13 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		lblId.setLayoutData(gd_lblId);
 		lblId.setText("Id:");
 		
-		dockerSubscriptionIdTextField = new Text(mainContainer, SWT.BORDER | SWT.READ_ONLY);
-		GridData gd_dockerSubscriptionIdTextField = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
-		gd_dockerSubscriptionIdTextField.horizontalIndent = 3;
+		dockerSubscriptionIdTextField = new Text(mainContainer, SWT.BORDER);
+		GridData gd_dockerSubscriptionIdTextField = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		gd_dockerSubscriptionIdTextField.widthHint = 250;
 		dockerSubscriptionIdTextField.setLayoutData(gd_dockerSubscriptionIdTextField);
-		dockerSubscriptionIdTextField.setBackground(mainContainer.getBackground());
-		dockerSubscriptionIdTextField.setEnabled(false);
+		dockerSubscriptionIdTextField.setEditable(false);
+		formToolkit.adapt(dockerSubscriptionIdTextField, true, true);
+		new Label(mainContainer, SWT.NONE);
 		
 		
 		Label lblRegion = new Label(mainContainer, SWT.NONE);
@@ -134,7 +175,7 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		lblRegion.setText("Region:");
 		
 		Combo dockerLocationComboBox = new Combo(mainContainer, SWT.READ_ONLY);
-		GridData gd_dockerLocationComboBox = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		GridData gd_dockerLocationComboBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerLocationComboBox.widthHint = 200;
 		dockerLocationComboBox.setLayoutData(gd_dockerLocationComboBox);
 		new Label(mainContainer, SWT.NONE);
@@ -272,6 +313,30 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		GridData gd_dockerSelectStorageComboBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerSelectStorageComboBox.widthHint = 220;
 		dockerSelectStorageComboBox.setLayoutData(gd_dockerSelectStorageComboBox);
+		
+		FormToolkit toolkit = new FormToolkit(mainContainer.getDisplay());
+		toolkit.getHyperlinkGroup().setHyperlinkUnderlineMode(
+				HyperlinkSettings.UNDERLINE_HOVER);
+		managedForm = new ManagedForm(mainContainer);
+		errMsgForm = managedForm.getForm();
+		errMsgForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
+		errMsgForm.setBackground(mainContainer.getBackground());
+		errDispatcher = managedForm.getMessageManager();
+//		errDispatcher.addMessage("dockerHostNameTextField", "Test error", null, IMessageProvider.ERROR, dockerHostNameTextField);
+		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);
+		
+		//dockerHostNameTextField
+//		Form errMsgForm = formToolkit.createForm(mainContainer);
+//		errMsgForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
+////		formToolkit.paintBordersFor(frmNewForm);
+////		frmNewForm.setText("New Form");
+//		errMsgForm.setBackground(mainContainer.getBackground());
+
+//		Form form = toolkit.createForm(parent);
+//		form.setBackground(mainContainer.getBackground());
+////		form.addMessageHyperlinkListener(new HyperlinkAdapter());
+//		form.setMessage("This is an error message", IMessageProvider.ERROR);
+//		form.setVisible(false);
 		
 	}
 

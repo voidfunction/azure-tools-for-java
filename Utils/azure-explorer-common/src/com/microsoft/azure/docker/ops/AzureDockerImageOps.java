@@ -23,10 +23,7 @@ package com.microsoft.azure.docker.ops;
 
 import com.fasterxml.jackson.databind.*;
 import com.jcraft.jsch.Session;
-import com.microsoft.azure.docker.model.AzureDockerException;
-import com.microsoft.azure.docker.model.AzureDockerImageInstance;
-import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azure.docker.model.DockerImage;
+import com.microsoft.azure.docker.model.*;
 
 import java.util.*;
 
@@ -45,10 +42,22 @@ public class AzureDockerImageOps {
 
       AzureDockerVMOps.waitForDockerDaemonStartup(session);
 
+      // delete any containers first
+      if (dockerImage.containers != null) {
+        for (DockerContainer dockerContainer : dockerImage.containers.values()) {
+          AzureDockerContainerOps.delete(dockerContainer, session);
+        }
+      }
+
       if (DEBUG) System.out.format("Start executing docker rmi %s\n", dockerImage.name);
       String cmdOut1 = AzureDockerSSHOps.executeCommand("docker rmi " + dockerImage.name, session, true);
       if (DEBUG) System.out.println(cmdOut1);
       if (DEBUG) System.out.format("Done executing docker rmi %s\n", dockerImage.name);
+
+      if (DEBUG) System.out.format("Start executing rm -f -r %s/%s\n", DEFAULT_DOCKER_IMAGES_DIRECTORY, dockerImage.name);
+      cmdOut1 = AzureDockerSSHOps.executeCommand(String.format("rm -f -r %s/%s ", DEFAULT_DOCKER_IMAGES_DIRECTORY, dockerImage.name), session, true);
+      if (DEBUG) System.out.println(cmdOut1);
+      if (DEBUG) System.out.format("Done executing rm -f -r %s/%s\n", DEFAULT_DOCKER_IMAGES_DIRECTORY, dockerImage.name);
     } catch (Exception e) {
       throw new AzureDockerException(e.getMessage(), e);
     }
