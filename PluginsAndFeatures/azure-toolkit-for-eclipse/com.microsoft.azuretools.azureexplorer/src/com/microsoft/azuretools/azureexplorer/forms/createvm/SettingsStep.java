@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Text;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.microsoft.azure.management.resources.ResourceGroup;
@@ -306,10 +307,12 @@ public class SettingsStep extends WizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (CREATE_NEW.equals(networkComboBox.getText())) {
-					// showNewVirtualNetworkForm();
+					 showNewVirtualNetworkForm();
 				} else if ((Network) networkComboBox.getData(networkComboBox.getText()) != null) {
 					Network network = (Network) networkComboBox.getData(networkComboBox.getText());
 					wizard.setVirtualNetwork(network);
+					wizard.setNewNetwork(false);
+					wizard.setNewNetwork(null);
 					subnetComboBox.removeAll();
 
 					for (String subnet : network.subnets().keySet()) {
@@ -432,6 +435,7 @@ public class SettingsStep extends WizardPage {
 							pipCombo.add(pip.name());
 							pipCombo.setData(pip.name(), pip);
 						}
+						pipCombo.select(0);
 					}
 				});
             }
@@ -494,6 +498,7 @@ public class SettingsStep extends WizardPage {
 							nsgCombo.add(nsg.name());
 							nsgCombo.setData(nsg.name(), nsg);
 						}
+						nsgCombo.select(0);
 					}
 				});
             }
@@ -513,6 +518,7 @@ public class SettingsStep extends WizardPage {
                 @Override
                 public void run() {
                     nsgCombo.setItems(new String[]{NONE, LOADING});
+                    nsgCombo.select(0);
                 }
             });
         }
@@ -536,6 +542,7 @@ public class SettingsStep extends WizardPage {
 							availabilityCombo.add(availabilitySet.name());
 							availabilityCombo.setData(availabilitySet.name(), availabilitySet);
 						}
+						availabilityCombo.select(0);
 					}
 				});
             }
@@ -593,6 +600,31 @@ public class SettingsStep extends WizardPage {
 			}
 		});
 
+        form.open();
+    }
+    
+    private void showNewVirtualNetworkForm() {
+        final CreateVirtualNetworkForm form = new CreateVirtualNetworkForm(wizard.getName());
+        form.setOnCreate(new Runnable() {
+            @Override
+            public void run() {
+                VirtualNetwork newVirtualNetwork = form.getNetwork();
+
+                if (newVirtualNetwork != null) {
+                    wizard.setNewNetwork(newVirtualNetwork);
+                    wizard.setNewNetwork(true);
+					networkComboBox.add(newVirtualNetwork.name + " (New)", 0);
+					networkComboBox.select(0);
+					subnetComboBox.setEnabled(false);
+					subnetComboBox.removeAll();
+					subnetComboBox.add(newVirtualNetwork.subnet.name);
+					subnetComboBox.select(0);
+					wizard.setSubnet(newVirtualNetwork.subnet.name);
+                } else {
+                    networkComboBox.setText(null);
+                }
+            }
+        });
         form.open();
     }
 

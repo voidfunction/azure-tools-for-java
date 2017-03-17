@@ -229,6 +229,7 @@ public class SelectImageStep extends WizardPage {
             setPageComplete(false);
          // will set to null if selected subscription changes
             if (wizard.getRegion() == null) {
+            	setPageComplete(false);
                 Map<SubscriptionDetail, List<Location>> subscription2Location = AzureModel.getInstance().getSubscriptionToLocationMap();
                 if (subscription2Location == null || subscription2Location.get(wizard.getSubscription()) == null) {
                 	DefaultLoader.getIdeHelper().runInBackground(null, "Loading Available Locations...", true, true, "", new Runnable() {
@@ -251,7 +252,6 @@ public class SelectImageStep extends WizardPage {
                     fillRegions();
                 }
             }
-            regionComboBox.select(0);
             selectRegion();
             enableControls(customImageBtn.getSelection());
         }
@@ -263,13 +263,15 @@ public class SelectImageStep extends WizardPage {
                 .stream().map(Location::name).sorted().collect(Collectors.toList());
         regionComboBox.setItems((String[])locations.toArray(new String[locations.size()]));
         if (locations.size() > 0) {
+            regionComboBox.select(0);
             selectRegion();
         }
+        setPageComplete(true);
     }
 	
 	private void enableControls(boolean customImage) {
         knownImageComboBox.setEnabled(!customImage);
-        setPageComplete(!customImage);
+        setPageComplete(!customImage && regionComboBox.getText() != null);
 //        model.getCurrentNavigationState().NEXT.setEnabled(!customImage || !imageLabelList.isSelectionEmpty());
         imageLabelList.setEnabled(customImage);
         publisherComboBox.setEnabled(customImage);

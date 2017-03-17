@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -46,6 +47,8 @@ import com.microsoft.azuretools.azureexplorer.Activator;
 import com.microsoft.azuretools.core.utils.Messages;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.utils.AzureModel;
+import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
 import com.microsoft.tooling.msservices.model.ReplicationTypes;
@@ -178,16 +181,34 @@ public class CreateArmStorageAccountForm extends Dialog {
         //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         subscriptionComboBox.setLayoutData(gridData);
 
-        
         resourceGroupLabel = new Label(container, SWT.LEFT);
         resourceGroupLabel.setText("Resource group:");
-        Group group = new Group(container, SWT.NONE);
-        group.setLayout(new RowLayout(SWT.HORIZONTAL));
-        createNewRadioButton = new Button(group, SWT.RADIO);
+        
+        final Composite composite = new Composite(container, SWT.NONE);
+        gridLayout = new GridLayout();
+        gridLayout.numColumns = 2;
+        gridData = new GridData();
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.verticalAlignment = GridData.BEGINNING;
+         gridData.grabExcessHorizontalSpace = true;
+//        gridData.widthHint = 250;
+        composite.setLayout(gridLayout);
+        composite.setLayoutData(gridData);
+        
+        createNewRadioButton = new Button(composite, SWT.RADIO);
         createNewRadioButton.setText("Create new");
         createNewRadioButton.setSelection(true);
-        useExistingRadioButton = new Button(group, SWT.RADIO);
+        resourceGrpField = new Text(composite, SWT.LEFT | SWT.BORDER);
+        //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+        resourceGrpField.setLayoutData(gridData);
+        
+        useExistingRadioButton = new Button(composite, SWT.RADIO);
         useExistingRadioButton.setText("Use existing");
+        resourceGrpCombo = new Combo(composite, SWT.READ_ONLY);
+        //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+        resourceGrpCombo.setLayoutData(gridData);
+        resourceGroupViewer = new ComboViewer(resourceGrpCombo);
+        resourceGroupViewer.setContentProvider(ArrayContentProvider.getInstance());
         
         SelectionListener updateListener = new SelectionAdapter() {
         	@Override
@@ -197,24 +218,13 @@ public class CreateArmStorageAccountForm extends Dialog {
 		};
         createNewRadioButton.addSelectionListener(updateListener);
         useExistingRadioButton.addSelectionListener(updateListener);	
-        
-        resourceGrpField = new Text(container, SWT.LEFT | SWT.BORDER);
-        //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-        resourceGrpField.setLayoutData(gridData);
-        
-        resourceGrpCombo = new Combo(container, SWT.READ_ONLY);
-        //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-        resourceGrpCombo.setLayoutData(gridData);
-        resourceGroupViewer = new ComboViewer(resourceGrpCombo);
-        resourceGroupViewer.setContentProvider(ArrayContentProvider.getInstance());
-        resourceGrpCombo.setVisible(false);
-        
+   
         //updateResourceGroup();
         
         regionLabel = new Label(container, SWT.LEFT);
         regionLabel.setText("Region:");
         regionComboBox = new Combo(container, SWT.READ_ONLY);
-        //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         regionComboBox.setLayoutData(gridData);
 //        regionViewer = new ComboViewer(regionComboBox);
 //        regionViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -225,7 +235,7 @@ public class CreateArmStorageAccountForm extends Dialog {
 
         pricingLabel = new Link(container, SWT.LEFT);
         pricingLabel.setText(PRICING_LINK);
-        pricingLabel.setLayoutData(gridData);
+//        pricingLabel.setLayoutData(gridData);
         pricingLabel.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -280,9 +290,9 @@ public class CreateArmStorageAccountForm extends Dialog {
     }
     
     private void updateResourceGroup() {
-		final boolean isNewGroup = createNewRadioButton.getSelection();
-         resourceGrpField.setVisible(isNewGroup);
-         resourceGrpCombo.setVisible(!isNewGroup);
+    	final boolean isNewGroup = createNewRadioButton.getSelection();
+        resourceGrpField.setEnabled(isNewGroup);
+        resourceGrpCombo.setEnabled(!isNewGroup);
 	}
 
     private void validateEmptyFields() {
@@ -417,6 +427,7 @@ public class CreateArmStorageAccountForm extends Dialog {
         } else { // create form create VM form
             subscriptionComboBox.setEnabled(false);
             subscriptionComboBox.add(subscription.getSubscriptionName());
+            subscriptionComboBox.setData(subscription.getSubscriptionName(), subscription);
             subscriptionComboBox.select(0);
             kindCombo.add("General purpose"); // only General purpose accounts supported for VMs
             kindCombo.setData(Kind.STORAGE);
@@ -522,30 +533,44 @@ public class CreateArmStorageAccountForm extends Dialog {
     
     public void loadGroups() {
     	resourceGrpCombo.add("<Loading...>");
-
-        DefaultLoader.getIdeHelper().runInBackground(null, "Loading resource groups...", false, true, "Loading resource groups...", new Runnable() {
-            @Override
-            public void run() {
-                try {
-                	AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-                    Azure azure = azureManager.getAzure(subscription.getSubscriptionId());
-                    List<ResourceGroup> resourceGroups = azure.resourceGroups().list();
-                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            final Vector<Object> vector = new Vector<Object>();
-                            vector.addAll(resourceGroups);
-                            resourceGroupViewer.setInput(vector);
-                            if (resourceGroups.size() > 0) {
-                            	resourceGrpCombo.select(1);
+    	Map<SubscriptionDetail, List<ResourceGroup>> subscription2Group = AzureModel.getInstance().getSubscriptionToResourceGroupMap();
+    	if (subscription2Group == null || subscription2Group.get(subscriptionComboBox.getData(subscriptionComboBox.getText())) == null) {
+        	DefaultLoader.getIdeHelper().runInBackground(null, "Loading Resource Groups", true, true, "", new Runnable() {
+    			@Override
+    			public void run() {
+                    try {
+                        AzureModelController.updateSubscriptionMaps(null);
+                        DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+							@Override
+							public void run() {
+                                fillGroups();
                             }
-                        }
-                    });
-                } catch (Exception e) {
-                	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
-                			"An error occurred while loading the resource groups list.", e);
+                        });
+                    } catch (Exception ex) {
+                    	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, "Error loading resource groups", ex);
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            fillGroups();
+        }
+    }
+    
+    public void fillGroups() {
+    	List<ResourceGroup> resourceGroups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(subscriptionComboBox.getData(subscriptionComboBox.getText()));
+        List<String> filteredGroups = resourceGroups.stream()
+//        		.filter(group -> wizard.getRegion().equals(group.regionName()))
+                .map(ResourceGroup::name).sorted().collect(Collectors.toList());
+		DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				final Vector<Object> vector = new Vector<Object>();
+				vector.addAll(filteredGroups);
+				resourceGroupViewer.setInput(vector);
+				if (filteredGroups.size() > 0) {
+					resourceGrpCombo.select(0);
+				}
+			}
+		});
     }
 }
