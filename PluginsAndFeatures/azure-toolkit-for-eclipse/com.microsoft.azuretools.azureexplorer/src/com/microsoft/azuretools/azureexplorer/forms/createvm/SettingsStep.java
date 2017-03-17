@@ -339,7 +339,7 @@ public class SettingsStep extends WizardPage {
         List<Network> filteredNetworks = new ArrayList<>();
 
         for (Network network : virtualNetworks) {
-            if (network.region().equals(wizard.getRegion())) {
+            if (network.regionName().equals(wizard.getRegion())) {
                 filteredNetworks.add(network);
             }
         }
@@ -405,7 +405,7 @@ public class SettingsStep extends WizardPage {
 
         for (StorageAccount storageAccount : storageAccounts.values()) {
             // VM and storage account need to be in the same region; only general purpose accounts support page blobs, so only they can be used to create vm
-            if (storageAccount.region().equals(wizard.getRegion()) 
+            if (storageAccount.regionName().equals(wizard.getRegion()) 
             		&& storageAccount.kind() == Kind.STORAGE
                     && storageAccount.sku().name() != SkuName.STANDARD_ZRS) {
                 filteredStorageAccounts.add(storageAccount);
@@ -470,7 +470,7 @@ public class SettingsStep extends WizardPage {
 
         for (PublicIpAddress publicIpAddress : publicIpAddresses) {
             // VM and public ip address need to be in the same region
-            if (publicIpAddress.region().equals(wizard.getRegion())) {
+            if (publicIpAddress.regionName().equals(wizard.getRegion())) {
                 filteredPips.add(publicIpAddress);
             }
         }
@@ -571,7 +571,7 @@ public class SettingsStep extends WizardPage {
 
         for (NetworkSecurityGroup nsg : networkSecurityGroups) {
             // VM and network security group
-            if (nsg.region().equals(wizard.getRegion())) {
+            if (nsg.regionName().equals(wizard.getRegion())) {
                 filteredNsgs.add(nsg);
             }
         }

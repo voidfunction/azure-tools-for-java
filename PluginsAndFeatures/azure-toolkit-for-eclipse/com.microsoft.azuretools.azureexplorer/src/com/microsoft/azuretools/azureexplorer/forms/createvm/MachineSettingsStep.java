@@ -270,9 +270,12 @@ public class MachineSettingsStep extends WizardPage {
 							vmSizeComboBox.removeAll();
 							for (VirtualMachineSize size : sizes) {
 								vmSizeComboBox.add(size.name());
-								vmSizeComboBox.setData(size.toString(), size);
+								vmSizeComboBox.setData(size.name(), size);
 							}
-							selectDefaultSize();
+							if (sizes.size() > 0) {
+								vmSizeComboBox.select(0);
+							}
+//							selectDefaultSize();
 						}
 					});
 				}

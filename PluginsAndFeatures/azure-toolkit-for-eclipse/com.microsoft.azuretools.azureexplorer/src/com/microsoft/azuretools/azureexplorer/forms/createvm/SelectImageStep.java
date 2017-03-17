@@ -48,7 +48,6 @@ import com.microsoft.azure.management.compute.VirtualMachineOffer;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.compute.VirtualMachineSku;
 import com.microsoft.azure.management.resources.Location;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.core.utils.Messages;
 import com.microsoft.azuretools.core.utils.PluginUtil;
@@ -105,6 +104,7 @@ public class SelectImageStep extends WizardPage {
         	@Override
             public void widgetSelected(SelectionEvent e) {
         		enableControls(!knownImageBtn.getSelection());
+        		setMachineImage();
         	}
         };
         knownImageBtn.addSelectionListener(updateListener);
@@ -119,6 +119,7 @@ public class SelectImageStep extends WizardPage {
         	}	
 		});
         knownImageBtn.setSelection(true);
+        setMachineImage();
 		
 		publisherComboBox.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -223,7 +224,7 @@ public class SelectImageStep extends WizardPage {
 	
 	@Override
     public String getTitle() {
-        if (virtualMachineImages == null && wizard.getSubscription() != null) {
+        if (wizard.getRegion() == null && wizard.getSubscription() != null) {
 //            imageTypeComboBox.setEnabled(false);
             setPageComplete(false);
          // will set to null if selected subscription changes
@@ -250,12 +251,6 @@ public class SelectImageStep extends WizardPage {
                     fillRegions();
                 }
             }
-            
-            
-            for (Region region : Region.values()) {
-            	regionComboBox.add(region.toString());
-            	regionComboBox.setData(region.toString(), region);
-            }
             regionComboBox.select(0);
             selectRegion();
             enableControls(customImageBtn.getSelection());
@@ -273,7 +268,6 @@ public class SelectImageStep extends WizardPage {
     }
 	
 	private void enableControls(boolean customImage) {
-        wizard.setKnownMachineImage(!customImage);
         knownImageComboBox.setEnabled(!customImage);
         setPageComplete(!customImage);
 //        model.getCurrentNavigationState().NEXT.setEnabled(!customImage || !imageLabelList.isSelectionEmpty());
@@ -288,13 +282,13 @@ public class SelectImageStep extends WizardPage {
     }
 
 	private void selectRegion() {
-		fillPublishers();
+//		fillPublishers();
 		wizard.setRegion(regionComboBox.getText());
 	}
 
 	private void fillPublishers() {
 		setPageComplete(false);
-		Region region = (Region) regionComboBox.getData(regionComboBox.getText());
+		String region = regionComboBox.getText();
 		publisherComboBox.removeAll();
 		offerComboBox.setEnabled(false);
         DefaultLoader.getIdeHelper().runInBackground(null, "Loading image publishers...", false, true, "", new Runnable() {
@@ -428,4 +422,15 @@ public class SelectImageStep extends WizardPage {
             wizard.setSize(null);
         }
     }
+
+	private void setMachineImage() {
+		boolean customImage = customImageBtn.getSelection();
+		wizard.setKnownMachineImage(!customImage);
+		if (customImage) {
+			wizard.setKnownMachineImage(null);
+		} else {
+			wizard.setKnownMachineImage(knownImageComboBox.getData(knownImageComboBox.getText()));
+			wizard.setVirtualMachineImage(null);
+		}
+	}
 }
