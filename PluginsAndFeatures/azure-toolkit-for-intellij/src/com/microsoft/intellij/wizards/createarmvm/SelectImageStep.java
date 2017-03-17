@@ -259,9 +259,12 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
         if (model.getRegion() == null) {
             Map<SubscriptionDetail, List<Location>> subscription2Location = AzureModel.getInstance().getSubscriptionToLocationMap();
             if (subscription2Location == null || subscription2Location.get(model.getSubscription()) == null) {
-                ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading Available Locations...", false) {
+                final DefaultComboBoxModel<String> loadingModel = new DefaultComboBoxModel<>(new String[]{"<Loading...>"});
+                regionComboBox.setModel(loadingModel);
+                model.getCurrentNavigationState().NEXT.setEnabled(false);
+                DefaultLoader.getIdeHelper().runInBackground(project, "Loading Available Locations...", false, true, "Loading Available Locations...", new Runnable() {
                     @Override
-                    public void run(@NotNull ProgressIndicator indicator) {
+                    public void run() {
                         try {
                             AzureModelController.updateSubscriptionMaps(null);
                             ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -289,6 +292,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
         if (locations.size() > 0) {
             selectRegion();
         }
+        enableControls(customImageBtn.isSelected());
     }
 
     private void selectRegion() {
