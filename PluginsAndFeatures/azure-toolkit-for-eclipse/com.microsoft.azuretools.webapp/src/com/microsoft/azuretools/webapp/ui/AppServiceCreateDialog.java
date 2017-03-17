@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.URI;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.service.log.LogService;
 
 import com.microsoft.azure.management.appservice.AppServicePlan;
@@ -299,6 +301,18 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         linkAppServicePricing = new Link(compositeAppServicePlan, SWT.NONE);
         linkAppServicePricing.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
         linkAppServicePricing.setText("<a>App service pricing details</a>");
+        linkAppServicePricing.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				try {
+					PlatformUI.getWorkbench().getBrowserSupport().
+					getExternalBrowser().openURL(new URL("https://azure.microsoft.com/en-us/pricing/details/app-service/"));
+				}
+				catch (Exception ex) {
+					LOGGER.log(LogService.LOG_ERROR, "SelectionAdapter.widgetSelected", ex);
+				}
+			}
+		});
         
         tabItemResourceGroup = new TabItem(tabFolder, SWT.NONE);
         tabItemResourceGroup.setText("Resource group");
@@ -377,6 +391,19 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         linkJdkLicense = new Link(compositeJDK, SWT.NONE);
         linkJdkLicense.setEnabled(false);
         linkJdkLicense.setText("<a>License</a>");
+        linkJdkLicense.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				try {
+					PlatformUI.getWorkbench().getBrowserSupport().
+					getExternalBrowser().openURL(new URL(AzulZuluModel.getLicenseUrl()));
+				}
+				catch (Exception ex) {
+					LOGGER.log(LogService.LOG_ERROR, "SelectionAdapter.widgetSelected", ex);
+				}
+			}
+		});
+
         
         btnJdkOwnDownloadUrl = new Button(compositeJDK, SWT.RADIO);
         btnJdkOwnDownloadUrl.addSelectionListener(new SelectionAdapter() {
