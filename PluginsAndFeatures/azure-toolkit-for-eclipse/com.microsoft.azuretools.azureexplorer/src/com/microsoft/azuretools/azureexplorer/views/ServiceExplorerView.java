@@ -59,6 +59,7 @@ import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.azuretools.azureexplorer.Activator;
+import com.microsoft.azuretools.azureexplorer.AzureModuleImpl;
 import com.microsoft.azuretools.core.handlers.SelectSubsriptionsCommandHandler;
 import com.microsoft.azuretools.core.handlers.SignInCommandHandler;
 import com.microsoft.azuretools.core.handlers.SignOutCommandHandler;
@@ -133,7 +134,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
         }
 
         private void initialize() {
-            azureModule = new AzureModule(null);
+            azureModule = new AzureModuleImpl();
             HDInsightRootModuleImpl hdInsightRootModule =  new HDInsightRootModuleImpl(azureModule);
             azureModule.setHdInsightModule(hdInsightRootModule);
             
