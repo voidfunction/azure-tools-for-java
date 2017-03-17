@@ -64,6 +64,7 @@ import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.azuretools.utils.CanceledByUserException;
 import com.microsoft.azuretools.utils.WebAppUtils;
+import org.eclipse.swt.layout.RowData;
 
 
 public class WebAppDeployDialog extends TitleAreaDialog {
@@ -132,11 +133,11 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         tblclmnName.setText("Name");
         
         TableColumn tblclmnJdk = new TableColumn(table, SWT.LEFT);
-        tblclmnJdk.setWidth(110);
+        tblclmnJdk.setWidth(100);
         tblclmnJdk.setText("JDK");
         
         TableColumn tblclmnWebContainer = new TableColumn(table, SWT.LEFT);
-        tblclmnWebContainer.setWidth(170);
+        tblclmnWebContainer.setWidth(150);
         tblclmnWebContainer.setText("Web container");
         
         TableColumn tblclmnResourceGroup = new TableColumn(table, SWT.LEFT);
@@ -145,18 +146,20 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         
         Composite composite = new Composite(container, SWT.NONE);
         composite.setLayout(new RowLayout(SWT.VERTICAL));
-        composite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
         
         Button btnCreate = new Button(composite, SWT.NONE);
+        btnCreate.setLayoutData(new RowData(90, SWT.DEFAULT));
         btnCreate.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 createAppService();
             }
         });
-        btnCreate.setText("Create..");
+        btnCreate.setText("Create...");
         
         Button btnDelete = new Button(composite, SWT.NONE);
+        btnDelete.setLayoutData(new RowData(90, SWT.DEFAULT));
         btnDelete.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -166,6 +169,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         btnDelete.setText("Delete...");
         
         Button btnRefresh = new Button(composite, SWT.NONE);
+        btnRefresh.setLayoutData(new RowData(90, SWT.DEFAULT));
         btnRefresh.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -186,7 +190,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         grpAppServiceDetails.setText("App service details");
         
         browserAppServiceDetailes = new Browser(grpAppServiceDetails, SWT.NONE);
-        FontData browserFontData = browserAppServiceDetailes.getFont().getFontData()[0];
+        FontData browserFontData = btnRefresh.getFont().getFontData()[0];
         browserFontStyle = String.format("font: %spt %s;", browserFontData.getHeight(), browserFontData.getName());
         browserAppServiceDetailes.addLocationListener(new LocationListener() {
             public void changing(LocationEvent event) {
@@ -313,7 +317,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         setErrorMessage(null);
         int selectedRow = table.getSelectionIndex();
         if (selectedRow < 0) {
-            setErrorMessage("Please select App Service to deploy to");
+            setErrorMessage("Select App Service to deploy to.");
             return false;
         }
         
@@ -411,6 +415,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         Map<ResourceGroup, List<AppServicePlan>> rgaspMap = AzureModel.getInstance().getResourceGroupToAppServicePlanMap();
 
         webAppWebAppDetailsMap.clear();
+        table.removeAll();
         
         for (SubscriptionDetail sd : srgMap.keySet()) {
             if (!sd.isSelected()) continue;
@@ -421,7 +426,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                     aspMap.put(asp.id(), asp);
                 }
             }
-
+            
             for (ResourceGroup rg : srgMap.get(sd)) {
                 for (WebApp wa : rgwaMap.get(rg)) {
                     TableItem item = new TableItem(table, SWT.NULL);
@@ -574,7 +579,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
         
         boolean confirmed = MessageDialog.openConfirm(getShell(), 
-                "Detete App Service", 
+                "Delete App Service", 
                 "Do you really want to delete the App Service '" + appServiceName + "'?");
         
         if (!confirmed) {
@@ -590,7 +595,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             ProgressDialog.get(this.getShell(), "Delete App Service Progress").run(true, true, new IRunnableWithProgress() {
                 @Override
                 public void run(IProgressMonitor monitor) {
-                    monitor.beginTask("Deleteting App Service...", IProgressMonitor.UNKNOWN);
+                    monitor.beginTask("Deleting App Service...", IProgressMonitor.UNKNOWN);
                     
                     try {
                         manager.getAzure(wad.subscriptionDetail.getSubscriptionId()).webApps().deleteById(wad.webApp.id());
