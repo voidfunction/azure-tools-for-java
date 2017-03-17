@@ -35,7 +35,7 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 public class FxClassLoader {
 
 	private static final String JOB_VIEW_FX_UTILS_NAME = "com.microsoft.hdinsight.jobs.JobViewFxUtil";
-	private static final String JOB_VIEW_FX_JAR_PATH = PluginUtil.pluginFolder + "/com.microsoft.azure.hdinsight" + "/hdinsight-job-view.jar";
+	private static final String JOB_VIEW_FX_JAR_PATH = PluginUtil.pluginFolder + "/com.microsoft.azuretools.hdinsight" + "/hdinsight-job-view.jar";
 	
 	private static boolean isJavaFxLoaded = false;
 	

@@ -53,7 +53,7 @@
     <target name="dist" depends="compile-sources" description="generate the distributable files ">
         <jar destfile="${basedir}\jar\${jar_name}" basedir="${basedir}\build"/>
         <copy file="${basedir}\jar\${jar_name}"
-              tofile="${basedir}\..\..\PluginsAndFeatures\com.microsoft.hdinsights\resources\${jar_name}"
+              tofile="${basedir}\..\${jar_name}"
               overwrite="true"/>
     </target>
 
