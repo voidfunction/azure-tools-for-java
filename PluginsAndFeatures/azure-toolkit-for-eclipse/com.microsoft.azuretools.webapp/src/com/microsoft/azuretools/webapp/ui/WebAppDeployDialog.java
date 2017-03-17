@@ -111,7 +111,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
      */
     @Override
     protected Control createDialogArea(Composite parent) {
-        setMessage("Select an App Service to deploy to");
+        setMessage("Select App Service to deploy to:");
         setTitle("Deploy Web App");
         Composite area = (Composite) super.createDialogArea(parent);
         Composite container = new Composite(area, SWT.NONE);
@@ -127,37 +127,25 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
         
-        TableColumn tblclmnNewColumn = new TableColumn(table, SWT.NONE);
-        tblclmnNewColumn.setWidth(100);
-        tblclmnNewColumn.setText("Name");
+        TableColumn tblclmnName = new TableColumn(table, SWT.LEFT);
+        tblclmnName.setWidth(230);
+        tblclmnName.setText("Name");
         
-        TableColumn tblclmnJdk = new TableColumn(table, SWT.NONE);
-        tblclmnJdk.setWidth(100);
+        TableColumn tblclmnJdk = new TableColumn(table, SWT.LEFT);
+        tblclmnJdk.setWidth(110);
         tblclmnJdk.setText("JDK");
         
-        TableColumn tblclmnWebContainer = new TableColumn(table, SWT.NONE);
-        tblclmnWebContainer.setWidth(100);
-        tblclmnWebContainer.setText("Web Container");
+        TableColumn tblclmnWebContainer = new TableColumn(table, SWT.LEFT);
+        tblclmnWebContainer.setWidth(170);
+        tblclmnWebContainer.setText("Web container");
         
-        TableColumn tblclmnResourceGroup = new TableColumn(table, SWT.NONE);
-        tblclmnResourceGroup.setWidth(100);
-        tblclmnResourceGroup.setText("Resource Group");
+        TableColumn tblclmnResourceGroup = new TableColumn(table, SWT.LEFT);
+        tblclmnResourceGroup.setWidth(190);
+        tblclmnResourceGroup.setText("Resource group");
         
         Composite composite = new Composite(container, SWT.NONE);
         composite.setLayout(new RowLayout(SWT.VERTICAL));
         composite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-        
-        Button btnRefresh = new Button(composite, SWT.NONE);
-        btnRefresh.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                table.removeAll();
-                browserAppServiceDetailes.setText("");
-                AzureModel.getInstance().setResourceGroupToWebAppMap(null);
-                fillTable();
-            }
-        });
-        btnRefresh.setText("Refresh");
         
         Button btnCreate = new Button(composite, SWT.NONE);
         btnCreate.addSelectionListener(new SelectionAdapter() {
@@ -177,13 +165,25 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         });
         btnDelete.setText("Delete...");
         
+        Button btnRefresh = new Button(composite, SWT.NONE);
+        btnRefresh.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                table.removeAll();
+                browserAppServiceDetailes.setText("");
+                AzureModel.getInstance().setResourceGroupToWebAppMap(null);
+                fillTable();
+            }
+        });
+        btnRefresh.setText("Refresh");
+        
         Group grpAppServiceDetails = new Group(container, SWT.NONE);
         grpAppServiceDetails.setLayout(new FillLayout(SWT.HORIZONTAL));
         GridData gd_grpAppServiceDetails = new GridData(SWT.FILL, SWT.BOTTOM, false, false, 1, 1);
         gd_grpAppServiceDetails.heightHint = 100;
         gd_grpAppServiceDetails.widthHint = 396;
         grpAppServiceDetails.setLayoutData(gd_grpAppServiceDetails);
-        grpAppServiceDetails.setText("App Service Details");
+        grpAppServiceDetails.setText("App service details");
         
         browserAppServiceDetailes = new Browser(grpAppServiceDetails, SWT.NONE);
         FontData browserFontData = browserAppServiceDetailes.getFont().getFontData()[0];
@@ -491,8 +491,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         PublishingProfile pp = webApp.getPublishingProfile();
                         WebAppUtils.deployArtifact(artifactName, artifactPath,
                                 pp, isDeployToRoot, new UpdateProgressIndicator(monitor));
-                        String sitePath = buildSiteLink(wad.webApp, artifactName);
-                        monitor.setTaskName("Checking the web app is available...");
+                        String sitePath = buildSiteLink(wad.webApp,  isDeployToRoot ? null : artifactName);
+                        monitor.setTaskName("Checking Web App availability...");
                         monitor.subTask("Link: " + sitePath);
                         // to make warn up cancelable
                         int stepLimit = 5;
