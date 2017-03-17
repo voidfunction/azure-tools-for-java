@@ -44,7 +44,7 @@
          </menu>
       </menuContribution>
       <menuContribution locationURI="menu:com.microsoft.ui.dropdown.toolbar.command">
-         <command commandId="com.microsoft.azuretools.docker.commands.azurePublishDockerContainer" label="Publish to Azure Docker Container" style="push">
+         <command commandId="com.microsoft.azuretools.docker.commands.azurePublishDockerContainer" label="Publish as Docker Container..." style="push">
             <parameter name="com.microsoft.ui.dropdown.msg" value="Docker Container"></parameter>
          </command>
       </menuContribution>
