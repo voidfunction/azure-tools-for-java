@@ -210,7 +210,7 @@ public class BlobExplorerFileEditor extends EditorPart {
         
         queryButton = new Button(container, SWT.PUSH);
         queryButton.setImage(Activator.getImageDescriptor("icons/Start.png").createImage());
-        queryButton.setToolTipText("Execute");
+        queryButton.setToolTipText("Search");
 
         refreshButton = new Button(container, SWT.PUSH);
         refreshButton.setImage(Activator.getImageDescriptor("icons/storagerefresh.png").createImage());

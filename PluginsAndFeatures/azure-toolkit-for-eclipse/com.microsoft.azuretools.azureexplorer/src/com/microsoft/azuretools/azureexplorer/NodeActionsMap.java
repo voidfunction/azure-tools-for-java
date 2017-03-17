@@ -31,11 +31,9 @@ import com.microsoft.azuretools.azureexplorer.actions.CreateArmVMAction;
 import com.microsoft.azuretools.azureexplorer.actions.CreateBlobContainer;
 import com.microsoft.azuretools.azureexplorer.actions.CreateQueueAction;
 import com.microsoft.azuretools.azureexplorer.actions.CreateTableAction;
-import com.microsoft.azuretools.azureexplorer.actions.ManageSubscriptionsAction;
 import com.microsoft.azuretools.azureexplorer.actions.OpenWebappAction;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
-import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappNode;
@@ -44,7 +42,6 @@ public class NodeActionsMap {
     public static final Map<Class<? extends Node>, ImmutableList<Class<? extends NodeActionListener>>> node2Actions =
             new HashMap<Class<? extends Node>, ImmutableList<Class<? extends NodeActionListener>>>();
     static {
-        node2Actions.put(AzureModule.class, new ImmutableList.Builder().add(ManageSubscriptionsAction.class).build());
         node2Actions.put(VMArmModule.class, new ImmutableList.Builder().add(CreateArmVMAction.class).build());
         node2Actions.put(TableModule.class, new ImmutableList.Builder().add(CreateTableAction.class).build());
         node2Actions.put(QueueModule.class, new ImmutableList.Builder().add(CreateQueueAction.class).build());

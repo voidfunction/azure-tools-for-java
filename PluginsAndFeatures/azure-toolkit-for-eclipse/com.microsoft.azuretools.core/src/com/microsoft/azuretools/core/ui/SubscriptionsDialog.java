@@ -120,7 +120,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
         GridData gd_btnRefresh = new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1);
         gd_btnRefresh.widthHint = 78;
         btnRefresh.setLayoutData(gd_btnRefresh);
-        btnRefresh.setText("Refresh...");
+        btnRefresh.setText("Refresh");
 
         return area;
     }
