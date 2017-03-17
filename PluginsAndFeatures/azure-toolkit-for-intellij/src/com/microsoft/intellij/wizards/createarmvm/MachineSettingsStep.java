@@ -150,7 +150,10 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
                 }
 
                 passwordPanel.setEnabled(passwordCheckBox.isSelected());
-
+                if (!passwordCheckBox.isSelected()) {
+                    vmPasswordField.setText("");
+                    confirmPasswordField.setText("");
+                }
                 validateEmptyFields();
             }
         });

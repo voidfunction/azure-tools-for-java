@@ -146,7 +146,7 @@ public class AzureSDKManager {
             }
             VirtualMachine.DefinitionStages.WithLinuxCreate withLinuxCreate;
             // we assume either password or public key is not empty
-            if (password != null) {
+            if (password != null && !password.isEmpty()) {
                 withLinuxCreate = withLinuxRootPasswordOrPublicKey.withRootPassword(password);
                 if (publicKey != null) {
                     withCreate = withLinuxCreate.withSsh(publicKey);
