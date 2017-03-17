@@ -310,6 +310,22 @@ public class CreateVMWizard extends Wizard {
         this.virtualNetwork = virtualNetwork;
     }
 
+	public VirtualNetwork getNewNetwork() {
+		return newNetwork;
+	}
+
+	public void setNewNetwork(VirtualNetwork newNetwork) {
+		this.newNetwork = newNetwork;
+	}
+
+	public boolean isNewNetwork() {
+		return isNewNetwork;
+	}
+
+	public void setNewNetwork(boolean isNewNetwork) {
+		this.isNewNetwork = isNewNetwork;
+	}
+
 	public String getResourceGroupName() {
 		return resourceGroupName;
 	}

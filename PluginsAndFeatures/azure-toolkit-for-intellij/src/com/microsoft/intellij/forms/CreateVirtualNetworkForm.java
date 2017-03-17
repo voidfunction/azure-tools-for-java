@@ -40,7 +40,6 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
     private JTextField addressSpaceField;
     private JTextField subnetNameField;
     private JTextField subnetAddressRangeField;
-    private JLabel userInfoLabel;
     private JTextField regionField;
 
     private Runnable onCreate;
@@ -96,27 +95,18 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-        try {
-            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-            if (azureManager == null) {
-                DefaultLoader.getUIHelper().showError("Need to be signed in to create virtual network", "Not signed in");
-                return;
-            }
-            Azure azure = azureManager.getAzure(subscriptionId);
-            network = new VirtualNetwork(nameField.getText().trim(), addressSpaceField.getText().trim(), subnetNameField.getText().trim(),
-                    subnetAddressRangeField.getText().trim());
-            DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    if (onCreate != null) {
-                        onCreate.run();
-                    }
+        network = new VirtualNetwork(nameField.getText().trim(), addressSpaceField.getText().trim(), subnetNameField.getText().trim(),
+                subnetAddressRangeField.getText().trim());
+        DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                if (onCreate != null) {
+                    onCreate.run();
                 }
-            });
-            close(DialogWrapper.OK_EXIT_CODE, true);
-        } catch (Exception ex) {
-            DefaultLoader.getUIHelper().logError(ex.getMessage(), ex);
-        }
+            }
+        });
+        close(DialogWrapper.OK_EXIT_CODE, true);
+
 //        ProgressManager.getInstance().run(
 //                new Task.Modal(project, "Creating virtual network", true) {
 //                    @Override
