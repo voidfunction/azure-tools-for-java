@@ -59,14 +59,14 @@
             style="pulldown" tooltip="Publish"/>
             
             <command
-                commandId="com.microsoft.azuretools.eclipse.ui.WANewCertificate"
+                commandId="com.microsoft.azuretools.core.ui.WANewCertificate"
                 icon="icons/small/newCert.png"
                 label="New Self Signed Certificate"
                 tooltip="New Self Signed Certificate"
                 style="push">
             </command>
             <command
-                commandId="com.microsoft.azuretools.eclipse.ui.AzureSamplesCmd"
+                commandId="com.microsoft.azuretools.core.ui.AzureSamplesCmd"
                 icon="icons/small/CodeSamples_16.png"
                 label="Azure Code Samples"
                 tooltip="Azure Code Samples"
@@ -121,11 +121,11 @@
             </enabledWhen>
         </handler>
         <handler
-            class="com.microsoft.azuretools.eclipse.ui.WANewCertificate"
+            class="com.microsoft.azuretools.core.ui.WANewCertificate"
             commandId="com.microsoft.azuretools.core.ui.WANewCertificate">
         </handler>
         <handler
-            class="com.microsoft.azuretools.eclipse.ui.AzureSamples"
+            class="com.microsoft.azuretools.core.ui.AzureSamples"
             commandId="com.microsoft.azuretools.core.ui.AzureSamplesCmd">
         </handler>
     </extension>
