@@ -81,7 +81,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
     private TreeViewer viewer;
     private Action refreshAction;
     private Action signInOutAction;
-    private Action manageSubscriptionAction;
+    private Action selectSubscriptionAction;
     private Action doubleClickAction;
 
     private AzureModule azureModule;
@@ -344,13 +344,13 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
         manager.add(refreshAction);
         manager.add(new Separator());
         manager.add(signInOutAction);
-        manager.add(manageSubscriptionAction);
+        manager.add(selectSubscriptionAction);
     }
 
     private void fillLocalToolBar(IToolBarManager manager) {
         manager.add(refreshAction);
         manager.add(signInOutAction);
-        manager.add(manageSubscriptionAction);
+        manager.add(selectSubscriptionAction);
         manager.add(new Separator());
     }
 
@@ -376,13 +376,13 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
             	}
             }	
 		};
-        manageSubscriptionAction = new Action("Select Subscriptions", com.microsoft.azuretools.core.Activator.getImageDescriptor("icons/ConnectAccountsLight_16.png")) {
+        selectSubscriptionAction = new Action("Select Subscriptions", com.microsoft.azuretools.core.Activator.getImageDescriptor("icons/ConnectAccountsLight_16.png")) {
             public void run() {
             	SelectSubsriptionsCommandHandler.onSelectSubscriptions(PluginUtil.getParentShell());
                 azureModule.load(false);
             }
         };
-        manageSubscriptionAction.setToolTipText("Manage Subscriptions");
+        selectSubscriptionAction.setToolTipText("Select Subscriptions");
         doubleClickAction = new Action() {
             public void run() {
 //                ISelection selection = viewer.getSelection();

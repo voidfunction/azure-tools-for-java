@@ -50,7 +50,7 @@
                   <preferredSize width="32" height="32"/>
                   <selected value="false"/>
                   <text value=""/>
-                  <toolTipText value="Execute"/>
+                  <toolTipText value="Search"/>
                   <verticalAlignment value="1"/>
                   <verticalTextPosition value="1"/>
                   <visible value="true"/>

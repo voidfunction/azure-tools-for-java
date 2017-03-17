@@ -32,7 +32,7 @@ public class CommonConst {
     public static final String StorageAccountIConPath = "StorageAccount_16.png";
     public static final String ADLS_STORAGE_ACCOUNT_ICON_PATH = "adls_storageaccount.png";
     public static final String StorageAccountFoldIConPath = "StorageAccountFolder.png";
-    public static final String BlobContainerIConPath = "container.png";
+    public static final String BlobContainerIConPath = "BlobFile_16.png";
     public static final String JavaProjectIconPath = "/icons/Spark-Java.png";
     public static final String ScalaProjectIconPath = "/icons/Spark-Scala.png";
     public static final String StopIconPath = "/icons/Stop.png";

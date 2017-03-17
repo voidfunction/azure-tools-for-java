@@ -32,7 +32,7 @@
             point="org.eclipse.ui.editors">
        <editor
                class="com.microsoft.azuretools.azureexplorer.editors.BlobExplorerFileEditor"
-               icon="icons/storage.png"
+               icon="icons/BlobFile_16.png"
                name="[Container]"
                extensions="mtl"
                id="com.microsoft.azuretools.azureexplorer.editors.BlobExplorerFileEditor"/>

@@ -27,7 +27,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 
-@Name("Manage Subscriptions")
+@Name("Select Subscriptions")
 public class ManageSubscriptionsAction  extends NodeActionListener {
     private AzureModule azureServiceModule;
 
