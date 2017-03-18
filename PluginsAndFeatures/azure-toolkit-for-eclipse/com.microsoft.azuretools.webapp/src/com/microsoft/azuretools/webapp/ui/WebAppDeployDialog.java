@@ -280,94 +280,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         return new Point(800, 550);
     }
     
-//    private void collectProjectData() throws Exception {
-//        IProject project = null;
-//        ISelectionService selectionService = 
-//                PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
-//        ISelection selection = selectionService.getSelection();
-//
-//        if(selection instanceof IStructuredSelection) {
-//            Object element = ((IStructuredSelection)selection).getFirstElement();
-//        }
-//        
-//        IWorkspace ws = ResourcesPlugin.getWorkspace();
-//        IWorkspaceRoot weRoot = ws.getRoot();
-//        //weRoot.get
-//        
-//        IWorkspaceDescription wsd =  ws.getDescription();
-//        //wsd.
-//        
-//        IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-//        for (IProject p : projects) {
-//            System.out.println(p.getName() + " : " + p.getFullPath());
-//            System.out.println(p.getFolder( p.getFullPath()));
-//            System.out.println(p.getFolder( p.getLocation()));
-//            System.out.println(p.getType());
-//            IProjectDescription dp = p.getDescription(); 
-//            System.out.println(dp.getName());
-//            System.out.println(dp.getLocationURI());
-//            
-//            System.out.println(String.join("\n", dp.getNatureIds()));
-//            
-//            System.out.println("\n");
-//        }
-//    }
-    
-    private boolean validated() {
-        setErrorMessage(null);
-        int selectedRow = table.getSelectionIndex();
-        if (selectedRow < 0) {
-            setErrorMessage("Select App Service to deploy to.");
-            return false;
-        }
-        
-        String appServiceName = table.getItems()[selectedRow].getText(0);
-        WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
-        if (wad.webApp.javaVersion()  == JavaVersion.OFF ) {
-            setErrorMessage("Please select java based App Service");
-            return false;
-        }
-        return true; 
-    }
-    
-    @Override
-    protected void okPressed () {
-        if (!validated()) return;
-        try {
-            String projectName = project.getName();
-            String destinationPath = project.getLocation() + "/" + projectName + ".war";
-            export(projectName, destinationPath);
-            deploy(projectName, destinationPath);
-        } catch (Exception e) {
-            LOGGER.log(LogService.LOG_ERROR,"okPressed::run", e);
-            e.printStackTrace();
-        };
-        super.okPressed();
-    }
-    
-    public void export(String projectName, String destinationPath) throws Exception {
-
-        System.out.println("Building project '" + projectName + "'...");
-        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-        project.build(IncrementalProjectBuilder.FULL_BUILD, null);
-
-        System.out.println("Exporting to WAR...");
-        IDataModel dataModel = DataModelFactory.createDataModel(new WebComponentExportDataModelProvider());
-        dataModel.setProperty(IJ2EEComponentExportDataModelProperties.PROJECT_NAME, projectName);
-        dataModel.setProperty(IJ2EEComponentExportDataModelProperties.ARCHIVE_DESTINATION, destinationPath);
-
-        dataModel.getDefaultOperation().execute(null, null);
-        System.out.println("Done.");
-    }
-    
-    private void fillTable() {
-        if (AzureModel.getInstance().getResourceGroupToWebAppMap() == null) {
-            updateAndFillTable();
-        } else {
-            doFillTable();
-        }
-    }
-    
     private void updateAndFillTable() {
         try {
             ProgressDialog.get(getShell(), "Update Azure Local Cache Progress").run(true, true, new IRunnableWithProgress() {
@@ -457,7 +369,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             }
         }
     }
-
+    
     private void createAppService() {
         AppServiceCreateDialog d = AppServiceCreateDialog.go(getShell());
         if (d == null) {
@@ -470,6 +382,97 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         fillAppServiceDetails();
     }
 
+
+
+    
+//    private void collectProjectData() throws Exception {
+//        IProject project = null;
+//        ISelectionService selectionService = 
+//                PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
+//        ISelection selection = selectionService.getSelection();
+//
+//        if(selection instanceof IStructuredSelection) {
+//            Object element = ((IStructuredSelection)selection).getFirstElement();
+//        }
+//        
+//        IWorkspace ws = ResourcesPlugin.getWorkspace();
+//        IWorkspaceRoot weRoot = ws.getRoot();
+//        //weRoot.get
+//        
+//        IWorkspaceDescription wsd =  ws.getDescription();
+//        //wsd.
+//        
+//        IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+//        for (IProject p : projects) {
+//            System.out.println(p.getName() + " : " + p.getFullPath());
+//            System.out.println(p.getFolder( p.getFullPath()));
+//            System.out.println(p.getFolder( p.getLocation()));
+//            System.out.println(p.getType());
+//            IProjectDescription dp = p.getDescription(); 
+//            System.out.println(dp.getName());
+//            System.out.println(dp.getLocationURI());
+//            
+//            System.out.println(String.join("\n", dp.getNatureIds()));
+//            
+//            System.out.println("\n");
+//        }
+//    }
+    
+    private boolean validated() {
+        setErrorMessage(null);
+        int selectedRow = table.getSelectionIndex();
+        if (selectedRow < 0) {
+            setErrorMessage("Select App Service to deploy to.");
+            return false;
+        }
+        
+        String appServiceName = table.getItems()[selectedRow].getText(0);
+        WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
+        if (wad.webApp.javaVersion()  == JavaVersion.OFF ) {
+            setErrorMessage("Please select java based App Service");
+            return false;
+        }
+        return true; 
+    }
+    
+    @Override
+    protected void okPressed () {
+        if (!validated()) return;
+        try {
+            String projectName = project.getName();
+            String destinationPath = project.getLocation() + "/" + projectName + ".war";
+            export(projectName, destinationPath);
+            deploy(projectName, destinationPath);
+        } catch (Exception e) {
+            LOGGER.log(LogService.LOG_ERROR,"okPressed::run", e);
+            e.printStackTrace();
+        };
+        super.okPressed();
+    }
+    
+    public void export(String projectName, String destinationPath) throws Exception {
+
+        System.out.println("Building project '" + projectName + "'...");
+        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+        project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+        System.out.println("Exporting to WAR...");
+        IDataModel dataModel = DataModelFactory.createDataModel(new WebComponentExportDataModelProvider());
+        dataModel.setProperty(IJ2EEComponentExportDataModelProperties.PROJECT_NAME, projectName);
+        dataModel.setProperty(IJ2EEComponentExportDataModelProperties.ARCHIVE_DESTINATION, destinationPath);
+
+        dataModel.getDefaultOperation().execute(null, null);
+        System.out.println("Done.");
+    }
+    
+    private void fillTable() {
+        if (AzureModel.getInstance().getResourceGroupToWebAppMap() == null) {
+            updateAndFillTable();
+        } else {
+            doFillTable();
+        }
+    }
+    
     private void selectTableRowWithWebAppName(String webAppName) {
         for (int ri = 0; ri < table.getItemCount(); ++ri) {
             String waName = table.getItem(ri).getText(0);
@@ -486,7 +489,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
         WebApp webApp = wad.webApp;
         boolean isDeployToRoot = btnDeployToRoot.getSelection();
-        String errTitle = "Deploying Web App Error";
+        String errTitle = "Deploy Web App Error";
         try {
             ProgressDialog.get(this.getShell(), "Deploy Web App Progress").run(true, true, new IRunnableWithProgress() {
                 @Override
@@ -515,7 +518,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
-                                    LOGGER.log(LogService.LOG_ERROR,"deploy::warmup", e);
+                                    LOGGER.log(LogService.LOG_ERROR,"deploy::ProgressDialog::warmup", e);
                                 }
                             }
                         });
@@ -525,16 +528,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                             else Thread.sleep(sleepMs);
                         }
                         monitor.done();
-                        
-                        Display.getDefault().asyncExec(new Runnable() {
-                            @Override
-                            public void run() {
-                                showLink(sitePath);
-                            }
-                        });
-
+                        showLink(sitePath);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        LOGGER.log(LogService.LOG_ERROR,"deploy::ProgressDialog", e);
                         Display.getDefault().asyncExec(new Runnable() {
                             @Override
                             public void run() {
@@ -546,27 +543,33 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             });
         } catch (InvocationTargetException | InterruptedException e) {
             e.printStackTrace();
+            LOGGER.log(LogService.LOG_ERROR,"deploy", e);
             ErrorWindow.go(getShell(), e.getMessage(), errTitle);;
         }
     }
     
     private void showLink(String link) {
-        MessageBox messageBox = new MessageBox(
-                getShell(), 
-                SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-        messageBox.setMessage( "Web App has been uploaded successfully.\nLink: " + link + "\nOpen in browser?");
-        messageBox.setText("Upload Web App Status");
-        
-        
-        int response = messageBox.open();
-        if (response == SWT.YES) {
-            try {
-                PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(link));
-            } catch (Exception e) {
-                LOGGER.log(LogService.LOG_ERROR,"showLink", e);
-                e.printStackTrace();
-            }
-        }
+        Display.getDefault().asyncExec(new Runnable() {
+              @Override
+              public void run() {
+                  MessageBox messageBox = new MessageBox(
+                          getShell(), 
+                          SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+                  messageBox.setMessage( "Web App has been uploaded successfully.\nLink: " + link + "\nOpen in browser?");
+                  messageBox.setText("Upload Web App Status");
+                  
+                  
+                  int response = messageBox.open();
+                  if (response == SWT.YES) {
+                      try {
+                          PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(link));
+                      } catch (Exception e) {
+                          LOGGER.log(LogService.LOG_ERROR,"showLink", e);
+                          e.printStackTrace();
+                      }
+                  }
+              }
+        });
     }
     
     private void deleteAppService() {
@@ -610,6 +613,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         });
                     } catch (Exception e) {
                         e.printStackTrace();
+                        LOGGER.log(LogService.LOG_ERROR,"deleteAppService::ProgressDialog", e);
                         Display.getDefault().asyncExec(new Runnable() {
                             @Override
                             public void run() {
