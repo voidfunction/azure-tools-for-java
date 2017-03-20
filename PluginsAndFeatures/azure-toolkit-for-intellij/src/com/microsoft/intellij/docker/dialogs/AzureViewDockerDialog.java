@@ -25,7 +25,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azure.docker.model.EditableDockerHost;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.Nullable;
 
@@ -241,5 +240,14 @@ public class AzureViewDockerDialog extends DialogWrapper {
   protected void doOKAction() {
     super.doOKAction();
   }
+
+  @Nullable
+  @Override
+  protected Action[] createActions() {
+    Action okAction = getOKAction();
+    okAction.putValue(Action.NAME, "Close");
+    return new Action[] {okAction};
+  }
+
 
 }

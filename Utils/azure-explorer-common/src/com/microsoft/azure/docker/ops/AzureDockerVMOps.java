@@ -26,21 +26,16 @@ import com.microsoft.azure.docker.model.*;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.compute.ImageReference;
 import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.compute.VirtualMachineExtension;
-import com.microsoft.azure.management.compute.VirtualMachineSizeTypes;
 import com.microsoft.azure.management.keyvault.Vault;
 import com.microsoft.azure.management.network.*;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.ResourceUtils;
 import com.microsoft.azure.management.resources.fluentcore.utils.ResourceNamer;
 import com.microsoft.azure.management.storage.StorageAccount;
-import com.microsoft.azuretools.utils.Pair;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.*;
 
 import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.DEBUG;
