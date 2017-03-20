@@ -47,6 +47,7 @@ import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerSubscription;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -382,31 +383,43 @@ public class AzureNewDockerConfigPage extends WizardPage {
                 }
 			}
 		});
+//		for (AzureDockerSubscription sd : dockerManager.getSubscriptionsList()) {
+//			dockerSubscriptionCombo.add(sd.name);
+//			dockerSubscriptionCombo.setData(sd.name, sd);
+//		}
 		dockerSubscriptionComboViewer.setContentProvider(ArrayContentProvider.getInstance());
 		dockerSubscriptionComboViewer.setInput(dockerManager.getSubscriptionsList());
 
 		if (dockerManager.getSubscriptionsList() != null && dockerManager.getSubscriptionsList().size() > 0) {
 			dockerSubscriptionCombo.select(0);
-			dockerSubscriptionIdTextField.setText(((AzureDockerSubscription) dockerSubscriptionComboViewer.getStructuredSelection().getFirstElement()).id);
+			AzureDockerSubscription currentSubscription = (AzureDockerSubscription) dockerSubscriptionCombo.getData(dockerSubscriptionCombo.getText());
+			dockerSubscriptionIdTextField.setText(dockerSubscriptionCombo.getText());
+//			dockerSubscriptionIdTextField.setText(((AzureDockerSubscription) dockerSubscriptionCombo.getData(dockerSubscriptionCombo.getText())).id);
 		}
 	}
 	
 	private void updateDockerHostVMSize(Composite mainContainer) {
+		
 	}
 
 	private void updateDockerLocationGroup(Composite mainContainer) {
+		
 	}
 
 	private void updateDockerHostOSTypeComboBox(Composite mainContainer) {
+		
 	}
 
 	private void updateDockerHostRGGroup(Composite mainContainer) {
+		
 	}
 
 	private void updateDockerHostVnetGroup(Composite mainContainer) {
+		
 	}
 
 	private void updateDockerHostStorageGroup(Composite mainContainer) {
+		
 	}
 
 	private void updateDockerLocationComboBox(Composite mainContainer, AzureDockerSubscription currentSubscription) {
