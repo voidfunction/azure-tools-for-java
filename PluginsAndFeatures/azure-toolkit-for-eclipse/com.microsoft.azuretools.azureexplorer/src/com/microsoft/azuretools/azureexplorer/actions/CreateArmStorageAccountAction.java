@@ -31,7 +31,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 
-@Name("Create Storage Account")
+@Name("Create Storage Account...")
 public class CreateArmStorageAccountAction extends NodeActionListener {
 
     private StorageModule storageModule;
