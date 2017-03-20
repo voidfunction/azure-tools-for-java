@@ -256,7 +256,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
     }
 
     public void log(String message) {
-        getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, message));
+        getLog().log(new Status(IStatus.INFO, PLUGIN_ID, message));
     }
 
     public static String getPrefState() {
