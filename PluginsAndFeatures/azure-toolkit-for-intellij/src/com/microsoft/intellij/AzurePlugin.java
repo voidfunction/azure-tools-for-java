@@ -124,7 +124,6 @@ public class AzurePlugin extends AbstractProjectComponent {
         if (!IS_ANDROID_STUDIO) {
             LOG.info("Starting Azure Plugin");
             try {
-                initAuthManage();
                 //this code is for copying componentset.xml in plugins folder
                 copyPluginComponents();
                 initializeTelemetry();
@@ -136,18 +135,6 @@ public class AzurePlugin extends AbstractProjectComponent {
                 LOG.error(AzureBundle.message("expErlStrtUp"), e);
             }
         }
-    }
-
-    private void initAuthManage() throws IOException {
-        if (CommonSettings.getUiFactory() == null) {
-            CommonSettings.setUiFactory(new UIFactory());
-        }
-        String wd = "AzureToolsForIntelliJ";
-        Path dirPath = Paths.get(System.getProperty("user.home"), wd);
-        if (!Files.exists(dirPath)) {
-            Files.createDirectory(dirPath);
-        }
-        CommonSettings.settingsBaseDir = dirPath.toString();
     }
 
     private void initializeTelemetry() throws Exception {

@@ -37,28 +37,6 @@ import java.util.logging.SimpleFormatter;
  * Created by shch on 10/10/2016.
  */
 public class CommonSettings {
-    private final static Logger LOGGER = Logger.getLogger(CommonSettings.class.getName());
-    private static FileHandler fh = null;
-
-    static {
-        try {
-            String wd = "AzureToolsLog";
-            Path dirPath = Paths.get(System.getProperty("user.home"), wd);
-            if (!Files.exists(dirPath)) {
-                Files.createDirectory(dirPath);
-            }
-            String loggerFilePath = Paths.get(dirPath.toString(), "log.txt").toString();
-            System.out.println("Logger path:" + loggerFilePath);
-            fh = new FileHandler(loggerFilePath, false);
-            Logger l = Logger.getLogger("");
-            fh.setFormatter(new SimpleFormatter());
-            l.addHandler(fh);
-            l.setLevel(Level.INFO);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static String settingsBaseDir = null;
     public static final String authMethodDetailsFileName = "AuthMethodDetails.json";
 
