@@ -41,12 +41,14 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by vlashch on 1/9/17.
  */
 public class AzureModelController {
-
+    private final static Logger LOGGER = Logger.getLogger(AzureModelController.class.getName());
     private static ISubscriptionSelectionListener subscriptionSelectionListener = new ISubscriptionSelectionListener() {
         @Override
         public void update(boolean isRefresh) {
@@ -64,6 +66,7 @@ public class AzureModelController {
                             subscriptionSelectionChanged(pi);
                         } catch (Exception e) {
                             e.printStackTrace();
+                            LOGGER.log(Level.SEVERE, "IWorker.work", e);
                         }
                     }
 
@@ -74,6 +77,7 @@ public class AzureModelController {
                 });
             } catch (Exception e) {
                 e.printStackTrace();
+                LOGGER.log(Level.SEVERE, "update()", e);
             }
         }
     };

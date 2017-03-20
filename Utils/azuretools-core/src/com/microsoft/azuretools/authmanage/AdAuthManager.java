@@ -34,9 +34,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class AdAuthManager {
-
+    private final static Logger LOGGER = Logger.getLogger(AdAuthManager.class.getName());
     private final TokenCache cache;
     private TokenFileStorage tokenFileStorage;
     private static AdAuthManager instance = null;
@@ -98,7 +99,7 @@ public class AdAuthManager {
                 tidToSidsMap.put(t.tenantId(), sids);
 
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                System.out.println("Exception: AdAuthManager auth for tid: " + tid + e.getMessage());
             }
         }
 

@@ -26,12 +26,14 @@ import com.microsoft.azuretools.authmanage.srvpri.entities.AzureErrorArm;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by vlashch on 10/25/16.
  */
 public class AzureArmException extends AzureException {
-
+    private final static Logger LOGGER = Logger.getLogger(AzureArmException.class.getName());
     /**
 	 * 
 	 */
@@ -45,6 +47,7 @@ public class AzureArmException extends AzureException {
             azureError = mapper.readValue(json, AzureErrorArm.class);
         } catch (IOException e) {
             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "c-tor", e);
         }
     }
 

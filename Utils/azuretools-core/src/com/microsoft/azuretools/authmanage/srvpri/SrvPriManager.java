@@ -32,6 +32,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.microsoft.azuretools.authmanage.srvpri.entities.SrvPriData;
 import com.microsoft.azuretools.authmanage.srvpri.report.FileListener;
@@ -54,7 +56,7 @@ public class SrvPriManager {
     // app - sp (1-1)
     // sp - role (1-many)
 
-
+    private final static Logger LOGGER = Logger.getLogger(SrvPriManager.class.getName());
     public static String createSp(String tenantId, List<String> subscriptionIds, String suffix, IListener<Status> statusListener, String destinationFolder) throws Exception {
 
         System.out.print(tenantId +": [");
@@ -177,12 +179,14 @@ public class SrvPriManager {
 
         } catch (IOException io) {
             io.printStackTrace();
+            LOGGER.log(Level.SEVERE, "createArtifact()", io);
         } finally {
             if (output != null) {
                 try {
                     output.close();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    LOGGER.log(Level.SEVERE, "output.close()", e);
                 }
             }
         }

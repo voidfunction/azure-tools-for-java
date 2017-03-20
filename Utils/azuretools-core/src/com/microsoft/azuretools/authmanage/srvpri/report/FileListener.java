@@ -25,11 +25,14 @@ package com.microsoft.azuretools.authmanage.srvpri.report;
 import com.microsoft.azuretools.authmanage.FileStorage;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by vlashch on 10/20/16.
  */
 public class FileListener implements IListener<String> {
+    private final static Logger LOGGER = Logger.getLogger(FileListener.class.getName());
     private final FileStorage fsReport;
     public FileListener(String filename, String path) throws Exception {
         fsReport = new FileStorage(filename, path);
@@ -41,6 +44,7 @@ public class FileListener implements IListener<String> {
             fsReport.appendln(message);
         } catch (IOException e) {
             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "listen()", e);
         }
     }
 }

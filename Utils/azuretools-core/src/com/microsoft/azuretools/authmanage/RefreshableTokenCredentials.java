@@ -23,6 +23,8 @@
 package com.microsoft.azuretools.authmanage;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.AzureTokenCredentials;
@@ -36,7 +38,7 @@ import okhttp3.OkHttpClient;
  */
 //public class RefreshableTokenCredentials extends TokenCredentials implements AzureTokenCredentials {
 public class RefreshableTokenCredentials implements AzureTokenCredentials {
-
+    private final static Logger LOGGER = Logger.getLogger(RefreshableTokenCredentials.class.getName());
     private AdAuthManager authManager;
     private String tid;
 
@@ -71,6 +73,7 @@ public class RefreshableTokenCredentials implements AzureTokenCredentials {
             return authManager.getAccessToken(tid, s, PromptBehavior.Auto);
         } catch (Exception ex) {
             ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "getToken()", ex);
         }
 
         return null;

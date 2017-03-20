@@ -39,13 +39,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
  * Created by shch on 10/9/2016.
  */
 public class AuthMethodManager {
-
+    private final static Logger LOGGER = Logger.getLogger(AuthMethodManager.class.getName());
     private AuthMethodDetails authMethodDetails = null;
     private static AuthMethodManager instance = null;
     private AzureManager azureManager;
@@ -128,8 +130,10 @@ public class AuthMethodManager {
             ServicePrincipalAzureManager.cleanPersist();
             authMethodDetails.setAccountEmail(null);
             authMethodDetails.setCredFilePath(null);
+            saveSettings();
         } catch (Exception e) {
             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "cleanAll()", e);
         }
     }
 
