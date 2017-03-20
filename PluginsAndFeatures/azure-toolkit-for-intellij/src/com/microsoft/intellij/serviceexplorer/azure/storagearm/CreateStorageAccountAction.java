@@ -33,7 +33,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageMod
 
 import java.util.List;
 
-@Name("Create Storage Account")
+@Name("Create Storage Account...")
 public class CreateStorageAccountAction extends NodeActionListener {
 
     private StorageModule storageModule;
