@@ -55,6 +55,10 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
     this.model = model;
     model.setNewDockerWizardDialog(this);
     this.onCreate = null;
+    if (model.getDockerHost().hostVM.region == null) {
+      model.getCurrentNavigationState().NEXT.setEnabled(false);
+      model.getCurrentNavigationState().FINISH.setEnabled(false);
+    }
   }
 
   public void DialogShaker(ValidationInfo info) {

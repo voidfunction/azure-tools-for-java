@@ -54,10 +54,37 @@ import org.eclipse.swt.widgets.Display;
 
 public class AzureNewDockerConfigPage extends WizardPage {
 	private Text dockerHostNameTextField;
-	private Text dockerNewStorageTextField;
+	private ComboViewer dockerSubscriptionComboViewer;
+	private Combo dockerSubscriptionCombo;
+	private Text dockerSubscriptionIdTextField;
+	private Combo dockerLocationComboBox;
+
+	private TabFolder hostDetailsTabFolder;
+	private TabItem vmKindTableItem;
+	private Composite vmKindComposite;
+	private Combo dockerHostOSTypeComboBox;
+	private Combo dockerHostVMSizeComboBox;
+	private Button dockerHostVMPreferredSizesCheckBox;
+	
+	private TabItem rgTableItem;
+	private Button btnNewResourceGroup;	
 	private Text dockerHostRGTextField;
+	private Button btnExistingResourceGroup;
+	private Combo dockerHostSelectRGComboBox;
+	
+	private TabItem networkTableItem;
+	private Button btnRadioButton;
 	private Text dockerHostNewVNetNameTextField;
 	private Text dockerHostNewVNetAddrSpaceTextField;
+	private Button btnExistingVirtualNetwork;
+	private Combo dockerHostSelectVnetComboBox;
+	private Combo dockerHostSelectSubnetComboBox;
+	
+	private TabItem storageTableItem;
+	private Button dockerHostNewStorageRadioButton;
+	private Text dockerNewStorageTextField;
+	private Button dockerHostSelectStorageRadioButton;
+	private Combo dockerSelectStorageComboBox;
 	
 	private String prefferedLocation;
 	private final String SELECT_REGION = "<select region>";
@@ -71,7 +98,6 @@ public class AzureNewDockerConfigPage extends WizardPage {
 	private ManagedForm managedForm;
 	private ScrolledForm errMsgForm;
 	private IMessageManager errDispatcher;
-	private Text dockerSubscriptionIdTextField;
 
 	/**
 	 * Create the wizard.
@@ -109,18 +135,6 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		gd_dockerHostNameTextField.horizontalIndent = 3;
 		gd_dockerHostNameTextField.widthHint = 200;
 		dockerHostNameTextField.setLayoutData(gd_dockerHostNameTextField);
-		dockerHostNameTextField.setText(newHost.name);
-		dockerHostNameTextField.setToolTipText(AzureDockerValidationUtils.getDockerHostNameTip());
-		dockerHostNameTextField.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent event) {
-				if (AzureDockerValidationUtils.validateDockerHostName(((Text) event.getSource()).getText())) {
-					errDispatcher.removeMessage("dockerHostNameTextField", dockerHostNameTextField);
-				} else {
-					errDispatcher.addMessage("dockerHostNameTextField", AzureDockerValidationUtils.getDockerHostNameTip(), null, IMessageProvider.ERROR, dockerHostNameTextField);
-				}
-			}
-		});
 		
 		Label lblNewLabel = new Label(mainContainer, SWT.NONE);
 		GridData gd_lblNewLabel = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1);
@@ -128,30 +142,10 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		lblNewLabel.setLayoutData(gd_lblNewLabel);
 		lblNewLabel.setText("Subscription:");
 		
-		ComboViewer dockerSubscriptionComboViewer = new ComboViewer(mainContainer, SWT.READ_ONLY);
-		Combo dockerSubscriptionCombo = dockerSubscriptionComboViewer.getCombo();
-//		formToolkit.paintBordersFor(dockerSubscriptionCombo);
-		dockerSubscriptionComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-                if (selection.size() > 0){
-                	AzureDockerSubscription currentSubscription = (AzureDockerSubscription) selection.getFirstElement();
-                    dockerSubscriptionIdTextField.setText(currentSubscription != null ? currentSubscription.id : "");
-					errDispatcher.removeMessage("dockerSubscriptionCombo", dockerSubscriptionCombo);
-                } else {
-					errDispatcher.addMessage("dockerSubscriptionCombo", "No active subscriptions found", null, IMessageProvider.ERROR, dockerSubscriptionCombo);
-                }
-			}
-		});
-		dockerSubscriptionComboViewer.setContentProvider(ArrayContentProvider.getInstance());
-		dockerSubscriptionComboViewer.setInput(dockerManager.getSubscriptionsList());
-		if (dockerManager.getSubscriptionsList() != null && !dockerManager.getSubscriptionsList().isEmpty()) {
-			dockerSubscriptionCombo.select(0);
-		}
+		dockerSubscriptionComboViewer = new ComboViewer(mainContainer, SWT.READ_ONLY);
+		dockerSubscriptionCombo = dockerSubscriptionComboViewer.getCombo();
 		dockerSubscriptionCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		new Label(mainContainer, SWT.NONE);
-		
 		
 		Label lblId = new Label(mainContainer, SWT.NONE);
 		GridData gd_lblId = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -159,14 +153,14 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		lblId.setLayoutData(gd_lblId);
 		lblId.setText("Id:");
 		
-		dockerSubscriptionIdTextField = new Text(mainContainer, SWT.BORDER);
+		dockerSubscriptionIdTextField = new Text(mainContainer, SWT.NONE);
 		GridData gd_dockerSubscriptionIdTextField = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-		gd_dockerSubscriptionIdTextField.widthHint = 250;
+		gd_dockerSubscriptionIdTextField.horizontalIndent = 3;
+		gd_dockerSubscriptionIdTextField.widthHint = 300;
 		dockerSubscriptionIdTextField.setLayoutData(gd_dockerSubscriptionIdTextField);
 		dockerSubscriptionIdTextField.setEditable(false);
-		formToolkit.adapt(dockerSubscriptionIdTextField, true, true);
+		dockerSubscriptionIdTextField.setBackground(mainContainer.getBackground());
 		new Label(mainContainer, SWT.NONE);
-		
 		
 		Label lblRegion = new Label(mainContainer, SWT.NONE);
 		GridData gd_lblRegion = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -174,28 +168,28 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		lblRegion.setLayoutData(gd_lblRegion);
 		lblRegion.setText("Region:");
 		
-		Combo dockerLocationComboBox = new Combo(mainContainer, SWT.READ_ONLY);
+		dockerLocationComboBox = new Combo(mainContainer, SWT.READ_ONLY);
 		GridData gd_dockerLocationComboBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerLocationComboBox.widthHint = 200;
 		dockerLocationComboBox.setLayoutData(gd_dockerLocationComboBox);
 		new Label(mainContainer, SWT.NONE);
 		
-		TabFolder hostDetailsTabFolder = new TabFolder(mainContainer, SWT.NONE);
+		hostDetailsTabFolder = new TabFolder(mainContainer, SWT.NONE);
 		GridData gd_hostDetailsTabFolder = new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1);
 		gd_hostDetailsTabFolder.heightHint = 140;
 		hostDetailsTabFolder.setLayoutData(gd_hostDetailsTabFolder);
 		
-		TabItem vmKindTableItem = new TabItem(hostDetailsTabFolder, SWT.NONE);
+		vmKindTableItem = new TabItem(hostDetailsTabFolder, SWT.NONE);
 		vmKindTableItem.setText("OS and Size");
 		
-		Composite vmKindComposite = new Composite(hostDetailsTabFolder, SWT.NO_BACKGROUND);
+		vmKindComposite = new Composite(hostDetailsTabFolder, SWT.NO_BACKGROUND);
 		vmKindTableItem.setControl(vmKindComposite);
 		vmKindComposite.setLayout(new GridLayout(2, false));
 		
 		Label lblNewLabel_1 = new Label(vmKindComposite, SWT.NONE);
 		lblNewLabel_1.setText("Host OS:");
 		
-		Combo dockerHostOSTypeComboBox = new Combo(vmKindComposite, SWT.READ_ONLY);
+		dockerHostOSTypeComboBox = new Combo(vmKindComposite, SWT.READ_ONLY);
 		GridData gd_dockerHostOSTypeComboBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostOSTypeComboBox.widthHint = 200;
 		dockerHostOSTypeComboBox.setLayoutData(gd_dockerHostOSTypeComboBox);
@@ -203,23 +197,23 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		Label lblSize = new Label(vmKindComposite, SWT.NONE);
 		lblSize.setText("Size:");
 		
-		Combo dockerHostVMSizeComboBox = new Combo(vmKindComposite, SWT.READ_ONLY);
+		dockerHostVMSizeComboBox = new Combo(vmKindComposite, SWT.READ_ONLY);
 		GridData gd_dockerHostVMSizeComboBox = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
 		gd_dockerHostVMSizeComboBox.widthHint = 200;
 		dockerHostVMSizeComboBox.setLayoutData(gd_dockerHostVMSizeComboBox);
 		
-		Button dockerHostVMPreferredSizesCheckBox = new Button(vmKindComposite, SWT.CHECK);
+		dockerHostVMPreferredSizesCheckBox = new Button(vmKindComposite, SWT.CHECK);
 		dockerHostVMPreferredSizesCheckBox.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		dockerHostVMPreferredSizesCheckBox.setText("Show preferred sizes only");
 		
-		TabItem rgTableItem = new TabItem(hostDetailsTabFolder, SWT.NONE);
+		rgTableItem = new TabItem(hostDetailsTabFolder, SWT.NONE);
 		rgTableItem.setText("Resource Group");
 		
 		Composite rgComposite = new Composite(hostDetailsTabFolder, SWT.NONE);
 		rgTableItem.setControl(rgComposite);
 		rgComposite.setLayout(new GridLayout(2, false));
 		
-		Button btnNewResourceGroup = new Button(rgComposite, SWT.RADIO);
+		btnNewResourceGroup = new Button(rgComposite, SWT.RADIO);
 		btnNewResourceGroup.setText("New resource group:");
 		
 		dockerHostRGTextField = new Text(rgComposite, SWT.BORDER);
@@ -228,22 +222,22 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		gd_dockerHostRGTextField.widthHint = 200;
 		dockerHostRGTextField.setLayoutData(gd_dockerHostRGTextField);
 		
-		Button btnExistingResourceGroup = new Button(rgComposite, SWT.RADIO);
+		btnExistingResourceGroup = new Button(rgComposite, SWT.RADIO);
 		btnExistingResourceGroup.setText("Existing resource group:");
 		
-		Combo dockerHostSelectRGComboBox = new Combo(rgComposite, SWT.READ_ONLY);
+		dockerHostSelectRGComboBox = new Combo(rgComposite, SWT.READ_ONLY);
 		GridData gd_dockerHostSelectRGComboBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostSelectRGComboBox.widthHint = 220;
 		dockerHostSelectRGComboBox.setLayoutData(gd_dockerHostSelectRGComboBox);
 		
-		TabItem networkTableItem = new TabItem(hostDetailsTabFolder, SWT.NONE);
+		networkTableItem = new TabItem(hostDetailsTabFolder, SWT.NONE);
 		networkTableItem.setText("Network");
 		
 		Composite networkComposite = new Composite(hostDetailsTabFolder, SWT.NONE);
 		networkTableItem.setControl(networkComposite);
 		networkComposite.setLayout(new GridLayout(2, false));
 		
-		Button btnRadioButton = new Button(networkComposite, SWT.RADIO);
+		btnRadioButton = new Button(networkComposite, SWT.RADIO);
 		btnRadioButton.setText("New virtual network");
 		new Label(networkComposite, SWT.NONE);
 		
@@ -271,10 +265,10 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		gd_dockerHostNewVNetAddrSpaceTextField.widthHint = 200;
 		dockerHostNewVNetAddrSpaceTextField.setLayoutData(gd_dockerHostNewVNetAddrSpaceTextField);
 		
-		Button btnExistingVirtualNetwork = new Button(networkComposite, SWT.RADIO);
+		btnExistingVirtualNetwork = new Button(networkComposite, SWT.RADIO);
 		btnExistingVirtualNetwork.setText("Existing virtual network:");
 		
-		Combo dockerHostSelectVnetComboBox = new Combo(networkComposite, SWT.READ_ONLY);
+		dockerHostSelectVnetComboBox = new Combo(networkComposite, SWT.READ_ONLY);
 		GridData gd_dockerHostSelectVnetComboBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostSelectVnetComboBox.widthHint = 220;
 		dockerHostSelectVnetComboBox.setLayoutData(gd_dockerHostSelectVnetComboBox);
@@ -285,19 +279,19 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		lblSubnet.setLayoutData(gd_lblSubnet);
 		lblSubnet.setText("Subnet:");
 		
-		Combo dockerHostSelectSubnetComboBox = new Combo(networkComposite, SWT.READ_ONLY);
+		dockerHostSelectSubnetComboBox = new Combo(networkComposite, SWT.READ_ONLY);
 		GridData gd_dockerHostSelectSubnetComboBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostSelectSubnetComboBox.widthHint = 220;
 		dockerHostSelectSubnetComboBox.setLayoutData(gd_dockerHostSelectSubnetComboBox);
 		
-		TabItem storageTableItem = new TabItem(hostDetailsTabFolder, SWT.NONE);
+		storageTableItem = new TabItem(hostDetailsTabFolder, SWT.NONE);
 		storageTableItem.setText("Storage");
 		
 		Composite storageComposite = new Composite(hostDetailsTabFolder, SWT.NONE);
 		storageTableItem.setControl(storageComposite);
 		storageComposite.setLayout(new GridLayout(2, false));
 		
-		Button dockerHostNewStorageRadioButton = new Button(storageComposite, SWT.RADIO);
+		dockerHostNewStorageRadioButton = new Button(storageComposite, SWT.RADIO);
 		dockerHostNewStorageRadioButton.setText("New storage account:");
 		
 		dockerNewStorageTextField = new Text(storageComposite, SWT.BORDER);
@@ -306,10 +300,10 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		gd_dockerNewStorageTextField.widthHint = 200;
 		dockerNewStorageTextField.setLayoutData(gd_dockerNewStorageTextField);
 		
-		Button dockerHostSelectStorageRadioButton = new Button(storageComposite, SWT.RADIO);
+		dockerHostSelectStorageRadioButton = new Button(storageComposite, SWT.RADIO);
 		dockerHostSelectStorageRadioButton.setText("Existing storage account:");
 		
-		Combo dockerSelectStorageComboBox = new Combo(storageComposite, SWT.READ_ONLY);
+		dockerSelectStorageComboBox = new Combo(storageComposite, SWT.READ_ONLY);
 		GridData gd_dockerSelectStorageComboBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerSelectStorageComboBox.widthHint = 220;
 		dockerSelectStorageComboBox.setLayoutData(gd_dockerSelectStorageComboBox);
@@ -338,7 +332,92 @@ public class AzureNewDockerConfigPage extends WizardPage {
 //		form.setMessage("This is an error message", IMessageProvider.ERROR);
 //		form.setVisible(false);
 		
+		initUIMainContainer(mainContainer);
 	}
+	
+	private void initUIMainContainer(Composite mainContainer) {
+		updateHostNameTextField(mainContainer);
+		updateDockerSubscriptionComboBox(mainContainer);
+		
+		updateDockerHostVMSize(mainContainer);
+		updateDockerLocationGroup(mainContainer);
+		updateDockerHostOSTypeComboBox(mainContainer);
+		updateDockerHostRGGroup(mainContainer);
+		updateDockerHostVnetGroup(mainContainer);
+		updateDockerHostStorageGroup(mainContainer);
+	}
+
+	private void updateHostNameTextField(Composite mainContainer) {
+		dockerHostNameTextField.setText(newHost.name);
+		dockerHostNameTextField.setToolTipText(AzureDockerValidationUtils.getDockerHostNameTip());
+		dockerHostNameTextField.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent event) {
+				if (AzureDockerValidationUtils.validateDockerHostName(((Text) event.getSource()).getText())) {
+					errDispatcher.removeMessage("dockerHostNameTextField", dockerHostNameTextField);
+				} else {
+					errDispatcher.addMessage("dockerHostNameTextField", AzureDockerValidationUtils.getDockerHostNameTip(), null, IMessageProvider.ERROR, dockerHostNameTextField);
+				}
+			}
+		});		
+	}
+
+	private void updateDockerSubscriptionComboBox(Composite mainContainer) {
+		dockerSubscriptionComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+                if (selection.size() > 0){
+                	AzureDockerSubscription currentSubscription = (AzureDockerSubscription) selection.getFirstElement();
+                    dockerSubscriptionIdTextField.setText(currentSubscription != null ? currentSubscription.id : "");
+					errDispatcher.removeMessage("dockerSubscriptionCombo", dockerSubscriptionCombo);
+			        updateDockerLocationComboBox(mainContainer, currentSubscription);
+			        updateDockerHostSelectRGComboBox(mainContainer, currentSubscription);
+//			        String region = (String) dockerLocationComboBox.getSelectedItem();
+//			        Region regionObj = Region.findByLabelOrName(region);
+//			        updateDockerSelectVnetComboBox( currentSubscription, regionObj != null ? regionObj.name() : region);
+//			        updateDockerSelectStorageComboBox(currentSubscription);
+                } else {
+					errDispatcher.addMessage("dockerSubscriptionCombo", "No active subscriptions found", null, IMessageProvider.ERROR, dockerSubscriptionCombo);
+                }
+			}
+		});
+		dockerSubscriptionComboViewer.setContentProvider(ArrayContentProvider.getInstance());
+		dockerSubscriptionComboViewer.setInput(dockerManager.getSubscriptionsList());
+
+		if (dockerManager.getSubscriptionsList() != null && dockerManager.getSubscriptionsList().size() > 0) {
+			dockerSubscriptionCombo.select(0);
+			dockerSubscriptionIdTextField.setText(((AzureDockerSubscription) dockerSubscriptionComboViewer.getStructuredSelection().getFirstElement()).id);
+		}
+	}
+	
+	private void updateDockerHostVMSize(Composite mainContainer) {
+	}
+
+	private void updateDockerLocationGroup(Composite mainContainer) {
+	}
+
+	private void updateDockerHostOSTypeComboBox(Composite mainContainer) {
+	}
+
+	private void updateDockerHostRGGroup(Composite mainContainer) {
+	}
+
+	private void updateDockerHostVnetGroup(Composite mainContainer) {
+	}
+
+	private void updateDockerHostStorageGroup(Composite mainContainer) {
+	}
+
+	private void updateDockerLocationComboBox(Composite mainContainer, AzureDockerSubscription currentSubscription) {
+		if (currentSubscription != null && currentSubscription.locations != null) {
+			
+		}
+	}
+
+	private void updateDockerHostSelectRGComboBox(Composite mainContainer, AzureDockerSubscription currentSubscription) {
+	}
+
 
 	public boolean doValidate() {
 		return false;

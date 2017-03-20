@@ -73,6 +73,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
   private JLabel dockerHostFirstPwdLabel;
   private JLabel dockerHostImportSSHBrowseLabel;
   private JLabel dockerHostImportKeyvaultComboLabel;
+  private JLabel dockerHostPwdLabel;
 
   private AzureNewDockerWizardModel model;
   private AzureDockerHostsManager dockerManager;
@@ -135,6 +136,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
     dockerHostNoSshRadioButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
+        dockerHostPwdLabel.setText("(Required)");
         dockerHostImportSSHBrowseTextField.setEnabled(false);
         dockerHostImportSSHBrowseLabel.setVisible(false);
         setDialogButtonsState(doValidate(false) == null);
@@ -143,6 +145,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
     dockerHostAutoSshRadioButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
+        dockerHostPwdLabel.setText("(Optional)");
         dockerHostImportSSHBrowseTextField.setEnabled(false);
         dockerHostImportSSHBrowseLabel.setVisible(false);
         setDialogButtonsState(doValidate(false) == null);
@@ -151,7 +154,9 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
     dockerHostImportSshRadioButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
+        dockerHostPwdLabel.setText("(Optional)");
         dockerHostImportSSHBrowseTextField.setEnabled(true);
+        setDialogButtonsState(doValidate(false) == null);
       }
     });
     dockerHostImportSSHBrowseTextField.addActionListener(UIUtils.createFileChooserListener(dockerHostImportSSHBrowseTextField, model.getProject(),
@@ -408,6 +413,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
         }
         return info;
       }
+      dockerHostFirstPwdLabel.setVisible(false);
       if (dockerHostFirstPwdField.getPassword().length > 0) {
         newHost.certVault.vmPwd = new String(dockerHostFirstPwdField.getPassword());
         newHost.hasPwdLogIn = true;

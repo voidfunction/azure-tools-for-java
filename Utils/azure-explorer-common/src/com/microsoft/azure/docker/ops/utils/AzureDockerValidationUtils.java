@@ -24,6 +24,7 @@ package com.microsoft.azure.docker.ops.utils;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerSubscription;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.regex.Matcher;
@@ -48,13 +49,15 @@ public class AzureDockerValidationUtils {
   }
 
   public static boolean validateDockerArtifactPath(String name) {
-    return Files.exists(Paths.get(name)) &&
+    return name != null && name.length() > 0 &&
+        Files.exists(Paths.get(name)) &&
         Files.isRegularFile(Paths.get(name)) &&
-        Files.isReadable(Paths.get(name));
+        Files.isReadable(Paths.get(name)) &&
+        (new File(name).getName()).toLowerCase().matches("[a-z_0-9-.]+[jw]ar");
   }
 
   public static String getDockerArtifactPathTip() {
-    return "Full path to the artifact to be deployed";
+    return "Full path to the artifact to be deployed; white spaces and special characters are not allowed in the file name";
   }
 
   public static boolean validateDockerPortSettings(String name) {

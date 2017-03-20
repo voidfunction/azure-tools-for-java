@@ -173,8 +173,10 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
           }
           prefferedLocation = selectedRegion;
           updateDockerSelectVnetComboBox(currentSubscription, selectedRegion);
+          setDialogButtonsState(doValidate(false) == null);
         } else {
           updateDockerSelectVnetComboBox(currentSubscription, null);
+          setDialogButtonsState(false);
         }
         updateDockerHostVMSizeComboBox(dockerHostVMPreferredSizesCheckBox.isSelected());
       }

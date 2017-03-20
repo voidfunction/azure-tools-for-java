@@ -61,6 +61,8 @@ public class AzureViewDockerDialog extends DialogWrapper {
   private JTextField dockerHostTlsAuthTextField;
   private JTextPane dockerHostKeyvaultTextPane;
   private JTextField dockerHostSidTextField;
+  private JTextField dockerHostPublicIpTextField;
+  private JTextField dockerHostPrivateIpTextField;
 
   private Action myClickApplyAction;
   private Project project;
@@ -89,6 +91,8 @@ public class AzureViewDockerDialog extends DialogWrapper {
     setTextField(dockerHostRGNameTextField, dockerHost.hostVM.resourceGroupName);
     setTextField(dockerHostVnetNameAddrTextField, String.format("%s (%s)", dockerHost.hostVM.vnetName, dockerHost.hostVM.vnetAddressSpace));
     setTextField(dockerHostSubnetNameAddrTextField, String.format("%s (%s)", dockerHost.hostVM.subnetName, dockerHost.hostVM.subnetAddressRange));
+    setTextField(dockerHostPublicIpTextField, String.format("%s (%s)", dockerHost.hostVM.publicIp, dockerHost.hostVM.publicIpName));
+    setTextField(dockerHostPrivateIpTextField, dockerHost.hostVM.privateIp);
     setTextField(dockerHostStorageNameTypeTextField, String.format("%s (%s)", dockerHost.hostVM.storageAccountName, dockerHost.hostVM.storageAccountType));
 
     // Docker VM log in settings
