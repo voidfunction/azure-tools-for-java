@@ -30,7 +30,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.SimpleFormatter;
 
+import javax.inject.Inject;
 import javax.swing.event.EventListenerList;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -58,11 +62,15 @@ import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
 import com.microsoft.azuretools.azurecommons.deploy.UploadProgressEventArgs;
 import com.microsoft.azuretools.azurecommons.deploy.UploadProgressEventListener;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.log.LogService;
 
 /**
  * The activator class controls the plug-in life cycle
  */
 public class Activator extends AbstractUIPlugin implements PluginComponent {
+	@Inject
+    private static LogService LOGGER;
+	private static FileHandler logFileHandler = null;
 
     // The plug-in ID
     public static final String PLUGIN_ID = "com.microsoft.azuretools.core"; //$NON-NLS-1$
@@ -102,7 +110,8 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
         plugin = this;
         DefaultLoader.setPluginComponent(this);
         DefaultLoader.setIdeHelper(new IDEHelperImpl());
-        CommonSettings.setUserAgent(String.format(USER_AGENT, FrameworkUtil.getBundle(getClass()).getVersion()));
+        initAzureToolsCoreLibsSettings();
+        
         // load up the plugin settings
         try {
             loadPluginSettings();
@@ -111,21 +120,45 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
                     "settings for the Azure Core plugin.", e, "Azure Core Plugin", false, true);
         }
         isHDInsightEnabled = isHDInsightEnabled(context);
+        
+        super.start(context);
+    }
+
+    private void initAzureToolsCoreLibsSettings() {
         try {
+            CommonSettings.setUserAgent(String.format(USER_AGENT, FrameworkUtil.getBundle(getClass()).getVersion()));
             if (CommonSettings.getUiFactory() == null)
                 CommonSettings.setUiFactory(new UIFactory());
             String wd = "AzureToolsForEclipse";
             Path dirPath = Paths.get(System.getProperty("user.home"), wd);
             if (!Files.exists(dirPath)) {
-                    Files.createDirectory(dirPath);
+            	Files.createDirectory(dirPath);
             }
             CommonSettings.settingsBaseDir = dirPath.toString();
+            initAzureToolsCoreLibsLoggerFileHandler();
         } catch (IOException e) {
             e.printStackTrace();
+            LOGGER.log(LogService.LOG_ERROR, "start", e);
         }
-        
-        super.start(context);
     }
+
+    private void initAzureToolsCoreLibsLoggerFileHandler() {
+        try {
+            String loggerFilePath = Paths.get(CommonSettings.settingsBaseDir, "corelibs.log").toString();
+            System.out.println("Logger path:" + loggerFilePath);
+            logFileHandler = new FileHandler(loggerFilePath, false);
+            java.util.logging.Logger l = java.util.logging.Logger.getLogger("");
+            logFileHandler.setFormatter(new SimpleFormatter());
+            l.addHandler(logFileHandler);
+            // FIXME: use environment variable to set the level
+            l.setLevel(Level.INFO);
+            l.info("=== Log session started ===");
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOGGER.log(LogService.LOG_ERROR, "initLoggerFileHandler()", e);
+        }
+    }
+
     
     public boolean isHDInsightEnabled() {
         return isHDInsightEnabled;
