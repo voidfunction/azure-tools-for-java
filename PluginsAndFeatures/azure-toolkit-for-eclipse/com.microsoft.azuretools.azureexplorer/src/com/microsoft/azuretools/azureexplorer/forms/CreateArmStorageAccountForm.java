@@ -308,7 +308,7 @@ public class CreateArmStorageAccountForm extends Dialog {
         if (nameTextField.getText().length() < 3
                 || nameTextField.getText().length() > 24
                 || !nameTextField.getText().matches("[a-z0-9]+")) {
-            DefaultLoader.getUIHelper().showError("Invalid storage account name. The name should be between 3 and 24 characters long and \n" +
+            DefaultLoader.getUIHelper().showError("Invalid storage account name. The name should be between 3 and 24 characters long and " +
                     "can contain only lowercase letters and numbers.", "Azure Explorer");
             return;
 		}
