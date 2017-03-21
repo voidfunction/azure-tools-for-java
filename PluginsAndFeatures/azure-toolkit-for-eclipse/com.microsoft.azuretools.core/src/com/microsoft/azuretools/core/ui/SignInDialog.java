@@ -281,6 +281,7 @@ public class SignInDialog extends TitleAreaDialog {
             signInAsync();
             accountEmail = adAuthManager.getAccountEmail();
         } catch (Exception ex) {
+            System.out.println("doSignIn(): " + ex.getMessage());
             ex.printStackTrace();
             LOGGER.log(LogService.LOG_ERROR,"doSignIn()", ex);
         }
@@ -294,8 +295,9 @@ public class SignInDialog extends TitleAreaDialog {
                 try {
                     AdAuthManager.getInstance().signIn();
                 } catch (Exception ex) {
-                    System.out.println("signInAsync ex: " + ex.getMessage());
-                    LOGGER.log(LogService.LOG_ERROR,"signInAsync", ex);
+                    System.out.println("signInAsync()::run(): " + ex.getMessage());
+                    ex.printStackTrace();
+                    LOGGER.log(LogService.LOG_ERROR,"signInAsync()", ex);
                 }
             }
         };
