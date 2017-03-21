@@ -78,7 +78,7 @@ public class AdAuthManager {
         String commonTid = "common";
         AuthContext ac = new AuthContext(String.format("%s/%s", Constants.authority, commonTid), cache);
 
-        AuthenticationResult result = ac.acquireToken(Constants.resourceARM, Constants.clientId, Constants.redirectUri, PromptBehavior.Always, null);
+        AuthenticationResult result = ac.acquireToken(AzureEnvironment.AZURE.getResourceManagerEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Always, null);
         String displayableId = result.getUserInfo().getDisplayableId();
         UserIdentifier uid = new UserIdentifier(displayableId, UserIdentifierType.RequiredDisplayableId);
 
@@ -89,9 +89,7 @@ public class AdAuthManager {
             String tid = t.tenantId();
             try {
                 AuthContext ac1 = new AuthContext(String.format("%s/%s", Constants.authority, tid), cache);
-//                ac1.acquireToken(Constants.resourceARM, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
                 ac1.acquireToken(AzureEnvironment.AZURE.getResourceManagerEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
-//                ac1.acquireToken(Constants.resourceGraph, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
                 ac1.acquireToken(AzureEnvironment.AZURE.getGraphEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
                 ac1.acquireToken(Constants.resourceVault, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
                 List<String> sids = new LinkedList<>();
@@ -100,7 +98,7 @@ public class AdAuthManager {
                 }
                 tidToSidsMap.put(t.tenantId(), sids);
 
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.out.println("signIn@AdAuthManager exception for tid: " + tid + ":\n" + e.getMessage());
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
             }
