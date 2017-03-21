@@ -97,7 +97,7 @@
         <command
             name="Select Subscriptions..."
             categoryId="com.microsoft.azuretools.core.category.Azure"
-            id="com.microsoft.azuretools.core.commands.SelectSubsriptions"
+            id="com.microsoft.azuretools.core.commands.SelectSubscriptions"
             icon="icons/ConnectAccountsLight_16.png">
         </command>
     </extension>
@@ -114,7 +114,7 @@
             class="com.microsoft.azuretools.core.handlers.SignOutCommandHandler">
         </handler>
         <handler
-            commandId="com.microsoft.azuretools.core.commands.SelectSubsriptions"
+            commandId="com.microsoft.azuretools.core.commands.SelectSubscriptions"
             class="com.microsoft.azuretools.core.handlers.SelectSubsriptionsCommandHandler">
             <enabledWhen>
                 <reference definitionId="when.is.signed.in"/>
@@ -152,7 +152,7 @@
                 mnemonic="A"
                 id="com.microsoft.azuretools.core.menus.Azure">
                 <command
-                    commandId="com.microsoft.azuretools.core.commands.SelectSubsriptions"
+                    commandId="com.microsoft.azuretools.core.commands.SelectSubscriptions"
                     mnemonic="S"
                     id="com.microsoft.azuretools.core.menus.SelectSubsriptions">
                 </command>
