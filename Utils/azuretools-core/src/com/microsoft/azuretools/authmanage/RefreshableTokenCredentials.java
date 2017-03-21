@@ -75,6 +75,7 @@ public class RefreshableTokenCredentials implements AzureTokenCredentials {
             //System.out.println("RefreshableTokenCredentials: getToken()");
             return authManager.getAccessToken(tid, s, PromptBehavior.Auto);
        } catch (URISyntaxException | InterruptedException | ExecutionException | AuthException e) {
+            System.out.println("=== getToken@RefreshableTokenCredentials exception: " + e.getMessage());
             e.printStackTrace();
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
             throw new IOException(e);

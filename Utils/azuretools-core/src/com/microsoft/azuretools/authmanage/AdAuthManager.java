@@ -101,7 +101,7 @@ public class AdAuthManager {
                 tidToSidsMap.put(t.tenantId(), sids);
 
             } catch (Exception e) {
-                System.out.println("Exception: AdAuthManager auth for tid: " + tid + e.getMessage());
+                System.out.println("signIn@AdAuthManager exception for tid: " + tid + ":\n" + e.getMessage());
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
             }
         }
