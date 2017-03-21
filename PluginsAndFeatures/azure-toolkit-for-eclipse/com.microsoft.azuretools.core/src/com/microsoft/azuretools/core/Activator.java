@@ -138,7 +138,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
             initAzureToolsCoreLibsLoggerFileHandler();
         } catch (IOException e) {
             e.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR, "start", e);
+            LOGGER.log(LogService.LOG_ERROR, "initAzureToolsCoreLibsSettings@Activator", e);
         }
     }
 
@@ -155,7 +155,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
             l.info("=== Log session started ===");
         } catch (IOException e) {
             e.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR, "initLoggerFileHandler()", e);
+            LOGGER.log(LogService.LOG_ERROR, "initAzureToolsCoreLibsLoggerFileHandler@Activator", e);
         }
     }
 

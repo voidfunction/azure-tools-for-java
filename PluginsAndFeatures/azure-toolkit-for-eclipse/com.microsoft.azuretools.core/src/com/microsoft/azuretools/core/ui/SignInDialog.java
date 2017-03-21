@@ -1,10 +1,13 @@
 package com.microsoft.azuretools.core.ui;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
@@ -32,6 +35,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.osgi.service.log.LogService;
 
+import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.adauth.StringUtils;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
@@ -280,24 +284,24 @@ public class SignInDialog extends TitleAreaDialog {
             }
             signInAsync();
             accountEmail = adAuthManager.getAccountEmail();
-        } catch (Exception ex) {
-            System.out.println("doSignIn(): " + ex.getMessage());
+        } catch (IOException | InvocationTargetException | InterruptedException ex) {
+            System.out.println("doSignIn@SingInDialog: " + ex.getMessage());
             ex.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"doSignIn()", ex);
+            LOGGER.log(LogService.LOG_ERROR, "doSignIn@SingInDialog", ex);
         }
     }
 
-    private void signInAsync() throws Exception {
+    private void signInAsync() throws InvocationTargetException, InterruptedException  {
         IRunnableWithProgress op = new IRunnableWithProgress() {
             @Override
             public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
                 monitor.beginTask("Signing In...", IProgressMonitor.UNKNOWN);
                 try {
                     AdAuthManager.getInstance().signIn();
-                } catch (Exception ex) {
-                    System.out.println("signInAsync()::run(): " + ex.getMessage());
-                    ex.printStackTrace();
-                    LOGGER.log(LogService.LOG_ERROR,"signInAsync()", ex);
+                } catch (IOException | URISyntaxException | ExecutionException | AuthException e) {
+                    System.out.println("run@signInAsync@SingInDialog: " + e.getMessage());
+                    e.printStackTrace();
+                    LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@signInAsync@SingInDialog", e);
                 }
             }
         };
@@ -308,9 +312,9 @@ public class SignInDialog extends TitleAreaDialog {
         try {
             accountEmail = null;
             AdAuthManager.getInstance().signOut();
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"doSignOut()", ex);
+            LOGGER.log(LogService.LOG_ERROR,"doSignOut@SingInDialog", ex);
         }
     }
     
@@ -340,8 +344,8 @@ public class SignInDialog extends TitleAreaDialog {
                     try {
                         subscriptionManager.getSubscriptionDetails();
                     } catch (Exception ex) {
-                        System.out.println("Getting Subscription List ex: " + ex.getMessage());
-                        LOGGER.log(LogService.LOG_ERROR,"doCreateServicePrincipal::subscriptionManager.getSubscriptionDetails()", ex);
+                        System.out.println("run@doCreateServicePrincipal@SignInDialo: " + ex.getMessage());
+                        LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@doCreateServicePrincipal@SignInDialog", ex);
                     }
                 }
             };
@@ -391,16 +395,10 @@ public class SignInDialog extends TitleAreaDialog {
             
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"doCreateServicePrincipal()", ex);
+            LOGGER.log(LogService.LOG_ERROR,"doCreateServicePrincipal@SignInDialog", ex);
         } finally {
             if (adAuthManager != null) {
-                try {
-                    System.out.println(">> Signing out...");
-                    adAuthManager.signOut();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    LOGGER.log(LogService.LOG_ERROR,"signOut()", e);
-                }
+                adAuthManager.signOut();
             }
         }
     }

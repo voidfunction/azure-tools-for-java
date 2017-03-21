@@ -148,14 +148,14 @@ public class SubscriptionsDialog extends TitleAreaDialog {
                     try {
                         subscriptionManager.getSubscriptionDetails();
                     } catch (IOException | AuthException e) {
-                        LOGGER.log(LogService.LOG_ERROR, e.getMessage(), e);
+                        LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@efreshSubscriptionsAsync@SubscriptionDialog", e);
                         e.printStackTrace();
                     }
                     monitor.done();
                 }
             });
         } catch (InvocationTargetException | InterruptedException e) {
-            LOGGER.log(LogService.LOG_ERROR,e.getMessage(), e);
+            LOGGER.log(LogService.LOG_ERROR, "run@refreshSubscriptionsAsync@SubscriptionDialog", e);
             e.printStackTrace();
         }
     }
@@ -169,7 +169,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
                 item.setChecked(sd.isSelected());
             }
         } catch (IOException | AuthException e) {
-            LOGGER.log(LogService.LOG_ERROR, e.getMessage(), e);
+            LOGGER.log(LogService.LOG_ERROR, "setSubscriptionDetails@SubscriptionDialog", e);
             e.printStackTrace();
         }
     }
@@ -183,7 +183,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
             setSubscriptionDetails();
             subscriptionManager.setSubscriptionDetails(sdl);
         } catch (IOException | AuthException e) {
-            LOGGER.log(LogService.LOG_ERROR, e.getMessage(), e);
+            LOGGER.log(LogService.LOG_ERROR, "refreshSubscriptions@SubscriptionDialog", e);
             e.printStackTrace();
         }
     }
@@ -229,7 +229,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
         try {
             subscriptionManager.setSubscriptionDetails(sdl);
         } catch (Exception e) {
-            LOGGER.log(LogService.LOG_ERROR, e.getMessage(), e);
+            LOGGER.log(LogService.LOG_ERROR, "okPressed@SubscriptionDialog", e);
             e.printStackTrace();
         }
 

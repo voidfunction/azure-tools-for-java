@@ -202,7 +202,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                     event.doit = false;
                     PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(event.location));
                 } catch (Exception e) {
-                    LOGGER.log(LogService.LOG_ERROR,"LocationListener.changing", e);
+                    LOGGER.log(LogService.LOG_ERROR,"changing@LocationListener@AppServiceCreateDialog", e);
                     e.printStackTrace();
                 }       
             }
@@ -309,14 +309,14 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         });
 
                     } catch (Exception ex) {
-                        LOGGER.log(LogService.LOG_ERROR,"updateAndFillTable::run", ex);
+                        LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@updateAndFillTable@AppServiceCreateDialog", ex);
                         ex.printStackTrace();
                     }
                     monitor.done();
                 }
             });
         } catch (InvocationTargetException | InterruptedException e) {
-            LOGGER.log(LogService.LOG_ERROR,"updateAndFillTable::run", e);
+            LOGGER.log(LogService.LOG_ERROR,"updateAndFillTable@AppServiceCreateDialog", e);
             e.printStackTrace();
         }
     }
@@ -441,7 +441,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             export(projectName, destinationPath);
             deploy(projectName, destinationPath);
         } catch (Exception e) {
-            LOGGER.log(LogService.LOG_ERROR,"okPressed::run", e);
+            LOGGER.log(LogService.LOG_ERROR,"okPressed@AppServiceCreateDialog", e);
             e.printStackTrace();
         };
         super.okPressed();
@@ -515,7 +515,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
-                                    LOGGER.log(LogService.LOG_ERROR,"deploy::ProgressDialog::warmup", e);
+                                    LOGGER.log(LogService.LOG_ERROR,"run@Tread@run@ProgressDialog@deploy@AppServiceCreateDialog", e);
                                 }
                             }
                         });
@@ -528,7 +528,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         showLink(sitePath);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        LOGGER.log(LogService.LOG_ERROR,"deploy::ProgressDialog", e);
+                        LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@deploy@AppServiceCreateDialog", e);
                         Display.getDefault().asyncExec(new Runnable() {
                             @Override
                             public void run() {
@@ -540,7 +540,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             });
         } catch (InvocationTargetException | InterruptedException e) {
             e.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"deploy", e);
+            LOGGER.log(LogService.LOG_ERROR,"deploy@AppServiceCreateDialog", e);
             ErrorWindow.go(getShell(), e.getMessage(), errTitle);;
         }
     }
@@ -561,7 +561,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                       try {
                           PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(link));
                       } catch (Exception e) {
-                          LOGGER.log(LogService.LOG_ERROR,"showLink", e);
+                          LOGGER.log(LogService.LOG_ERROR,"run@Display@showLink@AppServiceCreateDialog", e);
                           e.printStackTrace();
                       }
                   }
@@ -610,7 +610,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         });
                     } catch (Exception e) {
                         e.printStackTrace();
-                        LOGGER.log(LogService.LOG_ERROR,"deleteAppService::ProgressDialog", e);
+                        LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@deleteAppService@AppServiceCreateDialog", e);
                         Display.getDefault().asyncExec(new Runnable() {
                             @Override
                             public void run() {
@@ -623,7 +623,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             });
         } catch (Exception e) {
             e.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"deleteAppService", e);
+            LOGGER.log(LogService.LOG_ERROR,"deleteAppService@AppServiceCreateDialog", e);
             ErrorWindow.go(getShell(), e.getMessage(), errTitle);
         }
     }

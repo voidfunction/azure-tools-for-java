@@ -309,7 +309,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
 					getExternalBrowser().openURL(new URL("https://azure.microsoft.com/en-us/pricing/details/app-service/"));
 				}
 				catch (Exception ex) {
-					LOGGER.log(LogService.LOG_ERROR, "SelectionAdapter.widgetSelected", ex);
+					LOGGER.log(LogService.LOG_ERROR, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex);
 				}
 			}
 		});
@@ -399,7 +399,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
 					getExternalBrowser().openURL(new URL(AzulZuluModel.getLicenseUrl()));
 				}
 				catch (Exception ex) {
-					LOGGER.log(LogService.LOG_ERROR, "SelectionAdapter.widgetSelected", ex);
+					LOGGER.log(LogService.LOG_ERROR, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex);
 				}
 			}
 		});
@@ -525,7 +525,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR, "fillWebContainers", ex);
+            LOGGER.log(LogService.LOG_ERROR, "fillWebContainers@AppServiceCreateDialog", ex);
         }
     }
     
@@ -611,7 +611,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"doFillSubscriptions", ex);
+            LOGGER.log(LogService.LOG_ERROR,"doFillSubscriptions@AppServiceCreateDialog", ex);
         }
     }
     
@@ -721,7 +721,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"fillAppServicePlanPricingTiers", ex);
+            LOGGER.log(LogService.LOG_ERROR,"fillAppServicePlanPricingTiers@AppServiceCreateDialog", ex);
         }
     }
     
@@ -767,6 +767,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
                             });                    
                         } catch (Exception e) {
                             e.printStackTrace();
+                            LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@okPressed@AppServiceCreateDialog", e);
                             Display.getDefault().asyncExec(new Runnable() {
                                 @Override
                                 public void run() {
@@ -779,7 +780,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
                 });
             } catch (InvocationTargetException | InterruptedException e) {
                 e.printStackTrace();
-                LOGGER.log(LogService.LOG_ERROR, " okPressed", e);
+                LOGGER.log(LogService.LOG_ERROR, "okPressed@AppServiceCreateDialog", e);
                 ErrorWindow.go(getShell(), e.getMessage(), errTitle);;
             }
         }
