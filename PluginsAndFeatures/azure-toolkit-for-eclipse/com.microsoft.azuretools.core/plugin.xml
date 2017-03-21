@@ -95,7 +95,7 @@
               name="Sign Out...">
         </command>      
         <command
-            name="Select Subsriptions"
+            name="Select Subscriptions..."
             categoryId="com.microsoft.azuretools.core.category.Azure"
             id="com.microsoft.azuretools.core.commands.SelectSubsriptions"
             icon="icons/ConnectAccountsLight_16.png">
@@ -123,10 +123,6 @@
         <handler
             class="com.microsoft.azuretools.core.ui.WANewCertificate"
             commandId="com.microsoft.azuretools.core.ui.WANewCertificate">
-        </handler>
-        <handler
-            class="com.microsoft.azuretools.core.ui.AzureSamples"
-            commandId="com.microsoft.azuretools.core.ui.AzureSamplesCmd">
         </handler>
     </extension>
 <!--   
