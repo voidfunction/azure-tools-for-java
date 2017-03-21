@@ -22,9 +22,13 @@
 
 package com.microsoft.azuretools.adauth;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,7 +42,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     private final UserIdentifier userId;
 
     AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, String resource,
-                                   String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, IWebUi webUi) throws Exception {
+                                   String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, IWebUi webUi) throws IOException, URISyntaxException {
         super(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User);
         if (redirectUri == null) {
             throw new IllegalArgumentException("redirectUri");
@@ -74,11 +78,11 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     }
 
     @Override
-    protected void preTokenRequest() throws Exception {
+    protected void preTokenRequest() throws URISyntaxException, ExecutionException, AuthException, InterruptedException, UnsupportedEncodingException {
         acquireAuthorization();
     }
 
-    private void acquireAuthorization() throws Exception {
+    private void acquireAuthorization() throws UnsupportedEncodingException, URISyntaxException, ExecutionException, InterruptedException, AuthException {
         log.log(Level.FINEST, "acquireAuthorization...");
 
         URI authorizationUri = this.createAuthorizationUri(false);
@@ -94,7 +98,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
         verifyAuthorizationResult();
    }
 
-    private URI createAuthorizationUri(boolean includeFormsAuthParam) throws Exception {
+    private URI createAuthorizationUri(boolean includeFormsAuthParam) throws UnsupportedEncodingException, URISyntaxException {
         String loginHint = null;
         if (!userId.isAnyUser()
             && (userId.type == UserIdentifierType.OptionalDisplayableId
@@ -134,7 +138,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
         return authorizationRequestParameters;
     }
 
-    private void verifyAuthorizationResult() throws Exception {
+    private void verifyAuthorizationResult() throws AuthException {
         if (this.promptBehavior == PromptBehavior.Never
                 && authorizationResult.error.equals(OAuthError.LoginRequired)) {
             String message = AuthError.UserInteractionRequired;
@@ -156,7 +160,7 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     }
 
     @Override
-    protected void postTokenRequest(AuthenticationResult result) throws Exception {
+    protected void postTokenRequest(AuthenticationResult result) throws AuthException {
         super.postTokenRequest(result);
         if ((this.displayableId == null && this.uniqueId == null)
                 || this.userIdentifierType == UserIdentifierType.OptionalDisplayableId) {

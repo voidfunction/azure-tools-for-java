@@ -25,6 +25,8 @@ package com.microsoft.azuretools.adauth;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.io.IOException;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AuthenticationResult {
     private final static String Oauth2AuthorizationHeader = "Bearer ";
@@ -120,7 +122,7 @@ public class AuthenticationResult {
     /// Serializes the object to a JSON String
     /// </summary>
     /// <returns>Deserialized authentication result</returns>
-    static AuthenticationResult deserialize(String serializedObject) throws Exception {
+    static AuthenticationResult deserialize(String serializedObject) throws IOException {
         return JsonHelper.deserialize(AuthenticationResult.class, serializedObject);
     }
 
@@ -136,7 +138,7 @@ public class AuthenticationResult {
     /// Serializes the object to a JSON String
     /// </summary>
     /// <returns>Serialized authentication result</returns>
-    String serialize() throws Exception {
+    String serialize() throws IOException {
         return JsonHelper.serialize(this);
     }
 

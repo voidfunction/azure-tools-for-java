@@ -23,6 +23,7 @@
 package com.microsoft.azuretools.adauth;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
@@ -55,7 +56,7 @@ public class FileTokenCache extends TokenCache {
         }
     }
     
-    private FileLock acquireLock(RandomAccessFile raf) throws Exception {
+    private FileLock acquireLock(RandomAccessFile raf) throws IOException, InterruptedException {
         // in case of multiprocess file access
         FileLock lock = null;
         int tryCount = 3;
@@ -73,7 +74,7 @@ public class FileTokenCache extends TokenCache {
         return lock;
     }
     
-    private void read() throws Exception {
+    private void read() throws IOException, InterruptedException {
         RandomAccessFile in = new RandomAccessFile(filePath.toString(), "rw");
         try {
             // in case of multiprocess file access
@@ -98,7 +99,7 @@ public class FileTokenCache extends TokenCache {
         }
     }
     
-    private void write() throws Exception {
+    private void write() throws IOException, InterruptedException {
         RandomAccessFile out = new RandomAccessFile(filePath.toString(), "rw");
         try {
             // in case of multiprocess file access
@@ -120,21 +121,21 @@ public class FileTokenCache extends TokenCache {
             out.close();
         }
     }
-    
-    @Override 
-    void onBeforeAccess() throws Exception {
-        synchronized (lock) {
-            read();
-        }        
-    }
-    
-    @Override 
-    void onAfterAccess() throws Exception {
-        synchronized (lock) {
-            if(getHasStateChanged()) {
-                write();
-                setHasStateChanged(false);
-            }
-        }        
-    }
+//
+//    @Override
+//    void onBeforeAccess() throws IOException, InterruptedException {
+//        synchronized (lock) {
+//            read();
+//        }
+//    }
+//
+//    @Override
+//    void onAfterAccess() {
+//        synchronized (lock) {
+//            if(getHasStateChanged()) {
+//                write();
+//                setHasStateChanged(false);
+//            }
+//        }
+//    }
 }

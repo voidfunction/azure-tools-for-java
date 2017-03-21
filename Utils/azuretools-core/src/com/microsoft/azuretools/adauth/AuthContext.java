@@ -22,6 +22,9 @@
 
 package com.microsoft.azuretools.adauth;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 enum AuthorityValidationType {
@@ -40,31 +43,31 @@ public class AuthContext {
     	AuthContext.userDefinedWebUi = userDefinedWebUi;
     }
 
-    public AuthContext(String authority, TokenCache tokenCache) throws Exception {
+    public AuthContext(String authority, TokenCache tokenCache) throws IOException, URISyntaxException {
         this(authority, AuthorityValidationType.NotProvided, tokenCache);
     }
 
-    private AuthContext(String authority, AuthorityValidationType validateAuthority, TokenCache tokenCache) throws Exception {
+    private AuthContext(String authority, AuthorityValidationType validateAuthority, TokenCache tokenCache) throws IOException, URISyntaxException {
         // If authorityType is not provided (via first constructor), we validate by default (except for ASG and Office tenants).
         this.authenticator = new Authenticator(authority, (validateAuthority != AuthorityValidationType.False));
         this.tokenCache = tokenCache;
     }
 
-    public AuthenticationResult acquireToken(String resource, String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userIdentifier) throws Exception {
+    public AuthenticationResult acquireToken(String resource, String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userIdentifier) throws IOException, URISyntaxException, InterruptedException, ExecutionException, AuthException {
         AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(this.authenticator, this.tokenCache,
                 resource, clientId, redirectUri, promptBehavior, (userIdentifier != null) ? userIdentifier : UserIdentifier.anyUser,
                 this.createWebAuthenticationDialog(promptBehavior));
         return handler.run();
     }
 
-    public Future<AuthenticationResult> acquireTokenAsync(String resource, String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userIdentifier) throws Exception {
+    public Future<AuthenticationResult> acquireTokenAsync(String resource, String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userIdentifier) throws IOException, URISyntaxException {
     	AcquireTokenInteractiveHandler handler = new AcquireTokenInteractiveHandler(this.authenticator, this.tokenCache,
     			resource, clientId, redirectUri, promptBehavior, (userIdentifier != null) ? userIdentifier : UserIdentifier.anyUser,
     					this.createWebAuthenticationDialog(promptBehavior));
     	return handler.runAsync();
     }
     
-    private IWebUi createWebAuthenticationDialog(PromptBehavior promptBehavior) throws Exception {
+    private IWebUi createWebAuthenticationDialog(PromptBehavior promptBehavior) {
         if(userDefinedWebUi != null) {
         	return userDefinedWebUi;
         }

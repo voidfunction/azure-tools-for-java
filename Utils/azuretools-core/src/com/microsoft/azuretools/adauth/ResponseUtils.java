@@ -24,7 +24,10 @@ package com.microsoft.azuretools.adauth;
 
 import org.apache.commons.codec.binary.Base64;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +37,7 @@ import java.util.logging.Logger;
 public class ResponseUtils {
     private final static Logger log = Logger.getLogger(ResponseUtils.class.getName());
     
-    public static AuthorizationResult parseAuthorizeResponse(String webAuthenticationResult, CallState callState) throws Exception {
+    public static AuthorizationResult parseAuthorizeResponse(String webAuthenticationResult, CallState callState) throws URISyntaxException, UnsupportedEncodingException {
         AuthorizationResult result = null;
 
         URI resultUri = new URI(webAuthenticationResult);
@@ -71,7 +74,7 @@ public class ResponseUtils {
         return result;
     }
 
-    public static AuthenticationResult parseTokenResponse(TokenResponse tokenResponse) throws Exception  {
+    public static AuthenticationResult parseTokenResponse(TokenResponse tokenResponse) throws AuthException, IOException, URISyntaxException {
          AuthenticationResult result;
 
          if (tokenResponse.accessToken != null) {
@@ -126,7 +129,7 @@ public class ResponseUtils {
          return result;
      }
 
-     private static IdToken parseIdToken(String idToken) throws Exception {
+     private static IdToken parseIdToken(String idToken) throws IOException {
          IdToken idTokenBody = null;
          if (!StringUtils.isNullOrWhiteSpace(idToken)) {
              log.log(Level.FINEST, "idToken: " + idToken);

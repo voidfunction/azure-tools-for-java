@@ -25,7 +25,9 @@ package com.microsoft.azuretools.adauth;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,14 +60,14 @@ class AuthenticatorTemplate {
     public String userRealmEndpoint;
 
     // factory method
-    public static AuthenticatorTemplate createFromHost(String host) throws Exception {
+    public static AuthenticatorTemplate createFromHost(String host) throws IOException {
         String metadata = metadataTemplate.replace("{host}", host);
         AuthenticatorTemplate authority = JsonHelper.deserialize(AuthenticatorTemplate.class, metadata);
         authority.issuer = authority.tokenEndpoint;
         return authority;
     }
 
-    public void verifyAnotherHostByInstanceDiscoveryAsync(String host, String tenant, CallState callState) throws Exception {
+    public void verifyAnotherHostByInstanceDiscoveryAsync(String host, String tenant, CallState callState) throws IOException, AuthException {
         String instanceDiscoveryEndpoint = this.instanceDiscoveryEndpoint;
         instanceDiscoveryEndpoint += ("?api-version=1.0&authorization_endpoint=" + authorizeEndpointTemplate);
         instanceDiscoveryEndpoint = instanceDiscoveryEndpoint.replace("{host}", host);

@@ -22,6 +22,7 @@
 
 package com.microsoft.azuretools.adauth;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,14 +31,13 @@ public class AuthenticatorTemplateList {
     final String[] trustedHostList = { "login.windows.net", "login.chinacloudapi.cn", "login.cloudgovapi.us", "login.microsoftonline.com" };
 
 
-    public AuthenticatorTemplateList() throws Exception {
+    public AuthenticatorTemplateList() throws IOException {
     	for(String host : trustedHostList) {
     		list.add(AuthenticatorTemplate.createFromHost(host));
     	}
     }
 
-    public AuthenticatorTemplate findMatchingItem(boolean validateAuthority, String host, String tenant, CallState callState) throws Exception
-    {
+    public AuthenticatorTemplate findMatchingItem(boolean validateAuthority, String host, String tenant, CallState callState) throws IOException, AuthException {
         AuthenticatorTemplate matchingAuthenticatorTemplate = null;
         if (validateAuthority)
         {

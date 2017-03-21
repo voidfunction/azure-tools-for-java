@@ -30,10 +30,13 @@ import com.microsoft.azuretools.Constants;
 import com.microsoft.azuretools.authmanage.models.AdAuthDetails;
 import com.microsoft.azuretools.sdkmanage.AccessTokenAzureManager;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 public class AdAuthManager {
@@ -55,13 +58,11 @@ public class AdAuthManager {
         return instance;
     }
 
-    public String getAccessToken(String tid) throws Exception {
-        AuthContext ac = new AuthContext(String.format("%s/%s", Constants.authority, tid), cache);
-        AuthenticationResult result = ac.acquireToken(Constants.resourceARM, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, null);
-        return result.getAccessToken();
+    public String getAccessToken(String tid) throws IOException, URISyntaxException, InterruptedException, ExecutionException, AuthException {
+        return getAccessToken(tid, Constants.resourceARM, PromptBehavior.Auto);
     }
 
-    public String getAccessToken(String tid, String resource, PromptBehavior promptBehavior) throws Exception {
+    public String getAccessToken(String tid, String resource, PromptBehavior promptBehavior) throws IOException, URISyntaxException, InterruptedException, ExecutionException, AuthException {
         AuthContext ac = new AuthContext(String.format("%s/%s", Constants.authority, tid), cache);
         AuthenticationResult result = ac.acquireToken(resource, Constants.clientId, Constants.redirectUri, promptBehavior, null);
         return result.getAccessToken();

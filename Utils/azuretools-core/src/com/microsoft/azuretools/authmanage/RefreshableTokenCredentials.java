@@ -23,12 +23,15 @@
 package com.microsoft.azuretools.authmanage;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.credentials.AzureTokenCredentialsInterceptor;
+import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.adauth.PromptBehavior;
 
 import okhttp3.OkHttpClient;
@@ -71,9 +74,13 @@ public class RefreshableTokenCredentials implements AzureTokenCredentials {
         try {
             //System.out.println("RefreshableTokenCredentials: getToken()");
             return authManager.getAccessToken(tid, s, PromptBehavior.Auto);
-        } catch (Exception ex) {
+        } catch (URISyntaxException ex) {
             ex.printStackTrace();
             LOGGER.log(Level.SEVERE, "getToken()", ex);
+        } catch (InterruptedException | ExecutionException | AuthException e) {
+            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            throw new IOException(e);
         }
 
         return null;

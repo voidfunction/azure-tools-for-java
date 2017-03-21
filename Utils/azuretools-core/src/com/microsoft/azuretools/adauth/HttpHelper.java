@@ -22,11 +22,9 @@
 
 package com.microsoft.azuretools.adauth;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -41,7 +39,7 @@ public class HttpHelper {
 
     public static <T> T sendPostRequestAndDeserializeJsonResponse(final String uri,
             final Map<String, String> requestParameters, final CallState callState, final Class<T> cls)
-            throws AuthException, Exception {
+            throws AuthException, IOException, IllegalAccessException, InstantiationException {
         log.log(Level.FINEST, "sendPostRequestAndDeserializeJsonResponseAsync...");
         URL url = new URL(uri);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -87,7 +85,7 @@ public class HttpHelper {
             if (r.error.equals("invalid_grant"))
                 throw new AuthException(message);
             else
-                throw new Exception(message);
+                throw new IOException(message);
         }
 
         verifyCorrelationIdInReponseHeader(connection, callState);
@@ -112,7 +110,7 @@ public class HttpHelper {
         return deserializeResponse(response, cls);
     }
 
-    public static <T> T deserializeResponse(String response, Class<T> cls) throws Exception {
+    public static <T> T deserializeResponse(String response, Class<T> cls) throws IOException {
         return JsonHelper.deserialize(cls, response);
     }
 

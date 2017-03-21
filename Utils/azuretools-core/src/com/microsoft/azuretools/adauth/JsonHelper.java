@@ -24,6 +24,7 @@ package com.microsoft.azuretools.adauth;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 //import java.util.logging.Logger;
@@ -31,7 +32,7 @@ import java.io.InputStream;
 public class JsonHelper {
 //	private static final Logger log = Logger.getLogger(JsonHelper.class.getName());
 	
-    public static <T> T deserialize(Class<T> cls, String json) throws Exception {
+    public static <T> T deserialize(Class<T> cls, String json) throws IOException {
 //    	log.log(Level.FINEST, "structure: " + cls.getName());
 //    	log.log(Level.FINEST, "json string: " + json);
         if(json == null) return null;
@@ -39,13 +40,13 @@ public class JsonHelper {
         return mapper.readValue(json, cls);
     }
     
-    public static <T> T deserialize(Class<T> cls,InputStream is) throws Exception {
+    public static <T> T deserialize(Class<T> cls,InputStream is) throws IOException {
         if(is == null) return null;
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(is, cls);
     }
     
-    public static <T> String serialize(T jsonObject) throws Exception {
+    public static <T> String serialize(T jsonObject) throws IOException {
     	if(jsonObject == null) return null;
     	ObjectMapper mapper = new ObjectMapper();
     	return mapper.writeValueAsString(jsonObject);

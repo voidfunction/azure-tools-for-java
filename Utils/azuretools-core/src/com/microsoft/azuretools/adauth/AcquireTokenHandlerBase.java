@@ -22,6 +22,9 @@
 
 package com.microsoft.azuretools.adauth;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -62,7 +65,7 @@ public abstract class AcquireTokenHandlerBase {
         this.supportADFS = false;
     }
 
-    AuthenticationResult run() throws Exception {
+    AuthenticationResult run() throws AuthException, ExecutionException, InterruptedException, IOException, URISyntaxException {
         boolean notifiedBeforeAccessCache = false;
         try {
             synchronized (cacheLock) {
@@ -110,7 +113,7 @@ public abstract class AcquireTokenHandlerBase {
         }
     }
     
-    Future<AuthenticationResult> runAsync() throws Exception {
+    Future<AuthenticationResult> runAsync() {
         return service.submit(new Callable<AuthenticationResult>() {
             @Override
             public AuthenticationResult call() throws Exception {
@@ -119,14 +122,14 @@ public abstract class AcquireTokenHandlerBase {
         });
     }
 
-    protected void preRun() throws Exception {
+    protected void preRun() throws AuthException, IOException, URISyntaxException {
         this.authenticator.updateFromTemplate(this.callState);
         this.validateAuthorityType();
     }
 
-    protected abstract void preTokenRequest() throws Exception;
+    protected abstract void preTokenRequest() throws URISyntaxException, ExecutionException, AuthException, InterruptedException, UnsupportedEncodingException;
     
-    protected Future<AuthenticationResult> acquireTokenAsync() throws Exception {
+    protected Future<AuthenticationResult> acquireTokenAsync() {
         return Executors.newSingleThreadExecutor().submit(new Callable<AuthenticationResult>() {
             @Override
             public AuthenticationResult call() throws Exception {
@@ -139,7 +142,7 @@ public abstract class AcquireTokenHandlerBase {
         });
     }
 
-    protected void postTokenRequest(AuthenticationResult result) throws Exception {
+    protected void postTokenRequest(AuthenticationResult result) throws AuthException {
         authenticator.updateTenantId(result.tenantId);
     }
 
@@ -188,7 +191,7 @@ public abstract class AcquireTokenHandlerBase {
         });
     }
     
-    protected AuthenticationResult sendTokenRequestByRefreshToken(String refreshToken) throws AuthException, Exception {
+    protected AuthenticationResult sendTokenRequestByRefreshToken(String refreshToken) throws AuthException, IllegalAccessException, IOException, InstantiationException, URISyntaxException {
         Map<String, String> requestParameters = new HashMap<>();
         requestParameters.put(OAuthParameter.Resource, this.resource);
         requestParameters.put(OAuthParameter.ClientId, this.clientKey.clientId);
@@ -197,7 +200,7 @@ public abstract class AcquireTokenHandlerBase {
         return sendHttpMessage(requestParameters);
     }
 
-    private AuthenticationResult sendHttpMessage(final Map<String, String> requestParameters) throws AuthException, Exception {
+    private AuthenticationResult sendHttpMessage(final Map<String, String> requestParameters) throws AuthException, IllegalAccessException, IOException, InstantiationException, URISyntaxException {
         String uri = authenticator.tokenUri;
         TokenResponse tokenResponse = HttpHelper.sendPostRequestAndDeserializeJsonResponse(uri, requestParameters, callState, TokenResponse.class);
         AuthenticationResult result = ResponseUtils.parseTokenResponse(tokenResponse);
@@ -209,11 +212,11 @@ public abstract class AcquireTokenHandlerBase {
         return result;
     }
 
-    private void notifyBeforeAccessCache() throws Exception {
+    private void notifyBeforeAccessCache() {
         tokenCache.onBeforeAccess();
     }
 
-    private void notifyAfterAccessCache() throws Exception {
+    private void notifyAfterAccessCache() {
         tokenCache.onAfterAccess();
     }
 
@@ -226,7 +229,7 @@ public abstract class AcquireTokenHandlerBase {
         }
     }
 
-    private void validateAuthorityType() throws Exception {
+    private void validateAuthorityType() throws AuthException {
         if (!this.supportADFS && this.authenticator.authorityType == AuthorityType.ADFS) {
             String message = AuthError.InvalidAuthorityType + ": " + this.authenticator.getAuthority();
             throw new AuthException(message);

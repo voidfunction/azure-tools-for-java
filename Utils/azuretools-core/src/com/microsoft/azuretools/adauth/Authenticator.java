@@ -23,6 +23,7 @@
 package com.microsoft.azuretools.adauth;
 
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
@@ -62,7 +63,7 @@ class Authenticator {
         return (tenant.compareToIgnoreCase(tenantlessTenantName) == 0);
     }
 
-    public Authenticator(String authority, boolean validateAuthority) throws Exception {
+    public Authenticator(String authority, boolean validateAuthority) throws IOException, URISyntaxException {
     	this.authenticatorTemplateList = new AuthenticatorTemplateList();
         setAuthority(canonicalizeUri(authority));
         this.authorityType = detectAuthorityType(this.getAuthority());
@@ -74,7 +75,7 @@ class Authenticator {
         this.validateAuthority = validateAuthority;
     }
 
-    public void updateFromTemplate(CallState callState) throws Exception {
+    public void updateFromTemplate(CallState callState) throws URISyntaxException, IOException, AuthException {
         if (!updatedFromTemplate) {
             URI authorityUri = new URI(this.getAuthority());
             String host = authorityUri.getAuthority();

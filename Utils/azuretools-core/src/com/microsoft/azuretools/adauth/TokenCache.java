@@ -22,10 +22,7 @@
 
 package com.microsoft.azuretools.adauth;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -51,7 +48,7 @@ public class TokenCache {
     /// <summary>
     /// Constructor receiving state of the cache
     /// </summary>
-    public TokenCache(byte[] state) throws Exception {
+    public TokenCache(byte[] state) throws IOException {
        this();
         this.deserialize(state);
     }
@@ -96,7 +93,7 @@ public class TokenCache {
     /// passing that blob back in constructor or by calling method Deserialize.
     /// </summary>
     /// <returns>Current state of the cache as a blob</returns>
-    public byte[] serialize() throws Exception {
+    public byte[] serialize() throws IOException {
        synchronized (lock) {
           log.log(Level.FINEST, "Serializing...");
           // memory stream
@@ -126,7 +123,7 @@ public class TokenCache {
     /// Deserializes state of the cache. The state should be the blob received earlier by calling the method Serialize.
     /// </summary>
     /// <param name="state">State of the cache as a blob</param>
-    public void deserialize(byte[] state) throws Exception {
+    public void deserialize(byte[] state) throws IOException {
        synchronized(lock) {
           log.log(Level.FINEST, "Deserializing...");
             if (state.length == 0) {
@@ -219,12 +216,12 @@ public class TokenCache {
         }
     }
 
-    void onAfterAccess() throws Exception {
+    void onAfterAccess() {
         if(onAfterAccessCallback != null) {
             onAfterAccessCallback.run();
         }
     }
-    void onBeforeAccess() throws Exception {
+    void onBeforeAccess() {
         if (onBeforeAccessCallback != null) {
             onBeforeAccessCallback.run();
         }
@@ -241,7 +238,7 @@ public class TokenCache {
         this.onAfterAccessCallback = onAfterAccessCallback;
     }
 
-    AuthenticationResult loadFromCache(String authority, String resource, String clientId, TokenSubjectType subjectType, String uniqueId, String displayableId) throws Exception {
+    AuthenticationResult loadFromCache(String authority, String resource, String clientId, TokenSubjectType subjectType, String uniqueId, String displayableId) throws AuthException {
        synchronized(lock) {
             log.log(Level.FINEST, "Looking up cache for a token...");
             AuthenticationResult result = null;
