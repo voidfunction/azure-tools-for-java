@@ -67,6 +67,7 @@ import com.microsoft.azuretools.utils.WebAppUtils;
 import org.eclipse.swt.layout.RowData;
 
 
+@SuppressWarnings("restriction")
 public class WebAppDeployDialog extends TitleAreaDialog {
     @Inject
     private static LogService LOGGER;
@@ -96,7 +97,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         setHelpAvailable(false);
         setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
         this.project = project;
-    }    
+    }
     
     public static WebAppDeployDialog go(Shell parentShell, IProject project) {
         WebAppDeployDialog d = new WebAppDeployDialog(parentShell, project);
@@ -191,7 +192,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         
         browserAppServiceDetailes = new Browser(grpAppServiceDetails, SWT.NONE);
         FontData browserFontData = btnRefresh.getFont().getFontData()[0];
-        browserFontStyle = String.format("font: %spt %s;", browserFontData.getHeight(), browserFontData.getName());
+        //browserFontStyle = String.format("font-family: '%s';", browserFontData.getHeight(), browserFontData.getName());
+        browserFontStyle = String.format("font-family: '%s'; font-size: 80%%;", browserFontData.getName());
         browserAppServiceDetailes.addLocationListener(new LocationListener() {
             public void changing(LocationEvent event) {
                 try {
@@ -233,7 +235,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         });
     } 
 
-    
     @Override
     protected void createButtonsForButtonBar(Composite parent) {
         super.createButtonsForButtonBar(parent);
@@ -248,7 +249,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
         SubscriptionDetail sd = wad.subscriptionDetail;
         AppServicePlan asp = wad.appServicePlan;
-
         
         StringBuilder sb = new StringBuilder();
         sb.append("<div style=\"margin: 7px 7px 7px 7px; " + browserFontStyle + "\">");
@@ -381,9 +381,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         selectTableRowWithWebAppName(wa.name());
         fillAppServiceDetails();
     }
-
-
-
     
 //    private void collectProjectData() throws Exception {
 //        IProject project = null;
@@ -553,7 +550,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
               @Override
               public void run() {
                   MessageBox messageBox = new MessageBox(
-                          getShell(), 
+                          Display.getDefault().getActiveShell(), 
                           SWT.ICON_QUESTION | SWT.YES | SWT.NO);
                   messageBox.setMessage( "Web App has been uploaded successfully.\nLink: " + link + "\nOpen in browser?");
                   messageBox.setText("Upload Web App Status");
