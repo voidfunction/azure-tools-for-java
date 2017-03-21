@@ -25,20 +25,16 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.wizard.WizardDialog;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
-import com.microsoft.azure.docker.model.AzureDockerCertVault;
 import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
 import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -55,6 +51,10 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
     this.model = model;
     model.setNewDockerWizardDialog(this);
     this.onCreate = null;
+    if (model.getDockerHost().hostVM.region == null) {
+      model.getCurrentNavigationState().NEXT.setEnabled(false);
+      model.getCurrentNavigationState().FINISH.setEnabled(false);
+    }
   }
 
   public void DialogShaker(ValidationInfo info) {

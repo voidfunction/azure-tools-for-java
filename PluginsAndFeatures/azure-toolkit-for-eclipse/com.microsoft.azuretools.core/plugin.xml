@@ -86,7 +86,7 @@
             name="Sign In..."
             categoryId="com.microsoft.azuretools.core.category.Azure"
             id="com.microsoft.azuretools.core.commands.SignIn"
-            icon="icons/SignOutLight_16.png">
+            icon="icons/SignInLight_16.png">
         </command>
         <command
               categoryId="com.microsoft.azuretools.core.category.Azure"
@@ -98,7 +98,7 @@
             name="Select Subsriptions"
             categoryId="com.microsoft.azuretools.core.category.Azure"
             id="com.microsoft.azuretools.core.commands.SelectSubsriptions"
-            icon="icons/SignOutLight_16.png">
+            icon="icons/ConnectAccountsLight_16.png">
         </command>
     </extension>
    

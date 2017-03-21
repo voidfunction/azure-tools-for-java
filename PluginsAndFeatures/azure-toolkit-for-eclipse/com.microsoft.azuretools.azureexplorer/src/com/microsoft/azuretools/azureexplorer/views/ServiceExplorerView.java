@@ -137,7 +137,6 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
             azureModule = new AzureModuleImpl();
             HDInsightRootModuleImpl hdInsightRootModule =  new HDInsightRootModuleImpl(azureModule);
             azureModule.setHdInsightModule(hdInsightRootModule);
-            
             invisibleRoot = new TreeNode(null);
             invisibleRoot.add(createTreeNode(azureModule));
 
@@ -337,15 +336,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
 
     private void contributeToActionBars() {
         IActionBars bars = getViewSite().getActionBars();
-        fillLocalPullDown(bars.getMenuManager());
         fillLocalToolBar(bars.getToolBarManager());
-    }
-
-    private void fillLocalPullDown(IMenuManager manager) {
-        manager.add(refreshAction);
-        manager.add(new Separator());
-        manager.add(signInOutAction);
-        manager.add(selectSubscriptionAction);
     }
 
     private void fillLocalToolBar(IToolBarManager manager) {

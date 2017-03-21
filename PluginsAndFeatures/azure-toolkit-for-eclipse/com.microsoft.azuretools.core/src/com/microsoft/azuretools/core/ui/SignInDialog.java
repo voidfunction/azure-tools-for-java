@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -28,6 +30,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.osgi.service.log.LogService;
 
 import com.microsoft.azuretools.adauth.StringUtils;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
@@ -38,6 +41,8 @@ import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AccessTokenAzureManager;
 
 public class SignInDialog extends TitleAreaDialog {
+    @Inject
+    private static LogService LOGGER;
     private Text textAuthenticationFilePath;
     private Button rbtnInteractive;
     private Button rbtnAutomated;
@@ -271,12 +276,14 @@ public class SignInDialog extends TitleAreaDialog {
         try {
             AdAuthManager adAuthManager = AdAuthManager.getInstance();
             if (adAuthManager.isSignedIn()) {
-                doSingOut();
+                doSignOut();
             }
             signInAsync();
             accountEmail = adAuthManager.getAccountEmail();
         } catch (Exception ex) {
+            System.out.println("doSignIn(): " + ex.getMessage());
             ex.printStackTrace();
+            LOGGER.log(LogService.LOG_ERROR,"doSignIn()", ex);
         }
     }
 
@@ -288,19 +295,22 @@ public class SignInDialog extends TitleAreaDialog {
                 try {
                     AdAuthManager.getInstance().signIn();
                 } catch (Exception ex) {
-                    System.out.println("signInAsync ex: " + ex.getMessage());
+                    System.out.println("signInAsync()::run(): " + ex.getMessage());
+                    ex.printStackTrace();
+                    LOGGER.log(LogService.LOG_ERROR,"signInAsync()", ex);
                 }
             }
         };
         new ProgressMonitorDialog(this.getShell()).run(true, false, op);
     }
 
-    private void doSingOut() {
+    private void doSignOut() {
         try {
             accountEmail = null;
             AdAuthManager.getInstance().signOut();
         } catch (Exception ex) {
             ex.printStackTrace();
+            LOGGER.log(LogService.LOG_ERROR,"doSignOut()", ex);
         }
     }
     
@@ -331,6 +341,7 @@ public class SignInDialog extends TitleAreaDialog {
                         subscriptionManager.getSubscriptionDetails();
                     } catch (Exception ex) {
                         System.out.println("Getting Subscription List ex: " + ex.getMessage());
+                        LOGGER.log(LogService.LOG_ERROR,"doCreateServicePrincipal::subscriptionManager.getSubscriptionDetails()", ex);
                     }
                 }
             };
@@ -379,8 +390,8 @@ public class SignInDialog extends TitleAreaDialog {
             fileDialog.setFilterPath(destinationFolder);
             
         } catch (Exception ex) {
-            System.out.println("doCreateServicePrincipal ex:");
             ex.printStackTrace();
+            LOGGER.log(LogService.LOG_ERROR,"doCreateServicePrincipal()", ex);
         } finally {
             if (adAuthManager != null) {
                 try {
@@ -388,6 +399,7 @@ public class SignInDialog extends TitleAreaDialog {
                     adAuthManager.signOut();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    LOGGER.log(LogService.LOG_ERROR,"signOut()", e);
                 }
             }
         }

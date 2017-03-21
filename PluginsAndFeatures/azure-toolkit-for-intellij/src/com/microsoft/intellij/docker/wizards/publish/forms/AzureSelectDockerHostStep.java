@@ -124,7 +124,8 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
 
     dockerArtifactPath.setText(artifact != null ?
         artifact.getOutputFilePath() :
-        ArtifactUtil.getDefaultArtifactOutputPath(dockerImageInstance.artifactName, model.getProject()));
+//        ArtifactUtil.getDefaultArtifactOutputPath(dockerImageInstance.artifactName, model.getProject()));
+        model.getProject().getBasePath());
     dockerArtifactPath.setToolTipText(AzureDockerValidationUtils.getDockerArtifactPathTip());
     dockerArtifactPath.getTextField().setInputVerifier(new InputVerifier() {
       @Override

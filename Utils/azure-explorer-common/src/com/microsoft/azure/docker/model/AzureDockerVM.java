@@ -37,6 +37,7 @@ public class AzureDockerVM {
   public String networkSecurityGroupName;
   public String publicIpName;
   public String publicIp;
+  public String privateIp;
   public String dnsName;
   public String storageAccountName;
   public String storageAccountType;

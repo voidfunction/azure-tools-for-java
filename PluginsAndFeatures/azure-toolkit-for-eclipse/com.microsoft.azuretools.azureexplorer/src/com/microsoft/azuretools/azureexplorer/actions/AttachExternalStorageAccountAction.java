@@ -30,7 +30,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.ExternalStorageNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 
-@Name("Attach external storage account")
+@Name("Attach external storage account...")
 public class AttachExternalStorageAccountAction extends NodeActionListener {
     private final StorageModule storageModule;
 

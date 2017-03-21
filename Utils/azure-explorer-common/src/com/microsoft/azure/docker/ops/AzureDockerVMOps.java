@@ -26,21 +26,16 @@ import com.microsoft.azure.docker.model.*;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.compute.ImageReference;
 import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.compute.VirtualMachineExtension;
-import com.microsoft.azure.management.compute.VirtualMachineSizeTypes;
 import com.microsoft.azure.management.keyvault.Vault;
 import com.microsoft.azure.management.network.*;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.ResourceUtils;
 import com.microsoft.azure.management.resources.fluentcore.utils.ResourceNamer;
 import com.microsoft.azure.management.storage.StorageAccount;
-import com.microsoft.azuretools.utils.Pair;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.*;
 
 import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.DEBUG;
@@ -122,7 +117,7 @@ public class AzureDockerVMOps {
         // reuse existing virtual network
         String vnetName = newHost.hostVM.vnetName.split("@")[0];
         String vnetResourceGroupName = newHost.hostVM.vnetName.split("@")[1];
-        vnet = azureClient.networks().getByGroup(vnetName, vnetResourceGroupName);
+        vnet = azureClient.networks().getByGroup(vnetResourceGroupName, vnetName);
       } else {
         // create a new virtual network (a subnet will be automatically created as part of this)
         vnet = azureClient.networks()
@@ -181,8 +176,8 @@ public class AzureDockerVMOps {
 
   public static AzureDockerVM getDockerVM(VirtualMachine vm) {
     try {
-      PublicIpAddress publicIp = vm.getPrimaryPublicIpAddress();
-      NicIpConfiguration nicIpConfiguration = publicIp.getAssignedNetworkInterfaceIpConfiguration();
+      NicIpConfiguration nicIpConfiguration = vm.getPrimaryNetworkInterface().primaryIpConfiguration();
+      PublicIpAddress publicIp = nicIpConfiguration.getPublicIpAddress();
       Network vnet = nicIpConfiguration.getNetwork();
       AzureDockerVM dockerVM = new AzureDockerVM();
       dockerVM.name = vm.name();
@@ -190,13 +185,20 @@ public class AzureDockerVMOps {
       dockerVM.resourceGroupName = vm.resourceGroupName().toLowerCase();
       dockerVM.region = vm.regionName();
       dockerVM.availabilitySet = (vm.availabilitySetId() != null) ? ResourceUtils.nameFromResourceId(vm.availabilitySetId()) : null;
-      dockerVM.publicIpName = publicIp.name();
-      dockerVM.publicIp = publicIp.ipAddress();
-      dockerVM.dnsName = (publicIp.fqdn() != null && !publicIp.fqdn().isEmpty()) ?
-          publicIp.fqdn() :
-          (publicIp.ipAddress() != null && !publicIp.ipAddress().isEmpty()) ?
-              publicIp.ipAddress() :
-              dockerVM.name + "." + dockerVM.region + ".cloudapp.azure.com";
+      dockerVM.privateIp = nicIpConfiguration.privateIpAddress();
+      if (publicIp != null) {
+        dockerVM.publicIpName = publicIp.name();
+        dockerVM.publicIp = publicIp.ipAddress();
+        dockerVM.dnsName = (publicIp.fqdn() != null && !publicIp.fqdn().isEmpty()) ?
+            publicIp.fqdn() :
+            (publicIp.ipAddress() != null && !publicIp.ipAddress().isEmpty()) ?
+                publicIp.ipAddress() :
+                dockerVM.name + "." + dockerVM.region + ".cloudapp.azure.com";
+      } else {
+        dockerVM.publicIpName = "NA";
+        dockerVM.publicIp = "";
+        dockerVM.dnsName = dockerVM.privateIp;
+      }
       dockerVM.nicName = vm.getPrimaryNetworkInterface().name();
       dockerVM.vnetName = vnet.name();
       dockerVM.vnetAddressSpace = vnet.addressSpaces().get(0);

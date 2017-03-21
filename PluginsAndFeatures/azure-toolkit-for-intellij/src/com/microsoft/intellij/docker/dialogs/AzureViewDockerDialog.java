@@ -25,7 +25,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azure.docker.model.EditableDockerHost;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,6 +60,8 @@ public class AzureViewDockerDialog extends DialogWrapper {
   private JTextField dockerHostTlsAuthTextField;
   private JTextPane dockerHostKeyvaultTextPane;
   private JTextField dockerHostSidTextField;
+  private JTextField dockerHostPublicIpTextField;
+  private JTextField dockerHostPrivateIpTextField;
 
   private Action myClickApplyAction;
   private Project project;
@@ -89,6 +90,8 @@ public class AzureViewDockerDialog extends DialogWrapper {
     setTextField(dockerHostRGNameTextField, dockerHost.hostVM.resourceGroupName);
     setTextField(dockerHostVnetNameAddrTextField, String.format("%s (%s)", dockerHost.hostVM.vnetName, dockerHost.hostVM.vnetAddressSpace));
     setTextField(dockerHostSubnetNameAddrTextField, String.format("%s (%s)", dockerHost.hostVM.subnetName, dockerHost.hostVM.subnetAddressRange));
+    setTextField(dockerHostPublicIpTextField, String.format("%s (%s)", dockerHost.hostVM.publicIp, dockerHost.hostVM.publicIpName));
+    setTextField(dockerHostPrivateIpTextField, dockerHost.hostVM.privateIp);
     setTextField(dockerHostStorageNameTypeTextField, String.format("%s (%s)", dockerHost.hostVM.storageAccountName, dockerHost.hostVM.storageAccountType));
 
     // Docker VM log in settings
@@ -237,5 +240,14 @@ public class AzureViewDockerDialog extends DialogWrapper {
   protected void doOKAction() {
     super.doOKAction();
   }
+
+  @Nullable
+  @Override
+  protected Action[] createActions() {
+    Action okAction = getOKAction();
+    okAction.putValue(Action.NAME, "Close");
+    return new Action[] {okAction};
+  }
+
 
 }
