@@ -21,6 +21,7 @@
  */
 package com.microsoft.azuretools.core.ui;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -47,6 +48,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.osgi.service.log.LogService;
 
+import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.core.utils.ProgressDialog;
@@ -64,7 +66,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
 //    public List<SubscriptionDetail> getSubscriptionDetails() {
 //        return sdl;
 //    }
-    
+
     /**
      * Create the dialog.
      * @param parentShell
@@ -74,7 +76,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
         setHelpAvailable(false);
         setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
         this.subscriptionManager = subscriptionManage;
-    }    
+    }
     
     public static SubscriptionsDialog go(Shell parentShell, SubscriptionManager subscriptionManager) {
         SubscriptionsDialog d = new SubscriptionsDialog(parentShell, subscriptionManager);
@@ -124,7 +126,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
 
         return area;
     }
-    
+
     @Override
     public void create() {
         super.create();
@@ -145,19 +147,19 @@ public class SubscriptionsDialog extends TitleAreaDialog {
                     monitor.beginTask("Reading subscriptions...", IProgressMonitor.UNKNOWN);
                     try {
                         subscriptionManager.getSubscriptionDetails();
-                    } catch (Exception e) {
-                        LOGGER.log(LogService.LOG_ERROR,"refreshSubscriptionsAsync::ProgressDialog", e);
+                    } catch (IOException | AuthException e) {
+                        LOGGER.log(LogService.LOG_ERROR, e.getMessage(), e);
                         e.printStackTrace();
                     }
                     monitor.done();
                 }
             });
-        } catch (Exception e) {
-            LOGGER.log(LogService.LOG_ERROR,"refreshSubscriptionsAsync", e);
+        } catch (InvocationTargetException | InterruptedException e) {
+            LOGGER.log(LogService.LOG_ERROR,e.getMessage(), e);
             e.printStackTrace();
         }
     }
-    
+
     private void setSubscriptionDetails() {
         try {
             sdl = subscriptionManager.getSubscriptionDetails();
@@ -166,12 +168,12 @@ public class SubscriptionsDialog extends TitleAreaDialog {
                 item.setText(new String[] {sd.getSubscriptionName(), sd.getSubscriptionId()});
                 item.setChecked(sd.isSelected());
             }
-        } catch (Exception e) {
-            LOGGER.log(LogService.LOG_ERROR,"subscriptionManager.getSubscriptionDetails", e);
+        } catch (IOException | AuthException e) {
+            LOGGER.log(LogService.LOG_ERROR, e.getMessage(), e);
             e.printStackTrace();
         }
     }
-    
+
     private void refreshSubscriptions() {
         try {
             System.out.println("refreshSubscriptions");
@@ -180,8 +182,8 @@ public class SubscriptionsDialog extends TitleAreaDialog {
             refreshSubscriptionsAsync();
             setSubscriptionDetails();
             subscriptionManager.setSubscriptionDetails(sdl);
-        } catch (Exception e) {
-            LOGGER.log(LogService.LOG_ERROR,"subscriptionManager.setSubscriptionDetails", e);
+        } catch (IOException | AuthException e) {
+            LOGGER.log(LogService.LOG_ERROR, e.getMessage(), e);
             e.printStackTrace();
         }
     }
@@ -196,7 +198,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
         Button okButton = getButton(IDialogConstants.OK_ID);
         okButton.setText("Select");
     }
-    
+
     /**
      * Return the initial size of the dialog.
      */
@@ -204,7 +206,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
     protected Point getInitialSize() {
         return new Point(668, 410);
     }
-    
+
     @Override
     public void okPressed() {
         TableItem[] tia = table.getItems();
@@ -214,23 +216,23 @@ public class SubscriptionsDialog extends TitleAreaDialog {
                 chekedCount++;
             }
         }
-        
+
         if (chekedCount == 0) {
-            this.setErrorMessage("Please select at least one subscription");
+            this.setErrorMessage("Select at least one subscription");
             return;
         }        
-        
+
         for (int i = 0; i < tia.length; ++i) {
             this.sdl.get(i).setSelected(tia[i].getChecked());
         }
-        
+
         try {
             subscriptionManager.setSubscriptionDetails(sdl);
         } catch (Exception e) {
-            LOGGER.log(LogService.LOG_ERROR,"subscriptionManager.setSubscriptionDetails", e);
+            LOGGER.log(LogService.LOG_ERROR, e.getMessage(), e);
             e.printStackTrace();
         }
-        
+
         super.okPressed();
     }
 }
