@@ -28,6 +28,7 @@ import com.microsoft.azuretools.authmanage.srvpri.report.Reporter;
 import com.microsoft.azuretools.authmanage.srvpri.rest.GraphRestHelper;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,7 +40,7 @@ public class ServicePrincipalStep implements IStep {
     private Reporter<String> reporter;
 
     @Override
-    public void execute(Map<String, Object> params) throws Exception {
+    public void execute(Map<String, Object> params) throws IOException, InterruptedException {
         //System.out.println("ServicePrincipalStep execute...");
 
         UUID appId = (UUID)params.get("appId");
@@ -64,7 +65,7 @@ public class ServicePrincipalStep implements IStep {
     }
 
     @Override
-    public void rollback(Map<String, Object> params) throws Exception {
+    public void rollback(Map<String, Object> params) throws IOException {
         //System.out.println("ServicePrincipalStep rollback...");
         Object spObjectId = params.get("spObjectId");
         if(spObjectId != null)
@@ -79,7 +80,7 @@ public class ServicePrincipalStep implements IStep {
     // helpers
 
     // Create Service Principals
-    private ServicePrincipalRet createAadServicePrincipal(UUID appId) throws Exception {
+    private ServicePrincipalRet createAadServicePrincipal(UUID appId) throws IOException {
     /*
         POST https://graph.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/servicePrincipals?api-version=1.6-internal HTTP/1.1
 
@@ -102,7 +103,7 @@ public class ServicePrincipalStep implements IStep {
         return spr;
     }
 
-    private void destroyAadServicePrincipal(UUID objectId) throws Exception {
+    private void destroyAadServicePrincipal(UUID objectId) throws IOException {
         // DELETE https://graph.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/servicePrincipals/f144ba9d-f4af-48b8-a992-3e328f2710b9?api-version=1.6-internal
 
         @SuppressWarnings("unused")
@@ -110,7 +111,7 @@ public class ServicePrincipalStep implements IStep {
     }
 
         @SuppressWarnings("unused")
-		private static ServicePrincipalRet getAadServicePrincipal(UUID objectId) throws Exception {
+		private static ServicePrincipalRet getAadServicePrincipal(UUID objectId) {
         // GET https://graph.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/servicePrincipals/f144ba9d-f4af-48b8-a992-3e328f2710b9?api-version=1.6-internal
         return null;
     }

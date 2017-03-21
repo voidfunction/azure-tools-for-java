@@ -28,6 +28,7 @@ import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.Subscription;
+import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.CommonSettings;
 import com.microsoft.azuretools.authmanage.ISubscriptionSelectionListener;
@@ -40,6 +41,7 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,33 +54,28 @@ public class AzureModelController {
     private static ISubscriptionSelectionListener subscriptionSelectionListener = new ISubscriptionSelectionListener() {
         @Override
         public void update(boolean isRefresh) {
-            try {
-                if (isRefresh) {
-                    clearAll();
-                    return;
+            if (isRefresh) {
+                clearAll();
+                return;
+            }
+
+            IProgressTask pt = new ProgressTask(CommonSettings.getUiFactory().getProgressTaskImpl());
+            pt.work(new IWorker() {
+                @Override
+                public void work(IProgressIndicator pi) {
+                    try {
+                        subscriptionSelectionChanged(pi);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        LOGGER.log(Level.SEVERE, "IWorker.work", e);
+                    }
                 }
 
-                IProgressTask pt = new ProgressTask(CommonSettings.getUiFactory().getProgressTaskImpl());
-                pt.work(new IWorker() {
-                    @Override
-                    public void work(IProgressIndicator pi) {
-                        try {
-                            subscriptionSelectionChanged(pi);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            LOGGER.log(Level.SEVERE, "IWorker.work", e);
-                        }
-                    }
-
-                    @Override
-                    public String getName() {
-                        return "Update Azure Local Cache Progress";
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-                LOGGER.log(Level.SEVERE, "update()", e);
-            }
+                @Override
+                public String getName() {
+                    return "Update Azure Local Cache Progress";
+                }
+            });
         }
     };
 
@@ -91,7 +88,7 @@ public class AzureModelController {
         // TODO: notify subscribers
     }
 
-    private static synchronized void subscriptionSelectionChanged(IProgressIndicator progressIndicator) throws Exception {
+    private static synchronized void subscriptionSelectionChanged(IProgressIndicator progressIndicator) throws IOException, AuthException {
         System.out.println("AzureModelController.subscriptionSelectionChanged: starting");
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         // not signed in
@@ -219,7 +216,7 @@ public class AzureModelController {
 //        }
     }
 
-    public static synchronized void updateSubscriptionMaps(IProgressIndicator progressIndicator) throws Exception {
+    public static synchronized void updateSubscriptionMaps(IProgressIndicator progressIndicator) throws IOException, CanceledByUserException, AuthException {
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         // not signed in
         if (azureManager == null) { return; }
@@ -269,7 +266,7 @@ public class AzureModelController {
         azureModel.setSubscriptionToLocationMap(sdlocMap);
     }
 
-    public static synchronized void updateResourceGroupMaps(IProgressIndicator progressIndicator) throws Exception {
+    public static synchronized void updateResourceGroupMaps(IProgressIndicator progressIndicator) throws IOException, CanceledByUserException, AuthException {
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         // not signed in
         if (azureManager == null) { return;}

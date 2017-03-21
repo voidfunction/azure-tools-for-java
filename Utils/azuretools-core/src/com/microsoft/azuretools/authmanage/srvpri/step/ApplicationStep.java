@@ -29,6 +29,7 @@ import com.microsoft.azuretools.authmanage.srvpri.report.Reporter;
 import com.microsoft.azuretools.authmanage.srvpri.rest.GraphRestHelper;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -45,7 +46,7 @@ public class ApplicationStep implements IStep {
     private Reporter<String> reporter;
 
     @Override
-    public void execute(Map<String, Object> params) throws Exception {
+    public void execute(Map<String, Object> params) throws IOException, InterruptedException {
 
         //System.out.println("ApplicationStep execute...");
 
@@ -81,7 +82,7 @@ public class ApplicationStep implements IStep {
     }
 
     @Override
-    public void rollback(Map<String, Object> params) throws Exception {
+    public void rollback(Map<String, Object> params) throws IOException {
         //System.out.println("ApplicationStep rollback...");
         Object appObjectId= params.get("appObjectId");
         if(appObjectId != null)
@@ -100,7 +101,7 @@ public class ApplicationStep implements IStep {
             String displayName,
             String homePage,
             String[] identifierUris,
-            String password ) throws Exception {
+            String password ) throws IOException {
 
         /*
             POST https://graph.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/applications?api-version=1.6
@@ -144,7 +145,7 @@ public class ApplicationStep implements IStep {
         return applicationRet;
     }
 
-    private void destroyAadApplication (UUID appObjectId) throws Exception {
+    private void destroyAadApplication (UUID appObjectId) throws IOException {
         // DELETE https://graph.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/applications/8a30c28a-dd22-456d-b377-99e6a775f552?api-version=1.6-internal
         String resp = graphRestHelper.doDelete("applications/" + appObjectId.toString(), null, null);
         System.out.println("destroyAadApplication responce: " + resp);

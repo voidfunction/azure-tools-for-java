@@ -22,13 +22,21 @@
 
 package com.microsoft.azuretools.authmanage.srvpri.rest;
 
+import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.adauth.PromptBehavior;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by vlashch on 8/29/16.
  */
 abstract class RequestFactoryBase implements IRequestFactory {
+    private final static Logger LOGGER = Logger.getLogger(RequestFactoryBase.class.getName());
     protected String apiVersion;
     protected String urlPrefix;
     protected String tenantId;
@@ -52,9 +60,17 @@ abstract class RequestFactoryBase implements IRequestFactory {
         if (urlPrefix == null) throw new NullPointerException("this.urlPrefix is null");
         return urlPrefix;
     }
-    public String getAccessToken() throws Exception {
-        if (tenantId == null) throw new NullPointerException("this.tenantId is null");
-        if (resource == null) throw new NullPointerException("this.resource is null");
-        return AdAuthManager.getInstance().getAccessToken(tenantId, resource, promptBehavior);
+    public String getAccessToken() throws IOException {
+        if (tenantId == null) throw new IllegalArgumentException("this.tenantId is null");
+        if (resource == null) throw new IllegalArgumentException("this.resource is null");
+
+        try {
+            return AdAuthManager.getInstance().getAccessToken(tenantId, resource, promptBehavior);
+        } catch (URISyntaxException | InterruptedException | ExecutionException | AuthException e) {
+            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            throw new IOException(e);
+
+        }
     }
 }

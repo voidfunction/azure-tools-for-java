@@ -205,7 +205,7 @@ public class TokenCache {
     /// Clears the cache by deleting all the items. Note that if the cache is the default shared cache, clearing it would
     /// impact all the instances of <see cref="AuthenticationContext"/> which share that cache.
     /// </summary>
-    public void clear() throws Exception {
+    public void clear() {
        synchronized(lock) {
             onBeforeAccess();
             log.log(Level.FINEST, String.format("Clearing Cache :- %d items to be removed", tokenCacheDictionary.size()));

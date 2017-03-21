@@ -41,7 +41,7 @@ public class FileTokenCache extends TokenCache {
     private static final String CacheFileName = "msauth4j.cache";
     private Path filePath;
     
-    public FileTokenCache() throws Exception {
+    public FileTokenCache() throws IOException {
         String homeDir = System.getProperty("user.home");
 
         Path dirPath = Paths.get(homeDir, CacheDir);

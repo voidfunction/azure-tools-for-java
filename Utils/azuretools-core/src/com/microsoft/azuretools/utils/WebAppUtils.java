@@ -57,7 +57,7 @@ public class WebAppUtils {
     private static String reportFilename = "report.txt";
     private static String statusFilename = "status.txt";
 
-    public static FTPClient getFtpConnection(PublishingProfile pp) throws Exception {
+    public static FTPClient getFtpConnection(PublishingProfile pp) throws IOException {
 
         FTPClient ftp = new FTPClient();
 
@@ -81,7 +81,7 @@ public class WebAppUtils {
         return ftp;
     }
 
-    public static void deployArtifact(String artifactName, String artifactPath, PublishingProfile pp, boolean toRoot, IProgressIndicator indicator) throws Exception {
+    public static void deployArtifact(String artifactName, String artifactPath, PublishingProfile pp, boolean toRoot, IProgressIndicator indicator) throws IOException {
         FTPClient ftp = null;
         try {
             if (indicator != null) indicator.setText("Connecting to FTP server...");
@@ -140,7 +140,7 @@ public class WebAppUtils {
         if (pi != null) pi.setText2("");
     }
 
-    private static void uploadJdkDownloadScript(FTPClient ftp, String jdkDownloadUrl) throws Exception {
+    private static void uploadJdkDownloadScript(FTPClient ftp, String jdkDownloadUrl) throws IOException {
 
         String aspxPageName = aspScriptName;
 
@@ -171,7 +171,7 @@ public class WebAppUtils {
         return false;
     }
 
-    public static int sendGet(String sitePath) throws Exception {
+    public static int sendGet(String sitePath) throws IOException {
         URL url = new URL(sitePath);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
@@ -214,7 +214,7 @@ public class WebAppUtils {
         }
     }
 
-    public static void deployCustomJdk(WebApp webApp, String jdkDownloadUrl, WebContainer webContainer, IProgressIndicator indicator) throws Exception {
+    public static void deployCustomJdk(WebApp webApp, String jdkDownloadUrl, WebContainer webContainer, IProgressIndicator indicator) throws IOException, InterruptedException, WebAppException {
         FTPClient ftp = null;
         String customJdkFolderName =  null;
         try {
@@ -272,7 +272,7 @@ public class WebAppUtils {
             customJdkFolderName = ftpDirs[0].getName();
 
             uploadWebConfigForCustomJdk(ftp, webApp, customJdkFolderName, webContainer, indicator);
-        } catch (Exception ex){
+        } catch (IOException | WebAppException | InterruptedException ex){
             if (doesRemoteFolderExist(ftp, ftpRootPath, jdkFolderName)) {
                 indicator.setText("Error happened. Cleaning up...");
                 removeFtpDirectory(ftp, ftpJdkPath, indicator);
@@ -287,9 +287,9 @@ public class WebAppUtils {
         }
     }
 
-    private static void uploadWebConfigForCustomJdk(FTPClient ftp, WebApp webApp, String jdkFolderName, WebContainer webContainer, IProgressIndicator indicator) throws Exception {
+    private static void uploadWebConfigForCustomJdk(FTPClient ftp, WebApp webApp, String jdkFolderName, WebContainer webContainer, IProgressIndicator indicator) throws IOException {
         if  (jdkFolderName == null || jdkFolderName.isEmpty()) {
-            throw new Exception("jdkFolderName is null or empty");
+            throw new IllegalArgumentException("jdkFolderName is null or empty");
         }
 
         if(indicator != null) indicator.setText("Stopping the service...");
@@ -548,7 +548,7 @@ public class WebAppUtils {
 
     }
 
-    public static WebApp createAppService(IProgressIndicator progressIndicator, CreateAppServiceModel model) throws Exception {
+    public static WebApp createAppService(IProgressIndicator progressIndicator, CreateAppServiceModel model) throws IOException, WebAppException, InterruptedException, AzureCmdException {
 
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         // not signed in

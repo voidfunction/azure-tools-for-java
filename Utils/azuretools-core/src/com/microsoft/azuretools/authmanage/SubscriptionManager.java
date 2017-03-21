@@ -29,6 +29,7 @@ import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.utils.Pair;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -48,7 +49,7 @@ public class SubscriptionManager {
         this.azureManager = azureManager;
     }
 
-    public synchronized List<SubscriptionDetail> getSubscriptionDetails() throws Exception {
+    public synchronized List<SubscriptionDetail> getSubscriptionDetails() throws AuthException, IOException {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManager.getSubscriptionDetails()");
         if (subscriptionDetails == null) {
             List<SubscriptionDetail> sdl = updateAccountSubscriptionList();
@@ -57,7 +58,7 @@ public class SubscriptionManager {
         return subscriptionDetails;
     }
 
-    protected List<SubscriptionDetail> updateAccountSubscriptionList() throws Exception {
+    protected List<SubscriptionDetail> updateAccountSubscriptionList() throws IOException {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManager.updateAccountSubscriptionList()");
 
         if (azureManager == null) {
@@ -88,7 +89,7 @@ public class SubscriptionManager {
         updateSidToTidMap();
     }
 
-    public void setSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws Exception {
+    public void setSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws AuthException, IOException {
         System.out.println("SubscriptionManager.setSubscriptionDetails() " + Thread.currentThread().getId());
         doSetSubscriptionDetails(subscriptionDetails);
         notifyAllListeners();
@@ -110,18 +111,18 @@ public class SubscriptionManager {
         }
     }
 
-    public synchronized String getSubscriptionTenant(String sid) throws Exception {
+    public synchronized String getSubscriptionTenant(String sid) {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManager.getSubscriptionTenant()");
         String tid = sidToTid.get(sid);
         return tid;
     }
 
-    public synchronized Set<String> getAccountSidList() throws Exception {
+    public synchronized Set<String> getAccountSidList() {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManager.getAccountSidList()");
         return sidToTid.keySet();
     }
 
-    public void cleanSubscriptions() throws Exception {
+    public void cleanSubscriptions() throws IOException {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManager.cleanSubscriptions()");
         synchronized (this) {
             if (subscriptionDetails != null) {

@@ -22,10 +22,12 @@
 
 package com.microsoft.azuretools.authmanage;
 
+import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.adauth.JsonHelper;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +43,7 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
     }
 
     @Override
-    public void setSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws Exception {
+    public void setSubscriptionDetails(List<SubscriptionDetail> subscriptionDetails) throws AuthException, IOException {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManagerPersist.setSubscriptionDetails()");
         synchronized (this) {
             String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
@@ -51,7 +53,7 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
     }
 
     @Override
-    protected List<SubscriptionDetail> updateAccountSubscriptionList() throws Exception {
+    protected List<SubscriptionDetail> updateAccountSubscriptionList() throws IOException {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManagerPersist.updateAccountSubscriptionList()");
         List<SubscriptionDetail> sdl = null;
         synchronized (this) {
@@ -66,21 +68,21 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
     }
 
     @Override
-    public synchronized void cleanSubscriptions() throws Exception {
+    public synchronized void cleanSubscriptions() throws IOException {
         System.out.println(Thread.currentThread().getId() + " SubscriptionManagerPersist.cleanSubscriptions()");
         String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
         deleteSubscriptions(subscriptionsDetailsFileName);
         super.cleanSubscriptions();
     }
 
-    public synchronized static void deleteSubscriptions(String subscriptionsDetailsFileName) throws Exception {
+    public synchronized static void deleteSubscriptions(String subscriptionsDetailsFileName) throws IOException {
         System.out.println("cleaning " + subscriptionsDetailsFileName + " file");
         //String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
         FileStorage fs = new FileStorage(subscriptionsDetailsFileName, CommonSettings.settingsBaseDir);
         fs.cleanFile();
     }
 
-    private static List<SubscriptionDetail> loadSubscriptions(String subscriptionsDetailsFileName) throws Exception {
+    private static List<SubscriptionDetail> loadSubscriptions(String subscriptionsDetailsFileName) throws IOException {
         System.out.println("SubscriptionManagerPersist.loadSubscriptions()");
 
         //subscriptionDetails.clear();
@@ -99,7 +101,7 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
         return sdl;
     }
 
-    private static void saveSubscriptions(List<SubscriptionDetail> sdl, String subscriptionsDetailsFileName) throws Exception {
+    private static void saveSubscriptions(List<SubscriptionDetail> sdl, String subscriptionsDetailsFileName) throws IOException {
         System.out.println("SubscriptionManagerPersist.saveSubscriptions()");
         String sd = JsonHelper.serialize(sdl);
         //String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();

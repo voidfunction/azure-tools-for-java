@@ -33,6 +33,7 @@ import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.sdkmanage.ServicePrincipalAzureManager;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -79,18 +80,18 @@ public class AuthMethodManager {
         }
     }
 
-    public static AuthMethodManager getInstance() throws Exception {
+    public static AuthMethodManager getInstance() throws IOException {
         if( instance == null) {
             instance = new AuthMethodManager();
         }
         return instance;
     }
 
-    public AzureManager getAzureManager() {
+    public AzureManager getAzureManager() throws IOException {
         return getAzureManager(getAuthMethod());
     }
 
-    private AzureManager getAzureManager(AuthMethod authMethod) {
+    private AzureManager getAzureManager(AuthMethod authMethod) throws IOException {
         if (azureManager != null) return azureManager;
         switch (authMethod) {
             case AD:
@@ -116,28 +117,23 @@ public class AuthMethodManager {
         return azureManager;
     }
 
-    public void signOut() {
+    public void signOut() throws IOException {
         cleanAll();
         notifySignOutEventListener();
     }
 
-    private void cleanAll() {
-        try {
-            if (azureManager != null) {
-                azureManager.getSubscriptionManager().cleanSubscriptions();
-                azureManager = null;
-            }
-            ServicePrincipalAzureManager.cleanPersist();
-            authMethodDetails.setAccountEmail(null);
-            authMethodDetails.setCredFilePath(null);
-            saveSettings();
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.log(Level.SEVERE, "cleanAll()", e);
+    private void cleanAll() throws IOException {
+        if (azureManager != null) {
+            azureManager.getSubscriptionManager().cleanSubscriptions();
+            azureManager = null;
         }
+        ServicePrincipalAzureManager.cleanPersist();
+        authMethodDetails.setAccountEmail(null);
+        authMethodDetails.setCredFilePath(null);
+        saveSettings();
     }
 
-    public boolean isSignedIn() {
+    public boolean isSignedIn() throws IOException {
         return getAzureManager() != null;
     }
 
@@ -145,7 +141,7 @@ public class AuthMethodManager {
         return authMethodDetails.getAuthMethod();
     }
 
-    public void setAuthMethodDetails(AuthMethodDetails authMethodDetails) throws Exception {
+    public void setAuthMethodDetails(AuthMethodDetails authMethodDetails) throws IOException {
         cleanAll();
         this.authMethodDetails = authMethodDetails;
         saveSettings();
@@ -156,11 +152,11 @@ public class AuthMethodManager {
         return this.authMethodDetails;
     }
 
-    private AuthMethodManager() throws Exception {
+    private AuthMethodManager() throws IOException {
         loadSettings();
     }
 
-    private void loadSettings() throws Exception {
+    private void loadSettings() throws IOException {
         System.out.println("loading authMethodDetails...");
         FileStorage fs = new FileStorage(CommonSettings.authMethodDetailsFileName, CommonSettings.settingsBaseDir);
         byte[] data = fs.read();
@@ -173,7 +169,7 @@ public class AuthMethodManager {
         authMethodDetails = JsonHelper.deserialize(AuthMethodDetails.class, json);
     }
 
-    private void saveSettings() throws Exception {
+    private void saveSettings() throws IOException {
         System.out.println("saving authMethodDetails...");
         String sd = JsonHelper.serialize(authMethodDetails);
         FileStorage fs = new FileStorage(CommonSettings.authMethodDetailsFileName, CommonSettings.settingsBaseDir);

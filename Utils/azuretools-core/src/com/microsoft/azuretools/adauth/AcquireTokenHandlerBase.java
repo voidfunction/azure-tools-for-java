@@ -116,7 +116,7 @@ public abstract class AcquireTokenHandlerBase {
     Future<AuthenticationResult> runAsync() {
         return service.submit(new Callable<AuthenticationResult>() {
             @Override
-            public AuthenticationResult call() throws Exception {
+            public AuthenticationResult call() throws InterruptedException, ExecutionException, AuthException, URISyntaxException, IOException {
                 return run();
             }
         });
@@ -132,7 +132,7 @@ public abstract class AcquireTokenHandlerBase {
     protected Future<AuthenticationResult> acquireTokenAsync() {
         return Executors.newSingleThreadExecutor().submit(new Callable<AuthenticationResult>() {
             @Override
-            public AuthenticationResult call() throws Exception {
+            public AuthenticationResult call() throws URISyntaxException, IOException, AuthException, InstantiationException, IllegalAccessException {
                 Map<String, String> requestParameters = new HashMap<>();
                 requestParameters.put(OAuthParameter.Resource, resource);
                 requestParameters.put(OAuthParameter.ClientId, clientKey.clientId);
@@ -169,7 +169,7 @@ public abstract class AcquireTokenHandlerBase {
     private Future<AuthenticationResult> refreshAccessTokenAsync(final AuthenticationResult result) {
         return Executors.newSingleThreadExecutor().submit(new Callable<AuthenticationResult>() {
             @Override
-            public AuthenticationResult call() throws Exception {
+            public AuthenticationResult call() throws URISyntaxException, IOException, InstantiationException, IllegalAccessException {
                 AuthenticationResult newResult = null;
                 if (resource != null) {
                     log.log(Level.FINEST, "Refreshing access token...");
@@ -177,7 +177,7 @@ public abstract class AcquireTokenHandlerBase {
                         newResult = sendTokenRequestByRefreshToken(result.refreshToken);
                        
                     } catch (AuthException e) {
-                        log.log(Level.FINEST, "Error getting token - need to re-login.");
+                        log.log(Level.WARNING, "Error getting token - need to re-login.");
                         return null;
                     }
                     authenticator.updateTenantId(result.tenantId);

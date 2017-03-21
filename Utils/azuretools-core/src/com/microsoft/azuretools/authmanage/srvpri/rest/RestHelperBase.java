@@ -24,10 +24,12 @@ package com.microsoft.azuretools.authmanage.srvpri.rest;
 
 
 import javax.net.ssl.HttpsURLConnection;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -62,7 +64,7 @@ public abstract class RestHelperBase {
 //    private static final String urlPatternParamless = urlPrefix + "%s?" + apiVersion;
 
 
-    protected static String action(IRequestFactory factory, String verb, String request, String params, String body) throws Exception {
+    protected static String action(IRequestFactory factory, String verb, String request, String params, String body) throws IOException {
         String urlSrtring = (params == null)
                 ? String.format(factory.getUrlPatternParamless(), request)
                 : String.format(factory.getUrlPattern(), request, params);
@@ -136,19 +138,19 @@ public abstract class RestHelperBase {
         }
     }
 
-    public String doGet(String request, String params) throws Exception{
+    public String doGet(String request, String params) throws IOException {
         return action(getRequestFactory(), "GET", request, params, null);
     }
 
-    public String doPost(String request, String params, String body) throws Exception {
+    public String doPost(String request, String params, String body) throws IOException {
         return action(getRequestFactory(), "POST", request, params, body);
     }
 
-    public String doPut(String request, String params, String body) throws Exception {
+    public String doPut(String request, String params, String body) throws IOException {
         return action(getRequestFactory(), "PUT", request, params, body);
     }
 
-    public String doDelete(String request, String params, String body) throws Exception {
+    public String doDelete(String request, String params, String body) throws IOException {
         return action(getRequestFactory(), "DELETE", request, params, body);
     }
 }

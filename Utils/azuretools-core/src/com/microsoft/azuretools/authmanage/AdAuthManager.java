@@ -37,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AdAuthManager {
@@ -48,7 +49,7 @@ public class AdAuthManager {
     private static AdAuthDetails adAuthDetails = new AdAuthDetails();
     //private static Map<String, List<String>> tidToSidsMap = new HashMap<>();
 
-    public static AdAuthManager getInstance() throws Exception {
+    public static AdAuthManager getInstance() throws IOException {
         if( instance == null) {
             AuthContext.setUserDefinedWebUi(CommonSettings.getUiFactory().getWebUi());
             instance = new AdAuthManager(false);
@@ -68,7 +69,7 @@ public class AdAuthManager {
         return result.getAccessToken();
     }
 
-    public AuthenticationResult signIn() throws Exception {
+    public AuthenticationResult signIn() throws IOException, URISyntaxException, InterruptedException, ExecutionException, AuthException {
 
         // build token cache for azure and graph api
         // using azure sdk directly
@@ -101,6 +102,7 @@ public class AdAuthManager {
 
             } catch (Exception e) {
                 System.out.println("Exception: AdAuthManager auth for tid: " + tid + e.getMessage());
+                LOGGER.log(Level.WARNING, e.getMessage(), e);
             }
         }
 
@@ -121,7 +123,7 @@ public class AdAuthManager {
         return adAuthDetails.getTidToSidsMap();
     }
 
-    public void signOut() throws Exception {
+    public void signOut() {
         cleanCache();
         adAuthDetails.setAccountEmail(null);
         adAuthDetails.setTidToSidsMap(null);
@@ -135,11 +137,11 @@ public class AdAuthManager {
     public String getAccountEmail() { return adAuthDetails.getAccountEmail(); }
 
     // logout
-    public void cleanCache() throws Exception {
+    public void cleanCache() {
         cache.clear();
     }
 
-    private AdAuthManager(boolean useFileCache) throws Exception {
+    private AdAuthManager(boolean useFileCache) throws IOException {
         cache = new TokenCache();
         if (useFileCache) {
             tokenFileStorage = new TokenFileStorage(CommonSettings.settingsBaseDir);
@@ -153,7 +155,7 @@ public class AdAuthManager {
                             tokenFileStorage.write(cache.serialize());
                             cache.setHasStateChanged(false);
                         }
-                    } catch (Exception ex) {
+                    } catch (IOException ex) {
                         System.out.println(ex.getMessage());
                     }
                 }
@@ -161,7 +163,7 @@ public class AdAuthManager {
         }
     }
 
-//    private void loadSettings() throws Exception {
+//    private void loadSettings() {
 //        System.out.println("loadSettings()");
 //        FileStorage fs = new FileStorage(adAuthSettingsFileName, settingsBaseDir);
 //        byte[] data = fs.read();
@@ -174,7 +176,7 @@ public class AdAuthManager {
 //        adAuthDetails = JsonHelper.deserialize(AdAuthDetails.class, json);
 //    }
 
-//    private void saveSettings() throws Exception {
+//    private void saveSettings() {
 //        System.out.println("saveSettings()");
 //        String sd = JsonHelper.serialize(adAuthDetails);
 //        FileStorage fs = new FileStorage(adAuthSettingsFileName, settingsBaseDir);

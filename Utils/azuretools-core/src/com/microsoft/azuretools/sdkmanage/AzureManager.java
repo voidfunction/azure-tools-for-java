@@ -29,17 +29,18 @@ import com.microsoft.azure.management.resources.Tenant;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.utils.Pair;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface AzureManager {
-    Azure getAzure(String sid) throws Exception;
-    List<Subscription> getSubscriptions() throws Exception;
-    List<Pair<Subscription, Tenant>> getSubscriptionsWithTenant() throws Exception;
+    Azure getAzure(String sid) throws IOException;
+    List<Subscription> getSubscriptions() throws IOException;
+    List<Pair<Subscription, Tenant>> getSubscriptionsWithTenant() throws IOException;
     Settings getSettings();
     SubscriptionManager getSubscriptionManager();
-    void drop() throws Exception;
+    void drop() throws IOException;
 //    public List<Tenant> getTenants() throws Throwable;
     KeyVaultClient getKeyVaultClient(String tid) throws Exception;
-    String getCurrentUserId() throws Exception;
-    String getAccessToken(String tid) throws Exception;
+    String getCurrentUserId() throws IOException;
+    String getAccessToken(String tid) throws IOException;
 }

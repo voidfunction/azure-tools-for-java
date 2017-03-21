@@ -23,6 +23,7 @@
 package com.microsoft.azuretools.adauth;
 
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,7 +41,7 @@ public class TokenFileStorage {
     private Path filePath;
     private ReentrantReadWriteLock rwlock = new ReentrantReadWriteLock();
 
-    public TokenFileStorage(String baseDirPath) throws Exception {
+    public TokenFileStorage(String baseDirPath) throws IOException {
         
         String baseDir = System.getProperty("user.home");
         
@@ -60,7 +61,7 @@ public class TokenFileStorage {
         }
     }
     
-    public byte[] read() throws Exception {
+    public byte[] read() throws IOException {
         try {
             rwlock.readLock().lock();
             return Files.readAllBytes(filePath);
@@ -70,7 +71,7 @@ public class TokenFileStorage {
         }
     }
 
-    public void write(byte[] data) throws Exception {
+    public void write(byte[] data) throws IOException {
         try {
             rwlock.writeLock().lock();
             Files.write(filePath, data);

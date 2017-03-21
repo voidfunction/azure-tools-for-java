@@ -43,12 +43,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ServicePrincipalAzureManager extends AzureManagerBase {
-
+    private final static Logger LOGGER = Logger.getLogger(ServicePrincipalAzureManager.class.getName());
     private static Settings settings;
     private final SubscriptionManager subscriptionManager;
     private final File credFile;
@@ -59,7 +62,7 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
         settings.setSubscriptionsDetailsFileName("subscriptionsDetails-sp.json");
     }
 
-    public static void cleanPersist() throws Exception {
+    public static void cleanPersist() throws IOException {
         String subscriptionsDetailsFileName = settings.getSubscriptionsDetailsFileName();
         SubscriptionManagerPersist.deleteSubscriptions(subscriptionsDetailsFileName);
     }
@@ -84,7 +87,7 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
     }
 
     @Override
-    public Azure getAzure(String sid) throws Exception {
+    public Azure getAzure(String sid) throws IOException {
         if (sidToAzureMap.containsKey(sid)) {
             return sidToAzureMap.get(sid);
         }
@@ -96,23 +99,23 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
     }
 
     @Override
-    public List<Subscription> getSubscriptions() throws Exception {
+    public List<Subscription> getSubscriptions() throws IOException {
         List<Subscription> sl = auth().subscriptions().list();
         return sl;
     }
 
     @Override
-    public List<Pair<Subscription, Tenant>> getSubscriptionsWithTenant() throws Exception {
+    public List<Pair<Subscription, Tenant>> getSubscriptionsWithTenant() throws IOException {
         List<Pair<Subscription, Tenant>> stl = new LinkedList<>();
         for (Tenant t : getTenants()) {
             //String tid = t.tenantId();
-            try {
-                for (Subscription s : getSubscriptions()) {
-                    stl.add(new Pair<Subscription, Tenant>(s, t));
-                }
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
+            for (Subscription s : getSubscriptions()) {
+                stl.add(new Pair<Subscription, Tenant>(s, t));
             }
+//            try {
+//            } catch (IOException e) {
+//                System.out.println(e.getMessage());
+//            }
         }
         return stl;
     }
@@ -128,18 +131,18 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
     }
 
     @Override
-    public void drop() throws Exception {
+    public void drop() throws IOException {
         System.out.println("ServicePrincipalAzureManager.drop()");
         subscriptionManager.cleanSubscriptions();
     }
 
-    public List<Tenant> getTenants() throws Exception {
+    public List<Tenant> getTenants() throws IOException {
         List<Tenant> tl = auth().tenants().list();
         return tl;
     }
 
     @Override
-    public KeyVaultClient getKeyVaultClient(String tid) throws Exception {
+    public KeyVaultClient getKeyVaultClient(String tid) {
         ServiceClientCredentials creds = new KeyVaultCredentials() {
             @Override
             public String doAuthenticate(String authorization, String resource, String scope) {
@@ -173,7 +176,7 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
     }
 
     @Override
-    public String getCurrentUserId() throws  Exception{
+    public String getCurrentUserId() throws IOException {
         ApplicationTokenCredentials credentials = (atc == null)
             ? ApplicationTokenCredentials.fromFile(credFile)
             : atc;
@@ -182,7 +185,7 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
     }
 
     @Override
-    public String getAccessToken(String tid) throws Exception {
+    public String getAccessToken(String tid) throws IOException {
         ExecutorService service = null;
         AuthenticationResult authenticationResult;
         try {
@@ -195,11 +198,15 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
             ClientCredential clientCredential = new ClientCredential(credentials.getClientId(), credentials.getSecret());
             Future<AuthenticationResult> future = context.acquireToken(Constants.resourceARM, clientCredential, null);
             authenticationResult = future.get();
+            return authenticationResult.getAccessToken();
+        } catch (InterruptedException  | ExecutionException e) {
+            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            throw new IOException(e);
         } finally {
             if (service != null) {
                 service.shutdown();
             }
         }
-        return authenticationResult.getAccessToken();
     }
 }

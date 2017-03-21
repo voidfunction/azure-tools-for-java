@@ -22,8 +22,13 @@
 
 package com.microsoft.azuretools.sdkmanage;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
@@ -31,6 +36,7 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
 import com.microsoft.azuretools.Constants;
+import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.adauth.PromptBehavior;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.CommonSettings;
@@ -41,7 +47,7 @@ import com.microsoft.azuretools.utils.Pair;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
 
 public class AccessTokenAzureManager extends AzureManagerBase {
-
+    private final static Logger LOGGER = Logger.getLogger(AccessTokenAzureManager.class.getName());
     private final SubscriptionManager subscriptionManager;
 
     public AccessTokenAzureManager() {
@@ -54,7 +60,7 @@ public class AccessTokenAzureManager extends AzureManagerBase {
     }
 
     @Override
-    public void drop() throws Exception {
+    public void drop() throws IOException {
         subscriptionManager.cleanSubscriptions();
         AdAuthManager.getInstance().signOut();
     }
@@ -67,7 +73,7 @@ public class AccessTokenAzureManager extends AzureManagerBase {
     }
 
     @Override
-    public Azure getAzure(String sid) throws Exception {
+    public Azure getAzure(String sid) throws IOException {
         if (sidToAzureMap.containsKey(sid)) {
             return sidToAzureMap.get(sid);
         }
@@ -80,32 +86,23 @@ public class AccessTokenAzureManager extends AzureManagerBase {
     }
 
     @Override
-    public List<Subscription> getSubscriptions() throws Exception {
+    public List<Subscription> getSubscriptions() throws IOException {
         List<Subscription> sl = new LinkedList<Subscription>();
         // could be multi tenant - return all subscriptions for the current account
         List<Tenant> tl = getTenants("common");
         for (Tenant t : tl) {
-            try {
-                sl.addAll(getSubscriptions(t.tenantId()));
-
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
+            sl.addAll(getSubscriptions(t.tenantId()));
         }
         return sl;
     }
 
     @Override
-    public List<Pair<Subscription, Tenant>> getSubscriptionsWithTenant() throws Exception {
+    public List<Pair<Subscription, Tenant>> getSubscriptionsWithTenant() throws IOException {
         List<Pair<Subscription, Tenant>> stl = new LinkedList<>();
         for (Tenant t : getTenants("common")) {
             String tid = t.tenantId();
-            try {
-                for (Subscription s : getSubscriptions(tid)) {
-                    stl.add(new Pair<Subscription, Tenant>(s, t));
-                }
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
+            for (Subscription s : getSubscriptions(tid)) {
+                stl.add(new Pair<Subscription, Tenant>(s, t));
             }
         }
         return stl;
@@ -116,12 +113,12 @@ public class AccessTokenAzureManager extends AzureManagerBase {
         return settings;
     }
 
-    public static List<Subscription> getSubscriptions(String tid) throws Exception {
+    public static List<Subscription> getSubscriptions(String tid) throws IOException {
         List<Subscription> sl = authTid(tid).subscriptions().list();
         return sl;
     }
 
-    public static List<Tenant> getTenants(String tid) throws Exception {
+    public static List<Tenant> getTenants(String tid) throws IOException {
         List<Tenant> tl = authTid(tid).tenants().list();
         return tl;
     }
@@ -134,22 +131,22 @@ public class AccessTokenAzureManager extends AzureManagerBase {
 //        return null;
 //    }
 
-    private static Azure.Authenticated authTid(String tid) throws Exception {
+    private static Azure.Authenticated authTid(String tid) throws IOException {
 //        String token = AdAuthManager.getInstance().getAccessToken(tid);
 //        return auth(token);
         return Azure.configure().withUserAgent(CommonSettings.USER_AGENT).authenticate(new RefreshableTokenCredentials(AdAuthManager.getInstance(), tid));
     }
 
     @Override
-    public KeyVaultClient getKeyVaultClient(String tid) throws Exception {
+    public KeyVaultClient getKeyVaultClient(String tid) {
         ServiceClientCredentials creds = new KeyVaultCredentials() {
             @Override
             public String doAuthenticate(String authorization, String resource, String scope) {
-                try {
-                    return AdAuthManager.getInstance().getAccessToken(tid, Constants.resourceVault, PromptBehavior.Auto);
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
+            try {
+                return AdAuthManager.getInstance().getAccessToken(tid, Constants.resourceVault, PromptBehavior.Auto);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
             }
         };
 
@@ -157,12 +154,18 @@ public class AccessTokenAzureManager extends AzureManagerBase {
     }
 
     @Override
-    public String getCurrentUserId() throws  Exception{
+    public String getCurrentUserId() throws IOException {
         return AdAuthManager.getInstance().getAccountEmail();
     }
 
     @Override
-    public String getAccessToken(String tid) throws Exception {
-        return AdAuthManager.getInstance().getAccessToken(tid, Constants.resourceARM, PromptBehavior.Auto);
+    public String getAccessToken(String tid) throws IOException {
+        try {
+            return AdAuthManager.getInstance().getAccessToken(tid, Constants.resourceARM, PromptBehavior.Auto);
+        } catch (InterruptedException | ExecutionException | AuthException | URISyntaxException e) {
+            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            throw new IOException(e);
+        }
     }
 }

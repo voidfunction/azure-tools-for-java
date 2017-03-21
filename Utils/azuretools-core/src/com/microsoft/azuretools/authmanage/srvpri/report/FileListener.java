@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 public class FileListener implements IListener<String> {
     private final static Logger LOGGER = Logger.getLogger(FileListener.class.getName());
     private final FileStorage fsReport;
-    public FileListener(String filename, String path) throws Exception {
+    public FileListener(String filename, String path) throws IOException {
         fsReport = new FileStorage(filename, path);
     }
 

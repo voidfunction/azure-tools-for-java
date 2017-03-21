@@ -23,17 +23,21 @@
 package com.microsoft.azuretools.utils;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.*;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.InvalidKeyException;
 import java.util.*;
 
 /**
  * Created by vlashch on 1/19/17.
  */
 public class StorageAccoutUtils {
-    private static CloudStorageAccount getCloudStorageAccount(String blobLink, String saKey) throws Exception {
+    private static CloudStorageAccount getCloudStorageAccount(String blobLink, String saKey) throws MalformedURLException, URISyntaxException, InvalidKeyException {
         if (blobLink == null || blobLink.isEmpty()) {
             throw new IllegalArgumentException("Invalid blob link, it's null or empty: " + blobLink);
         }
@@ -52,7 +56,7 @@ public class StorageAccoutUtils {
         return cloudStorageAccount;
     }
 
-    public static String  getBlobSasUri(String blobLink, String saKey) throws Exception {
+    public static String  getBlobSasUri(String blobLink, String saKey) throws URISyntaxException, StorageException, InvalidKeyException, MalformedURLException {
         CloudStorageAccount cloudStorageAccount = getCloudStorageAccount(blobLink, saKey);
         // Create the blob client.
         CloudBlobClient blobClient = cloudStorageAccount.createCloudBlobClient();

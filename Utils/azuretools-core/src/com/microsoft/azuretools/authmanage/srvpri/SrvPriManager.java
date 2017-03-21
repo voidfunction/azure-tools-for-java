@@ -57,7 +57,12 @@ public class SrvPriManager {
     // sp - role (1-many)
 
     private final static Logger LOGGER = Logger.getLogger(SrvPriManager.class.getName());
-    public static String createSp(String tenantId, List<String> subscriptionIds, String suffix, IListener<Status> statusListener, String destinationFolder) throws Exception {
+    public static String createSp(String tenantId,
+                                  List<String> subscriptionIds,
+                                  String suffix,
+                                  IListener<Status> statusListener,
+                                  String destinationFolder)
+            throws IOException {
 
         System.out.print(tenantId +": [");
         for (String sid : subscriptionIds) {

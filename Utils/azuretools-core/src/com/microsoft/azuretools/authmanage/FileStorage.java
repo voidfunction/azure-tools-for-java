@@ -39,7 +39,7 @@ public class FileStorage {
     private Path filePath;
     private ReentrantReadWriteLock rwlock = new ReentrantReadWriteLock();
 
-    public FileStorage(String filename, String baseDirPath) throws Exception {
+    public FileStorage(String filename, String baseDirPath) throws IOException {
 
         if (StringUtils.isNullOrEmpty(filename)) {
             throw new IllegalArgumentException("filename is null or empty");
@@ -83,7 +83,7 @@ public class FileStorage {
         }
     }
 
-    public void cleanFile() throws Exception {
+    public void cleanFile() throws IOException {
         write(new byte[]{});
     }
 
