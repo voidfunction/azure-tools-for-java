@@ -36,11 +36,16 @@ import javax.swing.*;
 
 public class SparkLibraryType extends LibraryType<SparkLibraryProperties>{
 
+    // overriding deprecated method to temporarily make code compatible both with IntelliJ 2016.x and 2017.1
     @Nullable
     @Override
-    public Icon getIcon(@Nullable LibraryProperties properties) {
+    public Icon getIcon() {
         return PlatformIcons.LIBRARY_ICON;
     }
+
+//    public Icon getIcon(@Nullable SparkLibraryProperties properties) {
+//        return PlatformIcons.LIBRARY_ICON;
+//    }
 
     public SparkLibraryType() {
         super(SparkLibraryKind.getInstance());
