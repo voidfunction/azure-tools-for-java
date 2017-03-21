@@ -98,6 +98,8 @@
             text="Publish as Docker Container..." description="Azure website deployment for Java on Docker"
             icon="/icons/publish.png">
     </action>
+    <action class="com.microsoft.intellij.actions.AzureExplorerOpenAction" id="Actions.AzureExplorerOpenAction"
+            text="Show Azure Explorer" description="Show Azure Explorer" icon="/icons/AzureExplorer_16.png"/>
     <action id="Actions.AzureCodeSamples"
             class="com.microsoft.intellij.actions.AzureCodeSamples"
             text="Azure Code Samples"
@@ -130,6 +132,7 @@
         <reference ref="Actions.AzureWebDeploy"/>
         <reference ref="Actions.AzureDockerHostDeploy"/>
       </group>
+      <reference ref="Actions.AzureExplorerOpenAction"/>
       <reference ref="Actions.AzureCodeSamples"/>
     </group>
 

@@ -55,6 +55,26 @@
                id="com.microsoft.azure.hdinsight.jobview"/>        
     </extension>
 
+	<extension point="org.eclipse.ui.handlers">
+        <handler
+            commandId="com.microsoft.azuretools.azureexplorer.commands.ShowAzureExplorer"
+            class="com.microsoft.azuretools.azureexplorer.actions.ShowAzureExplorer"/>
+    </extension>
+
+	<extension point="org.eclipse.ui.menus">
+      <menuContribution locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar id="com.persistent.ui.toolbar">
+            <command
+                commandId="com.microsoft.azuretools.azureexplorer.commands.ShowAzureExplorer"
+                label="Show Azure Explorer"
+                tooltip="Show Azure Explorer"
+                icon="icons/AzureExplorer_16.png"
+                style="push">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+
     <extension
          point="org.eclipse.help.contexts">
       <contexts

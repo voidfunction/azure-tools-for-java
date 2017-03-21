@@ -77,7 +77,7 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
     /**
      * The ID of the view as specified by the extension.
      */
-    public static final String ID = "ServiceExplorerView";
+    public static final String ID = "com.microsoft.azuretools.azureexplorer.views.ServiceExplorerView";
 
     private TreeViewer viewer;
     private Action refreshAction;
