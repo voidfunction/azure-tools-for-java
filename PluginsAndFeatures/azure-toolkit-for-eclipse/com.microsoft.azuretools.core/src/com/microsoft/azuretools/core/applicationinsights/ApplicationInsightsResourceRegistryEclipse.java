@@ -30,12 +30,10 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import com.microsoft.applicationinsights.management.rest.client.RestOperationException;
-import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.azuretools.core.Activator;
-import com.microsoft.azuretools.core.applicationinsights.ApplicationInsightsPreferences;
 
 
 public class ApplicationInsightsResourceRegistryEclipse {

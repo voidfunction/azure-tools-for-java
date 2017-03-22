@@ -6,12 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -30,6 +31,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -47,7 +49,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
-import org.osgi.service.log.LogService;
 
 import com.microsoft.azure.management.appservice.AppServicePlan;
 import com.microsoft.azure.management.appservice.JavaVersion;
@@ -64,13 +65,12 @@ import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.azuretools.utils.CanceledByUserException;
 import com.microsoft.azuretools.utils.WebAppUtils;
-import org.eclipse.swt.layout.RowData;
+import com.microsoft.azuretools.webapp.Activator;
 
 
 @SuppressWarnings("restriction")
 public class WebAppDeployDialog extends TitleAreaDialog {
-    @Inject
-    private static LogService LOGGER;
+	private static ILog LOG = Activator.getDefault().getLog();
     
     private Table table;
     private Browser browserAppServiceDetailes;
@@ -201,9 +201,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                     if (!event.location.contains("http")) return;
                     event.doit = false;
                     PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(event.location));
-                } catch (Exception e) {
-                    LOGGER.log(LogService.LOG_ERROR,"changing@LocationListener@AppServiceCreateDialog", e);
-                    e.printStackTrace();
+                } catch (Exception ex) {
+                    //LOGGER.log(LogService.LOG_ERROR,"changing@LocationListener@AppServiceCreateDialog", e);
+                    ex.printStackTrace();
+                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
                 }       
             }
             public void changed(LocationEvent event) {}
@@ -309,15 +310,17 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         });
 
                     } catch (Exception ex) {
-                        LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@updateAndFillTable@AppServiceCreateDialog", ex);
-                        ex.printStackTrace();
+                    	ex.printStackTrace();
+                        //LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@updateAndFillTable@AppServiceCreateDialog", ex);
+                    	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
                     }
                     monitor.done();
                 }
             });
-        } catch (InvocationTargetException | InterruptedException e) {
-            LOGGER.log(LogService.LOG_ERROR,"updateAndFillTable@AppServiceCreateDialog", e);
-            e.printStackTrace();
+        } catch (InvocationTargetException | InterruptedException ex) {
+        	ex.printStackTrace();
+            //LOGGER.log(LogService.LOG_ERROR,"updateAndFillTable@AppServiceCreateDialog", e);
+        	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
         }
     }
     
@@ -440,9 +443,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             String destinationPath = project.getLocation() + "/" + projectName + ".war";
             export(projectName, destinationPath);
             deploy(projectName, destinationPath);
-        } catch (Exception e) {
-            LOGGER.log(LogService.LOG_ERROR,"okPressed@AppServiceCreateDialog", e);
-            e.printStackTrace();
+        } catch (Exception ex) {
+        	ex.printStackTrace();
+            //LOGGER.log(LogService.LOG_ERROR,"okPressed@AppServiceCreateDialog", e);
+        	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
         };
         super.okPressed();
     }
@@ -513,9 +517,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                                         }
                                         Thread.sleep(sleepMs);
                                     }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    LOGGER.log(LogService.LOG_ERROR,"run@Tread@run@ProgressDialog@deploy@AppServiceCreateDialog", e);
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                    //LOGGER.log(LogService.LOG_ERROR,"run@Tread@run@ProgressDialog@deploy@AppServiceCreateDialog", e);
+                                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
                                 }
                             }
                         });
@@ -526,22 +531,24 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         }
                         monitor.done();
                         showLink(sitePath);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@deploy@AppServiceCreateDialog", e);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        //LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@deploy@AppServiceCreateDialog", e);
+                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
                         Display.getDefault().asyncExec(new Runnable() {
                             @Override
                             public void run() {
-                                ErrorWindow.go(getShell(), e.getMessage(), errTitle);;
+                                ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
                             }
                         });
                     }
                 }
             });
-        } catch (InvocationTargetException | InterruptedException e) {
-            e.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"deploy@AppServiceCreateDialog", e);
-            ErrorWindow.go(getShell(), e.getMessage(), errTitle);;
+        } catch (InvocationTargetException | InterruptedException ex) {
+            ex.printStackTrace();
+            //LOGGER.log(LogService.LOG_ERROR,"deploy@AppServiceCreateDialog", e);
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
+            ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
         }
     }
     
@@ -560,9 +567,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                   if (response == SWT.YES) {
                       try {
                           PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(link));
-                      } catch (Exception e) {
-                          LOGGER.log(LogService.LOG_ERROR,"run@Display@showLink@AppServiceCreateDialog", e);
-                          e.printStackTrace();
+                      } catch (Exception ex) {
+                    	  ex.printStackTrace();
+                          //LOGGER.log(LogService.LOG_ERROR,"run@Display@showLink@AppServiceCreateDialog", e);
+                    	  LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
                       }
                   }
               }
@@ -608,23 +616,25 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                                 browserAppServiceDetailes.setText("");
                             };
                         });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@deleteAppService@AppServiceCreateDialog", e);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        //LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@deleteAppService@AppServiceCreateDialog", e);
+                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
                         Display.getDefault().asyncExec(new Runnable() {
                             @Override
                             public void run() {
-                                ErrorWindow.go(getShell(), e.getMessage(), errTitle);;
+                                ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
                             }
                         });
                         
                     }
                 }
             });
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"deleteAppService@AppServiceCreateDialog", e);
-            ErrorWindow.go(getShell(), e.getMessage(), errTitle);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            //LOGGER.log(LogService.LOG_ERROR,"deleteAppService@AppServiceCreateDialog", e);
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
+            ErrorWindow.go(getShell(), ex.getMessage(), errTitle);
         }
     }
 }

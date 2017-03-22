@@ -25,9 +25,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import javax.inject.Inject;
-
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -46,17 +47,15 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.osgi.service.log.LogService;
 
 import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.core.Activator;
 import com.microsoft.azuretools.core.utils.ProgressDialog;
 
 public class SubscriptionsDialog extends TitleAreaDialog {
-
-    @Inject
-    private static LogService LOGGER;
+	private static ILog LOG = Activator.getDefault().getLog();
     
     private Table table;
     
@@ -147,16 +146,18 @@ public class SubscriptionsDialog extends TitleAreaDialog {
                     monitor.beginTask("Reading subscriptions...", IProgressMonitor.UNKNOWN);
                     try {
                         subscriptionManager.getSubscriptionDetails();
-                    } catch (IOException | AuthException e) {
-                        LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@efreshSubscriptionsAsync@SubscriptionDialog", e);
-                        e.printStackTrace();
+                    } catch (IOException | AuthException ex) {
+                    	ex.printStackTrace();
+                        //LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@efreshSubscriptionsAsync@SubscriptionDialog", e);
+                    	 LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@efreshSubscriptionsAsync@SubscriptionDialog", ex));
                     }
                     monitor.done();
                 }
             });
-        } catch (InvocationTargetException | InterruptedException e) {
-            LOGGER.log(LogService.LOG_ERROR, "run@refreshSubscriptionsAsync@SubscriptionDialog", e);
-            e.printStackTrace();
+        } catch (InvocationTargetException | InterruptedException ex) {
+        	ex.printStackTrace();
+            //LOGGER.log(LogService.LOG_ERROR, "run@refreshSubscriptionsAsync@SubscriptionDialog", e);
+        	 LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@refreshSubscriptionsAsync@SubscriptionDialog", ex));
         }
     }
 
@@ -168,9 +169,10 @@ public class SubscriptionsDialog extends TitleAreaDialog {
                 item.setText(new String[] {sd.getSubscriptionName(), sd.getSubscriptionId()});
                 item.setChecked(sd.isSelected());
             }
-        } catch (IOException | AuthException e) {
-            LOGGER.log(LogService.LOG_ERROR, "setSubscriptionDetails@SubscriptionDialog", e);
-            e.printStackTrace();
+        } catch (IOException | AuthException ex) {
+        	ex.printStackTrace();
+            //LOGGER.log(LogService.LOG_ERROR, "setSubscriptionDetails@SubscriptionDialog", ex);
+        	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "setSubscriptionDetails@SubscriptionDialog", ex));
         }
     }
 
@@ -182,9 +184,10 @@ public class SubscriptionsDialog extends TitleAreaDialog {
             refreshSubscriptionsAsync();
             setSubscriptionDetails();
             subscriptionManager.setSubscriptionDetails(sdl);
-        } catch (IOException | AuthException e) {
-            LOGGER.log(LogService.LOG_ERROR, "refreshSubscriptions@SubscriptionDialog", e);
-            e.printStackTrace();
+        } catch (IOException | AuthException ex) {
+        	ex.printStackTrace();
+            //LOGGER.log(LogService.LOG_ERROR, "refreshSubscriptions@SubscriptionDialog", ex);
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "refreshSubscriptions@SubscriptionDialog", ex));
         }
     }
 
@@ -228,9 +231,10 @@ public class SubscriptionsDialog extends TitleAreaDialog {
 
         try {
             subscriptionManager.setSubscriptionDetails(sdl);
-        } catch (Exception e) {
-            LOGGER.log(LogService.LOG_ERROR, "okPressed@SubscriptionDialog", e);
-            e.printStackTrace();
+        } catch (Exception ex) {
+        	ex.printStackTrace();
+            //LOGGER.log(LogService.LOG_ERROR, "okPressed@SubscriptionDialog", e);
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "okPressed@SubscriptionDialog", ex));
         }
 
         super.okPressed();

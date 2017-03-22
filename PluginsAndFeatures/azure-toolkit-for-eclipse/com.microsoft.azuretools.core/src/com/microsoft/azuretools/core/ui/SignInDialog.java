@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import javax.inject.Inject;
-
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
-
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.osgi.service.log.LogService;
 
 import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.adauth.StringUtils;
@@ -42,11 +41,11 @@ import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.interact.AuthMethod;
 import com.microsoft.azuretools.authmanage.models.AuthMethodDetails;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.core.Activator;
 import com.microsoft.azuretools.sdkmanage.AccessTokenAzureManager;
 
 public class SignInDialog extends TitleAreaDialog {
-    @Inject
-    private static LogService LOGGER;
+	private static ILog LOG = Activator.getDefault().getLog();
     private Text textAuthenticationFilePath;
     private Button rbtnInteractive;
     private Button rbtnAutomated;
@@ -287,7 +286,8 @@ public class SignInDialog extends TitleAreaDialog {
         } catch (IOException | InvocationTargetException | InterruptedException ex) {
             System.out.println("doSignIn@SingInDialog: " + ex.getMessage());
             ex.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR, "doSignIn@SingInDialog", ex);
+            //LOGGER.log(LogService.LOG_ERROR, "doSignIn@SingInDialog", ex);
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
         }
     }
 
@@ -301,7 +301,8 @@ public class SignInDialog extends TitleAreaDialog {
                 } catch (IOException | URISyntaxException | ExecutionException | AuthException e) {
                     System.out.println("run@signInAsync@SingInDialog: " + e.getMessage());
                     e.printStackTrace();
-                    LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@signInAsync@SingInDialog", e);
+                    //LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@signInAsync@SingInDialog", e);
+                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@signInAsync@SingInDialog", e));
                 }
             }
         };
@@ -314,7 +315,8 @@ public class SignInDialog extends TitleAreaDialog {
             AdAuthManager.getInstance().signOut();
         } catch (IOException ex) {
             ex.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"doSignOut@SingInDialog", ex);
+            //LOGGER.log(LogService.LOG_ERROR,"doSignOut@SingInDialog", ex);
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignOut@SingInDialog", ex));
         }
     }
     
@@ -345,7 +347,8 @@ public class SignInDialog extends TitleAreaDialog {
                         subscriptionManager.getSubscriptionDetails();
                     } catch (Exception ex) {
                         System.out.println("run@doCreateServicePrincipal@SignInDialo: " + ex.getMessage());
-                        LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@doCreateServicePrincipal@SignInDialog", ex);
+                        //LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@doCreateServicePrincipal@SignInDialog", ex);
+                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@doCreateServicePrincipal@SignInDialogg", ex));
                     }
                 }
             };
@@ -395,7 +398,8 @@ public class SignInDialog extends TitleAreaDialog {
             
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"doCreateServicePrincipal@SignInDialog", ex);
+            //LOGGER.log(LogService.LOG_ERROR,"doCreateServicePrincipal@SignInDialog", ex);
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doCreateServicePrincipal@SignInDialog", ex));
         } finally {
             if (adAuthManager != null) {
                 adAuthManager.signOut();

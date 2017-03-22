@@ -22,10 +22,6 @@ package com.microsoft.azuretools.core.utils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -62,16 +58,13 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.service.prefs.Preferences;
 
-import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
-import com.microsoft.azuretools.azurecommons.util.WAEclipseHelperMethods;
 import com.microsoft.azuretools.core.Activator;
-import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
 
 
 public class PluginUtil {
 
 	public static final String pluginFolder = getPluginFolderPathUsingBundle();
-	private static final String COMPONENTSETS_TYPE = "COMPONENTSETS";
+	//private static final String COMPONENTSETS_TYPE = "COMPONENTSETS";
 
 	/**
 	 * @return Template(componentssets.xml)

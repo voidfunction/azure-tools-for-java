@@ -34,7 +34,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
 
-import javax.inject.Inject;
 import javax.swing.event.EventListenerList;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -48,28 +47,25 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
-import com.microsoft.azuretools.core.ui.views.Messages;
 import com.google.gson.Gson;
-import com.microsoft.azuretools.core.azureexplorer.helpers.IDEHelperImpl;
 import com.microsoft.azuretools.authmanage.CommonSettings;
-import com.microsoft.azuretools.core.ui.UIFactory;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.tooling.msservices.components.PluginComponent;
-import com.microsoft.tooling.msservices.components.PluginSettings;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
 import com.microsoft.azuretools.azurecommons.deploy.UploadProgressEventArgs;
 import com.microsoft.azuretools.azurecommons.deploy.UploadProgressEventListener;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.service.log.LogService;
+import com.microsoft.azuretools.core.azureexplorer.helpers.IDEHelperImpl;
+import com.microsoft.azuretools.core.ui.UIFactory;
+import com.microsoft.azuretools.core.ui.views.Messages;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.components.PluginComponent;
+import com.microsoft.tooling.msservices.components.PluginSettings;
 
 /**
  * The activator class controls the plug-in life cycle
  */
 public class Activator extends AbstractUIPlugin implements PluginComponent {
-	@Inject
-    private static LogService LOGGER;
 	private static FileHandler logFileHandler = null;
 
     // The plug-in ID
@@ -138,7 +134,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
             initAzureToolsCoreLibsLoggerFileHandler();
         } catch (IOException e) {
             e.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR, "initAzureToolsCoreLibsSettings@Activator", e);
+            log("initAzureToolsCoreLibsSettings@Activator", e);
         }
     }
 
@@ -155,7 +151,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
             l.info("=== Log session started ===");
         } catch (IOException e) {
             e.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR, "initAzureToolsCoreLibsLoggerFileHandler@Activator", e);
+            log("initAzureToolsCoreLibsLoggerFileHandler@Activator", e);
         }
     }
 

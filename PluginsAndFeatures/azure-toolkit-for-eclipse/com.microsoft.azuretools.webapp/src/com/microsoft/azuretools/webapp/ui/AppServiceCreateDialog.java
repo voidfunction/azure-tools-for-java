@@ -14,9 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -43,8 +44,6 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
-import org.osgi.service.log.LogService;
-
 import com.microsoft.azure.management.appservice.AppServicePlan;
 import com.microsoft.azure.management.appservice.AppServicePricingTier;
 import com.microsoft.azure.management.appservice.WebApp;
@@ -60,10 +59,10 @@ import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.azuretools.utils.StorageAccoutUtils;
 import com.microsoft.azuretools.utils.WebAppUtils;
+import com.microsoft.azuretools.webapp.Activator;
 
 public class AppServiceCreateDialog extends TitleAreaDialog {
-    @Inject
-    private LogService LOGGER;
+	private static ILog LOG = Activator.getDefault().getLog();
 
     private Text textAppName;
     private Text textResourceGroupName;
@@ -309,7 +308,8 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
 					getExternalBrowser().openURL(new URL("https://azure.microsoft.com/en-us/pricing/details/app-service/"));
 				}
 				catch (Exception ex) {
-					LOGGER.log(LogService.LOG_ERROR, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex);
+					//LOGGER.log(LogService.LOG_ERROR, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex);
+					LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex));
 				}
 			}
 		});
@@ -399,7 +399,8 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
 					getExternalBrowser().openURL(new URL(AzulZuluModel.getLicenseUrl()));
 				}
 				catch (Exception ex) {
-					LOGGER.log(LogService.LOG_ERROR, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex);
+					//LOGGER.log(LogService.LOG_ERROR, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex);
+					LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "widgetSelected@SelectionAdapter@AppServiceCreateDialo", ex));
 				}
 			}
 		});
@@ -525,7 +526,8 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR, "fillWebContainers@AppServiceCreateDialog", ex);
+            //LOGGER.log(LogService.LOG_ERROR, "fillWebContainers@AppServiceCreateDialog", ex);
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "fillWebContainers@AppServiceCreateDialog", ex));
         }
     }
     
@@ -611,7 +613,8 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"doFillSubscriptions@AppServiceCreateDialog", ex);
+            //LOGGER.log(LogService.LOG_ERROR,"doFillSubscriptions@AppServiceCreateDialog", ex);
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doFillSubscriptions@AppServiceCreateDialog", ex));
         }
     }
     
@@ -721,7 +724,8 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.log(LogService.LOG_ERROR,"fillAppServicePlanPricingTiers@AppServiceCreateDialog", ex);
+            //LOGGER.log(LogService.LOG_ERROR,"fillAppServicePlanPricingTiers@AppServiceCreateDialog", ex);
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "fillAppServicePlanPricingTiers@AppServiceCreateDialog", ex));
         }
     }
     
@@ -765,23 +769,25 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
                                     AppServiceCreateDialog.super.okPressed();
                                 };
                             });                    
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@okPressed@AppServiceCreateDialog", e);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            //LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@okPressed@AppServiceCreateDialog", e);
+                            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "fillAppServicePlanPricingTiers@AppServiceCreateDialog", ex));
                             Display.getDefault().asyncExec(new Runnable() {
                                 @Override
                                 public void run() {
-                                    ErrorWindow.go(getShell(), e.getMessage(), errTitle);;
+                                    ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
                                 }
                             });
 
                         }
                     }
                 });
-            } catch (InvocationTargetException | InterruptedException e) {
-                e.printStackTrace();
-                LOGGER.log(LogService.LOG_ERROR, "okPressed@AppServiceCreateDialog", e);
-                ErrorWindow.go(getShell(), e.getMessage(), errTitle);;
+            } catch (InvocationTargetException | InterruptedException ex) {
+                ex.printStackTrace();
+                //LOGGER.log(LogService.LOG_ERROR, "okPressed@AppServiceCreateDialog", e);
+                LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "fillAppServicePlanPricingTiers@AppServiceCreateDialog", ex));
+                ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
             }
         }
     }
