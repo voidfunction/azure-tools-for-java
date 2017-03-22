@@ -30,6 +30,8 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -152,9 +154,6 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
     Button btnJdkOwnDownloadUrl;
     Label lblJdkOwnSrorageAccountKey;
     Label lblJdkOwnComment;
-    
-    
-    
     
     protected WebApp webApp;
 
@@ -719,6 +718,12 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         Map<SubscriptionDetail, List<Location>> sdlocMap = AzureModel.getInstance().getSubscriptionToLocationMap();
         SubscriptionDetail sd = binderSubscriptionDetails.get(i);
         List<Location> locl = sdlocMap.get(sd);
+        Collections.sort(locl, new Comparator<Location>() {
+            @Override
+            public int compare(Location lhs, Location rhs) {
+                return lhs.displayName().compareTo(rhs.displayName());
+            }
+        });
         
         comboAppServicePlanLocation.add("<select location>");
         binderAppServicePlanLocation.add(null);
