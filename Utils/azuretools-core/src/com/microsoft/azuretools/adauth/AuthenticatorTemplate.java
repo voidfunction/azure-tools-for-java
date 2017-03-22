@@ -22,6 +22,7 @@
 
 package com.microsoft.azuretools.adauth;
 
+import com.microsoft.azuretools.Constants;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -77,7 +78,8 @@ class AuthenticatorTemplate {
         URL url = new URL(instanceDiscoveryEndpoint);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
-        connection.setRequestProperty("User-Agent", "AzureToolkit4j");
+        connection.setReadTimeout(Constants.connection_read_timeout_ms);
+        //connection.setRequestProperty("User-Agent", "AzureToolkit4");
         HttpHelper.addCorrelationIdToRequestHeader(connection, callState);
         
         // process a response

@@ -22,6 +22,8 @@
 
 package com.microsoft.azuretools.adauth;
 
+import com.microsoft.azuretools.Constants;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -50,7 +52,7 @@ public class HttpHelper {
         connection.setDoOutput(true);
         connection.setDoInput(true);
         connection.setUseCaches(false);
-        connection.setReadTimeout(10000);
+        connection.setReadTimeout(Constants.connection_read_timeout_ms);
 
         byte[] requestData = UriUtils.toQueryString(requestParameters).getBytes(StandardCharsets.UTF_8);
         OutputStream output = connection.getOutputStream();

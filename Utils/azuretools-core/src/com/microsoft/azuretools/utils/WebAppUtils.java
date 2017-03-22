@@ -27,6 +27,7 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.appservice.*;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azuretools.Constants;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
@@ -175,6 +176,7 @@ public class WebAppUtils {
         URL url = new URL(sitePath);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
+        con.setReadTimeout(Constants.connection_read_timeout_ms);
         //con.setRequestProperty("User-Agent", "AzureTools for Intellij");
         return con.getResponseCode();
     }
@@ -183,6 +185,7 @@ public class WebAppUtils {
         HttpURLConnection.setFollowRedirects(false);
         HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
         con.setRequestMethod("HEAD");
+        con.setReadTimeout(Constants.connection_read_timeout_ms);
         if (con.getResponseCode() != HttpURLConnection.HTTP_OK) {
             return false;
         }
