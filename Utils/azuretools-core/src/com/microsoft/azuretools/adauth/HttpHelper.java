@@ -50,6 +50,7 @@ public class HttpHelper {
         connection.setDoOutput(true);
         connection.setDoInput(true);
         connection.setUseCaches(false);
+        connection.setReadTimeout(10000);
 
         byte[] requestData = UriUtils.toQueryString(requestParameters).getBytes(StandardCharsets.UTF_8);
         OutputStream output = connection.getOutputStream();
