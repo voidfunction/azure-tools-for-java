@@ -32,6 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 
 public class AzureViewDockerDialog extends DialogWrapper {
@@ -139,6 +140,8 @@ public class AzureViewDockerDialog extends DialogWrapper {
       setTextField(dockerHostKeyvaultTextField, "Not using Key Vault");
       dockerHostKeyvaultTextPane.setVisible(false);
     }
+
+    dockerHostKeyvaultTextPane.setFont(UIManager.getFont("Label.font"));
 
     exitCode = CLOSE_EXIT_CODE;
 
