@@ -57,9 +57,9 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.stream.Collectors;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
@@ -121,8 +121,8 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
             @Override
             public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
-                if (!(o instanceof String) && o != null) {
-                    setText("  " + o.toString());
+                if (o != null && (o instanceof Location)) {
+                    setText("  " + ((Location)o).displayName());
                 }
             }
         });
@@ -248,7 +248,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         try {
             boolean isNewResourceGroup = createNewRadioButton.isSelected();
             final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
-            storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), nameTextField.getText(), (String) regionComboBox.getSelectedItem(),
+            storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), nameTextField.getText(), ((Location) regionComboBox.getSelectedItem()).name(),
                     isNewResourceGroup, resourceGroupName, (Kind) accoountKindCombo.getSelectedItem(), (AccessTier)accessTeirComboBox.getSelectedItem(),
                     (Boolean)encriptonComboBox.getSelectedItem(), replicationComboBox.getSelectedItem().toString());
             // update resource groups cache if new resource group was created when creating storage account
@@ -425,8 +425,8 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     }
 
     private void fillRegions() {
-        List<String> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(subscriptionComboBox.getSelectedItem())
-                .stream().map(Location::name).sorted().collect(Collectors.toList());
+        List<Location> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(subscriptionComboBox.getSelectedItem())
+                .stream().sorted(Comparator.comparing(Location::displayName)).collect(Collectors.toList());
         regionComboBox.setModel(new DefaultComboBoxModel(locations.toArray()));
         loadGroups();
     }
@@ -434,7 +434,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     public void loadGroups() {
         // Resource groups already initialized in cache when loading locations on SelectImageStep
         List<ResourceGroup> groups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(subscriptionComboBox.getSelectedItem()    );
-        List<String> filteredGroups = groups.stream().filter(group -> regionComboBox.getSelectedItem().equals(group.regionName()))
+        List<String> filteredGroups = groups.stream().filter(group -> ((Location) regionComboBox.getSelectedItem()).name().equals(group.regionName()))
                 .map(ResourceGroup::name).sorted().collect(Collectors.toList());
         resourceGrpCombo.setModel(new DefaultComboBoxModel<>(filteredGroups.toArray(new String[filteredGroups.size()])));
     }

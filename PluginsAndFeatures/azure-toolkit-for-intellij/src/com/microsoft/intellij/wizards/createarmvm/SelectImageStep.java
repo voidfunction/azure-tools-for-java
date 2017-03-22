@@ -57,6 +57,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -118,6 +119,15 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
         } catch (Exception ex) {
             DefaultLoader.getUIHelper().logError("An error occurred when trying to authenticate\n\n" + ex.getMessage(), ex);
         }
+        regionComboBox.setRenderer(new ListCellRendererWrapper<Object>() {
+
+            @Override
+            public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
+                if (o != null && (o instanceof Location)) {
+                    setText("  " + ((Location)o).displayName());
+                }
+            }
+        });
         regionComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 selectRegion();
@@ -286,8 +296,8 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
     }
 
     private void fillRegions() {
-        List<String> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(model.getSubscription())
-                .stream().map(Location::name).sorted().collect(Collectors.toList());
+        List<Location> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(model.getSubscription())
+                .stream().sorted(Comparator.comparing(Location::displayName)).collect(Collectors.toList());
         regionComboBox.setModel(new DefaultComboBoxModel(locations.toArray()));
         if (locations.size() > 0) {
             selectRegion();
@@ -299,7 +309,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
         if (customImageBtn.isSelected()) {
             fillPublishers();
         }
-        model.setRegion((String) regionComboBox.getSelectedItem());
+        model.setRegion(((Location) regionComboBox.getSelectedItem()).name());
     }
 
     private void fillPublishers() {
@@ -311,7 +321,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
                 public void run(@org.jetbrains.annotations.NotNull ProgressIndicator progressIndicator) {
                     progressIndicator.setIndeterminate(true);
 
-                    final List<VirtualMachinePublisher> publishers = azure.virtualMachineImages().publishers().listByRegion((String) regionComboBox.getSelectedItem());
+                    final List<VirtualMachinePublisher> publishers = azure.virtualMachineImages().publishers().listByRegion(((Location) regionComboBox.getSelectedItem()).name());
 
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
                         @Override
