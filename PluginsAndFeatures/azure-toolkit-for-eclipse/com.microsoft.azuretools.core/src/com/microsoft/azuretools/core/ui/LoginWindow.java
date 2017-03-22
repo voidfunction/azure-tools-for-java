@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Microsoft Corporation
  * <p/>
  * All rights reserved.
@@ -26,6 +26,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -39,38 +42,44 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.microsoft.azuretools.core.Activator;
+
 public class LoginWindow implements com.microsoft.azuretools.adauth.IWebUi {
+    private static ILog LOG = Activator.getDefault().getLog();
     
     private String res = null;
-    
+
     private void setResult(String res) {
         this.res = res;
     }
-    
+
     private String getResult() {
         return res;
     }
-    
+
     public LoginWindow(){
         //System.out.println("==> SwtBrowserWIndow ctor---------------");
     }
 
     @Override
     public Future<String> authenticateAsync(URI requestUri, URI redirectUri) {
-        
+
         System.out.println("==> run authenticateAsync ---------------");
         
         final String redirectUriStr = redirectUri.toString();
         final String requestUriStr = requestUri.toString();
-        
-        System.out.println("==> redirectUriStr: " + redirectUriStr);
-        System.out.println("==> requestUriStr: " + requestUriStr);
-        
+        System.out.println("\tredirectUriStr: " + redirectUriStr);
+        System.out.println("\trequestUriStr: " + requestUriStr);
+
+        if (!requestUriStr.contains("login_hint")) {
+            System.out.println("\t--> Browser.clearSessions()");
+            Browser.clearSessions();
+        }
+
         try {
             final Runnable gui = new Runnable() {
                 @Override
                 public void run() {
-                    
                     try {
                         System.out.println("==> run gui ---------------");
                         Display display = Display.getDefault();
@@ -78,29 +87,30 @@ public class LoginWindow implements com.microsoft.azuretools.adauth.IWebUi {
                         LoginDialog dlg = new LoginDialog(activeShell, redirectUriStr, requestUriStr);
                         dlg.open();
                         setResult(dlg.getResult());
-                        
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@Runnable@LoginWindow", ex));
                     }
                 }
             };
-            
+
             final Callable<String> worker = new Callable<String>() {
                 @Override
                 public String call() {
                     return getResult();
                 }
             };
-       
+
             Display.getDefault().syncExec(gui);
             
             // just to return future to comply interface
             return Executors.newSingleThreadExecutor().submit(worker);
             
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "authenticateAsync@LoginWindow", ex));
         }
-        
+
         return null;
     }
 }
@@ -124,7 +134,6 @@ class LoginDialog extends Dialog {
         super(parentShell);
         this.redirectUriStr = redirectUri;
         this.requestUriStr = requestUri;
-
     }
     
     @Override
@@ -154,22 +163,22 @@ class LoginDialog extends Dialog {
     protected Control createDialogArea(Composite parent) {
 
         Composite container = (Composite) super.createDialogArea(parent);
-        
+
         FillLayout fillLayout = new FillLayout();
         fillLayout.type = SWT.VERTICAL;
         container.setLayout(fillLayout);
-        
+
         createDlgBody(container);
         return container;
     }
-    
+
     private void createDlgBody(Composite container) {
         final Browser browser = new Browser(container, SWT.NONE);
 
         browser.addLocationListener(new LocationAdapter() {
             @Override
             public void changing(LocationEvent locationEvent) {
-                System.out.println("==> locationEvent.location: " + locationEvent.location);
+                System.out.println("\t--> locationEvent.location: " + locationEvent.location);
                 if(locationEvent.location.startsWith(redirectUriStr)) {
                     setResult(locationEvent.location);
                     Display.getDefault().asyncExec(new Runnable() {
