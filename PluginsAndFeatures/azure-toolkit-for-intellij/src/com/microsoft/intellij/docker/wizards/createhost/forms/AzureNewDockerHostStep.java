@@ -89,7 +89,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
   private JLabel dockerLocationLabel;
   private JCheckBox dockerHostVMPreferredSizesCheckBox;
 
-  private String prefferedLocation;
+  private String preferredLocation;
   private final String SELECT_REGION = "<select region>";
 
   private AzureNewDockerWizardModel model;
@@ -103,7 +103,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
     this.dockerManager = model.getDockerManager();
     this.newHost = model.getDockerHost();
 
-    prefferedLocation = null;
+    preferredLocation = null;
 
     dockerHostNameLabel.setVisible(false);
     dockerHostNameTextField.setText(newHost.name);
@@ -166,12 +166,12 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
         if (!region.equals(SELECT_REGION)) {
           Region regionObj = Region.findByLabelOrName(region);
           String selectedRegion = regionObj != null ? regionObj.name() : region;
-          if (prefferedLocation == null && selectedRegion != null) {
+          if (preferredLocation == null && selectedRegion != null) {
             // remove the SELECT_REGION entry (first entry in the list)
             dockerLocationComboBox.removeItemAt(0);
             dockerLocationLabel.setVisible(false);
           }
-          prefferedLocation = selectedRegion;
+          preferredLocation = selectedRegion;
           updateDockerSelectVnetComboBox(currentSubscription, selectedRegion);
           setDialogButtonsState(doValidate(false) == null);
         } else {
@@ -187,19 +187,19 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
     if (currentSubscription != null && currentSubscription.locations != null) {
       DefaultComboBoxModel<String> dockerLocationComboModel = new DefaultComboBoxModel<>(); //new Vector<String>(currentSubscription.locations));
       if (currentSubscription.locations.size() > 0) {
-        String previousSelection = prefferedLocation;
-        prefferedLocation = null;
+        String previousSelection = preferredLocation;
+        preferredLocation = null;
         for (String region : currentSubscription.locations) {
           Region regionObj = Region.findByLabelOrName(region);
           dockerLocationComboModel.addElement(regionObj != null ? regionObj.label() : region);
           if ((previousSelection != null && region.equals(previousSelection)) ||
               (newHost.hostVM.region != null && region.equals(newHost.hostVM.region))) {
-            prefferedLocation = region;
+            preferredLocation = region;
             dockerLocationComboModel.setSelectedItem(regionObj != null ? regionObj.label() : region);
             dockerLocationLabel.setVisible(false);
           }
         }
-        if (prefferedLocation == null) {
+        if (preferredLocation == null) {
           dockerLocationComboModel.insertElementAt(SELECT_REGION, 0);
           dockerLocationComboModel.setSelectedItem(SELECT_REGION);
           dockerLocationLabel.setVisible(true);
@@ -258,7 +258,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
 
           PagedList<VirtualMachineSize> sizes = null;
           try {
-            sizes = azureClient.virtualMachines().sizes().listByRegion(prefferedLocation);
+            sizes = azureClient.virtualMachines().sizes().listByRegion(preferredLocation);
             Collections.sort(sizes, new Comparator<VirtualMachineSize>() {
               @Override
               public int compare(VirtualMachineSize size1, VirtualMachineSize size2) {
@@ -531,7 +531,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
     String vmImageSize = (String) dockerHostVMSizeComboBox.getSelectedItem();
     DefaultComboBoxModel<String> dockerHostStorageComboModel;
     if (vmImageSize != null) {
-      String vmImageType = vmImageSize.contains("_DS") ? "Premium_LRS" : "Standard_LRS";
+      String vmImageType = vmImageSize.contains("_D") ? "Premium_LRS" : "Standard_LRS";
       dockerHostStorageComboModel = new DefaultComboBoxModel<>(new Vector<>(dockerManager.getAvailableStorageAccounts(subscription.id, vmImageType)));
     } else {
       dockerHostStorageComboModel = new DefaultComboBoxModel<>();
@@ -589,7 +589,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
   private ValidationInfo validateDockerLocation(boolean shakeOnError) {
     // Location/region
     String region = (String) dockerLocationComboBox.getSelectedItem();
-    if (prefferedLocation == null || region == null || region.isEmpty()) {
+    if (preferredLocation == null || region == null || region.isEmpty()) {
       ValidationInfo info = AzureDockerUIResources.validateComponent("Location not found", rootConfigureContainerPanel, dockerLocationComboBox, null);
       setDialogButtonsState(false);
       if (shakeOnError) {
@@ -597,7 +597,7 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
       }
       return info;
     }
-    newHost.hostVM.region = prefferedLocation;
+    newHost.hostVM.region = preferredLocation;
     newHost.hostVM.dnsName = String.format("%s.%s.cloudapp.azure.com", newHost.hostVM.name, newHost.hostVM.region);
     newHost.apiUrl = newHost.hostVM.dnsName;
 

@@ -49,6 +49,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.ModifyEvent;
 
 public class AzureNewDockerLoginPage extends WizardPage {
 	private Button dockerHostImportKeyvaultCredsRadioButton;
@@ -120,17 +122,32 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		mainContainer.setLayout(new GridLayout(2, false));
 		
 		dockerHostImportKeyvaultCredsRadioButton = new Button(mainContainer, SWT.RADIO);
+		dockerHostImportKeyvaultCredsRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		GridData gd_dockerHostImportKeyvaultCredsRadioButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostImportKeyvaultCredsRadioButton.horizontalIndent = 5;
 		dockerHostImportKeyvaultCredsRadioButton.setLayoutData(gd_dockerHostImportKeyvaultCredsRadioButton);
 		dockerHostImportKeyvaultCredsRadioButton.setText("Import credentials from Azure Key Vault:");
 		
 		dockerHostImportKeyvaultComboBox = new Combo(mainContainer, SWT.READ_ONLY);
+		dockerHostImportKeyvaultComboBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		GridData gd_dockerHostImportKeyvaultComboBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostImportKeyvaultComboBox.widthHint = 230;
 		dockerHostImportKeyvaultComboBox.setLayoutData(gd_dockerHostImportKeyvaultComboBox);
 		
 		dockerHostNewCredsRadioButton = new Button(mainContainer, SWT.RADIO);
+		dockerHostNewCredsRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		GridData gd_dockerHostNewCredsRadioButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostNewCredsRadioButton.horizontalIndent = 5;
 		dockerHostNewCredsRadioButton.setLayoutData(gd_dockerHostNewCredsRadioButton);
@@ -138,8 +155,8 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		new Label(mainContainer, SWT.NONE);
 		
 		credsTabfolder = new TabFolder(mainContainer, SWT.NONE);
-		GridData gd_credsTabfolder = new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1);
-		gd_credsTabfolder.heightHint = 215;
+		GridData gd_credsTabfolder = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 2);
+		gd_credsTabfolder.heightHint = 235;
 		credsTabfolder.setLayoutData(gd_credsTabfolder);
 		
 		vmCredsTableItem = new TabItem(credsTabfolder, SWT.NONE);
@@ -156,6 +173,10 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		lblUsername.setText("Username:");
 		
 		dockerHostUsernameTextField = new Text(vmCredsComposite, SWT.BORDER);
+		dockerHostUsernameTextField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent arg0) {
+			}
+		});
 		GridData gd_dockerHostUsernameTextField = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostUsernameTextField.widthHint = 150;
 		dockerHostUsernameTextField.setLayoutData(gd_dockerHostUsernameTextField);
@@ -170,6 +191,10 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		lblPassword.setText("Password:");
 		
 		dockerHostFirstPwdField = new Text(vmCredsComposite, SWT.BORDER);
+		dockerHostFirstPwdField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent arg0) {
+			}
+		});
 		GridData gd_dockerHostFirstPwdField = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostFirstPwdField.widthHint = 150;
 		dockerHostFirstPwdField.setLayoutData(gd_dockerHostFirstPwdField);
@@ -186,6 +211,10 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		lblConfirm.setText("Confirm:");
 		
 		dockerHostSecondPwdField = new Text(vmCredsComposite, SWT.BORDER);
+		dockerHostSecondPwdField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent arg0) {
+			}
+		});
 		GridData gd_dockerHostSecondPwdField = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostSecondPwdField.widthHint = 150;
 		dockerHostSecondPwdField.setLayoutData(gd_dockerHostSecondPwdField);
@@ -209,6 +238,11 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1));
 		
 		dockerHostNoSshRadioButton = new Button(vmCredsComposite, SWT.RADIO);
+		dockerHostNoSshRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		GridData gd_dockerHostNoSshRadioButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 4, 1);
 		gd_dockerHostNoSshRadioButton.horizontalIndent = 5;
 		dockerHostNoSshRadioButton.setLayoutData(gd_dockerHostNoSshRadioButton);
@@ -217,6 +251,11 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		new Label(vmCredsComposite, SWT.NONE);
 		
 		dockerHostAutoSshRadioButton = new Button(vmCredsComposite, SWT.RADIO);
+		dockerHostAutoSshRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		GridData gd_dockerHostAutoSshRadioButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 4, 1);
 		gd_dockerHostAutoSshRadioButton.horizontalIndent = 5;
 		dockerHostAutoSshRadioButton.setLayoutData(gd_dockerHostAutoSshRadioButton);
@@ -225,6 +264,11 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		new Label(vmCredsComposite, SWT.NONE);
 		
 		dockerHostImportSshRadioButton = new Button(vmCredsComposite, SWT.RADIO);
+		dockerHostImportSshRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		GridData gd_dockerHostImportSshRadioButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 4, 1);
 		gd_dockerHostImportSshRadioButton.horizontalIndent = 5;
 		dockerHostImportSshRadioButton.setLayoutData(gd_dockerHostImportSshRadioButton);
@@ -233,6 +277,11 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		new Label(vmCredsComposite, SWT.NONE);
 		
 		dockerHostImportSSHTextField = new Text(vmCredsComposite, SWT.BORDER);
+		dockerHostImportSSHTextField.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		GridData gd_dockerHostImportSSHTextField = new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1);
 		gd_dockerHostImportSSHTextField.horizontalIndent = 24;
 		dockerHostImportSSHTextField.setLayoutData(gd_dockerHostImportSSHTextField);
@@ -267,6 +316,10 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		lblDockerDaemonPort.setText("Docker daemon port:");
 		
 		dockerDaemonPortTextField = new Text(daemonCredsComposite, SWT.BORDER);
+		dockerDaemonPortTextField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent arg0) {
+			}
+		});
 		GridData gd_dockerDaemonPortTextField = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerDaemonPortTextField.widthHint = 50;
 		dockerDaemonPortTextField.setLayoutData(gd_dockerDaemonPortTextField);
@@ -282,6 +335,11 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		label_1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		
 		dockerHostNoTlsRadioButton = new Button(daemonCredsComposite, SWT.RADIO);
+		dockerHostNoTlsRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		GridData gd_dockerHostNoTlsRadioButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1);
 		gd_dockerHostNoTlsRadioButton.horizontalIndent = 5;
 		dockerHostNoTlsRadioButton.setLayoutData(gd_dockerHostNoTlsRadioButton);
@@ -289,6 +347,11 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		new Label(daemonCredsComposite, SWT.NONE);
 		
 		dockerHostAutoTlsRadioButton = new Button(daemonCredsComposite, SWT.RADIO);
+		dockerHostAutoTlsRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		GridData gd_dockerHostAutoTlsRadioButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1);
 		gd_dockerHostAutoTlsRadioButton.horizontalIndent = 5;
 		dockerHostAutoTlsRadioButton.setLayoutData(gd_dockerHostAutoTlsRadioButton);
@@ -296,6 +359,11 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		new Label(daemonCredsComposite, SWT.NONE);
 		
 		dockerHostImportTlsRadioButton = new Button(daemonCredsComposite, SWT.RADIO);
+		dockerHostImportTlsRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		GridData gd_dockerHostImportTlsRadioButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1);
 		gd_dockerHostImportTlsRadioButton.horizontalIndent = 5;
 		dockerHostImportTlsRadioButton.setLayoutData(gd_dockerHostImportTlsRadioButton);
@@ -303,6 +371,10 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		new Label(daemonCredsComposite, SWT.NONE);
 		
 		dockerHostImportTLSTextField = new Text(daemonCredsComposite, SWT.BORDER);
+		dockerHostImportTLSTextField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent arg0) {
+			}
+		});
 		GridData gd_dockerHostImportTLSTextField = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
 		gd_dockerHostImportTLSTextField.horizontalIndent = 24;
 		dockerHostImportTLSTextField.setLayoutData(gd_dockerHostImportTLSTextField);
@@ -323,21 +395,30 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		});
 		dockerHostImportTLSBrowseButton.setText("Browse...");
 		
+		FormToolkit toolkit = new FormToolkit(mainContainer.getDisplay());
+		toolkit.getHyperlinkGroup().setHyperlinkUnderlineMode(
+				HyperlinkSettings.UNDERLINE_HOVER);
+		managedForm = new ManagedForm(mainContainer);
+		
 		dockerHostSaveCredsCheckBox = new Button(mainContainer, SWT.CHECK);
+		dockerHostSaveCredsCheckBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		GridData gd_dockerHostSaveCredsCheckBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostSaveCredsCheckBox.horizontalIndent = 5;
 		dockerHostSaveCredsCheckBox.setLayoutData(gd_dockerHostSaveCredsCheckBox);
 		dockerHostSaveCredsCheckBox.setText("Save credentials into a new Azure Key Vault:");
 		
 		dockerHostNewKeyvaultTextField = new Text(mainContainer, SWT.BORDER);
+		dockerHostNewKeyvaultTextField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent arg0) {
+			}
+		});
 		GridData gd_dockerHostNewKeyvaultTextField = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostNewKeyvaultTextField.widthHint = 210;
 		dockerHostNewKeyvaultTextField.setLayoutData(gd_dockerHostNewKeyvaultTextField);
-		
-		FormToolkit toolkit = new FormToolkit(mainContainer.getDisplay());
-		toolkit.getHyperlinkGroup().setHyperlinkUnderlineMode(
-				HyperlinkSettings.UNDERLINE_HOVER);
-		managedForm = new ManagedForm(mainContainer);
 		errMsgForm = managedForm.getForm();
 		errMsgForm.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		errMsgForm.setBackground(mainContainer.getBackground());
