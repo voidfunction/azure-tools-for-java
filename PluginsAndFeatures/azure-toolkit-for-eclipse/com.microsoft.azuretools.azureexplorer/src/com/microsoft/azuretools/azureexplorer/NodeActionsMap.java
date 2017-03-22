@@ -25,6 +25,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableList;
 import com.microsoft.azure.hdinsight.serverexplore.HDInsightRootModuleImpl;
 import com.microsoft.azuretools.azureexplorer.actions.AddNewClusterAction;
+import com.microsoft.azuretools.azureexplorer.actions.AddNewEmulatorAction;
 import com.microsoft.azuretools.azureexplorer.actions.AttachExternalStorageAccountAction;
 import com.microsoft.azuretools.azureexplorer.actions.CreateArmStorageAccountAction;
 import com.microsoft.azuretools.azureexplorer.actions.CreateArmVMAction;
@@ -50,6 +51,6 @@ public class NodeActionsMap {
 //        node2Actions.put(ExternalStorageNode.class, new ImmutableList.Builder().add(ConfirmDialogAction.class, ModifyExternalStorageAccountAction.class).build());
         node2Actions.put(StorageNode.class, new ImmutableList.Builder().add(CreateBlobContainer.class).build());        
         node2Actions.put(WebappNode.class, new ImmutableList.Builder().add(OpenWebappAction.class).build());
-        node2Actions.put(HDInsightRootModuleImpl.class, new ImmutableList.Builder().add(AddNewClusterAction.class).build());
+        node2Actions.put(HDInsightRootModuleImpl.class, new ImmutableList.Builder().add(AddNewClusterAction.class,AddNewEmulatorAction.class).build());
     }
 }
