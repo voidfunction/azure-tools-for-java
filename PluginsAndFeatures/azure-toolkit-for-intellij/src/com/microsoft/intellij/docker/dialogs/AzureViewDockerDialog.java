@@ -25,10 +25,14 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
+import com.microsoft.intellij.util.PluginUtil;
 import org.jdesktop.swingx.JXHyperlink;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 
 public class AzureViewDockerDialog extends DialogWrapper {
@@ -63,7 +67,6 @@ public class AzureViewDockerDialog extends DialogWrapper {
   private JTextField dockerHostPublicIpTextField;
   private JTextField dockerHostPrivateIpTextField;
 
-  private Action myClickApplyAction;
   private Project project;
   private DockerHost dockerHost;
   private AzureDockerHostsManager dockerManager;
@@ -131,13 +134,14 @@ public class AzureViewDockerDialog extends DialogWrapper {
           dockerHost.certVault.uri);
       dockerHostKeyvaultTextPane.setVisible(false);
     } else if (dockerHost.hostVM.vaultName != null && !dockerHost.hostVM.vaultName.isEmpty()) {
-      String defaultVaultName;
       setTextField(dockerHostKeyvaultTextField, String.format("Error reading http://%s.vault.azure.net", dockerHost.hostVM.vaultName));
       dockerHostKeyvaultTextPane.setVisible(true);
     } else {
       setTextField(dockerHostKeyvaultTextField, "Not using Key Vault");
       dockerHostKeyvaultTextPane.setVisible(false);
     }
+
+    dockerHostKeyvaultTextPane.setFont(UIManager.getFont("Label.font"));
 
     exitCode = CLOSE_EXIT_CODE;
 
@@ -185,20 +189,6 @@ public class AzureViewDockerDialog extends DialogWrapper {
       initDefaultUIValues(null);
     }
     setTitle(String.format(defaultTitle, dockerHost.name));
-
-    dockerHostSshExportHyperlink.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        onExportSshKeys();
-      }
-    });
-
-    dockerHostTlsExportHyperlink.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        onExportTlsCerts();
-      }
-    });
   }
 
   private void onUpdateLoginCreds() {
@@ -210,6 +200,16 @@ public class AzureViewDockerDialog extends DialogWrapper {
     if (dockerHost.hasSSHLogIn && dockerHost.certVault != null) {
       AzureExportDockerSshKeysDialog exportDockerSshKeysDialog = new AzureExportDockerSshKeysDialog(project, dockerHost.certVault);
       exportDockerSshKeysDialog.show();
+
+      if (exportDockerSshKeysDialog.getExitCode() == 0) {
+        try {
+          AzureDockerCertVaultOps.saveSshKeysToLocalFiles(exportDockerSshKeysDialog.getPath(), dockerHost.certVault);
+        }
+        catch (Exception e){
+          String msg = "An error occurred while attempting to export the SSh keys.\n" + e.getMessage();
+          PluginUtil.displayErrorDialogAndLog("Error", msg, e);
+        }
+      }
     }
   }
 
@@ -217,6 +217,16 @@ public class AzureViewDockerDialog extends DialogWrapper {
     if (dockerHost.isTLSSecured && dockerHost.certVault != null) {
       AzureExportDockerTlsKeysDialog exportDockerTlsKeysDialog = new AzureExportDockerTlsKeysDialog(project, dockerHost.certVault);
       exportDockerTlsKeysDialog.show();
+
+      if (exportDockerTlsKeysDialog.getExitCode() == 0) {
+        try {
+          AzureDockerCertVaultOps.saveTlsCertsToLocalFiles(exportDockerTlsKeysDialog.getPath(), dockerHost.certVault);
+        }
+        catch (Exception e){
+          String msg = "An error occurred while attempting to export the TLS keys.\n" + e.getMessage();
+          PluginUtil.displayErrorDialogAndLog("Error", msg, e);
+        }
+      }
     }
   }
 
@@ -241,7 +251,7 @@ public class AzureViewDockerDialog extends DialogWrapper {
     super.doOKAction();
   }
 
-  @Nullable
+  @NotNull
   @Override
   protected Action[] createActions() {
     Action okAction = getOKAction();

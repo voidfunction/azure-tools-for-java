@@ -26,13 +26,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.microsoft.azure.docker.model.AzureDockerCertVault;
-import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
 import com.microsoft.intellij.ui.util.UIUtils;
-import com.microsoft.intellij.util.PluginUtil;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.event.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -42,6 +39,7 @@ public class AzureExportDockerSshKeysDialog extends DialogWrapper {
 
   private Project project;
   private AzureDockerCertVault certVault;
+  private String path;
 
   public AzureExportDockerSshKeysDialog(Project project, AzureDockerCertVault certVault) {
     super(project, true);
@@ -53,7 +51,8 @@ public class AzureExportDockerSshKeysDialog extends DialogWrapper {
 
     exportSshPath.addActionListener(UIUtils.createFileChooserListener(exportSshPath, project,
         FileChooserDescriptorFactory.createSingleFolderDescriptor()));
-    exportSshPath.setText(project.getBasePath() + "/out/Docker/ssh");
+    path = project.getBasePath();
+    exportSshPath.setText(path);
     exportSshPath.getTextField().setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {
@@ -64,6 +63,8 @@ public class AzureExportDockerSshKeysDialog extends DialogWrapper {
     init();
     setTitle("Export SSH Keys");
   }
+
+  public String getPath() { return path;}
 
   @Nullable
   @Override
@@ -88,14 +89,8 @@ public class AzureExportDockerSshKeysDialog extends DialogWrapper {
   @Nullable
   @Override
   protected void doOKAction() {
-    try {
-      AzureDockerCertVaultOps.saveToLocalFiles(exportSshPath.getText(), certVault);
-      super.doOKAction();
-    }
-    catch (Exception e){
-      String msg = "An error occurred while attempting to export the SSh keys.\n" + e.getMessage();
-      PluginUtil.displayErrorDialogAndLog("Error", msg, e);
-    }
+    path = exportSshPath.getText();
+    super.doOKAction();
   }
 
 }

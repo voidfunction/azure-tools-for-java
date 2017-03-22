@@ -19,6 +19,10 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.createhost;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -26,6 +30,8 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -43,15 +49,25 @@ import org.eclipse.ui.forms.ManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 
+import com.microsoft.azure.PagedList;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerSubscription;
+import com.microsoft.azure.docker.model.AzureDockerVnet;
 import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.model.KnownDockerVirtualMachineImage;
+import com.microsoft.azure.docker.model.KnownDockerVirtualMachineSizes;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
-import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 public class AzureNewDockerConfigPage extends WizardPage {
 	private Text dockerHostNameTextField;
@@ -68,16 +84,16 @@ public class AzureNewDockerConfigPage extends WizardPage {
 	private Button dockerHostVMPreferredSizesCheckBox;
 	
 	private TabItem rgTableItem;
-	private Button btnNewResourceGroup;	
+	private Button dockerHostNewRGRadioButton;	
 	private Text dockerHostRGTextField;
-	private Button btnExistingResourceGroup;
+	private Button dockerHostSelectRGRadioButton;
 	private Combo dockerHostSelectRGComboBox;
 	
 	private TabItem networkTableItem;
-	private Button btnRadioButton;
+	private Button dockerHostNewVNetRadioButton;
 	private Text dockerHostNewVNetNameTextField;
 	private Text dockerHostNewVNetAddrSpaceTextField;
-	private Button btnExistingVirtualNetwork;
+	private Button dockerHostSelectVNetRadioButton;
 	private Combo dockerHostSelectVnetComboBox;
 	private Combo dockerHostSelectSubnetComboBox;
 	
@@ -87,7 +103,7 @@ public class AzureNewDockerConfigPage extends WizardPage {
 	private Button dockerHostSelectStorageRadioButton;
 	private Combo dockerSelectStorageComboBox;
 	
-	private String prefferedLocation;
+	private String preferredLocation;
 	private final String SELECT_REGION = "<select region>";
 	
 	private AzureNewDockerWizard wizard;
@@ -113,7 +129,7 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		this.newHost = wizard.getDockerHost();
 		this.project = wizard.getProject();
 
-		prefferedLocation = null;
+		preferredLocation = null;
 	}
 
 	/**
@@ -177,7 +193,7 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		
 		hostDetailsTabFolder = new TabFolder(mainContainer, SWT.NONE);
 		GridData gd_hostDetailsTabFolder = new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1);
-		gd_hostDetailsTabFolder.heightHint = 140;
+		gd_hostDetailsTabFolder.heightHint = 128;
 		hostDetailsTabFolder.setLayoutData(gd_hostDetailsTabFolder);
 		
 		vmKindTableItem = new TabItem(hostDetailsTabFolder, SWT.NONE);
@@ -214,8 +230,8 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		rgTableItem.setControl(rgComposite);
 		rgComposite.setLayout(new GridLayout(2, false));
 		
-		btnNewResourceGroup = new Button(rgComposite, SWT.RADIO);
-		btnNewResourceGroup.setText("New resource group:");
+		dockerHostNewRGRadioButton = new Button(rgComposite, SWT.RADIO);
+		dockerHostNewRGRadioButton.setText("New resource group:");
 		
 		dockerHostRGTextField = new Text(rgComposite, SWT.BORDER);
 		GridData gd_dockerHostRGTextField = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -223,8 +239,8 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		gd_dockerHostRGTextField.widthHint = 200;
 		dockerHostRGTextField.setLayoutData(gd_dockerHostRGTextField);
 		
-		btnExistingResourceGroup = new Button(rgComposite, SWT.RADIO);
-		btnExistingResourceGroup.setText("Existing resource group:");
+		dockerHostSelectRGRadioButton = new Button(rgComposite, SWT.RADIO);
+		dockerHostSelectRGRadioButton.setText("Existing resource group:");
 		
 		dockerHostSelectRGComboBox = new Combo(rgComposite, SWT.READ_ONLY);
 		GridData gd_dockerHostSelectRGComboBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -238,15 +254,8 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		networkTableItem.setControl(networkComposite);
 		networkComposite.setLayout(new GridLayout(2, false));
 		
-		btnRadioButton = new Button(networkComposite, SWT.RADIO);
-		btnRadioButton.setText("New virtual network");
-		new Label(networkComposite, SWT.NONE);
-		
-		Label lblName_1 = new Label(networkComposite, SWT.NONE);
-		GridData gd_lblName_1 = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-		gd_lblName_1.horizontalIndent = 18;
-		lblName_1.setLayoutData(gd_lblName_1);
-		lblName_1.setText("Name:");
+		dockerHostNewVNetRadioButton = new Button(networkComposite, SWT.RADIO);
+		dockerHostNewVNetRadioButton.setText("New virtual network");
 		
 		dockerHostNewVNetNameTextField = new Text(networkComposite, SWT.BORDER);
 		GridData gd_dockerHostNewVNetNameTextField = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -266,8 +275,8 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		gd_dockerHostNewVNetAddrSpaceTextField.widthHint = 200;
 		dockerHostNewVNetAddrSpaceTextField.setLayoutData(gd_dockerHostNewVNetAddrSpaceTextField);
 		
-		btnExistingVirtualNetwork = new Button(networkComposite, SWT.RADIO);
-		btnExistingVirtualNetwork.setText("Existing virtual network:");
+		dockerHostSelectVNetRadioButton = new Button(networkComposite, SWT.RADIO);
+		dockerHostSelectVNetRadioButton.setText("Existing virtual network:");
 		
 		dockerHostSelectVnetComboBox = new Combo(networkComposite, SWT.READ_ONLY);
 		GridData gd_dockerHostSelectVnetComboBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -317,8 +326,7 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		errMsgForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
 		errMsgForm.setBackground(mainContainer.getBackground());
 		errDispatcher = managedForm.getMessageManager();
-//		errDispatcher.addMessage("dockerHostNameTextField", "Test error", null, IMessageProvider.ERROR, dockerHostNameTextField);
-		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);
+//		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);
 		
 		//dockerHostNameTextField
 //		Form errMsgForm = formToolkit.createForm(mainContainer);
@@ -356,8 +364,12 @@ public class AzureNewDockerConfigPage extends WizardPage {
 			public void modifyText(ModifyEvent event) {
 				if (AzureDockerValidationUtils.validateDockerHostName(((Text) event.getSource()).getText())) {
 					errDispatcher.removeMessage("dockerHostNameTextField", dockerHostNameTextField);
+					setErrorMessage(null);
+					setPageComplete(doValidate());
 				} else {
 					errDispatcher.addMessage("dockerHostNameTextField", AzureDockerValidationUtils.getDockerHostNameTip(), null, IMessageProvider.ERROR, dockerHostNameTextField);
+					setErrorMessage("Invalid virtual machine name");
+					setPageComplete(false);
 				}
 			}
 		});		
@@ -374,65 +386,666 @@ public class AzureNewDockerConfigPage extends WizardPage {
 					errDispatcher.removeMessage("dockerSubscriptionCombo", dockerSubscriptionCombo);
 			        updateDockerLocationComboBox(mainContainer, currentSubscription);
 			        updateDockerHostSelectRGComboBox(mainContainer, currentSubscription);
-//			        String region = (String) dockerLocationComboBox.getSelectedItem();
-//			        Region regionObj = Region.findByLabelOrName(region);
-//			        updateDockerSelectVnetComboBox( currentSubscription, regionObj != null ? regionObj.name() : region);
-//			        updateDockerSelectStorageComboBox(currentSubscription);
+			        String region = (String) dockerLocationComboBox.getText();
+			        Region regionObj = Region.findByLabelOrName(region);
+			        updateDockerSelectVnetComboBox( mainContainer, currentSubscription, regionObj != null ? regionObj.name() : region);
+			        updateDockerSelectStorageComboBox(mainContainer, currentSubscription);
+			        setPageComplete(doValidate());
                 } else {
 					errDispatcher.addMessage("dockerSubscriptionCombo", "No active subscriptions found", null, IMessageProvider.ERROR, dockerSubscriptionCombo);
+					setPageComplete(false);
                 }
 			}
 		});
-//		for (AzureDockerSubscription sd : dockerManager.getSubscriptionsList()) {
-//			dockerSubscriptionCombo.add(sd.name);
-//			dockerSubscriptionCombo.setData(sd.name, sd);
-//		}
 		dockerSubscriptionComboViewer.setContentProvider(ArrayContentProvider.getInstance());
 		dockerSubscriptionComboViewer.setInput(dockerManager.getSubscriptionsList());
 
 		if (dockerManager.getSubscriptionsList() != null && dockerManager.getSubscriptionsList().size() > 0) {
-			dockerSubscriptionCombo.select(0);
-			AzureDockerSubscription currentSubscription = (AzureDockerSubscription) dockerSubscriptionCombo.getData(dockerSubscriptionCombo.getText());
-			dockerSubscriptionIdTextField.setText(dockerSubscriptionCombo.getText());
-//			dockerSubscriptionIdTextField.setText(((AzureDockerSubscription) dockerSubscriptionCombo.getData(dockerSubscriptionCombo.getText())).id);
+			dockerSubscriptionCombo.select(0);			
+			dockerSubscriptionIdTextField.setText(((AzureDockerSubscription) ((StructuredSelection) dockerSubscriptionComboViewer.getSelection()).getFirstElement()).id);
 		}
 	}
 	
-	private void updateDockerHostVMSize(Composite mainContainer) {
-		
-	}
-
 	private void updateDockerLocationGroup(Composite mainContainer) {
-		
-	}
-
-	private void updateDockerHostOSTypeComboBox(Composite mainContainer) {
-		
-	}
-
-	private void updateDockerHostRGGroup(Composite mainContainer) {
-		
-	}
-
-	private void updateDockerHostVnetGroup(Composite mainContainer) {
-		
-	}
-
-	private void updateDockerHostStorageGroup(Composite mainContainer) {
-		
+		AzureDockerSubscription currentSubscription = getCurrentSubscription();
+		dockerLocationComboBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String region = dockerLocationComboBox.getText();
+		        if (!region.equals(SELECT_REGION)) {
+					Region regionObj = Region.findByLabelOrName(region);
+					String selectedRegion = regionObj != null ? regionObj.name() : region;
+					if (preferredLocation == null && selectedRegion != null) {
+						// remove the SELECT_REGION entry (first entry in the
+						// list)
+						dockerLocationComboBox.remove(SELECT_REGION);
+					}
+					preferredLocation = selectedRegion;
+					updateDockerSelectVnetComboBox(mainContainer, currentSubscription, selectedRegion);
+					setPageComplete(doValidate());
+				} else {
+					updateDockerSelectVnetComboBox(mainContainer, currentSubscription, null);
+					setPageComplete(false);
+				}
+				updateDockerHostVMSizeComboBox(mainContainer, dockerHostVMPreferredSizesCheckBox.getSelection());
+			}
+		});
+		updateDockerLocationComboBox(mainContainer, currentSubscription);
 	}
 
 	private void updateDockerLocationComboBox(Composite mainContainer, AzureDockerSubscription currentSubscription) {
 		if (currentSubscription != null && currentSubscription.locations != null) {
-			
+			dockerLocationComboBox.removeAll();
+			if (currentSubscription.locations.size() > 0) {
+				String previousSelection = preferredLocation;
+				preferredLocation = null;
+				for (String region : currentSubscription.locations) {
+					Region regionObj = Region.findByLabelOrName(region);
+					dockerLocationComboBox.add(regionObj != null ? regionObj.label() : region);
+					if ((previousSelection != null && region.equals(previousSelection))
+							|| (newHost.hostVM.region != null && region.equals(newHost.hostVM.region))) {
+						preferredLocation = region;
+						dockerLocationComboBox.select(dockerLocationComboBox.getItemCount() - 1);
+					}
+				}
+				if (preferredLocation == null) {
+					dockerLocationComboBox.add(SELECT_REGION, 0);
+					dockerLocationComboBox.select(0);
+					setPageComplete(false);
+				}
+			}
+			updateDockerHostVMSizeComboBox(mainContainer, dockerHostVMPreferredSizesCheckBox.getSelection());
 		}
 	}
 
+	private void updateDockerHostOSTypeComboBox(Composite mainContainer) {
+		int index = 0;
+		for (KnownDockerVirtualMachineImage knownDockerVirtualMachineImage : KnownDockerVirtualMachineImage.values()) {
+			String vmImage = knownDockerVirtualMachineImage.name();
+			dockerHostOSTypeComboBox.add(vmImage);
+			if (vmImage.equals(newHost.hostOSType.name()))
+				dockerHostOSTypeComboBox.select(index);
+			index++;
+		}
+	}
+	
+	private void updateDockerHostVMSize(Composite mainContainer) {
+		dockerHostVMPreferredSizesCheckBox.setSelection(true);
+		dockerHostVMPreferredSizesCheckBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateDockerHostVMSizeComboBox(mainContainer, dockerHostVMPreferredSizesCheckBox.getSelection());
+				setPageComplete(doValidate());
+			}
+		});
+		
+		dockerHostVMSizeComboBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateDockerSelectStorageComboBox(mainContainer, getCurrentSubscription());
+				setPageComplete(doValidate());
+			}
+		});
+		updateDockerHostVMSizeComboBox(mainContainer, true);
+	}
+
+	private void updateDockerHostVMSizeComboBox(Composite mainContainer, boolean preferredSizesOnly) {
+		dockerHostVMSizeComboBox.deselectAll();
+		dockerHostVMSizeComboBox.removeAll();
+		dockerHostVMSizeComboBox.redraw();
+		if (preferredSizesOnly) {
+			int index = 0;
+			for (KnownDockerVirtualMachineSizes knownDockerVirtualMachineSize : KnownDockerVirtualMachineSizes.values()) {
+				dockerHostVMSizeComboBox.add(knownDockerVirtualMachineSize.name());
+				if (newHost.hostVM.vmSize.equals(knownDockerVirtualMachineSize.name())) {
+					dockerHostVMSizeComboBox.select(index);
+				}
+				index++;
+			}
+			if (index == 0 || !newHost.hostVM.vmSize.equals((String) dockerHostVMSizeComboBox.getText())) {
+				dockerHostVMSizeComboBox.add(newHost.hostVM.vmSize, 0);
+				dockerHostVMSizeComboBox.select(0);
+			}
+			updateDockerSelectStorageComboBox(mainContainer, getCurrentSubscription());
+		} else {
+			dockerHostVMSizeComboBox.add("<Loading...>", 0);
+			dockerHostVMSizeComboBox.select(0);
+			dockerHostVMSizeComboBox.redraw();
+			Azure azureClient = getCurrentSubscription().azureClient;
+			DefaultLoader.getIdeHelper().runInBackground(null, "Loading VM sizes...", false, true, "", new Runnable() {
+				@Override
+				public void run() {
+					PagedList<VirtualMachineSize> sizes = null;
+					try {
+						sizes = azureClient.virtualMachines().sizes().listByRegion(preferredLocation);
+						Collections.sort(sizes, new Comparator<VirtualMachineSize>() {
+							@Override
+							public int compare(VirtualMachineSize size1, VirtualMachineSize size2) {
+								if (size1.name().contains("Basic") && size2.name().contains("Basic")) {
+									return size1.name().compareTo(size2.name());
+								} else if (size1.name().contains("Basic")) {
+									return -1;
+								} else if (size2.name().contains("Basic")) {
+									return 1;
+								}
+
+								int coreCompare = Integer.valueOf(size1.numberOfCores())
+										.compareTo(size2.numberOfCores());
+
+								if (coreCompare == 0) {
+									return Integer.valueOf(size1.memoryInMB()).compareTo(size2.memoryInMB());
+								} else {
+									return coreCompare;
+								}
+							}
+						});
+					} catch (Exception notHandled) {
+					}
+					PagedList<VirtualMachineSize> sortedSizes = sizes;
+
+					DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
+						@Override
+						public void run() {
+							dockerHostVMSizeComboBox.deselectAll();
+							dockerHostVMSizeComboBox.removeAll();
+							if (sortedSizes != null) {
+								int index = 0;
+								for (VirtualMachineSize vmSize : sortedSizes) {
+									dockerHostVMSizeComboBox.add(vmSize.name());
+									if (vmSize.name().equals(newHost.hostVM.vmSize))
+										dockerHostVMSizeComboBox.select(index);
+									index++;
+								}
+							}
+							if (sortedSizes.size() != 0 && !newHost.hostVM.vmSize.equals((String) dockerHostVMSizeComboBox.getText())) {
+								dockerHostVMSizeComboBox.add(newHost.hostVM.vmSize, 0);
+								dockerHostVMSizeComboBox.select(0);
+							}
+							updateDockerSelectStorageComboBox(mainContainer, getCurrentSubscription());
+							dockerHostVMSizeComboBox.redraw();
+						}
+					});
+				}
+			});
+		}
+	}
+
+	private void updateDockerHostRGGroup(Composite mainContainer) {
+		dockerHostNewRGRadioButton.setSelection(true);
+		dockerHostNewRGRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dockerHostRGTextField.setEnabled(true);
+				dockerHostSelectRGComboBox.setEnabled(false);
+				setPageComplete(doValidate());
+			}
+		});
+		dockerHostSelectRGRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dockerHostRGTextField.setEnabled(false);
+				dockerHostSelectRGComboBox.setEnabled(true);
+				setPageComplete(doValidate());
+			}
+		});
+		dockerHostRGTextField.setText(newHost.hostVM.resourceGroupName);
+		dockerHostRGTextField.setToolTipText(AzureDockerValidationUtils.getDockerHostResourceGroupNameTip());
+		dockerHostRGTextField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent event) {
+				if (AzureDockerValidationUtils.validateDockerHostResourceGroupName(((Text) event.getSource()).getText())) {
+					errDispatcher.removeMessage("dockerHostRGTextField", dockerHostRGTextField);
+					setErrorMessage(null);
+					setPageComplete(doValidate());
+				} else {
+					errDispatcher.addMessage("dockerHostRGTextField", AzureDockerValidationUtils.getDockerHostResourceGroupNameTip(), null, IMessageProvider.ERROR, dockerHostRGTextField);
+					setErrorMessage("Invalid resource group name");
+					setPageComplete(false);
+				}
+			}
+		});
+		
+		updateDockerHostSelectRGComboBox(mainContainer, getCurrentSubscription());
+	}
+
 	private void updateDockerHostSelectRGComboBox(Composite mainContainer, AzureDockerSubscription currentSubscription) {
+		dockerHostSelectRGComboBox.deselectAll();
+		dockerHostSelectRGComboBox.removeAll();
+		for (String rgName : dockerManager.getResourceGroups(currentSubscription)) {
+			dockerHostSelectRGComboBox.add(rgName);
+		}
+		if (dockerHostSelectRGComboBox.getItemCount() > 0) {
+			dockerHostSelectRGComboBox.select(0);
+		}
+		dockerHostSelectRGComboBox.redraw();
+	}
+
+	private void updateDockerHostVnetGroup(Composite mainContainer) {
+		dockerHostNewVNetRadioButton.setSelection(true);
+		dockerHostNewVNetRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dockerHostNewVNetNameTextField.setEnabled(true);
+				dockerHostNewVNetAddrSpaceTextField.setEnabled(true);
+		        dockerHostSelectVnetComboBox.setEnabled(false);
+		        dockerHostSelectSubnetComboBox.setEnabled(false);
+				setPageComplete(doValidate());
+			}
+		});
+		dockerHostNewVNetNameTextField.setToolTipText(AzureDockerValidationUtils.getDockerVnetNameTip());
+		dockerHostNewVNetNameTextField.setText(newHost.hostVM.vnetName);
+		dockerHostNewVNetNameTextField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent event) {
+				if (AzureDockerValidationUtils.validateDockerVnetName(((Text) event.getSource()).getText())) {
+					errDispatcher.removeMessage("dockerHostNewVNetNameTextField", dockerHostNewVNetNameTextField);
+					setErrorMessage(null);
+					setPageComplete(doValidate());
+				} else {
+					errDispatcher.addMessage("dockerHostNewVNetNameTextField", AzureDockerValidationUtils.getDockerVnetNameTip(), null, IMessageProvider.ERROR, dockerHostNewVNetNameTextField);
+					setErrorMessage("Invalid network name");
+					setPageComplete(false);
+				}
+			}
+		});
+		dockerHostNewVNetAddrSpaceTextField.setToolTipText(AzureDockerValidationUtils.getDockerVnetAddrspaceTip());
+		dockerHostNewVNetAddrSpaceTextField.setText(newHost.hostVM.vnetAddressSpace);
+		dockerHostNewVNetAddrSpaceTextField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent event) {
+				if (AzureDockerValidationUtils.validateDockerVnetAddrSpace(((Text) event.getSource()).getText())) {
+					errDispatcher.removeMessage("dockerHostNewVNetAddrSpaceTextField", dockerHostNewVNetAddrSpaceTextField);
+					setErrorMessage(null);
+					setPageComplete(doValidate());
+				} else {
+					errDispatcher.addMessage("dockerHostNewVNetAddrSpaceTextField", AzureDockerValidationUtils.getDockerVnetAddrspaceTip(), null, IMessageProvider.ERROR, dockerHostNewVNetAddrSpaceTextField);
+					setErrorMessage("Invalid address space");
+					setPageComplete(false);
+				}
+			}
+		});
+		dockerHostSelectVNetRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dockerHostNewVNetNameTextField.setEnabled(false);
+				dockerHostNewVNetAddrSpaceTextField.setEnabled(false);
+		        dockerHostSelectVnetComboBox.setEnabled(true);
+		        dockerHostSelectSubnetComboBox.setEnabled(true);
+				setPageComplete(doValidate());
+			}
+		});
+		dockerHostSelectVnetComboBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+		        updateDockerSelectSubnetComboBox(mainContainer, (AzureDockerVnet) dockerHostSelectVnetComboBox.getData(dockerHostSelectVnetComboBox.getText()));
+				setPageComplete(doValidate());
+			}
+		});
+		dockerHostSelectSubnetComboBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setPageComplete(doValidate());
+			}
+		});
+
+        dockerHostSelectVnetComboBox.setEnabled(false);
+        dockerHostSelectSubnetComboBox.setEnabled(false);
+        String region = (String) dockerLocationComboBox.getText();
+        Region regionObj = Region.findByLabelOrName(region);
+        updateDockerSelectVnetComboBox( mainContainer, getCurrentSubscription(), regionObj != null ? regionObj.name() : region);
+	}
+
+	private void updateDockerSelectVnetComboBox(Composite mainContainer, AzureDockerSubscription currentSubscription, String region) {
+		dockerHostSelectVnetComboBox.deselectAll();
+		dockerHostSelectVnetComboBox.removeAll();
+		if (currentSubscription != null && region != null) {
+			List<AzureDockerVnet> dockerVnets = dockerManager.getNetworksAndSubnets(currentSubscription);
+			for (AzureDockerVnet vnet : dockerVnets) {
+				if (region != null && vnet.region.equals(region)) {
+					dockerHostSelectVnetComboBox.add(vnet.name);
+					dockerHostSelectVnetComboBox.setData(vnet.name, vnet);
+				}
+			}
+		}
+		dockerHostSelectVnetComboBox.redraw();
+		if (dockerHostSelectVnetComboBox.getItemCount() > 0) {
+			dockerHostSelectVnetComboBox.select(0);
+			updateDockerSelectSubnetComboBox(mainContainer, (AzureDockerVnet) dockerHostSelectVnetComboBox.getData(dockerHostSelectVnetComboBox.getText()));
+		} else {
+			updateDockerSelectSubnetComboBox(mainContainer, null);
+		}
+	}
+	
+	private void updateDockerSelectSubnetComboBox(Composite mainContainer, AzureDockerVnet vnet) {
+		dockerHostSelectSubnetComboBox.deselectAll();
+		dockerHostSelectSubnetComboBox.removeAll();
+		if (vnet != null) {
+			for (String subnetName : vnet.subnets) {
+				dockerHostSelectSubnetComboBox.add(subnetName);
+			}
+		}
+		if (dockerHostSelectSubnetComboBox.getItemCount() > 0) {
+			dockerHostSelectSubnetComboBox.select(0);
+		}
+		dockerHostSelectSubnetComboBox.redraw();
+	}
+
+	private void updateDockerHostStorageGroup(Composite mainContainer) {
+		dockerHostNewStorageRadioButton.setSelection(true);
+		dockerHostNewStorageRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dockerNewStorageTextField.setEnabled(true);
+				dockerSelectStorageComboBox.setEnabled(false);
+				setPageComplete(doValidate());
+			}
+		});
+		dockerHostSelectStorageRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dockerNewStorageTextField.setEnabled(false);
+				dockerSelectStorageComboBox.setEnabled(true);
+				setPageComplete(doValidate());
+			}
+		});
+	    dockerNewStorageTextField.setText(newHost.hostVM.storageAccountName);
+		dockerNewStorageTextField.setToolTipText(AzureDockerValidationUtils.getDockerHostStorageNameTip());
+		dockerNewStorageTextField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent event) {
+				if (AzureDockerValidationUtils.validateDockerHostStorageName(((Text) event.getSource()).getText())) {
+					errDispatcher.removeMessage("dockerNewStorageTextField", dockerNewStorageTextField);
+					setErrorMessage(null);
+					setPageComplete(doValidate());
+				} else {
+					errDispatcher.addMessage("dockerNewStorageTextField", AzureDockerValidationUtils.getDockerHostStorageNameTip(), null, IMessageProvider.ERROR, dockerNewStorageTextField);
+					setErrorMessage("Invalid storage account name");
+					setPageComplete(false);
+				}
+			}
+		});
+		dockerSelectStorageComboBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setPageComplete(doValidate());
+			}
+		});
+		dockerSelectStorageComboBox.setEnabled(false);
+		
+	    updateDockerSelectStorageComboBox(mainContainer, getCurrentSubscription());
 	}
 
 
+	private void updateDockerSelectStorageComboBox(Composite mainContainer, AzureDockerSubscription currentSubscription) {
+		dockerSelectStorageComboBox.deselectAll();
+		dockerSelectStorageComboBox.removeAll();
+		String vmImageSize = (String) dockerHostVMSizeComboBox.getText();
+		if (vmImageSize != null) {
+			String vmImageType = vmImageSize.contains("_D") ? "Premium_LRS" : "Standard_LRS";
+			for (String storageAccName : dockerManager.getAvailableStorageAccounts(currentSubscription.id, vmImageType)) {
+				dockerSelectStorageComboBox.add(storageAccName);
+			}
+		}
+		if (dockerSelectStorageComboBox.getItemCount() > 0) {
+			dockerSelectStorageComboBox.select(0);
+		}
+		dockerSelectStorageComboBox.redraw();
+	}
+	
+	
+//	@Override
+//	public IWizardPage getNextPage() {
+//		return null;
+////		return super.getNextPage();
+//	}
+//	@Override
+//	public boolean isPageComplete() {
+////		if(doValidate()) {
+//			return super.isPageComplete();
+////		} else {
+////			return false;
+////		}
+//	}
+//	
+//	@Override
+//	public boolean canFlipToNextPage() {
+//		getWizard().getContainer().updateButtons();
+////		setPageComplete(false);
+//		return ;
+//	}
+	private boolean validateDockerHostName() {
+		// Docker virtual machine name
+		String hostName = dockerHostNameTextField.getText();
+		if (hostName == null || hostName.isEmpty() || !AzureDockerValidationUtils.validateDockerHostName(hostName)) {
+			String errMsg = "Invalid virtual machine name";
+			errDispatcher.addMessage("dockerHostNameTextField", AzureDockerValidationUtils.getDockerHostNameTip(), null, IMessageProvider.ERROR, dockerHostNameTextField);
+			setErrorMessage(errMsg);
+			return false;
+		} else {
+			newHost.name = hostName;
+			newHost.hostVM.name = hostName;
+			newHost.certVault.hostName = hostName;
+			newHost.hostVM.publicIpName = hostName + "-pip";
+			errDispatcher.removeMessage("dockerHostNameTextField", dockerHostNameTextField);
+			setErrorMessage(null);
+			return true;
+		}
+	}
+	
+	private boolean validateDockerSubscription() {
+		// Subscription
+		AzureDockerSubscription currentSubscription = getCurrentSubscription();
+		if (currentSubscription == null || currentSubscription.id == null || currentSubscription.id.isEmpty()) {
+			String errMsg = "Subscription not found";
+			errDispatcher.addMessage("dockerSelectStorageComboBox", errMsg, null, IMessageProvider.ERROR, dockerSelectStorageComboBox);
+			setErrorMessage(errMsg);
+			return false;
+		} else {
+			newHost.sid = currentSubscription.id;
+			errDispatcher.removeMessage("dockerSelectStorageComboBox", dockerSelectStorageComboBox);
+			setErrorMessage(null);
+			return true;
+		}
+	}
+
+	private boolean validateDockerLocation() {
+		// Location/region
+		String region = (String) dockerLocationComboBox.getText();
+		if (preferredLocation == null || region == null || region.isEmpty() || region.equals(SELECT_REGION)) {
+			String errMsg = "Region not found";
+			errDispatcher.addMessage("dockerLocationComboBox", errMsg, null, IMessageProvider.ERROR, dockerLocationComboBox);
+			setErrorMessage(errMsg);
+			return false;
+		} else {
+			newHost.hostVM.region = preferredLocation;
+			newHost.hostVM.dnsName = String.format("%s.%s.cloudapp.azure.com", newHost.hostVM.name, newHost.hostVM.region);
+			newHost.apiUrl = newHost.hostVM.dnsName;
+			errDispatcher.removeMessage("dockerLocationComboBox", dockerLocationComboBox);
+			setErrorMessage(null);
+			return true;
+		}
+	}
+
+	private boolean validateDockerOSType() {
+		// OS type
+		KnownDockerVirtualMachineImage osType = KnownDockerVirtualMachineImage.valueOf(dockerHostOSTypeComboBox.getText()); 
+		if (osType == null) {
+	    	hostDetailsTabFolder.setSelection(0);
+			String errMsg = "OS type not set";
+			errDispatcher.addMessage("dockerHostOSTypeComboBox", errMsg, null, IMessageProvider.ERROR, dockerHostOSTypeComboBox);
+			setErrorMessage(errMsg);
+			return false;
+		} else {
+			newHost.hostOSType = DockerHost.DockerHostOSType.valueOf(osType.toString());
+			newHost.hostVM.osHost = osType.getAzureOSHost();
+			errDispatcher.removeMessage("dockerHostOSTypeComboBox", dockerHostOSTypeComboBox);
+			setErrorMessage(null);
+			return true;
+		}
+	}
+
+	private boolean validateDockerVMSize() {
+		// Docker virtual machine size
+		String vmSize = (String) dockerHostVMSizeComboBox.getText();
+	    if (vmSize == null || vmSize.isEmpty()) {
+	    	hostDetailsTabFolder.setSelection(0);
+			String errMsg = "Virtual machine size not set";
+			errDispatcher.addMessage("dockerHostVMSizeComboBox", errMsg, null, IMessageProvider.ERROR, dockerHostVMSizeComboBox);
+			setErrorMessage(errMsg);
+			return false;
+		} else {
+			newHost.hostVM.vmSize = vmSize;
+			errDispatcher.removeMessage("dockerHostVMSizeComboBox", dockerHostVMSizeComboBox);
+			setErrorMessage(null);
+			return true;
+		}
+	}
+
+	private boolean validateDockerRG() {
+		// Docker resource group name
+		if (dockerHostNewRGRadioButton.getSelection()) {
+			// New resource group
+			String rgName = dockerHostRGTextField.getText();
+			if (rgName == null || rgName.isEmpty() || !AzureDockerValidationUtils.validateDockerHostResourceGroupName(rgName)) {
+		    	hostDetailsTabFolder.setSelection(1);
+				errDispatcher.addMessage("dockerHostRGTextField", AzureDockerValidationUtils.getDockerHostResourceGroupNameTip(), null, IMessageProvider.ERROR, dockerHostRGTextField);
+				setErrorMessage("Invalid resource group name");
+				return false;
+			} else {
+				errDispatcher.removeMessage("dockerHostRGTextField", dockerHostRGTextField);
+				setErrorMessage(null);
+				newHost.hostVM.resourceGroupName = rgName;
+				return true;
+			}
+		} else {
+			// Existing resource group
+			String rgName = (String) dockerHostSelectRGComboBox.getText();
+			if (rgName == null || rgName.isEmpty()) {
+		    	hostDetailsTabFolder.setSelection(1);
+				String errMsg = "Resource group not set";
+				errDispatcher.addMessage("dockerHostSelectRGComboBox", errMsg, null, IMessageProvider.ERROR, dockerHostSelectRGComboBox);
+				setErrorMessage(errMsg);
+				return false;
+			} else {
+				// Add "@" to mark this as an existing resource group
+				newHost.hostVM.resourceGroupName = rgName + "@";
+				errDispatcher.removeMessage("dockerHostSelectRGComboBox", dockerHostSelectRGComboBox);
+				setErrorMessage(null);
+				return true;
+			}
+		}
+	}
+
+	private boolean validateDockerVnet() {
+		// Docker virtual network name
+		if (dockerHostNewVNetRadioButton.getSelection()) {
+			// New virtual network
+			String vnetName = dockerHostNewVNetNameTextField.getText();
+			if (vnetName == null || vnetName.isEmpty() || !AzureDockerValidationUtils.validateDockerVnetName(vnetName)) {
+		    	hostDetailsTabFolder.setSelection(2);
+				errDispatcher.addMessage("dockerHostNewVNetNameTextField", AzureDockerValidationUtils.getDockerVnetNameTip(), null, IMessageProvider.ERROR, dockerHostNewVNetNameTextField);
+				setErrorMessage("Invalid network name");
+				return false;
+			} else {
+				errDispatcher.removeMessage("dockerHostNewVNetNameTextField", dockerHostNewVNetNameTextField);
+				setErrorMessage(null);
+				
+				String vnetAddrSpace = dockerHostNewVNetAddrSpaceTextField.getText();
+				if (vnetAddrSpace == null || vnetAddrSpace.isEmpty() || !AzureDockerValidationUtils.validateDockerVnetAddrSpace(vnetAddrSpace)) {
+			    	hostDetailsTabFolder.setSelection(2);
+					errDispatcher.addMessage("dockerHostNewVNetAddrSpaceTextField", AzureDockerValidationUtils.getDockerVnetAddrspaceTip(), null, IMessageProvider.ERROR, dockerHostNewVNetAddrSpaceTextField);
+					setErrorMessage("Invalid address space");
+					return false;
+				} else {
+					errDispatcher.removeMessage("dockerHostNewVNetAddrSpaceTextField", dockerHostNewVNetAddrSpaceTextField);
+					setErrorMessage(null);
+					newHost.hostVM.vnetName = vnetName;
+					newHost.hostVM.vnetAddressSpace = vnetAddrSpace;
+					newHost.hostVM.subnetName = "subnet1";
+					return true;
+				}
+			}
+		} else {
+			// Existing virtual network and subnet
+			AzureDockerVnet vnet = (AzureDockerVnet) dockerHostSelectVnetComboBox.getData(dockerHostSelectVnetComboBox.getText());
+			if (vnet == null || vnet.name == null || vnet.name.isEmpty()) {
+		    	hostDetailsTabFolder.setSelection(2);
+				String errMsg = "Network not set";
+				errDispatcher.addMessage("dockerHostSelectVnetComboBox", errMsg, null, IMessageProvider.ERROR, dockerHostSelectVnetComboBox);
+				setErrorMessage(errMsg);
+				return false;
+			} else {
+				errDispatcher.removeMessage("dockerHostSelectVnetComboBox", dockerHostSelectVnetComboBox);
+				setErrorMessage(null);
+				String subnet = (String) dockerHostSelectSubnetComboBox.getText();
+				if (subnet == null || subnet.isEmpty()) {
+			    	hostDetailsTabFolder.setSelection(2);
+					errDispatcher.addMessage("dockerHostSelectSubnetComboBox", AzureDockerValidationUtils.getDockerVnetAddrspaceTip(), null, IMessageProvider.ERROR, dockerHostSelectSubnetComboBox);
+					setErrorMessage("Subnet not set");
+					return false;
+				} else {
+					errDispatcher.removeMessage("dockerHostSelectSubnetComboBox", dockerHostSelectSubnetComboBox);
+					setErrorMessage(null);
+					// Add "@resourceGroupName" to mark this as an existing virtual
+					// network
+					newHost.hostVM.vnetName = vnet.name + "@" + vnet.resourceGroup;
+					newHost.hostVM.vnetAddressSpace = vnet.addrSpace;
+					newHost.hostVM.subnetName = subnet;
+					return true;
+				}
+			}
+		}
+	}
+
+	private boolean validateDockerStorage() {
+		// Docker storage account
+		String vmSize = (String) dockerHostVMSizeComboBox.getText();
+		String storageName;
+		if (dockerHostNewStorageRadioButton.getSelection()) {
+			// New storage account
+			storageName = dockerNewStorageTextField.getText();
+			if (storageName == null || storageName.isEmpty() || vmSize == null || vmSize.isEmpty() || !AzureDockerValidationUtils.validateDockerHostStorageName(storageName, getCurrentSubscription())) {
+		    	hostDetailsTabFolder.setSelection(3);
+				errDispatcher.addMessage("dockerNewStorageTextField", AzureDockerValidationUtils.getDockerHostStorageNameTip(), null, IMessageProvider.ERROR, dockerNewStorageTextField);
+				setErrorMessage("Invalid storage account name");
+				return false;
+			} else {
+				errDispatcher.removeMessage("dockerNewStorageTextField", dockerNewStorageTextField);
+				setErrorMessage(null);
+				newHost.hostVM.storageAccountName = storageName;
+				newHost.hostVM.storageAccountType = AzureDockerUtils.getStorageTypeForVMSize(vmSize);
+				return true;
+			}
+		} else {
+			// Existing resource group
+			storageName = (String) dockerSelectStorageComboBox.getText();
+			if (storageName == null || storageName.isEmpty() || vmSize == null || vmSize.isEmpty()) {
+		    	hostDetailsTabFolder.setSelection(3);
+				String errMsg = "Storage account not set";
+				errDispatcher.addMessage("dockerSelectStorageComboBox", errMsg, null, IMessageProvider.ERROR, dockerSelectStorageComboBox);
+				setErrorMessage(errMsg);
+				return false;
+			} else {
+				errDispatcher.removeMessage("dockerSelectStorageComboBox", dockerSelectStorageComboBox);
+				setErrorMessage(null);
+				// Add "@" to mark this as an existing storage account
+				newHost.hostVM.storageAccountName = storageName + "@";
+				newHost.hostVM.storageAccountType = AzureDockerUtils.getStorageTypeForVMSize(vmSize);
+				return true;
+			}
+		}
+	}
+	
 	public boolean doValidate() {
-		return false;
+		return
+				validateDockerHostName() && 
+				validateDockerSubscription() && 
+				validateDockerLocation() &&
+				validateDockerOSType() &&
+				validateDockerVMSize() &&
+				validateDockerRG() &&
+				validateDockerVnet() &&
+				validateDockerStorage();
+	}
+	
+	
+	private AzureDockerSubscription getCurrentSubscription() {
+		return (AzureDockerSubscription) ((StructuredSelection) dockerSubscriptionComboViewer.getSelection()).getFirstElement();
 	}
 }
