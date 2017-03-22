@@ -172,7 +172,7 @@ public class RoleAssignmentStep implements IStep {
          */
 
         @SuppressWarnings("unused")
-		String resp = armRestHelper.doDelete(
+        String resp = armRestHelper.doDelete(
                 subscriptionId + "/providers/Microsoft.Authorization/roleAssignments/" + roleAssignmentName,
                 null,
                 null
@@ -180,7 +180,7 @@ public class RoleAssignmentStep implements IStep {
     }
 
     @SuppressWarnings("unused")
-	private static RoleAssignmentRet getRoleAsiignment(String roleAsiignmetnName, UUID subscriptionId) {
+    private static RoleAssignmentRet getRoleAsiignment(String roleAsiignmetnName, UUID subscriptionId) {
         //TODO.shch: implement
         return null;
     }

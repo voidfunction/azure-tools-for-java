@@ -44,7 +44,7 @@ public class FileListener implements IListener<String> {
             fsReport.appendln(message);
         } catch (IOException e) {
             e.printStackTrace();
-            LOGGER.log(Level.SEVERE, "listen()", e);
+            LOGGER.log(Level.SEVERE, "listen@FileListener", e);
         }
     }
 }

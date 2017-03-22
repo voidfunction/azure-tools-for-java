@@ -25,6 +25,7 @@ package com.microsoft.azuretools.authmanage.srvpri.step;
 import com.microsoft.azuretools.authmanage.srvpri.exceptions.AzureException;
 import com.microsoft.azuretools.authmanage.srvpri.report.Reporter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +71,7 @@ public class StepManager {
             reporter.report("!! Rolling back...");
 
             rollback();
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             //e.printStackTrace();
             reporter.report(">> Executing step FAILED: " + e.getMessage());
             reporter.report("!! Rolling back...");
@@ -86,7 +87,7 @@ public class StepManager {
                 IStep step =  steps.get(curStep);
                 reporter.report("<< Rolling back step: " + step.getName() + "...");
                 step.rollback(getParamMap());
-            } catch (Exception e) {
+            } catch (IOException e) {
                 isOk = false;
                 reporter.report("<< Roll back FAILED: " + e.getMessage());
                 //e.printStackTrace();

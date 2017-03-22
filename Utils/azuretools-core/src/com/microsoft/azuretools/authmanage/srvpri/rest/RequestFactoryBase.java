@@ -68,7 +68,7 @@ abstract class RequestFactoryBase implements IRequestFactory {
             return AdAuthManager.getInstance().getAccessToken(tenantId, resource, promptBehavior);
         } catch (URISyntaxException | InterruptedException | ExecutionException | AuthException e) {
             e.printStackTrace();
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.log(Level.SEVERE, "getAccessToken@RequestFactoryBase", e);
             throw new IOException(e);
 
         }
