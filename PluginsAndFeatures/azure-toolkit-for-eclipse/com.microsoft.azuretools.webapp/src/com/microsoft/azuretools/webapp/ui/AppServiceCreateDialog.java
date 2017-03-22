@@ -1,8 +1,30 @@
+/*
+ * Copyright (c) Microsoft Corporation
+ * <p/>
+ * All rights reserved.
+ * <p/>
+ * MIT License
+ * <p/>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * <p/>
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software.
+ * <p/>
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package com.microsoft.azuretools.webapp.ui;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
@@ -43,6 +65,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import com.microsoft.azure.management.appservice.AppServicePlan;
 import com.microsoft.azure.management.appservice.AppServicePricingTier;
@@ -62,7 +85,7 @@ import com.microsoft.azuretools.utils.WebAppUtils;
 import com.microsoft.azuretools.webapp.Activator;
 
 public class AppServiceCreateDialog extends TitleAreaDialog {
-	private static ILog LOG = Activator.getDefault().getLog();
+   private static ILog LOG = Activator.getDefault().getLog();
 
     private Text textAppName;
     private Text textResourceGroupName;
@@ -301,18 +324,18 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         linkAppServicePricing.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
         linkAppServicePricing.setText("<a>App service pricing details</a>");
         linkAppServicePricing.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				try {
-					PlatformUI.getWorkbench().getBrowserSupport().
-					getExternalBrowser().openURL(new URL("https://azure.microsoft.com/en-us/pricing/details/app-service/"));
-				}
-				catch (Exception ex) {
-					//LOGGER.log(LogService.LOG_ERROR, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex);
-					LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex));
-				}
-			}
-		});
+         @Override
+         public void widgetSelected(SelectionEvent event) {
+            try {
+               PlatformUI.getWorkbench().getBrowserSupport().
+               getExternalBrowser().openURL(new URL("https://azure.microsoft.com/en-us/pricing/details/app-service/"));
+            }
+            catch (PartInitException | MalformedURLException ex) {
+               //LOGGER.log(LogService.LOG_ERROR, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex);
+               LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "widgetSelected@SelectionAdapter@linkAppServicePricing@AppServiceCreateDialog", ex));
+            }
+         }
+      });
         
         tabItemResourceGroup = new TabItem(tabFolder, SWT.NONE);
         tabItemResourceGroup.setText("Resource group");
@@ -392,18 +415,18 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         linkJdkLicense.setEnabled(false);
         linkJdkLicense.setText("<a>License</a>");
         linkJdkLicense.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				try {
-					PlatformUI.getWorkbench().getBrowserSupport().
-					getExternalBrowser().openURL(new URL(AzulZuluModel.getLicenseUrl()));
-				}
-				catch (Exception ex) {
-					//LOGGER.log(LogService.LOG_ERROR, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex);
-					LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "widgetSelected@SelectionAdapter@AppServiceCreateDialo", ex));
-				}
-			}
-		});
+         @Override
+         public void widgetSelected(SelectionEvent event) {
+            try {
+               PlatformUI.getWorkbench().getBrowserSupport().
+               getExternalBrowser().openURL(new URL(AzulZuluModel.getLicenseUrl()));
+            }
+            catch (Exception ex) {
+               //LOGGER.log(LogService.LOG_ERROR, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex);
+               LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "widgetSelected@SelectionAdapter@AppServiceCreateDialo", ex));
+            }
+         }
+      });
 
         
         btnJdkOwnDownloadUrl = new Button(compositeJDK, SWT.RADIO);
@@ -772,7 +795,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             //LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@okPressed@AppServiceCreateDialog", e);
-                            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "fillAppServicePlanPricingTiers@AppServiceCreateDialog", ex));
+                            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@okPressed@AppServiceCreateDialog", ex));
                             Display.getDefault().asyncExec(new Runnable() {
                                 @Override
                                 public void run() {
@@ -786,7 +809,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
             } catch (InvocationTargetException | InterruptedException ex) {
                 ex.printStackTrace();
                 //LOGGER.log(LogService.LOG_ERROR, "okPressed@AppServiceCreateDialog", e);
-                LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "fillAppServicePlanPricingTiers@AppServiceCreateDialog", ex));
+                LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "okPressed@AppServiceCreateDialog", ex));
                 ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
             }
         }

@@ -23,6 +23,8 @@
 package com.microsoft.azuretools.authmanage.srvpri.rest;
 
 
+import com.microsoft.azuretools.Constants;
+
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,7 +60,7 @@ public abstract class RestHelperBase {
         conn.setRequestMethod(verb);
         conn.setDoOutput(true);
         conn.setDoInput(true);
-        conn.setReadTimeout(10000);
+        conn.setReadTimeout(Constants.connection_read_timeout_ms);
 
         if(body != null) {
             conn.addRequestProperty("Content-Type", "application/json; charset=utf-8");
