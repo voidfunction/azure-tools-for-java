@@ -54,7 +54,7 @@ public class SignOutCommandHandler extends AbstractHandler {
                     shell, 
                     SWT.ICON_QUESTION | SWT.YES | SWT.NO);
             messageBox.setMessage(artifact + "\n"
-                    + "Dou you really want to sign out?");
+                    + "Do you really want to sign out?");
             messageBox.setText("Azure Sign Out");
             
             
