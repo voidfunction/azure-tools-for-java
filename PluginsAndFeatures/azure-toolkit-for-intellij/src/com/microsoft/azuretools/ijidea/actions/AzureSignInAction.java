@@ -87,7 +87,7 @@ public class AzureSignInAction extends AnAction {
                         : "Signed in using file \"" + authMethodManager.getAuthMethodDetails().getCredFilePath() + "\"";
                 int res = JOptionPane.showConfirmDialog(frame,
                         artifact + "\n"
-                                + "Dou you really want to sign out?",
+                                + "Do you really want to sign out?",
                         "Azure Sign Out",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
                         new ImageIcon("icons/azure.png"));
@@ -112,7 +112,7 @@ public class AzureSignInAction extends AnAction {
             ErrorWindow.show(ex.getMessage(), "AzureSignIn Action Error", frame);
         }
     }
-
+    
     public static boolean doSignIn(AuthMethodManager authMethodManager, Project project) throws Exception {
         boolean isSignIn = authMethodManager.isSignedIn();
         if (isSignIn) return true;

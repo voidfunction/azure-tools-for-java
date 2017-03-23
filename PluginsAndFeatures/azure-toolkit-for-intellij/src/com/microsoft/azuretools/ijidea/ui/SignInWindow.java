@@ -340,7 +340,7 @@ public class SignInWindow extends DialogWrapper {
             String authPath = authFileTextField.getText();
             if (StringUtils.isNullOrWhiteSpace(authPath)) {
                 JOptionPane.showMessageDialog(contentPane,
-                        "Please select authentication file",
+                        "Select authentication file",
                         "Sing in dialog info",
                         JOptionPane.INFORMATION_MESSAGE);
                 return;
