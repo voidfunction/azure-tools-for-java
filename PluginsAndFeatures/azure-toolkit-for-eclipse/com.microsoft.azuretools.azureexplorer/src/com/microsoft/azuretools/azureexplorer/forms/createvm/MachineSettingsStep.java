@@ -25,6 +25,7 @@ import com.microsoft.azure.management.compute.OperatingSystemTypes;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
+import com.microsoft.azuretools.azureexplorer.Activator;
 import com.microsoft.azuretools.core.utils.Messages;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 
@@ -67,7 +68,7 @@ public class MachineSettingsStep extends WizardPage {
     private boolean inSetPageComplete = false;
 
     public MachineSettingsStep(CreateVMWizard wizard) {
-        super("Create new Virtual Machine", "Virtual Machine Basic Settings", null);
+        super("Create new Virtual Machine", "Virtual Machine Basic Settings", Activator.getImageDescriptor("icons/large/Azure.png"));
         this.wizard = wizard;
     }
 
@@ -166,6 +167,12 @@ public class MachineSettingsStep extends WizardPage {
         confirmPasswordField.addModifyListener(modifyListener);
     }
 
+    private GridData getGridData(int columns) {
+    	GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+    	gridData.horizontalSpan = columns;
+    	return gridData;
+    }
+    
     private void certificateCheckBoxSelected(boolean selected) {
         certificateLabel.setEnabled(selected);
         certificateField.setEnabled(selected);

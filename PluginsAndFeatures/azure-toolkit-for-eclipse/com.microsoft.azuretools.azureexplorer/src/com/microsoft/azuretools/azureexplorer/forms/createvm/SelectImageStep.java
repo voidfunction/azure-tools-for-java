@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -38,8 +40,10 @@ import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.PlatformUI;
 
 import com.microsoft.azure.management.compute.KnownLinuxVirtualMachineImage;
@@ -82,7 +86,7 @@ public class SelectImageStep extends WizardPage {
 	private java.util.List<VirtualMachineImage> virtualMachineImages;
 
 	public SelectImageStep(final CreateVMWizard wizard) {
-		super("Select a Virtual Machine Image", "Select a Virtual Machine Image", null);
+		super("Select a Virtual Machine Image", "Select a Virtual Machine Image", Activator.getImageDescriptor("icons/large/Azure.png"));
 		this.wizard = wizard;
 	}
 
@@ -90,6 +94,8 @@ public class SelectImageStep extends WizardPage {
 	public void createControl(Composite parent) {
 		GridLayout gridLayout = new GridLayout(2, false);
 		GridData gridData = new GridData();
+		gridData.widthHint = 400;
+		gridData.horizontalAlignment = SWT.FILL;
 		gridData.grabExcessHorizontalSpace = true;
 		Composite container = new Composite(parent, 0);
 		container.setLayout(gridLayout);
@@ -155,29 +161,30 @@ public class SelectImageStep extends WizardPage {
 	private void createSettingsPanel(Composite container) {
 		final Composite composite = new Composite(container, SWT.NONE);
 		GridLayout gridLayout = new GridLayout();
-		gridLayout.numColumns = 1;
+		gridLayout.numColumns = 2;
 		GridData gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.verticalAlignment = GridData.BEGINNING;
 		// gridData.grabExcessHorizontalSpace = true;
-		gridData.widthHint = 250;
+		gridData.widthHint = 350;
 		composite.setLayout(gridLayout);
 		composite.setLayoutData(gridData);
 
 		regionLabel = new Label(composite, SWT.LEFT);
 		regionLabel.setText("Location:");
+//		regionLabel.setLayoutData(getGridDataForLabel());
 		regionComboBox = new Combo(composite, SWT.READ_ONLY);
-		gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-		regionComboBox.setLayoutData(gridData);
+		regionComboBox.setLayoutData(getGridData(1));
+		regionComboBox.setToolTipText("Specifies the location where your virtual machine will be created");
 		
 //		Group group = new Group(composite, SWT.NONE);
 //        group.setLayout(new RowLayout(SWT.VERTICAL));
 //        group.setBackground(PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.TRANSPARENT));
         knownImageBtn = new Button(composite, SWT.RADIO);
         knownImageBtn.setText("Recommended image:");
+        knownImageBtn.setLayoutData(getGridData(2));
         knownImageComboBox = new Combo(composite, SWT.READ_ONLY);
-		gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-		knownImageComboBox.setLayoutData(gridData);
+		knownImageComboBox.setLayoutData(getGridData(2));
 		for (KnownWindowsVirtualMachineImage image : KnownWindowsVirtualMachineImage.values()) {
 			knownImageComboBox.add(image.offer() + " - " + image.sku());
 			knownImageComboBox.setData(image.offer() + " - " + image.sku(), image);
@@ -197,33 +204,59 @@ public class SelectImageStep extends WizardPage {
 		
         customImageBtn = new Button(composite, SWT.RADIO);
         customImageBtn.setText("Custom image:");
+        customImageBtn.setLayoutData(getGridData(2));
 
 		publisherLabel = new Label(composite, SWT.LEFT);
 		publisherLabel.setText("Publisher:");
+		publisherLabel.setLayoutData(getGridDataForLabel());
 		publisherComboBox = new Combo(composite, SWT.READ_ONLY);
-		gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-		publisherComboBox.setLayoutData(gridData);
+		publisherComboBox.setLayoutData(getGridData(1));
+		publisherComboBox.setToolTipText("Specifies the publisher which created the image which you will use to create your virtual machine");
 
 		offerLabel = new Label(composite, SWT.LEFT);
 		offerLabel.setText("Offer:");
+		offerLabel.setLayoutData(getGridDataForLabel());
 		offerComboBox = new Combo(composite, SWT.READ_ONLY);
-		gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-		offerComboBox.setLayoutData(gridData);
+		offerComboBox.setLayoutData(getGridData(1));
+		offerComboBox.setToolTipText("Specifies which the virtual machine which offering to use from the selected publisher");
 
 		skuLabel = new Label(composite, SWT.LEFT);
 		skuLabel.setText("Sku:");
+		skuLabel.setLayoutData(getGridDataForLabel());
 		skuComboBox = new Combo(composite, SWT.READ_ONLY);
-		gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-		skuComboBox.setLayoutData(gridData);
+		skuComboBox.setLayoutData(getGridData(1));
+		skuComboBox.setToolTipText("Specifies the Stockkeeping Unit (SKU) to use from the selected offering");
 
 		versionLabel = new Label(composite, SWT.LEFT);
 		versionLabel.setText("Version #:");
+		versionLabel.setLayoutData(getGridDataForLabel());
 		imageLabelList = new org.eclipse.swt.widgets.List(composite, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL);
 		// gridData = new GridData();
 		// gridData.widthHint = 300;
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.verticalIndent = 10;
 		imageLabelList.setLayoutData(gridData);
+		imageLabelList.setToolTipText("Specifies the label for the specific image to use from the selected SKU; this is often the version for an image");
 	}
+	
+    private GridData getGridData(int columns) {
+    	GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+    	gridData.horizontalSpan = columns;
+    	gridData.horizontalAlignment = SWT.FILL;
+		gridData.widthHint = 280;
+		gridData.verticalIndent = 10;
+		gridData.grabExcessHorizontalSpace = true;
+    	return gridData;
+    }
+    
+    private GridData getGridDataForLabel() {
+    	GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.verticalIndent = 10;
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.widthHint = 100;
+    	return gridData;
+    }
 	
 	@Override
     public String getTitle() {

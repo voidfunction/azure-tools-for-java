@@ -53,7 +53,7 @@ public class SubscriptionStep extends WizardPage {
     private CreateVMWizard wizard;
 
     public SubscriptionStep(CreateVMWizard wizard) {
-        super("Create new Virtual Machine", "Choose a Subscription", null);
+        super("Create new Virtual Machine", "Choose a Subscription", Activator.getImageDescriptor("icons/large/Azure.png"));
         this.wizard = wizard;
     }
 

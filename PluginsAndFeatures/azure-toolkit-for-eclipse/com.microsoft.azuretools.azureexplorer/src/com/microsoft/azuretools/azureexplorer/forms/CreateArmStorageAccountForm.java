@@ -285,7 +285,6 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
     
 	private GridData gridDataForText(int width) {
 		GridData gridData = new GridData();
-		gridData.horizontalAlignment = SWT.END;
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.widthHint = width;
 		gridData.verticalIndent = 10;
