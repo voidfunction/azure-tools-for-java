@@ -193,7 +193,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         browserAppServiceDetailes = new Browser(grpAppServiceDetails, SWT.NONE);
         FontData browserFontData = btnRefresh.getFont().getFontData()[0];
         //browserFontStyle = String.format("font-family: '%s';", browserFontData.getHeight(), browserFontData.getName());
-        browserFontStyle = String.format("font-family: '%s'; font-size: 80%%;", browserFontData.getName());
+        browserFontStyle = String.format("font-family: '%s'; font-size: 70%%;", browserFontData.getName());
         browserAppServiceDetailes.addLocationListener(new LocationListener() {
             public void changing(LocationEvent event) {
                 try {
@@ -202,9 +202,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                     event.doit = false;
                     PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(event.location));
                 } catch (Exception ex) {
-                    //LOGGER.log(LogService.LOG_ERROR,"changing@LocationListener@AppServiceCreateDialog", e);
                     ex.printStackTrace();
-                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
+                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "changing@LocationListener@browserAppServiceDetailes@AppServiceCreateDialog", ex));
                 }       
             }
             public void changed(LocationEvent event) {}
@@ -311,16 +310,14 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 
                     } catch (Exception ex) {
                     	ex.printStackTrace();
-                        //LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@updateAndFillTable@AppServiceCreateDialog", ex);
-                    	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
+                    	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@updateAndFillTable@AppServiceCreateDialog", ex));
                     }
                     monitor.done();
                 }
             });
         } catch (InvocationTargetException | InterruptedException ex) {
         	ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR,"updateAndFillTable@AppServiceCreateDialog", e);
-        	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
+        	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "updateAndFillTable@AppServiceCreateDialog", ex));
         }
     }
     
@@ -385,39 +382,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         fillAppServiceDetails();
     }
     
-//    private void collectProjectData() throws Exception {
-//        IProject project = null;
-//        ISelectionService selectionService = 
-//                PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
-//        ISelection selection = selectionService.getSelection();
-//
-//        if(selection instanceof IStructuredSelection) {
-//            Object element = ((IStructuredSelection)selection).getFirstElement();
-//        }
-//        
-//        IWorkspace ws = ResourcesPlugin.getWorkspace();
-//        IWorkspaceRoot weRoot = ws.getRoot();
-//        //weRoot.get
-//        
-//        IWorkspaceDescription wsd =  ws.getDescription();
-//        //wsd.
-//        
-//        IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-//        for (IProject p : projects) {
-//            System.out.println(p.getName() + " : " + p.getFullPath());
-//            System.out.println(p.getFolder( p.getFullPath()));
-//            System.out.println(p.getFolder( p.getLocation()));
-//            System.out.println(p.getType());
-//            IProjectDescription dp = p.getDescription(); 
-//            System.out.println(dp.getName());
-//            System.out.println(dp.getLocationURI());
-//            
-//            System.out.println(String.join("\n", dp.getNatureIds()));
-//            
-//            System.out.println("\n");
-//        }
-//    }
-    
     private boolean validated() {
         setErrorMessage(null);
         int selectedRow = table.getSelectionIndex();
@@ -445,8 +409,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             deploy(projectName, destinationPath);
         } catch (Exception ex) {
         	ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR,"okPressed@AppServiceCreateDialog", e);
-        	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
+        	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "okPressed@AppServiceCreateDialog", ex));
         };
         super.okPressed();
     }
@@ -519,8 +482,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                                     }
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
-                                    //LOGGER.log(LogService.LOG_ERROR,"run@Tread@run@ProgressDialog@deploy@AppServiceCreateDialog", e);
-                                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
+                                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@Thread@run@ProgressDialog@deploy@AppServiceCreateDialog@SingInDialog", ex));
                                 }
                             }
                         });
@@ -533,8 +495,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         showLink(sitePath);
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        //LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@deploy@AppServiceCreateDialog", e);
-                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
+                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@deploy@AppServiceCreateDialog", ex));
                         Display.getDefault().asyncExec(new Runnable() {
                             @Override
                             public void run() {
@@ -546,8 +507,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             });
         } catch (InvocationTargetException | InterruptedException ex) {
             ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR,"deploy@AppServiceCreateDialog", e);
-            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "deploy@AppServiceCreateDialog", ex));
             ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
         }
     }
@@ -569,8 +529,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                           PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(link));
                       } catch (Exception ex) {
                     	  ex.printStackTrace();
-                          //LOGGER.log(LogService.LOG_ERROR,"run@Display@showLink@AppServiceCreateDialog", e);
-                    	  LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
+                    	  LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@Display@showLink@AppServiceCreateDialog", ex));
                       }
                   }
               }
@@ -612,14 +571,12 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                             @Override
                             public void run() {
                                 table.remove(selectedRow);
-                                //table.redraw();
                                 browserAppServiceDetailes.setText("");
                             };
                         });
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        //LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@deleteAppService@AppServiceCreateDialog", e);
-                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
+                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@deleteAppService@AppServiceCreateDialog", ex));
                         Display.getDefault().asyncExec(new Runnable() {
                             @Override
                             public void run() {
@@ -632,8 +589,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             });
         } catch (Exception ex) {
             ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR,"deleteAppService@AppServiceCreateDialog", e);
-            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "deleteAppService@AppServiceCreateDialog", ex));
             ErrorWindow.go(getShell(), ex.getMessage(), errTitle);
         }
     }
