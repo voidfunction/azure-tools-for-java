@@ -678,6 +678,9 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         for (ResourceGroup rg : rgl) {
             List<AppServicePlan> aspl = AzureModel.getInstance().getResourceGroupToAppServicePlanMap().get(rg);
             for (AppServicePlan asp : aspl) {
+                if (asp.pricingTier().toSkuDescription().tier().compareToIgnoreCase("dynamic") == 0) {
+                    continue;
+                }
                 binderAppServicePlan.add(asp);
                 comboAppServicePlan.add(asp.name());
             }
