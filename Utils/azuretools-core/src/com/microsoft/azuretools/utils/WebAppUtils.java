@@ -38,10 +38,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 
 import java.io.*;
-import java.net.ConnectException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
+import java.net.*;
 import java.util.concurrent.CancellationException;
 
 /**
@@ -172,13 +169,12 @@ public class WebAppUtils {
         return false;
     }
 
-    public static int sendGet(String sitePath) throws IOException {
+    public static void sendGet(String sitePath) throws IOException {
         URL url = new URL(sitePath);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setReadTimeout(Constants.connection_read_timeout_ms);
         //con.setRequestProperty("User-Agent", "AzureTools for Intellij");
-        return con.getResponseCode();
     }
 
     public static boolean isUrlAccessible(String url) throws IOException {
@@ -186,7 +182,11 @@ public class WebAppUtils {
         HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
         con.setRequestMethod("HEAD");
         con.setReadTimeout(Constants.connection_read_timeout_ms);
-        if (con.getResponseCode() != HttpURLConnection.HTTP_OK) {
+        try {
+            if (con.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                return false;
+            }
+        } catch (IOException ex) {
             return false;
         }
         return true;
