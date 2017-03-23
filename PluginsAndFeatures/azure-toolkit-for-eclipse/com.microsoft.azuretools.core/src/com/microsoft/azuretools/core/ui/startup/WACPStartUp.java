@@ -22,8 +22,11 @@ package com.microsoft.azuretools.core.ui.startup;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IStartup;
@@ -45,6 +48,26 @@ public class WACPStartUp implements IStartup {
 	
 	public void earlyStartup() {
 		initialize();
+		
+		Collection<String> obsoletePackages = Activator.getDefault().getObsoletePackages();
+		if (obsoletePackages != null && !obsoletePackages.isEmpty()) {
+			Display.getDefault().syncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					MessageDialog.openInformation(
+							Display.getDefault().getActiveShell(),
+							"Need to clean packages",
+							"You have an older version of the Azure Toolkit for Eclipse installed which "
+							+ "could not be automatically upgraded. You should uninstall all the listed "
+							+ "components manually, and reinstall from http://dl.microsoft.com/eclipse\n\n" + 
+							StringUtils.join(obsoletePackages, "\n"));
+					
+				}
+			
+			});
+			
+		}
 	}
 
 	/**
@@ -128,7 +151,7 @@ public class WACPStartUp implements IStartup {
 					DataOperations.updatePropertyValue(doc, Messages.prefVal, String.valueOf(accepted));
 				}
 
-				if(isHDInsight && !Activator.getDefault().isHDInsightEnabled()) {
+				if(!Activator.getDefault().isHDInsightEnabled()) {
 					boolean isShowHDInsightTips = true;
 					HDInsightHelpDlg hdInsightHelpDlg = new HDInsightHelpDlg(Display.getDefault().getActiveShell());
 					if(hdInsightHelpDlg.open() == Window.CANCEL && !hdInsightHelpDlg.isShowTipsStatus()) {

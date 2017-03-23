@@ -29,7 +29,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
@@ -88,6 +93,8 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
 
     private boolean isHDInsightEnabled = false;
     
+    private Collection<String> obsoletePackages;
+    
     private static final EventListenerList UPLOAD_PROGRESS_EVENT_LISTENERS = new EventListenerList();
     public static List<DeploymentEventListener> depEveList = new ArrayList<DeploymentEventListener>();
 
@@ -116,7 +123,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
                     "settings for the Azure Core plugin.", e, "Azure Core Plugin", false, true);
         }
         isHDInsightEnabled = isHDInsightEnabled(context);
-        
+        findObsoletePackages(context);
         super.start(context);
     }
 
@@ -160,6 +167,10 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
         return isHDInsightEnabled;
     }
     
+    public Collection<String> getObsoletePackages() {
+    	return obsoletePackages;
+    }
+    
     private boolean isHDInsightEnabled(BundleContext context) {
         Bundle [] bundles = context.getBundles();
         boolean isScalaEnabled = false, isHDIEnabled = false;
@@ -172,6 +183,38 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
             }
         }
         return isScalaEnabled && isHDIEnabled;
+    }
+    
+    private void findObsoletePackages(BundleContext context) {
+    	/// Fix Issue : https://github.com/Microsoft/azure-tools-for-java/issues/188
+    	Map<String, String> obsoletePackageMap = new HashMap<String, String>();
+		obsoletePackageMap.put("com.microsoftopentechnologies.acsfilter.ui", "Azure Access Control Services Filter UI");
+		obsoletePackageMap.put("com.microsoft.webapp", "Azure Web Apps Plugin for Java");
+		obsoletePackageMap.put("com.persistent.winazure.eclipseplugin", "Azure Plugin for Eclipse with Java Library");
+		obsoletePackageMap.put("com.microsoftopentechnologies.acsfilter.feature", "Azure Access Control Services Filter");
+		obsoletePackageMap.put("com.microsoftopentechnologies.wacommon.feature", "Azure Common Plugin");
+		obsoletePackageMap.put("com.microsoftopentechnologies.qpid.feature", "Package for Apache Qpid Client Libraries for JMS");
+		obsoletePackageMap.put("com.microsoftopentechnologies.windowsazure.tools.wasdkjava.ui", "Package for Microsoft Azure Libraries for Java UI");
+		obsoletePackageMap.put("com.microsoft.azureexplorer.feature", "Azure Explorer for Eclipse");
+		obsoletePackageMap.put("com.persistent.winazure.eclipseplugin.feature", "Azure Plugin for Eclipse with Java");
+		obsoletePackageMap.put("com.microsoft.hdinsights", "HDInsights");
+		obsoletePackageMap.put("com.microsoftopentechnologies.wacommon", "Azure Common Plugin Library");
+		obsoletePackageMap.put("com.microsoft.hdinsights.feature", "Azure HDInsight plugin for Java");
+		obsoletePackageMap.put("com.microsoft.azureexplorer", "Azure Explorer Plugin for Eclipse");
+		obsoletePackageMap.put("com.microsoft.webapp.feature", "Azure Web Apps Plugin for Java");
+		obsoletePackageMap.put("com.microsoftopentechnologies.acsfilter", "Azure Access Control Services Filter Library");
+		obsoletePackageMap.put("com.microsoftopentechnologies.windowsazure.tools.sdk", "Package for Microsoft Azure Libraries for Java Plugin");
+		obsoletePackageMap.put("com.microsoftopentechnologies.windowsazure.tools.sdk.feature", "Package for Microsoft Azure Libraries for Java");
+		obsoletePackageMap.put("com.microsoftopentechnologies.qpid.ui", "Package for Apache Qpid Client Libraries for JMS UI");
+		obsoletePackageMap.put("com.microsoftopentechnologies.qpid", "Package for Apache Qpid Client Libraries for JMS Library");
+		obsoletePackages = new HashSet<String>();
+		Bundle[] bundles = context.getBundles();
+		for (int i = 0; i < bundles.length; ++i) {
+			String symbolicName = bundles[i].getSymbolicName().toLowerCase();
+			if (obsoletePackageMap.containsKey(symbolicName)) {
+				obsoletePackages.add(obsoletePackageMap.get(symbolicName) + "(" + bundles[i].getVersion() + ")");
+			}
+		}
     }
     /*
      * (non-Javadoc)
