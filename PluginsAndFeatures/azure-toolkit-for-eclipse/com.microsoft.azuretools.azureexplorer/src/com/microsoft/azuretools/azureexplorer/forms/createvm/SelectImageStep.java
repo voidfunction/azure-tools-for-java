@@ -50,6 +50,7 @@ import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.compute.VirtualMachineSku;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.azureexplorer.Activator;
 import com.microsoft.azuretools.core.utils.Messages;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.utils.AzureModel;
@@ -57,6 +58,8 @@ import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 public class SelectImageStep extends WizardPage {
+    private static final String LOADING = "<Loading...>";
+	
 	private CreateVMWizard wizard;
 //	private JList createVmStepsList;
 
@@ -79,7 +82,7 @@ public class SelectImageStep extends WizardPage {
 	private java.util.List<VirtualMachineImage> virtualMachineImages;
 
 	public SelectImageStep(final CreateVMWizard wizard) {
-		super("Select a Virtual Machine Image", null, null);
+		super("Select a Virtual Machine Image", "Select a Virtual Machine Image", null);
 		this.wizard = wizard;
 	}
 
@@ -232,6 +235,14 @@ public class SelectImageStep extends WizardPage {
             	setPageComplete(false);
                 Map<SubscriptionDetail, List<Location>> subscription2Location = AzureModel.getInstance().getSubscriptionToLocationMap();
                 if (subscription2Location == null || subscription2Location.get(wizard.getSubscription()) == null) {
+                	DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
+        				@Override
+        				public void run() {
+        					regionComboBox.setItems(new String[] {LOADING});
+        					regionComboBox.select(0);
+        					regionComboBox.setEnabled(false);
+        				}
+        			});
                 	DefaultLoader.getIdeHelper().runInBackground(null, "Loading Available Locations...", true, true, "", new Runnable() {
             			@Override
             			public void run() {
@@ -258,6 +269,7 @@ public class SelectImageStep extends WizardPage {
     }
 	
 	private void fillRegions() {
+		regionComboBox.removeAll();
 		List<Location> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(wizard.getSubscription())
                 .stream().sorted(Comparator.comparing(Location::displayName)).collect(Collectors.toList());
 		for (Location location : locations) {
@@ -268,6 +280,7 @@ public class SelectImageStep extends WizardPage {
             regionComboBox.select(0);
             selectRegion();
         }
+        regionComboBox.setEnabled(true);
         setPageComplete(true);
     }
 	

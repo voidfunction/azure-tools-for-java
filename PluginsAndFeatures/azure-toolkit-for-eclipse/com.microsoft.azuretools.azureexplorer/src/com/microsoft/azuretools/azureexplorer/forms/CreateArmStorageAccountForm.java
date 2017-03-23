@@ -10,8 +10,8 @@ import java.util.TreeMap;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -27,13 +27,11 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
@@ -59,7 +57,7 @@ import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuTier;
 import com.microsoft.azure.management.storage.StorageAccount;
 
-public class CreateArmStorageAccountForm extends Dialog {
+public class CreateArmStorageAccountForm extends TitleAreaDialog {
     private static final String PRICING_LINK = "<a href=\"http://go.microsoft.com/fwlink/?LinkID=400838\">Read more about replication services and pricing details</a>";
     private static Map<String, Kind> ACCOUNT_KIND = new TreeMap<>();
     static {
@@ -92,7 +90,6 @@ public class CreateArmStorageAccountForm extends Dialog {
     private Label encriptionLabel;
     private Combo encriptionCombo;
     private Link pricingLabel;
-    private Label userInfoLabel;
 
     private ComboViewer resourceGroupViewer;
 
@@ -111,16 +108,23 @@ public class CreateArmStorageAccountForm extends Dialog {
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
         newShell.setText("Create Storage Account");
+        Image image;
+		try {
+			URL imgUrl = Activator.getDefault().getBundle().getEntry(Messages.strAccDlgImg);
+			URL imgFileURL = FileLocator.toFileURL(imgUrl);
+			URL path = FileLocator.resolve(imgFileURL);
+			String imgpath = path.getFile();
+			image = new Image(null, new FileInputStream(imgpath));
+			setTitleImage(image);
+		} catch (Exception e) {
+			PluginUtil.displayErrorDialogAndLog(getShell(), Messages.err, "Error loading storage account image", e);
+		}
     }
 
     @Override
     protected Control createButtonBar(Composite parent) {
-        GridData gridData = new GridData();
-        gridData.verticalAlignment = SWT.FILL;
-        gridData.horizontalAlignment = SWT.FILL;
-        parent.setLayoutData(gridData);
-        Control ctrl = super.createButtonBar(parent);
-        buttonOK = getButton(IDialogConstants.OK_ID);
+		Control ctrl = super.createButtonBar(parent);
+		buttonOK = getButton(IDialogConstants.OK_ID);
         buttonOK.setEnabled(false);
         buttonOK.setText("Create");
         buttonCancel = getButton(IDialogConstants.CANCEL_ID);
@@ -129,45 +133,46 @@ public class CreateArmStorageAccountForm extends Dialog {
     }
 
     @Override
-    protected Control createContents(Composite parent) {
-        Composite container = new Composite(parent, SWT.NONE);
+    protected Control createDialogArea(Composite parent) {
+    	setTitle("Create New Storage Account");
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "com.microsoft.azuretools.azureexplorer.storage_account_dialog");
+        
+		Composite container = new Composite(parent, SWT.FILL);
         GridLayout gridLayout = new GridLayout();
+		gridLayout.numColumns = 2;
+		gridLayout.marginBottom = 10;
         container.setLayout(gridLayout);
         GridData gridData = new GridData();
-        gridData.widthHint = 350;
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.horizontalAlignment = SWT.FILL;
+//		gridData.widthHint = 250;
         container.setLayoutData(gridData);
-
-        userInfoLabel = new Label(container, SWT.LEFT);
 
         nameLabel = new Label(container, SWT.LEFT);
         nameLabel.setText("Name:");
         nameTextField = new Text(container, SWT.LEFT | SWT.BORDER);
-        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-        nameTextField.setLayoutData(gridData);
+//        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+        nameTextField.setLayoutData(gridDataForText(180));
         
         kindLabel = new Label(container, SWT.LEFT);
         kindLabel.setText("Account kind:");
         kindCombo = new Combo(container, SWT.READ_ONLY);
-        //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-        kindCombo.setLayoutData(gridData);
+        kindCombo.setLayoutData(gridDataForText(180));
         
         performanceLabel = new Label(container, SWT.LEFT);
         performanceLabel.setText("Performance:");
         performanceCombo = new Combo(container, SWT.READ_ONLY);
-        //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-        performanceCombo.setLayoutData(gridData);
+        performanceCombo.setLayoutData(gridDataForText(180));
         
         replicationLabel = new Label(container, SWT.LEFT);
-        replicationLabel.setText("Replication");
+        replicationLabel.setText("Replication:");
         replicationComboBox = new Combo(container, SWT.READ_ONLY);
-        //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-        replicationComboBox.setLayoutData(gridData);
+        replicationComboBox.setLayoutData(gridDataForText(180));
         
         accessTierLabel = new Label(container, SWT.LEFT);
-        accessTierLabel.setText("Access Tier");
+        accessTierLabel.setText("Access Tier:");
         accessTierComboBox = new Combo(container, SWT.READ_ONLY);
-        //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-        accessTierComboBox.setLayoutData(gridData);        
+        accessTierComboBox.setLayoutData(gridDataForText(180));        
         for (AccessTier type : AccessTier.values()) {
         	accessTierComboBox.add(type.toString());
         	accessTierComboBox.setData(type.toString(), type);
@@ -177,11 +182,13 @@ public class CreateArmStorageAccountForm extends Dialog {
         subscriptionLabel = new Label(container, SWT.LEFT);
         subscriptionLabel.setText("Subscription:");
         subscriptionComboBox = new Combo(container, SWT.READ_ONLY);
-        //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-        subscriptionComboBox.setLayoutData(gridData);
+        subscriptionComboBox.setLayoutData(gridDataForText(180));
 
         resourceGroupLabel = new Label(container, SWT.LEFT);
         resourceGroupLabel.setText("Resource group:");
+        gridData = new GridData();
+        gridData.verticalAlignment = SWT.TOP;
+        resourceGroupLabel.setLayoutData(gridData);
         
         final Composite composite = new Composite(container, SWT.NONE);
         gridLayout = new GridLayout();
@@ -189,7 +196,7 @@ public class CreateArmStorageAccountForm extends Dialog {
         gridData = new GridData();
         gridData.horizontalAlignment = SWT.FILL;
         gridData.verticalAlignment = GridData.BEGINNING;
-         gridData.grabExcessHorizontalSpace = true;
+        gridData.grabExcessHorizontalSpace = true;
 //        gridData.widthHint = 250;
         composite.setLayout(gridLayout);
         composite.setLayoutData(gridData);
@@ -198,13 +205,13 @@ public class CreateArmStorageAccountForm extends Dialog {
         createNewRadioButton.setText("Create new");
         createNewRadioButton.setSelection(true);
         resourceGrpField = new Text(composite, SWT.LEFT | SWT.BORDER);
-        //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         resourceGrpField.setLayoutData(gridData);
         
         useExistingRadioButton = new Button(composite, SWT.RADIO);
         useExistingRadioButton.setText("Use existing");
         resourceGrpCombo = new Combo(composite, SWT.READ_ONLY);
-        //gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         resourceGrpCombo.setLayoutData(gridData);
         resourceGroupViewer = new ComboViewer(resourceGrpCombo);
         resourceGroupViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -218,23 +225,18 @@ public class CreateArmStorageAccountForm extends Dialog {
         createNewRadioButton.addSelectionListener(updateListener);
         useExistingRadioButton.addSelectionListener(updateListener);	
    
-        //updateResourceGroup();
+        updateResourceGroup();
         
         regionLabel = new Label(container, SWT.LEFT);
         regionLabel.setText("Region:");
         regionComboBox = new Combo(container, SWT.READ_ONLY);
-        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-        regionComboBox.setLayoutData(gridData);
-//        regionViewer = new ComboViewer(regionComboBox);
-//        regionViewer.setContentProvider(ArrayContentProvider.getInstance());
-        //regionComboBox.select(0);
-        
-
-        
+        regionComboBox.setLayoutData(gridDataForText(180));
 
         pricingLabel = new Link(container, SWT.LEFT);
         pricingLabel.setText(PRICING_LINK);
-//        pricingLabel.setLayoutData(gridData);
+        gridData = new GridData();
+        gridData.horizontalSpan = 2;
+        pricingLabel.setLayoutData(gridData);
         pricingLabel.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -275,18 +277,21 @@ public class CreateArmStorageAccountForm extends Dialog {
                 validateEmptyFields();
             }
         });
-
-        /*if (AzureManagerImpl.getManager().authenticated()) {
-            String upn = AzureManagerImpl.getManager().getUserInfo().getUniqueName();
-            userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
-        } else {
-            userInfoLabel.setText("");
-        }*/
         
         fillFields();
 
-        return super.createContents(parent);
+        return super.createDialogArea(parent);
     }
+    
+	private GridData gridDataForText(int width) {
+		GridData gridData = new GridData();
+		gridData.horizontalAlignment = SWT.END;
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.widthHint = width;
+		gridData.verticalIndent = 10;
+		gridData.grabExcessHorizontalSpace = true;
+		return gridData;
+	}
     
     private void updateResourceGroup() {
     	final boolean isNewGroup = createNewRadioButton.getSelection();
@@ -319,6 +324,7 @@ public class CreateArmStorageAccountForm extends Dialog {
 		Kind kind = (Kind) kindCombo.getData(kindCombo.getText());
 		AccessTier accessTier = (AccessTier)accessTierComboBox.getData(accessTierComboBox.getText());	
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(PluginUtil.getParentShell());
+		String subscriptionId = ((SubscriptionDetail)subscriptionComboBox.getData(subscriptionComboBox.getText())).getSubscriptionId();
 		try {
 			dialog.run(true, false, new IRunnableWithProgress() {
 				
@@ -326,7 +332,7 @@ public class CreateArmStorageAccountForm extends Dialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask("Creating storage account...", IProgressMonitor.UNKNOWN);
 					try {
-						storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), name, region, 
+						storageAccount = AzureSDKManager.createStorageAccount(subscriptionId, name, region, 
 							isNewResourceGroup, resourceGroupName, kind, accessTier,
 							false, replication);
 					
@@ -347,7 +353,7 @@ public class CreateArmStorageAccountForm extends Dialog {
 							@Override
 							public void run() {
 								PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), Messages.err,
-									"An error occurred while creating the storage account: " + e.getCause());
+									"An error occurred while creating the storage account: " + e.getMessage());
 							}
 						});
 					}
@@ -388,7 +394,6 @@ public class CreateArmStorageAccountForm extends Dialog {
                 });
 
                 if (subscriptionDetails.size() > 0) {
-                    this.subscription = subscriptionDetails.get(0);
                     subscriptionComboBox.select(0);
                     loadRegionsAndGroups();
                 }
