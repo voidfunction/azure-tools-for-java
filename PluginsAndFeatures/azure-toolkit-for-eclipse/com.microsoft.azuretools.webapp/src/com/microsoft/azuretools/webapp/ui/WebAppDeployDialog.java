@@ -86,7 +86,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         public WebApp webApp;
     }
 
-    private Map<String, WebAppDetails> webAppWebAppDetailsMap = new HashMap<>();
+    private Map<String, WebAppDetails> webAppDetailsMap = new HashMap<>();
    
     /**
      * Create the dialog.
@@ -246,7 +246,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         TableItem[] selections = table.getSelection();
         if (selections.length == 0) return;
         String appServiceName = selections[0].getText(0);
-        WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
+        WebAppDetails wad = webAppDetailsMap.get(appServiceName);
         SubscriptionDetail sd = wad.subscriptionDetail;
         AppServicePlan asp = wad.appServicePlan;
         
@@ -326,7 +326,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         Map<ResourceGroup, List<WebApp>> rgwaMap = AzureModel.getInstance().getResourceGroupToWebAppMap();
         Map<ResourceGroup, List<AppServicePlan>> rgaspMap = AzureModel.getInstance().getResourceGroupToAppServicePlanMap();
 
-        webAppWebAppDetailsMap.clear();
+        webAppDetailsMap.clear();
         table.removeAll();
         
         for (SubscriptionDetail sd : srgMap.keySet()) {
@@ -364,7 +364,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                     webAppDetails.subscriptionDetail = sd;
                     webAppDetails.resourceGroup = rg;
                     webAppDetails.appServicePlan = aspMap.get(wa.appServicePlanId());
-                    webAppWebAppDetailsMap.put(wa.name(), webAppDetails);
+                    webAppDetailsMap.put(wa.name(), webAppDetails);
                 }
             }
         }
@@ -391,7 +391,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         }
         
         String appServiceName = table.getItems()[selectedRow].getText(0);
-        WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
+        WebAppDetails wad = webAppDetailsMap.get(appServiceName);
         if (wad.webApp.javaVersion()  == JavaVersion.OFF ) {
             setErrorMessage("Please select java based App Service");
             return false;
@@ -450,7 +450,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
     private void deploy(String artifactName, String artifactPath) {
         int selectedRow = table.getSelectionIndex();
         String appServiceName = table.getItems()[selectedRow].getText(0);
-        WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
+        WebAppDetails wad = webAppDetailsMap.get(appServiceName);
         WebApp webApp = wad.webApp;
         boolean isDeployToRoot = btnDeployToRoot.getSelection();
         String errTitle = "Deploy Web App Error";
@@ -543,7 +543,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         }
 
         String appServiceName = table.getItems()[selectedRow].getText(0);
-        WebAppDetails wad = webAppWebAppDetailsMap.get(appServiceName);
+        WebAppDetails wad = webAppDetailsMap.get(appServiceName);
         
         boolean confirmed = MessageDialog.openConfirm(getShell(), 
                 "Delete App Service", 
