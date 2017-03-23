@@ -448,6 +448,9 @@ public class AppServiceCreateDialog extends DialogWrapper {
         for (ResourceGroup rg : rgl) {
             List<AppServicePlan> aspl = AzureModel.getInstance().getResourceGroupToAppServicePlanMap().get(rg);
             for (AppServicePlan asp : aspl) {
+                if (asp.pricingTier().toSkuDescription().tier().compareToIgnoreCase("dynamic") == 0) {
+                    continue;
+                }
                 cbModel.addElement(new AppServicePlanAdapter(asp));
             }
         }
