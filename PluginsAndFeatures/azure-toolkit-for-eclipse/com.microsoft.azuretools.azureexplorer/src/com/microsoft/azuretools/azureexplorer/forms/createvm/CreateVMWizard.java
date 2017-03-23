@@ -182,56 +182,6 @@ public class CreateVMWizard extends Wizard {
         return getContainer().getCurrentPage() instanceof SettingsStep;
     }
 
-	public List configStepList(Composite parent, final int step) {
-		GridData gridData = new GridData();
-		gridData.widthHint = 100;
-		//
-		gridData.verticalAlignment = GridData.BEGINNING;
-		gridData.grabExcessVerticalSpace = true;
-		List createVmStepsList = new List(parent, SWT.BORDER);
-		createVmStepsList.setItems(getStepTitleList());
-		createVmStepsList.setSelection(step);
-		createVmStepsList.setLayoutData(gridData);
-		createVmStepsList.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				List l = (List) e.widget;
-				l.setSelection(step);
-			}
-		});
-		// createVmStepsList.setEnabled(false);
-
-		// jList.setBorder(new EmptyBorder(10, 0, 10, 0));
-
-		// jList.setCellRenderer(new DefaultListCellRenderer() {
-		// @Override
-		// public Component getListCellRendererComponent(JList jList, Object o,
-		// int i, boolean b, boolean b1) {
-		// return super.getListCellRendererComponent(jList, " " + o.toString(),
-		// i, b, b1);
-		// }
-		// });
-		//
-		// for (MouseListener mouseListener : jList.getMouseListeners()) {
-		// jList.removeMouseListener(mouseListener);
-		// }
-		//
-		// for (MouseMotionListener mouseMotionListener :
-		// jList.getMouseMotionListeners()) {
-		// jList.removeMouseMotionListener(mouseMotionListener);
-		// }
-		return createVmStepsList;
-	}
-    
-    public String[] getStepTitleList() {
-        return new String[]{
-                "Subscription",
-                "Select Image",
-                "Machine Settings",
-                "Associated resources"
-        };
-    }
-
     public Azure getAzure() {
 		return azure;
 	}

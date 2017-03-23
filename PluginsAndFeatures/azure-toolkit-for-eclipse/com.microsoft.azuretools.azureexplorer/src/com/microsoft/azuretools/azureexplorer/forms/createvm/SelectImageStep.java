@@ -22,6 +22,7 @@
 package com.microsoft.azuretools.azureexplorer.forms.createvm;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -84,14 +85,13 @@ public class SelectImageStep extends WizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
-		GridLayout gridLayout = new GridLayout(3, false);
+		GridLayout gridLayout = new GridLayout(2, false);
 		GridData gridData = new GridData();
 		gridData.grabExcessHorizontalSpace = true;
 		Composite container = new Composite(parent, 0);
 		container.setLayout(gridLayout);
 		container.setLayoutData(gridData);
 
-		wizard.configStepList(container, 1);
 		createSettingsPanel(container);
 		regionComboBox.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -252,16 +252,18 @@ public class SelectImageStep extends WizardPage {
                     fillRegions();
                 }
             }
-            selectRegion();
             enableControls(customImageBtn.getSelection());
         }
         return super.getTitle();
     }
 	
 	private void fillRegions() {
-        List<String> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(wizard.getSubscription())
-                .stream().map(Location::name).sorted().collect(Collectors.toList());
-        regionComboBox.setItems((String[])locations.toArray(new String[locations.size()]));
+		List<Location> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(wizard.getSubscription())
+                .stream().sorted(Comparator.comparing(Location::displayName)).collect(Collectors.toList());
+		for (Location location : locations) {
+			regionComboBox.add(location.displayName());
+			regionComboBox.setData(location.displayName(), location);
+		}
         if (locations.size() > 0) {
             regionComboBox.select(0);
             selectRegion();
@@ -285,12 +287,12 @@ public class SelectImageStep extends WizardPage {
 
 	private void selectRegion() {
 //		fillPublishers();
-		wizard.setRegion(regionComboBox.getText());
+		wizard.setRegion(((Location) regionComboBox.getData(regionComboBox.getText())).name());
 	}
 
 	private void fillPublishers() {
 		setPageComplete(false);
-		String region = regionComboBox.getText();
+		String region = ((Location) regionComboBox.getData(regionComboBox.getText())).name();
 		publisherComboBox.removeAll();
 		offerComboBox.setEnabled(false);
         DefaultLoader.getIdeHelper().runInBackground(null, "Loading image publishers...", false, true, "", new Runnable() {

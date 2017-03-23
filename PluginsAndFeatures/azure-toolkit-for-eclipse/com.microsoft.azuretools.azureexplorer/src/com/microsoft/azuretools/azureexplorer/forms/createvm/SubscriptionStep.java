@@ -59,7 +59,7 @@ public class SubscriptionStep extends WizardPage {
 
     @Override
     public void createControl(Composite parent) {
-        GridLayout gridLayout = new GridLayout(3, false);
+        GridLayout gridLayout = new GridLayout(2, false);
         GridData gridData = new GridData();
         gridData.grabExcessHorizontalSpace = true;
         gridData.grabExcessVerticalSpace = true;
@@ -67,8 +67,6 @@ public class SubscriptionStep extends WizardPage {
         Composite container = new Composite(parent, 0);
         container.setLayout(gridLayout);
         container.setLayoutData(gridData);
-
-        wizard.configStepList(container, 0);
 
         createSubscriptionCombo(container);
 
@@ -143,8 +141,10 @@ public class SubscriptionStep extends WizardPage {
 			SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
 			List<SubscriptionDetail> subscriptionDetails = subscriptionManager.getSubscriptionDetails();
 			for (SubscriptionDetail subscription : subscriptionDetails) {
-				subscriptionComboBox.add(subscription.getSubscriptionName());
-				subscriptionComboBox.setData(subscription.getSubscriptionName(), subscription);
+				if (subscription.isSelected()) {
+					subscriptionComboBox.add(subscription.getSubscriptionName());
+					subscriptionComboBox.setData(subscription.getSubscriptionName(), subscription);
+				}
 			}
 			if (!subscriptionDetails.isEmpty()) {
 				subscriptionComboBox.select(0);

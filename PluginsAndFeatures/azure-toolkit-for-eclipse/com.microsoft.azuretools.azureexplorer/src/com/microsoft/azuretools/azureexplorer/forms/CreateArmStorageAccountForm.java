@@ -3,13 +3,13 @@ package com.microsoft.azuretools.azureexplorer.forms;
 import java.io.FileInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -52,9 +52,8 @@ import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
 import com.microsoft.tooling.msservices.model.ReplicationTypes;
-import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.AccessTier;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuTier;
@@ -313,7 +312,7 @@ public class CreateArmStorageAccountForm extends Dialog {
             return;
 		}
         String name = nameTextField.getText();
-        String region = regionComboBox.getText();
+        String region = ((Location) regionComboBox.getData(regionComboBox.getText())).name();
         final boolean isNewResourceGroup = createNewRadioButton.getSelection();
 		final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getText();
 		String replication = replicationComboBox.getData(replicationComboBox.getText()).toString();
@@ -366,7 +365,37 @@ public class CreateArmStorageAccountForm extends Dialog {
 
     public void fillFields() {
         if (subscription == null) {
-        	loadRegions();
+            try {
+                subscriptionComboBox.setEnabled(true);
+                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                // not signed in
+                if (azureManager == null) {
+                    return;
+                }
+                SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
+                List<SubscriptionDetail> subscriptionDetails = subscriptionManager.getSubscriptionDetails();
+                for (SubscriptionDetail sub : subscriptionDetails) {
+                	if (sub.isSelected()) {
+                		subscriptionComboBox.add(sub.getSubscriptionName());
+                		subscriptionComboBox.setData(sub.getSubscriptionName(), sub);
+                	}
+                }
+                subscriptionComboBox.addSelectionListener(new SelectionAdapter() {
+                    public void widgetSelected(SelectionEvent e) {
+                        CreateArmStorageAccountForm.this.subscription = (SubscriptionDetail) subscriptionComboBox.getData(subscriptionComboBox.getText());
+                        loadRegionsAndGroups();
+                    }
+                });
+
+                if (subscriptionDetails.size() > 0) {
+                    this.subscription = subscriptionDetails.get(0);
+                    subscriptionComboBox.select(0);
+                    loadRegionsAndGroups();
+                }
+            } catch (Exception e) {
+            	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
+            			"An error occurred while loading subscriptions.", e);
+            }
         	for (Map.Entry<String, Kind> entry : ACCOUNT_KIND.entrySet()) {
             	kindCombo.add(entry.getKey());
             	kindCombo.setData(entry.getKey(), entry.getValue());
@@ -392,38 +421,6 @@ public class CreateArmStorageAccountForm extends Dialog {
 				}
 			});
         	kindCombo.select(0);
-        	
-            try {
-                subscriptionComboBox.setEnabled(true);
-                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-                // not signed in
-                if (azureManager == null) {
-                    return;
-                }
-                SubscriptionManager subscriptionManager = azureManager.getSubscriptionManager();
-                List<SubscriptionDetail> subscriptionDetails = subscriptionManager.getSubscriptionDetails();
-                for (SubscriptionDetail sub : subscriptionDetails) {
-                    subscriptionComboBox.add(sub.getSubscriptionName());
-                    subscriptionComboBox.setData(sub.getSubscriptionName(), sub);
-                }
-                subscriptionComboBox.addSelectionListener(new SelectionAdapter() {
-                    public void widgetSelected(SelectionEvent e) {
-                        CreateArmStorageAccountForm.this.subscription = (SubscriptionDetail) subscriptionComboBox.getData(subscriptionComboBox.getText());
-                        loadGroups();
-                        loadRegions();
-                    }
-                });
-
-                if (subscriptionDetails.size() > 0) {
-                    this.subscription = subscriptionDetails.get(0);
-                    subscriptionComboBox.select(0);
-                    loadGroups();
-                    loadRegions();
-                }
-            } catch (Exception e) {
-            	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
-            			"An error occurred while loading subscriptions.", e);
-            }
         } else { // create form create VM form
             subscriptionComboBox.setEnabled(false);
             subscriptionComboBox.add(subscription.getSubscriptionName());
@@ -500,35 +497,43 @@ public class CreateArmStorageAccountForm extends Dialog {
         return storageAccount;
     }
 
-    public void loadRegions() {
-    	for (Region region : Region.values()) {
-    		regionComboBox.add(region.toString());
-    		regionComboBox.setData(region.toString(), region);
-    	}
-    	regionComboBox.select(0);
-//        regionComboBox.add("<Loading...>");
-//
-//        DefaultLoader.getIdeHelper().runInBackground(null, "Loading regions...", false, true, "Loading regions...", new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    final java.util.List<Location> locations = AzureManagerImpl.getManager().getLocations(subscription.getId().toString());
-//
-//                    DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            final Vector<Object> vector = new Vector<Object>();
-//                            vector.addAll(locations);
-//                            regionViewer.setInput(vector);
-//                            regionComboBox.select(1);
-//                        }
-//                    });
-//                } catch (AzureCmdException e) {
-//                	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
-//                			"An error occurred while loading the regions list.", e);
-//                }
-//            }
-//        });
+    public void loadRegionsAndGroups() {
+    	Map<SubscriptionDetail, List<Location>> subscription2Location = AzureModel.getInstance().getSubscriptionToLocationMap();
+        if (subscription2Location == null || subscription2Location.get(subscriptionComboBox.getData(subscriptionComboBox.getText())) == null) {
+        	DefaultLoader.getIdeHelper().runInBackground(null, "Loading Available Locations...", true, true, "", new Runnable() {
+    			@Override
+    			public void run() {
+                    try {
+                        AzureModelController.updateSubscriptionMaps(null);
+                        DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+							@Override
+							public void run() {
+                                fillRegions();
+                                fillGroups();
+                            }
+                        });
+                    } catch (Exception ex) {
+                    	PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err, "Error loading locations", ex);
+                    }
+                }
+            });
+        } else {
+            fillRegions();
+            fillGroups();
+        }
+        
+        
+    }
+    private void fillRegions() {
+		List<Location> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(subscriptionComboBox.getData(subscriptionComboBox.getText()))
+                .stream().sorted(Comparator.comparing(Location::displayName)).collect(Collectors.toList());
+		for (Location location : locations) {
+			regionComboBox.add(location.displayName());
+			regionComboBox.setData(location.displayName(), location);
+		}
+        if (locations.size() > 0) {
+            regionComboBox.select(0);
+        }
     }
     
     public void loadGroups() {
