@@ -76,7 +76,7 @@ import com.microsoft.azure.management.appservice.WebContainer;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
-import com.microsoft.azuretools.core.utils.ErrorWindow;
+import com.microsoft.azuretools.core.ui.ErrorWindow;
 import com.microsoft.azuretools.core.utils.ProgressDialog;
 import com.microsoft.azuretools.core.utils.UpdateProgressIndicator;
 import com.microsoft.azuretools.utils.AzulZuluModel;
@@ -87,7 +87,7 @@ import com.microsoft.azuretools.utils.WebAppUtils;
 import com.microsoft.azuretools.webapp.Activator;
 
 public class AppServiceCreateDialog extends TitleAreaDialog {
-   private static ILog LOG = Activator.getDefault().getLog();
+    private static ILog LOG = Activator.getDefault().getLog();
 
     private Text textAppName;
     private Text textResourceGroupName;
@@ -330,7 +330,6 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
                getExternalBrowser().openURL(new URL("https://azure.microsoft.com/en-us/pricing/details/app-service/"));
             }
             catch (PartInitException | MalformedURLException ex) {
-               //LOGGER.log(LogService.LOG_ERROR, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex);
                LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "widgetSelected@SelectionAdapter@linkAppServicePricing@AppServiceCreateDialog", ex));
             }
          }
@@ -421,7 +420,6 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
                getExternalBrowser().openURL(new URL(AzulZuluModel.getLicenseUrl()));
             }
             catch (Exception ex) {
-               //LOGGER.log(LogService.LOG_ERROR, "widgetSelected@SelectionAdapter@AppServiceCreateDialog", ex);
                LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "widgetSelected@SelectionAdapter@AppServiceCreateDialo", ex));
             }
          }
@@ -548,7 +546,6 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR, "fillWebContainers@AppServiceCreateDialog", ex);
             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "fillWebContainers@AppServiceCreateDialog", ex));
         }
     }
@@ -602,15 +599,15 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
                                 doFillSubscriptions();
                             };
                         });                    
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@updateAndFillSubscriptions@AppServiceCreateDialog", ex));
                     }
                 }
             });
-        } catch (InvocationTargetException | InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (InvocationTargetException | InterruptedException ex) {
+            ex.printStackTrace();
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "updateAndFillSubscriptions@AppServiceCreateDialog", ex));
         }
     }
     
@@ -635,7 +632,6 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR,"doFillSubscriptions@AppServiceCreateDialog", ex);
             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doFillSubscriptions@AppServiceCreateDialog", ex));
         }
     }
@@ -718,13 +714,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         Map<SubscriptionDetail, List<Location>> sdlocMap = AzureModel.getInstance().getSubscriptionToLocationMap();
         SubscriptionDetail sd = binderSubscriptionDetails.get(i);
         List<Location> locl = sdlocMap.get(sd);
-        Collections.sort(locl, new Comparator<Location>() {
-            @Override
-            public int compare(Location lhs, Location rhs) {
-                return lhs.displayName().compareTo(rhs.displayName());
-            }
-        });
-        
+       
         comboAppServicePlanLocation.add("<select location>");
         binderAppServicePlanLocation.add(null);
         
@@ -752,7 +742,6 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR,"fillAppServicePlanPricingTiers@AppServiceCreateDialog", ex);
             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "fillAppServicePlanPricingTiers@AppServiceCreateDialog", ex));
         }
     }
@@ -799,7 +788,6 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
                             });                    
                         } catch (Exception ex) {
                             ex.printStackTrace();
-                            //LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@okPressed@AppServiceCreateDialog", e);
                             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@okPressed@AppServiceCreateDialog", ex));
                             Display.getDefault().asyncExec(new Runnable() {
                                 @Override
@@ -813,7 +801,6 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
                 });
             } catch (InvocationTargetException | InterruptedException ex) {
                 ex.printStackTrace();
-                //LOGGER.log(LogService.LOG_ERROR, "okPressed@AppServiceCreateDialog", e);
                 LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "okPressed@AppServiceCreateDialog", ex));
                 ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
             }
@@ -984,8 +971,6 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            //LOGGER.error("volidateJdkTab", ex);
-            //ErrorWindow.show(ex.getMessage(), "Form Data Validation Error", this.contentPane);
             setError(dec_textJdkOwnUrl,"Url validation exception:" + ex.getMessage());
             return false;
         }
@@ -993,7 +978,6 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         return true;
     }
     
-  
     protected class Model extends WebAppUtils.CreateAppServiceModel {
         @Override
         public void collectData() {
