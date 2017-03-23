@@ -260,6 +260,12 @@ public class AzureModelController {
             sdrgMap.put(sd, rgList);
 
             List<Location> locl = sidToSubscriptionMap.get(sd.getSubscriptionId()).listLocations();
+            Collections.sort(locl, new Comparator<Location>() {
+                @Override
+                public int compare(Location lhs, Location rhs) {
+                    return lhs.displayName().compareTo(rhs.displayName());
+                }
+            });
             sdlocMap.put(sd, locl);
         }
         azureModel.setSubscriptionToResourceGroupMap(sdrgMap);
