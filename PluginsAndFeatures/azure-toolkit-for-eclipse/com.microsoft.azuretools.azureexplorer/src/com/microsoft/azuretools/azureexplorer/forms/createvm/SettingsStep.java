@@ -55,6 +55,7 @@ import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
+import com.microsoft.azuretools.azureexplorer.Activator;
 import com.microsoft.azuretools.azureexplorer.forms.CreateArmStorageAccountForm;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.utils.AzureModel;
@@ -96,7 +97,7 @@ public class SettingsStep extends WizardPage {
     private List<AvailabilitySet> availabilitySets;
 
     public SettingsStep(CreateVMWizard wizard) {
-        super("Create new Virtual Machine", "Associated resources", null);
+        super("Create new Virtual Machine", "Associated resources", Activator.getImageDescriptor("icons/large/Azure.png"));
         this.wizard = wizard;
     }
 
