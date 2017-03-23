@@ -193,7 +193,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         browserAppServiceDetailes = new Browser(grpAppServiceDetails, SWT.NONE);
         FontData browserFontData = btnRefresh.getFont().getFontData()[0];
         //browserFontStyle = String.format("font-family: '%s';", browserFontData.getHeight(), browserFontData.getName());
-        browserFontStyle = String.format("font-family: '%s'; font-size: 70%%;", browserFontData.getName());
+        browserFontStyle = String.format("font-family: '%s'; font-size: 9pt;", browserFontData.getName());
         browserAppServiceDetailes.addLocationListener(new LocationListener() {
             public void changing(LocationEvent event) {
                 try {
