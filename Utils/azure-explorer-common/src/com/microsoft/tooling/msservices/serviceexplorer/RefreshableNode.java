@@ -127,7 +127,7 @@ public abstract class RefreshableNode extends Node {
                     }
 
                     private void updateName(String name, final Throwable throwable) {
-                        DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+                        DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
                             @Override
                             public void run() {
                                 node.setName(name);
