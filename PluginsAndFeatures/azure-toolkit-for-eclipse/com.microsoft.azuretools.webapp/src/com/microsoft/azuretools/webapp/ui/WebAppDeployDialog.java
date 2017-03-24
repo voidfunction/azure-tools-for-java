@@ -76,6 +76,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
     private Browser browserAppServiceDetailes;
     private Button btnDeployToRoot;
     private String browserFontStyle;
+    private Button btnDelete;
     
     private IProject project;
     
@@ -155,16 +156,19 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 createAppService();
+                //cleanError();
             }
         });
         btnCreate.setText("Create...");
         
-        Button btnDelete = new Button(composite, SWT.NONE);
+        btnDelete = new Button(composite, SWT.NONE);
+        btnDelete.setEnabled(false);
         btnDelete.setLayoutData(new RowData(90, SWT.DEFAULT));
         btnDelete.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 deleteAppService();
+                //cleanError();
             }
         });
         btnDelete.setText("Delete...");
@@ -174,8 +178,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         btnRefresh.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
+                //cleanError();
                 table.removeAll();
-                browserAppServiceDetailes.setText("");
+                //browserAppServiceDetailes.setText("");
+                fillAppServiceDetails();
                 AzureModel.getInstance().setResourceGroupToWebAppMap(null);
                 fillTable();
             }
@@ -240,12 +246,24 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         super.createButtonsForButtonBar(parent);
         Button okButton = getButton(IDialogConstants.OK_ID);
         okButton.setText("Deploy");
+        okButton.setEnabled(false);
+    }
+    
+    private void cleanError() {
+        setErrorMessage(null);
     }
     
     private void fillAppServiceDetails() {
-        TableItem[] selections = table.getSelection();
-        if (selections.length == 0) return;
-        String appServiceName = selections[0].getText(0);
+        validated();
+        int selectedRow = table.getSelectionIndex();
+        if (selectedRow < 0) {
+            browserAppServiceDetailes.setText("");
+            btnDelete.setEnabled(false);
+            return;
+        }
+
+        btnDelete.setEnabled(true);
+        String appServiceName = table.getItems()[selectedRow].getText(0);
         WebAppDetails wad = webAppDetailsMap.get(appServiceName);
         SubscriptionDetail sd = wad.subscriptionDetail;
         AppServicePlan asp = wad.appServicePlan;
@@ -383,25 +401,28 @@ public class WebAppDeployDialog extends TitleAreaDialog {
     }
     
     private boolean validated() {
-        setErrorMessage(null);
+        cleanError();
         int selectedRow = table.getSelectionIndex();
+        Button okButton = getButton(IDialogConstants.OK_ID);
         if (selectedRow < 0) {
-            setErrorMessage("Select App Service to deploy to.");
+            //setErrorMessage("Select App Service to deploy to.");
+            okButton.setEnabled(false);
             return false;
         }
-        
         String appServiceName = table.getItems()[selectedRow].getText(0);
         WebAppDetails wad = webAppDetailsMap.get(appServiceName);
         if (wad.webApp.javaVersion()  == JavaVersion.OFF ) {
-            setErrorMessage("Please select java based App Service");
+            setErrorMessage("Select java based App Service");
+            okButton.setEnabled(false);
             return false;
         }
+        okButton.setEnabled(true);
         return true; 
     }
     
     @Override
     protected void okPressed () {
-        if (!validated()) return;
+        //if (!validated()) return;
         try {
             String projectName = project.getName();
             String destinationPath = project.getLocation() + "/" + projectName + ".war";
@@ -571,7 +592,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                             @Override
                             public void run() {
                                 table.remove(selectedRow);
-                                browserAppServiceDetailes.setText("");
+                                //browserAppServiceDetailes.setText("");
+                                fillAppServiceDetails();
                             };
                         });
                     } catch (Exception ex) {

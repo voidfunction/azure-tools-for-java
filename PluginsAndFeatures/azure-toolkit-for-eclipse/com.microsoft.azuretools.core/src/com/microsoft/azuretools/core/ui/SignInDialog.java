@@ -111,7 +111,6 @@ public class SignInDialog extends TitleAreaDialog {
         okButton.setText("Sign in");
     }
 
-
     /**
      * Create contents of the dialog.
      * @param parent
@@ -222,6 +221,7 @@ public class SignInDialog extends TitleAreaDialog {
     }
     
     private void enableAutomatedAuthControls(boolean enabled) {
+        setErrorMessage(null);
         lblInteractiveInfo.setEnabled(!enabled);
         lblAutomatedInfo.setEnabled(enabled);
         lblAuthenticationFile.setEnabled(enabled);
@@ -254,7 +254,7 @@ public class SignInDialog extends TitleAreaDialog {
       } else { // automated
           String authPath = textAuthenticationFilePath.getText();
           if (StringUtils.isNullOrWhiteSpace(authPath)) {
-              this.setErrorMessage("Please select authentication file");
+              this.setErrorMessage("Select authentication file");
               return;
           }
 
@@ -269,6 +269,7 @@ public class SignInDialog extends TitleAreaDialog {
     }
     
     private void doSelectCredFilepath() {
+        setErrorMessage(null);
         String path = fileDialog.open();
         if (path == null) return;
         textAuthenticationFilePath.setText(path);
@@ -320,6 +321,7 @@ public class SignInDialog extends TitleAreaDialog {
     }
     
     private void doCreateServicePrincipal() {
+        setErrorMessage(null);
         AdAuthManager adAuthManager = null;
         try {
             adAuthManager = AdAuthManager.getInstance();
@@ -397,7 +399,6 @@ public class SignInDialog extends TitleAreaDialog {
             
         } catch (Exception ex) {
             ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR,"doCreateServicePrincipal@SignInDialog", ex);
             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doCreateServicePrincipal@SignInDialog", ex));
         } finally {
             if (adAuthManager != null) {

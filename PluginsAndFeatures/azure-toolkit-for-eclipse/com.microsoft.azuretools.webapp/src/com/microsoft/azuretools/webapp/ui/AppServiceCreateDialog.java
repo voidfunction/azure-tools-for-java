@@ -84,6 +84,8 @@ import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.azuretools.utils.StorageAccoutUtils;
 import com.microsoft.azuretools.utils.WebAppUtils;
 import com.microsoft.azuretools.webapp.Activator;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 
 public class AppServiceCreateDialog extends TitleAreaDialog {
     private static ILog LOG = Activator.getDefault().getLog();
@@ -193,6 +195,12 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         lblAppName.setText("Enter name");
         
         textAppName = new Text(grpAppService, SWT.BORDER);
+        textAppName.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                cleanError();
+            }
+        });
         textAppName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         textAppName.setMessage("<enter name>");
         dec_textAppName = decorateContorolAndRegister(textAppName);
@@ -247,6 +255,12 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         btnAppServiceCreateNew.setText("Create new");
         
         textAppSevicePlanName = new Text(compositeAppServicePlan, SWT.BORDER);
+        textAppSevicePlanName.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                cleanError();
+            }
+        });
         textAppSevicePlanName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         textAppSevicePlanName.setMessage("<enter name>");
         dec_textAppSevicePlanName = decorateContorolAndRegister(textAppSevicePlanName);
@@ -258,6 +272,12 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         lblAppServiceCreateNewLocation.setText("Location");
         
         comboAppServicePlanLocation = new Combo(compositeAppServicePlan, SWT.READ_ONLY);
+        comboAppServicePlanLocation.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                cleanError();
+            }
+        });
         comboAppServicePlanLocation.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         dec_comboAppServicePlanLocation = decorateContorolAndRegister(comboAppServicePlanLocation);
         
@@ -352,6 +372,12 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         btnResourceGroupCreateNew.setText("Create new");
         
         textResourceGroupName = new Text(compositeResourceGroup, SWT.BORDER);
+        textResourceGroupName.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                cleanError();
+            }
+        });
         textResourceGroupName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         textResourceGroupName.setBounds(0, 0, 64, 19);
         textResourceGroupName.setMessage("<enter name>");
@@ -435,6 +461,12 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         btnJdkOwnDownloadUrl.setText("Download URL");
         
         textJdkOwnUrl = new Text(compositeJDK, SWT.BORDER);
+        textJdkOwnUrl.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                cleanError();
+            }
+        });
         textJdkOwnUrl.setEnabled(false);
         textJdkOwnUrl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         textJdkOwnUrl.setMessage("<enter url>");
@@ -482,12 +514,14 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
     
     @Override
     protected void createButtonsForButtonBar(Composite parent) {
+        cleanError();
         super.createButtonsForButtonBar(parent);
         Button okButton = getButton(IDialogConstants.OK_ID);
         okButton.setText("Create");
     }
     
     private void radioAppServicePlanLogic() { 
+        cleanError();
         boolean enabled = btnAppServiceCreateNew.getSelection();
         
         //btnAppServiceCreateNew.setEnabled(enabled);
@@ -510,12 +544,14 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
     }
 
     private void radioResourceGroupLogic() {
+        cleanError();
         boolean enabled = btnResourceGroupCreateNew.getSelection();
         textResourceGroupName.setEnabled(enabled);
         comboResourceGroup.setEnabled(!enabled);
     }
 
     private void radioJdkLogic() {
+        cleanError();
         boolean enabledDefault = btnJdkDefault.getSelection();
         lblJdkDefaultComment.setEnabled(enabledDefault);
 
@@ -529,7 +565,6 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         textJdkOwnStorageAccountKey.setEnabled(enabledOwn);
         lblJdkOwnComment.setEnabled(enabledOwn);
     }
-
 
     protected void fillWebContainers() {
         try {
@@ -835,9 +870,8 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
     }
      
     protected boolean validated() {
-        model.collectData();
-
         cleanError();
+        model.collectData();
         String webappName = model.webAppName;
         if (webappName.length() > 60 || !webappName.matches("^[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9]$")) {
             StringBuilder builder = new StringBuilder();
