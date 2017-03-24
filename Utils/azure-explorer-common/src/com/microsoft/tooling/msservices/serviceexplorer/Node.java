@@ -144,9 +144,12 @@ public class Node {
         while (!childNodes.isEmpty()) {
             Node node = childNodes.get(0);
 
-            // remove this node's child nodes (so they get an
-            // opportunity to clean up after them)
-            node.removeAllChildNodes();
+            // sometimes node can be null if multiple threads access this method; safer to check than make it synchronized
+            if (node != null) {
+                // remove this node's child nodes (so they get an
+                // opportunity to clean up after them)
+                node.removeAllChildNodes();
+            }
 
             // this remove call should cause the NodeListChangeListener object
             // registered on it's child nodes to fire

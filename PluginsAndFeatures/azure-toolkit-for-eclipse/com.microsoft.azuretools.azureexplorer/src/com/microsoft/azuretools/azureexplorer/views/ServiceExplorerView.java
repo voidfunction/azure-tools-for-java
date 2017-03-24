@@ -64,6 +64,7 @@ import com.microsoft.azuretools.core.handlers.SelectSubsriptionsCommandHandler;
 import com.microsoft.azuretools.core.handlers.SignInCommandHandler;
 import com.microsoft.azuretools.core.handlers.SignOutCommandHandler;
 import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangeListener;
 import com.microsoft.tooling.msservices.helpers.collections.ListChangedEvent;
 import com.microsoft.tooling.msservices.helpers.collections.ObservableList;
@@ -337,8 +338,32 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
     private void contributeToActionBars() {
         IActionBars bars = getViewSite().getActionBars();
         fillLocalToolBar(bars.getToolBarManager());
+        updateActions();
+        try {
+            Runnable signInOutListener = new Runnable() {
+				@Override
+				public void run() {
+					updateActions();
+				}
+            };
+            AuthMethodManager.getInstance().addSignInEventListener(signInOutListener);
+            AuthMethodManager.getInstance().addSignOutEventListener(signInOutListener);
+        } catch (Exception ex) {
+            DefaultLoader.getUIHelper().logError(ex.getMessage(), ex);
+        }
     }
 
+    private void updateActions() {
+		try {
+			boolean isSignedIn = AuthMethodManager.getInstance().isSignedIn();
+			selectSubscriptionAction.setEnabled(isSignedIn);
+			signInOutAction.setImageDescriptor(Activator.getImageDescriptor(isSignedIn ? "icons/SignOutLight_16.png" : "icons/SignInLight_16.png"));
+			signInOutAction.setToolTipText(isSignedIn ? "Sign Out" : "Sign In");
+		} catch (Exception ex) {
+			// ignore
+		}
+	}
+    
     private void fillLocalToolBar(IToolBarManager manager) {
         manager.add(refreshAction);
         manager.add(signInOutAction);
@@ -370,8 +395,13 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
 		};
         selectSubscriptionAction = new Action("Select Subscriptions", com.microsoft.azuretools.core.Activator.getImageDescriptor("icons/ConnectAccountsLight_16.png")) {
             public void run() {
-            	SelectSubsriptionsCommandHandler.onSelectSubscriptions(PluginUtil.getParentShell());
-                azureModule.load(false);
+            	try {
+            	    if (AuthMethodManager.getInstance().isSignedIn()) {
+            	        SelectSubsriptionsCommandHandler.onSelectSubscriptions(PluginUtil.getParentShell());
+                        azureModule.load(false);
+            	    }
+            	} catch (Exception ex) {
+				}
             }
         };
         selectSubscriptionAction.setToolTipText("Select Subscriptions");
