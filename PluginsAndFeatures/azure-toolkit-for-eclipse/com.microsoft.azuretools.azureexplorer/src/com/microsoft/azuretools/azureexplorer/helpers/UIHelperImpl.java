@@ -65,13 +65,16 @@ public class UIHelperImpl implements UIHelper {
                               final String title,
                               final boolean appendEx,
                               final boolean suggestDetail) {
-        Display.getDefault().asyncExec(new Runnable() {
-            @Override
-            public void run() {
-                PluginUtil.displayErrorDialogAndLog(null, title, message, ex);
-            }
-        });
-        
+    	if (Display.getCurrent() == null) {
+    		Display.getDefault().asyncExec(new Runnable() {
+    			@Override
+    			public void run() {
+    				PluginUtil.displayErrorDialogAndLog(null, title, message, ex);
+    			}
+    		});
+    	} else {
+    		PluginUtil.displayErrorDialogAndLog(null, title, message, ex);
+    	}
     }
 
     @Override
