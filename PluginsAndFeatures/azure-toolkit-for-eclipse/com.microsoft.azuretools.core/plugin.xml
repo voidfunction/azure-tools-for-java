@@ -158,6 +158,7 @@
             <menu
                 label="Azure"
                 mnemonic="A"
+                icon="icons/small/windowsAzure.png"
                 id="com.microsoft.azuretools.core.menus.Azure">
                 <command
                     commandId="com.microsoft.azuretools.core.commands.SelectSubscriptions"
@@ -194,27 +195,28 @@
                 label="Azure" 
                 icon="icons/small/windowsAzure.png"
                 id="com.microsoft.azuretools.webprojmenu">
+                <separator
+                    visible="true"
+                    name="signIn"/>
                 <command
                     icon="icons/SignInLight_16.png"
                     commandId="com.microsoft.azuretools.core.commands.SignIn">
+                    <visibleWhen checkEnabled="false">
+                        <not>
+                            <reference definitionId="when.is.signed.in"/>
+                        </not>
+                    </visibleWhen>
                 </command>
-                <visibleWhen checkEnabled="false">
-                    <not>
-                        <reference definitionId="when.is.signed.in"/>
-                    </not>
-                </visibleWhen>
-            </menu>
-            <menu
-                label="Azure"
-                icon="icons/small/windowsAzure.png"
-                id="com.microsoft.azuretools.webprojmenu">
                 <command
                     icon="icons/SignOutLight_16.png"
                     commandId="com.microsoft.azuretools.core.commands.SignOut">
+                    <visibleWhen checkEnabled="false">
+                        <reference definitionId="when.is.signed.in"/>
+                    </visibleWhen>
                 </command>
-                <visibleWhen checkEnabled="false">
-                    <reference definitionId="when.is.signed.in"/>
-                </visibleWhen>
+                <separator
+                    visible="true"
+                    name="signOut"/>
             </menu>
         </menuContribution>
     </extension>
