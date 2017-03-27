@@ -29,23 +29,42 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.serviceexplorer.AzureRefreshableNode;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 
 public class DockerHostModule extends AzureRefreshableNode {
   private static final String DOCKER_HOST_MODULE_ID = DockerHostModule.class.getName();
   private static final String DOCKER_HOST_ICON = "DockerContainer_16.png";
   private static final String BASE_MODULE_NAME = "Docker Hosts";
 
-  AzureDockerHostsManager dockerManager;
+  private AzureDockerHostsManager dockerManager;
 
   public DockerHostModule(Node parent) {
     super(DOCKER_HOST_MODULE_ID, BASE_MODULE_NAME, parent, DOCKER_HOST_ICON);
     dockerManager = null;
   }
 
+//  @Override
+//  protected void onNodeClick(NodeActionEvent e) {
+//    super.onNodeClick(e);
+//  }
+
   @Override
-  protected void onNodeClick(NodeActionEvent e) {
-    super.onNodeClick(e);
+  protected void refreshFromAzure() throws Exception {
+    try {
+      AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
+      // not signed in
+      if (azureAuthManager == null) {
+        return;
+      }
+
+      dockerManager = AzureDockerHostsManager.getAzureDockerHostsManager(azureAuthManager);
+
+      dockerManager.forceRefreshSubscriptions();
+      dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
+
+    } catch (Exception ex) {
+      DefaultLoader.getUIHelper().showException("An error occurred while attempting to load the Docker virtual machines from Azure", ex,
+          "Azure Services Explorer - Error Refreshing Docker Hosts", false, true);
+    }
   }
 
   @Override
@@ -57,16 +76,19 @@ public class DockerHostModule extends AzureRefreshableNode {
         return;
       }
 
-      dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(azureAuthManager);
-      // TODO: Implement progress bar steps and split the force refresh into multiple chunks
-      dockerManager.forceRefreshSubscriptions();
+      dockerManager = AzureDockerHostsManager.getAzureDockerHostsManager(azureAuthManager);
+
+      if (!dockerManager.isInitialized()) {
+        dockerManager.forceRefreshSubscriptions();
+        dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
+      }
 
       for (DockerHost host : dockerManager.getDockerHostsList()) {
         addChildNode(new DockerHostNode(this, dockerManager, host));
       }
     } catch (Exception ex) {
       DefaultLoader.getUIHelper().showException("An error occurred while attempting to load the Docker virtual machines from Azure", ex,
-          "Azure Services Explorer - Error Deleting Web App", false, true);
+          "Azure Services Explorer - Error Refreshing Docker Hosts", false, true);
     }
   }
 }

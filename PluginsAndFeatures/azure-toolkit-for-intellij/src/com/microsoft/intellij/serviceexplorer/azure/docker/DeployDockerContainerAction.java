@@ -27,7 +27,8 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardDialog;
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardModel;
 import com.microsoft.intellij.util.PluginUtil;
@@ -56,25 +57,31 @@ public class DeployDockerContainerAction extends NodeActionListener {
 
   @Override
   public void actionPerformed(NodeActionEvent e) {
-    if (dockerManager.getSubscriptionsMap().isEmpty()) {
-      PluginUtil.displayErrorDialog("Publish Docker Container", "Must select an Azure subscription first");
-      return;
-    }
-
-    AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
-
-    AzureSelectDockerWizardModel model = new AzureSelectDockerWizardModel(project, dockerManager, dockerImageDescription);
-    AzureSelectDockerWizardDialog wizard = new AzureSelectDockerWizardDialog(model);
-    model.selectDefaultDockerHost(dockerHost, false);
-    wizard.show();
-
-    if (wizard.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
-      try {
-        String url = wizard.deploy();
-        System.out.println("Web app published at: " + url);
-      } catch (Exception ex) {
-        PluginUtil.displayErrorDialogAndLog(message("webAppDplyErr"), ex.getMessage(), ex);
+    try {
+      if (!AzureSignInAction.doSignIn(AuthMethodManager.getInstance(), project)) return;
+      if (dockerManager.getSubscriptionsMap().isEmpty()) {
+        PluginUtil.displayErrorDialog("Publish Docker Container", "Must select an Azure subscription first");
+        return;
       }
+
+      AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
+
+      AzureSelectDockerWizardModel model = new AzureSelectDockerWizardModel(project, dockerManager, dockerImageDescription);
+      AzureSelectDockerWizardDialog wizard = new AzureSelectDockerWizardDialog(model);
+      model.selectDefaultDockerHost(dockerHost, false);
+      wizard.show();
+
+      if (wizard.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+        try {
+          String url = wizard.deploy();
+          System.out.println("Container published at: " + url);
+        } catch (Exception ex) {
+          PluginUtil.displayErrorDialogAndLog(message("webAppDplyErr"), ex.getMessage(), ex);
+        }
+      }
+    } catch(Exception ex1) {
+      LOGGER.error("actionPerformed", ex1);
+      ex1.printStackTrace();
     }
   }
 }

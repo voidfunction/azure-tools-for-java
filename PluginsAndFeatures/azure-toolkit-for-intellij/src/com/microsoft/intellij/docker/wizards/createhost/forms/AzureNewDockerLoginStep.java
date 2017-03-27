@@ -210,7 +210,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       @Override
       public boolean verify(JComponent input) {
         String text = dockerHostImportSSHBrowseTextField.getText();
-        if (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostSshDirectory(text)) {
+        if (dockerHostImportSshRadioButton.isSelected() && (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostSshDirectory(text))) {
           dockerHostImportSSHBrowseLabel.setVisible(true);
           setDialogButtonsState(false);
           return false;
@@ -309,7 +309,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
       @Override
       public boolean verify(JComponent input) {
         String text = dockerHostImportTLSBrowseTextField.getText();
-        if (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostTlsDirectory(text)) {
+        if (dockerHostImportTlsRadioButton.isSelected() && (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostTlsDirectory(text))) {
           dockerHostImportTLSBrowseLabel.setVisible(true);
           setDialogButtonsState(false);
           return false;
@@ -480,7 +480,7 @@ public class AzureNewDockerLoginStep extends AzureNewDockerWizardStep {
 
     // Docker daemon port settings
     if (dockerDaemonPortTextField.getText() == null || dockerDaemonPortTextField.getText().isEmpty() ||
-        !AzureDockerValidationUtils.validateDockerHostUserName(dockerDaemonPortTextField.getText()))
+        !AzureDockerValidationUtils.validateDockerHostPort(dockerDaemonPortTextField.getText()))
     {
       ValidationInfo info = AzureDockerUIResources.validateComponent("Invalid Docker daemon port settings", daemonCredsPanel, dockerDaemonPortTextField, dockerDaemonPortLabel);
       credsTabbedPane.setSelectedComponent(daemonCredsPanel);

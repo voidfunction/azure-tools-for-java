@@ -26,6 +26,7 @@ import com.intellij.openapi.project.Project;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.intellij.docker.wizards.createhost.AzureNewDockerWizardDialog;
@@ -35,8 +36,6 @@ import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostModule;
-
-import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 @Name("Create")
 public class CreateNewDockerHostAction extends NodeActionListener {
@@ -54,6 +53,7 @@ public class CreateNewDockerHostAction extends NodeActionListener {
   @Override
   public void actionPerformed(NodeActionEvent e) {
     try {
+      if (!AzureSignInAction.doSignIn( AuthMethodManager.getInstance(), project)) return;
       AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
 
       // not signed in

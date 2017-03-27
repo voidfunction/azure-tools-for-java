@@ -336,26 +336,26 @@ public class AzureDockerUIResources {
             do {
               progressIndicator.setFraction(.15 + .15 * retries);
               progressIndicator.setText2(String.format("%s new key vault %s ...", retryMsg, dockerHost.certVault.name));
-              System.out.println(retryMsg + " new Docker key vault: " + new Date().toString());
+              if (AzureDockerUtils.DEBUG) System.out.println(retryMsg + " new Docker key vault: " + new Date().toString());
               AzureDockerCertVaultOps.createOrUpdateVault(azureClient, dockerHost.certVault, keyVaultClient);
-              System.out.println("Done creating new key vault: " + new Date().toString());
+              if (AzureDockerUtils.DEBUG) System.out.println("Done creating new key vault: " + new Date().toString());
               if (progressIndicator.isCanceled()) {
                 if (displayWarningOnCreateKeyVaultCancelAction() == 1) {
                   return;
                 }
               }
               certVault = AzureDockerCertVaultOps.getVault(azureClient, dockerHost.certVault.name, dockerHost.certVault.resourceGroupName, keyVaultClient);
-              retries--;
+              retries++;
               retryMsg = "Retry creating";
             } while (retries < 5 && (certVault == null || certVault.vmUsername == null)); // Retry couple times
 
             progressIndicator.setFraction(.90);
             progressIndicator.setText2("Updating key vaults ...");
-            System.out.println("Refreshing key vaults: " + new Date().toString());
+            if (AzureDockerUtils.DEBUG) System.out.println("Refreshing key vaults: " + new Date().toString());
             dockerManager.refreshDockerVaults();
             dockerManager.refreshDockerVaultDetails();
 
-            System.out.println("Done refreshing key vaults: " + new Date().toString());
+            if (AzureDockerUtils.DEBUG) System.out.println("Done refreshing key vaults: " + new Date().toString());
             if (progressIndicator.isCanceled()) {
               if (displayWarningOnCreateKeyVaultCancelAction() == 1) {
                 return;
@@ -378,7 +378,7 @@ public class AzureDockerUIResources {
 
   private static int displayWarningOnCreateKeyVaultCancelAction(){
     return JOptionPane.showOptionDialog(null,
-        "This action can set the Docker host in an partial setup state and can not be later use for Docker container deployment!\n\n Are you sure you want this?",
+        "This action can leave the Docker virtual machine host in an partial setup state and which can cause publishing to a Docker container to fail!\n\n Are you sure you want this?",
         "Stop Create Azure Key Vault",
         JOptionPane.YES_NO_OPTION,
         JOptionPane.QUESTION_MESSAGE,

@@ -133,6 +133,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
         if (AzureDockerValidationUtils.validateDockerArtifactPath(dockerArtifactPath.getText())) {
           dockerArtifactPathLabel.setVisible(false);
           setDialogButtonsState(doValidate(false) == null);
+          model.setPredefinedDockerfileOptions(dockerArtifactPath.getText());
           return true;
         } else {
           dockerArtifactPathLabel.setVisible(true);
@@ -486,10 +487,6 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     setNextButtonState(buttonsState);
   }
 
-  public Artifact getArtifact() {
-    return artifact;
-  }
-
   public ValidationInfo doValidate(boolean shakeOnError) {
     if (dockerImageNameTextField.getText() == null || dockerImageNameTextField.getText().equals("")){
       ValidationInfo info = new ValidationInfo("Missing Docker image name", dockerImageNameTextField);
@@ -500,6 +497,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       return info;
     }
     dockerImageDescription.dockerImageName = dockerImageNameTextField.getText();
+    model.setDockerContainerName(AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName));
 
     if (dockerArtifactPath.getText() == null || !Files.isRegularFile(Paths.get(dockerArtifactPath.getText()))) {
       ValidationInfo info = new ValidationInfo("Missing the artifact to be published", dockerArtifactPath);

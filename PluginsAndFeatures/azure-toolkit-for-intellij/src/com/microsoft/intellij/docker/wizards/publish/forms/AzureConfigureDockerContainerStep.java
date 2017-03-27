@@ -102,12 +102,23 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
     dockerfileComboBox.setEnabled(true);
 
     for (KnownDockerImages image : dockerManager.getDefaultDockerImages()) {
-      dockerfileComboBox.addItem(image);
+      // Add predefined images that can run .WAR as default
+      if (!image.isCanRunJarFile()) {
+        dockerfileComboBox.addItem(image);
+      }
     }
 
     if (dockerImageDescription.predefinedDockerfile != null) {
       dockerfileComboBox.setSelectedItem(KnownDockerImages.valueOf(dockerImageDescription.predefinedDockerfile));
+    } else {
+      dockerfileComboBox.setSelectedIndex(0);
     }
+    dockerfileComboBox.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        dockerContainerPortSettings.setText(getDefaultPortMapping((KnownDockerImages) dockerfileComboBox.getSelectedItem()));
+      }
+    });
 
     customDockerfileBrowseButton.setEnabled(false);
     customDockerfileBrowseButton.addActionListener(UIUtils.createFileChooserListener(customDockerfileBrowseButton, model.getProject(),
@@ -155,14 +166,11 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       }
     });
 
-    dockerContainerPortSettings.setText(String.format("2%04d:", new Random().nextInt(10000)) + // default to host port 2xxxx
-        (dockerManager.getDefaultDockerImages().isEmpty() ?
-            "8080" :
-            ((KnownDockerImages) dockerfileComboBox.getSelectedItem()).getPortSettings()));
+    dockerContainerPortSettings.setText(getDefaultPortMapping((KnownDockerImages) dockerfileComboBox.getSelectedItem()));
     dockerContainerPortSettings.setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {
-        if (AzureDockerValidationUtils.validateDockerPortSettings(dockerContainerPortSettings.getText())) {
+        if (AzureDockerValidationUtils.validateDockerPortSettings(dockerContainerPortSettings.getText()) != null) {
           dockerContainerPortSettingsLabel.setVisible(false);
           setDialogButtonsState(doValidate(false) == null);
           return true;
@@ -237,7 +245,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
     }
 
     if (dockerContainerPortSettings.getText() == null || dockerContainerPortSettings.getText().equals("") ||
-        !AzureDockerValidationUtils.validateDockerPortSettings(dockerContainerPortSettings.getText())){
+        AzureDockerValidationUtils.validateDockerPortSettings(dockerContainerPortSettings.getText()) == null){
       ValidationInfo info = new ValidationInfo("Invalid port settings", dockerContainerPortSettings);
       if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
       dockerContainerPortSettingsLabel.setVisible(true);
@@ -249,6 +257,41 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
     setDialogButtonsState(true);
 
     return null;
+  }
+
+  private String getDefaultPortMapping(KnownDockerImages knownImage) {
+    int randomPort = new Random().nextInt(10000); // default to host port 2xxxx and 5xxxx (debug)
+    if (knownImage == null) {
+      return String.format("2%04d:80", randomPort);
+    }
+    if (knownImage.getDebugPortSettings() != null && !knownImage.getDebugPortSettings().isEmpty()) {
+      // TODO: add JVM port mapping
+      return String.format("2%04d:%s 5%04d:%s", randomPort, knownImage.getPortSettings(), randomPort, knownImage.getDebugPortSettings());
+    } else {
+      return String.format("2%04d:%s", randomPort, knownImage.getPortSettings());
+    }
+  }
+
+  public void setPredefinedDockerfileOptions(String artifactFileName) {
+    boolean isJarFile = artifactFileName.toLowerCase().matches(".*.jar");
+    dockerfileComboBox.removeAllItems();
+    for (KnownDockerImages image : dockerManager.getDefaultDockerImages()) {
+      if (image.isCanRunJarFile() == isJarFile) {
+        dockerfileComboBox.addItem(image);
+      }
+    }
+    if (dockerImageDescription.predefinedDockerfile != null) {
+      dockerfileComboBox.setSelectedItem(KnownDockerImages.valueOf(dockerImageDescription.predefinedDockerfile));
+    } else {
+      dockerfileComboBox.setSelectedIndex(0);
+    }
+    dockerContainerPortSettings.setText(getDefaultPortMapping((KnownDockerImages) dockerfileComboBox.getSelectedItem()));
+  }
+
+  public void setDockerContainerName(String dockerContainerName) {
+    if (dockerContainerName != null) {
+      dockerContainerNameTextField.setText(dockerContainerName);
+    }
   }
 
   private void setFinishButtonState(boolean finishButtonState) {

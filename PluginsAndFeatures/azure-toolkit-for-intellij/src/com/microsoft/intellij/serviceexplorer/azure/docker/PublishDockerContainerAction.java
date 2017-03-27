@@ -23,6 +23,8 @@ package com.microsoft.intellij.serviceexplorer.azure.docker;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
 import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
@@ -40,6 +42,12 @@ public class PublishDockerContainerAction extends NodeActionListener {
 
   @Override
   public void actionPerformed(NodeActionEvent e) {
-    AzureDockerUIResources.publish2DockerHostContainer(project);
+    try {
+      if (!AzureSignInAction.doSignIn(AuthMethodManager.getInstance(), project)) return;
+      AzureDockerUIResources.publish2DockerHostContainer(project);
+    } catch(Exception ex1) {
+      LOGGER.error("actionPerformed", ex1);
+      ex1.printStackTrace();
+    }
   }
 }

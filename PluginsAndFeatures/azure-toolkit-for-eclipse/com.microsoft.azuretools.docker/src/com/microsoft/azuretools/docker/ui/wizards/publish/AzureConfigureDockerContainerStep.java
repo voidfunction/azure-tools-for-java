@@ -19,6 +19,8 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.publish;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -29,22 +31,52 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.HyperlinkSettings;
+import org.eclipse.ui.forms.IMessageManager;
+import org.eclipse.ui.forms.ManagedForm;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.ScrolledForm;
+
+import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
+
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.ModifyEvent;
 
 public class AzureConfigureDockerContainerStep extends WizardPage {
-	private Text customDockerfileTextField;
 	private Text dockerContainerNameTextField;
+	private Button customDockerfileRadioButton;
+	private Combo dockerfileComboBox;
+	private Button predefinedDockerfileRadioButton;
+	private Text customDockerfileTextField;
+	private Button customDockerfileBrowseButton;
 	private Text dockerContainerPortSettings;
+	
+	private ManagedForm managedForm;
+	private ScrolledForm errMsgForm;
+	private IMessageManager errDispatcher;
+
+	private IProject project;
+	private AzureDockerHostsManager dockerManager;
+	private AzureDockerImageInstance dockerImageDescription;
+	private AzureSelectDockerWizard wizard;
 
 	/**
 	 * Create the wizard.
 	 */
-	public AzureConfigureDockerContainerStep() {
+	public AzureConfigureDockerContainerStep(AzureSelectDockerWizard wizard) {
 		super("Deploying Docker Container on Azure");
+
+		this.wizard = wizard;		
+		this.dockerManager = wizard.getDockerManager();
+		this.dockerImageDescription = wizard.getDockerImageInstance();
+		this.project = wizard.getProject();
+
 		setTitle("Configure the Docker container to be created");
 		setDescription("");
-		
 	}
 
 	/**
@@ -76,20 +108,20 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 		Label lblDockerfileSettings = new Label(mainContainer, SWT.SEPARATOR | SWT.HORIZONTAL);
 		lblDockerfileSettings.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
 		
-		Button predefinedDockerfileRadioButton = new Button(mainContainer, SWT.RADIO);
+		predefinedDockerfileRadioButton = new Button(mainContainer, SWT.RADIO);
 		GridData gd_predefinedDockerfileRadioButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
 		gd_predefinedDockerfileRadioButton.horizontalIndent = 3;
 		predefinedDockerfileRadioButton.setLayoutData(gd_predefinedDockerfileRadioButton);
 		predefinedDockerfileRadioButton.setText("Predefined Docker image");
 		new Label(mainContainer, SWT.NONE);
 		
-		Combo dockerfileComboBox = new Combo(mainContainer, SWT.NONE);
+		dockerfileComboBox = new Combo(mainContainer, SWT.NONE);
 		GridData gd_dockerfileComboBox = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
 		gd_dockerfileComboBox.horizontalIndent = 22;
 		dockerfileComboBox.setLayoutData(gd_dockerfileComboBox);
 		new Label(mainContainer, SWT.NONE);
 		
-		Button customDockerfileRadioButton = new Button(mainContainer, SWT.RADIO);
+		customDockerfileRadioButton = new Button(mainContainer, SWT.RADIO);
 		GridData gd_customDockerfileRadioButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
 		gd_customDockerfileRadioButton.horizontalIndent = 3;
 		customDockerfileRadioButton.setLayoutData(gd_customDockerfileRadioButton);
@@ -101,21 +133,7 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 		gd_customDockerfileTextField.horizontalIndent = 22;
 		customDockerfileTextField.setLayoutData(gd_customDockerfileTextField);
 		
-		Button customDockerfileBrowseButton = new Button(mainContainer, SWT.NONE);
-		customDockerfileBrowseButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				FileDialog fileDialog = new FileDialog(customDockerfileBrowseButton.getShell(), SWT.OPEN);
-				fileDialog.setText("Select Custom Dockerfile");
-				fileDialog.setFilterPath(System.getProperty("user.home"));
-				fileDialog.setFilterExtensions(new String[] { "Dockerfile", "*.*" });
-				String path = fileDialog.open();
-				if (path == null) {
-					return;
-				}
-				customDockerfileTextField.setText(path);
-			}
-		});
+		customDockerfileBrowseButton = new Button(mainContainer, SWT.NONE);
 		customDockerfileBrowseButton.setText("Browse...");
 		
 		Label label = new Label(mainContainer, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -137,6 +155,82 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 		lblForExampletcp.setLayoutData(gd_lblForExampletcp);
 		lblForExampletcp.setText("For example \"10022:22\"");
 		new Label(mainContainer, SWT.NONE);
+		
+		FormToolkit toolkit = new FormToolkit(mainContainer.getDisplay());
+		toolkit.getHyperlinkGroup().setHyperlinkUnderlineMode(
+				HyperlinkSettings.UNDERLINE_HOVER);
+		managedForm = new ManagedForm(mainContainer);
+		errMsgForm = managedForm.getForm();
+		errMsgForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
+		errMsgForm.setBackground(mainContainer.getBackground());
+		errDispatcher = managedForm.getMessageManager();
+		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);
+		
+		initUIMainContainer(mainContainer);
+	}
+	
+	private void initUIMainContainer(Composite mainContainer) {
+		
+	    dockerContainerNameTextField.setText(dockerImageDescription.dockerContainerName);
+	    dockerContainerNameTextField.setToolTipText(AzureDockerValidationUtils.getDockerContainerNameTip());
+		dockerContainerNameTextField.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent event) {
+				if (AzureDockerValidationUtils.validateDockerImageName(((Text) event.getSource()).getText())) {
+					errDispatcher.removeMessage("dockerContainerNameTextField", dockerContainerNameTextField);
+					setErrorMessage(null);
+					setPageComplete(doValidate());
+				} else {
+					errDispatcher.addMessage("dockerContainerNameTextField", AzureDockerValidationUtils.getDockerContainerNameTip(), null, IMessageProvider.ERROR, dockerContainerNameTextField);
+					setErrorMessage("Invalid Docker container name");
+					setPageComplete(false);
+				}
+			}
+		});
+
+		predefinedDockerfileRadioButton.setSelection(true);
+		predefinedDockerfileRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
+		dockerfileComboBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
+		customDockerfileRadioButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
+		customDockerfileTextField.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent event) {
+			}
+		});
+		customDockerfileBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FileDialog fileDialog = new FileDialog(customDockerfileBrowseButton.getShell(), SWT.OPEN);
+				fileDialog.setText("Select Custom Dockerfile");
+				fileDialog.setFilterPath(System.getProperty("user.home"));
+				fileDialog.setFilterExtensions(new String[] { "Dockerfile", "*.*" });
+				String path = fileDialog.open();
+				if (path == null) {
+					return;
+				}
+				customDockerfileTextField.setText(path);
+			}
+		});
+		dockerContainerPortSettings.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent event) {
+			}
+		});
 	}
 
+	public boolean doValidate() {
+		return true;
+	}
 }
