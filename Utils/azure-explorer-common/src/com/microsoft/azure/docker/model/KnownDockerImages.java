@@ -90,7 +90,7 @@ public enum KnownDockerImages {
             "EXPOSE 5005\n" +
             "EXPOSE 80\n" +
             "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /home/\n" +
-            "CMD [\"java\", \"-Xdebug\", \"-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8787\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
+            "CMD [\"java\", \"-Xdebug\", \"-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
     public static final String OPENSDK_8_DEFAULT_DOCKERFILE =
         "FROM openjdk:8\n" +
             "EXPOSE 80\n" +
@@ -101,7 +101,7 @@ public enum KnownDockerImages {
             "EXPOSE 5005\n" +
             "EXPOSE 80\n" +
             "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /home/\n" +
-            "CMD [\"java\", \"-Xdebug\", \"-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8787\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
+            "CMD [\"java\", \"-Xdebug\", \"-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
     public static final String OPENSDK_9_DEFAULT_DOCKERFILE =
         "FROM openjdk:9\n" +
             "EXPOSE 80\n" +
@@ -112,7 +112,7 @@ public enum KnownDockerImages {
             "EXPOSE 5005\n" +
             "EXPOSE 80\n" +
             "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /home/\n" +
-            "CMD [\"java\", \"-Xdebug\", \"-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8787\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
+            "CMD [\"java\", \"-Xdebug\", \"-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
     public static final String OPENSDK_LATEST_DEFAULT_DOCKERFILE =
         "FROM openjdk:latest\n" +
             "EXPOSE 80\n" +
@@ -124,6 +124,6 @@ public enum KnownDockerImages {
             "EXPOSE 5005\n" +
             "EXPOSE 80\n" +
             "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /home/\n" +
-            "CMD [\"java\", \"-Xdebug\", \"-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8787\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
+            "CMD [\"java\", \"-Xdebug\", \"-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
   }
 }
