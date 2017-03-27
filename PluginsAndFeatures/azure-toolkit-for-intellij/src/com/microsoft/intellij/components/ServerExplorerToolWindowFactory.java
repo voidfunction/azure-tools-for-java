@@ -21,7 +21,6 @@
  */
 package com.microsoft.intellij.components;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.treeView.NodeRenderer;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -112,9 +111,6 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         root.add(createTreeNode(azureModule, project));
 
         // kick-off asynchronous load of child nodes on all the modules
-//        if (AzureSettings.getSafeInstance(project).iswebAppLoaded()) {
-//            azureModule.webSiteConfigMap = AzureSettings.getSafeInstance(project).loadWebApps();
-//        }
         azureModule.load(false);
 
         return root;
