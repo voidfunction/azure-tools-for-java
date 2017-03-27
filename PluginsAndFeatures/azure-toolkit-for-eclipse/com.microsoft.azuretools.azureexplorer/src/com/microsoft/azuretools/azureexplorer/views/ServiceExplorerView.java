@@ -43,6 +43,10 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -407,19 +411,13 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
         selectSubscriptionAction.setToolTipText("Select Subscriptions");
         doubleClickAction = new Action() {
             public void run() {
-//                ISelection selection = viewer.getSelection();
-//                Object obj = ((IStructuredSelection) selection).getFirstElement();
-//                viewer.expandToLevel(obj, 1);
-//                try {
-//                    List<Subscription> subscriptions = AzureManagerImpl.getManager().getFullSubscriptionList();
-//                    if ((subscriptions == null || subscriptions.isEmpty()) &&
-//                            (((TreeNode) obj).node instanceof StorageModule || ((TreeNode) obj).node instanceof AzureModule)) {
-////                        ManageSubscriptionDialog subscriptionsDialog = new ManageSubscriptionDialog(getSite().getShell(), true, false);
-////                        subscriptionsDialog.open();
-//                    }
-//                } catch (AzureCmdException e) {
-//                    Activator.getDefault().log(e.getMessage(), e);
-//                }
+                ISelection selection = viewer.getSelection();
+                Object obj = ((IStructuredSelection) selection).getFirstElement();
+                if (!viewer.getExpandedState(obj)) {
+                	viewer.expandToLevel(obj, 1);
+                } else {
+					viewer.collapseToLevel(obj, 1);
+				}
             }
         };
     }
@@ -431,18 +429,23 @@ public class ServiceExplorerView extends ViewPart implements PropertyChangeListe
             }
         });
         Tree tree = (Tree) viewer.getControl();
-        tree.addSelectionListener(new SelectionAdapter() {
+        tree.addMouseListener(new MouseAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
-                TreeItem item = (TreeItem) e.item;
-                Node node = ((TreeNode) item.getData()).node;
-                // if the node in question is in a "loading" state then we
-                // do not propagate the click event to it
-                if (!node.isLoading()) {
-                    node.getClickAction().fireNodeActionEvent();
-                }
-            }
-        });
+        	public void mouseUp(MouseEvent e) {
+            	if (e.button == 1) { // left button
+            		TreeItem[] selection = ((Tree)e.widget).getSelection();
+            		if (selection.length > 0) {
+						TreeItem item = ((Tree) e.widget).getSelection()[0];
+						Node node = ((TreeNode) item.getData()).node;
+						// if the node in question is in a "loading" state then
+						// we do not propagate the click event to it
+						if (!node.isLoading()) {
+							node.getClickAction().fireNodeActionEvent();
+						}
+					}
+            	}
+        	}
+		});
     }
 
     /**

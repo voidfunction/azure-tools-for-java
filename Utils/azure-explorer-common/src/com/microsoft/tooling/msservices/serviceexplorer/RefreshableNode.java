@@ -67,7 +67,6 @@ public abstract class RefreshableNode extends Node {
     protected void onNodeClick(NodeActionEvent e) {
         if (!initialized) {
             this.load(false);
-            initialized = true;
         }
     }
 
@@ -101,6 +100,7 @@ public abstract class RefreshableNode extends Node {
     }
 
     public ListenableFuture<List<Node>> load(boolean forceRefresh) {
+        initialized = true;
         final RefreshableNode node = this;
         final SettableFuture<List<Node>> future = SettableFuture.create();
 
