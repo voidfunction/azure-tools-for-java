@@ -67,6 +67,7 @@ public class WebAppUtils {
         ftp.connect(uri.getHost(), 21);
         final int replyCode = ftp.getReplyCode();
         if (!FTPReply.isPositiveCompletion(replyCode)) {
+            ftp.disconnect();
             throw new ConnectException("Unable to connect to FTP server");
         }
 
@@ -74,38 +75,43 @@ public class WebAppUtils {
             throw new ConnectException("Unable to login to FTP server");
         }
 
-        ftp.setControlKeepAliveTimeout(3000);
+        ftp.setControlKeepAliveTimeout(Constants.connection_read_timeout_ms);
+        ftp.setFileType(FTP.BINARY_FILE_TYPE);
+        ftp.enterLocalPassiveMode();//Switch to passive mode
 
         return ftp;
     }
 
     public static void deployArtifact(String artifactName, String artifactPath, PublishingProfile pp, boolean toRoot, IProgressIndicator indicator) throws IOException {
         FTPClient ftp = null;
+        InputStream input = null;
         try {
             if (indicator != null) indicator.setText("Connecting to FTP server...");
 
             ftp = getFtpConnection(pp);
 
-            ftp.setFileType(FTP.BINARY_FILE_TYPE);
-
             if (indicator != null) indicator.setText("Uploading the application...");
-            InputStream input = new FileInputStream(artifactPath);
+            input = new FileInputStream(artifactPath);
             if (toRoot) {
                 WebAppUtils.removeFtpDirectory(ftp, ftpWebAppsPath + "ROOT", indicator);
+                ftp.deleteFile(ftpWebAppsPath + "ROOT.war");
                 ftp.storeFile(ftpWebAppsPath + "ROOT.war", input);
             } else {
                 WebAppUtils.removeFtpDirectory(ftp, ftpWebAppsPath + artifactName, indicator);
-                ftp.storeFile(ftpWebAppsPath + artifactName + ".war", input);
+                ftp.deleteFile(artifactName + ".war");
+                boolean success = ftp.storeFile(ftpWebAppsPath + artifactName + ".war", input);
+                if (!success) {
+                    int rc = ftp.getReplyCode();
+                    throw new IOException("FTP client can't store the artifact, reply code: " + rc);
+                }
             }
-            input.close();
             if (indicator != null) indicator.setText("Logging out of FTP server...");
             ftp.logout();
         } finally {
+            if (input != null)
+                input.close();
             if (ftp != null && ftp.isConnected()) {
-                try {
-                    ftp.disconnect();
-                } catch (IOException ignored) {
-                }
+                ftp.disconnect();
             }
         }
     }
@@ -224,13 +230,6 @@ public class WebAppUtils {
 
             PublishingProfile pp = webApp.getPublishingProfile();
             ftp = getFtpConnection(pp);
-            ftp.setFileType(FTP.BINARY_FILE_TYPE);
-
-            // {{ debug only
-            System.out.println("\t\t" + pp.ftpUrl());
-            System.out.println("\t\t" + pp.ftpUsername());
-            System.out.println("\t\t" + pp.ftpPassword());
-            // }}
 
             // stop and restart web app
             if (indicator != null) indicator.setText("Stopping the service...");
