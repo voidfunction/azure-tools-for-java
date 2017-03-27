@@ -27,7 +27,6 @@ import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
@@ -102,8 +101,6 @@ public class CreateVMWizard extends Wizard {
             @Override
             public void run() {
                 try {
-//                    virtualMachine.getEndpoints().addAll(endpointStep.getEndpointsList());
-
                     byte[] certData = new byte[0];
 
                     if (!certificate.isEmpty()) {

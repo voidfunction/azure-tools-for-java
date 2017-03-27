@@ -322,50 +322,30 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
 		String replication = replicationComboBox.getData(replicationComboBox.getText()).toString();
 		Kind kind = (Kind) kindCombo.getData(kindCombo.getText());
 		AccessTier accessTier = (AccessTier)accessTierComboBox.getData(accessTierComboBox.getText());	
-		ProgressMonitorDialog dialog = new ProgressMonitorDialog(PluginUtil.getParentShell());
 		String subscriptionId = ((SubscriptionDetail)subscriptionComboBox.getData(subscriptionComboBox.getText())).getSubscriptionId();
-		try {
-			dialog.run(true, false, new IRunnableWithProgress() {
-				
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Creating storage account...", IProgressMonitor.UNKNOWN);
-					try {
-						storageAccount = AzureSDKManager.createStorageAccount(subscriptionId, name, region, 
-							isNewResourceGroup, resourceGroupName, kind, accessTier,
-							false, replication);
-					
-						// AzureManagerImpl.getManager().refreshStorageAccountInformation(storageAccount);
-						if (onCreate != null) {
-							onCreate.run();
-						}
-						monitor.done();
-						Display.getDefault().asyncExec(new Runnable() {
-							@Override
-							public void run() {
-								closeDialog();
-							}
-	                	});
-					} catch (Exception e) {
-						storageAccount = null;
-						DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
-							@Override
-							public void run() {
-								PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), Messages.err,
-									"An error occurred while creating the storage account: " + e.getMessage());
-							}
-						});
+		DefaultLoader.getIdeHelper().runInBackground(null, "Creating storage account", false, true, "Creating storage account " + name + "...", new Runnable() {
+            @Override
+            public void run() {
+            	try {
+					storageAccount = AzureSDKManager.createStorageAccount(subscriptionId, name, region, 
+						isNewResourceGroup, resourceGroupName, kind, accessTier,
+						false, replication);
+					if (onCreate != null) {
+						onCreate.run();
 					}
+				} catch (Exception e) {
+					storageAccount = null;
+					DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), Messages.err,
+								"An error occurred while creating the storage account: " + e.getMessage());
+						}
+					});
 				}
-			});
-		} catch (InvocationTargetException | InterruptedException e) {
-			PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), Messages.err,
-					"An error occurred while creating the storage account.", e);
-		}
-    }
-    
-    private void closeDialog() {
-    	super.okPressed();
+			}
+		});
+		super.okPressed();
     }
 
     public void fillFields() {
