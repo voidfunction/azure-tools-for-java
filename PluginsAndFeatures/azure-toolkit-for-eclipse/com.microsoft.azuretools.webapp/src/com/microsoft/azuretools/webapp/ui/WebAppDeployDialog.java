@@ -1,5 +1,6 @@
 package com.microsoft.azuretools.webapp.ui;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.HashMap;
@@ -79,6 +80,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
     private Button btnDelete;
     
     private IProject project;
+    private Shell parentShell;
     
     static class WebAppDetails {
         public SubscriptionDetail subscriptionDetail;
@@ -98,6 +100,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         setHelpAvailable(false);
         setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
         this.project = project;
+        this.parentShell = parentShell;
     }
     
     public static WebAppDeployDialog go(Shell parentShell, IProject project) {
@@ -427,7 +430,10 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             String projectName = project.getName();
             String destinationPath = project.getLocation() + "/" + projectName + ".war";
             export(projectName, destinationPath);
-            deploy(projectName, destinationPath);
+            String sitePath = deploy(projectName, destinationPath);
+            if (sitePath != null) {
+                showLink(sitePath);
+            }
         } catch (Exception ex) {
         	ex.printStackTrace();
         	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "okPressed@AppServiceCreateDialog", ex));
@@ -468,13 +474,16 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         }
     }
     
-    private void deploy(String artifactName, String artifactPath) {
+    private String deploy(String artifactName, String artifactPath) {
         int selectedRow = table.getSelectionIndex();
         String appServiceName = table.getItems()[selectedRow].getText(0);
         WebAppDetails wad = webAppDetailsMap.get(appServiceName);
         WebApp webApp = wad.webApp;
         boolean isDeployToRoot = btnDeployToRoot.getSelection();
         String errTitle = "Deploy Web App Error";
+        String sitePath = buildSiteLink(wad.webApp,  isDeployToRoot ? null : artifactName);
+        Map<String, String> threadParams = new HashMap<>();
+        threadParams.put("sitePath", sitePath);
         try {
             ProgressDialog.get(this.getShell(), "Deploy Web App Progress").run(true, true, new IRunnableWithProgress() {
                 @Override
@@ -484,7 +493,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         PublishingProfile pp = webApp.getPublishingProfile();
                         WebAppUtils.deployArtifact(artifactName, artifactPath,
                                 pp, isDeployToRoot, new UpdateProgressIndicator(monitor));
-                        String sitePath = buildSiteLink(wad.webApp,  isDeployToRoot ? null : artifactName);
                         monitor.setTaskName("Checking Web App availability...");
                         monitor.subTask("Link: " + sitePath);
                         // to make warn up cancelable
@@ -513,48 +521,46 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                             else Thread.sleep(sleepMs);
                         }
                         monitor.done();
-                        showLink(sitePath);
-                    } catch (Exception ex) {
+                    } catch (IOException ex) {
+                        threadParams.put("sitePath", null);
                         ex.printStackTrace();
                         LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@deploy@AppServiceCreateDialog", ex));
                         Display.getDefault().asyncExec(new Runnable() {
                             @Override
                             public void run() {
-                                ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
+                                ErrorWindow.go(parentShell, ex.getMessage(), errTitle);;
                             }
                         });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             });
         } catch (InvocationTargetException | InterruptedException ex) {
+            threadParams.put("sitePath", null);
             ex.printStackTrace();
             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "deploy@AppServiceCreateDialog", ex));
             ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
         }
+        
+        return threadParams.get("sitePath");
     }
     
     private void showLink(String link) {
-        Display.getDefault().asyncExec(new Runnable() {
-              @Override
-              public void run() {
-                  MessageBox messageBox = new MessageBox(
-                          Display.getDefault().getActiveShell(), 
-                          SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-                  messageBox.setMessage( "Web App has been uploaded successfully.\nLink: " + link + "\nOpen in browser?");
-                  messageBox.setText("Upload Web App Status");
-                  
-                  
-                  int response = messageBox.open();
-                  if (response == SWT.YES) {
-                      try {
-                          PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(link));
-                      } catch (Exception ex) {
-                    	  ex.printStackTrace();
-                    	  LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@Display@showLink@AppServiceCreateDialog", ex));
-                      }
-                  }
-              }
-        });
+        MessageBox messageBox = new MessageBox(
+                parentShell, 
+                SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+        messageBox.setMessage( "Web App has been uploaded successfully.\nLink: " + link + "\nOpen in browser?");
+        messageBox.setText("Upload Web App Status");
+        int response = messageBox.open();
+        if (response == SWT.YES) {
+            try {
+                PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(link));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@Display@showLink@AppServiceCreateDialog", ex));
+            }
+        }
     }
     
     private void deleteAppService() {
