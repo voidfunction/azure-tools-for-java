@@ -27,6 +27,8 @@ import com.microsoft.azure.docker.model.AzureDockerSubscription;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,23 +62,30 @@ public class AzureDockerValidationUtils {
     return "Full path to the artifact to be deployed; white spaces and special characters are not allowed in the file name";
   }
 
-  public static boolean validateDockerPortSettings(String name) {
-    if (name == null || name.length() < 4 || name.length() > 15) {
-      return false;
+  public static Map<String, String> validateDockerPortSettings(String portSettings) {
+    if (portSettings == null || portSettings.length() < 4 || portSettings.length() > 255) {
+      return null;
     }
+    Map<String, String> portMapping = new HashMap<>();
 
-    Pattern DOCKER_PORT_SETTINGS = Pattern.compile("^(\\d+):(\\d+)(.*)"); // i.e. 18080:8080/tcp
-    Matcher matcher = DOCKER_PORT_SETTINGS.matcher(name);
-    if (!matcher.matches()){
-      return false;
-    }
-    for (int i = 1; i < 3; i++) {
-      int port = Integer.parseInt(matcher.group(i));
-      if (port < 1 || port > 65535 ) {
-        return false;
+    for (String item : portSettings.trim().toLowerCase().split("[\\s]+")) {
+      Pattern DOCKER_PORT_SETTINGS = Pattern.compile("^(\\d+):(\\d+)[/]?(tcp|udp)?"); // i.e. 18080:8080/tcp
+      Matcher matcher = DOCKER_PORT_SETTINGS.matcher(item);
+      if (!matcher.matches()) {
+        return null;
       }
+      int hostPort = Integer.parseInt(matcher.group(1));
+      System.out.format("\t%d - %d\n", 1, hostPort);
+      if (hostPort < 1 || hostPort > 65535) {
+        return null;
+      }
+      int containerPort = Integer.parseInt(matcher.group(2));
+      if (containerPort < 1 || containerPort > 65535) {
+        return null;
+      }
+      portMapping.put(matcher.group(1), matcher.group(2));
     }
-    return true;
+    return portMapping;
   }
 
   public static String getDockerPortSettingsTip() {

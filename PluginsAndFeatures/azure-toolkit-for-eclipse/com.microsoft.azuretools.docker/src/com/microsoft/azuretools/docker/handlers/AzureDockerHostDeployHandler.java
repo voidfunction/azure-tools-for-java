@@ -23,6 +23,7 @@ import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.docker.ui.wizards.createhost.AzureNewDockerWizard;
+import com.microsoft.azuretools.docker.ui.wizards.publish.AzureSelectDockerWizard;
 import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 
@@ -53,15 +54,13 @@ public class AzureDockerHostDeployHandler extends AbstractHandler {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 		ISelectionService selectionService = window.getSelectionService();
 		ISelection selection = selectionService.getSelection();
+		Shell shell = window.getShell();
 		
 		if(selection instanceof IStructuredSelection) {
 			 Object element = ((IStructuredSelection)selection).getFirstElement();
 			
-			System.out.print("Geting project: "); 
 			if (element instanceof IResource) {
-				System.out.println("IResource");
 				IProject project = ((IResource)element).getProject();
-				Shell shell = window.getShell();
 				
 				// TODO check the project is Dynamic Web Application
 				
@@ -87,32 +86,37 @@ public class AzureDockerHostDeployHandler extends AbstractHandler {
 						dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
 					}
 
-					WizardDialog createNewDockerHostDialog = new WizardDialog(shell,
-	                        new AzureNewDockerWizard(project, dockerManager));
-					if (createNewDockerHostDialog.open() == Window.OK) {
-						MessageDialog.openInformation(
-								shell,
-								"WebAppPlugin",
-								"Hello, Create Docker Host here");					
-					} else {
-						MessageDialog.openInformation(
-								shell,
-								"WebAppPlugin",
-								"Canceled");
-					}
-
 					if (dockerManager.getSubscriptionsMap().isEmpty()) {
 						PluginUtil.displayErrorDialog(shell, "Create Docker Host",
 								"Must select an Azure subscription first");
 						return null;
+					}
+					
+					AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager);
+					WizardDialog selectDockerHostDialog = new WizardDialog(shell, selectDockerWizard);
+					if (selectDockerHostDialog.open() == Window.OK) {
+
+//					AzureNewDockerWizard newDockerWizard = new AzureNewDockerWizard(project, dockerManager);
+//					WizardDialog createNewDockerHostDialog = new WizardDialog(shell, newDockerWizard);
+//					if (createNewDockerHostDialog.open() == Window.OK) {
+//						newDockerWizard.createHost();
+//					} else {
+//						MessageDialog.openInformation(
+//								shell,
+//								"WebAppPlugin",
+//								"Canceled");
 					}
 				} catch (Exception e) {
 					log.log(Level.SEVERE, "execute: " + e.getMessage(), e);
 					e.printStackTrace();					
 				}
 				
+			} else {
+				MessageDialog.openInformation(
+						shell,
+						"Publish as Docker Container",
+						"Please select a project first");
 			}
-
 		}
 		
 		return null;

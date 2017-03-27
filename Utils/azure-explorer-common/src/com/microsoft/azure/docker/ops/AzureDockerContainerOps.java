@@ -312,7 +312,12 @@ public class AzureDockerContainerOps {
 
       AzureDockerVMOps.waitForDockerDaemonStartup(session);
 
-      String cmd1 = String.format("docker create -p \"%s\" --name %s %s \n", dockerContainer.dockerPortSettings, dockerContainer.dockerContainerName, dockerContainer.dockerImageName);
+      String portSettings = "";
+      for (String item : dockerContainer.dockerPortSettings.trim().split("[\\s]+")) {
+        portSettings += " -p " + item;
+      }
+
+      String cmd1 = String.format("docker create %s --name %s %s \n", portSettings, dockerContainer.dockerContainerName, dockerContainer.dockerImageName);
       if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
       String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
       if (DEBUG) System.out.println(cmdOut1);

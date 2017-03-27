@@ -54,6 +54,18 @@ public class AzureSelectDockerWizardModel extends WizardModel {
     add(configureDockerContainerForm);
   }
 
+  public void setPredefinedDockerfileOptions(String artifactFileName) {
+    if (configureDockerContainerForm != null) {
+      configureDockerContainerForm.setPredefinedDockerfileOptions(artifactFileName);
+    }
+  }
+
+  public void setDockerContainerName(String dockerContainerName) {
+    if (configureDockerContainerForm != null) {
+      configureDockerContainerForm.setDockerContainerName(dockerContainerName);
+    }
+  }
+
   public void setDockerUIManager(AzureDockerHostsManager manager) {
     dockerManager = manager;
   }
@@ -93,8 +105,6 @@ public class AzureSelectDockerWizardModel extends WizardModel {
 
     return null;
   }
-
-  public boolean canClose() { return finishedOK;}
 
   public void selectDefaultDockerHost(DockerHost dockerHost, boolean selectOtherHosts) {
     if (selectDockerHostForm != null) {

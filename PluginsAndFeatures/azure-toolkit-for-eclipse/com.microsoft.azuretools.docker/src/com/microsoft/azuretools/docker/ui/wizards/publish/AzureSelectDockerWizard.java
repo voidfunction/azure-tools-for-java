@@ -19,23 +19,60 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.publish;
 
+import java.util.logging.Logger;
+
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.Wizard;
 
-public class AzureSelectDockerWizard extends Wizard {
+import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
 
-	public AzureSelectDockerWizard() {
+public class AzureSelectDockerWizard extends Wizard {
+	private static final Logger log =  Logger.getLogger(AzureDockerUIResources.class.getName());
+	
+	private AzureSelectDockerHostPage azureSelectDockerHostPage;
+	private AzureConfigureDockerContainerStep azureConfigureDockerContainerStep;
+
+	private IProject project;
+	private AzureDockerHostsManager dockerManager;
+	private AzureDockerImageInstance dockerImageDescription;
+
+	public AzureSelectDockerWizard(final IProject project, AzureDockerHostsManager dockerManager) {
+	    this.project = project;
+	    this.dockerManager = dockerManager;
+
+	    azureSelectDockerHostPage = new AzureSelectDockerHostPage(this);
+	    azureConfigureDockerContainerStep = new AzureConfigureDockerContainerStep(this);
+
 		setWindowTitle("Deploying Docker Container on Azure");
 	}
 
 	@Override
 	public void addPages() {
-		addPage(new AzureSelectDockerHostPage());
-		addPage(new AzureConfigureDockerContainerStep());
+		addPage(azureSelectDockerHostPage);
+		addPage(azureConfigureDockerContainerStep);
 	}
 
 	@Override
 	public boolean performFinish() {
-		return true;
+		return doValidate();
+	}
+	
+	public boolean doValidate() {
+		return azureSelectDockerHostPage.doValidate() && azureConfigureDockerContainerStep.doValidate();
+	}
+
+	public AzureDockerImageInstance getDockerImageInstance() {
+		return dockerImageDescription;
+	}
+
+	public IProject getProject() {
+		return project;
+	}
+
+	public AzureDockerHostsManager getDockerManager() {
+		return dockerManager;
 	}
 
 }

@@ -30,7 +30,7 @@ import com.intellij.ui.wizard.WizardDialog;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.AzureDockerVMOps;
-import com.microsoft.azure.keyvault.KeyVaultClient;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
@@ -105,7 +105,6 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
           progressIndicator.setText2(String.format("Reading subscription details for Docker host %s ...", dockerHost.apiUrl));
           AzureDockerHostsManager dockerManager = model.getDockerManager();
           Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
-          KeyVaultClient keyVaultClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).keyVaultClient;
           if (progressIndicator.isCanceled()) {
             if (displayWarningOnCreateHostCancelAction() == 1) {
               return;
@@ -114,9 +113,9 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
 
           progressIndicator.setFraction(.10);
           progressIndicator.setText2(String.format("Creating new virtual machine %s ...", dockerHost.name));
-          System.out.println("Creating new virtual machine: " + new Date().toString());
+          if (AzureDockerUtils.DEBUG) System.out.println("Creating new virtual machine: " + new Date().toString());
           AzureDockerVMOps.createDockerHostVM(azureClient, dockerHost);
-          System.out.println("Done creating new virtual machine: " + new Date().toString());
+          if (AzureDockerUtils.DEBUG) System.out.println("Done creating new virtual machine: " + new Date().toString());
           if (progressIndicator.isCanceled()) {
             if (displayWarningOnCreateHostCancelAction() == 1) {
               return;
@@ -125,9 +124,9 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
 
           progressIndicator.setFraction(.65);
           progressIndicator.setText2(String.format("Waiting for virtual machine %s to be up...", dockerHost.name));
-          System.out.println("Waiting for virtual machine to be up: " + new Date().toString());
+          if (AzureDockerUtils.DEBUG) System.out.println("Waiting for virtual machine to be up: " + new Date().toString());
           AzureDockerVMOps.waitForVirtualMachineStartup(azureClient, dockerHost);
-          System.out.println("Done Waiting for virtual machine to be up: " + new Date().toString());
+          if (AzureDockerUtils.DEBUG) System.out.println("Done Waiting for virtual machine to be up: " + new Date().toString());
           if (progressIndicator.isCanceled()) {
             if (displayWarningOnCreateHostCancelAction() == 1) {
               return;
@@ -136,10 +135,10 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
 
           progressIndicator.setFraction(.75);
           progressIndicator.setText2(String.format("Configuring Docker service for %s ...", dockerHost.apiUrl));
-          System.out.println("Configuring Docker host: " + new Date().toString());
+          if (AzureDockerUtils.DEBUG) System.out.println("Configuring Docker host: " + new Date().toString());
           AzureDockerVMOps.installDocker(dockerHost);
-          System.out.println("Done configuring Docker host: " + new Date().toString());
-          System.out.println("Finished setting up Docker host");
+          if (AzureDockerUtils.DEBUG) System.out.println("Done configuring Docker host: " + new Date().toString());
+          if (AzureDockerUtils.DEBUG) System.out.println("Finished setting up Docker host");
           if (progressIndicator.isCanceled()) {
             if (displayWarningOnCreateHostCancelAction() == 1) {
               return;
@@ -153,7 +152,7 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
           progressIndicator.setFraction(.90);
           progressIndicator.setIndeterminate(true);
           progressIndicator.setText2("Refreshing the Docker virtual machines details...");
-          System.out.println("Refreshing Docker hosts details: " + new Date().toString());
+          if (AzureDockerUtils.DEBUG) System.out.println("Refreshing Docker hosts details: " + new Date().toString());
           // dockerManager.refreshDockerHostDetails();
           VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
           if (vm != null) {
@@ -171,7 +170,7 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
             }
           }
 
-          System.out.println("Done refreshing Docker hosts details: " + new Date().toString());
+          if (AzureDockerUtils.DEBUG) System.out.println("Done refreshing Docker hosts details: " + new Date().toString());
           if (progressIndicator.isCanceled()) {
             if (displayWarningOnCreateHostCancelAction() == 1) {
               return;
@@ -192,7 +191,7 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
 
   private int displayWarningOnCreateHostCancelAction(){
     return JOptionPane.showOptionDialog(null,
-        "This action can set the Docker host virtual machine in an partial setup state and can not be for Docker container deployment!\n\n Are you sure you want this?",
+        "This action can leave the Docker virtual machine host in an partial setup state and which can cause publishing to a Docker container to fail!\n\n Are you sure you want this?",
         "Stop Create Docker Host",
         JOptionPane.YES_NO_OPTION,
         JOptionPane.QUESTION_MESSAGE,

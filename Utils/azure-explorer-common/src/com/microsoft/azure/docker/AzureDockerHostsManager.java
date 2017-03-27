@@ -33,8 +33,6 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 import java.util.*;
 
 public class AzureDockerHostsManager {
-  private static boolean DEBUG = true;
-
   private static AzureDockerHostsManager instance = null;
   private static boolean isInitialized = false;
 
@@ -240,18 +238,20 @@ public class AzureDockerHostsManager {
 
   }
 
-  public boolean checkStorageNameAvailability(AzureDockerSubscription subscription, String name) {
-    if (subscription != null && subscription.azureClient != null && name != null) {
-      return AzureDockerUtils.checkStorageNameAvailability(subscription.azureClient, name);
-    } else {
-      return false;
-    }
-  }
-
   public List<KnownDockerImages> getDefaultDockerImages() {
-    List<KnownDockerImages> dockerImagesList = new ArrayList<KnownDockerImages>();
-    dockerImagesList.add(KnownDockerImages.JBOSS_WILDFLY);
+    List<KnownDockerImages> dockerImagesList = new ArrayList<>();
     dockerImagesList.add(KnownDockerImages.TOMCAT8);
+    dockerImagesList.add(KnownDockerImages.TOMCAT8_DEBUG);
+    dockerImagesList.add(KnownDockerImages.JBOSS_WILDFLY);
+    dockerImagesList.add(KnownDockerImages.JBOSS_WILDFLY_DEBUG);
+    dockerImagesList.add(KnownDockerImages.OPENSDK_LATEST);
+    dockerImagesList.add(KnownDockerImages.OPENSDK_LATEST_DEBUG);
+    dockerImagesList.add(KnownDockerImages.OPENSDK_7);
+    dockerImagesList.add(KnownDockerImages.OPENSDK_7_DEBUG);
+    dockerImagesList.add(KnownDockerImages.OPENSDK_8);
+    dockerImagesList.add(KnownDockerImages.OPENSDK_8_DEBUG);
+    dockerImagesList.add(KnownDockerImages.OPENSDK_9);
+    dockerImagesList.add(KnownDockerImages.OPENSDK_9_DEBUG);
 
     return dockerImagesList;
   }
@@ -294,7 +294,7 @@ public class AzureDockerHostsManager {
     if (sid != null && !sid.isEmpty()) {
       return AzureDockerUtils.getAvailableStorageAccounts(dockerStorageAccountMap.get(sid), vmImageSizeType);
     } else {
-      return new ArrayList<String>();
+      return new ArrayList<>();
     }
   }
 
@@ -326,7 +326,7 @@ public class AzureDockerHostsManager {
     host.isTLSSecured = true;
     host.hasKeyVault = true;
 
-    host.certVault = AzureDockerCertVaultOps.generateSSHKeys(null, "SSH key for " + name);;
+    host.certVault = AzureDockerCertVaultOps.generateSSHKeys(null, "SSH key for " + name);
     host.certVault.name = AzureDockerUtils.getDefaultRandomName(host.name.toLowerCase(), 22) + "kv";
     host.certVault.hostName = host.hostVM.name;
     host.certVault.resourceGroupName = host.hostVM.resourceGroupName;
@@ -402,73 +402,7 @@ public class AzureDockerHostsManager {
   public void updateDockerHost(DockerHost originalDockerHost, DockerHost updatedDockerHost) {
     try {
       Thread.sleep(20000);
-    } catch (Exception e) {}
-  }
-
-
-  // ********************************* //
-
-  public List<AzureDockerSubscription> createNewFakeSubscriptionList() {
-    List<AzureDockerSubscription> subscriptionList = new ArrayList<AzureDockerSubscription>();
-
-
-    return subscriptionList;
-  }
-
-  public DockerHost createNewFakeDockerHost(String name) {
-    DockerHost host = new DockerHost();
-    host.name = name;
-    host.apiUrl = "http://" + name + ".centralus.cloudapp.azure.com";
-    host.port = "2375";
-    host.isTLSSecured = false;
-    host.state = DockerHost.DockerHostVMState.RUNNING;
-    host.hostOSType = DockerHost.DockerHostOSType.UBUNTU_SERVER_16_04_LTS;
-    host.hostVM = new AzureDockerVM();
-    host.hostVM.name = name;
-    host.hostVM.vmSize = KnownDockerVirtualMachineSizes.Standard_DS2_v2.name();
-    host.hostVM.region = "centralus";
-    host.hostVM.resourceGroupName = "myresourcegroup";
-    host.hostVM.vnetName = "network1";
-    host.hostVM.vnetAddressSpace = "10.0.0.0/8";
-    host.hostVM.subnetName = "subnet1";
-    host.hostVM.subnetAddressRange = "10.0.0.0/16";
-    host.hostVM.storageAccountName = "sa12313111244";
-    host.hostVM.storageAccountType = "Premium_LSR";
-
-    host.hasPwdLogIn = true;
-    host.hasSSHLogIn = true;
-    host.isTLSSecured = true;
-    host.hasKeyVault = true;
-
-    host.certVault = new AzureDockerCertVault();
-    host.certVault.name = "mykeyvault1";
-    host.certVault.uri = host.certVault.name + ".someregion.azure.com";
-    host.certVault.hostName = name;
-    host.certVault.resourceGroupName = "mykeyvault1rg";
-    host.certVault.region = "centralus";
-    host.certVault.userId = "dockerUser";
-    host.certVault.vmPwd = "PasswordGoesHere";
-    host.certVault.sshKey = "id_rsa";
-    host.certVault.sshPubKey = "id_rsa.pub";
-    host.certVault.tlsCACert = "ca.pem";
-    host.certVault.tlsCAKey = "ca-key.pem";
-    host.certVault.tlsClientCert = "cert.pem";
-    host.certVault.tlsClientKey = "key.pem";
-    host.certVault.tlsServerCert = "server.pem";
-    host.certVault.tlsServerKey = "server-key.pem";
-
-    return host;
-  }
-
-  public List<DockerHost> createNewFakeDockerHostList() {
-    List<DockerHost> hosts = new ArrayList<DockerHost>();
-    hosts.add(createNewFakeDockerHost("someDockerHost112"));
-    hosts.add(createNewFakeDockerHost("otherDockerHost212"));
-    hosts.add(createNewFakeDockerHost("qnyDockerHost132"));
-    hosts.add(createNewFakeDockerHost("anyDockerHost612"));
-    dockerHostsList = hosts;
-
-    return hosts;
+    } catch (Exception ignored) {}
   }
 
 }
