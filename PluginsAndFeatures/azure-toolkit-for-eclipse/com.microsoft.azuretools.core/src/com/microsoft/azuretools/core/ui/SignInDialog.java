@@ -259,7 +259,7 @@ public class SignInDialog extends TitleAreaDialog {
           }
 
           authMethodDetailsResult.setAuthMethod(AuthMethod.SP);
-          // TODO: check field is empty, check file is valid
+          // TODO: check the file is valid
           authMethodDetailsResult.setCredFilePath(authPath);
       }
       

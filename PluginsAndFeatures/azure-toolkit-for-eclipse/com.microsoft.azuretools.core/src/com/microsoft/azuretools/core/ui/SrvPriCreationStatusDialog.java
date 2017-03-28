@@ -27,7 +27,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -49,12 +51,15 @@ import org.eclipse.swt.widgets.TableItem;
 import com.microsoft.azuretools.authmanage.srvpri.SrvPriManager;
 import com.microsoft.azuretools.authmanage.srvpri.report.IListener;
 import com.microsoft.azuretools.authmanage.srvpri.step.Status;
+import com.microsoft.azuretools.core.Activator;
+
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
 
 public class SrvPriCreationStatusDialog extends TitleAreaDialog {
+    private static ILog LOG = Activator.getDefault().getLog();
     private Table table;
     org.eclipse.swt.widgets.List listCreatedFiles;
     
@@ -229,8 +234,9 @@ public class SrvPriCreationStatusDialog extends TitleAreaDialog {
                                     });
                                 }
                             } catch (Exception ex) {
-                                // TODO: use logger
-                                System.out.println("Creating service principal exception: " + ex.getMessage());
+                                ex.printStackTrace();
+                                LOG.log(new org.eclipse.core.runtime.Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@createServicePrincipalAsync@SrvPriCreationStatusDialog", ex));
+                                
                             }
                         }
                     }

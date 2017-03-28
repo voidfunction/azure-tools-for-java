@@ -34,6 +34,6 @@ public class ProgressTaskModal implements IProgressTaskImpl {
         } catch (Exception ex) {
             ex.printStackTrace();
             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@doWork@ProgressTaskModal", ex));
-        }         
+        }
     }
 }
