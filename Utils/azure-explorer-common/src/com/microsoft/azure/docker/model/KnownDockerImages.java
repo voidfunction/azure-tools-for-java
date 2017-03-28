@@ -28,14 +28,14 @@ public enum KnownDockerImages {
   TOMCAT8_DEBUG("tomcat:8.0.20-jre8 Debug Enabled Port 5005", TOMCAT8_DEBUG_DOCKERFILE, "8080", false, "5005"),
   JBOSS_WILDFLY("JBoss WildFly", JBOSS_WILDFLY_DEFAULT_DOCKERFILE, "8080", false, null),
   JBOSS_WILDFLY_DEBUG("JBoss WildFly Debug Enabled Port 8787", JBOSS_WILDFLY_DEBUG_DOCKERFILE, "8080", false, "8787"),
-  OPENSDK_7("OpenSDK 7", OPENSDK_7_DEFAULT_DOCKERFILE, "80", true, null),
-  OPENSDK_8("OpenSDK 8", OPENSDK_8_DEFAULT_DOCKERFILE, "80", true, null),
-  OPENSDK_9("OpenSDK 9", OPENSDK_9_DEFAULT_DOCKERFILE, "80", true, null),
-  OPENSDK_LATEST("OpenSDK Latest", OPENSDK_LATEST_DEFAULT_DOCKERFILE, "80", true, null),
-  OPENSDK_7_DEBUG("OpenSDK 7 Debug Enabled Port 5005", OPENSDK_7_DEBUG_DOCKERFILE, "80", true, "5005"),
-  OPENSDK_8_DEBUG("OpenSDK 8 Debug Enabled Port 5005", OPENSDK_8_DEBUG_DOCKERFILE, "80", true, "5005"),
-  OPENSDK_9_DEBUG("OpenSDK 9 Debug Enabled Port 5005", OPENSDK_9_DEBUG_DOCKERFILE, "80", true, "5005"),
-  OPENSDK_LATEST_DEBUG("OpenSDK Latest Debug Enabled Port 5005", OPENSDK_LATEST_DEBUG_DOCKERFILE, "80", true, "5005");
+  OPENJDK_7("OpenJDK 7", OPENJDK_7_DEFAULT_DOCKERFILE, "80", true, null),
+  OPENJDK_8("OpenJDK 8", OPENJDK_8_DEFAULT_DOCKERFILE, "80", true, null),
+  OPENJDK_9("OpenJDK 9", OPENJDK_9_DEFAULT_DOCKERFILE, "80", true, null),
+  OPENJDK_LATEST("OpenJDK Latest", OPENJDK_LATEST_DEFAULT_DOCKERFILE, "80", true, null),
+  OPENJDK_7_DEBUG("OpenJDK 7 Debug Enabled Port 5005", OPENJDK_7_DEBUG_DOCKERFILE, "80", true, "5005"),
+  OPENJDK_8_DEBUG("OpenJDK 8 Debug Enabled Port 5005", OPENJDK_8_DEBUG_DOCKERFILE, "80", true, "5005"),
+  OPENJDK_9_DEBUG("OpenJDK 9 Debug Enabled Port 5005", OPENJDK_9_DEBUG_DOCKERFILE, "80", true, "5005"),
+  OPENJDK_LATEST_DEBUG("OpenJDK Latest Debug Enabled Port 5005", OPENJDK_LATEST_DEBUG_DOCKERFILE, "80", true, "5005");
 
   private final String dockerfileContent;
   private final String name;
@@ -80,46 +80,46 @@ public enum KnownDockerImages {
             "ENV JPDA_TRANSPORT=dt_socket\n" +
             "EXPOSE 5005\n" +
             "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /usr/local/tomcat/webapps/\n";
-    public static final String OPENSDK_7_DEFAULT_DOCKERFILE =
+    public static final String OPENJDK_7_DEFAULT_DOCKERFILE =
         "FROM openjdk:7\n" +
             "EXPOSE 80\n" +
             "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /home/\n" +
             "CMD [\"java\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
-    public static final String OPENSDK_7_DEBUG_DOCKERFILE =
+    public static final String OPENJDK_7_DEBUG_DOCKERFILE =
         "FROM openjdk:7\n" +
             "EXPOSE 5005\n" +
             "EXPOSE 80\n" +
             "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /home/\n" +
             "CMD [\"java\", \"-Xdebug\", \"-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
-    public static final String OPENSDK_8_DEFAULT_DOCKERFILE =
+    public static final String OPENJDK_8_DEFAULT_DOCKERFILE =
         "FROM openjdk:8\n" +
             "EXPOSE 80\n" +
             "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /home/\n" +
             "CMD [\"java\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
-    public static final String OPENSDK_8_DEBUG_DOCKERFILE =
+    public static final String OPENJDK_8_DEBUG_DOCKERFILE =
         "FROM openjdk:8\n" +
             "EXPOSE 5005\n" +
             "EXPOSE 80\n" +
             "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /home/\n" +
             "CMD [\"java\", \"-Xdebug\", \"-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
-    public static final String OPENSDK_9_DEFAULT_DOCKERFILE =
+    public static final String OPENJDK_9_DEFAULT_DOCKERFILE =
         "FROM openjdk:9\n" +
             "EXPOSE 80\n" +
             "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /home/\n" +
             "CMD [\"java\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
-    public static final String OPENSDK_9_DEBUG_DOCKERFILE =
+    public static final String OPENJDK_9_DEBUG_DOCKERFILE =
         "FROM openjdk:9\n" +
             "EXPOSE 5005\n" +
             "EXPOSE 80\n" +
             "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /home/\n" +
             "CMD [\"java\", \"-Xdebug\", \"-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
-    public static final String OPENSDK_LATEST_DEFAULT_DOCKERFILE =
+    public static final String OPENJDK_LATEST_DEFAULT_DOCKERFILE =
         "FROM openjdk:latest\n" +
             "EXPOSE 80\n" +
             "ADD [$]DOCKER_ARTIFACT_FILENAME[$] /home/\n" +
             "EXPOSE 80\n" +
             "CMD [\"java\", \"-jar\", \"/home/[$]DOCKER_ARTIFACT_FILENAME[$]\"]\n";
-    public static final String OPENSDK_LATEST_DEBUG_DOCKERFILE =
+    public static final String OPENJDK_LATEST_DEBUG_DOCKERFILE =
         "FROM openjdk:latest\n" +
             "EXPOSE 5005\n" +
             "EXPOSE 80\n" +

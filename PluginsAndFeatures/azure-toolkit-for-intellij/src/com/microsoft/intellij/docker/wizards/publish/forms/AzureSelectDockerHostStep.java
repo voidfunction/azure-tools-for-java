@@ -133,7 +133,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
         if (AzureDockerValidationUtils.validateDockerArtifactPath(dockerArtifactPath.getText())) {
           dockerArtifactPathLabel.setVisible(false);
           setDialogButtonsState(doValidate(false) == null);
-          model.setPredefinedDockerfileOptions(dockerArtifactPath.getText());
+          setDialogButtonsState(doValidate() == null);
           return true;
         } else {
           dockerArtifactPathLabel.setVisible(true);
@@ -496,6 +496,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
         model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
+    model.setPredefinedDockerfileOptions(dockerArtifactPath.getText());
     dockerImageDescription.dockerImageName = dockerImageNameTextField.getText();
     model.setDockerContainerName(AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName));
 

@@ -19,6 +19,11 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.publish;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Random;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.WizardPage;
@@ -39,6 +44,7 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azure.docker.model.KnownDockerImages;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
 
 import org.eclipse.swt.events.SelectionAdapter;
@@ -192,21 +198,61 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 		predefinedDockerfileRadioButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+		        dockerfileComboBox.setEnabled(true);
+		        customDockerfileTextField.setEnabled(false);
+		        customDockerfileBrowseButton.setEnabled(false);
+				setPageComplete(doValidate());
 			}
 		});
+
+		int idx = 0;
+		boolean selected = false;
+		for (KnownDockerImages predefinedImage : dockerManager.getDefaultDockerImages()) {
+			// Add predefined images that can run .WAR as default
+			if (!predefinedImage.isCanRunJarFile()) {
+				dockerfileComboBox.add(predefinedImage.getName());
+				dockerfileComboBox.setData(predefinedImage.getName(), predefinedImage);
+				if (dockerImageDescription.predefinedDockerfile != null && dockerImageDescription.predefinedDockerfile.equals(predefinedImage)) {
+					dockerfileComboBox.select(idx);
+					selected = true;
+				}
+				idx ++;
+			}
+		}
+		if (!selected) {
+			dockerfileComboBox.select(0);
+		}
 		dockerfileComboBox.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				dockerContainerPortSettings.setText(getDefaultPortMapping((KnownDockerImages) dockerfileComboBox.getData(dockerfileComboBox.getText())));
+				setPageComplete(doValidate());
 			}
 		});
+
 		customDockerfileRadioButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+		        dockerfileComboBox.setEnabled(false);
+		        customDockerfileTextField.setEnabled(true);
+		        customDockerfileBrowseButton.setEnabled(true);
+				setPageComplete(doValidate());
 			}
 		});
+
+		customDockerfileTextField.setToolTipText(AzureDockerValidationUtils.getDockerfilePathTip());
 		customDockerfileTextField.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent event) {
+				if (AzureDockerValidationUtils.validateDockerfilePath(((Text) event.getSource()).getText())) {
+					errDispatcher.removeMessage("customDockerfileTextField", customDockerfileTextField);
+					setErrorMessage(null);
+					setPageComplete(doValidate());
+				} else {
+					errDispatcher.addMessage("customDockerfileTextField", AzureDockerValidationUtils.getDockerfilePathTip(), null, IMessageProvider.ERROR, customDockerfileTextField);
+					setErrorMessage("Invalid Dockerfile location");
+					setPageComplete(false);
+				}
 			}
 		});
 		customDockerfileBrowseButton.addSelectionListener(new SelectionAdapter() {
@@ -221,16 +267,131 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 					return;
 				}
 				customDockerfileTextField.setText(path);
+				setPageComplete(doValidate());
 			}
 		});
+
+		dockerContainerPortSettings.setText(getDefaultPortMapping((KnownDockerImages) dockerfileComboBox.getData(dockerfileComboBox.getText())));
+		dockerContainerPortSettings.setToolTipText(AzureDockerValidationUtils.getDockerPortSettingsTip());
 		dockerContainerPortSettings.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent event) {
+				if (AzureDockerValidationUtils.validateDockerPortSettings(((Text) event.getSource()).getText()) != null) {
+					errDispatcher.removeMessage("dockerContainerPortSettings", dockerContainerPortSettings);
+					setErrorMessage(null);
+					setPageComplete(doValidate());
+				} else {
+					errDispatcher.addMessage("dockerContainerPortSettings", AzureDockerValidationUtils.getDockerPortSettingsTip(), null, IMessageProvider.ERROR, dockerContainerPortSettings);
+					setErrorMessage("Invalid Docker container port settings");
+					setPageComplete(false);
+				}
 			}
 		});
 	}
 
 	public boolean doValidate() {
+		if (dockerContainerNameTextField.getText() == null || dockerContainerNameTextField.getText().equals("") ||
+				!AzureDockerValidationUtils.validateDockerContainerName(dockerContainerNameTextField.getText())) {
+			errDispatcher.addMessage("dockerContainerNameTextField", AzureDockerValidationUtils.getDockerContainerNameTip(), null, IMessageProvider.ERROR, dockerContainerNameTextField);
+			setErrorMessage("Invalid Docker container name");
+			return false;
+		} else {
+			errDispatcher.removeMessage("dockerContainerNameTextField", dockerContainerNameTextField);
+			setErrorMessage(null);
+			dockerImageDescription.dockerContainerName = dockerContainerNameTextField.getText();
+		}
+		
+		if (predefinedDockerfileRadioButton.getSelection()) {
+			KnownDockerImages dockerfileImage = (KnownDockerImages) dockerfileComboBox.getData(dockerfileComboBox.getText());
+			if (dockerfileImage == null) {
+				errDispatcher.addMessage("dockerfileComboBox", "Missing predefined Dockerfile options", null, IMessageProvider.ERROR, dockerfileComboBox);
+				setErrorMessage("Invalid Dockerfile selection");
+				return false;
+			} else {
+				errDispatcher.removeMessage("dockerfileComboBox", dockerfileComboBox);
+				setErrorMessage(null);
+				dockerImageDescription.predefinedDockerfile = dockerfileImage.name();
+				if (dockerImageDescription.artifactPath != null) {
+					dockerImageDescription.dockerfileContent = dockerfileImage.getDockerfileContent().replace(
+							KnownDockerImages.DOCKER_ARTIFACT_FILENAME, new File(dockerImageDescription.artifactPath).getName());
+				}
+			}
+		}
+		
+		if (customDockerfileRadioButton.getSelection()) {
+			String dockerfileName = customDockerfileTextField.getText();
+			if (dockerfileName == null || dockerfileName.equals("") || Files.notExists(Paths.get(dockerfileName))) {
+				errDispatcher.addMessage("customDockerfileTextField", AzureDockerValidationUtils.getDockerfilePathTip(), null, IMessageProvider.ERROR, customDockerfileTextField);
+				setErrorMessage("Invalid Docker container name");
+				return false;
+			} else {
+				try {
+					dockerImageDescription.dockerfileContent = new String(Files.readAllBytes(Paths.get(customDockerfileBrowseButton.getText())));
+				} catch (Exception e) {
+					errDispatcher.addMessage("customDockerfileTextField", AzureDockerValidationUtils.getDockerfilePathTip(), null, IMessageProvider.ERROR, customDockerfileTextField);
+					setErrorMessage("Error reading Dockerfile content");
+					return false;
+				}
+				errDispatcher.removeMessage("customDockerfileTextField", customDockerfileTextField);
+				setErrorMessage(null);
+				dockerImageDescription.predefinedDockerfile = null;
+			}
+		}
+		
+	    if (dockerContainerPortSettings.getText() == null || dockerContainerPortSettings.getText().equals("") ||
+	            AzureDockerValidationUtils.validateDockerPortSettings(dockerContainerPortSettings.getText()) == null) {
+			errDispatcher.addMessage("dockerContainerPortSettings", AzureDockerValidationUtils.getDockerPortSettingsTip(), null, IMessageProvider.ERROR, dockerContainerPortSettings);
+			setErrorMessage("Invalid Docker container port settings");
+			return false;
+		} else {
+			errDispatcher.removeMessage("dockerContainerPortSettings", dockerContainerPortSettings);
+			setErrorMessage(null);
+		    dockerImageDescription.dockerPortSettings = dockerContainerPortSettings.getText();
+		}
+		
 		return true;
 	}
+	
+	private String getDefaultPortMapping(KnownDockerImages knownImage) {
+		int randomPort = new Random().nextInt(10000); // default to host port 2xxxx and 5xxxx (debug)
+		if (knownImage == null) {
+			return String.format("2%04d:80", randomPort);
+		}
+		if (knownImage.getDebugPortSettings() != null && !knownImage.getDebugPortSettings().isEmpty()) {
+			// TODO: add JVM port mapping
+			return String.format("2%04d:%s 5%04d:%s", randomPort, knownImage.getPortSettings(), randomPort,
+					knownImage.getDebugPortSettings());
+		} else {
+			return String.format("2%04d:%s", randomPort, knownImage.getPortSettings());
+		}
+	}
+
+	public void setPredefinedDockerfileOptions(String artifactFileName) {
+		boolean isJarFile = artifactFileName.toLowerCase().matches(".*.jar");
+		dockerfileComboBox.removeAll();
+		int idx = 0;
+		boolean selected = false;
+		for (KnownDockerImages predefinedImage : dockerManager.getDefaultDockerImages()) {
+			if (predefinedImage.isCanRunJarFile() == isJarFile) {
+				dockerfileComboBox.add(predefinedImage.getName());
+				dockerfileComboBox.setData(predefinedImage.getName(), predefinedImage);
+				if (dockerImageDescription.predefinedDockerfile != null && dockerImageDescription.predefinedDockerfile.equals(predefinedImage)) {
+					dockerfileComboBox.select(idx);
+					selected = true;
+				}
+				idx ++;
+			}
+		}
+		if (!selected) {
+			dockerfileComboBox.select(0);
+		}
+		dockerContainerPortSettings.setText(getDefaultPortMapping((KnownDockerImages) dockerfileComboBox.getData(dockerfileComboBox.getText())));
+	}
+
+	public void setDockerContainerName(String dockerContainerName) {
+		if (dockerContainerName != null) {
+			dockerContainerNameTextField.setText(dockerContainerName);
+		}
+	}
+	
 }
