@@ -95,10 +95,10 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
 
     private Runnable onCreate;
     private SubscriptionDetail subscription;
-    private String region;
-    private StorageAccount storageAccount;
+    private Location region;
+    private com.microsoft.tooling.msservices.model.storage.StorageAccount newStorageAccount;
 
-    public CreateArmStorageAccountForm(Shell parentShell, SubscriptionDetail subscription, String region) {
+    public CreateArmStorageAccountForm(Shell parentShell, SubscriptionDetail subscription, Location region) {
         super(parentShell);
         this.subscription = subscription;
         this.region = region;
@@ -169,15 +169,17 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
         replicationComboBox = new Combo(container, SWT.READ_ONLY);
         replicationComboBox.setLayoutData(gridDataForText(180));
         
-        accessTierLabel = new Label(container, SWT.LEFT);
-        accessTierLabel.setText("Access Tier:");
-        accessTierComboBox = new Combo(container, SWT.READ_ONLY);
-        accessTierComboBox.setLayoutData(gridDataForText(180));        
-        for (AccessTier type : AccessTier.values()) {
-        	accessTierComboBox.add(type.toString());
-        	accessTierComboBox.setData(type.toString(), type);
+        if (subscription == null) { // not showing access tier with general purpose storage account which is used when creating vm
+        	accessTierLabel = new Label(container, SWT.LEFT);
+        	accessTierLabel.setText("Access Tier:");
+        	accessTierComboBox = new Combo(container, SWT.READ_ONLY);
+        	accessTierComboBox.setLayoutData(gridDataForText(180));        
+        	for (AccessTier type : AccessTier.values()) {
+        		accessTierComboBox.add(type.toString());
+        		accessTierComboBox.setData(type.toString(), type);
+        	}
+        	accessTierComboBox.select(0);
         }
-        accessTierComboBox.select(0);
 
         subscriptionLabel = new Label(container, SWT.LEFT);
         subscriptionLabel.setText("Subscription:");
@@ -308,43 +310,57 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
 
     @Override
     protected void okPressed() {
-        if (nameTextField.getText().length() < 3
-                || nameTextField.getText().length() > 24
-                || !nameTextField.getText().matches("[a-z0-9]+")) {
-            DefaultLoader.getUIHelper().showError("Invalid storage account name. The name should be between 3 and 24 characters long and " +
-                    "can contain only lowercase letters and numbers.", "Azure Explorer");
-            return;
+		if (nameTextField.getText().length() < 3 || nameTextField.getText().length() > 24
+				|| !nameTextField.getText().matches("[a-z0-9]+")) {
+			DefaultLoader.getUIHelper()
+					.showError("Invalid storage account name. The name should be between 3 and 24 characters long and "
+							+ "can contain only lowercase letters and numbers.", "Azure Explorer");
+			return;
 		}
-        String name = nameTextField.getText();
-        String region = ((Location) regionComboBox.getData(regionComboBox.getText())).name();
-        final boolean isNewResourceGroup = createNewRadioButton.getSelection();
+		final boolean isNewResourceGroup = createNewRadioButton.getSelection();
 		final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getText();
 		String replication = replicationComboBox.getData(replicationComboBox.getText()).toString();
+		String region = ((Location) regionComboBox.getData(regionComboBox.getText())).name();
 		Kind kind = (Kind) kindCombo.getData(kindCombo.getText());
-		AccessTier accessTier = (AccessTier)accessTierComboBox.getData(accessTierComboBox.getText());	
-		String subscriptionId = ((SubscriptionDetail)subscriptionComboBox.getData(subscriptionComboBox.getText())).getSubscriptionId();
-		DefaultLoader.getIdeHelper().runInBackground(null, "Creating storage account", false, true, "Creating storage account " + name + "...", new Runnable() {
-            @Override
-            public void run() {
-            	try {
-					storageAccount = AzureSDKManager.createStorageAccount(subscriptionId, name, region, 
-						isNewResourceGroup, resourceGroupName, kind, accessTier,
-						false, replication);
-					if (onCreate != null) {
-						onCreate.run();
-					}
-				} catch (Exception e) {
-					storageAccount = null;
-					DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+		if (subscription == null) {
+			String name = nameTextField.getText();
+			AccessTier accessTier = (AccessTier) accessTierComboBox.getData(accessTierComboBox.getText());
+			String subscriptionId = ((SubscriptionDetail) subscriptionComboBox.getData(subscriptionComboBox.getText())).getSubscriptionId();
+			DefaultLoader.getIdeHelper().runInBackground(null, "Creating storage account", false, true,
+					"Creating storage account " + name + "...", new Runnable() {
 						@Override
 						public void run() {
-							PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), Messages.err,
-								"An error occurred while creating the storage account: " + e.getMessage());
+							try {
+								AzureSDKManager.createStorageAccount(subscriptionId, name, region,
+										isNewResourceGroup, resourceGroupName, kind, accessTier, false, replication);
+								if (onCreate != null) {
+									onCreate.run();
+								}
+							} catch (Exception e) {
+								DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+									@Override
+									public void run() {
+										PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), Messages.err,
+												"An error occurred while creating the storage account: " + e.getMessage());
+									}
+								});
+							}
 						}
 					});
-				}
-			}
-		});
+		} else {
+			//creating from 'create vm'
+            newStorageAccount =
+                    new com.microsoft.tooling.msservices.model.storage.StorageAccount(nameTextField.getText(), subscription.getSubscriptionId());
+            newStorageAccount.setResourceGroupName(resourceGroupName);
+            newStorageAccount.setNewResourceGroup(isNewResourceGroup);
+            newStorageAccount.setType(replication);
+            newStorageAccount.setLocation(region);
+            newStorageAccount.setKind(kind);
+
+            if (onCreate != null) {
+                onCreate.run();
+            }
+		}
 		super.okPressed();
     }
 
@@ -367,7 +383,6 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
                 }
                 subscriptionComboBox.addSelectionListener(new SelectionAdapter() {
                     public void widgetSelected(SelectionEvent e) {
-                        CreateArmStorageAccountForm.this.subscription = (SubscriptionDetail) subscriptionComboBox.getData(subscriptionComboBox.getText());
                         loadRegionsAndGroups();
                     }
                 });
@@ -415,7 +430,8 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
             kindCombo.setEnabled(false);
             kindCombo.select(0);
             
-            regionComboBox.add(region.toString());
+            regionComboBox.add(region.displayName());
+            regionComboBox.setData(region.displayName(), region);
             regionComboBox.setEnabled(false);
             regionComboBox.select(0);
             loadGroups();
@@ -477,8 +493,8 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
         this.onCreate = onCreate;
     }
 
-    public StorageAccount getStorageAccount() {
-        return storageAccount;
+    public com.microsoft.tooling.msservices.model.storage.StorageAccount getStorageAccount() {
+        return newStorageAccount;
     }
 
     public void loadRegionsAndGroups() {

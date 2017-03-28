@@ -29,6 +29,7 @@ import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.intellij.wizards.createarmvm.MachineSettingsStep;
@@ -45,7 +46,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 public class VMWizardModel extends WizardModel {
-    private String region;
+    private Location region;
     private VirtualMachineImage virtualMachineImage;
     private boolean isKnownMachineImage;
     private Object knownMachineImage;
@@ -53,6 +54,8 @@ public class VMWizardModel extends WizardModel {
     private VirtualNetwork newNetwork;
     private boolean withNewNetwork;
     private StorageAccount storageAccount;
+    private com.microsoft.tooling.msservices.model.storage.StorageAccount newStorageAccount;
+    private boolean withNewStorageAccount;
     //    private String availabilitySet;
     private PublicIpAddress publicIpAddress;
     private boolean withNewPip;
@@ -188,11 +191,11 @@ public class VMWizardModel extends WizardModel {
         this.knownMachineImage = knownMachineImage;
     }
 
-    public String getRegion() {
+    public Location getRegion() {
         return region;
     }
 
-    public void setRegion(String region) {
+    public void setRegion(Location region) {
         this.region = region;
     }
 
@@ -226,6 +229,22 @@ public class VMWizardModel extends WizardModel {
 
     public void setStorageAccount(StorageAccount storageAccount) {
         this.storageAccount = storageAccount;
+    }
+
+    public com.microsoft.tooling.msservices.model.storage.StorageAccount getNewStorageAccount() {
+        return newStorageAccount;
+    }
+
+    public void setNewStorageAccount(com.microsoft.tooling.msservices.model.storage.StorageAccount newStorageAccount) {
+        this.newStorageAccount = newStorageAccount;
+    }
+
+    public boolean isWithNewStorageAccount() {
+        return withNewStorageAccount;
+    }
+
+    public void setWithNewStorageAccount(boolean withNewStorageAccount) {
+        this.withNewStorageAccount = withNewStorageAccount;
     }
 
     public PublicIpAddress getPublicIpAddress() {

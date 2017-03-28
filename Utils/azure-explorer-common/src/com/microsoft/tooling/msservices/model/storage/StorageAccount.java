@@ -21,7 +21,9 @@
  */
 package com.microsoft.tooling.msservices.model.storage;
 
+import com.microsoft.azure.management.storage.AccessTier;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.microsoft.azure.management.storage.Kind;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -32,7 +34,6 @@ public class StorageAccount extends ClientStorageAccount {
     private String label = "";
     private String status = "";
     private String location = "";
-    private String affinityGroup = "";
     private String secondaryKey = "";
     private String managementUri = "";
     private String primaryRegion = "";
@@ -43,6 +44,8 @@ public class StorageAccount extends ClientStorageAccount {
 
     private String resourceGroupName = "";
     private boolean isNewResourceGroup;
+    private Kind kind;
+    private AccessTier accessTier;
 
     public StorageAccount(@NotNull String name,
                           @NotNull String subscriptionId) {
@@ -93,15 +96,6 @@ public class StorageAccount extends ClientStorageAccount {
 
     public void setLocation(@NotNull String location) {
         this.location = location;
-    }
-
-    @NotNull
-    public String getAffinityGroup() {
-        return affinityGroup;
-    }
-
-    public void setAffinityGroup(@NotNull String affinityGroup) {
-        this.affinityGroup = affinityGroup;
     }
 
     @NotNull
@@ -181,5 +175,21 @@ public class StorageAccount extends ClientStorageAccount {
 
     public void setNewResourceGroup(boolean newResourceGroup) {
         isNewResourceGroup = newResourceGroup;
+    }
+
+    public Kind getKind() {
+        return kind;
+    }
+
+    public void setKind(Kind kind) {
+        this.kind = kind;
+    }
+
+    public AccessTier getAccessTier() {
+        return accessTier;
+    }
+
+    public void setAccessTier(AccessTier accessTier) {
+        this.accessTier = accessTier;
     }
 }

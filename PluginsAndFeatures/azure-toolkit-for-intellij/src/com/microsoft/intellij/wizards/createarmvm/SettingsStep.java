@@ -719,11 +719,13 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        StorageAccount newStorageAccount = form.getStorageAccount();
+                        com.microsoft.tooling.msservices.model.storage.StorageAccount newStorageAccount = form.getStorageAccount();
 
                         if (newStorageAccount != null) {
-                            model.setStorageAccount(newStorageAccount);
-                            fillStorage();
+                            model.setNewStorageAccount(newStorageAccount);
+                            model.setWithNewStorageAccount(true);
+                            ((DefaultComboBoxModel)storageComboBox.getModel()).insertElementAt(newStorageAccount.getName() + " (New)", 0);
+                            storageComboBox.setSelectedIndex(0);
                         }
                     }
                 });
@@ -777,8 +779,6 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                         }
                     }
 
-                    StorageAccount storageAccount = model.getStorageAccount();
-
 //                    for (StorageAccount account : AzureManagerImpl.getManager(project).getStorageAccounts(
 //                            model.getSubscription().getId(), true)) {
 //                        if (account.getName().equals(storageAccount.getName())) {
@@ -792,11 +792,13 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                                     resourceGroupName,
                                     createNewRadioButton.isSelected(),
                                     model.getSize(),
-                                    model.getRegion(),
+                                    model.getRegion().name(),
                                     model.getVirtualMachineImage(),
                                     model.getKnownMachineImage(),
                                     model.isKnownMachineImage(),
-                                    storageAccount,
+                                    model.getStorageAccount(),
+                                    model.getNewStorageAccount(),
+                                    model.isWithNewStorageAccount(),
                                     model.getVirtualNetwork(),
                                     model.getNewNetwork(),
                                     model.isWithNewNetwork(),
@@ -813,8 +815,6 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                         ResourceGroup rg = azure.resourceGroups().getByName(resourceGroupName);
                         AzureModelController.addNewResourceGroup(model.getSubscription(), rg);
                     }
-
-//                    virtualMachine = AzureManagerImpl.getManager(project).refreshVirtualMachineInformation(virtualMachine);
 
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
                         @Override

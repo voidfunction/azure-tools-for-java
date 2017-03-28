@@ -27,6 +27,7 @@ import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
@@ -64,7 +65,7 @@ public class CreateVMWizard extends Wizard {
 	protected String subnet;
 	protected VirtualMachineSize size;
     
-    private String region;
+    private Location region;
     private Network virtualNetwork;
     private VirtualNetwork newNetwork;
     private boolean isNewNetwork;
@@ -74,6 +75,8 @@ public class CreateVMWizard extends Wizard {
 	private Object knownMachineImage;
 	private boolean isKnownMachineImage;
 	private StorageAccount storageAccount;
+    private com.microsoft.tooling.msservices.model.storage.StorageAccount newStorageAccount;
+    private boolean withNewStorageAccount;
     private PublicIpAddress publicIpAddress;
     private boolean withNewPip;
     private AvailabilitySet availabilitySet;
@@ -132,11 +135,13 @@ public class CreateVMWizard extends Wizard {
                             resourceGroupName,
                             isNewResourceGroup,
                             size.name(),
-                            region,
+                            region.name(),
                             virtualMachineImage,
                             knownMachineImage,
                             isKnownMachineImage,
                             storageAccount,
+                            newStorageAccount,
+                            withNewStorageAccount,
                             virtualNetwork,
                             newNetwork,
                             isNewNetwork,
@@ -241,11 +246,11 @@ public class CreateVMWizard extends Wizard {
 	    this.subnet = subnet;
 	}
     
-    public String getRegion() {
+    public Location getRegion() {
 		return region;
 	}
 
-	public void setRegion(String region) {
+	public void setRegion(Location region) {
 		this.region = region;
 	}
 
@@ -319,6 +324,22 @@ public class CreateVMWizard extends Wizard {
 
 	public void setStorageAccount(StorageAccount storageAccount) {
 		this.storageAccount = storageAccount;
+	}
+
+	public com.microsoft.tooling.msservices.model.storage.StorageAccount getNewStorageAccount() {
+		return newStorageAccount;
+	}
+
+	public void setNewStorageAccount(com.microsoft.tooling.msservices.model.storage.StorageAccount newStorageAccount) {
+		this.newStorageAccount = newStorageAccount;
+	}
+
+	public boolean isWithNewStorageAccount() {
+		return withNewStorageAccount;
+	}
+
+	public void setWithNewStorageAccount(boolean withNewStorageAccount) {
+		this.withNewStorageAccount = withNewStorageAccount;
 	}
 
 	public PublicIpAddress getPublicIpAddress() {

@@ -75,7 +75,8 @@ public class AzureSDKManager {
 
     public static VirtualMachine createVirtualMachine(String subscriptionId, @NotNull String name, @NotNull String resourceGroup, boolean withNewResourceGroup,
                                                       @NotNull String size, @NotNull String region, final VirtualMachineImage vmImage, Object knownImage, boolean isKnownImage,
-                                                      @NotNull final StorageAccount storageAccount, @NotNull final Network network, VirtualNetwork newNetwork, boolean withNewNetwork,
+                                                      final StorageAccount storageAccount, com.microsoft.tooling.msservices.model.storage.StorageAccount newStorageAccount, boolean withNewStorageAccount,
+                                                      final Network network, VirtualNetwork newNetwork, boolean withNewNetwork,
                                                       @NotNull String subnet, @Nullable PublicIpAddress pip, boolean withNewPip,
                                                       @Nullable AvailabilitySet availabilitySet, boolean withNewAvailabilitySet,
                                                       @NotNull final String username, @Nullable final String password, @Nullable String publicKey) throws Exception {
@@ -87,6 +88,7 @@ public class AzureSDKManager {
         } else {
             isWindows = vmImage.osDiskImage().operatingSystem().equals(OperatingSystemTypes.WINDOWS);
         }
+        // ------ Resource Group ------
         VirtualMachine.DefinitionStages.WithGroup withGroup = azure.virtualMachines().define(name)
                 .withRegion(region);
         Creatable<ResourceGroup> newResourceGroup = null;
@@ -97,6 +99,7 @@ public class AzureSDKManager {
         } else {
             withNetwork = withGroup.withExistingResourceGroup(resourceGroup);
         }
+        // ------ Virtual Network -----
         VirtualMachine.DefinitionStages.WithPublicIpAddress withPublicIpAddress;
         if (withNewNetwork) {
             Network.DefinitionStages.WithGroup networkWithGroup = azure.networks().define(newNetwork.name).withRegion(region);
@@ -118,6 +121,7 @@ public class AzureSDKManager {
                     .withSubnet(subnet)
                     .withPrimaryPrivateIpAddressDynamic();
         }
+        // ------ Public IP Address------
         VirtualMachine.DefinitionStages.WithOS withOS;
         if (pip == null) {
             if (withNewPip) {
@@ -128,6 +132,7 @@ public class AzureSDKManager {
         } else {
             withOS = withPublicIpAddress.withExistingPrimaryPublicIpAddress(pip);
         }
+        // ------ OS and credentials -----
         VirtualMachine.DefinitionStages.WithCreate withCreate;
         if (isWindows) {
             VirtualMachine.DefinitionStages.WithWindowsAdminUsername withWindowsAdminUsername;
@@ -157,7 +162,22 @@ public class AzureSDKManager {
                 withCreate = withLinuxRootPasswordOrPublicKey.withSsh(publicKey);
             }
         }
-        withCreate = withCreate.withSize(size).withExistingStorageAccount(storageAccount);
+        withCreate = withCreate.withSize(size);
+        // ---- Storage Account --------
+        if (withNewStorageAccount) {
+            StorageAccount.DefinitionStages.WithCreate newAccount;
+            StorageAccount.DefinitionStages.WithGroup withGroupAccount = azure.storageAccounts().define(newStorageAccount.getName()).withRegion(newStorageAccount.getLocation());
+            if (newStorageAccount.isNewResourceGroup()) {
+                newAccount = withGroupAccount.withNewResourceGroup(newStorageAccount.getResourceGroupName());
+            } else {
+                newAccount = withGroupAccount.withExistingResourceGroup(newStorageAccount.getResourceGroupName());
+            }
+            // only general purpose accounts used to create vm
+            newAccount.withGeneralPurposeAccountKind().withSku(SkuName.fromString(newStorageAccount.getType()));
+            withCreate = withCreate.withNewStorageAccount(newAccount);
+        } else {
+            withCreate = withCreate.withExistingStorageAccount(storageAccount);
+        }
         if (withNewAvailabilitySet) {
             withCreate = withCreate.withNewAvailabilitySet(name + "as");
         } else if (availabilitySet != null) {

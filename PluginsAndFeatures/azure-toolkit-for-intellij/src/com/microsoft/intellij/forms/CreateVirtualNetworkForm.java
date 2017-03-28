@@ -23,9 +23,7 @@ package com.microsoft.intellij.forms;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.microsoft.azure.management.Azure;
-import com.microsoft.azuretools.authmanage.AuthMethodManager;
-import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azure.management.resources.Location;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 import org.jetbrains.annotations.Nullable;
@@ -45,15 +43,13 @@ public class CreateVirtualNetworkForm extends DialogWrapper {
     private Runnable onCreate;
     private VirtualNetwork network;
     private String subscriptionId;
-    private String region;
     private Project project;
 
-    public CreateVirtualNetworkForm(Project project, String subscriptionId, String region, String vmName) {
+    public CreateVirtualNetworkForm(Project project, String subscriptionId, Location region, String vmName) {
         super(project, true);
 
         this.project = project;
         this.subscriptionId = subscriptionId;
-        this.region = region;
         nameField.setText(vmName + "-vnet");
 
         setModal(true);

@@ -248,7 +248,7 @@ public class MachineSettingsStep extends WizardPage {
 				@Override
 				public void run() {
 					PagedList<com.microsoft.azure.management.compute.VirtualMachineSize> sizes = wizard.getAzure()
-							.virtualMachines().sizes().listByRegion(wizard.getRegion());
+							.virtualMachines().sizes().listByRegion(wizard.getRegion().name());
 					Collections.sort(sizes, new Comparator<VirtualMachineSize>() {
 						@Override
 						public int compare(VirtualMachineSize t0, VirtualMachineSize t1) {

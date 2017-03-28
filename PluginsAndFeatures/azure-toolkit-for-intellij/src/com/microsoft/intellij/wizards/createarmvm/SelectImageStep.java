@@ -70,7 +70,6 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
     private JComboBox<String> regionComboBox;
 
     private JList imageLabelList;
-    private JEditorPane imageDescriptionTextPane;
     private JComboBox publisherComboBox;
     private JComboBox offerComboBox;
     private JComboBox skuComboBox;
@@ -89,7 +88,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
     private Project project;
 
     private void createUIComponents() {
-        imageInfoPanel = new JPanel() {
+        imageInfoPanel = new VMDetailsPanel() {
             @Override
             public Dimension getPreferredSize() {
 
@@ -284,7 +283,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
                                 }
                             });
                         } catch (Exception ex) {
-                            AzurePlugin.log("Error loading locations", ex);
+                            PluginUtil.displayErrorDialogInAWTAndLog("Error", "Error loading locations", ex);
                         }
                     }
                 });
@@ -309,7 +308,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
         if (customImageBtn.isSelected()) {
             fillPublishers();
         }
-        model.setRegion(((Location) regionComboBox.getSelectedItem()).name());
+        model.setRegion((Location) regionComboBox.getSelectedItem());
     }
 
     private void fillPublishers() {
@@ -415,7 +414,7 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
         });
     }
 
-    public void disableNext() {
+    private void disableNext() {
         //validation might be delayed, so lets check if we are still on this screen
         if (customImageBtn.isSelected() && model.getCurrentStep().equals(this)) {
             model.getCurrentNavigationState().NEXT.setEnabled(false);
