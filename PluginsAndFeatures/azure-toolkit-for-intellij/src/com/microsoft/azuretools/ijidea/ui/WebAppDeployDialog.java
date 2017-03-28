@@ -66,6 +66,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.html.HTMLDocument;
 import java.awt.*;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
@@ -557,7 +558,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                     }
                     deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 100, message("runStatus"));
                     showLink(sitePath);
-                } catch (Exception ex) {
+                } catch (IOException | InterruptedException ex) {
                     ex.printStackTrace();
                     LOGGER.error("deploy", ex);
                     ErrorWindow.show(ex.getMessage(), "Deploy Web App Error", WebAppDeployDialog.this.contentPane);
