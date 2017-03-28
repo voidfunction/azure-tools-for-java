@@ -71,7 +71,7 @@ import com.microsoft.azuretools.webapp.Activator;
 
 @SuppressWarnings("restriction")
 public class WebAppDeployDialog extends TitleAreaDialog {
-	private static ILog LOG = Activator.getDefault().getLog();
+    private static ILog LOG = Activator.getDefault().getLog();
     
     private Table table;
     private Browser browserAppServiceDetailes;
@@ -88,6 +88,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         public AppServicePlan appServicePlan;
         public WebApp webApp;
     }
+    
+    final String ftpLinkString = "ShowFtpCredentials";
 
     private Map<String, WebAppDetails> webAppDetailsMap = new HashMap<>();
    
@@ -207,9 +209,14 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             public void changing(LocationEvent event) {
                 try {
                     //System.out.println("LocationEvent.location: " + event.location);
-                    if (!event.location.contains("http")) return;
-                    event.doit = false;
-                    PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(event.location));
+                    if (event.location.contains(ftpLinkString)) {
+                        event.doit = false;
+                        showFtpCreadentialsWindow();
+                    }
+                    if (event.location.contains("http")) { 
+                        event.doit = false;
+                        PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(event.location));
+                    }
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "changing@LocationListener@browserAppServiceDetailes@AppServiceCreateDialog", ex));
@@ -252,6 +259,17 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         okButton.setEnabled(false);
     }
     
+    private void showFtpCreadentialsWindow() {
+        int selectedRow = table.getSelectionIndex();
+        if (selectedRow < 0) {
+             return;
+        }
+        String appServiceName = table.getItems()[selectedRow].getText(0);
+        WebAppDetails wad = webAppDetailsMap.get(appServiceName);
+        FtpCredentialsWindow w = new FtpCredentialsWindow(getShell(), wad.webApp);
+        w.open();
+    }
+    
     private void cleanError() {
         setErrorMessage(null);
     }
@@ -280,7 +298,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         sb.append(String.format("App Service Plan name:&nbsp;<b>%s</b>;&nbsp;Pricing tier:&nbsp;<b>%s</b>;<br/>", aspName, aspPricingTier));
 
         String link = buildSiteLink(wad.webApp, null);
-        sb.append(String.format("Link:&nbsp;<a href=\"%s\">%s</a>", link, link));
+        sb.append(String.format("Link:&nbsp;<a href=\"%s\">%s</a><br/>", link, link));
+        sb.append(String.format("<a href=\"%s\">%s</a>", ftpLinkString, "Show FTP deployment credentials"));
         sb.append("</div>");
         browserAppServiceDetailes.setText(sb.toString());
     }
@@ -330,8 +349,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         });
 
                     } catch (Exception ex) {
-                    	ex.printStackTrace();
-                    	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@updateAndFillTable@AppServiceCreateDialog", ex));
+                        ex.printStackTrace();
+                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@updateAndFillTable@AppServiceCreateDialog", ex));
                     }
                     monitor.done();
                 }
@@ -435,8 +454,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                 showLink(sitePath);
             }
         } catch (Exception ex) {
-        	ex.printStackTrace();
-        	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "okPressed@AppServiceCreateDialog", ex));
+            ex.printStackTrace();
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "okPressed@AppServiceCreateDialog", ex));
         };
         super.okPressed();
     }
