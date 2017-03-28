@@ -132,6 +132,7 @@ class LoginDialog extends Dialog {
 
     public LoginDialog(Shell parentShell, String redirectUri, String requestUri) {
         super(parentShell);
+        setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
         this.redirectUriStr = redirectUri;
         this.requestUriStr = requestUri;
     }

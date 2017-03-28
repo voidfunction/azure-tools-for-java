@@ -29,6 +29,7 @@ public class FtpCredentialsWindow extends TitleAreaDialog {
 	 */
 	public FtpCredentialsWindow(Shell parentShell, WebApp webApp) {
 		super(parentShell);
+		setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
 		setHelpAvailable(false);
 		this.webApp = webApp;
 	}
@@ -95,7 +96,7 @@ public class FtpCredentialsWindow extends TitleAreaDialog {
 	 */
 	@Override
 	protected Point getInitialSize() {
-		return new Point(600, 300);
+		return new Point(520, 246);
 	}
 
 }

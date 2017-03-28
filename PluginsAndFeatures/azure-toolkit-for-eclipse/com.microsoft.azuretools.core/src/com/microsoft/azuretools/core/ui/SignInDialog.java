@@ -91,7 +91,7 @@ public class SignInDialog extends TitleAreaDialog {
     public SignInDialog(Shell parentShell) {
         super(parentShell);
         setHelpAvailable(false);
-        setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
+        setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
     }
     
     public static SignInDialog go(Shell parentShell, AuthMethodDetails authMethodDetails) {

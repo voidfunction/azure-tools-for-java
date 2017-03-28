@@ -90,7 +90,7 @@ public class SrvPriCreationStatusDialog extends TitleAreaDialog {
     private SrvPriCreationStatusDialog(Shell parentShell) {
         super(parentShell);
         setHelpAvailable(false);
-        setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
+        setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
     }
 
     /**

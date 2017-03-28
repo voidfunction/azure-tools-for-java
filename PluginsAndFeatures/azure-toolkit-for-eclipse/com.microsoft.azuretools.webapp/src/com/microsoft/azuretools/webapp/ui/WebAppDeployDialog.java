@@ -100,7 +100,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
     private WebAppDeployDialog(Shell parentShell, IProject project) {
         super(parentShell);
         setHelpAvailable(false);
-        setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
+        setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
         this.project = project;
         this.parentShell = parentShell;
     }
@@ -144,7 +144,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         tblclmnJdk.setText("JDK");
         
         TableColumn tblclmnWebContainer = new TableColumn(table, SWT.LEFT);
-        tblclmnWebContainer.setWidth(150);
+        tblclmnWebContainer.setWidth(145);
         tblclmnWebContainer.setText("Web container");
         
         TableColumn tblclmnResourceGroup = new TableColumn(table, SWT.LEFT);

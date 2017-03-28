@@ -69,7 +69,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
     private SubscriptionsDialog(Shell parentShell, SubscriptionManager subscriptionManage) {
         super(parentShell);
         setHelpAvailable(false);
-        setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
+        setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
         this.subscriptionManager = subscriptionManage;
     }
     
