@@ -216,8 +216,8 @@ public class LibrariesConfigurationDialog extends DialogWrapper {
             if (!currentLibs.contains(lib)) {
                 if (lib.getName().equalsIgnoreCase(AzureLibrary.AZURE_LIBRARIES.toString())) {
                     AppInsightsCustomEvent.create("Azure Libraries", AzurePlugin.AZURE_LIBRARIES_VERSION);
-                } else if (lib.getName().equalsIgnoreCase(AzureLibrary.QPID_CLIENT.toString())) {
-                    AppInsightsCustomEvent.create("Apache Qpid", AzurePlugin.QPID_LIBRARIES_VERSION);
+                } else if (lib.getName().equalsIgnoreCase(AzureLibrary.SQL_JDBC.toString())) {
+                    AppInsightsCustomEvent.create("Microsoft JDBC Driver", AzurePlugin.JDBC_LIBRARIES_VERSION);
                 }
             }
         }

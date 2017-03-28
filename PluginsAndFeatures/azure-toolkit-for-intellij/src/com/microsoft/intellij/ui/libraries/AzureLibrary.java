@@ -22,8 +22,8 @@
 package com.microsoft.intellij.ui.libraries;
 
 public class AzureLibrary {
-    public static AzureLibrary QPID_CLIENT = new AzureLibrary("Package for Apache Qpid Client Libraries for JMS (by Microsoft)",
-            "com-microsoftopentechnologies-qpid", new String[]{});
+    public static AzureLibrary SQL_JDBC = new AzureLibrary("Microsoft JDBC Driver 6.0 for SQL Server UI",
+            "com-microsoft-sqljdbc", new String[]{});
     public static AzureLibrary AZURE_LIBRARIES = new AzureLibrary("Package for Microsoft Azure Libraries for Java (by Microsoft)",
             null,
             new String[]{
@@ -72,7 +72,7 @@ public class AzureLibrary {
                     "azure-mgmt-cdn-1.0.0-beta4.1.jar",
                     "azure-mgmt-sql-1.0.0-beta4.1.jar"
             });
-    public static AzureLibrary[] LIBRARIES = new AzureLibrary[]{QPID_CLIENT, AZURE_LIBRARIES};
+    public static AzureLibrary[] LIBRARIES = new AzureLibrary[]{SQL_JDBC, AZURE_LIBRARIES};
 
     private String name;
     private String location;
