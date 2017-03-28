@@ -1,23 +1,27 @@
 package com.microsoft.azuretools.core.utils;
 
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 
+import com.microsoft.azuretools.core.Activator;
 import com.microsoft.azuretools.utils.IProgressTaskImpl;
 import com.microsoft.azuretools.utils.IWorker;
 
 public class ProgressTaskModal implements IProgressTaskImpl {
-	private Shell parentShell;
-	
-	public ProgressTaskModal(Shell parentShell) {
-		this.parentShell = parentShell;
-	}
+    private static ILog LOG = Activator.getDefault().getLog();
+    private Shell parentShell;
+    
+    public ProgressTaskModal(Shell parentShell) {
+        this.parentShell = parentShell;
+    }
 
-	@Override
-	public void doWork(IWorker worker) {
-		// TODO Auto-generated method stub
-		IRunnableWithProgress op = new IRunnableWithProgress() {
+    @Override
+    public void doWork(IWorker worker) {
+        IRunnableWithProgress op = new IRunnableWithProgress() {
             @Override
             public void run(IProgressMonitor monitor) {
                 monitor.beginTask(worker.getName(), IProgressMonitor.UNKNOWN);
@@ -26,10 +30,10 @@ public class ProgressTaskModal implements IProgressTaskImpl {
             }
         };
         try {
-        	ProgressDialog.get(parentShell, worker.getName()).run(true, true, op);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 		
-	}
+            ProgressDialog.get(parentShell, worker.getName()).run(true, true, op);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@doWork@ProgressTaskModal", ex));
+        }         
+    }
 }

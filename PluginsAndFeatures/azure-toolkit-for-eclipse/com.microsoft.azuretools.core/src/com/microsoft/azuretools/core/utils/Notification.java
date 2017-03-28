@@ -10,7 +10,7 @@ public class Notification implements INotification {
 
     @Override
     public void deliver(String subject, String message) {
-        Shell shell = getDisplay().getActiveShell();
+        Shell shell = getShell();
         Display.getDefault().asyncExec(new Runnable() {
             @Override
             public void run() {
@@ -22,11 +22,16 @@ public class Notification implements INotification {
         });
     }
     
-    private Display getDisplay() {
+    private Shell getShell() {
         Display display = Display.getCurrent();
         //may be null if outside the UI thread
         if (display == null)
            display = Display.getDefault();
-        return display;   
+        Shell shell = display.getActiveShell();
+        
+        if (shell == null) {
+            shell = new Shell();
+        }
+        return shell;   
     }
 }

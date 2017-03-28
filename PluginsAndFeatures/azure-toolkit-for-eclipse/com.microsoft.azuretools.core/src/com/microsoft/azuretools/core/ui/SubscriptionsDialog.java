@@ -62,10 +62,6 @@ public class SubscriptionsDialog extends TitleAreaDialog {
     private SubscriptionManager subscriptionManager;
     private List<SubscriptionDetail> sdl;
 
-//    public List<SubscriptionDetail> getSubscriptionDetails() {
-//        return sdl;
-//    }
-
     /**
      * Create the dialog.
      * @param parentShell
@@ -148,7 +144,6 @@ public class SubscriptionsDialog extends TitleAreaDialog {
                         subscriptionManager.getSubscriptionDetails();
                     } catch (IOException | AuthException ex) {
                     	ex.printStackTrace();
-                        //LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@efreshSubscriptionsAsync@SubscriptionDialog", e);
                     	 LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@efreshSubscriptionsAsync@SubscriptionDialog", ex));
                     }
                     monitor.done();
@@ -171,7 +166,6 @@ public class SubscriptionsDialog extends TitleAreaDialog {
             }
         } catch (IOException | AuthException ex) {
         	ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR, "setSubscriptionDetails@SubscriptionDialog", ex);
         	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "setSubscriptionDetails@SubscriptionDialog", ex));
         }
     }
@@ -186,7 +180,6 @@ public class SubscriptionsDialog extends TitleAreaDialog {
             subscriptionManager.setSubscriptionDetails(sdl);
         } catch (IOException | AuthException ex) {
         	ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR, "refreshSubscriptions@SubscriptionDialog", ex);
             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "refreshSubscriptions@SubscriptionDialog", ex));
         }
     }
@@ -233,7 +226,6 @@ public class SubscriptionsDialog extends TitleAreaDialog {
             subscriptionManager.setSubscriptionDetails(sdl);
         } catch (Exception ex) {
         	ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR, "okPressed@SubscriptionDialog", e);
             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "okPressed@SubscriptionDialog", ex));
         }
 

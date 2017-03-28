@@ -337,8 +337,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                 }
             });
         } catch (InvocationTargetException | InterruptedException ex) {
-        	ex.printStackTrace();
-        	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "updateAndFillTable@AppServiceCreateDialog", ex));
+            ex.printStackTrace();
+            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "updateAndFillTable@AppServiceCreateDialog", ex));
         }
     }
     
