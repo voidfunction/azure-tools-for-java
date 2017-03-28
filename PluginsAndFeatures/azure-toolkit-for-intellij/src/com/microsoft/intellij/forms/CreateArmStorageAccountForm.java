@@ -30,10 +30,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.ListCellRendererWrapper;
-import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.AccessTier;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuTier;
@@ -68,7 +66,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     private JPanel contentPane;
     private JComboBox<SubscriptionDetail> subscriptionComboBox;
     private JTextField nameTextField;
-    private JComboBox<String> regionComboBox;
+    private JComboBox<Location> regionComboBox;
     private JComboBox replicationComboBox;
     private JLabel pricingLabel;
     private JLabel userInfoLabel;
@@ -86,7 +84,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
     private Runnable onCreate;
     private SubscriptionDetail subscription;
-    private StorageAccount storageAccount;
+    private com.microsoft.tooling.msservices.model.storage.StorageAccount newStorageAccount; // use this field only when creating from 'Create vm'
     private Project project;
 
     private static final String PRICING_LINK = "http://go.microsoft.com/fwlink/?LinkID=400838";
@@ -156,8 +154,6 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         regionComboBox.addItemListener(validateListener);
         resourceGrpCombo.addItemListener(validateListener);
         regionComboBox.addItemListener(e -> loadGroups());
-        // TODO
-//        userInfoLabel.setText("Signed in as: " + (upn.contains("#") ? upn.split("#")[1] : upn));
 
         accoountKindCombo.setRenderer(new ListCellRendererWrapper<Kind>() {
             @Override
@@ -210,6 +206,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
     @Override
     protected void doOKAction() {
 
+
 //        final String name = nameTextField.getText();
 //        final String region = regionComboBox.getSelectedItem().toString();
 //        final String replication = replicationComboBox.getSelectedItem().toString();
@@ -223,9 +220,10 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 //        storageAccount.setKind((Kind) accoountKindCombo.getSelectedItem());
 //        storageAccount.setAccessTier((AccessTier)accessTeirComboBox.getSelectedItem());
 //        storageAccount.setEnableEncription((Boolean)encriptonComboBox.getSelectedItem());
-
-        ProgressManager.getInstance().run(
-            new Task.Modal(project, "Creating storage account", true) {
+        // creating from Azure Explorer directly
+        if (subscription == null) {
+            ProgressManager.getInstance().run(new Task.Backgroundable(project,
+                    "Creating storage account " + nameTextField.getText() + "...", false) {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
                     indicator.setIndeterminate(true);
@@ -240,15 +238,49 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
                     }
                 }
+            });
+        } else { //creating from 'create vm'
+            newStorageAccount =
+                    new com.microsoft.tooling.msservices.model.storage.StorageAccount(nameTextField.getText(), subscription.getSubscriptionId());
+            boolean isNewResourceGroup = createNewRadioButton.isSelected();
+            final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
+            newStorageAccount.setResourceGroupName(resourceGroupName);
+            newStorageAccount.setNewResourceGroup(isNewResourceGroup);
+            newStorageAccount.setType(replicationComboBox.getSelectedItem().toString());
+            newStorageAccount.setLocation(((Location) regionComboBox.getSelectedItem()).name());
+            newStorageAccount.setKind((Kind) accoountKindCombo.getSelectedItem());
+            newStorageAccount.setAccessTier((AccessTier)accessTeirComboBox.getSelectedItem());
+
+            if (onCreate != null) {
+                onCreate.run();
             }
-        );
+            close(DialogWrapper.OK_EXIT_CODE, true);
+        }
+//        ProgressManager.getInstance().run(
+//            new Task.Modal(project, "Creating storage account", true) {
+//                @Override
+//                public void run(@NotNull ProgressIndicator indicator) {
+//                    indicator.setIndeterminate(true);
+//                    boolean success = createStorageAccount();
+//                    if (success) {
+//                        ApplicationManager.getApplication().invokeLater(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                close(DialogWrapper.OK_EXIT_CODE, true);
+//                            }
+//                        }, ModalityState.any());
+//
+//                    }
+//                }
+//            }
+//        );
     }
 
     private boolean createStorageAccount() {
         try {
             boolean isNewResourceGroup = createNewRadioButton.isSelected();
             final String resourceGroupName = isNewResourceGroup ? resourceGrpField.getText() : resourceGrpCombo.getSelectedItem().toString();
-            storageAccount = AzureSDKManager.createStorageAccount(subscription.getSubscriptionId(), nameTextField.getText(), ((Location) regionComboBox.getSelectedItem()).name(),
+            AzureSDKManager.createStorageAccount(((SubscriptionDetail) subscriptionComboBox.getSelectedItem()).getSubscriptionId(), nameTextField.getText(), ((Location) regionComboBox.getSelectedItem()).name(),
                     isNewResourceGroup, resourceGroupName, (Kind) accoountKindCombo.getSelectedItem(), (AccessTier)accessTeirComboBox.getSelectedItem(),
                     (Boolean)encriptonComboBox.getSelectedItem(), replicationComboBox.getSelectedItem().toString());
             // update resource groups cache if new resource group was created when creating storage account
@@ -272,7 +304,6 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             });
             return true;
         } catch (Exception e) {
-            storageAccount = null;
             String msg = "An error occurred while attempting to create the specified storage account in subscription " + subscription.getSubscriptionId() + ".<br>"
                     + String.format(message("webappExpMsg"), e.getCause());
             DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
@@ -281,8 +312,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         return false;
     }
 
-    public void fillFields(final SubscriptionDetail subscription, String region) {
-        final CreateArmStorageAccountForm createStorageAccountForm = this;
+    public void fillFields(final SubscriptionDetail subscription, Location region) {
         if (subscription == null) {
 //            loadRegions();
             accoountKindCombo.setModel(new DefaultComboBoxModel(Kind.values()));
@@ -314,7 +344,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
                 subscriptionComboBox.setModel(new DefaultComboBoxModel<>(selectedSubscriptions.toArray(new SubscriptionDetail[selectedSubscriptions.size()])));
                 if (selectedSubscriptions.size() > 0) {
-                    createStorageAccountForm.subscription = selectedSubscriptions.get(0);
+                    this.subscription = selectedSubscriptions.get(0);
                     loadRegions();
                 }
             } catch (Exception ex) {
@@ -324,7 +354,6 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             subscriptionComboBox.addItemListener(new ItemListener() {
                 @Override
                 public void itemStateChanged(ItemEvent itemEvent) {
-                    createStorageAccountForm.subscription = (SubscriptionDetail) itemEvent.getItem();
                     loadRegions();
                 }
             });
@@ -333,6 +362,8 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             subscriptionComboBox.addItem(subscription);
             accoountKindCombo.addItem(Kind.STORAGE); // only General purpose accounts supported for VMs
             accoountKindCombo.setEnabled(false);
+            accessTeirComboBox.setVisible(false); // Access tier is not available for General purpose accounts
+            accessTierLabel.setVisible(false);
             regionComboBox.addItem(region);
             regionComboBox.setEnabled(false);
             loadGroups();
@@ -401,8 +432,8 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         this.onCreate = onCreate;
     }
 
-    public StorageAccount getStorageAccount() {
-        return storageAccount;
+    public com.microsoft.tooling.msservices.model.storage.StorageAccount getStorageAccount() {
+        return newStorageAccount;
     }
 
     public void loadRegions() {
@@ -433,7 +464,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
     public void loadGroups() {
         // Resource groups already initialized in cache when loading locations on SelectImageStep
-        List<ResourceGroup> groups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(subscriptionComboBox.getSelectedItem()    );
+        List<ResourceGroup> groups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(subscriptionComboBox.getSelectedItem());
         List<String> filteredGroups = groups.stream().filter(group -> ((Location) regionComboBox.getSelectedItem()).name().equals(group.regionName()))
                 .map(ResourceGroup::name).sorted().collect(Collectors.toList());
         resourceGrpCombo.setModel(new DefaultComboBoxModel<>(filteredGroups.toArray(new String[filteredGroups.size()])));

@@ -590,11 +590,15 @@ public class SettingsStep extends WizardPage {
 		form.setOnCreate(new Runnable() {
 			@Override
 			public void run() {
-				StorageAccount newStorageAccount = form.getStorageAccount();
+				com.microsoft.tooling.msservices.model.storage.StorageAccount newStorageAccount = form.getStorageAccount();
 				if (newStorageAccount != null) {
-					wizard.setStorageAccount(newStorageAccount);
-					storageAccounts.put(newStorageAccount.name(), newStorageAccount);
-					fillStorage(newStorageAccount.name());
+					wizard.setNewStorageAccount(newStorageAccount);
+					wizard.setWithNewStorageAccount(true);
+					wizard.setStorageAccount(null);
+					storageComboBox.add(newStorageAccount.getName() + " (New)", 0);
+					storageComboBox.select(0);
+//					storageAccounts.put(newStorageAccount.name(), newStorageAccount);
+//					fillStorage(newStorageAccount.name());
 				}
 			}
 		});

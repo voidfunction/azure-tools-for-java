@@ -233,7 +233,7 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
                 public void run(@NotNull ProgressIndicator progressIndicator) {
                     progressIndicator.setIndeterminate(true);
 
-                    PagedList<com.microsoft.azure.management.compute.VirtualMachineSize> sizes = azure.virtualMachines().sizes().listByRegion(((VMWizardModel) model).getRegion());
+                    PagedList<com.microsoft.azure.management.compute.VirtualMachineSize> sizes = azure.virtualMachines().sizes().listByRegion(model.getRegion().name());
                     Collections.sort(sizes, new Comparator<VirtualMachineSize>() {
                         @Override
                         public int compare(VirtualMachineSize t0, VirtualMachineSize t1) {
