@@ -153,34 +153,6 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
         nameTextField = new Text(container, SWT.LEFT | SWT.BORDER);
 //        gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         nameTextField.setLayoutData(gridDataForText(180));
-        
-        kindLabel = new Label(container, SWT.LEFT);
-        kindLabel.setText("Account kind:");
-        kindCombo = new Combo(container, SWT.READ_ONLY);
-        kindCombo.setLayoutData(gridDataForText(180));
-        
-        performanceLabel = new Label(container, SWT.LEFT);
-        performanceLabel.setText("Performance:");
-        performanceCombo = new Combo(container, SWT.READ_ONLY);
-        performanceCombo.setLayoutData(gridDataForText(180));
-        
-        replicationLabel = new Label(container, SWT.LEFT);
-        replicationLabel.setText("Replication:");
-        replicationComboBox = new Combo(container, SWT.READ_ONLY);
-        replicationComboBox.setLayoutData(gridDataForText(180));
-        
-        if (subscription == null) { // not showing access tier with general purpose storage account which is used when creating vm
-        	accessTierLabel = new Label(container, SWT.LEFT);
-        	accessTierLabel.setText("Access Tier:");
-        	accessTierComboBox = new Combo(container, SWT.READ_ONLY);
-        	accessTierComboBox.setLayoutData(gridDataForText(180));        
-        	for (AccessTier type : AccessTier.values()) {
-        		accessTierComboBox.add(type.toString());
-        		accessTierComboBox.setData(type.toString(), type);
-        	}
-        	accessTierComboBox.select(0);
-        }
-
         subscriptionLabel = new Label(container, SWT.LEFT);
         subscriptionLabel.setText("Subscription:");
         subscriptionComboBox = new Combo(container, SWT.READ_ONLY);
@@ -233,6 +205,33 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
         regionLabel.setText("Region:");
         regionComboBox = new Combo(container, SWT.READ_ONLY);
         regionComboBox.setLayoutData(gridDataForText(180));
+        
+        kindLabel = new Label(container, SWT.LEFT);
+        kindLabel.setText("Account kind:");
+        kindCombo = new Combo(container, SWT.READ_ONLY);
+        kindCombo.setLayoutData(gridDataForText(180));
+        
+        performanceLabel = new Label(container, SWT.LEFT);
+        performanceLabel.setText("Performance:");
+        performanceCombo = new Combo(container, SWT.READ_ONLY);
+        performanceCombo.setLayoutData(gridDataForText(180));
+        
+        replicationLabel = new Label(container, SWT.LEFT);
+        replicationLabel.setText("Replication:");
+        replicationComboBox = new Combo(container, SWT.READ_ONLY);
+        replicationComboBox.setLayoutData(gridDataForText(180));
+        
+        if (subscription == null) { // not showing access tier with general purpose storage account which is used when creating vm
+        	accessTierLabel = new Label(container, SWT.LEFT);
+        	accessTierLabel.setText("Access Tier:");
+        	accessTierComboBox = new Combo(container, SWT.READ_ONLY);
+        	accessTierComboBox.setLayoutData(gridDataForText(180));        
+        	for (AccessTier type : AccessTier.values()) {
+        		accessTierComboBox.add(type.toString());
+        		accessTierComboBox.setData(type.toString(), type);
+        	}
+        	accessTierComboBox.select(0);
+        }
 
         pricingLabel = new Link(container, SWT.LEFT);
         pricingLabel.setText(PRICING_LINK);
@@ -399,27 +398,17 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
             	kindCombo.add(entry.getKey());
             	kindCombo.setData(entry.getKey(), entry.getValue());
             }
-        	kindCombo.addSelectionListener(new SelectionListener() {
-				
+        	kindCombo.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fillPerformanceComboBox();
                     fillReplicationTypes();
-                    
-                    //Kind kind = (Kind)kindCombo.getData(kindCombo.getText());
-                    boolean isBlobKind = (Kind)kindCombo.getData(kindCombo.getText()) == Kind.BLOB_STORAGE;
-                    accessTierComboBox.setEnabled(isBlobKind);
-                    accessTierLabel.setEnabled(isBlobKind);
-					
-				}
-				
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					// TODO Auto-generated method stub
-					
+     
+                    showAccessTier();					
 				}
 			});
-        	kindCombo.select(0);
+        	kindCombo.select(1);
+        	showAccessTier();
         } else { // create form create VM form
             subscriptionComboBox.setEnabled(false);
             subscriptionComboBox.add(subscription.getSubscriptionName());
@@ -578,4 +567,10 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
 			}
 		});
     }
+
+	private void showAccessTier() {
+		boolean isBlobKind = (Kind)kindCombo.getData(kindCombo.getText()) == Kind.BLOB_STORAGE;
+		accessTierComboBox.setVisible(isBlobKind);
+		accessTierLabel.setVisible(isBlobKind);
+	}
 }
