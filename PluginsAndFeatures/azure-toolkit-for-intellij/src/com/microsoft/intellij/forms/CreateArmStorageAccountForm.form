@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.microsoft.intellij.forms.CreateArmStorageAccountForm">
-  <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="21" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="22" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
       <xy x="48" y="54" width="600" height="655"/>
@@ -164,10 +164,11 @@
           <grid row="9" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <enabled value="false"/>
+          <enabled value="true"/>
           <labelFor value="717d6"/>
           <text value="Acess tier"/>
           <toolTipText value="Only available for 'Blob storage' account kind"/>
+          <visible value="false"/>
         </properties>
       </component>
       <component id="78a09" class="javax.swing.JComboBox" binding="accessTeirComboBox">
@@ -175,9 +176,10 @@
           <grid row="10" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <enabled value="false"/>
+          <enabled value="true"/>
           <model/>
           <toolTipText value="Only available for 'Blob storage' account kind"/>
+          <visible value="false"/>
         </properties>
       </component>
       <component id="27247" class="javax.swing.JLabel" binding="encriptonLabel">
@@ -208,6 +210,11 @@
           <text value="Resource group"/>
         </properties>
       </component>
+      <vspacer id="112ea">
+        <constraints>
+          <grid row="21" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
     </children>
   </grid>
 </form>

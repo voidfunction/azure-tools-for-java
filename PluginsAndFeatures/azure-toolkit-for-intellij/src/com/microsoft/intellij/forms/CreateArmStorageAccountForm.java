@@ -323,8 +323,8 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                         fillPerformanceComboBox();
                         fillReplicationTypes();
                         boolean isBlobKind = e.getItem().equals(Kind.BLOB_STORAGE);
-                        accessTeirComboBox.setEnabled(isBlobKind);
-                        accessTierLabel.setEnabled(isBlobKind);
+                        accessTeirComboBox.setVisible(isBlobKind);
+                        accessTierLabel.setVisible(isBlobKind);
                     }
                 }
             });
