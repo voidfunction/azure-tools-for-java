@@ -63,6 +63,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
 
   private AzureDockerHostsManager dockerManager;
   private AzureDockerImageInstance dockerImageDescription;
+  private int randomPort;
 
   public AzureConfigureDockerContainerStep(String title, AzureSelectDockerWizardModel model, AzureDockerHostsManager dockerManager, AzureDockerImageInstance dockerImageInstance) {
     // TODO: The message should go into the plugin property file that handles the various dialog titles
@@ -70,6 +71,8 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
     this.model = model;
     this.dockerManager = dockerManager;
     this.dockerImageDescription = dockerImageInstance;
+
+    this.randomPort = new Random().nextInt(10000); // default to host port 2xxxx and 5xxxx (debug)
 
     initUI();
   }
@@ -117,12 +120,14 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       @Override
       public void actionPerformed(ActionEvent e) {
         dockerContainerPortSettings.setText(getDefaultPortMapping((KnownDockerImages) dockerfileComboBox.getSelectedItem()));
+        setDialogButtonsState(doValidate(false) == null);
       }
     });
 
     customDockerfileBrowseButton.setEnabled(false);
     customDockerfileBrowseButton.addActionListener(UIUtils.createFileChooserListener(customDockerfileBrowseButton, model.getProject(),
         FileChooserDescriptorFactory.createSingleLocalFileDescriptor()));
+    customDockerfileBrowseButton.getTextField().setToolTipText(AzureDockerValidationUtils.getDockerfilePathTip());
     customDockerfileBrowseButton.getTextField().setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {
@@ -167,6 +172,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
     });
 
     dockerContainerPortSettings.setText(getDefaultPortMapping((KnownDockerImages) dockerfileComboBox.getSelectedItem()));
+    dockerContainerPortSettings.setToolTipText(AzureDockerValidationUtils.getDockerPortSettingsTip());
     dockerContainerPortSettings.setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {
@@ -192,7 +198,8 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
   }
 
   private ValidationInfo doValidate(Boolean shakeOnError) {
-    if (dockerContainerNameTextField.getText() == null || dockerContainerNameTextField.getText().equals("")){
+    if (dockerContainerNameTextField.getText() == null || dockerContainerNameTextField.getText().equals("") ||
+        !AzureDockerValidationUtils.validateDockerContainerName(dockerContainerNameTextField.getText())) {
       ValidationInfo info = new ValidationInfo("Please name your Docker container", dockerContainerNameTextField);
       dockerContainerNameLabel.setVisible(true);
       setDialogButtonsState(false);
@@ -217,8 +224,8 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       }
     }
 
-    String dockerfileName = customDockerfileBrowseButton.getText();
     if (customDockerfileRadioButton.isSelected()) {
+      String dockerfileName = customDockerfileBrowseButton.getText();
       if (dockerfileName == null || dockerfileName.equals("") || Files.notExists(Paths.get(dockerfileName))) {
         ValidationInfo info = new ValidationInfo("Dockerfile not found", customDockerfileBrowseButton);
         customDockerfileBrowseLabel.setVisible(true);
@@ -229,7 +236,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       dockerImageDescription.predefinedDockerfile = null;
 
       try {
-        model.getDockerImageDescription().dockerfileContent = new String(Files.readAllBytes(Paths.get(customDockerfileBrowseButton.getText())));
+        dockerImageDescription.dockerfileContent = new String(Files.readAllBytes(Paths.get(customDockerfileBrowseButton.getText())));
       } catch (Exception e) {
         customDockerfileBrowseLabel.setVisible(true);
         setDialogButtonsState(false);
@@ -245,7 +252,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
     }
 
     if (dockerContainerPortSettings.getText() == null || dockerContainerPortSettings.getText().equals("") ||
-        AzureDockerValidationUtils.validateDockerPortSettings(dockerContainerPortSettings.getText()) == null){
+        AzureDockerValidationUtils.validateDockerPortSettings(dockerContainerPortSettings.getText()) == null) {
       ValidationInfo info = new ValidationInfo("Invalid port settings", dockerContainerPortSettings);
       if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
       dockerContainerPortSettingsLabel.setVisible(true);
@@ -260,7 +267,6 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
   }
 
   private String getDefaultPortMapping(KnownDockerImages knownImage) {
-    int randomPort = new Random().nextInt(10000); // default to host port 2xxxx and 5xxxx (debug)
     if (knownImage == null) {
       return String.format("2%04d:80", randomPort);
     }

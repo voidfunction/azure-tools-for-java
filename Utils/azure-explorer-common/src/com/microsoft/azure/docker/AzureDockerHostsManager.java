@@ -244,14 +244,14 @@ public class AzureDockerHostsManager {
     dockerImagesList.add(KnownDockerImages.TOMCAT8_DEBUG);
     dockerImagesList.add(KnownDockerImages.JBOSS_WILDFLY);
     dockerImagesList.add(KnownDockerImages.JBOSS_WILDFLY_DEBUG);
-    dockerImagesList.add(KnownDockerImages.OPENSDK_LATEST);
-    dockerImagesList.add(KnownDockerImages.OPENSDK_LATEST_DEBUG);
-    dockerImagesList.add(KnownDockerImages.OPENSDK_7);
-    dockerImagesList.add(KnownDockerImages.OPENSDK_7_DEBUG);
-    dockerImagesList.add(KnownDockerImages.OPENSDK_8);
-    dockerImagesList.add(KnownDockerImages.OPENSDK_8_DEBUG);
-    dockerImagesList.add(KnownDockerImages.OPENSDK_9);
-    dockerImagesList.add(KnownDockerImages.OPENSDK_9_DEBUG);
+    dockerImagesList.add(KnownDockerImages.OPENJDK_LATEST);
+    dockerImagesList.add(KnownDockerImages.OPENJDK_LATEST_DEBUG);
+    dockerImagesList.add(KnownDockerImages.OPENJDK_7);
+    dockerImagesList.add(KnownDockerImages.OPENJDK_7_DEBUG);
+    dockerImagesList.add(KnownDockerImages.OPENJDK_8);
+    dockerImagesList.add(KnownDockerImages.OPENJDK_8_DEBUG);
+    dockerImagesList.add(KnownDockerImages.OPENJDK_9);
+    dockerImagesList.add(KnownDockerImages.OPENJDK_9_DEBUG);
 
     return dockerImagesList;
   }

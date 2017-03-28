@@ -75,4 +75,16 @@ public class AzureSelectDockerWizard extends Wizard {
 		return dockerManager;
 	}
 
+	public void setPredefinedDockerfileOptions(String artifactFileName) {
+		if (azureConfigureDockerContainerStep != null) {
+			azureConfigureDockerContainerStep.setPredefinedDockerfileOptions(artifactFileName);
+		}
+	}
+
+	public void setDockerContainerName(String dockerContainerName) {
+		if (azureConfigureDockerContainerStep != null) {
+			azureConfigureDockerContainerStep.setDockerContainerName(dockerContainerName);
+		}
+	}
+	
 }
