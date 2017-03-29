@@ -23,6 +23,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -46,6 +47,7 @@ import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.KnownDockerImages;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
+import com.microsoft.azuretools.docker.ui.wizards.createhost.AzureNewDockerWizard;
 
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -53,6 +55,8 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.ModifyEvent;
 
 public class AzureConfigureDockerContainerStep extends WizardPage {
+	private static final Logger log =  Logger.getLogger(AzureConfigureDockerContainerStep.class.getName());
+
 	private Text dockerContainerNameTextField;
 	private Button customDockerfileRadioButton;
 	private Combo dockerfileComboBox;
@@ -170,7 +174,7 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 		errMsgForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
 		errMsgForm.setBackground(mainContainer.getBackground());
 		errDispatcher = managedForm.getMessageManager();
-		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);
+//		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);
 		
 		initUIMainContainer(mainContainer);
 	}
@@ -201,6 +205,8 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 		        dockerfileComboBox.setEnabled(true);
 		        customDockerfileTextField.setEnabled(false);
 		        customDockerfileBrowseButton.setEnabled(false);
+				errDispatcher.removeMessage("customDockerfileTextField", customDockerfileTextField);
+				setErrorMessage(null);
 				setPageComplete(doValidate());
 			}
 		});

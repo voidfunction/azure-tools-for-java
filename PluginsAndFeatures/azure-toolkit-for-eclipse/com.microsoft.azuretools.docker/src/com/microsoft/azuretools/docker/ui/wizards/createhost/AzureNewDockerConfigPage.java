@@ -22,6 +22,7 @@ package com.microsoft.azuretools.docker.ui.wizards.createhost;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -61,6 +62,7 @@ import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azuretools.docker.ui.wizards.publish.AzureSelectDockerHostPage;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import org.eclipse.swt.widgets.TabFolder;
@@ -70,6 +72,8 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
 public class AzureNewDockerConfigPage extends WizardPage {
+	private static final Logger log =  Logger.getLogger(AzureNewDockerConfigPage.class.getName());
+
 	private Text dockerHostNameTextField;
 	private ComboViewer dockerSubscriptionComboViewer;
 	private Combo dockerSubscriptionCombo;

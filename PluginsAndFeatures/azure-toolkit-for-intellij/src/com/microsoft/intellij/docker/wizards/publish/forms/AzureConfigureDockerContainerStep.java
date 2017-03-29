@@ -83,7 +83,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
     dockerContainerNameTextField.setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {
-        if (AzureDockerValidationUtils.validateDockerImageName(((JTextField) input).getText())) {
+        if (AzureDockerValidationUtils.validateDockerContainerName(((JTextField) input).getText())) {
           dockerContainerNameLabel.setVisible(false);
           setDialogButtonsState(doValidate(false) == null);
           return true;
@@ -94,7 +94,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
         }
       }
     });
-    dockerContainerNameTextField.getDocument().addDocumentListener(resetDialogButtonsState(null));
+    dockerContainerNameTextField.getDocument().addDocumentListener(resetDialogButtonsState(dockerContainerNameLabel));
     dockerContainerNameLabel.setVisible(false);
 
     selectContainerButtonGroup = new ButtonGroup();
@@ -142,7 +142,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
         }
       }
     });
-    customDockerfileBrowseButton.getTextField().getDocument().addDocumentListener(resetDialogButtonsState(null));
+    customDockerfileBrowseButton.getTextField().getDocument().addDocumentListener(resetDialogButtonsState(customDockerfileBrowseLabel));
     customDockerfileBrowseLabel.setVisible(false);
     customDockerfileBrowseButton.setText("");
 
@@ -187,7 +187,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
         }
       }
     });
-    dockerContainerPortSettings.getDocument().addDocumentListener(resetDialogButtonsState(null));
+    dockerContainerPortSettings.getDocument().addDocumentListener(resetDialogButtonsState(dockerContainerPortSettingsLabel));
     dockerContainerPortSettingsLabel.setVisible(false);
 
   }
@@ -206,6 +206,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
       if (shakeOnError) model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
+    dockerContainerNameLabel.setVisible(false);
     dockerImageDescription.dockerContainerName = dockerContainerNameTextField.getText();
     dockerContainerNameLabel.setVisible(false);
 
@@ -237,6 +238,7 @@ public class AzureConfigureDockerContainerStep extends AzureSelectDockerWizardSt
 
       try {
         dockerImageDescription.dockerfileContent = new String(Files.readAllBytes(Paths.get(customDockerfileBrowseButton.getText())));
+        customDockerfileBrowseLabel.setVisible(true);
       } catch (Exception e) {
         customDockerfileBrowseLabel.setVisible(true);
         setDialogButtonsState(false);

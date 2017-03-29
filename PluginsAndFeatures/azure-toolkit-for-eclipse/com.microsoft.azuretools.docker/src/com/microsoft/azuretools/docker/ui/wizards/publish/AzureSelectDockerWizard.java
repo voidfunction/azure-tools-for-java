@@ -38,9 +38,10 @@ public class AzureSelectDockerWizard extends Wizard {
 	private AzureDockerHostsManager dockerManager;
 	private AzureDockerImageInstance dockerImageDescription;
 
-	public AzureSelectDockerWizard(final IProject project, AzureDockerHostsManager dockerManager) {
+	public AzureSelectDockerWizard(final IProject project, AzureDockerHostsManager dockerManager, AzureDockerImageInstance dockerImageDescription) {
 	    this.project = project;
 	    this.dockerManager = dockerManager;
+	    this.dockerImageDescription = dockerImageDescription;
 
 	    azureSelectDockerHostPage = new AzureSelectDockerHostPage(this);
 	    azureConfigureDockerContainerStep = new AzureConfigureDockerContainerStep(this);

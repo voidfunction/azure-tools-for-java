@@ -6,13 +6,20 @@ Bundle-Version: 3.0.0.qualifier
 Bundle-Activator: com.microsoft.azuretools.docker.Activator
 Bundle-Vendor: MICROSOFT
 Require-Bundle: org.eclipse.ui,
+ org.eclipse.wst.common.frameworks,
+ org.eclipse.jst.j2ee,
+ org.eclipse.jst.j2ee.web,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
  com.microsoft.azuretools.core;bundle-version="3.0.0",
  com.microsoft.azuretools.sdk;bundle-version="3.0.0",
  org.eclipse.swt,
- org.eclipse.ui.forms
+ org.eclipse.ui.forms,
+ org.eclipse.ui.views
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  swing2swt.jar
+Import-Package: org.eclipse.jst.j2ee.datamodel.properties,
+ org.eclipse.jst.j2ee.internal.web.archive.operations,
+ org.eclipse.wst.common.frameworks.datamodel

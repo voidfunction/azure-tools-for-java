@@ -45,8 +45,7 @@ import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 public class AzureNewDockerWizard extends Wizard {
-
-	private static final Logger log =  Logger.getLogger(AzureDockerUIResources.class.getName());
+	private static final Logger log =  Logger.getLogger(AzureNewDockerWizard.class.getName());
 	
 	private AzureNewDockerConfigPage azureNewDockerConfigPage;
 	private AzureNewDockerLoginPage azureNewDockerLoginPage;
