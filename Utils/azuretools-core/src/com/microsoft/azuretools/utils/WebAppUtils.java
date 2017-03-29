@@ -175,11 +175,12 @@ public class WebAppUtils {
         return false;
     }
 
-    public static void sendGet(String sitePath) throws IOException {
+    public static int sendGet(String sitePath) throws IOException {
         URL url = new URL(sitePath);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setReadTimeout(Constants.connection_read_timeout_ms);
+        return con.getResponseCode();
         //con.setRequestProperty("User-Agent", "AzureTools for Intellij");
     }
 
@@ -232,8 +233,8 @@ public class WebAppUtils {
             ftp = getFtpConnection(pp);
 
             // stop and restart web app
-            if (indicator != null) indicator.setText("Stopping the service...");
-            webApp.stop();
+//            if (indicator != null) indicator.setText("Stopping the service...");
+//            webApp.stop();
 
             if (indicator != null) indicator.setText("Deleting custom jdk artifacts, if any (takes a while)...");
             removeCustomJdkArtifacts(ftp, indicator);
@@ -241,11 +242,15 @@ public class WebAppUtils {
             if (indicator != null) indicator.setText("Uploading scripts...");
             uploadJdkDownloadScript(ftp, jdkDownloadUrl);
 
-            if (indicator != null) indicator.setText("Starting the service...");
-            webApp.start();
+//            if (indicator != null) indicator.setText("Starting the service...");
+//            webApp.start();
+
+            final String siteUrl = "https://" + webApp.defaultHostName();
+
+            // send get to activate the script
+            sendGet(siteUrl);
 
             // Polling report.txt...
-            final String siteUrl = "https://" + webApp.defaultHostName();
             if (indicator != null) indicator.setText("Checking the JDK gets downloaded and unpacked...");
             //int step = 0;
             while (!doesRemoteFileExist(ftp, ftpRootPath, reportFilename)) {
