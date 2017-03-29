@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 public class AzureDockerValidationUtils {
 
   public static boolean validateDockerImageName(String name) {
-    return (name != null && name.length() > 0 && name.length() < 26 && name.matches("^[a-z0-9][a-z0-9_-]*[a-z0-9_-]$"));
+    return (name != null && name.length() > 0 && name.length() < 64 && name.matches("^[a-z0-9][a-z0-9_-]*[a-z0-9_-]$"));
   }
 
   public static String getDockerImageNameTip() {
@@ -43,7 +43,7 @@ public class AzureDockerValidationUtils {
   }
 
   public static boolean validateDockerContainerName(String name) {
-    return (name != null && name.length() > 0 && name.length() < 26 && name.matches("^[a-z0-9][a-z0-9_-]*[a-z0-9_-]$"));
+    return (name != null && name.length() > 0 && name.length() < 64 && name.matches("^[a-z0-9][a-z0-9_-]*[a-z0-9_-]$"));
   }
 
   public static String getDockerContainerNameTip() {

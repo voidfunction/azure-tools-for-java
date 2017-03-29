@@ -143,7 +143,7 @@ public class LibrariesConfigurationDialog extends DialogWrapper {
                     }
                 }
                 Library.ModifiableModel newLibraryModel = newLibrary.getModifiableModel();
-                // if there is separate srosources folder
+                // if there is separate resources folder
                 if (azureLibrary.getLocation() != null) {
                     File file = new File(String.format("%s%s%s", AzurePlugin.pluginFolder, File.separator, azureLibrary.getLocation()));
                     AddLibraryUtility.addLibraryRoot(file, newLibraryModel);
