@@ -69,6 +69,8 @@ public class AzureDockerHostDeployHandler extends AbstractHandler {
 //				WebAppDeployDialog d = WebAppDeployDialog.go(window.getShell(), project);
 				
 				try {
+					AzureDockerUIResources.createArtifact(shell, project);
+					
 					AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
 
 					// not signed in

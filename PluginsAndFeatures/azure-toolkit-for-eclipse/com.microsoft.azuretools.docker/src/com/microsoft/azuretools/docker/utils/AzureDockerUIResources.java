@@ -20,17 +20,22 @@
 package com.microsoft.azuretools.docker.utils;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jst.j2ee.datamodel.properties.IJ2EEComponentExportDataModelProperties;
+import org.eclipse.jst.j2ee.internal.web.archive.operations.WebComponentExportDataModelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
+import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerCertVault;
@@ -201,6 +206,53 @@ public class AzureDockerUIResources {
 		createDockerHostJob.schedule();		
 	}
 	
+	public static void createArtifact(Shell shell, IProject project) {
+        String projectName = project.getName();
+        String destinationPath = project.getLocation() + "/" + projectName + ".war";
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
+		try {
+			dialog.run(true, true, new IRunnableWithProgress(){
+				public void run(IProgressMonitor progressMonitor) {
+					progressMonitor.beginTask("Creating WAR artifact", 100);
+					try {
+						progressMonitor.subTask(String.format("Building selected project: %s ...", project.getName()));
+						progressMonitor.worked(35);
+				        project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+						
+						progressMonitor.subTask("Exporting to WAR ...");
+						progressMonitor.worked(75);
+				        IDataModel dataModel = DataModelFactory.createDataModel(new WebComponentExportDataModelProvider());
+				        dataModel.setProperty(IJ2EEComponentExportDataModelProperties.PROJECT_NAME, projectName);
+				        dataModel.setProperty(IJ2EEComponentExportDataModelProperties.ARCHIVE_DESTINATION, destinationPath);
+
+				        dataModel.getDefaultOperation().execute(null, null);
+						
+//						progressMonitor.subTask("");
+//						progressMonitor.worked(1);
+//						if (progressMonitor.isCanceled()) {
+//							if (displayWarningOnCreateKeyVaultCancelAction() == 0) {
+//								progressMonitor.done();
+//								return Status.CANCEL_STATUS;
+//							}
+//						}
+	//
+			            progressMonitor.done();
+					} catch (Exception e) {
+						String msg = "An error occurred while attempting to create WAR artifact" + "\n" + e.getMessage();
+						log.log(Level.SEVERE, "createArtifact: " + msg, e);
+						e.printStackTrace();
+					}
+					
+					progressMonitor.done();
+				}
+			});
+		} catch (Exception e) {
+			CANCELED = true;
+			log.log(Level.SEVERE, "updateAzureResourcesWithProgressDialog: " + e.getMessage(), e);
+			e.printStackTrace();
+		}
+	}
+
 	private static int displayWarningOnCreateKeyVaultCancelAction(){
 		Display currentDisplay = Display.getCurrent();
 		Shell shell = currentDisplay.getActiveShell();
@@ -219,5 +271,7 @@ public class AzureDockerUIResources {
 		Display display = Display.getCurrent();
 		return display.getSystemColor(systemColorID);
 	}
+	
+	
 
 }
