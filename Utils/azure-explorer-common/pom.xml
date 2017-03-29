@@ -136,5 +136,12 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/../../PluginsAndFeatures/AddLibrary/AzureLibraries/com.microsoft.azuretools.sdk/dependencies/applicationinsights-core-1.0.3.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>applicationinsights-management</artifactId>
+            <version>1.0.3</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../PluginsAndFeatures/AddLibrary/AzureLibraries/com.microsoft.azuretools.sdk/dependencies/applicationinsights-management-1.0.3.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>
