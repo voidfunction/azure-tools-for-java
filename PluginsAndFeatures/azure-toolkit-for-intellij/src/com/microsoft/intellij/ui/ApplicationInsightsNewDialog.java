@@ -21,17 +21,24 @@
  */
 package com.microsoft.intellij.ui;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TitlePanel;
+import com.intellij.ui.ListCellRendererWrapper;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.utils.AzureModel;
+import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
@@ -51,9 +58,11 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
     private JComboBox comboSub;
     private JComboBox comboGrp;
     private JComboBox comboReg;
-    private JButton btnNew;
-    Map<String, Subscription> subMap = new HashMap<String, Subscription>();
-    private Subscription currentSub;
+    private JRadioButton createNewBtn;
+    private JRadioButton useExistingBtn;
+    private JTextField textGrp;
+    Map<String, SubscriptionDetail> subMap = new HashMap<String, SubscriptionDetail>();
+    private SubscriptionDetail currentSub;
     static ApplicationInsightsResource resourceToAdd;
     private AzureManager azureManager;
 
@@ -75,7 +84,28 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
     protected void init() {
         super.init();
         comboSub.addItemListener(subscriptionListener());
-        btnNew.addActionListener(newBtnListener());
+        final ButtonGroup resourceGroup = new ButtonGroup();
+        resourceGroup.add(createNewBtn);
+        resourceGroup.add(useExistingBtn);
+        final ItemListener updateListener = new ItemListener() {
+            public void itemStateChanged(final ItemEvent e) {
+                final boolean isNewGroup = createNewBtn.isSelected();
+                textGrp.setEnabled(isNewGroup);
+                comboGrp.setEnabled(!isNewGroup);
+            }
+        };
+        createNewBtn.addItemListener(updateListener);
+        useExistingBtn.addItemListener(updateListener);
+        comboReg.setRenderer(new ListCellRendererWrapper<Object>() {
+
+            @Override
+            public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
+                if (o != null && (o instanceof Location)) {
+                    setText("  " + ((Location)o).displayName());
+                }
+            }
+        });
+        createNewBtn.setSelected(true);
         populateValues();
     }
 
@@ -83,62 +113,68 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
         return new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                Subscription newSub = (Subscription) comboSub.getSelectedItem();
+                SubscriptionDetail newSub = (SubscriptionDetail) comboSub.getSelectedItem();
                 String prevResGrpVal = (String) comboGrp.getSelectedItem();
                 if (currentSub.equals(newSub)) {
-                    populateResourceGroupValues(currentSub.subscriptionId(), prevResGrpVal);
+                    populateResourceGroupValues(currentSub.getSubscriptionId(), prevResGrpVal);
                 } else {
-                    populateResourceGroupValues(currentSub.subscriptionId(), "");
+                    populateResourceGroupValues(currentSub.getSubscriptionId(), "");
                 }
                 currentSub = newSub;
             }
         };
     }
 
-    private ActionListener newBtnListener() {
-        return new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Subscription sub = (Subscription) comboSub.getSelectedItem();
-                NewResourceGroupDialog newResourceGroupDialog = new NewResourceGroupDialog(sub);
-                newResourceGroupDialog.show();
-                // populate data in storage registry dialog
-                if (newResourceGroupDialog.isOK()) {
-                    throw new NotImplementedException();
-/*
-                    ResourceGroupExtended group = NewResourceGroupDialog.getResourceGroup();
-                    if (group != null) {
-                        populateResourceGroupValues(findKeyAsPerValue(subTxt), group.getName());
-                    }
-*/
-                }
-            }
-        };
-    }
-
     private void populateValues() {
         try {
-            List<Subscription> subList = azureManager.getSubscriptions();
+            List<SubscriptionDetail> subList = azureManager.getSubscriptionManager().getSubscriptionDetails();
             // check at least single subscription is associated with the account
             if (subList.size() > 0) {
-                for (Subscription sub : subList) {
-                    subMap.put(sub.subscriptionId(), sub);
+                for (SubscriptionDetail sub : subList) {
+                    subMap.put(sub.getSubscriptionId(), sub);
                 }
                 comboSub.setModel(new DefaultComboBoxModel(subList.toArray()));
                 comboSub.setSelectedIndex(0);
                 currentSub = subList.get(0);
 
-                populateResourceGroupValues(currentSub.subscriptionId(), "");
-                btnNew.setEnabled(true);
+                populateResourceGroupValues(currentSub.getSubscriptionId(), "");
 
-                List<Location> regionList =currentSub.listLocations();
-                comboReg.setModel(new DefaultComboBoxModel(regionList.toArray()));
+                Map<SubscriptionDetail, List<Location>> subscription2Location = AzureModel.getInstance().getSubscriptionToLocationMap();
+                if (subscription2Location == null || subscription2Location.get(currentSub) == null) {
+                    final DefaultComboBoxModel<String> loadingModel = new DefaultComboBoxModel<>(new String[]{"<Loading...>"});
+                    comboReg.setModel(loadingModel);
+                    DefaultLoader.getIdeHelper().runInBackground(null, "Loading Available Locations...", false, true, "Loading Available Locations...", new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                AzureModelController.updateSubscriptionMaps(null);
+                                ApplicationManager.getApplication().invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        fillRegions();
+                                    }
+                                });
+                            } catch (Exception ex) {
+                                PluginUtil.displayErrorDialogInAWTAndLog("Error", "Error loading locations", ex);
+                            }
+                        }
+                    });
+                } else {
+                    fillRegions();
+                }
                 comboReg.setSelectedIndex(0);
-            } else {
-                btnNew.setEnabled(false);
             }
         } catch (Exception ex) {
             AzurePlugin.log(message("getValuesErrMsg"), ex);
+        }
+    }
+
+    private void fillRegions() {
+        List<Location> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(currentSub)
+                .stream().sorted(Comparator.comparing(Location::displayName)).collect(Collectors.toList());
+        comboReg.setModel(new DefaultComboBoxModel(locations.toArray()));
+        if (locations.size() > 0) {
+//            selectRegion();
         }
     }
 
@@ -188,13 +224,11 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
             }
         } else {
             try {
-//                String subId = findKeyAsPerValue((String) comboSub.getSelectedItem());
-                // TODO
-//                Resource resource = AzureManagerImpl.getManager().createApplicationInsightsResource(subId, (String) comboGrp.getSelectedItem(),
-//                        txtName.getText(), (String) comboReg.getSelectedItem());
-//                resourceToAdd = new ApplicationInsightsResource(resource.getName(), resource.getInstrumentationKey(),
-//                        (String) comboSub.getSelectedItem(), subId, resource.getLocation(),
-//                        resource.getResourceGroup(), true);
+                Resource resource = AzureSDKManager.createApplicationInsightsResource(currentSub, (String) comboGrp.getSelectedItem(),
+                        txtName.getText(), (String) comboReg.getSelectedItem());
+                resourceToAdd = new ApplicationInsightsResource(resource.getName(), resource.getInstrumentationKey(),
+                        (String) comboSub.getSelectedItem(), currentSub.getSubscriptionId(), resource.getLocation(),
+                        resource.getResourceGroup(), true);
                 isValid = true;
             } catch (Exception ex) {
                 PluginUtil.displayErrorDialogAndLog(message("aiErrTtl"), message("resCreateErrMsg"), ex);

@@ -21,6 +21,9 @@
  */
 package com.microsoft.tooling.msservices.helpers.azure.sdk;
 
+import com.microsoft.applicationinsights.management.rest.ApplicationInsightsManagementClient;
+import com.microsoft.applicationinsights.management.rest.client.RestOperationException;
+import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.KnownLinuxVirtualMachineImage;
@@ -38,16 +41,16 @@ import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.Nullable;
 import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 
+import java.io.IOException;
+import java.util.List;
+
 public class AzureSDKManager {
-    public static Azure createAzure(String subscriptionId) throws Exception {
-        AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-        return azureManager.getAzure(subscriptionId);
-    }
 
     public static StorageAccount createStorageAccount(String subscriptionId, String name, String region, boolean newResourceGroup, String resourceGroup,
                                                       Kind kind, AccessTier accessTier, boolean enableEncription, String skuName) throws Exception {
@@ -184,5 +187,35 @@ public class AzureSDKManager {
             withCreate = withCreate.withExistingAvailabilitySet(availabilitySet);
         }
         return withCreate.create();
+    }
+
+    public static List<Resource> getApplicationInsightsResources(@NotNull SubscriptionDetail subscription) throws Exception {
+        AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+        if (azureManager == null) { // not signed in
+            return null;
+        }
+        String tenantId = subscription.getTenantId();
+        return getApplicationManagementClient(tenantId, azureManager.getAccessToken(tenantId)).getResources(subscription.getSubscriptionId());
+    }
+
+    public static Resource createApplicationInsightsResource(@NotNull SubscriptionDetail subscription,
+                                                      @NotNull String resourceGroupName,
+                                                      @NotNull String resourceName,
+                                                      @NotNull String location) throws Exception {
+
+        AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+        if (azureManager == null) { // not signed in
+            return null;
+        }
+        String tenantId = subscription.getTenantId();
+        return getApplicationManagementClient(tenantId, azureManager.getAccessToken(tenantId))
+                .createResource(subscription.getSubscriptionId(), resourceGroupName, resourceName, location);
+    }
+
+    @NotNull
+    public static ApplicationInsightsManagementClient getApplicationManagementClient(@NotNull String tenantId, @NotNull String accessToken)
+            throws RestOperationException, IOException {
+        String userAgent = "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:19.0) Gecko/20100101 Firefox/19.0";
+        return new ApplicationInsightsManagementClient(tenantId, accessToken, userAgent);
     }
 }

@@ -77,7 +77,6 @@ public class AzurePlugin extends AbstractProjectComponent {
     private static final Logger LOG = Logger.getInstance("#com.microsoft.intellij.AzurePlugin");
     public static final String PLUGIN_VERSION = CommonConst.PLUGIN_VERISON;
     public static final String AZURE_LIBRARIES_VERSION = "beta4.1";
-    public static final String QPID_LIBRARIES_VERSION = "0.19.0";
     public static final String JDBC_LIBRARIES_VERSION = "6.0.7507.100";
     public final static int REST_SERVICE_MAX_RETRY_COUNT = 7;
 
@@ -87,17 +86,12 @@ public class AzurePlugin extends AbstractProjectComponent {
     public static boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
     public static boolean IS_ANDROID_STUDIO = "AndroidStudio".equals(PlatformUtils.getPlatformPrefix());
 
-    private static final String COMPONENTSETS_TYPE = "COMPONENTSETS";
-    private static final String PREFERENCESETS_TYPE = "PREFERENCESETS";
-
-    public static File cmpntFile = new File(WAHelper.getTemplateFile(message("cmpntFileName")));
-    public static String prefFilePath = WAHelper.getTemplateFile(message("prefFileName"));
     public static String pluginFolder = PluginUtil.getPluginRootDirectory();
 
     private static final EventListenerList DEPLOYMENT_EVENT_LISTENERS = new EventListenerList();
     public static List<DeploymentEventListener> depEveList = new ArrayList<DeploymentEventListener>();
 
-    String dataFile = WAHelper.getTemplateFile(message("dataFileName"));
+    private String dataFile = WAHelper.getTemplateFile(message("dataFileName"));
 
     private final AzureSettings azureSettings;
 

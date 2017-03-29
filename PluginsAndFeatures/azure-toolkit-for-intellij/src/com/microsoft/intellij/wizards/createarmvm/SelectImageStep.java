@@ -67,7 +67,7 @@ import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 public class SelectImageStep extends WizardStep<VMWizardModel> {
     private JPanel rootPanel;
     private JList createVmStepsList;
-    private JComboBox<String> regionComboBox;
+    private JComboBox regionComboBox;
 
     private JList imageLabelList;
     private JComboBox publisherComboBox;

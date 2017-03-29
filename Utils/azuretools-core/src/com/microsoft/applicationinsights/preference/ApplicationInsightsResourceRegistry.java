@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.microsoft.applicationinsights.management.rest.model.Resource;
-import com.microsoft.azure.management.resources.Subscription;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 
 public class ApplicationInsightsResourceRegistry {
 	/**
@@ -211,12 +211,12 @@ public class ApplicationInsightsResourceRegistry {
 	 * @return
 	 */
 	public static List<ApplicationInsightsResource> prepareAppResListFromRes(
-			List<Resource> resourceList, Subscription sub) {
+			List<Resource> resourceList, SubscriptionDetail sub) {
 		List<ApplicationInsightsResource> list = new ArrayList<ApplicationInsightsResource>();
 		for (Resource resource : resourceList) {
 			ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
 					resource.getName(), resource.getInstrumentationKey(),
-					sub.displayName(), sub.subscriptionId(),
+					sub.toString(), sub.getSubscriptionId(),
 					resource.getLocation(), resource.getResourceGroup(), true);
 			list.add(resourceToAdd);
 		}
