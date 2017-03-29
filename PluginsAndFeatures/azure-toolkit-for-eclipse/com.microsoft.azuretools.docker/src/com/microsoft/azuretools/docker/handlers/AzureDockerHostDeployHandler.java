@@ -20,6 +20,8 @@
 package com.microsoft.azuretools.docker.handlers;
 
 import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.docker.ui.wizards.createhost.AzureNewDockerWizard;
@@ -92,7 +94,9 @@ public class AzureDockerHostDeployHandler extends AbstractHandler {
 						return null;
 					}
 					
-					AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager);
+					DockerHost dockerHost = (dockerManager.getDockerPreferredSettings() != null) ? dockerManager.getDockerHostForURL(dockerManager.getDockerPreferredSettings().dockerApiName) : null;
+					AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
+					AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager, dockerImageDescription);
 					WizardDialog selectDockerHostDialog = new WizardDialog(shell, selectDockerWizard);
 					if (selectDockerHostDialog.open() == Window.OK) {
 

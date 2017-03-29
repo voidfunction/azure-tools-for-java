@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
@@ -212,6 +213,11 @@ public class AzureDockerUIResources {
 		}
 		
 		return 1;
+	}
+	
+	public static Color getColor(int systemColorID) {
+		Display display = Display.getCurrent();
+		return display.getSystemColor(systemColorID);
 	}
 
 }

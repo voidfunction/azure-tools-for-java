@@ -19,6 +19,8 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.createhost;
 
+import java.util.logging.Logger;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.WizardPage;
@@ -56,6 +58,8 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.ModifyEvent;
 
 public class AzureNewDockerLoginPage extends WizardPage {
+	private static final Logger log =  Logger.getLogger(AzureNewDockerLoginPage.class.getName());
+
 	private Button dockerHostImportKeyvaultCredsRadioButton;
 	private Combo dockerHostImportKeyvaultComboBox;
 	
