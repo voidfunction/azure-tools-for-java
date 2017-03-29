@@ -116,7 +116,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
             }
         };
         createNewRadioButton.addItemListener(updateListener);
-        createNewRadioButton.addItemListener(updateListener);
+        useExistingRadioButton.addItemListener(updateListener);
 
         storageComboBox.setRenderer(new ListCellRendererWrapper<Object>() {
             @Override
@@ -417,7 +417,11 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                     showNewStorageForm();
                 } else {
                     super.setSelectedItem(o);
-                    model.setStorageAccount((StorageAccount) o);
+                    if (o instanceof StorageAccount) {
+                        model.setStorageAccount((StorageAccount) o);
+                    } else {
+                        model.setStorageAccount(null); // creating new storage account
+                    }
                 }
             }
         };
@@ -736,7 +740,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
     }
 
     private void validateFinish() {
-        model.getCurrentNavigationState().FINISH.setEnabled(storageComboBox.getSelectedItem() instanceof StorageAccount &&
+        model.getCurrentNavigationState().FINISH.setEnabled(((storageComboBox.getSelectedItem() instanceof StorageAccount) || model.isWithNewStorageAccount()) &&
                 (!subnetComboBox.isEnabled() || subnetComboBox.getSelectedItem() instanceof String));
     }
 
