@@ -30,11 +30,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
@@ -55,6 +56,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 import com.google.gson.Gson;
+import com.microsoft.azuretools.adauth.StringUtils;
 import com.microsoft.azuretools.authmanage.CommonSettings;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
@@ -187,26 +189,30 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
     
     private void findObsoletePackages(BundleContext context) {
     	/// Fix Issue : https://github.com/Microsoft/azure-tools-for-java/issues/188
-    	Map<String, String> obsoletePackageMap = new HashMap<String, String>();
-		obsoletePackageMap.put("com.microsoftopentechnologies.acsfilter.ui", "Azure Access Control Services Filter UI");
-		obsoletePackageMap.put("com.microsoft.webapp", "Azure Web Apps Plugin for Java");
-		obsoletePackageMap.put("com.persistent.winazure.eclipseplugin", "Azure Plugin for Eclipse with Java Library");
-		obsoletePackageMap.put("com.microsoftopentechnologies.acsfilter.feature", "Azure Access Control Services Filter");
-		obsoletePackageMap.put("com.microsoftopentechnologies.wacommon.feature", "Azure Common Plugin");
-		obsoletePackageMap.put("com.microsoftopentechnologies.qpid.feature", "Package for Apache Qpid Client Libraries for JMS");
-		obsoletePackageMap.put("com.microsoftopentechnologies.windowsazure.tools.wasdkjava.ui", "Package for Microsoft Azure Libraries for Java UI");
-		obsoletePackageMap.put("com.microsoft.azureexplorer.feature", "Azure Explorer for Eclipse");
-		obsoletePackageMap.put("com.persistent.winazure.eclipseplugin.feature", "Azure Plugin for Eclipse with Java");
-		obsoletePackageMap.put("com.microsoft.hdinsights", "HDInsights");
-		obsoletePackageMap.put("com.microsoftopentechnologies.wacommon", "Azure Common Plugin Library");
-		obsoletePackageMap.put("com.microsoft.hdinsights.feature", "Azure HDInsight plugin for Java");
-		obsoletePackageMap.put("com.microsoft.azureexplorer", "Azure Explorer Plugin for Eclipse");
-		obsoletePackageMap.put("com.microsoft.webapp.feature", "Azure Web Apps Plugin for Java");
-		obsoletePackageMap.put("com.microsoftopentechnologies.acsfilter", "Azure Access Control Services Filter Library");
-		obsoletePackageMap.put("com.microsoftopentechnologies.windowsazure.tools.sdk", "Package for Microsoft Azure Libraries for Java Plugin");
-		obsoletePackageMap.put("com.microsoftopentechnologies.windowsazure.tools.sdk.feature", "Package for Microsoft Azure Libraries for Java");
-		obsoletePackageMap.put("com.microsoftopentechnologies.qpid.ui", "Package for Apache Qpid Client Libraries for JMS UI");
-		obsoletePackageMap.put("com.microsoftopentechnologies.qpid", "Package for Apache Qpid Client Libraries for JMS Library");
+		Map<String, String> obsoletePackageMap = new HashMap<String, String>();
+		BufferedReader reader = null;
+		try {
+			Properties prop = new Properties();
+			reader = new BufferedReader(new FileReader(getResourceAsFile("/resources/obsolete_packages.properties")));
+			prop.load(reader);
+			Enumeration<?> e = prop.propertyNames();
+
+			while (e.hasMoreElements()) {
+				String key = (String) e.nextElement();
+				if (!StringUtils.isNullOrWhiteSpace(key)) {
+					obsoletePackageMap.put(key, prop.getProperty(key));
+				}
+			}
+		} catch (IOException ex) {
+			log("findObsoletePackages@Activator", ex);
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException ignored) {
+				}
+			}
+		}
 		obsoletePackages = new HashSet<String>();
 		Bundle[] bundles = context.getBundles();
 		for (int i = 0; i < bundles.length; ++i) {
