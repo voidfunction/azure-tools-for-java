@@ -27,7 +27,7 @@ GOTO SUCCESS
 ECHO -------------------------------------------------------------------------------
 ECHO building %1
 ECHO -------------------------------------------------------------------------------
-CALL mvn install -f %2
+CALL mvn clean install -f %2
 IF NOT %ERRORLEVEL% EQU 0 ECHO Fail to build %1... && EXIT /b 1
 GOTO EOF
 
