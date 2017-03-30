@@ -135,73 +135,27 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
 
     private void loadInfoFirstTime() {
         try {
-            AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-            // not signed in
-            if (azureManager == null) {
-                return;
-            }
-            List<SubscriptionDetail> subList = azureManager.getSubscriptionManager().getSubscriptionDetails();
-            if (subList.size() > 0) {
+            if (AuthMethodManager.getInstance().isSignedIn()) {
+                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                List<SubscriptionDetail> subList = azureManager.getSubscriptionManager().getSubscriptionDetails();
+                if (subList.size() > 0) {
 //                if (!AzureSettings.getSafeInstance(myProject).isAppInsightsLoaded()) {
                     updateApplicationInsightsResourceRegistry(subList, myProject);
-                    if (AuthMethodManager.getInstance().isSignedIn()) {
-                        // authenticated using AD. Proceed for updating application insights registry.
-                        updateApplicationInsightsResourceRegistry(subList, myProject);
-                    } else {
-                        // imported publish settings file. just show manually added list from preferences
-                        // Neither clear subscription list nor show sign in dialog as user may just want to add key manually.
-                        keeepManuallyAddedList(myProject);
-                    }
+                } else {
+                    // imported publish settings file. just show manually added list from preferences
+                    // Neither clear subscription list nor show sign in dialog as user may just want to add key manually.
+                    keeepManuallyAddedList(myProject);
+                }
 //                } else {
-                    // show list from preferences - getTableContent() does it. So nothing to handle here
+                // show list from preferences - getTableContent() does it. So nothing to handle here
 //                }
             } else {
                 // just show manually added list from preferences
                 keeepManuallyAddedList(myProject);
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             AzurePlugin.log(ex.getMessage(), ex);
         }
-    }
-
-    private void createSubscriptionDialog(boolean invokeSignIn) {
-//        try {
-//            final ManageSubscriptionPanel manageSubscriptionPanel = new ManageSubscriptionPanel(myProject, false);
-//            final DefaultDialogWrapper subscriptionsDialog = new DefaultDialogWrapper(myProject, manageSubscriptionPanel) {
-//                @Nullable
-//                @Override
-//                protected JComponent createSouthPanel() {
-//                    return null;
-//                }
-//                @Override
-//                protected JComponent createTitlePane() {
-//                    return null;
-//                }
-//            };
-//            manageSubscriptionPanel.setDialog(subscriptionsDialog);
-            //TODO
-//            JButton signInBtn = manageSubscriptionPanel.getSignInButton();
-//            if (invokeSignIn && signInBtn != null && signInBtn.getText().equalsIgnoreCase("Sign In...")) {
-//                signInBtn.doClick();
-//            }
-            /*subscriptionsDialog.show();
-            com.microsoft.azuretools.sdkmanage.AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
-            // not signed in
-            if (azureManager == null) {
-                return;
-            }
-            List<Subscription> subList =
-                    AzureManagerImpl.getManager(myProject).getSubscriptionList();
-            if (subList.size() == 0) {
-                keeepManuallyAddedList(myProject);
-            } else {
-                updateApplicationInsightsResourceRegistry(subList, myProject);
-            }
-            ((InsightsTableModel) insightsTable.getModel()).setResources(getTableContent());
-            ((InsightsTableModel) insightsTable.getModel()).fireTableDataChanged();
-        } catch(Exception ex) {
-            PluginUtil.displayErrorDialog(message("errTtl"), message("importErrMsg"));
-        }*/
     }
 
     private List<ApplicationInsightsPageTableElement> getTableContent() {
@@ -220,31 +174,6 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
         elements.setElements(tableRowElements);
         return elements.getElements();
     }
-
-    /*private ActionListener importButtonListener() {
-        return new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    AzureManager manager = AzureManagerImpl.getManager(myProject);
-                    List<Subscription> subList = manager.getSubscriptionList();
-                    if (subList.size() > 0) {
-                        *//**//*if (manager.authenticated()) {
-                            createSubscriptionDialog(false);
-                        } else {*//**//*
-                            // imported publish settings file.
-                            manager.clearImportedPublishSettingsFiles();
-                            WizardCacheManager.clearSubscriptions();
-                            createSubscriptionDialog(true);
-//                        }
-                    } else {
-                        createSubscriptionDialog(true);
-                    }
-                } catch(Exception ex) {
-                    AzurePlugin.log(ex.getMessage(), ex);
-                }
-            }
-        };
-    }*/
 
     public static void updateApplicationInsightsResourceRegistry(List<SubscriptionDetail> subList, Project project) throws Exception {
         for (SubscriptionDetail sub : subList) {

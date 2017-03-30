@@ -96,15 +96,15 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
         };
         createNewBtn.addItemListener(updateListener);
         useExistingBtn.addItemListener(updateListener);
-        comboReg.setRenderer(new ListCellRendererWrapper<Object>() {
-
-            @Override
-            public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
-                if (o != null && (o instanceof Location)) {
-                    setText("  " + ((Location)o).displayName());
-                }
-            }
-        });
+//        comboReg.setRenderer(new ListCellRendererWrapper<Object>() {
+//
+//            @Override
+//            public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
+//                if (o != null && (o instanceof Location)) {
+//                    setText("  " + ((Location)o).displayName());
+//                }
+//            }
+//        });
         createNewBtn.setSelected(true);
         populateValues();
     }
@@ -139,42 +139,13 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
 
                 populateResourceGroupValues(currentSub.getSubscriptionId(), "");
 
-                Map<SubscriptionDetail, List<Location>> subscription2Location = AzureModel.getInstance().getSubscriptionToLocationMap();
-                if (subscription2Location == null || subscription2Location.get(currentSub) == null) {
-                    final DefaultComboBoxModel<String> loadingModel = new DefaultComboBoxModel<>(new String[]{"<Loading...>"});
-                    comboReg.setModel(loadingModel);
-                    DefaultLoader.getIdeHelper().runInBackground(null, "Loading Available Locations...", false, true, "Loading Available Locations...", new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                AzureModelController.updateSubscriptionMaps(null);
-                                ApplicationManager.getApplication().invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        fillRegions();
-                                    }
-                                });
-                            } catch (Exception ex) {
-                                PluginUtil.displayErrorDialogInAWTAndLog("Error", "Error loading locations", ex);
-                            }
-                        }
-                    });
-                } else {
-                    fillRegions();
-                }
-                comboReg.setSelectedIndex(0);
+                List<String> regionList = AzureSDKManager.getLocationsForApplicationInsights(currentSub);
+                String[] regionArray = regionList.toArray(new String[regionList.size()]);
+                comboReg.setModel(new DefaultComboBoxModel(regionArray));
+                comboReg.setSelectedItem(regionArray[0]);
             }
         } catch (Exception ex) {
             AzurePlugin.log(message("getValuesErrMsg"), ex);
-        }
-    }
-
-    private void fillRegions() {
-        List<Location> locations = AzureModel.getInstance().getSubscriptionToLocationMap().get(currentSub)
-                .stream().sorted(Comparator.comparing(Location::displayName)).collect(Collectors.toList());
-        comboReg.setModel(new DefaultComboBoxModel(locations.toArray()));
-        if (locations.size() > 0) {
-//            selectRegion();
         }
     }
 
