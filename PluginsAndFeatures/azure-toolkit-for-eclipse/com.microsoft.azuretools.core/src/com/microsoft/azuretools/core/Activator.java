@@ -29,7 +29,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
@@ -50,6 +56,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 import com.google.gson.Gson;
+import com.microsoft.azuretools.adauth.StringUtils;
 import com.microsoft.azuretools.authmanage.CommonSettings;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
@@ -88,6 +95,8 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
 
     private boolean isHDInsightEnabled = false;
     
+    private Collection<String> obsoletePackages;
+    
     private static final EventListenerList UPLOAD_PROGRESS_EVENT_LISTENERS = new EventListenerList();
     public static List<DeploymentEventListener> depEveList = new ArrayList<DeploymentEventListener>();
 
@@ -116,7 +125,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
                     "settings for the Azure Core plugin.", e, "Azure Core Plugin", false, true);
         }
         isHDInsightEnabled = isHDInsightEnabled(context);
-        
+        findObsoletePackages(context);
         super.start(context);
     }
 
@@ -160,6 +169,10 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
         return isHDInsightEnabled;
     }
     
+    public Collection<String> getObsoletePackages() {
+    	return obsoletePackages;
+    }
+    
     private boolean isHDInsightEnabled(BundleContext context) {
         Bundle [] bundles = context.getBundles();
         boolean isScalaEnabled = false, isHDIEnabled = false;
@@ -172,6 +185,42 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
             }
         }
         return isScalaEnabled && isHDIEnabled;
+    }
+    
+    private void findObsoletePackages(BundleContext context) {
+    	/// Fix Issue : https://github.com/Microsoft/azure-tools-for-java/issues/188
+		Map<String, String> obsoletePackageMap = new HashMap<String, String>();
+		BufferedReader reader = null;
+		try {
+			Properties prop = new Properties();
+			reader = new BufferedReader(new FileReader(getResourceAsFile("/resources/obsolete_packages.properties")));
+			prop.load(reader);
+			Enumeration<?> e = prop.propertyNames();
+
+			while (e.hasMoreElements()) {
+				String key = (String) e.nextElement();
+				if (!StringUtils.isNullOrWhiteSpace(key)) {
+					obsoletePackageMap.put(key, prop.getProperty(key));
+				}
+			}
+		} catch (IOException ex) {
+			log("findObsoletePackages@Activator", ex);
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException ignored) {
+				}
+			}
+		}
+		obsoletePackages = new HashSet<String>();
+		Bundle[] bundles = context.getBundles();
+		for (int i = 0; i < bundles.length; ++i) {
+			String symbolicName = bundles[i].getSymbolicName().toLowerCase();
+			if (obsoletePackageMap.containsKey(symbolicName)) {
+				obsoletePackages.add(obsoletePackageMap.get(symbolicName) + "(" + bundles[i].getVersion() + ")");
+			}
+		}
     }
     /*
      * (non-Javadoc)
