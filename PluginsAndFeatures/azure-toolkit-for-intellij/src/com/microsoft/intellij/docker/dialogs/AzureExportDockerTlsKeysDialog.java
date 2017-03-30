@@ -25,7 +25,6 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
-import com.microsoft.azure.docker.model.AzureDockerCertVault;
 import com.microsoft.intellij.ui.util.UIUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,15 +36,10 @@ public class AzureExportDockerTlsKeysDialog extends DialogWrapper {
   private JPanel mainPanel;
   private TextFieldWithBrowseButton exportTlsPath;
 
-  private Project project;
-  private AzureDockerCertVault certVault;
   private String path;
 
-  public AzureExportDockerTlsKeysDialog(Project project, AzureDockerCertVault certVault) {
+  public AzureExportDockerTlsKeysDialog(Project project) {
     super(project, true);
-
-    this.project = project;
-    this.certVault = certVault;
 
     setModal(true);
 

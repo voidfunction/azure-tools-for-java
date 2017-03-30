@@ -198,7 +198,7 @@ public class AzureViewDockerDialog extends DialogWrapper {
 
   private void onExportSshKeys() {
     if (dockerHost.hasSSHLogIn && dockerHost.certVault != null) {
-      AzureExportDockerSshKeysDialog exportDockerSshKeysDialog = new AzureExportDockerSshKeysDialog(project, dockerHost.certVault);
+      AzureExportDockerSshKeysDialog exportDockerSshKeysDialog = new AzureExportDockerSshKeysDialog(project);
       exportDockerSshKeysDialog.show();
 
       if (exportDockerSshKeysDialog.getExitCode() == 0) {
@@ -215,7 +215,7 @@ public class AzureViewDockerDialog extends DialogWrapper {
 
   private void onExportTlsCerts() {
     if (dockerHost.isTLSSecured && dockerHost.certVault != null) {
-      AzureExportDockerTlsKeysDialog exportDockerTlsKeysDialog = new AzureExportDockerTlsKeysDialog(project, dockerHost.certVault);
+      AzureExportDockerTlsKeysDialog exportDockerTlsKeysDialog = new AzureExportDockerTlsKeysDialog(project);
       exportDockerTlsKeysDialog.show();
 
       if (exportDockerTlsKeysDialog.getExitCode() == 0) {

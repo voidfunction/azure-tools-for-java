@@ -58,7 +58,7 @@ public class DockerContainerNode extends AzureRefreshableNode {
 
   public DockerContainerNode(Node parent, AzureDockerHostsManager dockerManager, DockerHost dockerHost, DockerContainer dockerContainer)
       throws AzureCmdException {
-    super(dockerHost.apiUrl, dockerContainer.name, parent, DOCKER_CONTAINER_ICON_PATH, true);
+    super(dockerContainer.id, dockerContainer.name, parent, DOCKER_CONTAINER_ICON_PATH, true);
 
     this.dockerManager = dockerManager;
     this.dockerHost = dockerHost;
@@ -72,7 +72,7 @@ public class DockerContainerNode extends AzureRefreshableNode {
 
   @Override
   protected void onNodeClick(NodeActionEvent e) {
-    super.onNodeClick(e);
+//    super.onNodeClick(e);
   }
 
   @Override
