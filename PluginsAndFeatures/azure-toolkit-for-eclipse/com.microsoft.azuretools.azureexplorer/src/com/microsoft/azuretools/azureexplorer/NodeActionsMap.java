@@ -33,8 +33,10 @@ import com.microsoft.azuretools.azureexplorer.actions.CreateBlobContainer;
 import com.microsoft.azuretools.azureexplorer.actions.CreateQueueAction;
 import com.microsoft.azuretools.azureexplorer.actions.CreateTableAction;
 import com.microsoft.azuretools.azureexplorer.actions.OpenWebappAction;
+import com.microsoft.azuretools.azureexplorer.actions.ViewDockerHostAction;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappNode;
@@ -52,5 +54,8 @@ public class NodeActionsMap {
         node2Actions.put(StorageNode.class, new ImmutableList.Builder().add(CreateBlobContainer.class).build());        
         node2Actions.put(WebappNode.class, new ImmutableList.Builder().add(OpenWebappAction.class).build());
         node2Actions.put(HDInsightRootModuleImpl.class, new ImmutableList.Builder().add(AddNewClusterAction.class,AddNewEmulatorAction.class).build());
+        node2Actions.put(DockerHostNode.class, new ImmutableList.Builder().add(ViewDockerHostAction.class).build());
+//        node2Actions.put(DockerHostNode.class, new ImmutableList.Builder().add(ViewDockerHostAction.class, DeployDockerContainerAction.class, DeleteDockerHostAction.class).build());
+//        node2Actions.put(DockerHostModule.class, new ImmutableList.Builder().add(CreateNewDockerHostAction.class, PublishDockerContainerAction.class).build());
     }
 }

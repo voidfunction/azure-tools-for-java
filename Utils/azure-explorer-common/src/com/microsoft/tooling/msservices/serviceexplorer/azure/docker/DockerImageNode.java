@@ -53,28 +53,30 @@ public class DockerImageNode extends AzureRefreshableNode {
 
   public DockerImageNode(Node parent, AzureDockerHostsManager dockerManager, DockerHost dockerHost, DockerImage dockerImage)
       throws AzureCmdException {
-    super(dockerHost.apiUrl, dockerImage.name, parent, DOCKER_IMAGE_ICON_PATH, true);
+    super(dockerImage.id, AzureDockerImageOps.getDockerImageMapKey(dockerImage), parent, DOCKER_IMAGE_ICON_PATH, true);
 
     this.dockerManager = dockerManager;
     this.dockerHost = dockerHost;
     this.dockerImage = dockerImage;
 
     loadActions();
+
+    refreshItems();
   }
 
   @Override
   protected void onNodeClick(NodeActionEvent e) {
-    super.onNodeClick(e);
+//    super.onNodeClick(e);
   }
 
 
   @Override
-  protected void refreshItems() throws AzureCmdException {
+  protected void refreshItems() {
     try {
       Map<String, DockerContainer> dockerContainers = AzureDockerContainerOps.getContainers(dockerHost);
       AzureDockerContainerOps.setContainersAndImages(dockerContainers, dockerHost.dockerImages);
       if (dockerHost.dockerImages != null) {
-        dockerImage = dockerHost.dockerImages.get(dockerImage.name);
+        dockerImage = dockerHost.dockerImages.get(AzureDockerImageOps.getDockerImageMapKey(dockerImage));
         if (dockerImage != null) {
           for (DockerContainer dockerContainer : dockerImage.containers.values()) {
             addChildNode(new DockerContainerNode(this, dockerManager, dockerHost, dockerContainer));

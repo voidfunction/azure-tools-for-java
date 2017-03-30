@@ -1,3 +1,22 @@
+/**
+ * Copyright (c) Microsoft Corporation
+ * 
+ * All rights reserved. 
+ * 
+ * MIT License
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files 
+ * (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, 
+ * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, 
+ * subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package com.microsoft.azuretools.docker.ui.dialogs;
 
 import java.util.logging.Logger;
@@ -6,15 +25,18 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.FontDescriptor;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azuretools.docker.handlers.AzureDockerHostDeployHandler;
+import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
+import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
 
 import org.eclipse.swt.layout.GridLayout;
@@ -66,6 +88,7 @@ public class AzureViewDockerDialog extends Dialog {
 	 */
 	public AzureViewDockerDialog(Shell parentShell, IProject project, DockerHost host, AzureDockerHostsManager dockerManager) {
 		super(parentShell);
+        setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
 		
 	    this.project = project;
 	    this.dockerHost = host;
@@ -208,7 +231,21 @@ public class AzureViewDockerDialog extends Dialog {
 		Link dockerHostSshExportHyperlink = new Link(loginSetsComposite, SWT.NONE);
 		dockerHostSshExportHyperlink.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent event) {
+				if (dockerHost.hasSSHLogIn && dockerHost.certVault != null) {
+					Display display = Display.getDefault();
+					Shell dialogShell = new Shell(display, SWT.APPLICATION_MODAL);
+					dialogShell = mainContainer.getShell();
+					AzureExportDockerSshKeysDialog exportDockerSshKeysDialog = new AzureExportDockerSshKeysDialog(dialogShell, project);
+					if (exportDockerSshKeysDialog.open() == Window.OK) {
+						try {
+							AzureDockerCertVaultOps.saveSshKeysToLocalFiles(exportDockerSshKeysDialog.getPath(), dockerHost.certVault);
+						} catch (Exception ex) {
+							String msg = "An error occurred while attempting to export the SSh keys.\n" + ex.getMessage();
+							PluginUtil.displayErrorDialogAndLog(mainContainer.getShell(), "Error", msg, ex);
+						}
+					}
+				}
 			}
 		});
 		dockerHostSshExportHyperlink.setText("<a>Export SSH keys...</a>");
@@ -239,7 +276,18 @@ public class AzureViewDockerDialog extends Dialog {
 		Link dockerHostTlsExportHyperlink = new Link(loginSetsComposite, SWT.NONE);
 		dockerHostTlsExportHyperlink.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent event) {
+				if (dockerHost.isTLSSecured && dockerHost.certVault != null) {
+					AzureExportDockerTlsKeysDialog exportDockerTlsKeysDialog = new AzureExportDockerTlsKeysDialog(mainContainer.getShell(), project);
+					if (exportDockerTlsKeysDialog.open() == Window.OK) {
+						try {
+							AzureDockerCertVaultOps.saveTlsCertsToLocalFiles(exportDockerTlsKeysDialog.getPath(), dockerHost.certVault);
+						} catch (Exception ex) {
+							String msg = "An error occurred while attempting to export the TLS keys.\n" + ex.getMessage();
+							PluginUtil.displayErrorDialogAndLog(mainContainer.getShell(), "Error", msg, ex);
+						}
+					}
+				}
 			}
 		});
 		dockerHostTlsExportHyperlink.setText("<a>Export TLS certs...</a>");
@@ -460,4 +508,7 @@ public class AzureViewDockerDialog extends Dialog {
 		return new Point(600, 550);
 	}
 
+	public int getInternalExitCode() {
+		return exitCode;
+	}
 }

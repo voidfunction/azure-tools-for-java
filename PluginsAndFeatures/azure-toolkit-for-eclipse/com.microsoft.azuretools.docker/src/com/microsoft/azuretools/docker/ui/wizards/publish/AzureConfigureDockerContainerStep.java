@@ -186,7 +186,7 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 		dockerContainerNameTextField.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent event) {
-				if (AzureDockerValidationUtils.validateDockerImageName(((Text) event.getSource()).getText())) {
+				if (AzureDockerValidationUtils.validateDockerContainerName(((Text) event.getSource()).getText())) {
 					errDispatcher.removeMessage("dockerContainerNameTextField", dockerContainerNameTextField);
 					setErrorMessage(null);
 					setPageComplete(doValidate());
