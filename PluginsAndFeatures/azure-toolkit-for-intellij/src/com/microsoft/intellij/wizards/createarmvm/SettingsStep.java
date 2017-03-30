@@ -182,7 +182,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
     private void fillResourceGroups() {
         // Resource groups already initialized in cache when loading locations on SelectImageStep
         List<ResourceGroup> groups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(model.getSubscription());
-        List<String> filteredGroups = groups.stream().filter(group -> model.getRegion().equals(group.regionName()))
+        List<String> filteredGroups = groups.stream().filter(group -> model.getRegion().name().equals(group.regionName()))
                 .map(ResourceGroup::name).sorted().collect(Collectors.toList());
         resourceGrpCombo.setModel(new DefaultComboBoxModel<>(filteredGroups.toArray(new String[filteredGroups.size()])));
     }
@@ -336,7 +336,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
         List<Network> filteredNetworks = new ArrayList<>();
 
         for (Network network : virtualNetworks) {
-            if (network.regionName() != null && network.regionName().equals(model.getRegion())) {
+            if (network.regionName() != null && network.regionName().equals(model.getRegion().name())) {
                 filteredNetworks.add(network);
             }
         }
@@ -445,7 +445,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
             // VM and storage account need to be in the same region;
             // only general purpose accounts support page blobs, so only they can be used to create vm;
             // zone-redundant acounts not supported for vm
-            if (storageAccount.regionName().equals(model.getRegion())
+            if (storageAccount.regionName().equals(model.getRegion().name())
                     && storageAccount.kind() == Kind.STORAGE
                     && storageAccount.sku().name() != SkuName.STANDARD_ZRS) {
                 filteredStorageAccounts.add(storageAccount);
@@ -534,7 +534,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
         for (PublicIpAddress publicIpAddress : publicIpAddresses) {
 
             // VM and public ip address need to be in the same region
-            if (publicIpAddress.regionName() != null && publicIpAddress.regionName().equals(model.getRegion())) {
+            if (publicIpAddress.regionName() != null && publicIpAddress.regionName().equals(model.getRegion().name())) {
                 filteredPips.add(publicIpAddress);
             }
         }
@@ -610,7 +610,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
 
         for (NetworkSecurityGroup nsg : networkSecurityGroups) {
             // VM and network security group
-            if (model.getRegion().equals(nsg.regionName())) {
+            if (model.getRegion().name().equals(nsg.regionName())) {
                 filteredNsgs.add(nsg);
             }
         }
