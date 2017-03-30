@@ -70,10 +70,10 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
 
     public AppInsightsMngmtPanel(Project project) {
         this.myProject = project;
-        init();
     }
 
-    protected void init() {
+    @Override
+    public void init() {
         insightsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         AzureSettings.getSafeInstance(myProject).loadAppInsights();
         loadInfoFirstTime();
