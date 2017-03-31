@@ -263,7 +263,7 @@ public class SettingsStep extends WizardPage {
 					public void run() {
 						// Resource groups already initialized in cache when loading locations on SelectImageStep
 				        List<ResourceGroup> resourceGroups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(wizard.getSubscription());
-				        List<String> filteredGroups = resourceGroups.stream().filter(group -> wizard.getRegion().equals(group.regionName()))
+				        List<String> filteredGroups = resourceGroups.stream().filter(group -> wizard.getRegion().name().equals(group.regionName()))
 				                .map(ResourceGroup::name).sorted().collect(Collectors.toList());
 						DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 							@Override
@@ -271,9 +271,9 @@ public class SettingsStep extends WizardPage {
 								final Vector<Object> vector = new Vector<Object>();
 								vector.addAll(filteredGroups);
 								resourceGroupViewer.setInput(vector);
-								// if (resourceGroups.size() > 0) {
-								// resourceGrpCombo.select(0);
-								// }
+								if (vector.size() > 0) {
+									resourceGrpCombo.select(0);
+								}
 							}
 						});
 
@@ -341,7 +341,7 @@ public class SettingsStep extends WizardPage {
         List<Network> filteredNetworks = new ArrayList<>();
 
         for (Network network : virtualNetworks) {
-            if (network.regionName().equals(wizard.getRegion())) {
+            if (network.regionName().equals(wizard.getRegion().name())) {
                 filteredNetworks.add(network);
             }
         }
@@ -407,7 +407,7 @@ public class SettingsStep extends WizardPage {
 
         for (StorageAccount storageAccount : storageAccounts.values()) {
             // VM and storage account need to be in the same region; only general purpose accounts support page blobs, so only they can be used to create vm
-            if (storageAccount.regionName().equals(wizard.getRegion()) 
+            if (storageAccount.regionName().equals(wizard.getRegion().name()) 
             		&& storageAccount.kind() == Kind.STORAGE
                     && storageAccount.sku().name() != SkuName.STANDARD_ZRS) {
                 filteredStorageAccounts.add(storageAccount);
@@ -473,7 +473,7 @@ public class SettingsStep extends WizardPage {
 
         for (PublicIpAddress publicIpAddress : publicIpAddresses) {
             // VM and public ip address need to be in the same region
-            if (publicIpAddress.regionName().equals(wizard.getRegion())) {
+            if (publicIpAddress.regionName().equals(wizard.getRegion().name())) {
                 filteredPips.add(publicIpAddress);
             }
         }
@@ -577,7 +577,7 @@ public class SettingsStep extends WizardPage {
 
         for (NetworkSecurityGroup nsg : networkSecurityGroups) {
             // VM and network security group
-            if (nsg.regionName().equals(wizard.getRegion())) {
+            if (nsg.regionName().equals(wizard.getRegion().name())) {
                 filteredNsgs.add(nsg);
             }
         }
