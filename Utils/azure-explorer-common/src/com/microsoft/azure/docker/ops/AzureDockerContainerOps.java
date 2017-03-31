@@ -31,6 +31,7 @@ import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import java.util.*;
 
 import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.DEBUG;
+import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.checkDockerContainerUrlAvailability;
 import static com.microsoft.azure.docker.ops.utils.AzureDockerVMSetupScriptsForUbuntu.DEFAULT_DOCKER_IMAGES_DIRECTORY;
 
 public class AzureDockerContainerOps {
@@ -449,7 +450,12 @@ public class AzureDockerContainerOps {
         if (dockerImage != null) {
           if (dockerImage.artifactFile != null && !dockerImage.artifactFile.isEmpty()) {
             // adjust the Url path to capture the artifact name
-            dockerContainer.url = dockerContainer.url + dockerImage.artifactFile.substring(0, dockerImage.artifactFile.lastIndexOf("."));
+            String url = dockerImage.artifactFile.toLowerCase().matches(".*\\.war") ?
+                dockerContainer.url + dockerImage.artifactFile.substring(0, dockerImage.artifactFile.lastIndexOf(".")) :
+                dockerContainer.url;
+            if (dockerContainer.isRunning && checkDockerContainerUrlAvailability(url)) {
+              dockerContainer.url = url;
+            }
           }
 
           dockerImage.containers.put(dockerContainer.name, dockerContainer);

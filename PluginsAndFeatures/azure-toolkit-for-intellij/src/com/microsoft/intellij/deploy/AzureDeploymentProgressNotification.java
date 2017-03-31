@@ -47,11 +47,11 @@ import java.util.Date;
 import static com.intellij.projectImport.ProjectImportBuilder.getCurrentProject;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
-public final class DeploymentManager {
+public final class AzureDeploymentProgressNotification {
 
     private Project myProject;
 
-    public DeploymentManager(Project project) {
+    public AzureDeploymentProgressNotification(Project project) {
         this.myProject = project;
     }
 

@@ -140,6 +140,19 @@ public class AzureDockerUtils {
     }
   }
 
+  public static boolean checkDockerContainerUrlAvailability(String containerUrl) {
+    try {
+      URL url = new URL(containerUrl);
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setRequestMethod("GET");
+      connection.connect();
+
+      return connection.getResponseCode() == 200;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
   public static List<String> getResourceGroups(Azure azureClient) {
     List<String> result = new ArrayList<>();
     if (azureClient != null) {

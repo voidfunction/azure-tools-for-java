@@ -34,6 +34,8 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -57,50 +59,54 @@ public class AzureDockerHostDeployHandler extends AbstractHandler {
 		ISelectionService selectionService = window.getSelectionService();
 		ISelection selection = selectionService.getSelection();
 		Shell shell = window.getShell();
+		IProject project = null;
 		
 		if(selection instanceof IStructuredSelection) {
 			 Object element = ((IStructuredSelection)selection).getFirstElement();
 			
 			if (element instanceof IResource) {
-				IProject project = ((IResource)element).getProject();
+				project = ((IResource)element).getProject();
+			}
+		}
+		if (project == null) {
+			project = AzureDockerUIResources.getCurrentSelectedProject();
+			if (project == null) {
+				return null;
+			}
+		}
 				
-				// TODO check the project is Dynamic Web Application
-				
-//				WebAppDeployDialog d = WebAppDeployDialog.go(window.getShell(), project);
-				
-				try {
-					AzureDockerUIResources.createArtifact(shell, project);
-					
-					AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
+		try {
+			AzureDockerUIResources.createArtifact(shell, project);
+			
+			AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
 
-					// not signed in
-					if (azureAuthManager == null) {
-						System.out.println("ERROR! Not signed in!");
-						return null;
-					}
+			// not signed in
+			if (azureAuthManager == null) {
+				System.out.println("ERROR! Not signed in!");
+				return null;
+			}
 
-					AzureDockerHostsManager dockerManager = AzureDockerHostsManager
-							.getAzureDockerHostsManager(azureAuthManager);
+			AzureDockerHostsManager dockerManager = AzureDockerHostsManager
+					.getAzureDockerHostsManager(azureAuthManager);
 
-					if (!dockerManager.isInitialized()) {
-						AzureDockerUIResources.updateAzureResourcesWithProgressDialog(shell, project);
-						if (AzureDockerUIResources.CANCELED) {
-							return null;
-						}
-						dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
-					}
+			if (!dockerManager.isInitialized()) {
+				AzureDockerUIResources.updateAzureResourcesWithProgressDialog(shell, project);
+				if (AzureDockerUIResources.CANCELED) {
+					return null;
+				}
+				dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
+			}
 
-					if (dockerManager.getSubscriptionsMap().isEmpty()) {
-						PluginUtil.displayErrorDialog(shell, "Create Docker Host",
-								"Must select an Azure subscription first");
-						return null;
-					}
-					
-					DockerHost dockerHost = (dockerManager.getDockerPreferredSettings() != null) ? dockerManager.getDockerHostForURL(dockerManager.getDockerPreferredSettings().dockerApiName) : null;
-					AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
-					AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager, dockerImageDescription);
-					WizardDialog selectDockerHostDialog = new WizardDialog(shell, selectDockerWizard);
-					if (selectDockerHostDialog.open() == Window.OK) {
+			if (dockerManager.getSubscriptionsMap().isEmpty()) {
+				PluginUtil.displayErrorDialog(shell, "Create Docker Host", "Must select an Azure subscription first");
+				return null;
+			}
+			
+			DockerHost dockerHost = (dockerManager.getDockerPreferredSettings() != null) ? dockerManager.getDockerHostForURL(dockerManager.getDockerPreferredSettings().dockerApiName) : null;
+			AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
+			AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager, dockerImageDescription);
+			WizardDialog selectDockerHostDialog = new WizardDialog(shell, selectDockerWizard);
+			if (selectDockerHostDialog.open() == Window.OK) {
 
 //					AzureNewDockerWizard newDockerWizard = new AzureNewDockerWizard(project, dockerManager);
 //					WizardDialog createNewDockerHostDialog = new WizardDialog(shell, newDockerWizard);
@@ -111,18 +117,10 @@ public class AzureDockerHostDeployHandler extends AbstractHandler {
 //								shell,
 //								"WebAppPlugin",
 //								"Canceled");
-					}
-				} catch (Exception e) {
-					log.log(Level.SEVERE, "execute: " + e.getMessage(), e);
-					e.printStackTrace();					
-				}
-				
-			} else {
-				MessageDialog.openInformation(
-						shell,
-						"Publish as Docker Container",
-						"Please select a project first");
 			}
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "execute: " + e.getMessage(), e);
+			e.printStackTrace();					
 		}
 		
 		return null;

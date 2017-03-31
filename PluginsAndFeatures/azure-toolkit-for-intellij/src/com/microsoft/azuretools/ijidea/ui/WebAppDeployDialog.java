@@ -27,7 +27,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -53,7 +52,7 @@ import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.azuretools.utils.CanceledByUserException;
 import com.microsoft.azuretools.utils.WebAppUtils;
-import com.microsoft.intellij.deploy.DeploymentManager;
+import com.microsoft.intellij.deploy.AzureDeploymentProgressNotification;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -515,13 +514,13 @@ public class WebAppDeployDialog extends DialogWrapper {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Deploy Web App Progress", true) {
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
-                DeploymentManager deploymentManager = new DeploymentManager(project);
+                AzureDeploymentProgressNotification azureDeploymentProgressNotification = new AzureDeploymentProgressNotification(project);
                 try {
                     progressIndicator.setIndeterminate(true);
                     PublishingProfile pp = webApp.getPublishingProfile();
 
                     Date startDate = new Date();
-                    deploymentManager.notifyProgress(webApp.name(), startDate, null, 5, "Deploying Web App...");
+                    azureDeploymentProgressNotification.notifyProgress(webApp.name(), startDate, null, 5, "Deploying Web App...");
 
                     WebAppUtils.deployArtifact(artifact.getName(), artifact.getOutputFilePath(),
                             pp, isDeployToRoot, new UpdateProgressIndicator(progressIndicator));
@@ -529,7 +528,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                     progressIndicator.setText("Checking Web App availability...");
                     progressIndicator.setText2("Link: " + sitePath);
 
-                    deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 75, "Checking Web App availability...");
+                    azureDeploymentProgressNotification.notifyProgress(webApp.name(), startDate, sitePath, 75, "Checking Web App availability...");
 
                     // to make warn up cancelable
                     Thread thread = new Thread(new Runnable() {
@@ -556,7 +555,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                         if (progressIndicator.isCanceled()) return;
                         else Thread.sleep(2000);
                     }
-                    deploymentManager.notifyProgress(webApp.name(), startDate, sitePath, 100, message("runStatus"));
+                    azureDeploymentProgressNotification.notifyProgress(webApp.name(), startDate, sitePath, 100, message("runStatus"));
                     showLink(sitePath);
                 } catch (IOException | InterruptedException ex) {
                     ex.printStackTrace();

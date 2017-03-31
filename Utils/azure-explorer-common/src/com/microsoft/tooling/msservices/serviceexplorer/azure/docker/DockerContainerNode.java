@@ -29,15 +29,14 @@ import com.microsoft.azure.docker.ops.AzureDockerContainerOps;
 import com.microsoft.azure.docker.ops.AzureDockerImageOps;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
-import com.microsoft.tooling.msservices.serviceexplorer.AzureRefreshableNode;
-import com.microsoft.tooling.msservices.serviceexplorer.Node;
-import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
-import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
+import com.microsoft.tooling.msservices.serviceexplorer.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureNodeActionPromptListener;
 
 import java.awt.*;
 import java.net.URI;
-import java.util.Map;
+import java.util.*;
+
+import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.checkDockerContainerUrlAvailability;
 
 public class DockerContainerNode extends AzureRefreshableNode {
   //TODO: Replace the icons with the real Docker host icons
@@ -115,6 +114,20 @@ public class DockerContainerNode extends AzureRefreshableNode {
   }
 
   @Override
+  public java.util.List<NodeAction> getNodeActions() {
+//  enable/disable menu items according to VM status
+    boolean started = dockerContainer != null && dockerContainer.isRunning;
+    getNodeActionByName(ACTION_OPEN_WEB_APP).setEnabled(started);
+    getNodeActionByName(ACTION_STOP).setEnabled(started);
+    getNodeActionByName(ACTION_START).setEnabled(!started);
+    getNodeActionByName(ACTION_RESTART).setEnabled(started);
+
+    return super.getNodeActions();
+  }
+
+
+
+  @Override
   protected void loadActions() {
     addAction(ACTION_OPEN_WEB_APP, DOCKER_CONTAINER_WEB_RUN_ICON, new NodeActionListener() {
       @Override
@@ -154,6 +167,22 @@ public class DockerContainerNode extends AzureRefreshableNode {
           public void run() {
             AzureDockerContainerOps.start(dockerContainer, dockerHost.session);
             dockerContainer.isRunning = true;
+            DockerImage dockerImage = dockerHost.dockerImages.get(dockerContainer.image);
+            if (dockerImage != null) {
+              if (dockerImage.artifactFile != null && !dockerImage.artifactFile.isEmpty()) {
+                // adjust the Url path to capture the artifact name
+                String url = dockerImage.artifactFile.toLowerCase().matches(".*\\.war") ?
+                    dockerContainer.url + dockerImage.artifactFile.substring(0, dockerImage.artifactFile.lastIndexOf(".")) :
+                    dockerContainer.url;
+                try {
+                  // Give some time for the container to start
+                  Thread.sleep(5000);
+                } catch (Exception ignored) {}
+                if (dockerContainer.isRunning && checkDockerContainerUrlAvailability(url)) {
+                  dockerContainer.url = url;
+                }
+              }
+            }
             setDockerContainerIconPath();
           }
         });

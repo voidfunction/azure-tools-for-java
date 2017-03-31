@@ -31,15 +31,12 @@ import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
-import com.microsoft.intellij.components.ServerExplorerToolWindowFactory;
-import com.microsoft.intellij.deploy.DeploymentManager;
+import com.microsoft.intellij.deploy.AzureDeploymentProgressNotification;
 import com.microsoft.intellij.ui.messages.AzureBundle;
 import com.microsoft.intellij.util.WAHelper;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
 import org.jetbrains.annotations.NotNull;
-
-import static org.jetbrains.lang.manifest.ManifestBundle.message;
 
 public class DockerContainerDeployTask extends Task.Backgroundable {
   String url;
@@ -76,7 +73,7 @@ public class DockerContainerDeployTask extends Task.Backgroundable {
     };
     AzurePlugin.addDeploymentEventListener(deployListnr);
     AzurePlugin.depEveList.add(deployListnr);
-    new DeploymentManager(project).deployToDockerContainer(dockerImageInstance, url);
+    new AzureDeploymentProgressNotification(project).deployToDockerContainer(dockerImageInstance, url);
 
     new Thread("Warm up the target site") {
       public void run() {
