@@ -320,27 +320,72 @@ public class WebAppUtils {
         webApp.start();
     }
 
-    public static String generateWebContainerPath(WebContainer webContainer) {
-        if (webContainer.equals(WebContainer.TOMCAT_7_0_NEWEST)) {
-            return "%AZURE_TOMCAT7_HOME%";
-        } else if (webContainer.equals(WebContainer.TOMCAT_8_0_NEWEST)) {
-            return "%AZURE_TOMCAT8_HOME%";
-        } else if (webContainer.equals(WebContainer.JETTY_9_1_NEWEST)) {
-            return "%AZURE_JETTY9_HOME%";
-        }
-        String binPath = "%programfiles(x86)%\\";
-        String wc = webContainer.toString();
-        int verIdx = wc.indexOf(" ") + 1;
-        String ver = wc.substring(verIdx);
-        if (wc.startsWith("tomcat")) {
-            return binPath + "apache-tomcat-" + ver;
-        } else if (wc.startsWith("jetty")) {
-            StringBuilder sbVer = new StringBuilder(ver);
-            sbVer.insert(ver.lastIndexOf('.')+1, 'v');
-            return binPath + "jetty-distribution-" + sbVer.toString();
+    public enum WebContainerMod {
+        Newest_Tomcat_70("Newest Tomcat 7.0", "tomcat 7.0"),
+        Newest_Tomcat_80("Newest Tomcat 8.0", "tomcat 8.0"),
+        Newest_Tomcat_85("Newest Tomcat 8.5", "tomcat 8.5"),
+        Newest_Jetty_91("Newest Jetty 9.1", "jetty 9.1"),
+        Newest_Jetty_93("Newest Jetty 9.3", "jetty 9.3");
+
+        private String displayName;
+        private String value;
+
+        WebContainerMod(String displayName, String value ) {
+            this.displayName = displayName;
+            this.value = value;
         }
 
-        return "%AZURE_TOMCAT8_HOME%";
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public WebContainer toWebContainer() {
+            return new WebContainer(getValue());
+        }
+
+        @Override
+        public String toString() {
+            return getDisplayName();
+        }
+
+    }
+
+    public static String generateWebContainerPath(WebContainer webContainer) throws IOException {
+        if (webContainer.toString().equals(WebContainerMod.Newest_Tomcat_70.getValue())) {
+            return "%AZURE_TOMCAT7_HOME%";
+        } else if (webContainer.toString().equals(WebContainerMod.Newest_Tomcat_80.getValue())) {
+            return "%AZURE_TOMCAT8_HOME%";
+        } else if (webContainer.toString().equals(WebContainerMod.Newest_Tomcat_85.getValue())) {
+            return "%AZURE_TOMCAT85_HOME%";
+        } else if (webContainer.toString().equals(WebContainerMod.Newest_Jetty_91.getValue())) {
+            return "%AZURE_JETTY9_HOME%";
+        } else if (webContainer.toString().equals(WebContainerMod.Newest_Jetty_93.getValue())) {
+            return "%AZURE_JETTY93_HOME%";
+        }
+//        if (webContainer.equals(WebContainer.TOMCAT_7_0_NEWEST)) {
+//            return "%AZURE_TOMCAT7_HOME%";
+//        } else if (webContainer.equals(WebContainer.TOMCAT_8_0_NEWEST)) {
+//            return "%AZURE_TOMCAT8_HOME%";
+//        } else if (webContainer.equals(WebContainer.JETTY_9_1_NEWEST)) {
+//            return "%AZURE_JETTY9_HOME%";
+//        }
+//        String binPath = "%programfiles(x86)%\\";
+//        String wc = webContainer.toString();
+//        int verIdx = wc.indexOf(" ") + 1;
+//        String ver = wc.substring(verIdx);
+//        if (wc.startsWith("tomcat")) {
+//            return binPath + "apache-tomcat-" + ver;
+//        } else if (wc.startsWith("jetty")) {
+//            StringBuilder sbVer = new StringBuilder(ver);
+//            sbVer.insert(ver.lastIndexOf('.')+1, 'v');
+//            return binPath + "jetty-distribution-" + sbVer.toString();
+//        }
+
+        throw new IOException("Unknown web container: " + webContainer.toString());
     }
 
     public static byte[] generateWebConfigForCustomJDK(String jdkPath, String webContainerPath) {
