@@ -100,17 +100,6 @@ public class SubscriptionsDialog extends DialogWrapper {
         setTitle("Select Subscriptions");
         setOKButtonText("Select");
 
-        DefaultTableModel model = new SubscriptionTableModel();
-        model.addColumn("");
-        model.addColumn("Subscription name");
-        model.addColumn("Subscription id");
-        table.setModel(model);
-        TableColumn column = table.getColumnModel().getColumn(0);
-        column.setMinWidth(23);
-        column.setMaxWidth(23);
-        table.setRowSelectionAllowed(false);
-        table.setCellSelectionEnabled(false);
-
         setSubscriptions();
 
         init();

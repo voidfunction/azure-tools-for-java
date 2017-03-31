@@ -188,8 +188,6 @@ public class AppServiceCreateDialog extends DialogWrapper {
 
         setOKButtonText("Create");
 
-        init();
-
         comboBoxSubscription.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
@@ -283,6 +281,8 @@ public class AppServiceCreateDialog extends DialogWrapper {
                 }
             }
         });
+
+        init();
     }
 
     private void radioAppServicePlanLogic() {
