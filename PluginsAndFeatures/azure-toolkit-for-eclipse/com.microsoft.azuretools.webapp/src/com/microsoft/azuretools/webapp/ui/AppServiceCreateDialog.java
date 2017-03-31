@@ -120,7 +120,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
     private final static String textNotAvailable = "N/A";
     
     // controls to types bindings by index 
-    private List<WebContainer> binderWebConteiners;
+    private List<WebAppUtils.WebContainerMod> binderWebConteiners;
     private List<SubscriptionDetail> binderSubscriptionDetails;
     private List<ResourceGroup> binderResourceGroup;
     private List<AppServicePlan> binderAppServicePlan;
@@ -162,7 +162,6 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         return this.webApp;
     }
 
-    
     public static AppServiceCreateDialog go(Shell parentShell) {
         AppServiceCreateDialog d = new AppServiceCreateDialog(parentShell);
         if (d.open() == Window.OK) {
@@ -342,17 +341,16 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         linkAppServicePricing.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
         linkAppServicePricing.setText("<a>App service pricing details</a>");
         linkAppServicePricing.addSelectionListener(new SelectionAdapter() {
-         @Override
-         public void widgetSelected(SelectionEvent event) {
-            try {
-               PlatformUI.getWorkbench().getBrowserSupport().
-               getExternalBrowser().openURL(new URL("https://azure.microsoft.com/en-us/pricing/details/app-service/"));
+            @Override
+            public void widgetSelected(SelectionEvent event) {
+                try {
+                    PlatformUI.getWorkbench().getBrowserSupport().
+                    getExternalBrowser().openURL(new URL("https://azure.microsoft.com/en-us/pricing/details/app-service/"));
+                } catch (PartInitException | MalformedURLException ex) {
+                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "widgetSelected@SelectionAdapter@linkAppServicePricing@AppServiceCreateDialog", ex));
+                }
             }
-            catch (PartInitException | MalformedURLException ex) {
-               LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "widgetSelected@SelectionAdapter@linkAppServicePricing@AppServiceCreateDialog", ex));
-            }
-         }
-      });
+        });
         
         tabItemResourceGroup = new TabItem(tabFolder, SWT.NONE);
         tabItemResourceGroup.setText("Resource group");
@@ -568,13 +566,13 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
 
     protected void fillWebContainers() {
         try {
-            List<WebContainer> wcl = createListFromClassFields(WebContainer.class);
             comboWebContainer.removeAll();
-            binderWebConteiners = new ArrayList<WebContainer>();
-            for (WebContainer wc : wcl) {
+            binderWebConteiners = new ArrayList<>();
+            for (WebAppUtils.WebContainerMod wc : WebAppUtils.WebContainerMod.values()) {
                 comboWebContainer.add(wc.toString());
                 binderWebConteiners.add(wc);
             }
+
             if (comboWebContainer.getItemCount() > 0) {
                 comboWebContainer.select(0);
             }
@@ -1020,7 +1018,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
           webAppName = textAppName.getText().trim();
           
           int index = comboWebContainer.getSelectionIndex();
-          webContainer = index < 0 ? null : binderWebConteiners.get(index);
+          webContainer = index < 0 ? null : binderWebConteiners.get(index).toWebContainer();
           
           index = comboSubscription.getSelectionIndex();
           subscriptionDetail = index < 0 ? null : binderSubscriptionDetails.get(index);
