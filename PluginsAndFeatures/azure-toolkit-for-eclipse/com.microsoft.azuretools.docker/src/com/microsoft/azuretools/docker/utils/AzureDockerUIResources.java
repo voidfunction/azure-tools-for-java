@@ -20,13 +20,21 @@
 package com.microsoft.azuretools.docker.utils;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.core.PackageFragmentRoot;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jst.j2ee.datamodel.properties.IJ2EEComponentExportDataModelProperties;
 import org.eclipse.jst.j2ee.internal.web.archive.operations.WebComponentExportDataModelProvider;
 import org.eclipse.swt.SWT;
@@ -34,6 +42,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.ISelectionService;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 
@@ -45,6 +55,7 @@ import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 
 import java.util.Date;
@@ -207,6 +218,10 @@ public class AzureDockerUIResources {
 	}
 	
 	public static void createArtifact(Shell shell, IProject project) {
+		if (project == null) {
+			return;
+		}
+		
         String projectName = project.getName();
         String destinationPath = project.getLocation() + "/" + projectName + ".war";
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
@@ -235,7 +250,6 @@ public class AzureDockerUIResources {
 //								return Status.CANCEL_STATUS;
 //							}
 //						}
-	//
 			            progressMonitor.done();
 					} catch (Exception e) {
 						String msg = "An error occurred while attempting to create WAR artifact" + "\n" + e.getMessage();
@@ -272,6 +286,36 @@ public class AzureDockerUIResources {
 		return display.getSystemColor(systemColorID);
 	}
 	
-	
+	public static IProject getCurrentSelectedProject() {
+		IProject project = null;
+		ISelectionService selectionService = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
+		ISelection selection = selectionService.getSelection();
+
+		if (selection instanceof IStructuredSelection) {
+			Object element = ((IStructuredSelection) selection).getFirstElement();
+
+			if (element instanceof IResource) {
+				project = ((IResource) element).getProject();
+			} else if (element instanceof PackageFragmentRoot) {
+				IJavaProject jProject = ((PackageFragmentRoot) element).getJavaProject();
+				project = jProject.getProject();
+			} else if (element instanceof IJavaElement) {
+				IJavaProject jProject = ((IJavaElement) element).getJavaProject();
+				project = jProject.getProject();
+			}
+		}
+		
+		if (project == null) {
+			IWorkspace workspace = ResourcesPlugin.getWorkspace();
+			if (workspace.getRoot() != null && workspace.getRoot().getProjects().length > 0) {
+				IProject[] projects = workspace.getRoot().getProjects();
+				project = projects[projects.length - 1];
+			} else {
+				PluginUtil.displayErrorDialog(Display.getDefault().getActiveShell(), "No Active Project", "Must have a project first");
+			}
+		}
+
+		return project;
+	}
 
 }

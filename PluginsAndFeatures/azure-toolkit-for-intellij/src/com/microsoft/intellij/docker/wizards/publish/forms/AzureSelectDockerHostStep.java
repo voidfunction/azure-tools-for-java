@@ -488,7 +488,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
   }
 
   public ValidationInfo doValidate(boolean shakeOnError) {
-    if (dockerImageNameTextField.getText() == null || dockerImageNameTextField.getText().equals("")){
+    if (dockerImageNameTextField.getText() == null || dockerImageNameTextField.getText().equals("")) {
       ValidationInfo info = new ValidationInfo("Missing Docker image name", dockerImageNameTextField);
       dockerImageNameLabel.setVisible(true);
       setDialogButtonsState(false);
@@ -496,7 +496,6 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
         model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
-    model.setPredefinedDockerfileOptions(dockerArtifactPath.getText());
     dockerImageDescription.dockerImageName = dockerImageNameTextField.getText();
     model.setDockerContainerName(AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName));
 
@@ -510,6 +509,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     }
     dockerImageDescription.artifactPath = dockerArtifactPath.getText();
     dockerImageDescription.hasRootDeployment = dockerImageDescription.artifactPath.toLowerCase().matches(".*.jar");
+    model.setPredefinedDockerfileOptions(dockerArtifactPath.getText());
 
     if (dockerHostsTableSelection == null && !dockerImageDescription.hasNewDockerHost){
       ValidationInfo info = new ValidationInfo("Please check a Docker host or create a new", dockerHostsTable);

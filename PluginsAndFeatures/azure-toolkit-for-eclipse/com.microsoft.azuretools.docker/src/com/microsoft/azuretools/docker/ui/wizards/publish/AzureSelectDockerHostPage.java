@@ -34,6 +34,7 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
@@ -47,6 +48,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -198,7 +201,7 @@ public class AzureSelectDockerHostPage extends WizardPage {
 		errMsgForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
 		errMsgForm.setBackground(mainContainer.getBackground());
 		errDispatcher = managedForm.getMessageManager();
-		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);
+//		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);
 		
 		initUIMainContainer(mainContainer);
 	}
@@ -221,7 +224,25 @@ public class AzureSelectDockerHostPage extends WizardPage {
 				}
 			}
 		});
+		
+		String artifactPath;
+		if (project != null) {
+			try {
+		        String projectName = project.getName();
+		        artifactPath = project.getLocation() + "/" + projectName + ".war";
+			} catch (Exception ignored) {
+				artifactPath = "";
+	        }
+		} else {
+			artifactPath = "";
+		}
 
+		if (artifactPath == null || artifactPath.isEmpty() || !Files.isRegularFile(Paths.get(artifactPath))) {
+			errDispatcher.addMessage("dockerArtifactPathTextField", AzureDockerValidationUtils.getDockerArtifactPathTip(), null, IMessageProvider.ERROR, dockerArtifactPathTextField);
+			setErrorMessage("Invalid artifact path");
+		} else {
+			dockerArtifactPathTextField.setText(artifactPath);
+		}
 	    dockerArtifactPathTextField.setToolTipText(AzureDockerValidationUtils.getDockerArtifactPathTip());
 		dockerArtifactPathTextField.addModifyListener(new ModifyListener() {
 			@Override
@@ -244,9 +265,9 @@ public class AzureSelectDockerHostPage extends WizardPage {
 				FileDialog fileDialog = new FileDialog(dockerArtifactPathBrowseButton.getShell(), SWT.OPEN);
 				fileDialog.setText("Select Artifact .WAR or .JAR");
 				fileDialog.setFilterPath(System.getProperty("user.home"));
-				fileDialog.setFilterExtensions(new String[] { "*.?ar", "*.*" });
+				fileDialog.setFilterExtensions(new String[] { "*.war;*.jar", "*.jar", "*.*" });
 				String path = fileDialog.open();
-				if (path == null || path.toLowerCase().contains(".war") || path.toLowerCase().contains(".jar")) {
+				if (path == null || (!path.toLowerCase().contains(".war") && !path.toLowerCase().contains(".jar"))) {
 					return;
 				}
 				dockerArtifactPathTextField.setText(path);
@@ -307,8 +328,6 @@ public class AzureSelectDockerHostPage extends WizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				if (e.detail == SWT.CHECK) {
 					DockerHost dockerHost = (DockerHost) ((TableItem) e.item).getData();
-					
-					MessageDialog.openInformation(mainContainer.getShell(), "AzureDockerPlugin","Click check " + dockerHost.name);
 					if (dockerHostsTableSelection == null || dockerHostsTableSelection.host != dockerHost) {
 						dockerHostsTableSelection = new DockerHostsTableSelection();
 						dockerHostsTableSelection.row = 0;
@@ -322,8 +341,6 @@ public class AzureSelectDockerHostPage extends WizardPage {
 					} else {
 						dockerHostsTableSelection = null;
 					}
-				} else {
-					MessageDialog.openInformation(mainContainer.getShell(), "AzureDockerPlugin", String.format("Click select on %d", dockerHostsTable.getSelectionIndex()));
 				}
 			}
 		});
@@ -354,10 +371,22 @@ public class AzureSelectDockerHostPage extends WizardPage {
 				AzureNewDockerWizard newDockerWizard = new AzureNewDockerWizard(project, dockerManager);
 				WizardDialog createNewDockerHostDialog = new WizardDialog(mainContainer.getShell(), newDockerWizard);
 				if (createNewDockerHostDialog.open() == Window.OK) {
-					MessageDialog.openInformation(mainContainer.getShell(), "AzureDockerPlugin", "OK");
-//					newDockerWizard.createHost();
-					// TODO add real thing here
-					dockerHostsList.add(0, dockerManager.createNewDockerHostDescription(AzureDockerUtils.getDefaultRandomName(AzureDockerUtils.getDefaultName(project.getName()))));
+					DockerHost host = newDockerWizard.getDockerHost();
+					dockerImageDescription.host = host;
+					dockerImageDescription.hasNewDockerHost = true;
+					dockerImageDescription.sid = host.sid;
+
+					AzureDockerPreferredSettings dockerPrefferedSettings = dockerManager.getDockerPreferredSettings();
+					if (dockerPrefferedSettings == null) {
+						dockerPrefferedSettings = new AzureDockerPreferredSettings();
+					}
+					dockerPrefferedSettings.region = host.hostVM.region;
+					dockerPrefferedSettings.vmSize = host.hostVM.vmSize;
+					dockerPrefferedSettings.vmOS = host.hostOSType.name();
+					dockerManager.setDockerPreferredSettings(dockerPrefferedSettings);
+					
+					dockerHostsList.add(0, host);
+
 					dockerHostsTable.setEnabled(false);
 					dockerHostsRefreshButton.setEnabled(false);
 					dockerHostsAddButton.setEnabled(false);
@@ -366,21 +395,22 @@ public class AzureSelectDockerHostPage extends WizardPage {
 					dockerHostsTableViewer.refresh();
 					dockerHostsTable.getItem(0).setChecked(true);
 					dockerHostsTable.select(0);
-				} else {
-					MessageDialog.openInformation(mainContainer.getShell(), "AzureDockerPlugin", "Canceled");
 				}
+				setPageComplete(doValidate());
 			}
 		});
 		
 		dockerHostsDeleteButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				setPageComplete(doValidate());
 			}
 		});
 		
 		dockerHostsEditButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				setPageComplete(doValidate());
 			}
 		});
 	}
@@ -424,6 +454,45 @@ public class AzureSelectDockerHostPage extends WizardPage {
 	}
 	
 	public boolean doValidate() {
+		if (dockerImageNameTextField.getText() == null || dockerImageNameTextField.getText().equals("")) {
+			errDispatcher.addMessage("dockerImageNameTextField", AzureDockerValidationUtils.getDockerImageNameTip(), null, IMessageProvider.ERROR, dockerImageNameTextField);
+			setErrorMessage("Invalid Docker image name");
+			return false;
+		} else {
+			errDispatcher.removeMessage("dockerImageNameTextField", dockerImageNameTextField);
+			setErrorMessage(null);
+		    dockerImageDescription.dockerImageName = dockerImageNameTextField.getText();
+		    wizard.setDockerContainerName(AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName));
+		}
+
+		if (dockerArtifactPathTextField.getText() == null || !Files.isRegularFile(Paths.get(dockerArtifactPathTextField.getText()))) {
+			errDispatcher.addMessage("dockerArtifactPathTextField", AzureDockerValidationUtils.getDockerArtifactPathTip(), null, IMessageProvider.ERROR, dockerArtifactPathTextField);
+			setErrorMessage("Invalid artifact path");
+			return false;
+		} else {
+			errDispatcher.removeMessage("dockerArtifactPathTextField", dockerArtifactPathTextField);
+			setErrorMessage(null);
+			dockerImageDescription.artifactPath = dockerArtifactPathTextField.getText();
+			dockerImageDescription.hasRootDeployment = dockerImageDescription.artifactPath.toLowerCase().matches(".*.jar");
+			wizard.setPredefinedDockerfileOptions(dockerArtifactPathTextField.getText());
+		}
+
+		if (dockerHostsTableSelection == null && !dockerImageDescription.hasNewDockerHost) {
+			String errMsg = "Missing check for the Docker host to publish into";
+			errDispatcher.addMessage("dockerHostsTable", errMsg, null, IMessageProvider.ERROR, dockerHostsTable);
+			setErrorMessage(errMsg);
+			return false;
+		} else {
+			errDispatcher.removeMessage("dockerHostsTable", dockerHostsTable);
+			setErrorMessage(null);
+		    dockerImageDescription.dockerImageName = dockerImageNameTextField.getText();
+		}
+
+		if (!dockerImageDescription.hasNewDockerHost) {
+			dockerImageDescription.host = dockerHostsTableSelection.host;
+			dockerImageDescription.sid = dockerImageDescription.host.sid;
+		}
+
 		return true;
 	}
 	
