@@ -331,14 +331,11 @@ public class AppServiceCreateDialog extends DialogWrapper {
     }
 
     protected void fillWebContainers() {
-        try {
-            DefaultComboBoxModel<WebContainer> cbModel = createComboboxModelFromClassFields(WebContainer.class);
-            comboBoxWebContainer.setModel(cbModel);
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            LOGGER.error("fillWebContainers", ex);
+        DefaultComboBoxModel<WebAppUtils.WebContainerMod> cbModel = new DefaultComboBoxModel<WebAppUtils.WebContainerMod>();
+        for (WebAppUtils.WebContainerMod wc : WebAppUtils.WebContainerMod.values()) {
+            cbModel.addElement(wc);
         }
+        comboBoxWebContainer.setModel(cbModel);
     }
 
     protected void fillSubscriptions() {
@@ -378,7 +375,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    LOGGER.error("updateAndFillSubscriptions", ex);
+                    LOGGER.error("updateAndFillSubscriptions@AppServiceCreateDialog", ex);
                 }
             }
         });
@@ -401,7 +398,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.error("doFillSubscriptions", ex);
+            LOGGER.error("doFillSubscriptions@AppServiceCreateDialog", ex);
         }
     }
 
@@ -492,7 +489,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.error("fillAppServicePlanLocations", ex);
+            LOGGER.error("fillAppServicePlanLocations@AppServiceCreateDialog", ex);
         }
     }
 
@@ -503,7 +500,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.error("fillAppServicePlanPricingTiers", ex);
+            LOGGER.error("fillAppServicePlanPricingTier@AppServiceCreateDialogs", ex);
         }
     }
 
@@ -543,7 +540,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
         @Override
         public void collectData() {
             webAppName = textFieldWebappName.getText().trim();
-            webContainer = (WebContainer)comboBoxWebContainer.getSelectedItem();
+            webContainer = ((WebAppUtils.WebContainerMod)comboBoxWebContainer.getSelectedItem()).toWebContainer();
             subscriptionDetail = (SubscriptionDetail)comboBoxSubscription.getSelectedItem();
 
             //isResourceGroupCreateNew = tabbedPaneResourceGroup.getSelectedComponent() == panelResourceGroupCreateNew;
@@ -748,7 +745,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     // TODO: show error message
-                    LOGGER.error("doOKAction :: Task.Modal", ex);
+                    LOGGER.error("run@Progress@doOKAction@@AppServiceCreateDialog", ex);
                     ErrorWindow.show(ex.getMessage(), "Create App Service Error", AppServiceCreateDialog.this.contentPane);
                 }
             }

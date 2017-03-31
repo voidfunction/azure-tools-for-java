@@ -267,7 +267,7 @@
                   <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="Deploy the default JDK (JDK 8)"/>
+                  <text value="Newest Java 8"/>
                 </properties>
               </component>
               <component id="9dbfc" class="javax.swing.JRadioButton" binding="radioButtonJdk3rdParty">
