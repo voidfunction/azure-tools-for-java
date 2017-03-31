@@ -33,8 +33,8 @@ apply plugin: 'org.jetbrains.intellij'
 
 intellij {
     pluginName 'azure-toolkit-for-intellij'
-    version 'IU-2016.3'
-    plugins 'org.intellij.scala:2016.3.5', 'ant'
+    version 'IU-2017.1'
+    plugins 'org.intellij.scala:2017.1.15'
 }
 
 sourceSets {
