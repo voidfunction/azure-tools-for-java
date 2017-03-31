@@ -344,45 +344,29 @@ public class WebAppUtils {
     }
 
     public static byte[] generateWebConfigForCustomJDK(String jdkPath, String webContainerPath) {
-        String jdkProcessPath = jdkPath.isEmpty() ? "%JAVA_HOME%\\bin\\java.exe" : jdkPath + "\\bin\\java.exe";
+        String javaPath = jdkPath.isEmpty() ? "%JAVA_HOME%\\bin\\java.exe" : jdkPath + "\\bin\\java.exe";
+        String debugOptions = "-Djava.net.preferIPv4Stack=true -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=127.0.0.1:%HTTP_PLATFORM_DEBUG_PORT% ";
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append("<?xml version='1.0' encoding='UTF-8' standalone='no'?>\n");
+        sb.append("<?xml version='1.0' encoding='UTF-8'?>\n");
         sb.append("<configuration>\n");
         sb.append("    <system.webServer>\n");
-        sb.append("        <applicationInitialization remapManagedRequestsTo='/hostingstart.html'>\n");
-        sb.append("        </applicationInitialization>\n");
 
-        if (webContainerPath.toUpperCase().contains("TOMCAT")) {
-            String javaOptsString =
-                    "-Djava.net.preferIPv4Stack=true -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=127.0.0.1:%HTTP_PLATFORM_DEBUG_PORT%";
-            String catalinaOpts = "-Dport.http=%HTTP_PLATFORM_PORT%";
-
-            sb.append("        <httpPlatform processPath='" + webContainerPath + "\\bin\\startup.bat" + "'>\n");
+        if (!webContainerPath.toUpperCase().contains("JETTY")) {
+            sb.append("        <httpPlatform>\n");
             sb.append("            <environmentVariables>\n");
             sb.append("                <environmentVariable name='JRE_HOME' value='"+ jdkPath +"'/>\n");
-            sb.append("                <environmentVariable name='JAVA_OPTS' value='"+ javaOptsString +"'/>\n");
-            sb.append("                <environmentVariable name='CATALINA_OPTS' value='"+ catalinaOpts +"'/>\n");
-            sb.append("                <environmentVariable name='CATALINA_HOME' value='" + webContainerPath + "'/>\n");
+            sb.append("                <environmentVariable name='JAVA_OPTS' value='"+ debugOptions +"'/>\n");
             sb.append("            </environmentVariables>\n");
             sb.append("        </httpPlatform>\n");
         } else {
-            String arg =
-                    "-Djava.net.preferIPv4Stack=true  -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=127.0.0.1:%HTTP_PLATFORM_DEBUG_PORT% -Djetty.port=%HTTP_PLATFORM_PORT% -Djetty.base=\"" +
+            String arg = debugOptions + "-Djetty.port=%HTTP_PLATFORM_PORT% -Djetty.base=\"" +
                     webContainerPath + "\" -Djetty.webapps=\"d:\\home\\site\\wwwroot\\webapps\"  -jar \"" + webContainerPath + "\\start.jar\" etc\\jetty-logging.xml";
 
-            sb.append("        <httpPlatform processPath='"+ jdkProcessPath +"' startupTimeLimit='30' startupRetryCount='10' arguments='"+ arg +"'/>\n");
+            sb.append("        <httpPlatform processPath='"+ javaPath +"' startupTimeLimit='30' startupRetryCount='10' arguments='"+ arg +"'/>\n");
         }
         sb.append("    </system.webServer>\n");
-        sb.append("    <system.web>\n");
-        sb.append("        <customErrors mode='Off'/>\n");
-        sb.append("        <compilation debug='true' targetFramework='4.5'>\n");
-        sb.append("            <assemblies>\n");
-        sb.append("            </assemblies>\n");
-        sb.append("        </compilation>\n");
-        sb.append("        <httpRuntime targetFramework='4.5'/>\n");
-        sb.append("    </system.web>\n");
         sb.append("</configuration>\n");
 
         return sb.toString().getBytes();
