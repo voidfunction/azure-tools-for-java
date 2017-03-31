@@ -284,7 +284,7 @@ public class ApplicationInsightsPanel implements AzureAbstractPanel {
         final ModifiableRootModel modifiableModel = ModuleRootManager.getInstance(module).getModifiableModel();
         for (OrderEntry orderEntry : modifiableModel.getOrderEntries()) {
             if (orderEntry instanceof ModuleLibraryOrderEntryImpl
-                    && AzureLibrary.AZURE_LIBRARIES.getName().equals(((ModuleLibraryOrderEntryImpl) orderEntry).getLibraryName())) {
+                    && AzureLibrary.APP_INSIGHTS.getName().equals(((ModuleLibraryOrderEntryImpl) orderEntry).getLibraryName())) {
                 return;
             }
         }
@@ -292,10 +292,10 @@ public class ApplicationInsightsPanel implements AzureAbstractPanel {
         final LibrariesContainer.LibraryLevel level = LibrariesContainer.LibraryLevel.MODULE;
         AccessToken token = WriteAction.start();
         try {
-            Library newLibrary = LibrariesContainerFactory.createContainer(modifiableModel).createLibrary(AzureLibrary.AZURE_LIBRARIES.getName(), level, new ArrayList<OrderRoot>());
+            Library newLibrary = LibrariesContainerFactory.createContainer(modifiableModel).createLibrary(AzureLibrary.APP_INSIGHTS.getName(), level, new ArrayList<OrderRoot>());
             for (OrderEntry orderEntry : modifiableModel.getOrderEntries()) {
                 if (orderEntry instanceof ModuleLibraryOrderEntryImpl
-                        && AzureLibrary.AZURE_LIBRARIES.getName().equals(((ModuleLibraryOrderEntryImpl) orderEntry).getLibraryName())) {
+                        && AzureLibrary.APP_INSIGHTS.getName().equals(((ModuleLibraryOrderEntryImpl) orderEntry).getLibraryName())) {
                     ((ModuleLibraryOrderEntryImpl) orderEntry).setExported(true);
                     break;
                 }
@@ -303,7 +303,7 @@ public class ApplicationInsightsPanel implements AzureAbstractPanel {
             Library.ModifiableModel newLibraryModel = newLibrary.getModifiableModel();
 //            File file = new File(String.format("%s%s%s", AzurePlugin.pluginFolder, File.separator, AzureLibrary.AZURE_LIBRARIES.getLocation()));
 //            AddLibraryUtility.addLibraryRoot(file, newLibraryModel);
-            AddLibraryUtility.addLibraryFiles(new File(PluginHelper.getAzureLibLocation()), newLibraryModel, AzureLibrary.AZURE_LIBRARIES.getFiles());
+            AddLibraryUtility.addLibraryFiles(new File(PluginHelper.getAzureLibLocation()), newLibraryModel, AzureLibrary.APP_INSIGHTS.getFiles());
 
             newLibraryModel.commit();
             modifiableModel.commit();

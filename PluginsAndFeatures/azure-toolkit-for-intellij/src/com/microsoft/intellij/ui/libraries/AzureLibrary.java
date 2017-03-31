@@ -72,6 +72,13 @@ public class AzureLibrary {
                     "azure-mgmt-cdn-1.0.0-beta4.1.jar",
                     "azure-mgmt-sql-1.0.0-beta4.1.jar"
             });
+    public static AzureLibrary APP_INSIGHTS = new AzureLibrary("Application Insights for Java",
+            null,
+            new String[]{
+                    "applicationinsights-core-1.0.3.jar",
+                    "applicationinsights-management-1.0.3.jar",
+                    "applicationinsights-web-1.0.3.jar"
+            });
     public static AzureLibrary[] LIBRARIES = new AzureLibrary[]{SQL_JDBC, AZURE_LIBRARIES};
 
     private String name;
