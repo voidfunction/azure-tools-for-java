@@ -127,6 +127,7 @@ public class AzureConfigurable extends SearchableConfigurable.Parent.Abstract im
         @Nullable
         @Override
         public JComponent createComponent() {
+            myPanel.init();
             return myPanel.getPanel();
         }
 

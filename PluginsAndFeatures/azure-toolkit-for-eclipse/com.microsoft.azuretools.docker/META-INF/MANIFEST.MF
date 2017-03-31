@@ -23,3 +23,4 @@ Bundle-ClassPath: .,
 Import-Package: org.eclipse.jst.j2ee.datamodel.properties,
  org.eclipse.jst.j2ee.internal.web.archive.operations,
  org.eclipse.wst.common.frameworks.datamodel
+Export-Package: com.microsoft.azuretools.docker.ui.dialogs

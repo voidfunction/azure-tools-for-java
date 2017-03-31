@@ -49,6 +49,9 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.ui.config.AIResourceChangeListener;
 import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.core.applicationinsights.ApplicationInsightsPreferences;
 import com.microsoft.azuretools.core.applicationinsights.ApplicationInsightsResourceRegistryEclipse;
 
@@ -328,23 +331,7 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 	 * Method opens dialog to create new application insights resource.
 	 */
 	protected void newButtonListener() {
-		/*try {
-			AzureManager manager = AzureManagerImpl.getManager();
-			List<Subscription> subList = manager.getSubscriptionList();
-			if (subList.size() > 0) {
-				if (!manager.authenticated()) {
-					// imported publish settings file.
-					manager.clearImportedPublishSettingsFiles();
-					WizardCacheManager.clearSubscriptions();
-					createSubscriptionDialog(true);
-				}
-			} else {
-				createSubscriptionDialog(true);
-			}
-			createNewDilaog();
-		} catch(Exception ex) {
-			Activator.getDefault().log(Messages.importErrMsg, ex);
-		}*/
+		createNewDilaog();
 	}
 
 	public void createNewDilaog() {
@@ -455,29 +442,27 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 	}
 
 	private void loadInfoFirstTime() {
-		/*try {
-			AzureManager manager = AzureManagerImpl.getManager();
-			List<Subscription> subList = manager.getSubscriptionList();
-			if (subList.size() > 0) {
-				if (!ApplicationInsightsPreferences.isLoaded()) {
-					if (manager.authenticated()) {
+		try {
+			if (AuthMethodManager.getInstance().isSignedIn()) {
+                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+                List<SubscriptionDetail> subList = azureManager.getSubscriptionManager().getSubscriptionDetails();
+                if (subList.size() > 0) {
+//				if (!ApplicationInsightsPreferences.isLoaded()) {
 						// authenticated using AD. Proceed for updating application insights registry.
-						ApplicationInsightsResourceRegistryEclipse.updateApplicationInsightsResourceRegistry(subList);
-					} else {
-						// imported publish settings file. just show manually added list from preferences
-						// Neither clear subscription list nor show sign in dialog as user may just want to add key manually.
-						ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
-					}
+					ApplicationInsightsResourceRegistryEclipse.updateApplicationInsightsResourceRegistry(subList);
 				} else {
-					// show list from preferences - getTableContent() does it. So nothing to handle here
+					ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
 				}
+//				} else {
+//					// show list from preferences - getTableContent() does it. So nothing to handle here
+//				}
 			} else {
 				// just show manually added list from preferences
 				ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
 			}
 		} catch(Exception ex) {
 			Activator.getDefault().log(Messages.importErrMsg, ex);
-		}*/
+		}
 	}
 
 	private void createSubscriptionDialog(boolean invokeSignIn) {

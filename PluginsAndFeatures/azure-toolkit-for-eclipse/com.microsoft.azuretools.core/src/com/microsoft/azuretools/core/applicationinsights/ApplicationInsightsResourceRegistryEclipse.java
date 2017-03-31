@@ -30,10 +30,13 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import com.microsoft.applicationinsights.management.rest.client.RestOperationException;
+import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.azuretools.core.Activator;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
 
 
 public class ApplicationInsightsResourceRegistryEclipse {
@@ -45,29 +48,22 @@ public class ApplicationInsightsResourceRegistryEclipse {
 	 * @throws RestOperationException
 	 * @throws AzureCmdException 
 	 */
-	//TODO
-	/*public static void updateApplicationInsightsResourceRegistry(List<Subscription> subList)
-			throws IOException, RestOperationException, AzureCmdException {
-		for (Subscription sub : subList) {
-			AzureManager manager = AzureManagerImpl.getManager();
+	public static void updateApplicationInsightsResourceRegistry(List<SubscriptionDetail> subList) throws Exception {
+		for (SubscriptionDetail sub : subList) {
 			// fetch resources available for particular subscription
-			List<Resource> resourceList = manager.getApplicationInsightsResources(sub.getId());
+			List<Resource> resourceList = AzureSDKManager.getApplicationInsightsResources(sub);
 
 			// Removal logic
-			List<ApplicationInsightsResource> registryList = ApplicationInsightsResourceRegistry.
-					getResourceListAsPerSub(sub.getId());
-			List<ApplicationInsightsResource> importedList = ApplicationInsightsResourceRegistry.
-					prepareAppResListFromRes(resourceList, sub);
+			List<ApplicationInsightsResource> registryList = ApplicationInsightsResourceRegistry.getResourceListAsPerSub(sub.getSubscriptionId());
+			List<ApplicationInsightsResource> importedList = ApplicationInsightsResourceRegistry.prepareAppResListFromRes(resourceList, sub);
 			List<String> inUsekeyList = getInUseInstrumentationKeys();
 			for (ApplicationInsightsResource registryRes : registryList) {
 				if (!importedList.contains(registryRes)) {
 					String key = registryRes.getInstrumentationKey();
 					int index = ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(key);
 					if (inUsekeyList.contains(key)) {
-						
-						 * key is used by project but not present in cloud,
-						 * so make it as manually added resource and not imported.
-						 
+//						 key is used by project but not present in cloud,
+//						 so make it as manually added resource and not imported.
 						ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
 								key, key, Messages.unknown, Messages.unknown,
 								Messages.unknown, Messages.unknown, false);
@@ -85,7 +81,7 @@ public class ApplicationInsightsResourceRegistryEclipse {
 			for (Resource resource : resourceList) {
 				ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
 						resource.getName(), resource.getInstrumentationKey(),
-						sub.getName(), sub.getId(),
+						sub.getSubscriptionName(), sub.getSubscriptionId(),
 						resource.getLocation(), resource.getResourceGroup(), true);
 				if (list.contains(resourceToAdd)) {
 					int index = ApplicationInsightsResourceRegistry.
@@ -103,7 +99,7 @@ public class ApplicationInsightsResourceRegistryEclipse {
 		}
 		ApplicationInsightsPreferences.save();
 		ApplicationInsightsPreferences.setLoaded(true);
-	}*/
+	}
 
 	public static void keeepManuallyAddedList() {
 		List<ApplicationInsightsResource> addedList = ApplicationInsightsResourceRegistry.getAddedResources();

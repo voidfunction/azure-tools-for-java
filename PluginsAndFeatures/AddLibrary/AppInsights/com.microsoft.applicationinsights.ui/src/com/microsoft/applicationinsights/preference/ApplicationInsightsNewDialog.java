@@ -20,6 +20,7 @@
 package com.microsoft.applicationinsights.preference;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,23 +51,30 @@ import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.util.AILibraryUtil;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.utils.AzureModel;
+import com.microsoft.azuretools.utils.AzureModelController;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
 import com.microsoftopentechnologies.wacommon.commoncontrols.NewResourceGroupDialog;
 /**
  * Class is intended for creating new application insights resources
  * remotely in the cloud.
  */
 public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
+    private static final String LOADING = "<Loading...>";
 	Text txtName;
-	Combo subscription;
+	private Combo subscription;
 	Combo resourceGrp;
 	Combo region;
 	Button okButton;
 	Button newBtn;
-	Map<String, String> subMap = new HashMap<String, String>();
-	String currentSub;
+	private SubscriptionDetail currentSub;
 	static ApplicationInsightsResource resourceToAdd;
 
 	public ApplicationInsightsNewDialog(Shell parentShell) {
@@ -117,26 +125,25 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 	}
 
 	private void populateValues() {
-		/*try {
-			AzureManager manager = AzureManagerImpl.getManager();
-			List<Subscription> subList = manager.getSubscriptionList();
+		try {
+			subscription.removeAll();
+			AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+			if (azureManager == null) {
+				return;
+			}
+			List<SubscriptionDetail> subList = azureManager.getSubscriptionManager().getSubscriptionDetails();
 			// check at least single subscription is associated with the account
 			if (subList.size() > 0) {
-				for (Subscription sub : subList) {
-					subMap.put(sub.getId(), sub.getName());
+				for (SubscriptionDetail sub : subList) {
+					subscription.add(sub.getSubscriptionName());
+					subscription.setData(sub.getSubscriptionName(), sub);
 				}
-				Collection<String> values = subMap.values();
-				String[] subNameArray = values.toArray(new String[values.size()]);
-				Set<String> keySet = subMap.keySet();
-				String[] subKeyArray = keySet.toArray(new String[keySet.size()]);
+				subscription.select(0);
+				currentSub = subList.get(0);
 
-				subscription.setItems(subNameArray);
-				subscription.setText(subNameArray[0]);
-				currentSub = subNameArray[0];
+				populateResourceGroupValues(currentSub.getSubscriptionId(), "");
 
-				populateResourceGroupValues(subKeyArray[0], "");
-
-				List<String> regionList = manager.getLocationsForApplicationInsights(subKeyArray[0]);
+				List<String> regionList = AzureSDKManager.getLocationsForApplicationInsights(currentSub);
 				String[] regionArray = regionList.toArray(new String[regionList.size()]);
 				region.setItems(regionArray);
 				region.setText(regionArray[0]);
@@ -144,7 +151,7 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 			enableOkBtn();
 		} catch (Exception ex) {
 			Activator.getDefault().log(Messages.getValuesErrMsg, ex);
-		}*/
+		}
 	}
 
 	private void populateResourceGroupValues(String subId, String valtoSet) {
@@ -203,19 +210,14 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				String newSub = subscription.getText();
+				SubscriptionDetail newSub = (SubscriptionDetail) subscription.getData(subscription.getText());
 				String prevResGrpVal = resourceGrp.getText();
-				String key = findKeyAsPerValue(newSub);
-				if (key != null && !key.isEmpty()) {
-					if (currentSub.equalsIgnoreCase(newSub)) {
-						populateResourceGroupValues(key, prevResGrpVal);
-					} else {
-						populateResourceGroupValues(key, "");
-					}
-					currentSub = newSub;
+				if (currentSub.equals(newSub)) {
+					populateResourceGroupValues(currentSub.getSubscriptionId(), prevResGrpVal);
 				} else {
-					Activator.getDefault().log(Messages.getSubIdErrMsg);
+					populateResourceGroupValues(newSub.getSubscriptionId(), "");
 				}
+				currentSub = newSub;
 				enableOkBtn();
 			}
 
@@ -257,7 +259,7 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 				if (result == Window.OK) {
 					ResourceGroup group = dialog.getResourceGroup();
 					if (group != null) {
-						populateResourceGroupValues(findKeyAsPerValue(subTxt), group.name());
+						populateResourceGroupValues(currentSub.getSubscriptionId(), group.name());
 					}
 				}
 			}
@@ -332,25 +334,13 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 		}
 	}
 
-	private String findKeyAsPerValue(String subName) {
-		String key = "";
-		for (Map.Entry<String, String> entry : subMap.entrySet()) {
-			if (entry.getValue().equalsIgnoreCase(subName)) {
-				key = entry.getKey();
-				break;
-			}
-		}
-		return key;
-	}
-
 	@Override
 	protected void okPressed() {
 		boolean isValid = false;
-		/*try {
+		try {
 			PluginUtil.showBusy(true, getShell());
-			String subId = findKeyAsPerValue(subscription.getText());
-			Resource resource = AzureManagerImpl.getManager().createApplicationInsightsResource(
-					subId, resourceGrp.getText(),
+			String subId = currentSub.getSubscriptionId();
+			Resource resource = AzureSDKManager.createApplicationInsightsResource(currentSub, resourceGrp.getText(),
 					txtName.getText(), region.getText());
 			resourceToAdd = new ApplicationInsightsResource(
 					resource.getName(), resource.getInstrumentationKey(),
@@ -361,7 +351,7 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 			PluginUtil.showBusy(false, getShell());
 			PluginUtil.displayErrorDialogAndLog(getShell(),
 					Messages.appTtl, Messages.resCreateErrMsg, ex);
-		}*/
+		}
 		if (isValid) {
 			PluginUtil.showBusy(false, getShell());
 			super.okPressed();

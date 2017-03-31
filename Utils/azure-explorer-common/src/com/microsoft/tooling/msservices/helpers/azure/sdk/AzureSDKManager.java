@@ -212,8 +212,18 @@ public class AzureSDKManager {
                 .createResource(subscription.getSubscriptionId(), resourceGroupName, resourceName, location);
     }
 
+    public static List<String> getLocationsForApplicationInsights(SubscriptionDetail subscription) throws Exception {
+        AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+        if (azureManager == null) { // not signed in
+            return null;
+        }
+        String tenantId = subscription.getTenantId();
+        return getApplicationManagementClient(tenantId, azureManager.getAccessToken(tenantId))
+                .getAvailableGeoLocations();
+    }
+
     @NotNull
-    public static ApplicationInsightsManagementClient getApplicationManagementClient(@NotNull String tenantId, @NotNull String accessToken)
+    private static ApplicationInsightsManagementClient getApplicationManagementClient(@NotNull String tenantId, @NotNull String accessToken)
             throws RestOperationException, IOException {
         String userAgent = "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:19.0) Gecko/20100101 Firefox/19.0";
         return new ApplicationInsightsManagementClient(tenantId, accessToken, userAgent);

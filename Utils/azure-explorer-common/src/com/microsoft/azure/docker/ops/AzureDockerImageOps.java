@@ -163,7 +163,7 @@ public class AzureDockerImageOps {
           .configure(SerializationFeature.INDENT_OUTPUT, true);
 
       // list all the Docker images on the Docker host
-      String cmd1 = String.format("docker images -a --format \"{ \\\"name\\\" : \\\"{{.Repository}}\\\", \\\"id\\\" : \\\"{{.ID}}\\\", \\\"size\\\" : \\\"{{.Size}}\\\" }\"");
+      String cmd1 = String.format("docker images -a --format \"{ \\\"name\\\" : \\\"{{.Repository}}\\\", \\\"tag\\\" : \\\"{{.Tag}}\\\", \\\"id\\\" : \\\"{{.ID}}\\\", \\\"size\\\" : \\\"{{.Size}}\\\" }\"");
       if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
       String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, dockerHost.session, false);
       if (DEBUG) System.out.println(cmdOut1);
@@ -183,14 +183,18 @@ public class AzureDockerImageOps {
         String currentLine = lines.nextLine();
         try {
           DockerImageRawInfo rawImage = mapper.readValue(currentLine, DockerImageRawInfo.class);
-          DockerImage dockerImage = new DockerImage();
-          dockerImage.name = rawImage.name;
-          dockerImage.id = rawImage.id;
-          dockerImage.size = rawImage.size;
-          dockerImage.dockerHostApiUrl = dockerHost.apiUrl;
-          dockerImage.containers = new HashMap<>();
-          dockerImageMap.put(dockerImage.name, dockerImage);
-        } catch (Exception ee){}
+          if (rawImage.name != null && !rawImage.name.equals("<none>")) {
+            DockerImage dockerImage = new DockerImage();
+            dockerImage.name = rawImage.name;
+            dockerImage.tag = (rawImage.tag != null && rawImage.tag.toLowerCase().equals("latest")) ? "" : rawImage.tag;
+            dockerImage.id = rawImage.id;
+            dockerImage.size = rawImage.size;
+            dockerImage.dockerHostApiUrl = dockerHost.apiUrl;
+            dockerImage.containers = new HashMap<>();
+
+            dockerImageMap.put(dockerImage.name + (dockerImage.tag.isEmpty() ? "" : ":" + dockerImage.tag), dockerImage);
+          }
+        } catch (Exception ignored){}
       }
       lines.close();
 
@@ -214,7 +218,7 @@ public class AzureDockerImageOps {
             if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
             dockerImage.artifactFile = cmdOut1.trim();
           }
-        } catch (Exception ee){}
+        } catch (Exception ignored){}
       }
       lines.close();
 
@@ -224,8 +228,17 @@ public class AzureDockerImageOps {
     }
   }
 
+  public static String getDockerImageMapKey(DockerImage dockerImage) {
+    if (dockerImage != null && dockerImage.name != null) {
+      return dockerImage.name + (dockerImage.tag == null || dockerImage.tag.isEmpty() ? "" : ":" + dockerImage.tag);
+    } else {
+      return "";
+    }
+  }
+
   public static class DockerImageRawInfo {
     public String name;
+    public String tag;
     public String id;
     public String size;
   }

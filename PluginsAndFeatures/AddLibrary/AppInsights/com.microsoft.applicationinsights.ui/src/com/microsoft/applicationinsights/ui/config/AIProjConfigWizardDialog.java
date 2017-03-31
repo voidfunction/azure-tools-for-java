@@ -70,6 +70,9 @@ import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.util.AILibraryUtil;
 import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
 import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.core.applicationinsights.AILibraryHandler;
 import com.microsoft.azuretools.core.applicationinsights.ApplicationInsightsPreferences;
 import com.microsoft.azuretools.core.applicationinsights.ApplicationInsightsResourceRegistryEclipse;
@@ -164,18 +167,22 @@ public class AIProjConfigWizardDialog extends TitleAreaDialog {
 	}
 	
 	private void setData() {
-		/*try {
-			AzureManager manager = AzureManagerImpl.getManager();
-			List<Subscription> subList = manager.getSubscriptionList();
+		try {
+			AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+            // not signed in
+            if (azureManager == null) {
+                return;
+            }
+            List<SubscriptionDetail> subList = azureManager.getSubscriptionManager().getSubscriptionDetails();
 			if (subList.size() > 0 && !ApplicationInsightsPreferences.isLoaded()) {
-				if (manager.authenticated()) {
+//				if (manager.authenticated()) {
 					// authenticated using AD. Proceed for updating application insights registry.
 					ApplicationInsightsResourceRegistryEclipse.updateApplicationInsightsResourceRegistry(subList);
-				} else {
+//				} else {
 					// imported publish settings file. just show manually added list from preferences
 					// Neither clear subscription list nor show sign in dialog as user may just want to add key manually.
-					ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
-				}
+//					ApplicationInsightsResourceRegistryEclipse.keeepManuallyAddedList();
+//				}
 			}
 		} catch(Exception ex) {
 			Activator.getDefault().log(ex.getMessage(), ex);
@@ -185,7 +192,7 @@ public class AIProjConfigWizardDialog extends TitleAreaDialog {
 		if (array.length > 0) {
 			comboInstrumentationKey.setItems(array);
 			comboInstrumentationKey.setText(array[0]);
-		}*/
+		}
 	}
 
 	private void populateData() {
