@@ -116,7 +116,9 @@ public class ApplicationInsightsPanel implements AzureAbstractPanel {
         public void actionPerformed(ActionEvent e) {
             String oldName = (String) comboInstrumentation.getSelectedItem();
             Project project = module.getProject();
-            final DefaultDialogWrapper dialog = new DefaultDialogWrapper(project, new AppInsightsMngmtPanel(project));
+            AppInsightsMngmtPanel appInsightsMngmtPanel = new AppInsightsMngmtPanel(project);
+            appInsightsMngmtPanel.init();
+            final DefaultDialogWrapper dialog = new DefaultDialogWrapper(project, appInsightsMngmtPanel);
             dialog.show();
             setData();
             List<String> list = Arrays.asList(ApplicationInsightsResourceRegistry.getResourcesNamesToDisplay());
