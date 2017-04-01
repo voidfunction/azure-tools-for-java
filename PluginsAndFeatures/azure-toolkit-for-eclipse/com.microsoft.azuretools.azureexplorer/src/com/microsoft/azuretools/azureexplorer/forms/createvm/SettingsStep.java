@@ -97,7 +97,7 @@ public class SettingsStep extends WizardPage {
     private List<AvailabilitySet> availabilitySets;
 
     public SettingsStep(CreateVMWizard wizard) {
-        super("Create new Virtual Machine", "Associated resources", Activator.getImageDescriptor("icons/large/Azure.png"));
+        super("Create new Virtual Machine", "Associated Resources", Activator.getImageDescriptor("icons/large/Azure.png"));
         this.wizard = wizard;
     }
 
