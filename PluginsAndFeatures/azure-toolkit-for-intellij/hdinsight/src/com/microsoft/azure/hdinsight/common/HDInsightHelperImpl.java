@@ -41,7 +41,7 @@ import javax.swing.*;
 
 public class HDInsightHelperImpl implements HDInsightHelper {
 
-
+    private static String instID = "";
     static {
         String dataFile = PluginHelper.getTemplateFile(AzureBundle.message("dataFileName"));
         instID = DataOperations.getProperty(dataFile, AzureBundle.message("instID"));
@@ -150,6 +150,4 @@ public class HDInsightHelperImpl implements HDInsightHelper {
         virtualFile.putUserData(JobViewEditorProvider.JOB_VIEW_UUID, uuid);
         openItem(project, virtualFile, closeableFile);
     }
-
-    private static String instID = "";
 }

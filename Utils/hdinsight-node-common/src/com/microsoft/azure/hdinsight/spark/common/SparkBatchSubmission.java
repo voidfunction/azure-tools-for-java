@@ -23,7 +23,6 @@ package com.microsoft.azure.hdinsight.spark.common;
 
 import com.microsoft.azure.hdinsight.common.HDInsightLoader;
 import com.microsoft.azure.hdinsight.common.StreamUtil;
-import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -46,7 +45,7 @@ public class SparkBatchSubmission {
     static {
         String installID = HDInsightLoader.getHDInsightHelper().getInstallationId();
         String userAgentSource = SparkBatchSubmission.class.getClassLoader().getClass().getName().toLowerCase().contains("intellij")
-                                        ? "Azure Toolkit for IntelliJ" : "Azure Toolkit for Eclipse";
+                                        ? "Azure Toolkit for IntelliJ " : "Azure Toolkit for Eclipse ";
         userAgentName = userAgentSource + installID;
     }
 
