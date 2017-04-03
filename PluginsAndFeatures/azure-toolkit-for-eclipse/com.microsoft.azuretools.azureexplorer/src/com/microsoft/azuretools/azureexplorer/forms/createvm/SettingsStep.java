@@ -37,11 +37,9 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -263,13 +261,12 @@ public class SettingsStep extends WizardPage {
 					public void run() {
 						// Resource groups already initialized in cache when loading locations on SelectImageStep
 				        List<ResourceGroup> resourceGroups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(wizard.getSubscription());
-				        List<String> filteredGroups = resourceGroups.stream().filter(group -> wizard.getRegion().name().equals(group.regionName()))
-				                .map(ResourceGroup::name).sorted().collect(Collectors.toList());
+				        List<String> sortedGroups = resourceGroups.stream().map(ResourceGroup::name).sorted().collect(Collectors.toList());
 						DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 							@Override
 							public void run() {
 								final Vector<Object> vector = new Vector<Object>();
-								vector.addAll(filteredGroups);
+								vector.addAll(sortedGroups);
 								resourceGroupViewer.setInput(vector);
 								if (vector.size() > 0) {
 									resourceGrpCombo.select(0);

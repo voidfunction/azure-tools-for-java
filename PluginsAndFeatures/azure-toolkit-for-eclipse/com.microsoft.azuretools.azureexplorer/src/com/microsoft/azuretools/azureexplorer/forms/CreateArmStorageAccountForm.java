@@ -552,16 +552,14 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
     
     public void fillGroups() {
     	List<ResourceGroup> resourceGroups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(subscriptionComboBox.getData(subscriptionComboBox.getText()));
-        List<String> filteredGroups = resourceGroups.stream()
-//        		.filter(group -> wizard.getRegion().equals(group.regionName()))
-                .map(ResourceGroup::name).sorted().collect(Collectors.toList());
+        List<String> sortedGroups = resourceGroups.stream().map(ResourceGroup::name).sorted().collect(Collectors.toList());
 		DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				final Vector<Object> vector = new Vector<Object>();
-				vector.addAll(filteredGroups);
+				vector.addAll(sortedGroups);
 				resourceGroupViewer.setInput(vector);
-				if (filteredGroups.size() > 0) {
+				if (sortedGroups.size() > 0) {
 					resourceGrpCombo.select(0);
 				}
 			}

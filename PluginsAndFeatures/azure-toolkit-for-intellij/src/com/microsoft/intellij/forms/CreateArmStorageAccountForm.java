@@ -462,11 +462,10 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
         loadGroups();
     }
 
-    public void loadGroups() {
-        // Resource groups already initialized in cache when loading locations on SelectImageStep
+    private void loadGroups() {
+        // Resource groups already initialized in cache when loading locations
         List<ResourceGroup> groups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(subscriptionComboBox.getSelectedItem());
-        List<String> filteredGroups = groups.stream().filter(group -> ((Location) regionComboBox.getSelectedItem()).name().equals(group.regionName()))
-                .map(ResourceGroup::name).sorted().collect(Collectors.toList());
-        resourceGrpCombo.setModel(new DefaultComboBoxModel<>(filteredGroups.toArray(new String[filteredGroups.size()])));
+        List<String> sortedGroups = groups.stream().map(ResourceGroup::name).sorted().collect(Collectors.toList());
+        resourceGrpCombo.setModel(new DefaultComboBoxModel<>(sortedGroups.toArray(new String[sortedGroups.size()])));
     }
 }

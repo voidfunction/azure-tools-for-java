@@ -182,9 +182,8 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
     private void fillResourceGroups() {
         // Resource groups already initialized in cache when loading locations on SelectImageStep
         List<ResourceGroup> groups = AzureModel.getInstance().getSubscriptionToResourceGroupMap().get(model.getSubscription());
-        List<String> filteredGroups = groups.stream().filter(group -> model.getRegion().name().equals(group.regionName()))
-                .map(ResourceGroup::name).sorted().collect(Collectors.toList());
-        resourceGrpCombo.setModel(new DefaultComboBoxModel<>(filteredGroups.toArray(new String[filteredGroups.size()])));
+        List<String> sortedGroups = groups.stream().map(ResourceGroup::name).sorted().collect(Collectors.toList());
+        resourceGrpCombo.setModel(new DefaultComboBoxModel<>(sortedGroups.toArray(new String[sortedGroups.size()])));
     }
 
     @Override
