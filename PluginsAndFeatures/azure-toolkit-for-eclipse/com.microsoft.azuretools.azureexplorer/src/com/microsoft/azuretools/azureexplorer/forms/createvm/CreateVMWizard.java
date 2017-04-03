@@ -167,12 +167,11 @@ public class CreateVMWizard extends Wizard {
                         }
                     });
                 } catch (Exception e) {
-                    DefaultLoader.getUIHelper().showException("An error occurred while trying to create the specified virtual machine",
-                            e,
-                            "Error Creating Virtual Machine",
-                            false,
-                            true);
-                    Activator.getDefault().log("Error Creating Virtual Machine", e);
+                	DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+                		public void run() {
+                			PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), "Error Creating Virtual Machine", "An error occurred while trying to create the specified virtual machine", e);
+                		}
+                	});
                 }
             }
         });
