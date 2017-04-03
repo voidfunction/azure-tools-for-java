@@ -21,11 +21,9 @@
  */
 package com.microsoft.azuretools.azureexplorer.actions;
 
-import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.azureexplorer.forms.CreateArmStorageAccountForm;
+import com.microsoft.azuretools.core.handlers.SignInCommandHandler;
 import com.microsoft.azuretools.core.utils.PluginUtil;
-import com.microsoft.azuretools.sdkmanage.AzureManager;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
@@ -42,20 +40,7 @@ public class CreateArmStorageAccountAction extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        // check if we have a valid subscription handy
-    	AzureManager azureManager;
-		try {
-			azureManager = AuthMethodManager.getInstance().getAzureManager();
-		} catch (Exception e1) {
-			azureManager = null;
-		}
-
-        if (azureManager == null) {
-            DefaultLoader.getUIHelper().showException("Please configure an Azure subscription by right-clicking on the \"Azure\" " +
-                    "node and selecting \"Manage subscriptions\".", null, "No Azure subscription found", false, true);
-            return;
-        }
-
+        if (!SignInCommandHandler.doSignIn(PluginUtil.getParentShell())) return;	
         CreateArmStorageAccountForm createStorageAccountForm = new CreateArmStorageAccountForm(PluginUtil.getParentShell(), null, null);
 
         createStorageAccountForm.setOnCreate(new Runnable() {
