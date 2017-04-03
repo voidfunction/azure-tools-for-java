@@ -304,7 +304,7 @@ public class AzureDockerHostsManager {
     host.name = name.toLowerCase();
     host.apiUrl = "http://" + name.toLowerCase() + ".centralus.cloudapp.azure.com";
     host.port = "2376"; /* Default Docker dockerHost port when TLS is enabled, "2375" otherwise */
-    host.state = DockerHost.DockerHostVMState.STARTING;
+    host.state = DockerHost.DockerHostVMState.TO_BE_CREATED;
     host.hostOSType = (dockerPreferredSettings != null && dockerPreferredSettings.vmOS != null) ? DockerHost.DockerHostOSType.valueOf(dockerPreferredSettings.vmOS) : DockerHost.DockerHostOSType.UBUNTU_SERVER_16_04_LTS;
     host.hostVM = new AzureDockerVM();
     host.hostVM.name = host.name;

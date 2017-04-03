@@ -88,4 +88,8 @@ public class AzureSelectDockerWizard extends Wizard {
 		}
 	}
 	
+	public String deploy() {
+		return "http://www.bing.com";
+	}
+	
 }

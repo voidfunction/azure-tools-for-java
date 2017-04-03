@@ -31,10 +31,13 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.core.PackageFragmentRoot;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jst.j2ee.datamodel.properties.IJ2EEComponentExportDataModelProperties;
 import org.eclipse.jst.j2ee.internal.web.archive.operations.WebComponentExportDataModelProvider;
 import org.eclipse.swt.SWT;
@@ -49,14 +52,18 @@ import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerCertVault;
+import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
+import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.docker.ui.wizards.publish.AzureSelectDockerWizard;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import java.util.Date;
 import java.util.logging.Level;
@@ -64,7 +71,7 @@ import java.util.logging.Logger;
 
 
 public class AzureDockerUIResources {
-	private static final Logger log =  Logger.getLogger(AzureDockerUIResources.class.getName());
+	private static final Logger log = Logger.getLogger(AzureDockerUIResources.class.getName());
 	public static boolean CANCELED = false;
 
 	public static void updateAzureResourcesWithProgressDialog(Shell shell, IProject project) {
@@ -317,5 +324,137 @@ public class AzureDockerUIResources {
 
 		return project;
 	}
+	
+	public static int deleteAzureDockerHostConfirmationDialog(Shell shell, Azure azureClient, DockerHost dockerHost) {
+		String promptMessageDeleteAll = String.format(
+				"This operation will delete virtual machine %s and its resources:\n" + "\t - network interface: %s\n"
+						+ "\t - public IP: %s\n" + "\t - virtual network: %s\n"
+						+ "The associated disks and storage account will not be deleted\n",
+				dockerHost.hostVM.name, dockerHost.hostVM.nicName, dockerHost.hostVM.publicIpName,
+				dockerHost.hostVM.vnetName);
 
+		String promptMessageDelete = String.format("This operation will delete virtual machine %s.\n"
+				+ "The associated disks and storage account will not be deleted\n\n"
+				+ "Are you sure you want to continue?\n", dockerHost.hostVM.name);
+
+		String[] options;
+		String promptMessage;
+
+		if (AzureDockerVMOps.isDeletingDockerHostAllSafe(azureClient, dockerHost.hostVM.resourceGroupName,
+				dockerHost.hostVM.name)) {
+			promptMessage = promptMessageDeleteAll;
+			options = new String[] { "Cancel", "Delete VM Only", "Delete All" };
+		} else {
+			promptMessage = promptMessageDelete;
+			options = new String[] { "Cancel", "Delete" };
+		}
+
+		MessageDialog deleteDialog = new MessageDialog(shell, "Delete Docker Host", null, promptMessage, MessageDialog.ERROR,options, 0);
+		int dialogReturn = deleteDialog.open();
+
+		switch (dialogReturn) {
+		case 0:
+			if (AzureDockerUtils.DEBUG) System.out.format("Delete Docker Host op was canceled %s\n", dialogReturn);
+			break;
+		case 1:
+			if (AzureDockerUtils.DEBUG) System.out.println("Delete VM only: " + dockerHost.name);
+			break;
+		case 2:
+			if (AzureDockerUtils.DEBUG) System.out.println("Delete VM and resources: " + dockerHost.name);
+			break;
+		default:
+			if (AzureDockerUtils.DEBUG) System.out.format("Delete Docker Host op was canceled %s\n", dialogReturn);
+		}
+
+		return dialogReturn;
+	}
+
+	public static void deleteDockerHost(Shell shell, IProject project, Azure azureClient, DockerHost dockerHost, int option, Runnable runnable) {
+		String progressMsg = (option == 2)
+				? String.format("Deleting Virtual Machine %s and Its Resources...", dockerHost.name)
+				: String.format("Deleting Docker Host %s...", dockerHost.name);
+
+		DefaultLoader.getIdeHelper().runInBackground(project, "Deleting Docker Host", false, true, progressMsg, new Runnable() {
+				@Override
+				public void run() {
+					try {
+						if (option == 2) {
+								AzureDockerVMOps.deleteDockerHostAll(azureClient, dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
+						} else {
+								AzureDockerVMOps.deleteDockerHost(azureClient, dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
+						}
+						DefaultLoader.getIdeHelper().runInBackground(project, "Updating Docker Hosts Details ",
+								false, true, "Updating Docker hosts details...", new Runnable() {
+									@Override
+									public void run() {
+										try {
+											AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
+											dockerManager.refreshDockerHostDetails();
+
+											if (runnable != null) {
+												runnable.run();
+											}
+										} catch (Exception ee) {
+											if (AzureDockerUtils.DEBUG)
+												ee.printStackTrace();
+											log.log(Level.SEVERE, "onRemoveDockerHostAction", ee);
+										}
+									}
+								});
+					} catch (Exception e) {
+	                    DefaultLoader.getUIHelper().showException(
+	                    		String.format("Unexpected error detected while deleting Docker host %s:\n\n%s", dockerHost.name, e.getMessage()),
+	                    		e, "Error Deleting Docker Host", false, true);
+						if (AzureDockerUtils.DEBUG) e.printStackTrace();
+						log.log(Level.SEVERE, "onRemoveDockerHostAction", e);
+					}
+				}
+		});
+	}
+
+	public static void publish2DockerHostContainer(Shell shell, IProject project) {
+		try {
+			AzureDockerUIResources.createArtifact(shell, project);
+			
+			AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
+
+			// not signed in
+			if (azureAuthManager == null) {
+				return;
+			}
+
+			AzureDockerHostsManager dockerManager = AzureDockerHostsManager
+					.getAzureDockerHostsManager(azureAuthManager);
+
+			if (!dockerManager.isInitialized()) {
+				AzureDockerUIResources.updateAzureResourcesWithProgressDialog(shell, project);
+				if (AzureDockerUIResources.CANCELED) {
+					return;
+				}
+				dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
+			}
+
+			if (dockerManager.getSubscriptionsMap().isEmpty()) {
+				PluginUtil.displayErrorDialog(shell, "Create Docker Host", "Must select an Azure subscription first");
+				return;
+			}
+			
+			DockerHost dockerHost = (dockerManager.getDockerPreferredSettings() != null) ? dockerManager.getDockerHostForURL(dockerManager.getDockerPreferredSettings().dockerApiName) : null;
+			AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
+			AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager, dockerImageDescription);
+			WizardDialog selectDockerHostDialog = new WizardDialog(shell, selectDockerWizard);
+			if (selectDockerHostDialog.open() == Window.OK) {
+		        try {
+		            String url = selectDockerWizard.deploy();
+		            if (AzureDockerUtils.DEBUG) System.out.println("Web app published at: " + url);
+		          } catch (Exception ex) {
+		            PluginUtil.displayErrorDialogAndLog(shell, "Unexpected error detected while publishing to a Docker container", ex.getMessage(), ex);
+		            log.log(Level.SEVERE, "publish2DockerHostContainer: " + ex.getMessage(), ex);
+		          }
+			}
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "execute: " + e.getMessage(), e);
+			e.printStackTrace();					
+		}
+	}
 }

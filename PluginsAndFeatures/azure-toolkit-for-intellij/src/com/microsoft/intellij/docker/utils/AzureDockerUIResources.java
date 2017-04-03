@@ -225,6 +225,10 @@ public class AzureDockerUIResources {
               try {
                 AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
                 dockerManager.refreshDockerHostDetails();
+
+                if (runnable != null) {
+                  runnable.run();
+                }
               } catch (Exception ee) {
                 if (AzureDockerUtils.DEBUG) ee.printStackTrace();
                 LOGGER.error("onRemoveDockerHostAction", ee);
@@ -241,10 +245,6 @@ public class AzureDockerUIResources {
             }
           });
         }
-
-        if (runnable != null) {
-          runnable.run();
-        }
       }
     });
   }
@@ -254,7 +254,7 @@ public class AzureDockerUIResources {
       AzureDockerUIResources.CANCELED = false;
 
       Module module = PluginUtil.getSelectedModule();
-      java.util.List<Module> modules = Arrays.asList(ModuleManager.getInstance(project).getModules());
+      List<Module> modules = Arrays.asList(ModuleManager.getInstance(project).getModules());
 
       if (module == null && modules.isEmpty()) {
         Messages.showErrorDialog(message("noModule"), message("error"));
@@ -293,7 +293,7 @@ public class AzureDockerUIResources {
       if (wizard.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
         try {
           String url = wizard.deploy();
-          System.out.println("Web app published at: " + url);
+          if (AzureDockerUtils.DEBUG) System.out.println("Web app published at: " + url);
         } catch (Exception ex) {
           PluginUtil.displayErrorDialogAndLog(message("webAppDplyErr"), ex.getMessage(), ex);
         }

@@ -101,6 +101,7 @@ public class DockerHost {
     STARTING,
     STOPPED,
     UNKNOWN,
-    UPDATING
+    UPDATING,
+    TO_BE_CREATED
   }
 }

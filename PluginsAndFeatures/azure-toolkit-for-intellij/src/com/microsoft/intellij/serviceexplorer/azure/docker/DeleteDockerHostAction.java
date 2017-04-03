@@ -69,7 +69,12 @@ public class DeleteDockerHostAction extends NodeActionListener {
       }
     });
 
-    AzureDockerUIResources.deleteDockerHost(project, azureClient, dockerHost, option, null);
+    AzureDockerUIResources.deleteDockerHost(project, azureClient, dockerHost, option, new Runnable() {
+      @Override
+      public void run() {
+        dockerManager.getDockerHostsList().remove(dockerHost);
+      }
+    });
   }
 }
 

@@ -37,7 +37,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostModule;
 
-@Name("Create")
+@Name("New Host")
 public class CreateNewDockerHostAction extends NodeActionListener {
   private static final Logger LOGGER = Logger.getInstance(CreateNewDockerHostAction.class);
   DockerHost dockerHost;
@@ -58,7 +58,6 @@ public class CreateNewDockerHostAction extends NodeActionListener {
 
       // not signed in
       if (azureAuthManager == null) {
-        System.out.println("ERROR! Not signed in!");
         return;
       }
 

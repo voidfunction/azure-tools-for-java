@@ -17,7 +17,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH 
  * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.microsoft.azuretools.azureexplorer.actions;
+package com.microsoft.azuretools.azureexplorer.actions.docker;
 
 import java.util.logging.Logger;
 
@@ -25,23 +25,22 @@ import org.eclipse.core.resources.IProject;
 
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azure.docker.model.EditableDockerHost;
-import com.microsoft.azuretools.core.utils.PluginUtil;
-import com.microsoft.azuretools.docker.ui.dialogs.AzureViewDockerDialog;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostNode;
 
-@Name("Details")
-public class ViewDockerHostAction extends NodeActionListener {
-	private static final Logger log = Logger.getLogger(ViewDockerHostAction.class.getName());
+@Name("Publish")
+public class DeployDockerContainerAction extends NodeActionListener {
+	private static final Logger log = Logger.getLogger(DeployDockerContainerAction.class.getName());
 	DockerHost dockerHost;
 	AzureDockerHostsManager dockerManager;
 	IProject project;
 	DockerHostNode dockerHostNode;
 
-	public ViewDockerHostAction(DockerHostNode dockerHostNode) {
+	public DeployDockerContainerAction(DockerHostNode dockerHostNode) {
 		this.dockerManager = dockerHostNode.getDockerManager();
 		this.dockerHost = dockerHostNode.getDockerHost();
 		this.dockerHostNode = dockerHostNode;
@@ -51,7 +50,7 @@ public class ViewDockerHostAction extends NodeActionListener {
 	public void actionPerformed(NodeActionEvent e) {
 		IProject project;
 		try {
-			project = PluginUtil.getSelectedProject();
+			project = AzureDockerUIResources.getCurrentSelectedProject();
 		} catch (Exception Ignored) {
 			project = null;
 		}
@@ -59,19 +58,6 @@ public class ViewDockerHostAction extends NodeActionListener {
 			project = (IProject) dockerHostNode.getProject();
 		}
 
-		AzureViewDockerDialog viewDockerDialog = new AzureViewDockerDialog(PluginUtil.getParentShell(), project, dockerHost, dockerManager);
-		viewDockerDialog.open();
-
-		if (viewDockerDialog.getInternalExitCode() == AzureViewDockerDialog.UPDATE_EXIT_CODE) {
-			EditableDockerHost editableDockerHost = new EditableDockerHost(dockerHost);
-//
-//			AzureEditDockerLoginCredsDialog editDockerDialog = new AzureEditDockerLoginCredsDialog(project,
-//					editableDockerHost, dockerManager);
-//			editDockerDialog.show();
-//
-//			if (editDockerDialog.getExitCode() == 0) {
-//				// TODO: Apply the edit actions here
-//			}
-		}
+	    Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
 	}
 }

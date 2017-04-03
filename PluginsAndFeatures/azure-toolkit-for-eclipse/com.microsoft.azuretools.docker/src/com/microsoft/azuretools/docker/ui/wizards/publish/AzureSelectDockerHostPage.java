@@ -38,9 +38,12 @@ import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.docker.ui.dialogs.AzureViewDockerDialog;
 import com.microsoft.azuretools.docker.ui.wizards.createhost.AzureNewDockerWizard;
 import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -330,7 +333,7 @@ public class AzureSelectDockerHostPage extends WizardPage {
 					DockerHost dockerHost = (DockerHost) ((TableItem) e.item).getData();
 					if (dockerHostsTableSelection == null || dockerHostsTableSelection.host != dockerHost) {
 						dockerHostsTableSelection = new DockerHostsTableSelection();
-						dockerHostsTableSelection.row = 0;
+						dockerHostsTableSelection.row = dockerHostsTable.indexOf((TableItem) e.item);
 						dockerHostsTableSelection.host = dockerHost;
 						for (TableItem tableItem : dockerHostsTable.getItems()) {
 							if (tableItem != ((TableItem) e.item) && tableItem.getChecked()) {
@@ -341,6 +344,7 @@ public class AzureSelectDockerHostPage extends WizardPage {
 					} else {
 						dockerHostsTableSelection = null;
 					}
+					setPageComplete(doValidate());
 				}
 			}
 		});
@@ -403,7 +407,41 @@ public class AzureSelectDockerHostPage extends WizardPage {
 		dockerHostsDeleteButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				setPageComplete(doValidate());
+				//dockerHostsList
+				int idx = dockerHostsTable.getSelectionIndex();
+
+				if (idx >= 0 && dockerHostsTable.getItem(idx) != null) {
+					DockerHost deleteHost = (DockerHost) dockerHostsTable.getItem(idx).getData();
+					if (deleteHost != null) {
+					    Azure azureClient = dockerManager.getSubscriptionsMap().get(deleteHost.sid).azureClient;
+						int option = AzureDockerUIResources.deleteAzureDockerHostConfirmationDialog(mainContainer.getShell(), azureClient, deleteHost);
+
+						if (option != 1 && option != 2) {
+							if (AzureDockerUtils.DEBUG) System.out.format("User canceled delete Docker host op: %d\n", option);
+							return;
+						}
+						dockerHostsList.remove(deleteHost);
+						if (dockerHostsTableSelection != null && dockerHostsTableSelection.row == idx) {
+							dockerHostsTableSelection = null;
+						}
+						dockerHostsTableViewer.refresh();
+
+						AzureDockerUIResources.deleteDockerHost(mainContainer.getShell(), project, azureClient, deleteHost, option, new Runnable() {
+					        @Override
+					        public void run() {
+								dockerManager.getDockerHostsList().remove(deleteHost);
+								dockerManager.refreshDockerHostDetails();
+								DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
+									@Override
+									public void run() {
+										refreshDockerHostsTable(mainContainer);
+									}
+								});
+					        }
+					      });
+					}
+					setPageComplete(doValidate());
+				}
 			}
 		});
 		
@@ -428,7 +466,8 @@ public class AzureSelectDockerHostPage extends WizardPage {
 	
 	private void refreshDockerHostsTable(Composite mainContainer) {
 		dockerHostsList.clear();
-		for (DockerHost host : testInput) {
+		// TODO: real Docker Hosts list goes here
+		for (DockerHost host : dockerManager.getDockerHostsList()) {
 			dockerHostsList.add(host);
 		}
 

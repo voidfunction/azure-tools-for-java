@@ -74,7 +74,7 @@ public class AzureDockerHostDeployHandler extends AbstractHandler {
 				return null;
 			}
 		}
-				
+
 		try {
 			AzureDockerUIResources.createArtifact(shell, project);
 			

@@ -33,10 +33,15 @@ import com.microsoft.azuretools.azureexplorer.actions.CreateBlobContainer;
 import com.microsoft.azuretools.azureexplorer.actions.CreateQueueAction;
 import com.microsoft.azuretools.azureexplorer.actions.CreateTableAction;
 import com.microsoft.azuretools.azureexplorer.actions.OpenWebappAction;
+import com.microsoft.azuretools.azureexplorer.actions.docker.CreateNewDockerHostAction;
+import com.microsoft.azuretools.azureexplorer.actions.docker.DeleteDockerHostAction;
+import com.microsoft.azuretools.azureexplorer.actions.docker.DeployDockerContainerAction;
+import com.microsoft.azuretools.azureexplorer.actions.docker.PublishDockerContainerAction;
+import com.microsoft.azuretools.azureexplorer.actions.docker.ViewDockerHostAction;
 import com.microsoft.azuretools.azureexplorer.actions.RemoteDebugAction;
-import com.microsoft.azuretools.azureexplorer.actions.ViewDockerHostAction;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostNode;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.*;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
@@ -55,8 +60,7 @@ public class NodeActionsMap {
         node2Actions.put(StorageNode.class, new ImmutableList.Builder().add(CreateBlobContainer.class).build());        
         node2Actions.put(WebappNode.class, new ImmutableList.Builder().add(OpenWebappAction.class, RemoteDebugAction.class).build());
         node2Actions.put(HDInsightRootModuleImpl.class, new ImmutableList.Builder().add(AddNewClusterAction.class,AddNewEmulatorAction.class).build());
-        node2Actions.put(DockerHostNode.class, new ImmutableList.Builder().add(ViewDockerHostAction.class).build());
-//        node2Actions.put(DockerHostNode.class, new ImmutableList.Builder().add(ViewDockerHostAction.class, DeployDockerContainerAction.class, DeleteDockerHostAction.class).build());
-//        node2Actions.put(DockerHostModule.class, new ImmutableList.Builder().add(CreateNewDockerHostAction.class, PublishDockerContainerAction.class).build());
+        node2Actions.put(DockerHostNode.class, new ImmutableList.Builder().add(DeployDockerContainerAction.class, ViewDockerHostAction.class, DeleteDockerHostAction.class).build());
+        node2Actions.put(DockerHostModule.class, new ImmutableList.Builder().add(CreateNewDockerHostAction.class, PublishDockerContainerAction.class).build());
     }
 }

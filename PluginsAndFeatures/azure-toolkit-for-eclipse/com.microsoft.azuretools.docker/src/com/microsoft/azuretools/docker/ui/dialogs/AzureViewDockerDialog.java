@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.model.DockerHost.DockerHostVMState;
 import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
@@ -458,7 +459,7 @@ public class AzureViewDockerDialog extends Dialog {
 		setTextField(dockerHostTlsAuthTextField, (updating != null)
 						? (dockerHost.isTLSSecured ? "Using TLS certificates" : (dockerHost.certVault == null) ? "-unknown- " : "Open/unsecured access") + updating
 						: (dockerHost.isTLSSecured ? "Using TLS certificates" : (dockerHost.certVault == null) ? "-unknown- " : "Open/unsecured access"));
-		dockerHostTlsExportHyperlink.setEnabled(!dockerHost.isUpdating && dockerHost.isTLSSecured);
+		dockerHostTlsExportHyperlink.setEnabled(!dockerHost.isUpdating && dockerHost.isTLSSecured && !dockerHost.state.equals(DockerHostVMState.TO_BE_CREATED));
 
 		setTextField(dockerHostPortTextField, (updating != null) ? dockerHost.port + updating : dockerHost.port);
 
