@@ -23,15 +23,14 @@ package com.microsoft.intellij.serviceexplorer.azure.storagearm;
 
 import com.intellij.openapi.project.Project;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
-import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.forms.CreateArmStorageAccountForm;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
-
-import java.util.List;
 
 @Name("Create Storage Account...")
 public class CreateStorageAccountAction extends NodeActionListener {
@@ -44,30 +43,22 @@ public class CreateStorageAccountAction extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        // check if we have a valid subscription handy
-        AzureManager azureManager;
+        Project project = (Project) storageModule.getProject();
         try {
-            azureManager = AuthMethodManager.getInstance().getAzureManager();
-        } catch (Exception e1) {
-            azureManager = null;
-        }
+            if (!AzureSignInAction.doSignIn(AuthMethodManager.getInstance(), project)) return;
+            CreateArmStorageAccountForm createStorageAccountForm = new CreateArmStorageAccountForm((Project) storageModule.getProject());
+            createStorageAccountForm.fillFields(null, null);
 
-        if (azureManager == null) {
-            DefaultLoader.getUIHelper().showException("No active Azure subscription was found. Please enable one more Azure " +
-                            "subscriptions by right-clicking on the \"Azure\" " +
-                            "node and selecting \"Manage subscriptions\".", null,
-                    "Azure Services Explorer - No Active Azure Subscription", false, false);
-            return;
+            createStorageAccountForm.setOnCreate(new Runnable() {
+                @Override
+                public void run() {
+                    storageModule.load(false);
+                }
+            });
+            createStorageAccountForm.show();
+        } catch (Exception ex) {
+            AzurePlugin.log("Error creating storage account", ex);
+            DefaultLoader.getUIHelper().showException("Error creating storage account", ex, "Error Creating Storage Account", false, true);
         }
-        CreateArmStorageAccountForm createStorageAccountForm = new CreateArmStorageAccountForm((Project) storageModule.getProject());
-        createStorageAccountForm.fillFields(null, null);
-
-        createStorageAccountForm.setOnCreate(new Runnable() {
-            @Override
-            public void run() {
-                storageModule.load(false);
-            }
-        });
-        createStorageAccountForm.show();
     }
 }

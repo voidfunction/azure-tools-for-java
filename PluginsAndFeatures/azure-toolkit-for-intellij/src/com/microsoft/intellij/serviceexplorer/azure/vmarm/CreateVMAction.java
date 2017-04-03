@@ -21,8 +21,10 @@
  */
 package com.microsoft.intellij.serviceexplorer.azure.vmarm;
 
+import com.intellij.openapi.project.Project;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
-import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
+import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.wizards.createarmvm.CreateVMWizard;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.Name;
@@ -32,29 +34,22 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
 
 @Name("Create VM")
 public class CreateVMAction extends NodeActionListener {
-    private VMArmModule vmServiceModule;
+    private VMArmModule vmModule;
 
-    public CreateVMAction(VMArmModule vmServiceModule) {
-        this.vmServiceModule = vmServiceModule;
+    public CreateVMAction(VMArmModule vmModule) {
+        this.vmModule = vmModule;
     }
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        // check if we have a valid subscription handy
-        AzureManager azureManager;
+        Project project = (Project) vmModule.getProject();
         try {
-            azureManager = AuthMethodManager.getInstance().getAzureManager();
-        } catch (Exception e1) {
-            azureManager = null;
+            if (!AzureSignInAction.doSignIn(AuthMethodManager.getInstance(), project)) return;
+            CreateVMWizard createVMWizard = new CreateVMWizard((VMArmModule) e.getAction().getNode());
+            createVMWizard.show();
+        } catch (Exception ex) {
+            AzurePlugin.log("Error creating virtual machine", ex);
+            DefaultLoader.getUIHelper().showException("Error creating virtual machine", ex, "Error Creating Virtual Machine", false, true);
         }
-        if (azureManager == null) {
-            DefaultLoader.getUIHelper().showException("No active Azure subscription was found. Please enable one more Azure " +
-                            "subscriptions by right-clicking on the \"Azure\" " +
-                            "node and selecting \"Manage subscriptions\".", null,
-                    "Azure Services Explorer - No Active Azure Subscription", false, false);
-            return;
-        }
-        CreateVMWizard createVMWizard = new CreateVMWizard((VMArmModule) e.getAction().getNode());
-        createVMWizard.show();
     }
 }
