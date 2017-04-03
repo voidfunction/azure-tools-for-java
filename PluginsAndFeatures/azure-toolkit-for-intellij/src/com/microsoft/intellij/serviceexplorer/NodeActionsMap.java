@@ -29,6 +29,7 @@ import com.microsoft.azure.hdinsight.serverexplore.action.AddNewEmulatorAction;
 import com.microsoft.intellij.serviceexplorer.azure.docker.*;
 import com.microsoft.intellij.serviceexplorer.azure.storage.*;
 import com.microsoft.intellij.serviceexplorer.azure.webapps.OpenWebappAction;
+import com.microsoft.intellij.serviceexplorer.azure.webapps.RemoteDebugAction;
 import com.microsoft.tooling.msservices.serviceexplorer.Node;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostModule;
@@ -53,7 +54,7 @@ public class NodeActionsMap {
         node2Actions.put(StorageNode.class, new ImmutableList.Builder().add(CreateBlobContainer.class).build());
         // todo: what is ConfirmDialogAction?
         node2Actions.put(ExternalStorageNode.class, new ImmutableList.Builder().add(ConfirmDialogAction.class, ModifyExternalStorageAccountAction.class).build());
-        node2Actions.put(WebappNode.class, new ImmutableList.Builder().add(OpenWebappAction.class).build());
+        node2Actions.put(WebappNode.class, new ImmutableList.Builder().add(OpenWebappAction.class, RemoteDebugAction.class).build());
         node2Actions.put(HDInsightRootModuleImpl.class, new ImmutableList.Builder().add(AddNewClusterAction.class, AddNewEmulatorAction.class).build());
         node2Actions.put(DockerHostNode.class, new ImmutableList.Builder().add(ViewDockerHostAction.class, DeployDockerContainerAction.class, DeleteDockerHostAction.class).build());
         node2Actions.put(DockerHostModule.class, new ImmutableList.Builder().add(CreateNewDockerHostAction.class, PublishDockerContainerAction.class).build());
