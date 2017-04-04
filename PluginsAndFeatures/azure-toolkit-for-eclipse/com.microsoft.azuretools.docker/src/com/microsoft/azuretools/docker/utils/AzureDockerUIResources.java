@@ -438,11 +438,16 @@ public class AzureDockerUIResources {
 				PluginUtil.displayErrorDialog(shell, "Create Docker Host", "Must select an Azure subscription first");
 				return;
 			}
-			
+
 			DockerHost dockerHost = (dockerManager.getDockerPreferredSettings() != null) ? dockerManager.getDockerHostForURL(dockerManager.getDockerPreferredSettings().dockerApiName) : null;
 			AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
 			AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager, dockerImageDescription);
 			WizardDialog selectDockerHostDialog = new WizardDialog(shell, selectDockerWizard);
+
+			if (dockerHost != null) {
+				selectDockerWizard.selectDefaultDockerHost(dockerHost, true);
+			}
+
 			if (selectDockerHostDialog.open() == Window.OK) {
 		        try {
 		            String url = selectDockerWizard.deploy();
@@ -453,7 +458,7 @@ public class AzureDockerUIResources {
 		          }
 			}
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "execute: " + e.getMessage(), e);
+			log.log(Level.SEVERE, "publish2DockerHostContainer: " + e.getMessage(), e);
 			e.printStackTrace();					
 		}
 	}

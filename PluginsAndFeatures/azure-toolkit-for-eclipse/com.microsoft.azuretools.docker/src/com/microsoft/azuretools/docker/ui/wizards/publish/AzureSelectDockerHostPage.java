@@ -113,10 +113,11 @@ public class AzureSelectDockerHostPage extends WizardPage {
 		setTitle("Type an image name, select the artifact's path and check a Docker host to be used");
 		setDescription("");
 		
-		testInput = new ArrayList<>();
-		testInput.add(dockerManager.createNewDockerHostDescription(AzureDockerUtils.getDefaultRandomName(AzureDockerUtils.getDefaultName(project.getName()))));
-		testInput.add(dockerManager.createNewDockerHostDescription(AzureDockerUtils.getDefaultRandomName(AzureDockerUtils.getDefaultName(project.getName()))));
-		testInput.add(dockerManager.createNewDockerHostDescription(AzureDockerUtils.getDefaultRandomName(AzureDockerUtils.getDefaultName(project.getName()))));
+		dockerHostsList = new ArrayList<>();
+		for (DockerHost host : dockerManager.getDockerHostsList()) {
+			dockerHostsList.add(host);
+		}
+
 	}
 
 	/**
@@ -278,11 +279,6 @@ public class AzureSelectDockerHostPage extends WizardPage {
 			}
 		});
 		
-		dockerHostsList = new ArrayList<>();
-		for (DockerHost host : testInput) {
-			dockerHostsList.add(host);
-		}
-
 		TableViewerColumn colHostName = createTableViewerColumn(dockerHostsTableViewer, "Name", 150, 1);
 		colHostName.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -316,7 +312,7 @@ public class AzureSelectDockerHostPage extends WizardPage {
 		dockerHostsList = new ArrayList<>();
 		dockerHostsTableViewer.setInput(dockerHostsList);
 		refreshDockerHostsTable(mainContainer);
-		if (!dockerHostsList.isEmpty()) {
+		if (!dockerHostsList.isEmpty() && dockerHostsTableSelection == null) {
 			dockerHostsTable.select(0);
 			dockerHostsTable.getItem(0).setChecked(true);
 			dockerHostsTableSelection = new DockerHostsTableSelection();
@@ -491,7 +487,32 @@ public class AzureSelectDockerHostPage extends WizardPage {
 			}
 		}
 	}
-	
+
+	public void selectDefaultDockerHost(DockerHost dockerHost, boolean selectOtherHosts) {
+		if (dockerHost != null) {
+			if (dockerHostsTableSelection == null) {
+				dockerHostsTableSelection = new DockerHostsTableSelection();
+			}
+
+			int idx = 0;
+			DockerHost selected = null;
+			for (DockerHost host : dockerHostsList) {
+				if (dockerHost.apiUrl.equals(host.apiUrl)) {
+					selected = host;
+					break;
+				}
+				idx++;
+			}
+			if (selected != null) {
+				if (dockerHostsTableSelection == null) {
+					dockerHostsTableSelection = new DockerHostsTableSelection();
+				}
+				dockerHostsTableSelection.row = idx;
+				dockerHostsTableSelection.host = selected;
+			}
+		}
+	}
+
 	public boolean doValidate() {
 		if (dockerImageNameTextField.getText() == null || dockerImageNameTextField.getText().equals("")) {
 			errDispatcher.addMessage("dockerImageNameTextField", AzureDockerValidationUtils.getDockerImageNameTip(), null, IMessageProvider.ERROR, dockerImageNameTextField);

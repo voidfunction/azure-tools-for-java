@@ -27,4 +27,5 @@ Import-Package: org.eclipse.jst.j2ee.datamodel.properties,
  org.eclipse.wst.common.frameworks.datamodel
 Export-Package: com.microsoft.azuretools.docker.ui.dialogs,
  com.microsoft.azuretools.docker.ui.wizards.createhost,
+ com.microsoft.azuretools.docker.ui.wizards.publish,
  com.microsoft.azuretools.docker.utils

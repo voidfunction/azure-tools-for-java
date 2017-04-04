@@ -19,14 +19,23 @@
  */
 package com.microsoft.azuretools.azureexplorer.actions.docker;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 
 import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.core.handlers.SignInCommandHandler;
+import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.docker.ui.wizards.publish.AzureSelectDockerWizard;
 import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
@@ -48,16 +57,62 @@ public class DeployDockerContainerAction extends NodeActionListener {
 
 	@Override
 	public void actionPerformed(NodeActionEvent e) {
-		IProject project;
 		try {
-			project = AzureDockerUIResources.getCurrentSelectedProject();
-		} catch (Exception Ignored) {
-			project = null;
-		}
-		if (project == null) {
-			project = (IProject) dockerHostNode.getProject();
-		}
+			if (!SignInCommandHandler.doSignIn(PluginUtil.getParentShell()))
+				return;
 
-	    Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
+			IProject project;
+			try {
+				project = AzureDockerUIResources.getCurrentSelectedProject();
+			} catch (Exception Ignored) {
+				project = null;
+			}
+			if (project == null) {
+				project = (IProject) dockerHostNode.getProject();
+			}
+
+			AzureDockerUIResources.createArtifact(PluginUtil.getParentShell(), project);
+			
+			AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
+
+			// not signed in
+			if (azureAuthManager == null) {
+				return;
+			}
+
+			AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManager(azureAuthManager);
+
+			if (!dockerManager.isInitialized()) {
+				AzureDockerUIResources.updateAzureResourcesWithProgressDialog(PluginUtil.getParentShell(), project);
+				if (AzureDockerUIResources.CANCELED) {
+					return;
+				}
+				dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
+			}
+
+			if (dockerManager.getSubscriptionsMap().isEmpty()) {
+				PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), "Create Docker Host", "Must select an Azure subscription first");
+				return;
+			}
+
+			AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
+			AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager, dockerImageDescription);
+			WizardDialog selectDockerHostDialog = new WizardDialog(PluginUtil.getParentShell(), selectDockerWizard);
+			selectDockerWizard.selectDefaultDockerHost(dockerHost, false);
+
+			if (selectDockerHostDialog.open() == Window.OK) {
+		        try {
+		            String url = selectDockerWizard.deploy();
+		            if (AzureDockerUtils.DEBUG) System.out.println("Web app published at: " + url);
+		          } catch (Exception ex) {
+		            PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(), "Unexpected error detected while publishing to a Docker container", ex.getMessage(), ex);
+		            log.log(Level.SEVERE, "publish2DockerHostContainer: " + ex.getMessage(), ex);
+		          }
+			}
+
+		} catch (Exception ex1) {
+			log.log(Level.SEVERE, "actionPerformed", ex1);
+			ex1.printStackTrace();
+		}
 	}
 }

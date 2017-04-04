@@ -106,6 +106,11 @@ public class AzureDockerHostDeployHandler extends AbstractHandler {
 			AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
 			AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager, dockerImageDescription);
 			WizardDialog selectDockerHostDialog = new WizardDialog(shell, selectDockerWizard);
+
+			if (dockerHost != null) {
+				selectDockerWizard.selectDefaultDockerHost(dockerHost, true);
+			}
+
 			if (selectDockerHostDialog.open() == Window.OK) {
 
 //					AzureNewDockerWizard newDockerWizard = new AzureNewDockerWizard(project, dockerManager);

@@ -106,25 +106,6 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
     dockerPreferredSettings.dockerfileOption = dockerImageInstance.predefinedDockerfile;
     model.getDockerHostsManager().setDockerPreferredSettings(dockerPreferredSettings);
 
-    performFinish();
-
-    return String.format("%s://%s:%s/%s",
-        (dockerImageInstance.isHttpsWebApp ? "https" : "http"),
-        dockerImageInstance.host.hostVM.dnsName,
-        dockerImageInstance.dockerPortSettings.split(":")[0],  // "12345:80/tcp" -> "12345"
-        dockerImageInstance.artifactName);
-  }
-
-  public AzureDockerImageInstance getDockerImageInstance() {
-    return model.getDockerImageDescription();
-  }
-
-  /**
-   * This method gets called when wizard's finish button is clicked.
-   *
-   * @return True, if project gets created successfully; else false.
-   */
-  private void performFinish() {
     DefaultLoader.getIdeHelper().runInBackground(model.getProject(), "Deploying Docker Container on Azure", false, true, "Deploying Web app to a Docker host on Azure...", new Runnable() {
       @Override
       public void run() {
@@ -151,13 +132,10 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
 
                     if (loginCredsDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
                       // Update Docker host log in credentials
-                      try {
-                        AzureDockerVMOps.updateDockerHostVM(model.getDockerHostsManager().getSubscriptionsMap().get(model.getDockerImageDescription().sid).azureClient, editableDockerHost.updatedDockerHost);
-                        dockerImageInstance.host.certVault = editableDockerHost.updatedDockerHost.certVault;
-                        dockerImageInstance.host.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
-                        dockerImageInstance.host.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
-                      } catch (Exception ignored) {
-                      }
+                      dockerImageInstance.host.certVault = editableDockerHost.updatedDockerHost.certVault;
+                      dockerImageInstance.host.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
+                      dockerImageInstance.host.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
+//                    AzureDockerVMOps.updateDockerHostVM(model.getDockerHostsManager().getSubscriptionsMap().get(model.getDockerImageDescription().sid).azureClient, editableDockerHost.updatedDockerHost);
                     } else {
                       return;
                     }
@@ -165,7 +143,10 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
                 } while (session == null);
               }
 
-              doFinish();
+              Azure azureClient = model.getDockerHostsManager().getSubscriptionsMap().get(model.getDockerImageDescription().sid).azureClient;
+
+              DockerContainerDeployTask task = new DockerContainerDeployTask(model.getProject(), azureClient, model.getDockerImageDescription());
+              task.queue();
 
               // Update caches here
               if (onCreate != null) {
@@ -179,18 +160,16 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
         }
       }
     });
+
+    return String.format("%s://%s:%s/%s",
+        (dockerImageInstance.isHttpsWebApp ? "https" : "http"),
+        dockerImageInstance.host.hostVM.dnsName,
+        dockerImageInstance.dockerPortSettings.split(":")[0],  // "12345:80/tcp" -> "12345"
+        dockerImageInstance.artifactName);
   }
 
-  private void doFinish() {
-    try {
-      Azure azureClient = model.getDockerHostsManager().getSubscriptionsMap().get(model.getDockerImageDescription().sid).azureClient;
-
-      DockerContainerDeployTask task = new DockerContainerDeployTask(model.getProject(), azureClient, model.getDockerImageDescription());
-      task.queue();
-
-    } catch (Exception e) {
-      // TODO: These strings should be retrieved from AzureBundle
-      PluginUtil.displayErrorDialogAndLog("Error", "Error deploying to Docker", e);
-    }
+  public AzureDockerImageInstance getDockerImageInstance() {
+    return model.getDockerImageDescription();
   }
+
 }
