@@ -65,7 +65,6 @@ import java.util.stream.Collectors;
 public class MachineSettingsStep extends WizardStep<VMWizardModel> {
     private JPanel rootPanel;
     private JList createVmStepsList;
-    private JEditorPane imageDescriptionTextPane;
     private JTextField vmNameTextField;
     private JComboBox<String> vmSizeComboBox;
     private JTextField vmUserTextField;
@@ -113,21 +112,6 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
         certificateField.getDocument().addDocumentListener(documentListener);
         vmPasswordField.getDocument().addDocumentListener(documentListener);
         confirmPasswordField.getDocument().addDocumentListener(documentListener);
-
-        imageDescriptionTextPane.addHyperlinkListener(new HyperlinkListener() {
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent hyperlinkEvent) {
-                if (hyperlinkEvent.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                    if (Desktop.isDesktopSupported()) {
-                        try {
-                            Desktop.getDesktop().browse(hyperlinkEvent.getURL().toURI());
-                        } catch (Exception e) {
-                            AzurePlugin.log(e.getStackTrace().toString());
-                        }
-                    }
-                }
-            }
-        });
 
         certificateCheckBox.addItemListener(new ItemListener() {
             @Override
@@ -221,9 +205,6 @@ public class MachineSettingsStep extends WizardStep<VMWizardModel> {
         }
 
         validateEmptyFields();
-
-//        imageDescriptionTextPane.setText(model.getHtmlFromVMImage(virtualMachineImage));
-        imageDescriptionTextPane.setCaretPosition(0);
 
         if (vmSizeComboBox.getItemCount() == 0) {
             vmSizeComboBox.setModel(new DefaultComboBoxModel(new String[]{"<Loading...>"}));

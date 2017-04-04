@@ -80,29 +80,10 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
     private JLabel offerLabel;
     private JLabel skuLabel;
     private JLabel versionLabel;
-    private JPanel imageInfoPanel;
 
     private VMWizardModel model;
     private Azure azure;
-    List<VirtualMachineImage> virtualMachineImages;
     private Project project;
-
-    private void createUIComponents() {
-        imageInfoPanel = new VMDetailsPanel() {
-            @Override
-            public Dimension getPreferredSize() {
-
-                double height = 0;
-                for (Component component : this.getComponents()) {
-                    height += component.getHeight();
-                }
-
-                Dimension preferredSize = super.getPreferredSize();
-                preferredSize.setSize(preferredSize.getWidth(), height);
-                return preferredSize;
-            }
-        };
-    }
 
     public SelectImageStep(final VMWizardModel model, Project project) {
         super("Select a Virtual Machine Image", null, null);

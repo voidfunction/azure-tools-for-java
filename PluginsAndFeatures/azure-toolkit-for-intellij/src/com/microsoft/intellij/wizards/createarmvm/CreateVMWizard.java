@@ -36,8 +36,8 @@ public class CreateVMWizard extends WizardDialog<VMWizardModel> {
     @Override
     protected Dimension getWindowPreferredSize() {
         this.getWindow();
-        this.setResizable(false);
-        return new Dimension(790, 467);
+//        this.setResizable(false);
+        return new Dimension(500, 467);
     }
 
 

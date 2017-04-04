@@ -72,8 +72,7 @@
             <colspec value="fill:114px:noGrow"/>
             <colspec value="left:p:noGrow"/>
             <colspec value="fill:p:noGrow"/>
-            <colspec value="left:85dlu:noGrow"/>
-            <colspec value="fill:max(d;4px):noGrow"/>
+            <colspec value="left:p:grow"/>
             <constraints>
               <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
               <forms defaultalign-vert="false"/>
@@ -97,7 +96,7 @@
               </component>
               <component id="9c35c" class="javax.swing.JTextField" binding="resourceGrpField">
                 <constraints>
-                  <grid row="2" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                  <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
                   </grid>
                   <forms defaultalign-horz="false"/>
@@ -106,8 +105,8 @@
               </component>
               <component id="a4945" class="javax.swing.JComboBox" binding="resourceGrpCombo">
                 <constraints>
-                  <grid row="4" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                  <forms/>
+                  <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <forms defaultalign-horz="false"/>
                 </constraints>
                 <properties>
                   <enabled value="false"/>
@@ -116,21 +115,21 @@
               </component>
               <component id="f1618" class="javax.swing.JComboBox" binding="networkComboBox">
                 <constraints>
-                  <grid row="12" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="12" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                   <forms defaultalign-vert="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="102ad" class="javax.swing.JComboBox" binding="subnetComboBox">
                 <constraints>
-                  <grid row="16" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="16" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                   <forms defaultalign-vert="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="4311e" class="javax.swing.JComboBox" binding="availabilityComboBox">
                 <constraints>
-                  <grid row="28" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="28" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -140,21 +139,21 @@
               </component>
               <component id="1544a" class="javax.swing.JComboBox" binding="storageComboBox">
                 <constraints>
-                  <grid row="8" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="8" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties/>
               </component>
               <component id="3e478" class="javax.swing.JComboBox" binding="pipCombo">
                 <constraints>
-                  <grid row="20" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="20" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties/>
               </component>
               <component id="364dc" class="javax.swing.JComboBox" binding="nsgCombo">
                 <constraints>
-                  <grid row="24" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="24" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties/>
