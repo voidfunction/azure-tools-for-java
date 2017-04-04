@@ -307,7 +307,9 @@ public class SelectImageStep extends WizardPage {
     }
 
 	private void selectRegion() {
-//		fillPublishers();
+		if (customImageBtn.getSelection()) {
+			fillPublishers();
+		}
 		wizard.setRegion((Location) regionComboBox.getData(regionComboBox.getText()));
 	}
 
@@ -315,7 +317,11 @@ public class SelectImageStep extends WizardPage {
 		setPageComplete(false);
 		String region = ((Location) regionComboBox.getData(regionComboBox.getText())).name();
 		publisherComboBox.removeAll();
+		offerComboBox.removeAll();
+		imageLabelList.removeAll();
 		offerComboBox.setEnabled(false);
+		skuComboBox.setEnabled(false);
+		imageLabelList.setEnabled(false);
         DefaultLoader.getIdeHelper().runInBackground(null, "Loading image publishers...", false, true, "", new Runnable() {
 			@Override
 					public void run() {
@@ -341,7 +347,10 @@ public class SelectImageStep extends WizardPage {
 	private void fillOffers() {
 		setPageComplete(false);
 		offerComboBox.removeAll();
+		skuComboBox.removeAll();
+		imageLabelList.removeAll();
 		skuComboBox.setEnabled(false);
+		imageLabelList.setEnabled(false);
 		VirtualMachinePublisher publisher = (VirtualMachinePublisher) publisherComboBox.getData(publisherComboBox.getText());
 		
 		DefaultLoader.getIdeHelper().runInBackground(null, "Loading image offers...", false, true, "", new Runnable() {
@@ -374,7 +383,7 @@ public class SelectImageStep extends WizardPage {
 	private void fillSkus() {
 		setPageComplete(false);
 		imageLabelList.setEnabled(false);
-		skuComboBox.removeAll();
+		imageLabelList.removeAll();
 		VirtualMachineOffer offer = (VirtualMachineOffer) offerComboBox.getData(offerComboBox.getText());
 		if (offerComboBox.getItemCount() > 0) {
 			DefaultLoader.getIdeHelper().runInBackground(null, "Loading skus...", false, true, "", new Runnable() {
