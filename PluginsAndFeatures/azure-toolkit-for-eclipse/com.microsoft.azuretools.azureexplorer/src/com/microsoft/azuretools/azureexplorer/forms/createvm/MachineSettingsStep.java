@@ -46,7 +46,8 @@ import java.util.*;
 
 
 public class MachineSettingsStep extends WizardPage {
-    private Label vmNameLabel;
+    private static String LOADING = "<Loading...>";
+	private Label vmNameLabel;
     private Text vmNameTextField;
     private Label vmSizeLabel;
     private Combo vmSizeComboBox;
@@ -101,19 +102,19 @@ public class MachineSettingsStep extends WizardPage {
         composite.setLayoutData(gridData);
 
         vmNameLabel = new Label(composite, SWT.LEFT);
-        vmNameLabel.setText("Virtual Machine Name");
+        vmNameLabel.setText("Virtual Machine Name:");
         vmNameTextField = new Text(composite, SWT.LEFT | SWT.BORDER);
         gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         vmNameTextField.setLayoutData(gridData);
 
         vmSizeLabel = new Label(composite, SWT.LEFT);
-        vmSizeLabel.setText("Size");
+        vmSizeLabel.setText("Size:");
         vmSizeComboBox = new Combo(composite, SWT.READ_ONLY);
         gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         vmSizeComboBox.setLayoutData(gridData);
 
         vmUserLabel = new Label(composite, SWT.LEFT);
-        vmUserLabel.setText("User name");
+        vmUserLabel.setText("User name:");
         vmUserTextField = new Text(composite, SWT.LEFT | SWT.BORDER);
         gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         vmUserTextField.setLayoutData(gridData);
@@ -144,12 +145,12 @@ public class MachineSettingsStep extends WizardPage {
         });
 
         vmPasswordLabel = new Label(composite, SWT.LEFT);
-        vmPasswordLabel.setText("Password");
+        vmPasswordLabel.setText("Password:");
         vmPasswordField = new Text(composite, SWT.PASSWORD | SWT.BORDER);
         gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         vmPasswordField.setLayoutData(gridData);
         confirmPasswordLabel = new Label(composite, SWT.LEFT);
-        confirmPasswordLabel.setText("Confirm");
+        confirmPasswordLabel.setText("Confirm:");
         confirmPasswordField = new Text(composite, SWT.PASSWORD | SWT.BORDER);
         gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         confirmPasswordField.setLayoutData(gridData);
@@ -193,7 +194,7 @@ public class MachineSettingsStep extends WizardPage {
         panel.setLayoutData(gridData);
 
         certificateLabel = new Label(panel, SWT.LEFT);
-        certificateLabel.setText("Certificate");
+        certificateLabel.setText("Certificate:");
         gridData = new GridData();
         gridData.horizontalSpan = 2;
         certificateLabel.setLayoutData(gridData);
@@ -243,7 +244,7 @@ public class MachineSettingsStep extends WizardPage {
 //        imageDescription.setText(wizard.getHtmlFromVMImage(virtualMachineImage));
 
 		if (vmSizeComboBox.getItemCount() == 0) {
-			vmSizeComboBox.setItems(new String[] { "<Loading...>" });
+			vmSizeComboBox.setItems(new String[] { LOADING });
 			DefaultLoader.getIdeHelper().runInBackground(null, "Loading VM sizes...", false, true, "", new Runnable() {
 				@Override
 				public void run() {
@@ -363,6 +364,7 @@ public class MachineSettingsStep extends WizardPage {
                         || (passwordCheckBox.getSelection() &&
                         (vmPasswordField.getText().length() == 0
                                 || confirmPasswordField.getText().length() == 0))
+                        || (vmSizeComboBox.getText() == null || vmSizeComboBox.getText().isEmpty() || LOADING.equals(vmSizeComboBox.getText()))
                         || (certificateCheckBox.getSelection() && certificateField.getText().isEmpty()));
         inSetPageComplete = true;
         setPageComplete(allFieldsCompleted);
