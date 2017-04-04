@@ -58,9 +58,7 @@ public class SelectImageStep extends WizardPage {
     private static final String LOADING = "<Loading...>";
 	
 	private CreateVMWizard wizard;
-//	private JList createVmStepsList;
 
-//	private JEditorPane imageDescriptionTextPane;
     private Button knownImageBtn;
     private Button customImageBtn;
     private Combo knownImageComboBox;
@@ -74,9 +72,6 @@ public class SelectImageStep extends WizardPage {
 	private Combo skuComboBox;
 	private Label versionLabel;
 	private org.eclipse.swt.widgets.List imageLabelList;
-	// private JPanel imageInfoPanel;
-
-	private java.util.List<VirtualMachineImage> virtualMachineImages;
 
 	public SelectImageStep(final CreateVMWizard wizard) {
 		super("Select a Virtual Machine Image", "Select a Virtual Machine Image", Activator.getImageDescriptor("icons/large/Azure.png"));
@@ -106,6 +101,7 @@ public class SelectImageStep extends WizardPage {
         	@Override
             public void widgetSelected(SelectionEvent e) {
         		enableControls(!knownImageBtn.getSelection());
+        		validateNext();
         		setMachineImage();
         	}
         };
@@ -148,6 +144,7 @@ public class SelectImageStep extends WizardPage {
 				imageLabelSelected();
 			}
 		});
+		validateNext();
 		this.setControl(container);
 	}
 
@@ -187,7 +184,7 @@ public class SelectImageStep extends WizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent selectionEvent) {
 				wizard.setKnownMachineImage(knownImageComboBox.getData(knownImageComboBox.getText()));
-				setPageComplete(true);
+				validateNext();
 			}
 		});
 		knownImageComboBox.select(0);		
@@ -292,12 +289,12 @@ public class SelectImageStep extends WizardPage {
             selectRegion();
         }
         regionComboBox.setEnabled(true);
-        setPageComplete(true);
+        validateNext();
     }
 	
 	private void enableControls(boolean customImage) {
         knownImageComboBox.setEnabled(!customImage);
-        setPageComplete(!customImage && regionComboBox.getText() != null);
+//        setPageComplete(!customImage && regionComboBox.getText() != null);
 //        model.getCurrentNavigationState().NEXT.setEnabled(!customImage || !imageLabelList.isSelectionEmpty());
         imageLabelList.setEnabled(customImage);
         publisherComboBox.setEnabled(customImage);
@@ -460,5 +457,12 @@ public class SelectImageStep extends WizardPage {
 			wizard.setKnownMachineImage(knownImageComboBox.getData(knownImageComboBox.getText()));
 			wizard.setVirtualMachineImage(null);
 		}
+	}
+	
+	private void validateNext() {
+		String region = regionComboBox.getText(); 
+		boolean isValid = !(LOADING.equals(region) || region == null || region.isEmpty() ||
+				(customImageBtn.getSelection() && imageLabelList.getSelection().length > 0));
+		setPageComplete(isValid);
 	}
 }
