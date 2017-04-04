@@ -43,11 +43,9 @@ import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.utils.AzureModel;
 import com.microsoft.azuretools.utils.AzureModelController;
-import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.intellij.wizards.VMWizardModel;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -365,7 +363,8 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
                 }
             });
         } else {
-            // todo
+            skuComboBox.removeAllItems();
+            imageLabelList.setListData(new Object[]{});
         }
     }
 
