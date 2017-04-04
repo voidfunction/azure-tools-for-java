@@ -74,7 +74,7 @@ public class MachineSettingsStep extends WizardPage {
 
     @Override
     public void createControl(Composite parent) {
-        GridLayout gridLayout = new GridLayout(2, false);
+        GridLayout gridLayout = new GridLayout(1, false);
         GridData gridData = new GridData();
         gridData.grabExcessHorizontalSpace = true;
         gridData.grabExcessVerticalSpace = true;
@@ -95,7 +95,7 @@ public class MachineSettingsStep extends WizardPage {
         GridData gridData = new GridData();
         gridData.horizontalAlignment = SWT.FILL;
         gridData.verticalAlignment = GridData.BEGINNING;
-//        gridData.grabExcessHorizontalSpace = true;
+        gridData.grabExcessHorizontalSpace = true;
         gridData.widthHint = 250;
         composite.setLayout(gridLayout);
         composite.setLayoutData(gridData);

@@ -85,9 +85,9 @@ public class SelectImageStep extends WizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
-		GridLayout gridLayout = new GridLayout(2, false);
+		GridLayout gridLayout = new GridLayout(1, false);
 		GridData gridData = new GridData();
-		gridData.widthHint = 400;
+//		gridData.widthHint = 400;
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.grabExcessHorizontalSpace = true;
 		Composite container = new Composite(parent, 0);
@@ -158,8 +158,8 @@ public class SelectImageStep extends WizardPage {
 		GridData gridData = new GridData();
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.verticalAlignment = GridData.BEGINNING;
-		// gridData.grabExcessHorizontalSpace = true;
-		gridData.widthHint = 350;
+		gridData.grabExcessHorizontalSpace = true;
+//		gridData.widthHint = 350;
 		composite.setLayout(gridLayout);
 		composite.setLayoutData(gridData);
 
@@ -170,9 +170,6 @@ public class SelectImageStep extends WizardPage {
 		regionComboBox.setLayoutData(getGridData(1));
 		regionComboBox.setToolTipText("Specifies the location where your virtual machine will be created");
 		
-//		Group group = new Group(composite, SWT.NONE);
-//        group.setLayout(new RowLayout(SWT.VERTICAL));
-//        group.setBackground(PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.TRANSPARENT));
         knownImageBtn = new Button(composite, SWT.RADIO);
         knownImageBtn.setText("Recommended image:");
         knownImageBtn.setLayoutData(getGridData(2));
@@ -201,28 +198,25 @@ public class SelectImageStep extends WizardPage {
 
 		publisherLabel = new Label(composite, SWT.LEFT);
 		publisherLabel.setText("Publisher:");
-		publisherLabel.setLayoutData(getGridDataForLabel());
 		publisherComboBox = new Combo(composite, SWT.READ_ONLY);
 		publisherComboBox.setLayoutData(getGridData(1));
 		publisherComboBox.setToolTipText("Specifies the publisher which created the image which you will use to create your virtual machine");
 
 		offerLabel = new Label(composite, SWT.LEFT);
 		offerLabel.setText("Offer:");
-		offerLabel.setLayoutData(getGridDataForLabel());
 		offerComboBox = new Combo(composite, SWT.READ_ONLY);
 		offerComboBox.setLayoutData(getGridData(1));
 		offerComboBox.setToolTipText("Specifies which the virtual machine which offering to use from the selected publisher");
 
 		skuLabel = new Label(composite, SWT.LEFT);
 		skuLabel.setText("Sku:");
-		skuLabel.setLayoutData(getGridDataForLabel());
+//		skuLabel.setLayoutData(getGridDataForLabel());
 		skuComboBox = new Combo(composite, SWT.READ_ONLY);
 		skuComboBox.setLayoutData(getGridData(1));
 		skuComboBox.setToolTipText("Specifies the Stockkeeping Unit (SKU) to use from the selected offering");
 
 		versionLabel = new Label(composite, SWT.LEFT);
 		versionLabel.setText("Version #:");
-		versionLabel.setLayoutData(getGridDataForLabel());
 		imageLabelList = new org.eclipse.swt.widgets.List(composite, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL);
 		// gridData = new GridData();
 		// gridData.widthHint = 300;
@@ -236,18 +230,9 @@ public class SelectImageStep extends WizardPage {
     	GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
     	gridData.horizontalSpan = columns;
     	gridData.horizontalAlignment = SWT.FILL;
-		gridData.widthHint = 280;
+//		gridData.widthHint = 280;
 		gridData.verticalIndent = 10;
 		gridData.grabExcessHorizontalSpace = true;
-    	return gridData;
-    }
-    
-    private GridData getGridDataForLabel() {
-    	GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
-		gridData.horizontalAlignment = SWT.FILL;
-		gridData.verticalIndent = 10;
-		gridData.grabExcessHorizontalSpace = true;
-		gridData.widthHint = 80;
     	return gridData;
     }
 	

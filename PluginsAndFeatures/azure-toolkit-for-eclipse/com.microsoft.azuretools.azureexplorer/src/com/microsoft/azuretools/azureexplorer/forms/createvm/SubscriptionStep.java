@@ -20,9 +20,6 @@
 package com.microsoft.azuretools.azureexplorer.forms.createvm;
 
 import java.util.List;
-import java.util.Vector;
-
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -39,14 +36,12 @@ import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.azuretools.azureexplorer.Activator;
 import com.microsoft.azuretools.core.utils.Messages;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 
 
 public class SubscriptionStep extends WizardPage {
-    private Label userInfoLabel;
     private Label subscriptionLabel;
     private Combo subscriptionComboBox;
 
@@ -59,7 +54,7 @@ public class SubscriptionStep extends WizardPage {
 
     @Override
     public void createControl(Composite parent) {
-        GridLayout gridLayout = new GridLayout(2, false);
+        GridLayout gridLayout = new GridLayout(1, false);
         GridData gridData = new GridData();
         gridData.grabExcessHorizontalSpace = true;
         gridData.grabExcessVerticalSpace = true;
@@ -72,11 +67,11 @@ public class SubscriptionStep extends WizardPage {
 
 //        this.buttonLogin = new Button(container, SWT.PUSH);
 //        this.buttonLogin.setImage(Activator.getImageDescriptor("icons/settings.png").createImage());
-        gridData = new GridData();
-        gridData.horizontalIndent = 5;
-        gridData.widthHint = 50;
-        gridData.heightHint = 40;
-        gridData.verticalAlignment = GridData.BEGINNING;
+//        gridData = new GridData();
+//        gridData.horizontalIndent = 5;
+//        gridData.widthHint = 50;
+//        gridData.heightHint = 40;
+//        gridData.verticalAlignment = GridData.BEGINNING;
 //        buttonLogin.setLayoutData(gridData);
 //        buttonLogin.addSelectionListener(new SelectionAdapter() {
 //            @Override
@@ -102,14 +97,12 @@ public class SubscriptionStep extends WizardPage {
         composite.setLayout(gridLayout);
         composite.setLayoutData(gridData);
 
-        this.userInfoLabel = new Label(composite, SWT.LEFT);
-
         this.subscriptionLabel = new Label(composite, SWT.LEFT);
-        this.subscriptionLabel.setText("Choose the subscription to use when creating the new virtual machine");
+        this.subscriptionLabel.setText("Choose the subscription to use when creating the new virtual machine:");
 
         this.subscriptionComboBox = new Combo(composite, SWT.READ_ONLY);
         gridData = new GridData();
-        gridData.widthHint = 382;
+//        gridData.widthHint = 182;
         gridData.grabExcessHorizontalSpace = true;
         gridData.horizontalAlignment = SWT.FILL;
         subscriptionComboBox.setLayoutData(gridData);

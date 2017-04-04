@@ -101,7 +101,7 @@ public class SettingsStep extends WizardPage {
 
     @Override
     public void createControl(Composite parent) {
-        GridLayout gridLayout = new GridLayout(2, false);
+        GridLayout gridLayout = new GridLayout(1, false);
         GridData gridData = new GridData();
         gridData.grabExcessHorizontalSpace = true;
         Composite container = new Composite(parent, 0);
@@ -145,8 +145,7 @@ public class SettingsStep extends WizardPage {
         GridData gridData = new GridData();
         gridData.horizontalAlignment = SWT.FILL;
         gridData.verticalAlignment = GridData.BEGINNING;
-        // gridData.grabExcessHorizontalSpace = true;
-        gridData.widthHint = 250;
+         gridData.grabExcessHorizontalSpace = true;
         composite.setLayout(gridLayout);
         composite.setLayoutData(gridData);
         
@@ -197,7 +196,7 @@ public class SettingsStep extends WizardPage {
         storageComboBox.setLayoutData(gridData);
 
         networkLabel = new Label(composite, SWT.LEFT);
-        networkLabel.setText("Virtual Network");
+        networkLabel.setText("Virtual Network:");
         networkComboBox = new Combo(composite, SWT.READ_ONLY);
         gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
         networkComboBox.setLayoutData(gridData);

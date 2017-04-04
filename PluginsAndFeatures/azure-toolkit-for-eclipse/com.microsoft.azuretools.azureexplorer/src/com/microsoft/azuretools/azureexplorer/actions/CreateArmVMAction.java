@@ -41,7 +41,7 @@ public class CreateArmVMAction extends NodeActionListener {
         CreateVMWizard createVMWizard = new CreateVMWizard((VMArmModule) e.getAction().getNode());
         WizardDialog dialog = new WizardDialog(PluginUtil.getParentShell(), createVMWizard);
         dialog.setTitle("Create new Virtual Machine");
-        dialog.setMinimumPageSize(450, 500);
+//        dialog.setPageSize(400, 500);
         dialog.create();
         dialog.open();
     }
