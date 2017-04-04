@@ -304,9 +304,10 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
             });
             return true;
         } catch (Exception e) {
-            String msg = "An error occurred while attempting to create the specified storage account in subscription " + subscription.getSubscriptionId() + ".<br>"
+            String msg = "An error occurred while attempting to create the specified storage account in subscription "
+                    + ((SubscriptionDetail) subscriptionComboBox.getSelectedItem()).getSubscriptionId() + ".\n"
                     + String.format(message("webappExpMsg"), e.getMessage());
-            DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true);
+            DefaultLoader.getIdeHelper().invokeAndWait(() -> DefaultLoader.getUIHelper().showException(msg, e, message("errTtl"), false, true));
             AzurePlugin.log(msg, e);
         }
         return false;
@@ -344,7 +345,6 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
 
                 subscriptionComboBox.setModel(new DefaultComboBoxModel<>(selectedSubscriptions.toArray(new SubscriptionDetail[selectedSubscriptions.size()])));
                 if (selectedSubscriptions.size() > 0) {
-                    this.subscription = selectedSubscriptions.get(0);
                     loadRegions();
                 }
             } catch (Exception ex) {
