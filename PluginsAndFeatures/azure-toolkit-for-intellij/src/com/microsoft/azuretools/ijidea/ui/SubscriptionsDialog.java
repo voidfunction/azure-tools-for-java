@@ -129,7 +129,7 @@ public class SubscriptionsDialog extends DialogWrapper {
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("refreshSubscriptions", ex);
-            ErrorWindow.show(ex.getMessage(), "Refresh Subscriptions Error", contentPane);
+            ErrorWindow.show(project, ex.getMessage(), "Refresh Subscriptions Error");
         }
     }
 

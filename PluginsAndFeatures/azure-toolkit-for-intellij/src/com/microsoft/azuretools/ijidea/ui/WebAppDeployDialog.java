@@ -437,7 +437,12 @@ public class WebAppDeployDialog extends DialogWrapper {
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             LOGGER.error("deleteAppService : Task.Modal ", ex);
-                            ErrorWindow.show(ex.getMessage(), "Delete App Service Error", WebAppDeployDialog.this.contentPane);
+                            ApplicationManager.getApplication().invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ErrorWindow.show(project, ex.getMessage(), "Delete App Service Error");
+                                }
+                            }, ModalityState.any());
 
                         }
                     }
@@ -445,7 +450,7 @@ public class WebAppDeployDialog extends DialogWrapper {
             } catch (Exception e) {
                 e.printStackTrace();
                 LOGGER.error("deleteAppService", e);
-                ErrorWindow.show(e.getMessage(), "Delete App Service Error", this.contentPane);
+                ErrorWindow.show(project, e.getMessage(), "Delete App Service Error");
             }
         }
     }
@@ -560,7 +565,12 @@ public class WebAppDeployDialog extends DialogWrapper {
                 } catch (IOException | InterruptedException ex) {
                     ex.printStackTrace();
                     LOGGER.error("deploy", ex);
-                    ErrorWindow.show(ex.getMessage(), "Deploy Web App Error", WebAppDeployDialog.this.contentPane);
+                    ApplicationManager.getApplication().invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            ErrorWindow.show(project, ex.getMessage(), "Deploy Web App Error");
+                        }
+                    }, ModalityState.any());
                 }
             }
         });

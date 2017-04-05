@@ -38,7 +38,9 @@ import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.azure.management.appservice.WebContainer;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.azuretools.ijidea.utility.UpdateProgressIndicator;
 import com.microsoft.azuretools.utils.*;
 import org.jdesktop.swingx.JXHyperlink;
@@ -47,6 +49,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
@@ -373,7 +376,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
                     }, ModalityState.any());
 
 
-                } catch (Exception ex) {
+                } catch (IOException | AuthException | CanceledByUserException ex) {
                     ex.printStackTrace();
                     LOGGER.error("updateAndFillSubscriptions@AppServiceCreateDialog", ex);
                 }
@@ -729,7 +732,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-        ProgressManager.getInstance().run(new Task.Modal(null,"Create App Service Progress", true) {
+        ProgressManager.getInstance().run(new Task.Modal(project,"Create App Service Progress", true) {
             @Override
             public void run(ProgressIndicator progressIndicator) {
                 try {
@@ -742,11 +745,19 @@ public class AppServiceCreateDialog extends DialogWrapper {
                             superDoOKAction();
                         }
                     }, ModalityState.any());
-                } catch (Exception ex) {
+                } catch (IOException ex) {
                     ex.printStackTrace();
                     // TODO: show error message
                     LOGGER.error("run@Progress@doOKAction@@AppServiceCreateDialog", ex);
-                    ErrorWindow.show(ex.getMessage(), "Create App Service Error", AppServiceCreateDialog.this.contentPane);
+                    ApplicationManager.getApplication().invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            ErrorWindow.show(project, ex.getMessage(), "Create App Service Error");
+                        }
+                    }, ModalityState.any());
+                } catch (InterruptedException | AzureCmdException | WebAppUtils.WebAppException ex) {
+                    ex.printStackTrace();
+                    LOGGER.error("run@Progress@doOKAction@@AppServiceCreateDialog", ex);
                 }
             }
         });

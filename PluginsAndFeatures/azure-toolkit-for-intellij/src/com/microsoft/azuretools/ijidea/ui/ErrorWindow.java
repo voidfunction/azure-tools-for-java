@@ -22,51 +22,52 @@
 
 package com.microsoft.azuretools.ijidea.ui;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
+import org.jetbrains.annotations.Nullable;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class ErrorWindow extends JDialog {
+public class ErrorWindow extends DialogWrapper {
     private JPanel contentPane;
-    private JButton buttonOK;
     private JTextPane textPane;
 
-    public static void show(String message, Component parent) {
-        ErrorWindow w = new ErrorWindow(message, null);
-        w.pack();
-        w.setLocationRelativeTo(parent);
-        w.setVisible(true);
+    public static void show(@Nullable Project project, String message, String title) {
+        ErrorWindow w = new ErrorWindow(project, message, null);
+        w.show();
     }
 
-    public static void show(String message, String title, Component parent) {
-        ErrorWindow w = new ErrorWindow(message, title);
-        w.pack();
-        w.setLocationRelativeTo(parent);
-        w.setVisible(true);
-    }
-
-    public ErrorWindow(String message, String title) {
-        setContentPane(contentPane);
+    private ErrorWindow(@Nullable Project project,String message, String title) {
+        super(project, true, IdeModalityType.PROJECT);
         setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
         if (title != null && !title.isEmpty()) {
             setTitle(title);
         } else {
             setTitle("Error Notification");
         }
-
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-
+        setCancelButtonText("Close");
         textPane.setText(message);
+
+        init();
     }
 
-    private void onOK() {
-        // add your code here
-        dispose();
+    @Nullable
+    @Override
+    protected JComponent createCenterPanel() {
+        return contentPane;
+    }
+
+    @Override
+    protected Action[] createActions() {
+        return new Action[]{this.getCancelAction()};
+    }
+
+    @Nullable
+    @Override
+    protected String getDimensionServiceKey() {
+        return "ErrorWindow";
     }
 }

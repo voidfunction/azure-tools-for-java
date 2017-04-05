@@ -22,6 +22,8 @@
 
 package com.microsoft.azuretools.ijidea.ui;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -168,7 +170,7 @@ public class SignInWindow extends DialogWrapper {
             } catch (IOException ex) {
                 ex.printStackTrace();
                 LOGGER.error("doSelectCredFilepath", ex);
-                ErrorWindow.show(ex.getMessage(), "File Path Error", contentPane);
+                ErrorWindow.show(project, ex.getMessage(), "File Path Error");
             }
         }
     }
@@ -184,7 +186,7 @@ public class SignInWindow extends DialogWrapper {
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("doSignIn", ex);
-            ErrorWindow.show(ex.getMessage(), "Sign In Error", contentPane);
+            ErrorWindow.show(project, ex.getMessage(), "Sign In Error");
         }
     }
 
@@ -203,7 +205,7 @@ public class SignInWindow extends DialogWrapper {
                         ex.printStackTrace();
                         LOGGER.error("signInAsync", ex);
                         try {
-                            ErrorWindow.show(ex.getMessage(), "Sign In Error", contentPane);
+                            ErrorWindow.show(project, ex.getMessage(), "Sign In Error");
                         } catch (Exception e) {
                             ex.printStackTrace();
                         }
@@ -220,7 +222,7 @@ public class SignInWindow extends DialogWrapper {
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("doSingOut", ex);
-            ErrorWindow.show(ex.getMessage(), "Sign Out Error", contentPane);
+            ErrorWindow.show(project, ex.getMessage(), "Sign Out Error");
         }
     }
 
@@ -253,7 +255,12 @@ public class SignInWindow extends DialogWrapper {
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         LOGGER.error("doCreateServicePrincipal::Task.Modal", ex);
-                        ErrorWindow.show(ex.getMessage(), "Load Subscription Error", contentPane);
+                        ApplicationManager.getApplication().invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                ErrorWindow.show(project, ex.getMessage(), "Load Subscription Error");
+                            }
+                        }, ModalityState.any());
 
                     }
                 }
@@ -305,7 +312,7 @@ public class SignInWindow extends DialogWrapper {
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("doCreateServicePrincipal", ex);
-            ErrorWindow.show(ex.getMessage(), "Get Subscription Error", contentPane);
+            ErrorWindow.show(project, ex.getMessage(), "Get Subscription Error");
 
         } finally {
             if (adAuthManager != null) {

@@ -129,7 +129,12 @@ public class AppServiceChangeSettingsDialog extends AppServiceCreateDialog {
                     ex.printStackTrace();
                     // TODO: show error message
                     LOGGER.error("doOKAction :: Task.Modal", ex);
-                    ErrorWindow.show(ex.getMessage(), "Create App Service Error", AppServiceChangeSettingsDialog.this.contentPane);
+                    ApplicationManager.getApplication().invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            ErrorWindow.show(project, ex.getMessage(), "Create App Service Error");
+                        }
+                    }, ModalityState.any());
                 }
             }
         });

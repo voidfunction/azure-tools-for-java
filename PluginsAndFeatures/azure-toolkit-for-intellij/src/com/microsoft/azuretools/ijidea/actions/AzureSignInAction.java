@@ -109,7 +109,7 @@ public class AzureSignInAction extends AnAction {
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("onAzureSignIn", ex);
-            ErrorWindow.show(ex.getMessage(), "AzureSignIn Action Error", frame);
+            ErrorWindow.show(project, ex.getMessage(), "AzureSignIn Action Error");
         }
     }
     

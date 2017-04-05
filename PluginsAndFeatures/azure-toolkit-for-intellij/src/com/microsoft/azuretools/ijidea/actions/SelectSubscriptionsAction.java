@@ -83,7 +83,7 @@ public class SelectSubscriptionsAction extends AnAction {
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("onShowSubscriptions", ex);
-            ErrorWindow.show(ex.getMessage(), "Select Subscriptions Action Error", frame);
+            ErrorWindow.show(project, ex.getMessage(), "Select Subscriptions Action Error");
         }
     }
 
