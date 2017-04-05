@@ -48,49 +48,33 @@ public class AzureDockerVMOps {
     try {
       VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
 //      VirtualMachineExtension.UpdateDefinitionStages.WithAttach<VirtualMachine.Update> defStage1;
-//      HashMap<String, Object> protectedSettings = new HashMap<>();
-//      if (vm.extensions().get("VMAccessForLinux") != null) {
-//        vm.update()
-//            .updateExtension("VMAccessForLinux")
-//            .withProtectedSettings(protectedSettings);
-//      } else {
-//        vm.update()
-//            .defineNewExtension("VMAccessForLinux")
-//            .withPublisher("Microsoft.OSTCExtensions")
-//            .withType("VMAccessForLinux")
-//            .withVersion("1.4");
-//
-//      }
-//      vm.update()
-//
-//      VirtualMachine.DefinitionStages.WithLinuxRootPasswordOrPublicKey defStage1 = azureClient.virtualMachines()
-//          .define(newHost.hostVM.name)
-//          .withRegion(newHost.hostVM.region)
-//          .withExistingResourceGroup(resourceGroupName)
-//          .withExistingPrimaryNetwork(vnet)
-//          .withSubnet(newHost.hostVM.subnetName)
-//          .withPrimaryPrivateIpAddressDynamic()
-//          .withNewPrimaryPublicIpAddress(newHost.hostVM.name)
-//          .withSpecificLinuxImageVersion(newHost.hostVM.osHost.imageReference())
-//          .withRootUsername(newHost.certVault.vmUsername);
-//
-//      VirtualMachine.DefinitionStages.WithLinuxCreate defStage2;
-//      if (newHost.hasPwdLogIn && newHost.hasSSHLogIn) {
-//        defStage2 = defStage1
-//            .withRootPassword(newHost.certVault.vmPwd)
-//            .withSsh(newHost.certVault.sshPubKey);
-//      } else {
-//        defStage2 = (newHost.hasSSHLogIn) ?
-//            defStage1.withSsh(newHost.certVault.sshPubKey) :
-//            defStage1.withRootPassword(newHost.certVault.vmPwd);
-//      }
-//
-//      defStage3 = defStage3.withTag("dockerhost", newHost.port);
-//      if (newHost.hasKeyVault) {
-//        defStage3 = defStage3.withTag("dockervault", newHost.certVault.name);
-//      }
-//
-//      return defStage3.create();
+      HashMap<String, Object> protectedSettings = new HashMap<>();
+      protectedSettings.put("username", dockerHost.certVault.vmUsername);
+      if (dockerHost.hasPwdLogIn) {
+        protectedSettings.put("password", dockerHost.certVault.vmPwd);
+      }
+      if (dockerHost.hasSSHLogIn) {
+        protectedSettings.put("ssh_key", dockerHost.certVault.sshPubKey);
+      }
+      protectedSettings.put("reset_ssh", "true");
+
+      if (vm.extensions().get("VMAccessForLinux") != null) {
+        vm.update()
+            .updateExtension("VMAccessForLinux")
+                .withProtectedSettings(protectedSettings)
+            .parent()
+            .apply();
+      } else {
+        vm.update()
+            .defineNewExtension("VMAccessForLinux")
+                .withPublisher("Microsoft.OSTCExtensions")
+                .withType("VMAccessForLinux")
+                .withVersion("1.4")
+                .withProtectedSettings(protectedSettings)
+            .attach()
+            .apply();
+      }
+
       return vm;
     } catch (Exception e) {
       throw new AzureDockerException(e.getMessage(), e);
