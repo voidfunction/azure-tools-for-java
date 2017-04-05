@@ -9,6 +9,15 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="azuretools-core" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../AddLibrary/AzureLibraries/com.microsoft.azuretools.sdk/dependencies/applicationinsights-core-1.0.3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
   <component name="POM File Configuration" pomFile="" />
 </module>
