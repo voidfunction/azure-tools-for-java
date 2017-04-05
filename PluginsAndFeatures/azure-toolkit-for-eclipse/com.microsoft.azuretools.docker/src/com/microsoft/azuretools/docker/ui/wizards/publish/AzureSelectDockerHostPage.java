@@ -36,10 +36,13 @@ import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.model.EditableDockerHost;
+import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.docker.ui.dialogs.AzureInputDockerLoginCredsDialog;
 import com.microsoft.azuretools.docker.ui.dialogs.AzureViewDockerDialog;
 import com.microsoft.azuretools.docker.ui.wizards.createhost.AzureNewDockerWizard;
 import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
@@ -55,6 +58,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.resources.IProject;
@@ -444,6 +448,37 @@ public class AzureSelectDockerHostPage extends WizardPage {
 		dockerHostsEditButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				int idx = dockerHostsTable.getSelectionIndex();
+				if (idx >= 0 && dockerHostsTable.getItem(idx) != null) {
+					DockerHost updateHost = (DockerHost) dockerHostsTable.getItem(idx).getData();
+					if (updateHost != null && !updateHost.isUpdating) {
+						EditableDockerHost editableDockerHost = new EditableDockerHost(updateHost);
+						AzureInputDockerLoginCredsDialog loginCredsDialog = new AzureInputDockerLoginCredsDialog(PluginUtil.getParentShell(), project, editableDockerHost, dockerManager, true);
+		
+						if (loginCredsDialog.open() == Window.OK) {
+							// Update Docker host log in credentials
+							updateHost.isUpdating = true;
+							DefaultLoader.getIdeHelper().runInBackground(project, String.format("Updating %s Log In Credentials", updateHost.name), false, true, String.format("Updating log in credentials for %s...", updateHost.name), new Runnable() {
+								@Override
+								public void run() {
+									try {
+										AzureDockerVMOps.updateDockerHostVM(dockerManager.getSubscriptionsMap().get(dockerImageDescription.sid).azureClient, editableDockerHost.updatedDockerHost);
+										updateHost.certVault = editableDockerHost.updatedDockerHost.certVault;
+										updateHost.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
+										updateHost.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
+									} catch (Exception ee) {
+										if (AzureDockerUtils.DEBUG)
+											ee.printStackTrace();
+										log.log(Level.SEVERE, "dockerHostsEditButton.addSelectionListener", ee);
+									}
+									updateHost.isUpdating = false;
+								}
+							});	
+						}
+					} else {
+						PluginUtil.displayErrorDialog(mainContainer.getShell(), "Error: Invalid Edit Selection", "The selected Docker host can not be edited at this time!");
+					}
+				}
 				setPageComplete(doValidate());
 			}
 		});

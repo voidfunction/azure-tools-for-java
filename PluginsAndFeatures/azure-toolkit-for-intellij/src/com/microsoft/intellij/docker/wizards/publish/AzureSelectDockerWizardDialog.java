@@ -127,14 +127,14 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
 
                   if (session == null) {
                     EditableDockerHost editableDockerHost = new EditableDockerHost(dockerImageInstance.host);
-                    AzureInputDockerLoginCredsDialog loginCredsDialog = new AzureInputDockerLoginCredsDialog(model.getProject(), editableDockerHost, model.getDockerHostsManager());
+                    AzureInputDockerLoginCredsDialog loginCredsDialog = new AzureInputDockerLoginCredsDialog(model.getProject(), editableDockerHost, model.getDockerHostsManager(), false);
                     loginCredsDialog.show();
 
                     if (loginCredsDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
                       // Update Docker host log in credentials
                       dockerImageInstance.host.certVault = editableDockerHost.updatedDockerHost.certVault;
-                      dockerImageInstance.host.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
                       dockerImageInstance.host.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
+                      dockerImageInstance.host.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
 //                    AzureDockerVMOps.updateDockerHostVM(model.getDockerHostsManager().getSubscriptionsMap().get(model.getDockerImageDescription().sid).azureClient, editableDockerHost.updatedDockerHost);
                     } else {
                       return;

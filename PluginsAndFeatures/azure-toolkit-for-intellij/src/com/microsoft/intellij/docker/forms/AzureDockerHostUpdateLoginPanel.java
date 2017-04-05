@@ -83,7 +83,7 @@ public class AzureDockerHostUpdateLoginPanel {
         AzureSelectKeyVault selectKeyvaultDialog = new AzureSelectKeyVault(project, dockerUIManager);
         selectKeyvaultDialog.show();
 
-        if (selectKeyvaultDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+        if (selectKeyvaultDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE && selectKeyvaultDialog.getSelectedKeyvault() != null) {
           updateUIWithKeyvault(selectKeyvaultDialog.getSelectedKeyvault());
         }
       }
@@ -151,19 +151,19 @@ public class AzureDockerHostUpdateLoginPanel {
     dockerHostKeepSshRadioButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        dockerHostImportSshRadioButton.setEnabled(false);
+        dockerHostImportSSHBrowseTextField.setEnabled(false);
       }
     });
     dockerHostAutoSshRadioButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        dockerHostImportSshRadioButton.setEnabled(false);
+        dockerHostImportSSHBrowseTextField.setEnabled(false);
       }
     });
     dockerHostImportSshRadioButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        dockerHostImportSshRadioButton.setEnabled(true);
+        dockerHostImportSSHBrowseTextField.setEnabled(true);
       }
     });
 
@@ -194,7 +194,6 @@ public class AzureDockerHostUpdateLoginPanel {
   }
 
   private void updateUIWithKeyvault(String keyvault) {
-    // TODO: call into dockerManager to retrieve the keyvault secrets
     AzureDockerCertVault certVault = dockerManager.getDockerVault(keyvault);
     if (certVault != null) {
       editableHost.updatedDockerHost.certVault = certVault;
@@ -253,6 +252,12 @@ public class AzureDockerHostUpdateLoginPanel {
     } else {
       editableHost.updatedDockerHost.certVault.vmPwd = null;
       editableHost.updatedDockerHost.hasPwdLogIn = false;
+    }
+
+    // Keep current SSH keys
+    if (dockerHostKeepSshRadioButton.isSelected()) {
+      AzureDockerCertVaultOps.copyVaultSshKeys(editableHost.updatedDockerHost.certVault, editableHost.originalDockerHost.certVault);
+      editableHost.updatedDockerHost.hasSSHLogIn = editableHost.originalDockerHost.hasSSHLogIn;
     }
 
     // SSH key auto generated

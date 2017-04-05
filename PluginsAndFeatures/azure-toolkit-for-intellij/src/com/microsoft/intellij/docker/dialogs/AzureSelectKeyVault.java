@@ -41,14 +41,21 @@ public class AzureSelectKeyVault extends DialogWrapper{
     this.dockerManager = dockerManager;
     keyvault = null;
 
-    // TODO: call into dockerManager to retrieve the list of current keyvaults
-    DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>();
-    comboBoxModel.addElement("dockerVault121121");
-    comboBoxModel.addElement("dockerVault121");
-    dockerKeyvaultsComboBox.setModel(comboBoxModel);
-
     init();
     setTitle("Select Azure Key Vault");
+
+    DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>();
+    if (dockerManager != null && dockerManager.getDockerVaultsMap() != null) {
+      for (String keyvaultName : dockerManager.getDockerVaultsMap().keySet()) {
+        comboBoxModel.addElement(keyvaultName);
+      }
+      dockerKeyvaultsComboBox.setModel(comboBoxModel);
+      if (dockerKeyvaultsComboBox.getItemCount() > 0) {
+        dockerKeyvaultsComboBox.setSelectedIndex(0);
+        keyvault = (String) dockerKeyvaultsComboBox.getSelectedItem();
+      }
+    }
+
   }
 
   @Nullable

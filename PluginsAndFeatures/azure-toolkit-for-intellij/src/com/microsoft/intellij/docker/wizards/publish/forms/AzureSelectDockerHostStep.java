@@ -26,6 +26,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.packaging.artifacts.Artifact;
@@ -42,9 +43,11 @@ import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.model.EditableDockerHost;
+import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.intellij.docker.dialogs.AzureEditDockerLoginCredsDialog;
+import com.microsoft.intellij.docker.dialogs.AzureInputDockerLoginCredsDialog;
 import com.microsoft.intellij.docker.dialogs.AzureViewDockerDialog;
 import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
@@ -54,6 +57,7 @@ import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardMode
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardStep;
 import com.microsoft.intellij.ui.util.UIUtils;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -376,13 +380,37 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       DefaultTableModel tableModel = (DefaultTableModel) dockerHostsTable.getModel();
       String apiURL = (String) tableModel.getValueAt(dockerHostsTable.getSelectedRow(), 4);
 
-      EditableDockerHost editableDockerHost = new EditableDockerHost(dockerManager.getDockerHostForURL(apiURL));
+      DockerHost updateHost = dockerManager.getDockerHostForURL(apiURL);
 
-      AzureEditDockerLoginCredsDialog editDockerDialog = new AzureEditDockerLoginCredsDialog(model.getProject(), editableDockerHost, dockerManager);
-      editDockerDialog.show();
+      if (updateHost == null || updateHost.isUpdating) {
+        EditableDockerHost editableDockerHost = new EditableDockerHost(updateHost);
 
-      if (editDockerDialog.getExitCode() == 0) {
-        forceRefreshDockerHostsTable();
+//      AzureEditDockerLoginCredsDialog editDockerDialog = new AzureEditDockerLoginCredsDialog(model.getProject(), editableDockerHost, dockerManager);
+//      editDockerDialog.show();
+        AzureInputDockerLoginCredsDialog loginCredsDialog = new AzureInputDockerLoginCredsDialog(model.getProject(), editableDockerHost, model.getDockerHostsManager(), true);
+        loginCredsDialog.show();
+
+        if (loginCredsDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+          // Update Docker host log in credentials
+          updateHost.isUpdating = true;
+          DefaultLoader.getIdeHelper().runInBackground(model.getProject(), String.format("Updating %s Log In Credentials", updateHost.name), false, true, String.format("Updating log in credentials for %s...", updateHost.name), new Runnable() {
+            @Override
+            public void run() {
+              try {
+                AzureDockerVMOps.updateDockerHostVM(model.getDockerHostsManager().getSubscriptionsMap().get(model.getDockerImageDescription().sid).azureClient, editableDockerHost.updatedDockerHost);
+                updateHost.certVault = editableDockerHost.updatedDockerHost.certVault;
+                updateHost.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
+                updateHost.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
+              } catch (Exception ee) {
+                if (AzureDockerUtils.DEBUG) ee.printStackTrace();
+                LOGGER.error("onEditDockerHostAction", ee);
+              }
+              updateHost.isUpdating = false;
+            }
+          });
+        }
+      } else {
+        PluginUtil.displayErrorDialog("Error: Invalid Edit Selection", "The selected Docker host can not be edited at this time!");
       }
     } catch (Exception e) {
       setDialogButtonsState(false);

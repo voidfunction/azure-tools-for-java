@@ -135,7 +135,7 @@ public class AzureSelectDockerWizard extends Wizard {
 
 									if (session == null) {
 										EditableDockerHost editableDockerHost = new EditableDockerHost(dockerImageDescription.host);
-										AzureInputDockerLoginCredsDialog loginCredsDialog = new AzureInputDockerLoginCredsDialog(PluginUtil.getParentShell(), project, editableDockerHost, dockerManager);
+										AzureInputDockerLoginCredsDialog loginCredsDialog = new AzureInputDockerLoginCredsDialog(PluginUtil.getParentShell(), project, editableDockerHost, dockerManager, false);
 
 										if (loginCredsDialog.open() == Window.OK) {
 											// Update Docker host log in credentials

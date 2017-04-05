@@ -17,19 +17,21 @@ public class AzureInputDockerLoginCredsDialog extends DialogWrapper {
   private EditableDockerHost editableHost;
   private AzureDockerHostsManager dockerManager;
   private AzureDockerHostUpdateLoginPanel loginPanel;
+  private boolean resetCredentials;
 
-  public AzureInputDockerLoginCredsDialog(Project project, EditableDockerHost editableHost, AzureDockerHostsManager dockerManager) {
+  public AzureInputDockerLoginCredsDialog(Project project, EditableDockerHost editableHost, AzureDockerHostsManager dockerManager, boolean resetCredentials) {
     super(project, true);
 
     this.project = project;
     this.editableHost = editableHost;
     this.dockerManager = dockerManager;
+    this.resetCredentials = resetCredentials;
 
     loginPanel = new AzureDockerHostUpdateLoginPanel(project, editableHost, dockerManager, this);
-    loginPanel.dockerHostAutoSshRadioButton.setVisible(false);
+    loginPanel.dockerHostAutoSshRadioButton.setVisible(resetCredentials);
 
     init();
-    setTitle("Update Login Credentials");
+    setTitle(resetCredentials ? "Update Log In Credentials" : "Enter Log In Credentials");
   }
 
   @Nullable
@@ -49,7 +51,7 @@ public class AzureInputDockerLoginCredsDialog extends DialogWrapper {
   @Override
   protected Action[] createActions() {
     Action updateAction = getOKAction();
-    updateAction.putValue(Action.NAME, "Update");
+    updateAction.putValue(Action.NAME, resetCredentials ? "Update" : "OK");
     return new Action[] {getCancelAction(), updateAction};
   }
 

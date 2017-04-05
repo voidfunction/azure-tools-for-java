@@ -56,6 +56,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.widgets.Control;
 
 public class AzureNewDockerLoginPage extends WizardPage {
 	private static final Logger log =  Logger.getLogger(AzureNewDockerLoginPage.class.getName());
@@ -91,7 +92,6 @@ public class AzureNewDockerLoginPage extends WizardPage {
 	private ManagedForm managedForm;
 	private ScrolledForm errMsgForm;
 	private IMessageManager errDispatcher;
-	private final FormToolkit formToolkit = new FormToolkit(Display.getDefault());
 
 	private AzureNewDockerWizard wizard;
 	private AzureDockerHostsManager dockerManager;
@@ -307,10 +307,6 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		dockerHostImportTLSBrowseButton = new Button(daemonCredsComposite, SWT.NONE);
 		dockerHostImportTLSBrowseButton.setText("Browse...");
 		
-		FormToolkit toolkit = new FormToolkit(mainContainer.getDisplay());
-		toolkit.getHyperlinkGroup().setHyperlinkUnderlineMode(HyperlinkSettings.UNDERLINE_HOVER);
-		managedForm = new ManagedForm(mainContainer);
-		
 		dockerHostSaveCredsCheckBox = new Button(mainContainer, SWT.CHECK);
 		GridData gd_dockerHostSaveCredsCheckBox = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostSaveCredsCheckBox.horizontalIndent = 5;
@@ -321,6 +317,10 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		GridData gd_dockerHostNewKeyvaultTextField = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_dockerHostNewKeyvaultTextField.widthHint = 210;
 		dockerHostNewKeyvaultTextField.setLayoutData(gd_dockerHostNewKeyvaultTextField);
+
+		FormToolkit toolkit = new FormToolkit(mainContainer.getDisplay());
+		toolkit.getHyperlinkGroup().setHyperlinkUnderlineMode(HyperlinkSettings.UNDERLINE_HOVER);
+		managedForm = new ManagedForm(mainContainer);
 		errMsgForm = managedForm.getForm();
 		errMsgForm.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		errMsgForm.setBackground(mainContainer.getBackground());
@@ -329,6 +329,7 @@ public class AzureNewDockerLoginPage extends WizardPage {
 //		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);
 		
 		initUIMainContainer(mainContainer);
+		mainContainer.setTabList(new Control[]{dockerHostImportKeyvaultCredsRadioButton, dockerHostImportKeyvaultComboBox, dockerHostNewCredsRadioButton, credsTabfolder, dockerHostSaveCredsCheckBox, dockerHostNewKeyvaultTextField});
 	}
 	
 	private void initUIMainContainer(Composite mainContainer) {
@@ -691,11 +692,17 @@ public class AzureNewDockerLoginPage extends WizardPage {
 					credsTabfolder.setSelection(0);
 					return false;
 				} else {
+					try {
+						AzureDockerCertVault certVault = AzureDockerCertVaultOps.getSSHKeysFromLocalFile(sshPath);
+						AzureDockerCertVaultOps.copyVaultSshKeys(newHost.certVault, certVault);
+						newHost.hasSSHLogIn = true;
+					} catch (Exception e) {
+						errDispatcher.addMessage("dockerHostImportSshRadioButton", AzureDockerValidationUtils.getDockerHostPasswordTip(), null, IMessageProvider.ERROR, dockerHostImportSshRadioButton);
+						setErrorMessage("Unexpected error reading SSH key files from specified directory: " + e.getMessage());
+						return false;
+					}
 					errDispatcher.removeMessage("dockerHostImportSSHTextField", dockerHostImportSSHTextField);
 					setErrorMessage(null);
-					AzureDockerCertVault certVault = AzureDockerCertVaultOps.getSSHKeysFromLocalFile(sshPath);
-					AzureDockerCertVaultOps.copyVaultSshKeys(newHost.certVault, certVault);
-					newHost.hasSSHLogIn = true;
 				}
 			}
 			
