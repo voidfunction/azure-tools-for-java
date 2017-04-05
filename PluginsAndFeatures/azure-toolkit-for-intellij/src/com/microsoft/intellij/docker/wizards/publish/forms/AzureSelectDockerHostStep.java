@@ -38,11 +38,13 @@ import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.wizard.WizardNavigationState;
 import com.intellij.ui.wizard.WizardStep;
+import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.model.EditableDockerHost;
+import com.microsoft.azure.docker.ops.AzureDockerSSHOps;
 import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.management.Azure;
@@ -382,7 +384,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
 
       DockerHost updateHost = dockerManager.getDockerHostForURL(apiURL);
 
-      if (updateHost == null || updateHost.isUpdating) {
+      if (updateHost != null && !updateHost.isUpdating) {
         EditableDockerHost editableDockerHost = new EditableDockerHost(updateHost);
 
 //      AzureEditDockerLoginCredsDialog editDockerDialog = new AzureEditDockerLoginCredsDialog(model.getProject(), editableDockerHost, dockerManager);
@@ -397,10 +399,13 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
             @Override
             public void run() {
               try {
-                AzureDockerVMOps.updateDockerHostVM(model.getDockerHostsManager().getSubscriptionsMap().get(model.getDockerImageDescription().sid).azureClient, editableDockerHost.updatedDockerHost);
+                AzureDockerVMOps.updateDockerHostVM(model.getDockerHostsManager().getSubscriptionsMap().get(updateHost.sid).azureClient, editableDockerHost.updatedDockerHost);
                 updateHost.certVault = editableDockerHost.updatedDockerHost.certVault;
                 updateHost.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
                 updateHost.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
+                Session session = AzureDockerSSHOps.createLoginInstance(updateHost);
+                AzureDockerVMOps.UpdateCurrentDockerUser(session);
+                updateHost.session = session;
               } catch (Exception ee) {
                 if (AzureDockerUtils.DEBUG) ee.printStackTrace();
                 LOGGER.error("onEditDockerHostAction", ee);

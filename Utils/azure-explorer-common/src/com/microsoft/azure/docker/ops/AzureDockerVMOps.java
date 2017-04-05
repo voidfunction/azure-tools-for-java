@@ -760,6 +760,22 @@ public class AzureDockerVMOps {
     }
   }
 
+  public static void UpdateCurrentDockerUser(Session session) {
+
+    // Adds current user as a recognized Docker user
+
+    try {
+      if (!session.isConnected()) session.connect();
+
+      if (DEBUG) System.out.format("Executing %s", UPDATE_CURRENT_DOCKER_USER);
+      String cmdOut1 = AzureDockerSSHOps.executeCommand(UPDATE_CURRENT_DOCKER_USER, session, true);
+      if (DEBUG) System.out.println(cmdOut1);
+      if (DEBUG) System.out.format("Done executing %s", UPDATE_CURRENT_DOCKER_USER);
+    } catch (Exception e) {
+      throw new AzureDockerException(e.getMessage(), e);
+    }
+  }
+
   public static void waitForDockerDaemonStartup(Session session) {
 
     // Start Docker daemon and wait until timeout or "docker ps" returns errorcode 0

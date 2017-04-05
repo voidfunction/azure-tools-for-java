@@ -32,11 +32,13 @@ import org.eclipse.ui.forms.ManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 
+import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.model.EditableDockerHost;
+import com.microsoft.azure.docker.ops.AzureDockerSSHOps;
 import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
@@ -462,15 +464,19 @@ public class AzureSelectDockerHostPage extends WizardPage {
 								@Override
 								public void run() {
 									try {
-										AzureDockerVMOps.updateDockerHostVM(dockerManager.getSubscriptionsMap().get(dockerImageDescription.sid).azureClient, editableDockerHost.updatedDockerHost);
+										AzureDockerVMOps.updateDockerHostVM(dockerManager.getSubscriptionsMap().get(updateHost.sid).azureClient, editableDockerHost.updatedDockerHost);
 										updateHost.certVault = editableDockerHost.updatedDockerHost.certVault;
 										updateHost.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
 										updateHost.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
+						                Session session = AzureDockerSSHOps.createLoginInstance(updateHost);
+						                AzureDockerVMOps.UpdateCurrentDockerUser(session);
+						                updateHost.session = session;
 									} catch (Exception ee) {
 										if (AzureDockerUtils.DEBUG)
 											ee.printStackTrace();
 										log.log(Level.SEVERE, "dockerHostsEditButton.addSelectionListener", ee);
 									}
+
 									updateHost.isUpdating = false;
 								}
 							});	

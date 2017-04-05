@@ -188,4 +188,8 @@ public class AzureDockerVMSetupScriptsForUbuntu {
 
   public static final String DEFAULT_DOCKER_IMAGES_DIRECTORY = "~/.azuredocker/images";
 
+  public static final String UPDATE_CURRENT_DOCKER_USER = "" +
+      "echo Running: sudo usermod -aG docker $USER &&" +
+      "sudo usermod -aG docker $USER \n";
+
 }
