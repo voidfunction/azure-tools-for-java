@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -566,16 +567,24 @@ public class AzureSelectDockerHostPage extends WizardPage {
 		    wizard.setDockerContainerName(AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName));
 		}
 
-		if (dockerArtifactPathTextField.getText() == null || !Files.isRegularFile(Paths.get(dockerArtifactPathTextField.getText()))) {
+		String artifactPath = dockerArtifactPathTextField.getText();
+		if (artifactPath == null || !Files.isRegularFile(Paths.get(artifactPath))) {
 			errDispatcher.addMessage("dockerArtifactPathTextField", AzureDockerValidationUtils.getDockerArtifactPathTip(), null, IMessageProvider.ERROR, dockerArtifactPathTextField);
 			setErrorMessage("Invalid artifact path");
 			return false;
 		} else {
+		    String artifactFileName = new File(artifactPath).getName();
+		    dockerImageDescription.artifactName = artifactFileName.indexOf(".") > 0 ? artifactFileName.substring(0, artifactFileName.lastIndexOf(".")) : "";
+		    if (dockerImageDescription.artifactName.isEmpty()) {
+				errDispatcher.addMessage("dockerArtifactPathTextField", AzureDockerValidationUtils.getDockerArtifactPathTip(), null, IMessageProvider.ERROR, dockerArtifactPathTextField);
+				setErrorMessage("Invalid artifact path: missing file name");
+				return false;
+		    }
+			dockerImageDescription.artifactPath = artifactPath;		    
+			dockerImageDescription.hasRootDeployment = artifactFileName.toLowerCase().matches(".*.jar");
+			wizard.setPredefinedDockerfileOptions(artifactFileName);
 			errDispatcher.removeMessage("dockerArtifactPathTextField", dockerArtifactPathTextField);
 			setErrorMessage(null);
-			dockerImageDescription.artifactPath = dockerArtifactPathTextField.getText();
-			dockerImageDescription.hasRootDeployment = dockerImageDescription.artifactPath.toLowerCase().matches(".*.jar");
-			wizard.setPredefinedDockerfileOptions(dockerArtifactPathTextField.getText());
 		}
 
 		if (dockerHostsTableSelection == null && !dockerImageDescription.hasNewDockerHost) {

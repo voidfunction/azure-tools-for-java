@@ -66,6 +66,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -123,15 +124,21 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     for (Artifact item : ArtifactUtil.getArtifactWithOutputPaths(model.getProject())) {
       if (item.getArtifactType().getPresentableName().equals("Web Application: Archive")) {
         artifact = item;
-        dockerImageInstance.artifactName = artifact.getName();
         break;
       }
     }
 
-    dockerArtifactPath.setText(artifact != null ?
-        artifact.getOutputFilePath() :
-//        ArtifactUtil.getDefaultArtifactOutputPath(dockerImageInstance.artifactName, model.getProject()));
-        "");
+    if (artifact != null && AzureDockerValidationUtils.validateDockerArtifactPath(artifact.getName())) {
+      String artifactFileName = new File(artifact.getOutputFilePath()).getName();
+      dockerImageDescription.artifactName = artifactFileName.indexOf(".") > 0 ? artifactFileName.substring(0, artifactFileName.lastIndexOf(".")) : "";
+      dockerImageInstance.artifactName = artifact.getName();
+      dockerArtifactPath.setText(artifact.getOutputFilePath());
+      dockerArtifactPathLabel.setVisible(false);
+    } else {
+      dockerArtifactPath.setText("");
+      dockerArtifactPathLabel.setVisible(true);
+    }
+
     dockerArtifactPath.setToolTipText(AzureDockerValidationUtils.getDockerArtifactPathTip());
     dockerArtifactPath.getTextField().setInputVerifier(new InputVerifier() {
       @Override
@@ -149,7 +156,6 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       }
     });
     dockerArtifactPath.getTextField().getDocument().addDocumentListener(resetDialogButtonsState(null));
-    dockerArtifactPathLabel.setVisible(false);
 
     refreshDockerHostsTable();
 
@@ -477,6 +483,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     try {
       List<DockerHost> dockerHosts = dockerManager.getDockerHostsList();
       if (dockerHosts != null) {
+        int idx = 0;
         for (DockerHost host : dockerHosts) {
           Vector<Object> row = new Vector<>();
           row.add(false);
@@ -485,6 +492,10 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
           row.add(host.hostOSType.toString());
           row.add(host.apiUrl);
           tableModel.addRow(row);
+          if (dockerHostsTableSelection != null && dockerHostsTableSelection.host.apiUrl.equals(host.apiUrl)) {
+            tableModel.setValueAt(true, idx, 0);
+          }
+          idx++;
         }
       }
     } catch (Exception e) {
@@ -540,9 +551,20 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
         model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
-    dockerImageDescription.artifactPath = dockerArtifactPath.getText();
-    dockerImageDescription.hasRootDeployment = dockerImageDescription.artifactPath.toLowerCase().matches(".*.jar");
-    model.setPredefinedDockerfileOptions(dockerArtifactPath.getText());
+    String artifactFilePath = dockerArtifactPath.getText();
+    String artifactFileName = new File(artifactFilePath).getName();
+    dockerImageDescription.artifactName = artifactFileName.indexOf(".") > 0 ? artifactFileName.substring(0, artifactFileName.lastIndexOf(".")) : "";
+    if (dockerImageDescription.artifactName.isEmpty()) {
+      ValidationInfo info = new ValidationInfo("Invalid artifact file name (it's missing a file name)", dockerArtifactPath);
+      dockerArtifactPathLabel.setVisible(true);
+      setDialogButtonsState(false);
+      if (shakeOnError)
+        model.getSelectDockerWizardDialog().DialogShaker(info);
+      return info;
+    }
+    dockerImageDescription.artifactPath = artifactFilePath;
+    dockerImageDescription.hasRootDeployment = artifactFileName.toLowerCase().matches(".*.jar");
+    model.setPredefinedDockerfileOptions(artifactFileName);
 
     if (dockerHostsTableSelection == null && !dockerImageDescription.hasNewDockerHost){
       ValidationInfo info = new ValidationInfo("Please check a Docker host or create a new", dockerHostsTable);

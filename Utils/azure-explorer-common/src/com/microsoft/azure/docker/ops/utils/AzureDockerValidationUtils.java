@@ -39,7 +39,7 @@ public class AzureDockerValidationUtils {
   }
 
   public static String getDockerImageNameTip() {
-    return "Docker image name should be less than 64 characters and it can only include lower case letters, numbers, underscores and dashes.";
+    return "Docker image name should be less than 64 characters and it can only include lower case letters, numbers, underscores and hyphens.";
   }
 
   public static boolean validateDockerContainerName(String name) {
@@ -59,7 +59,7 @@ public class AzureDockerValidationUtils {
   }
 
   public static String getDockerArtifactPathTip() {
-    return "Full path to the artifact to be deployed; white spaces and special characters are not allowed in the file name";
+    return "Full path to the artifact to be deployed; alphanumeric, periods and hyphens characters only, white spaces and special characters are not supported";
   }
 
   public static Map<String, String> validateDockerPortSettings(String portSettings) {

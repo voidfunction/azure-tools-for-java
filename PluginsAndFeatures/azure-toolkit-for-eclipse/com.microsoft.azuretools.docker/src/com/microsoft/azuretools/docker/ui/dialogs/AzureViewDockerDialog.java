@@ -26,6 +26,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
@@ -206,7 +207,6 @@ public class AzureViewDockerDialog extends Dialog {
 		dockerHostUsernameTextField.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		new Label(loginSetsComposite, SWT.NONE);
 		new Label(loginSetsComposite, SWT.NONE);
-		dockerHostUsernameTextField.setText("Test");
 		
 		Label lblLogInUsing = new Label(loginSetsComposite, SWT.NONE);
 		GridData gd_lblLogInUsing = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -418,8 +418,16 @@ public class AzureViewDockerDialog extends Dialog {
 		dockerHostStorageNameTypeTextField = new Text(vmSetsComposite, SWT.READ_ONLY);
 		dockerHostStorageNameTypeTextField.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		
+		Color tempColor = mainContainer.getBackground();
+		loginSetsComposite.setBackgroundMode(SWT.INHERIT_FORCE);
+		loginSetsComposite.setBackground(new Color(null, tempColor.getRed(), tempColor.getGreen(), tempColor.getBlue(), 255));
+		vmSetsComposite.setBackgroundMode(SWT.INHERIT_FORCE);
+		vmSetsComposite.setBackground(new Color(null, tempColor.getRed(), tempColor.getGreen(), tempColor.getBlue(), 255));
+
 		String updating = dockerHost.isUpdating ? " (updating...)" : null;
 		setTextField(dockerHostNameTextField, dockerHost.name);
+		dockerHostUsernameTextField.setBackground(tabFolder.getBackground());
+
 		setTextField(dockerHostUrlTextField, dockerHost.apiUrl);
 		setTextField(dockerHostSidTextField, dockerHost.sid);
 		setTextField(dockerHostLocationTextField, dockerHost.hostVM.region);
@@ -486,7 +494,7 @@ public class AzureViewDockerDialog extends Dialog {
 	private void setTextField(Text textField, String text) {
 		textField.setText(text != null ? text : "-unknown-");
 		textField.setEditable(false);
-		textField.setBackground(AzureDockerUIResources.getColor(37)); // SWT.COLOR_TRANSPARENT
+//		textField.setBackground(AzureDockerUIResources.getColor(37)); // SWT.COLOR_TRANSPARENT
 		FontDescriptor boldDescriptor = FontDescriptor.createFrom(textField.getFont()).setStyle(SWT.BOLD);
 		Font boldFont = boldDescriptor.createFont(textField.getDisplay());
 		textField.setFont(boldFont);
