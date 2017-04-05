@@ -110,7 +110,7 @@ public class AzureWebDeployAction extends AnAction {
         } catch (Exception ex) {
             ex.printStackTrace();
             LOGGER.error("actionPerformed", ex);
-            ErrorWindow.show(ex.getMessage(), "Azure Web Deploy Action Error", frame);
+            ErrorWindow.show(project, ex.getMessage(), "Azure Web Deploy Action Error");
         }
 
 

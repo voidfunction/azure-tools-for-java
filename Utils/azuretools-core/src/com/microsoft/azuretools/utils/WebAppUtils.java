@@ -213,7 +213,7 @@ public class WebAppUtils {
         ftp.deleteFile(ftpRootPath + statusFilename);
     }
 
-    private static class WebAppException extends Exception {
+    public static class WebAppException extends Exception {
         /**
          * 
          */
@@ -651,5 +651,26 @@ public class WebAppUtils {
         }
 
         return myWebApp;
+    }
+
+    public static void uploadWebConfig(WebApp webApp, InputStream fileStream, IProgressIndicator indicator) throws IOException {
+        FTPClient ftp = null;
+        try {
+            PublishingProfile pp = webApp.getPublishingProfile();
+            ftp = getFtpConnection(pp);
+
+            if(indicator != null) indicator.setText("Stopping the service...");
+            webApp.stop();
+
+            if(indicator != null) indicator.setText("Uploading " + webConfigFilename + "...");
+            ftp.storeFile(ftpRootPath + webConfigFilename, fileStream);
+
+            if(indicator != null) indicator.setText("Starting the service...");
+            webApp.start();
+        } finally {
+            if (ftp != null && ftp.isConnected()) {
+                ftp.disconnect();
+            }
+        }
     }
 }

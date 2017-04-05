@@ -21,7 +21,10 @@
  */
 package com.microsoft.intellij.serviceexplorer.azure.webapps;
 
+import com.intellij.openapi.actionSystem.DataKeys;
+import com.intellij.openapi.project.Project;
 import com.microsoft.azure.management.appservice.WebApp;
+import com.microsoft.azuretools.ijidea.ui.RemoteDebuggingClientDialog;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.helpers.Name;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
@@ -41,9 +44,12 @@ public class RemoteDebugAction extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
+        //Project project = DataKeys.PROJECT.getData(e.getDataContext());
         WebApp webApp = webappNode.getWebApp();
         try {
             // TODO
+            RemoteDebuggingClientDialog d = new RemoteDebuggingClientDialog((Project) webappNode.getProject(), webApp);
+            d.show();
         } catch (Exception ex) {
             PluginUtil.displayErrorDialogAndLog(message("error"), message("error"), ex);
         }
