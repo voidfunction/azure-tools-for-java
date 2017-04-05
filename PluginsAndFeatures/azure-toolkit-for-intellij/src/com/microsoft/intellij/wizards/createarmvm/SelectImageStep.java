@@ -378,14 +378,16 @@ public class SelectImageStep extends WizardStep<VMWizardModel> {
                 final List<VirtualMachineImage> images = new ArrayList<VirtualMachineImage>();
                 try {
                     VirtualMachineSku sku = (VirtualMachineSku) skuComboBox.getSelectedItem();
-                    List<VirtualMachineImage> skuImages = sku.images().list();
-                    images.addAll(skuImages);
-                    ApplicationManager.getApplication().invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            imageLabelList.setListData(images.toArray());
-                        }
-                    });
+                    if (sku != null) {
+                        List<VirtualMachineImage> skuImages = sku.images().list();
+                        images.addAll(skuImages);
+                        ApplicationManager.getApplication().invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                imageLabelList.setListData(images.toArray());
+                            }
+                        });
+                    }
                 } catch (CloudException e) {
                     String msg = "An error occurred while attempting to retrieve images list." + "\n" + String.format(message("webappExpMsg"), e.getMessage());
                     PluginUtil.displayErrorDialogInAWTAndLog(message("errTtl"), msg, e);
