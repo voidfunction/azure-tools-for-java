@@ -26,6 +26,7 @@ package com.microsoft.azuretools.utils;
  * Created by vlashch on 1/12/17.
  */
 public enum AzulZuluModel {
+    OpenJDK_180_u121("Azul Zulu, OpenJDK 1.8.0_u121", "http://azure.azulsystems.com/zulu/zulu8.20.0.5-jdk8.0.121-win_x64.zip", false),
     OpenJDK_180_u112("Azul Zulu, OpenJDK 1.8.0_u112", "http://azure.azulsystems.com/zulu/zulu8.19.0.1-jdk8.0.112-win_x64.zip", false),
     OpenJDK_180_u92("Azul Zulu, OpenJDK 1.8.0_u92", "http://azure.azulsystems.com/zulu/zulu8.15.0.1-jdk8.0.92-win_x64.zip", false),
     OpenJDK_180_u72("Azul Zulu, OpenJDK 1.8.0_u72", "http://azure.azulsystems.com/zulu/zulu8.13.0.5-jdk8.0.72-win_x64.zip", false),
