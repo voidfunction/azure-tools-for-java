@@ -135,22 +135,12 @@ public class WACPStartUp implements IStartup {
 	 */
 	private void setValues(final String dataFile, final boolean isAzureToolKit, final boolean isHDInsight) throws Exception {
 		final Document doc = ParserXMLUtility.parseXMLFile(dataFile);
+		if(isAzureToolKit) {
+			DataOperations.updatePropertyValue(doc, Messages.prefVal, "true");
+		}
+		
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				if(isAzureToolKit) {
-					boolean accepted = false;
-					AcceptLicenseDlg dlg = new AcceptLicenseDlg(Display.getDefault().getActiveShell());
-					if (dlg.open() == Window.OK) {
-						accepted = true;
-					}
-					if(accepted) {
-						AppInsightsCustomEvent.create(Messages.telemetryAcceptAction, "");
-					} else {
-						AppInsightsCustomEvent.create(Messages.telemetryDenyAction, "");
-					}
-					DataOperations.updatePropertyValue(doc, Messages.prefVal, String.valueOf(accepted));
-				}
-
 				if(isHDInsight && !Activator.getDefault().isHDInsightEnabled()) {
 					boolean isShowHDInsightTips = true;
 					HDInsightHelpDlg hdInsightHelpDlg = new HDInsightHelpDlg(Display.getDefault().getActiveShell());

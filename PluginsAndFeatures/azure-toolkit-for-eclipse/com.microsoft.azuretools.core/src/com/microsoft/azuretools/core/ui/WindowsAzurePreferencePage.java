@@ -150,11 +150,24 @@ extends PreferencePage implements IWorkbenchPreferencePage {
 					}
 					ParserXMLUtility.saveXMLFile(dataFile, doc);
 					// Its necessary to call application insights custom create event after saving data.xml
-					if (oldPrefVal != null && !oldPrefVal.isEmpty()
-							&& oldPrefVal.equals("false") && btnPreference.getSelection()) {
-						// Previous preference value is false and latest is true
-						// that indicates user agrees to send telemetry
-						AppInsightsCustomEvent.create(Messages.telAgrEvtName, "");
+					if (oldPrefVal != null && !oldPrefVal.isEmpty()){
+						if(oldPrefVal.equals("false") && btnPreference.getSelection()) {
+							// Previous preference value is false and latest is true
+							// that indicates user agrees to send telemetry
+							AppInsightsCustomEvent.create(Messages.telAgrEvtName, "");
+							}
+						else if(oldPrefVal.equals("true") && !btnPreference.getSelection()) {
+							// Previous preference value is true and latest is false
+							// that indicates user disagrees to send telemetry
+							AppInsightsCustomEvent.createTelemetryDenyEvent();
+							}
+					} else{
+						if(btnPreference.getSelection()){
+							AppInsightsCustomEvent.create(Messages.telAgrEvtName, "");
+						}
+						else{
+							AppInsightsCustomEvent.createTelemetryDenyEvent();
+						}
 					}
 				} else {
 					FileUtil.copyResourceFile(Messages.dataFileEntry, dataFile);

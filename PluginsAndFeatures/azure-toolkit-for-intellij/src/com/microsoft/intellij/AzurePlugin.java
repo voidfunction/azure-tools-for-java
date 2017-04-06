@@ -198,14 +198,7 @@ public class AzurePlugin extends AbstractProjectComponent {
         ApplicationManager.getApplication().invokeLater(new Runnable() {
             @Override
             public void run() {
-                boolean accepted = Messages.showYesNoDialog(message("preferenceQueMsg"), message("preferenceQueTtl"), null) == Messages.YES;
-                if(accepted) {
-                    AppInsightsCustomEvent.create(message("telemetryAcceptAction"),"");
-                } else {
-                    AppInsightsCustomEvent.createTelemetryDenyEvent();
-                }
-                DataOperations.updatePropertyValue(doc, message("prefVal"), String.valueOf(accepted));
-
+                DataOperations.updatePropertyValue(doc, message("prefVal"), String.valueOf("true"));
                 DataOperations.updatePropertyValue(doc, message("pluginVersion"), PLUGIN_VERSION);
                 DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
                 DataOperations.updatePropertyValue(doc, message("instID"), dateFormat.format(new Date()));
@@ -214,9 +207,9 @@ public class AzurePlugin extends AbstractProjectComponent {
                 } catch (Exception ex) {
                     LOG.error(message("error"), ex);
                 }
-                if (accepted) {
-                    AppInsightsCustomEvent.create(message("telAgrEvtName"), "");
-                }
+
+                AppInsightsCustomEvent.create(message("telAgrEvtName"), "");
+
             }
         }, ModalityState.defaultModalityState());
     }

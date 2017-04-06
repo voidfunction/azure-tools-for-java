@@ -92,11 +92,25 @@ public class AzurePanel implements AzureAbstractConfigurablePanel {
                 }
                 ParserXMLUtility.saveXMLFile(dataFile, doc);
                 // Its necessary to call application insights custom create event after saving data.xml
-                if (oldPrefVal != null && !oldPrefVal.isEmpty()
-                        && oldPrefVal.equals("false") && checkBox1.isSelected()) {
-                    // Previous preference value is false and latest is true
-                    // that indicates user agrees to send telemetry
-                    AppInsightsCustomEvent.create(message("telAgrEvtName"), "");
+                if (oldPrefVal != null && !oldPrefVal.isEmpty()){
+                    if(oldPrefVal.equals("false") && checkBox1.isSelected()) {
+                        // Previous preference value is false and latest is true
+                        // that indicates user agrees to send telemetry
+                        AppInsightsCustomEvent.create(message("telAgrEvtName"), "");
+                    }
+                    else if(oldPrefVal.equals("true") && !checkBox1.isSelected()) {
+                        // Previous preference value is true and latest is false
+                        // that indicates user disagrees to send telemetry
+                        AppInsightsCustomEvent.createTelemetryDenyEvent();
+                    }
+                }
+                else{
+                    if(checkBox1.isSelected()){
+                        AppInsightsCustomEvent.create(message("telAgrEvtName"), "");
+                    }
+                    else{
+                        AppInsightsCustomEvent.createTelemetryDenyEvent();
+                    }
                 }
             } else {
                 AzurePlugin.copyResourceFile(message("dataFileName"), dataFile);
@@ -119,6 +133,9 @@ public class AzurePanel implements AzureAbstractConfigurablePanel {
         ParserXMLUtility.saveXMLFile(dataFile, doc);
         if (checkBox1.isSelected()) {
             AppInsightsCustomEvent.create(message("telAgrEvtName"), "");
+        }
+        else{
+            AppInsightsCustomEvent.createTelemetryDenyEvent();
         }
     }
 
