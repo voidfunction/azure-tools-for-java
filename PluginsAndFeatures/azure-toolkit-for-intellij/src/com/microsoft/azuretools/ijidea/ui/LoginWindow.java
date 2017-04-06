@@ -29,7 +29,6 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -64,17 +63,12 @@ class LoginWindow extends DialogWrapper {
         fxPanel = new JFXPanel();
         setModal(true);
         setTitle("Azure Login Dialog");
-        init();
-    }
-
-    @Override
-    protected JComponent createCenterPanel() {
         fxPanel.setPreferredSize(new Dimension(500, 750));
         Platform.setImplicitExit(false);
         Runnable fxWorker = new Runnable() {
             @Override
             public void run() {
-                Group root = new Group();
+                //Group root = new Group();
                 final WebView browser = new WebView();
                 final WebEngine webEngine = browser.getEngine();
                 webEngine.locationProperty().addListener(new ChangeListener<String>(){
@@ -95,6 +89,12 @@ class LoginWindow extends DialogWrapper {
         };
 
         Platform.runLater(fxWorker);
+
+        init();
+    }
+
+    @Override
+    protected JComponent createCenterPanel() {
         return  fxPanel;
     }
 
@@ -114,6 +114,6 @@ class LoginWindow extends DialogWrapper {
 
     @Override
     protected String getDimensionServiceKey() {
-        return "Auth4jLoginDialog";
+        return "LoginWindow";
     }
 }

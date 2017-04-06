@@ -29,11 +29,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azuretools.utils.WebAppUtils;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
 import com.microsoft.intellij.deploy.AzureDeploymentProgressNotification;
 import com.microsoft.intellij.ui.messages.AzureBundle;
-import com.microsoft.intellij.util.WAHelper;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
 import org.jetbrains.annotations.NotNull;
@@ -80,7 +80,7 @@ public class DockerContainerDeployTask extends Task.Backgroundable {
         try {
 
           LOG.info("To warm the site up - implicitly trying to connect it");
-          WAHelper.sendGet(url);
+          WebAppUtils.sendGet(url);
         }
         catch (Exception ex) {
           LOG.info(ex.getMessage(), ex);

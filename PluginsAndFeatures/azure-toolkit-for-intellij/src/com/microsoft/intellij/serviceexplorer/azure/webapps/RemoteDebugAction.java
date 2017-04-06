@@ -33,7 +33,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappNode
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
-@Name("Remote debugging...")
+@Name("Remote Debugging...")
 public class RemoteDebugAction extends NodeActionListener {
 
     private WebappNode webappNode;
@@ -44,7 +44,6 @@ public class RemoteDebugAction extends NodeActionListener {
 
     @Override
     public void actionPerformed(NodeActionEvent e) {
-        //Project project = DataKeys.PROJECT.getData(e.getDataContext());
         WebApp webApp = webappNode.getWebApp();
         try {
             // TODO

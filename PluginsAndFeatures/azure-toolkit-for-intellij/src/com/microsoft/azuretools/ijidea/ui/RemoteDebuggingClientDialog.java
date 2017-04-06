@@ -14,7 +14,7 @@ import com.microsoft.azure.management.appservice.PublishingProfile;
 import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.azuretools.ijidea.utility.UpdateProgressIndicator;
 import com.microsoft.azuretools.utils.WebAppUtils;
-import com.microsoft.intellij.util.WAHelper;
+import com.microsoft.intellij.util.PluginHelper;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +24,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 
@@ -82,7 +81,7 @@ public class RemoteDebuggingClientDialog  extends DialogWrapper {
         ftpUsernametextField.setText(pp.ftpUsername());
         ftpPasswordTextField.setText(pp.ftpPassword());
 
-        String webConfigPath = WAHelper.getTemplateFile("remotedebug" + File.separator + "web.config");
+        String webConfigPath = PluginHelper.getTemplateFile("remotedebug" + File.separator + "web.config");
         webConfigPathTextFIeld.setText(webConfigPath);
         webConfigOpenLink.setURI(URI.create("file:///" + webConfigPath.replaceAll("\\\\", "/" )));
         webConfigOpenLink.setText("Show");
@@ -245,7 +244,7 @@ public class RemoteDebuggingClientDialog  extends DialogWrapper {
     }
 
     private void startClient() {
-        String webAppDirPath = WAHelper.getTemplateFile("remotedebug");
+        String webAppDirPath = PluginHelper.getTemplateFile("remotedebug");
         String command = String.format("DebugSession.bat --port %s --server %s --user %s --pass %s --auto",
                 portTextField.getText(),
                 serverTextField.getText(),
@@ -297,7 +296,7 @@ public class RemoteDebuggingClientDialog  extends DialogWrapper {
         runWithProgress(new IWorker() {
             @Override
             public void work(ProgressIndicator progressIndicator) throws Exception {
-                String webConfigPath = WAHelper.getTemplateFile("remotedebug/web.config");
+                String webConfigPath = PluginHelper.getTemplateFile("remotedebug/web.config");
                 File file = new File(webConfigPath);
                 FileInputStream fis = null;
                 try {

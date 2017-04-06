@@ -54,7 +54,7 @@ public class NodeActionsMap {
         node2Actions.put(StorageNode.class, new ImmutableList.Builder().add(CreateBlobContainer.class).build());
         // todo: what is ConfirmDialogAction?
         node2Actions.put(ExternalStorageNode.class, new ImmutableList.Builder().add(ConfirmDialogAction.class, ModifyExternalStorageAccountAction.class).build());
-        node2Actions.put(WebappNode.class, new ImmutableList.Builder().add(OpenWebappAction.class, RemoteDebugAction.class).build());
+        node2Actions.put(WebappNode.class, new ImmutableList.Builder().add(OpenWebappAction.class/*, RemoteDebugAction.class*/).build());
         node2Actions.put(HDInsightRootModuleImpl.class, new ImmutableList.Builder().add(AddNewClusterAction.class, AddNewEmulatorAction.class).build());
         node2Actions.put(DockerHostNode.class, new ImmutableList.Builder().add(ViewDockerHostAction.class, DeployDockerContainerAction.class, DeleteDockerHostAction.class).build());
         node2Actions.put(DockerHostModule.class, new ImmutableList.Builder().add(CreateNewDockerHostAction.class, PublishDockerContainerAction.class).build());

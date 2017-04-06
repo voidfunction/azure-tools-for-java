@@ -61,7 +61,6 @@
             icon="/icons/SparkSubmissionToolWindow.png"/>
 
       <library.type implementation="com.microsoft.azure.hdinsight.projects.SparkLibraryType" />
-    <configurationType implementation="com.microsoft.intellij.ui.debug.AzureRemoteConfigurationType"/>
   </extensions>
 
   <application-components>

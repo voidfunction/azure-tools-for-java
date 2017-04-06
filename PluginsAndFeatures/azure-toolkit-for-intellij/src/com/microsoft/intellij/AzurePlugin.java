@@ -36,31 +36,27 @@ import com.intellij.util.containers.HashSet;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceRegistry;
 import com.microsoft.azuretools.authmanage.CommonSettings;
+import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
+import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
-import com.microsoft.azuretools.ijidea.ui.UIFactory;
+import com.microsoft.azuretools.azurecommons.util.FileUtil;
+import com.microsoft.azuretools.azurecommons.util.ParserXMLUtility;
+import com.microsoft.azuretools.azurecommons.util.Utils;
+import com.microsoft.azuretools.azurecommons.util.WAEclipseHelperMethods;
+import com.microsoft.azuretools.azurecommons.xmlhandling.DataOperations;
 import com.microsoft.intellij.common.CommonConst;
 import com.microsoft.intellij.ui.libraries.AILibraryHandler;
 import com.microsoft.intellij.ui.libraries.AzureLibrary;
 import com.microsoft.intellij.ui.messages.AzureBundle;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
+import com.microsoft.intellij.util.PluginHelper;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.intellij.util.WAHelper;
-import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
-import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
-import com.microsoft.azuretools.azurecommons.util.ParserXMLUtility;
-import com.microsoft.azuretools.azurecommons.util.WAEclipseHelperMethods;
-import com.microsoft.azuretools.azurecommons.util.FileUtil;
-import com.microsoft.azuretools.azurecommons.util.Utils;
-import com.microsoft.azuretools.azurecommons.xmlhandling.DataOperations;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 
 import javax.swing.event.EventListenerList;
 import java.io.*;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -91,7 +87,7 @@ public class AzurePlugin extends AbstractProjectComponent {
     private static final EventListenerList DEPLOYMENT_EVENT_LISTENERS = new EventListenerList();
     public static List<DeploymentEventListener> depEveList = new ArrayList<DeploymentEventListener>();
 
-    private String dataFile = WAHelper.getTemplateFile(message("dataFileName"));
+    private String dataFile = PluginHelper.getTemplateFile(message("dataFileName"));
 
     private final AzureSettings azureSettings;
 
@@ -294,23 +290,6 @@ public class AzurePlugin extends AbstractProjectComponent {
                 }
             }
 
-            // copy remote debugging files
-            File remoteDebugFolder = new File(WAHelper.getTemplateFile("remotedebug"));
-            if (!remoteDebugFolder.exists()) {
-                remoteDebugFolder.mkdir();
-            }
-            String debugBat = WAHelper.getDebugFile("DebugSession.bat");
-            if (!new File(debugBat).exists()) {
-                copyResourceFile(message("debugBat"), debugBat);
-            }
-            String debugJar = WAHelper.getDebugFile("azure-websites-remote-debugging.jar");
-            if (!new File(debugJar).exists()) {
-                copyResourceFile(message("debugJar"), debugJar);
-            }
-            String debugConfig = WAHelper.getDebugFile("web.config");
-            if (!new File(debugConfig).exists()) {
-                copyResourceFile(message("debugConfig"), debugConfig);
-            }
             extractJobViewResource();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

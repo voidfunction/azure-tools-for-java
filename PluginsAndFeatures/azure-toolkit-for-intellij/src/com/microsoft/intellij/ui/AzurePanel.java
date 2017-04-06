@@ -26,8 +26,8 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
+import com.microsoft.intellij.util.PluginHelper;
 import com.microsoft.intellij.util.PluginUtil;
-import com.microsoft.intellij.util.WAHelper;
 import com.microsoft.azuretools.azurecommons.util.ParserXMLUtility;
 import com.microsoft.azuretools.azurecommons.xmlhandling.DataOperations;
 
@@ -47,7 +47,7 @@ public class AzurePanel implements AzureAbstractConfigurablePanel {
     private JCheckBox checkBox1;
     private JTextPane textPane1;
     private JPanel contentPane;
-    String dataFile = WAHelper.getTemplateFile(message("dataFileName"));
+    String dataFile = PluginHelper.getTemplateFile(message("dataFileName"));
 
     public AzurePanel() {
     }

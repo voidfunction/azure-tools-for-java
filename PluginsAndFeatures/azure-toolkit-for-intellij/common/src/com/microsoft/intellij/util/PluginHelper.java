@@ -21,7 +21,6 @@
  */
 package com.microsoft.intellij.util;
 
-import com.intellij.openapi.application.PathManager;
 import com.microsoft.intellij.ui.messages.AzureBundle;
 import com.wacommon.utils.WACommonException;
 
