@@ -22,9 +22,6 @@
 
 package com.microsoft.azuretools.ijidea.ui;
 
-import com.intellij.ide.DataManager;
-import com.intellij.openapi.actionSystem.DataContext;
-import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.project.Project;
 import com.microsoft.azuretools.adauth.IWebUi;
 import com.microsoft.azuretools.authmanage.interact.INotification;
@@ -51,8 +48,6 @@ public class UIFactory implements IUIFactory{
     }
 
     private Project getProject() {
-        DataContext dataContext = DataManager.getInstance().getDataContextFromFocus().getResult();
-        Project project = DataKeys.PROJECT.getData(dataContext);
-        return project;
+        return null;
     }
 }
