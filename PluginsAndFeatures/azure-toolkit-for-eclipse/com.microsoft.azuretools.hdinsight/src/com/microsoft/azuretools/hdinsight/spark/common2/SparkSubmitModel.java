@@ -269,7 +269,7 @@ public class SparkSubmitModel {
     	
     }
     
-    private void uploadFileToAzureBlob(@NotNull final IClusterDetail selectedClusterDetail, @NotNull final String selectedArtifactName) throws Exception {
+    private void uploadFileToHDFS(@NotNull final IClusterDetail selectedClusterDetail, @NotNull final String selectedArtifactName) throws Exception {
     	String buildJarPath;
     	if (submissionParameter.isLocalArtifact()) {
     		buildJarPath = submissionParameter.getLocalArtifactPath();
@@ -281,7 +281,7 @@ public class SparkSubmitModel {
     	}
                 	//((artifactHashMap.get(selectedArtifactName).getOutputFilePath()));
 
-        String fileOnBlobPath = SparkSubmitHelper.uploadFileToAzureBlob(/*project,*/ selectedClusterDetail, buildJarPath);
+        String fileOnBlobPath = SparkSubmitHelper.uploadFileToHDFS(/*project,*/ selectedClusterDetail, buildJarPath);
         submissionParameter.setFilePath(fileOnBlobPath);
     }
 
@@ -386,7 +386,7 @@ public class SparkSubmitModel {
                 }
 
                 try {
-                    uploadFileToAzureBlob(selectedClusterDetail, selectedArtifactName);
+                    uploadFileToHDFS(selectedClusterDetail, selectedArtifactName);
                     tryToCreateBatchSparkJob(selectedClusterDetail);
                 } catch (Exception exception) {
                 	exception.printStackTrace();

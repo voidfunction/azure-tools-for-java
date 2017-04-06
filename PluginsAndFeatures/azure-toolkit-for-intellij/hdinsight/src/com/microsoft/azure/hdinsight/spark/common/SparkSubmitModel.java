@@ -212,7 +212,7 @@ public class SparkSubmitModel {
 
         String filePath = selectedClusterDetail.isEmulator() ?
                 SparkSubmitHelper.uploadFileToEmulator(project, selectedClusterDetail, buildJarPath) :
-                SparkSubmitHelper.uploadFileToAzureBlob(project, selectedClusterDetail, buildJarPath);
+                SparkSubmitHelper.uploadFileToHDFS(project, selectedClusterDetail, buildJarPath);
         submissionParameter.setFilePath(filePath);
     }
 

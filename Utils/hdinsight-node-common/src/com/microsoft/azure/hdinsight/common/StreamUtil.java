@@ -127,7 +127,6 @@ public class StreamUtil {
         // rootPath should be in format: /path_name/
         final String remoteFilePath = String.format("%s%s/%s/%s", rootPath, SPARK_SUBMISSION_FOLDER, uuid, localFile.getName());
         WebHDFSUtils.uploadFileToADLS(storageAccount, localFile, remoteFilePath, true);
-        return String.format("https://%s.azuredatalakestore.net/%s", remoteFilePath);
+        return String.format("https://%s.azuredatalakestore.net/%s", storageAccount.getName(), remoteFilePath);
     }
-
 }

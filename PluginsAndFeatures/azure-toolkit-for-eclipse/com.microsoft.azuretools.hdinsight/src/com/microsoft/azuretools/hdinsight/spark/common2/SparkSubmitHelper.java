@@ -188,7 +188,7 @@ public class SparkSubmitHelper {
         }
     }
 
-    public String uploadFileToAzureBlob(/*Project project,*/ String localFile,IHDIStorageAccount storageAccount, String defaultContainerName, String uniqueFolderId)
+    public String uploadFileToHDFS(/*Project project,*/ String localFile,IHDIStorageAccount storageAccount, String defaultContainerName, String uniqueFolderId)
             throws Exception {
         final File file = new File(localFile);
         if(storageAccount.getAccountType() == StorageAccountTypeEnum.BLOB) {
@@ -288,12 +288,12 @@ public class SparkSubmitHelper {
         return null;
     }
 
-    public static String uploadFileToAzureBlob(/*@NotNull Project project,*/ @NotNull IClusterDetail selectedClusterDetail, @NotNull String buildJarPath) throws Exception {
+    public static String uploadFileToHDFS(/*@NotNull Project project,*/ @NotNull IClusterDetail selectedClusterDetail, @NotNull String buildJarPath) throws Exception {
 
         HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Get target jar from %s.", buildJarPath));
         String uniqueFolderId = UUID.randomUUID().toString();
 
-        return SparkSubmitHelper.getInstance().uploadFileToAzureBlob(/*project,*/ buildJarPath,
+        return SparkSubmitHelper.getInstance().uploadFileToHDFS(/*project,*/ buildJarPath,
                 selectedClusterDetail.getStorageAccount(), selectedClusterDetail.getStorageAccount().getDefaultContainerOrRootPath(), uniqueFolderId);
     }
 
