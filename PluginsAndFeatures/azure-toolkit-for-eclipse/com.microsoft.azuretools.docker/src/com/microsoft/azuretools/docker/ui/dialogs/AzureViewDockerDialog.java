@@ -39,7 +39,6 @@ import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.model.DockerHost.DockerHostVMState;
 import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
 import com.microsoft.azuretools.core.utils.PluginUtil;
-import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
 
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Label;
@@ -419,10 +418,12 @@ public class AzureViewDockerDialog extends Dialog {
 		dockerHostStorageNameTypeTextField.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		
 		Color tempColor = mainContainer.getBackground();
+		Color backgroundColor = tempColor; //new Color(null, tempColor.getRed(), tempColor.getGreen(), tempColor.getBlue(), 255);
+		
 		loginSetsComposite.setBackgroundMode(SWT.INHERIT_FORCE);
-		loginSetsComposite.setBackground(new Color(null, tempColor.getRed(), tempColor.getGreen(), tempColor.getBlue(), 255));
+		loginSetsComposite.setBackground(backgroundColor);
 		vmSetsComposite.setBackgroundMode(SWT.INHERIT_FORCE);
-		vmSetsComposite.setBackground(new Color(null, tempColor.getRed(), tempColor.getGreen(), tempColor.getBlue(), 255));
+		vmSetsComposite.setBackground(backgroundColor);
 
 		String updating = dockerHost.isUpdating ? " (updating...)" : null;
 		setTextField(dockerHostNameTextField, dockerHost.name);

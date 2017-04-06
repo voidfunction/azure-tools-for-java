@@ -177,49 +177,53 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
 
     public static void updateApplicationInsightsResourceRegistry(List<SubscriptionDetail> subList, Project project) throws Exception {
         for (SubscriptionDetail sub : subList) {
-            // fetch resources available for particular subscription
-            List<Resource> resourceList = AzureSDKManager.getApplicationInsightsResources(sub);
+            try {
+                // fetch resources available for particular subscription
+                List<Resource> resourceList = AzureSDKManager.getApplicationInsightsResources(sub);
 
-            // Removal logic
-            List<ApplicationInsightsResource> registryList = ApplicationInsightsResourceRegistry.getResourceListAsPerSub(sub.getSubscriptionId());
-            List<ApplicationInsightsResource> importedList = ApplicationInsightsResourceRegistry.prepareAppResListFromRes(resourceList, sub);
-            List<String> inUsekeyList = MethodUtils.getInUseInstrumentationKeys(project);
-            for (ApplicationInsightsResource registryRes : registryList) {
-                if (!importedList.contains(registryRes)) {
-                    String key = registryRes.getInstrumentationKey();
-                    int index = ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(key);
-                    if (inUsekeyList.contains(key)) {
-						/*
+                // Removal logic
+                List<ApplicationInsightsResource> registryList = ApplicationInsightsResourceRegistry.getResourceListAsPerSub(sub.getSubscriptionId());
+                List<ApplicationInsightsResource> importedList = ApplicationInsightsResourceRegistry.prepareAppResListFromRes(resourceList, sub);
+                List<String> inUsekeyList = MethodUtils.getInUseInstrumentationKeys(project);
+                for (ApplicationInsightsResource registryRes : registryList) {
+                    if (!importedList.contains(registryRes)) {
+                        String key = registryRes.getInstrumentationKey();
+                        int index = ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(key);
+                        if (inUsekeyList.contains(key)) {
+                        /*
 						 * key is used by project but not present in cloud,
 						 * so make it as manually added resource and not imported.
 						 */
-                        ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
-                                key, key, message("unknown"), message("unknown"),
-                                message("unknown"), message("unknown"), false);
-                        ApplicationInsightsResourceRegistry.getAppInsightsResrcList().set(index, resourceToAdd);
-                    } else {
-                        // key is not used by any project then delete it.
-                        ApplicationInsightsResourceRegistry.getAppInsightsResrcList().remove(index);
+                            ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
+                                    key, key, message("unknown"), message("unknown"),
+                                    message("unknown"), message("unknown"), false);
+                            ApplicationInsightsResourceRegistry.getAppInsightsResrcList().set(index, resourceToAdd);
+                        } else {
+                            // key is not used by any project then delete it.
+                            ApplicationInsightsResourceRegistry.getAppInsightsResrcList().remove(index);
+                        }
                     }
                 }
-            }
 
-            // Addition logic
-            List<ApplicationInsightsResource> list = ApplicationInsightsResourceRegistry.getAppInsightsResrcList();
-            for (Resource resource : resourceList) {
-                ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
-                        resource.getName(), resource.getInstrumentationKey(),
-                        sub.getSubscriptionName(), sub.getSubscriptionId(),
-                        resource.getLocation(), resource.getResourceGroup(), true);
-                if (list.contains(resourceToAdd)) {
-                    int index = ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(resource.getInstrumentationKey());
-                    ApplicationInsightsResource objectFromRegistry = list.get(index);
-                    if (!objectFromRegistry.isImported()) {
-                        ApplicationInsightsResourceRegistry.getAppInsightsResrcList().set(index, resourceToAdd);
+                // Addition logic
+                List<ApplicationInsightsResource> list = ApplicationInsightsResourceRegistry.getAppInsightsResrcList();
+                for (Resource resource : resourceList) {
+                    ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
+                            resource.getName(), resource.getInstrumentationKey(),
+                            sub.getSubscriptionName(), sub.getSubscriptionId(),
+                            resource.getLocation(), resource.getResourceGroup(), true);
+                    if (list.contains(resourceToAdd)) {
+                        int index = ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(resource.getInstrumentationKey());
+                        ApplicationInsightsResource objectFromRegistry = list.get(index);
+                        if (!objectFromRegistry.isImported()) {
+                            ApplicationInsightsResourceRegistry.getAppInsightsResrcList().set(index, resourceToAdd);
+                        }
+                    } else {
+                        ApplicationInsightsResourceRegistry.getAppInsightsResrcList().add(resourceToAdd);
                     }
-                } else {
-                    ApplicationInsightsResourceRegistry.getAppInsightsResrcList().add(resourceToAdd);
                 }
+            } catch (Exception ex) {
+                AzurePlugin.log("Error loading AppInsights information for subscription '" + sub.getSubscriptionName() + "'");
             }
         }
         AzureSettings.getSafeInstance(project).saveAppInsights();
