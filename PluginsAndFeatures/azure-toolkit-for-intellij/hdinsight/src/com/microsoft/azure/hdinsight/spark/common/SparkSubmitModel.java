@@ -23,10 +23,9 @@ package com.microsoft.azure.hdinsight.spark.common;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.intellij.openapi.compiler.CompileContext;
-import com.intellij.openapi.compiler.CompileScope;
-import com.intellij.openapi.compiler.CompileStatusNotification;
-import com.intellij.openapi.compiler.CompilerManager;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.compiler.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.packaging.artifacts.Artifact;
 import com.intellij.packaging.impl.artifacts.ArtifactUtil;
@@ -60,8 +59,8 @@ public class SparkSubmitModel {
 
     private static Map<Project, SparkSubmissionParameter> submissionParameterMap = new HashMap<>();
 
-    private Project project;
-    private List<IClusterDetail> cachedClusterDetails;
+    private final Project project;
+    private final List<IClusterDetail> cachedClusterDetails;
 
     private Map<String, IClusterDetail> mapClusterNameToClusterDetail = new HashMap<>();
     private Map<String, Artifact> artifactHashMap = new HashMap<>();
@@ -71,7 +70,7 @@ public class SparkSubmitModel {
     private DefaultComboBoxModel<String> clusterComboBoxModel;
     private DefaultComboBoxModel<String> artifactComboBoxModel;
     private SubmissionTableModel tableModel = new SubmissionTableModel(columns);
-    private Map<String, String> postEventProperty = new HashMap<>();
+    private final Map<String, String> postEventProperty = new HashMap<>();
 
 
     public SparkSubmitModel(@NotNull Project project, @NotNull List<IClusterDetail> cachedClusterDetails) {
@@ -163,33 +162,44 @@ public class SparkSubmitModel {
         if (isLocalArtifact()) {
             submit();
         } else {
-            List<Artifact> artifacts = new ArrayList<>();
+            final List<Artifact> artifacts = new ArrayList<>();
             final Artifact artifact = artifactHashMap.get(submissionParameter.getArtifactName());
             artifacts.add(artifact);
             ArtifactsWorkspaceSettings.getInstance(project).setArtifactsToBuild(artifacts);
 
-            final CompileScope scope = ArtifactCompileScope.createArtifactsScope(project, artifacts, true);
-
-            CompilerManager.getInstance(project).make(scope, new CompileStatusNotification() {
+            ApplicationManager.getApplication().invokeAndWait(new Runnable() {
                 @Override
-                public void finished(boolean aborted, int errors, int warnings, CompileContext compileContext) {
-                    if (aborted || errors != 0) {
-                        postEventProperty.put("IsSubmitSucceed", "false");
-                        postEventProperty.put("SubmitFailedReason", "CompileFailed");
-                        AppInsightsCustomEvent.create(HDInsightBundle.message("SparkProjectSystemJavaCreation"), null, postEventProperty);
-                        HDInsightUtil.getJobStatusManager(project).setJobRunningState(false);
-                        return;
-                    } else {
-                        CompilerManager.getInstance(project).make(new CompileStatusNotification() {
-                            @Override
-                            public void finished(boolean aborted1, int errors1, int warnings1, CompileContext compileContext1) {
+                public void run() {
+                    final CompileScope scope = ArtifactCompileScope.createArtifactsScope(project, artifacts, true);
+                    CompilerManager.getInstance(project).make(scope, new CompileStatusNotification() {
+                        @Override
+                        public void finished(boolean aborted, int errors, int warnings, CompileContext compileContext) {
+                            if (aborted || errors != 0) {
+                                showCompilerErrorMessage(compileContext);
+                                HDInsightUtil.getJobStatusManager(project).setJobRunningState(false);
+                            } else {
+                                postEventProperty.put("IsSubmitSucceed", "true");
+                                postEventProperty.put("SubmitFailedReason", "CompileSuccess");
+                                AppInsightsCustomEvent.create(HDInsightBundle.message("SparkProjectCompileSuccess"), null, postEventProperty);
+
                                 HDInsightUtil.showInfoOnSubmissionMessageWindow(project, String.format("Info : Build %s successfully.", artifact.getOutputFile()));
                                 submit();
                             }
-                        });
-                    }
+                        }
+                    });
                 }
-            });
+            }, ModalityState.defaultModalityState());
+        }
+    }
+
+    private void showCompilerErrorMessage(@NotNull CompileContext compileContext) {
+        postEventProperty.put("IsSubmitSucceed", "false");
+        postEventProperty.put("SubmitFailedReason", "CompileFailed");
+        AppInsightsCustomEvent.create(HDInsightBundle.message("SparkProjectCompileFailed"), null, postEventProperty);
+
+        CompilerMessage[] errorMessages= compileContext.getMessages(CompilerMessageCategory.ERROR);
+        for(CompilerMessage message : errorMessages) {
+            HDInsightUtil.showErrorMessageOnSubmissionMessageWindow(project, message.toString());
         }
     }
 
@@ -275,7 +285,8 @@ public class SparkSubmitModel {
             if (isFirstSubmit) {
                 HDInsightUtil.showErrorMessageOnSubmissionMessageWindow(project, "Error: Cluster Credentials Expired, Please sign in again...");
                 //get new credentials by call getClusterDetails
-                cachedClusterDetails = ClusterManagerEx.getInstance().getClusterDetails(getProject());
+                cachedClusterDetails.clear();
+                cachedClusterDetails.addAll(ClusterManagerEx.getInstance().getClusterDetails(getProject()));
 
                 for (IClusterDetail iClusterDetail : cachedClusterDetails) {
                     if (iClusterDetail.getName().equalsIgnoreCase(selectedClusterDetail.getName())) {
