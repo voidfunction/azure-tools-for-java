@@ -126,9 +126,8 @@ public class ApplicationInsightsPanel implements AzureAbstractPanel {
             if (list.size() > 0) {
                 if (dialog.isOK()) {
                     String newKey = dialog.getSelectedValue();
-                    int index = ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(newKey);
-                    if (index >= 0) {
-                        comboInstrumentation.setSelectedItem(list.get(index));
+                    if (newKey != null && ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(newKey) >= 0) {
+                        comboInstrumentation.setSelectedItem(list.get(ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(newKey)));
                     } else if (list.contains(oldName)) {
                         comboInstrumentation.setSelectedItem(oldName);
                     }

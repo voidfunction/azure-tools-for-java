@@ -46,9 +46,6 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
 
     private State myState = new State();
 
-    private boolean subscriptionLoaded;
-    private boolean webAppLoaded;
-    private boolean appInsightsLoaded;
     Map<String, Boolean> websiteDebugPrep = new HashMap<String, Boolean>();
 
     public static AzureSettings getSafeInstance(Project project) {
@@ -137,21 +134,6 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
         }
     }
 
-    /*public void saveWebApps(Map<WebSite, WebSiteConfiguration> map) {
-        try {
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            ObjectOutput output = new ObjectOutputStream(buffer);
-            try {
-                output.writeObject(map);
-            } finally {
-                output.close();
-            }
-            myState.webApps = new String(Base64.encode(buffer.toByteArray()));
-        } catch (IOException e) {
-            log(message("err"), e);
-        }
-    }*/
-
     public void setProperty(String name, String value) {
         myState.properties.put(name, value);
     }
@@ -170,30 +152,6 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
 
     public boolean isPropertySet(String name) {
         return myState.properties.containsKey(name);
-    }
-
-    public boolean isSubscriptionLoaded() {
-        return subscriptionLoaded;
-    }
-
-    public void setSubscriptionLoaded(boolean subscriptionLoaded) {
-        this.subscriptionLoaded = subscriptionLoaded;
-    }
-
-    public boolean iswebAppLoaded() {
-        return webAppLoaded;
-    }
-
-    public void setwebAppLoaded(boolean webAppLoaded) {
-        this.webAppLoaded = webAppLoaded;
-    }
-
-    public boolean isAppInsightsLoaded() {
-        return appInsightsLoaded;
-    }
-
-    public void setAppInsightsLoaded(boolean appInsightsLoaded) {
-        this.appInsightsLoaded = appInsightsLoaded;
     }
 
     public Map<String, Boolean> getWebsiteDebugPrep() {
