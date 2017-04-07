@@ -19,6 +19,11 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.publish;
 
+import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azure.docker.model.KnownDockerImages;
+import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -28,9 +33,13 @@ import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -42,17 +51,6 @@ import org.eclipse.ui.forms.IMessageManager;
 import org.eclipse.ui.forms.ManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
-
-import com.microsoft.azure.docker.AzureDockerHostsManager;
-import com.microsoft.azure.docker.model.AzureDockerImageInstance;
-import com.microsoft.azure.docker.model.KnownDockerImages;
-import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
-import com.microsoft.azuretools.docker.ui.wizards.createhost.AzureNewDockerWizard;
-
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.ModifyEvent;
 
 public class AzureConfigureDockerContainerStep extends WizardPage {
 	private static final Logger log =  Logger.getLogger(AzureConfigureDockerContainerStep.class.getName());
@@ -171,8 +169,9 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 				HyperlinkSettings.UNDERLINE_HOVER);
 		managedForm = new ManagedForm(mainContainer);
 		errMsgForm = managedForm.getForm();
-		errMsgForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
-		errMsgForm.setBackground(mainContainer.getBackground());
+		errMsgForm.setVisible(false);
+//		errMsgForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
+//		errMsgForm.setBackground(mainContainer.getBackground());
 		errDispatcher = managedForm.getMessageManager();
 //		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);
 		

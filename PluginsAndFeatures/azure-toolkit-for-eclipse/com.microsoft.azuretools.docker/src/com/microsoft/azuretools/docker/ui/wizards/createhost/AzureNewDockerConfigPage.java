@@ -19,6 +19,20 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.createhost;
 
+import com.microsoft.azure.PagedList;
+import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerSubscription;
+import com.microsoft.azure.docker.model.AzureDockerVnet;
+import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.model.KnownDockerVirtualMachineImage;
+import com.microsoft.azure.docker.model.KnownDockerVirtualMachineSizes;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
+import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -32,44 +46,27 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.forms.HyperlinkSettings;
 import org.eclipse.ui.forms.IMessageManager;
 import org.eclipse.ui.forms.ManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
-
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.docker.AzureDockerHostsManager;
-import com.microsoft.azure.docker.model.AzureDockerSubscription;
-import com.microsoft.azure.docker.model.AzureDockerVnet;
-import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azure.docker.model.KnownDockerVirtualMachineImage;
-import com.microsoft.azure.docker.model.KnownDockerVirtualMachineSizes;
-import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
-import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
-import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.compute.VirtualMachineSize;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
-import com.microsoft.azuretools.docker.ui.wizards.publish.AzureSelectDockerHostPage;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
-
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 
 public class AzureNewDockerConfigPage extends WizardPage {
 	private static final Logger log =  Logger.getLogger(AzureNewDockerConfigPage.class.getName());
@@ -141,9 +138,10 @@ public class AzureNewDockerConfigPage extends WizardPage {
 	 * @param parent
 	 */
 	public void createControl(Composite parent) {
-		Composite mainContainer = new Composite(parent, SWT.NO_BACKGROUND);
+		Composite mainContainer = new Composite(parent, SWT.NONE);
 		setControl(mainContainer);
 		mainContainer.setLayout(new GridLayout(3, false));
+
 		
 		Label lblName = new Label(mainContainer, SWT.NONE);
 		GridData gd_lblName = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -158,7 +156,7 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		dockerHostNameTextField.setLayoutData(gd_dockerHostNameTextField);
 		
 		Label lblNewLabel = new Label(mainContainer, SWT.NONE);
-		GridData gd_lblNewLabel = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1);
+		GridData gd_lblNewLabel = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
 		gd_lblNewLabel.horizontalIndent = 5;
 		lblNewLabel.setLayoutData(gd_lblNewLabel);
 		lblNewLabel.setText("Subscription:");
@@ -203,7 +201,7 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		vmKindTableItem = new TabItem(hostDetailsTabFolder, SWT.NONE);
 		vmKindTableItem.setText("OS and Size");
 		
-		vmKindComposite = new Composite(hostDetailsTabFolder, SWT.NO_BACKGROUND);
+		vmKindComposite = new Composite(hostDetailsTabFolder, SWT.NONE);
 		vmKindTableItem.setControl(vmKindComposite);
 		vmKindComposite.setLayout(new GridLayout(2, false));
 		
@@ -327,24 +325,11 @@ public class AzureNewDockerConfigPage extends WizardPage {
 				HyperlinkSettings.UNDERLINE_HOVER);
 		managedForm = new ManagedForm(mainContainer);
 		errMsgForm = managedForm.getForm();
-		errMsgForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
-		errMsgForm.setBackground(mainContainer.getBackground());
-		errDispatcher = managedForm.getMessageManager();
-//		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);
-		
-		//dockerHostNameTextField
-//		Form errMsgForm = formToolkit.createForm(mainContainer);
+		errMsgForm.setVisible(false);
 //		errMsgForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
-////		formToolkit.paintBordersFor(frmNewForm);
-////		frmNewForm.setText("New Form");
 //		errMsgForm.setBackground(mainContainer.getBackground());
+		errDispatcher = managedForm.getMessageManager();
 
-//		Form form = toolkit.createForm(parent);
-//		form.setBackground(mainContainer.getBackground());
-////		form.addMessageHyperlinkListener(new HyperlinkAdapter());
-//		form.setMessage("This is an error message", IMessageProvider.ERROR);
-//		form.setVisible(false);
-		
 		initUIMainContainer(mainContainer);
 	}
 	

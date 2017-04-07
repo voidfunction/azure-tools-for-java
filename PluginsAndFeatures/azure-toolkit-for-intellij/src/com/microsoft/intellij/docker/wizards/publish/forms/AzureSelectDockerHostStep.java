@@ -128,7 +128,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       }
     }
 
-    if (artifact != null && AzureDockerValidationUtils.validateDockerArtifactPath(artifact.getName())) {
+    if (artifact != null && AzureDockerValidationUtils.validateDockerArtifactPath(artifact.getOutputFilePath())) {
       String artifactFileName = new File(artifact.getOutputFilePath()).getName();
       dockerImageDescription.artifactName = artifactFileName.indexOf(".") > 0 ? artifactFileName.substring(0, artifactFileName.lastIndexOf(".")) : "";
       dockerImageInstance.artifactName = artifact.getName();
@@ -163,7 +163,6 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       DefaultTableModel tableModel = (DefaultTableModel) dockerHostsTable.getModel();
       tableModel.setValueAt(true, 0, 0);
       dockerHostsTableSelection = new DockerHostsTableSelection();
-      dockerHostsTableSelection.column = 0;
       dockerHostsTableSelection.row = 0;
       dockerHostsTableSelection.host = dockerManager.getDockerHostForURL((String) tableModel.getValueAt(0, 4));
       dockerHostsTable.repaint();
@@ -204,33 +203,36 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
 
     dockerListTableModel.addTableModelListener(new TableModelListener() {
       @Override
-      public void tableChanged(TableModelEvent e) {
-        DockerHostsTableSelection currentSelection = new DockerHostsTableSelection();
-        currentSelection.column = dockerHostsTable.getSelectedColumn();
-        currentSelection.row = dockerHostsTable.getSelectedRow();
+      public void tableChanged(TableModelEvent tableEvent) {
+        if (tableEvent.getType() == TableModelEvent.UPDATE) {
+          DockerHostsTableSelection currentSelection = new DockerHostsTableSelection();
+//          int column = dockerHostsTable.getSelectedColumn();
+          int column = tableEvent.getColumn();
+          currentSelection.row = tableEvent.getFirstRow();
 
-        if (currentSelection.column == 0) {
-          DefaultTableModel tableModel = (DefaultTableModel) dockerHostsTable.getModel();
-          if ((Boolean) tableModel.getValueAt(currentSelection.row, currentSelection.column)) {
-            if (dockerHostsTableSelection == null) {
-              dockerHostsTableSelection = currentSelection;
-              dockerHostsTableSelection.host = dockerManager.getDockerHostForURL((String) tableModel.getValueAt(dockerHostsTable.getSelectedRow(), 4));
-            } else {
-              int oldRow = dockerHostsTableSelection.row;
-              dockerHostsTableSelection = null;
-              if (currentSelection.row != oldRow) {
-                // disable previous selection
-                tableModel.setValueAt(false, oldRow, 0);
+          if (column == 0) {
+            DefaultTableModel tableModel = (DefaultTableModel) dockerHostsTable.getModel();
+            if ((Boolean) tableModel.getValueAt(currentSelection.row, 0)) {
+              if (dockerHostsTableSelection == null) {
                 dockerHostsTableSelection = currentSelection;
-                dockerHostsTableSelection.host = dockerManager.getDockerHostForURL((String) tableModel.getValueAt(dockerHostsTable.getSelectedRow(), 4));
+                dockerHostsTableSelection.host = dockerManager.getDockerHostForURL((String) tableModel.getValueAt(currentSelection.row, 4));
+              } else {
+                int oldRow = dockerHostsTableSelection.row;
+                dockerHostsTableSelection = null;
+                if (currentSelection.row != oldRow) {
+                  // disable previous selection
+                  tableModel.setValueAt(false, oldRow, 0);
+                  dockerHostsTableSelection = currentSelection;
+                  dockerHostsTableSelection.host = dockerManager.getDockerHostForURL((String) tableModel.getValueAt(dockerHostsTable.getSelectedRow(), 4));
+                }
               }
+              setFinishButtonState(doValidate(false) == null);
+              setNextButtonState(doValidate(false) == null);
+            } else {
+              dockerHostsTableSelection = null;
+              setFinishButtonState(false);
+              setNextButtonState(false);
             }
-            setFinishButtonState(doValidate(false) == null);
-            setNextButtonState(doValidate(false) == null);
-          } else {
-            dockerHostsTableSelection = null;
-            setFinishButtonState(false);
-            setNextButtonState(false);
           }
         }
       }
@@ -287,6 +289,8 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     AzureDockerUIResources.updateAzureResourcesWithProgressDialog(model.getProject());
 
     refreshDockerHostsTable();
+    setFinishButtonState(doValidate(false) == null);
+    setNextButtonState(doValidate(false) == null);
   }
 
   private void onViewDockerHostAction() {
@@ -375,9 +379,9 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       if (dockerHost.apiUrl.equals(apiURL)) {
         tableModel.setValueAt(true, i, 0);
         dockerHostsTable.setRowSelectionInterval(i, i);
+        dockerHostsTableSelection = new DockerHostsTableSelection();
         dockerHostsTableSelection.host = dockerHost;
         dockerHostsTableSelection.row = i;
-        dockerHostsTableSelection.column = 0;
         break;
       }
     }
@@ -445,8 +449,12 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       return;
     }
 
-    tableModel.removeRow(dockerHostsTable.getSelectedRow());
+    int currentRow = dockerHostsTable.getSelectedRow();
+    tableModel.removeRow(currentRow);
     tableModel.fireTableDataChanged();
+    if (dockerHostsTableSelection.row == currentRow) {
+      dockerHostsTableSelection = null;
+    }
 
     AzureDockerUIResources.deleteDockerHost(model.getProject(), azureClient, deleteHost, option, new Runnable() {
       @Override
@@ -460,6 +468,9 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
         });
       }
     });
+
+    setFinishButtonState(doValidate(false) == null);
+    setNextButtonState(doValidate(false) == null);
   }
 
   /* Force a refresh of the docker hosts entries in the select host table
@@ -474,14 +485,31 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
    *
    */
   private void refreshDockerHostsTable() {
-    final DefaultTableModel tableModel = (DefaultTableModel) dockerHostsTable.getModel();
-
-    while (tableModel.getRowCount() > 0) {
-      tableModel.removeRow(0);
+    DefaultTableModel tableModel = (DefaultTableModel) dockerHostsTable.getModel();
+    String oldSelection =  dockerHostsTableSelection != null ? dockerHostsTableSelection.host.apiUrl : null;
+    if (dockerHostsTableSelection != null) {
+      tableModel.setValueAt(false, dockerHostsTableSelection.row, 0);
+      dockerHostsTableSelection = null;
     }
+    if (dockerHostsTable.getSelectedRow() >= 0) {
+      dockerHostsTable.removeRowSelectionInterval(dockerHostsTable.getSelectedRow(), dockerHostsTable.getSelectedRow());
+    }
+
+    int size = tableModel.getRowCount();
+    while (size > 0) {
+      size--;
+      try {
+        tableModel.removeRow(size);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+    dockerHostsTable.removeAll();
+    dockerHostsTable.repaint();
 
     try {
       List<DockerHost> dockerHosts = dockerManager.getDockerHostsList();
+      boolean selected = false;
       if (dockerHosts != null) {
         int idx = 0;
         for (DockerHost host : dockerHosts) {
@@ -492,12 +520,18 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
           row.add(host.hostOSType.toString());
           row.add(host.apiUrl);
           tableModel.addRow(row);
-          if (dockerHostsTableSelection != null && dockerHostsTableSelection.host.apiUrl.equals(host.apiUrl)) {
+          if (oldSelection != null && oldSelection.equals(host.apiUrl)) {
             tableModel.setValueAt(true, idx, 0);
+            selected = true;
           }
           idx++;
         }
+
+        if (!selected) {
+          dockerHostsTableSelection = null;
+        }
       }
+      dockerHostsTable.repaint();
     } catch (Exception e) {
       setDialogButtonsState(false);
       String msg = "An error occurred while attempting to get the list of recognizable Docker hosts.\n" + e.getMessage();
@@ -518,11 +552,17 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
   }
 
   private void setFinishButtonState(boolean finishButtonState) {
-    model.getCurrentNavigationState().FINISH.setEnabled(finishButtonState);
+    // Dialog buttons might not be ready when we call to set them - see tableChanged listener
+    try {
+      model.getCurrentNavigationState().FINISH.setEnabled(finishButtonState);
+    } catch (Exception ignored) {}
   }
 
   private void setNextButtonState(boolean nextButtonState) {
-    model.getCurrentNavigationState().NEXT.setEnabled(nextButtonState);
+    // Dialog buttons might not be ready when we call to set them - see tableChanged listener
+    try {
+      model.getCurrentNavigationState().NEXT.setEnabled(nextButtonState);
+    } catch (Exception ignored) {}
   }
 
   @Override
@@ -611,7 +651,6 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
 
   private class DockerHostsTableSelection {
     int row;
-    int column;
     DockerHost host;
   }
 

@@ -19,30 +19,20 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.createhost;
 
-import java.util.logging.Logger;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.ui.forms.HyperlinkSettings;
-import org.eclipse.ui.forms.IMessageManager;
-import org.eclipse.ui.forms.ManagedForm;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.widgets.Form;
-import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.ScrolledForm;
-
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerCertVault;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
 
+import java.util.logging.Logger;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
@@ -53,10 +43,14 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.forms.HyperlinkSettings;
+import org.eclipse.ui.forms.IMessageManager;
+import org.eclipse.ui.forms.ManagedForm;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.ScrolledForm;
 
 public class AzureNewDockerLoginPage extends WizardPage {
 	private static final Logger log =  Logger.getLogger(AzureNewDockerLoginPage.class.getName());
@@ -117,15 +111,7 @@ public class AzureNewDockerLoginPage extends WizardPage {
 	 * @param parent
 	 */
 	public void createControl(Composite parent) {
-		Composite mainContainer = new Composite(parent, SWT.NULL);
-
-//		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-//		Form form = toolkit.createForm(parent);
-//		form.setBackground(mainContainer.getBackground());
-//		form.addMessageHyperlinkListener(new HyperlinkAdapter());
-//		form.setMessage("This is an different message", IMessageProvider.ERROR);
-////		form.setVisible(false);
-
+		Composite mainContainer = new Composite(parent, SWT.NONE);
 		setControl(mainContainer);
 		mainContainer.setLayout(new GridLayout(2, false));
 		
@@ -319,11 +305,13 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		dockerHostNewKeyvaultTextField.setLayoutData(gd_dockerHostNewKeyvaultTextField);
 
 		FormToolkit toolkit = new FormToolkit(mainContainer.getDisplay());
-		toolkit.getHyperlinkGroup().setHyperlinkUnderlineMode(HyperlinkSettings.UNDERLINE_HOVER);
+		toolkit.getHyperlinkGroup().setHyperlinkUnderlineMode(
+				HyperlinkSettings.UNDERLINE_HOVER);
 		managedForm = new ManagedForm(mainContainer);
 		errMsgForm = managedForm.getForm();
-		errMsgForm.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		errMsgForm.setBackground(mainContainer.getBackground());
+		errMsgForm.setVisible(false);
+//		errMsgForm.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+//		errMsgForm.setBackground(mainContainer.getBackground());
 		errDispatcher = managedForm.getMessageManager();
 //		errDispatcher.addMessage("dockerHostNameTextField", "Test error", null, IMessageProvider.ERROR, dockerHostNameTextField);
 //		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);

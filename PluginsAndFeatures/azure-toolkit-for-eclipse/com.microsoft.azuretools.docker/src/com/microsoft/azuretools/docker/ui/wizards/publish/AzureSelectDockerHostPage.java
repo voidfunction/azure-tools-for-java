@@ -19,19 +19,6 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.publish;
 
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.forms.HyperlinkSettings;
-import org.eclipse.ui.forms.IMessageManager;
-import org.eclipse.ui.forms.ManagedForm;
-import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.ScrolledForm;
-
 import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
@@ -50,12 +37,6 @@ import com.microsoft.azuretools.docker.ui.wizards.createhost.AzureNewDockerWizar
 import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -66,17 +47,33 @@ import java.util.logging.Logger;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.HyperlinkSettings;
+import org.eclipse.ui.forms.IMessageManager;
+import org.eclipse.ui.forms.ManagedForm;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.ScrolledForm;
 
 public class AzureSelectDockerHostPage extends WizardPage {
 	private static final Logger log =  Logger.getLogger(AzureSelectDockerHostPage.class.getName());
@@ -104,7 +101,6 @@ public class AzureSelectDockerHostPage extends WizardPage {
 	
 	private DockerHostsTableSelection dockerHostsTableSelection;
 	private List<DockerHost> dockerHostsList;
-	private List<DockerHost> testInput;
 
 	/**
 	 * Create the wizard.
@@ -209,8 +205,9 @@ public class AzureSelectDockerHostPage extends WizardPage {
 				HyperlinkSettings.UNDERLINE_HOVER);
 		managedForm = new ManagedForm(mainContainer);
 		errMsgForm = managedForm.getForm();
-		errMsgForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
-		errMsgForm.setBackground(mainContainer.getBackground());
+		errMsgForm.setVisible(false);
+//		errMsgForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
+//		errMsgForm.setBackground(mainContainer.getBackground());
 		errDispatcher = managedForm.getMessageManager();
 //		errMsgForm.setMessage("This is an error message", IMessageProvider.ERROR);
 		
@@ -608,7 +605,6 @@ public class AzureSelectDockerHostPage extends WizardPage {
 	
 	private class DockerHostsTableSelection {
 		int row;
-		int column;
 		DockerHost host;
 	}
 
