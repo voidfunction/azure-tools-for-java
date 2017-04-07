@@ -22,21 +22,12 @@
 
 package com.microsoft.azuretools.sdkmanage;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
 import com.microsoft.azuretools.Constants;
-import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.adauth.PromptBehavior;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.CommonSettings;
@@ -45,6 +36,11 @@ import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.utils.AzureRegisterProviderNamespaces;
 import com.microsoft.azuretools.utils.Pair;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
+
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Logger;
 
 public class AccessTokenAzureManager extends AzureManagerBase {
     private final static Logger LOGGER = Logger.getLogger(AccessTokenAzureManager.class.getName());
@@ -160,12 +156,6 @@ public class AccessTokenAzureManager extends AzureManagerBase {
 
     @Override
     public String getAccessToken(String tid) throws IOException {
-        try {
-            return AdAuthManager.getInstance().getAccessToken(tid, Constants.resourceARM, PromptBehavior.Auto);
-        } catch (InterruptedException | ExecutionException | AuthException | URISyntaxException e) {
-            e.printStackTrace();
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            throw new IOException(e);
-        }
+        return AdAuthManager.getInstance().getAccessToken(tid, Constants.resourceARM, PromptBehavior.Auto);
     }
 }
