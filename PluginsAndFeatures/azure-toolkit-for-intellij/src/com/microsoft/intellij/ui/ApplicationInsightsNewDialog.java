@@ -159,7 +159,7 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
                 String[] groupArray = groupStringList.toArray(new String[groupStringList.size()]);
                 comboGrp.removeAllItems();
                 comboGrp.setModel(new DefaultComboBoxModel(groupArray));
-                if (valtoSet.isEmpty() || !groupStringList.contains(valtoSet)) {
+                if (valtoSet == null || valtoSet.isEmpty() || !groupStringList.contains(valtoSet)) {
                     comboGrp.setSelectedItem(groupArray[0]);
                 } else {
                     comboGrp.setSelectedItem(valtoSet);
@@ -183,10 +183,10 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
     protected void doOKAction() {
         boolean isValid = false;
         if (txtName.getText().trim().isEmpty()
-                || ((String) comboSub.getSelectedItem()).isEmpty()
+                || comboSub.getSelectedItem() == null
                 || ((String) comboGrp.getSelectedItem()).isEmpty()
                 || ((String) comboReg.getSelectedItem()).isEmpty()) {
-            if (((String) comboSub.getSelectedItem()).isEmpty() || comboSub.getItemCount() <= 0) {
+            if (comboSub.getSelectedItem() == null || comboSub.getItemCount() <= 0) {
                 PluginUtil.displayErrorDialog(message("aiErrTtl"), message("noSubErrMsg"));
             } else if (((String) comboGrp.getSelectedItem()).isEmpty() || comboGrp.getItemCount() <= 0) {
                 PluginUtil.displayErrorDialog(message("aiErrTtl"), message("noResGrpErrMsg"));
@@ -198,7 +198,7 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
                 Resource resource = AzureSDKManager.createApplicationInsightsResource(currentSub, (String) comboGrp.getSelectedItem(),
                         txtName.getText(), (String) comboReg.getSelectedItem());
                 resourceToAdd = new ApplicationInsightsResource(resource.getName(), resource.getInstrumentationKey(),
-                        (String) comboSub.getSelectedItem(), currentSub.getSubscriptionId(), resource.getLocation(),
+                        currentSub.getSubscriptionName(), currentSub.getSubscriptionId(), resource.getLocation(),
                         resource.getResourceGroup(), true);
                 isValid = true;
             } catch (Exception ex) {

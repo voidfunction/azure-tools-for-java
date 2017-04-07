@@ -23,6 +23,7 @@ package com.microsoft.intellij.wizards;
 
 import com.intellij.openapi.application.ApplicationNamesInfo;
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.wizard.WizardModel;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
@@ -109,6 +110,7 @@ public class VMWizardModel extends WizardModel {
         for (MouseMotionListener mouseMotionListener : jList.getMouseMotionListeners()) {
             jList.removeMouseMotionListener(mouseMotionListener);
         }
+        jList.setBackground(JBColor.background());
     }
 
     public String getSubnet() {

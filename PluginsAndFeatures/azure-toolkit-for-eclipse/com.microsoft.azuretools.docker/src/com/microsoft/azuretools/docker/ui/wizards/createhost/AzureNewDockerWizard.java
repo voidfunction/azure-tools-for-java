@@ -42,7 +42,6 @@ import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 public class AzureNewDockerWizard extends Wizard {
 	private static final Logger log =  Logger.getLogger(AzureNewDockerWizard.class.getName());
@@ -108,7 +107,6 @@ public class AzureNewDockerWizard extends Wizard {
 					progressMonitor.subTask(String.format("Reading subscription details for Docker host %s ...", dockerHost.apiUrl));
 					progressMonitor.worked(5);
 					Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
-					KeyVaultClient keyVaultClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).keyVaultClient;
 					if (progressMonitor.isCanceled()) {
 						if (displayWarningOnCreateHostCancelAction() == 0) {
 							progressMonitor.done();

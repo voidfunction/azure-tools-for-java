@@ -417,8 +417,7 @@ public class AzureViewDockerDialog extends Dialog {
 		dockerHostStorageNameTypeTextField = new Text(vmSetsComposite, SWT.READ_ONLY);
 		dockerHostStorageNameTypeTextField.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		
-		Color tempColor = mainContainer.getBackground();
-		Color backgroundColor = tempColor; //new Color(null, tempColor.getRed(), tempColor.getGreen(), tempColor.getBlue(), 255);
+		Color backgroundColor =  mainContainer.getBackground(); //new Color(null,  mainContainer.getBackground().getRed(),  mainContainer.getBackground().getGreen(),  mainContainer.getBackground().getBlue(), 255);
 		
 		loginSetsComposite.setBackgroundMode(SWT.INHERIT_FORCE);
 		loginSetsComposite.setBackground(backgroundColor);

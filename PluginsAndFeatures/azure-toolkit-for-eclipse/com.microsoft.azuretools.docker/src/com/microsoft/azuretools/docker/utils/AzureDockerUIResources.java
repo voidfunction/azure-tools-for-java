@@ -19,6 +19,25 @@
  */
 package com.microsoft.azuretools.docker.utils;
 
+import com.microsoft.azure.docker.AzureDockerHostsManager;
+import com.microsoft.azure.docker.model.AzureDockerCertVault;
+import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
+import com.microsoft.azure.docker.ops.AzureDockerVMOps;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
+import com.microsoft.azure.keyvault.KeyVaultClient;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.docker.ui.wizards.publish.AzureSelectDockerWizard;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
+
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -49,26 +68,6 @@ import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
-
-import com.microsoft.azure.docker.AzureDockerHostsManager;
-import com.microsoft.azure.docker.model.AzureDockerCertVault;
-import com.microsoft.azure.docker.model.AzureDockerImageInstance;
-import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
-import com.microsoft.azure.docker.ops.AzureDockerVMOps;
-import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
-import com.microsoft.azure.keyvault.KeyVaultClient;
-import com.microsoft.azure.management.Azure;
-import com.microsoft.azuretools.authmanage.AuthMethodManager;
-import com.microsoft.azuretools.core.utils.PluginUtil;
-import com.microsoft.azuretools.docker.ui.wizards.publish.AzureSelectDockerWizard;
-import com.microsoft.azuretools.sdkmanage.AzureManager;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
-
-import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 
 public class AzureDockerUIResources {
 	private static final Logger log = Logger.getLogger(AzureDockerUIResources.class.getName());
