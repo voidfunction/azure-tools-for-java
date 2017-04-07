@@ -22,9 +22,6 @@
 package com.microsoft.azuretools.core.ui;
 
 import java.net.URI;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
@@ -62,7 +59,8 @@ public class LoginWindow implements com.microsoft.azuretools.adauth.IWebUi {
     }
 
     @Override
-    public Future<String> authenticateAsync(URI requestUri, URI redirectUri) {
+    //public Future<String> authenticateAsync(URI requestUri, URI redirectUri) {
+    public String authenticate(URI requestUri, URI redirectUri) {
 
         System.out.println("==> run authenticateAsync ---------------");
         
@@ -76,42 +74,34 @@ public class LoginWindow implements com.microsoft.azuretools.adauth.IWebUi {
             Browser.clearSessions();
         }
 
-        try {
-            final Runnable gui = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        System.out.println("==> run gui ---------------");
-                        Display display = Display.getDefault();
-                        final Shell activeShell = display.getActiveShell();
-                        LoginDialog dlg = new LoginDialog(activeShell, redirectUriStr, requestUriStr);
-                        dlg.open();
-                        setResult(dlg.getResult());
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@Runnable@LoginWindow", ex));
-                    }
+        final Runnable gui = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println("==> run gui ---------------");
+                    Display display = Display.getDefault();
+                    final Shell activeShell = display.getActiveShell();
+                    LoginDialog dlg = new LoginDialog(activeShell, redirectUriStr, requestUriStr);
+                    dlg.open();
+                    setResult(dlg.getResult());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@Runnable@LoginWindow", ex));
                 }
-            };
-
-            final Callable<String> worker = new Callable<String>() {
-                @Override
-                public String call() {
-                    return getResult();
-                }
-            };
-
-            Display.getDefault().syncExec(gui);
-            
-            // just to return future to comply interface
-            return Executors.newSingleThreadExecutor().submit(worker);
-            
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "authenticateAsync@LoginWindow", ex));
-        }
-
-        return null;
+            }
+        };
+        Display.getDefault().syncExec(gui);
+        
+//            final Callable<String> worker = new Callable<String>() {
+//                @Override
+//                public String call() {
+//                    return getResult();
+//                }
+//            };
+        // just to return future to comply interface
+        //return Executors.newSingleThreadExecutor().submit(worker);
+        
+        return getResult();
     }
 }
 

@@ -23,12 +23,10 @@ package com.microsoft.azuretools.core.ui;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,13 +47,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.microsoft.azuretools.adauth.AuthException;
+import com.microsoft.azuretools.adauth.AuthCanceledException;
 import com.microsoft.azuretools.adauth.StringUtils;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
@@ -286,7 +285,6 @@ public class SignInDialog extends TitleAreaDialog {
         } catch (IOException | InvocationTargetException | InterruptedException ex) {
             System.out.println("doSignIn@SingInDialog: " + ex.getMessage());
             ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR, "doSignIn@SingInDialog", ex);
             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignIn@SingInDialog", ex));
         }
     }
@@ -298,11 +296,18 @@ public class SignInDialog extends TitleAreaDialog {
                 monitor.beginTask("Signing In...", IProgressMonitor.UNKNOWN);
                 try {
                     AdAuthManager.getInstance().signIn();
-                } catch (IOException | URISyntaxException | ExecutionException | AuthException e) {
-                    System.out.println("run@ProgressDialog@signInAsync@SingInDialog: " + e.getMessage());
-                    e.printStackTrace();
-                    //LOGGER.log(LogService.LOG_ERROR, "run@ProgressDialog@signInAsync@SingInDialog", e);
-                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@signInAsync@SingInDialog", e));
+                } catch (AuthCanceledException ex) {
+                    System.out.println(ex.getMessage());
+                } catch (IOException ex) {
+                    System.out.println("run@ProgressDialog@signInAsync@SingInDialog: " + ex.getMessage());
+                    //ex.printStackTrace();
+                    //LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@signInAsync@SingInDialog", e));
+                    Display.getDefault().asyncExec(new Runnable() {
+                        @Override
+                        public void run() {
+                            ErrorWindow.go(getShell(), ex.getMessage(), "Sign In Error");;
+                        }
+                    });
                 }
             }
         };
@@ -315,7 +320,6 @@ public class SignInDialog extends TitleAreaDialog {
             AdAuthManager.getInstance().signOut();
         } catch (IOException ex) {
             ex.printStackTrace();
-            //LOGGER.log(LogService.LOG_ERROR,"doSignOut@SingInDialog", ex);
             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "doSignOut@SingInDialog", ex));
         }
     }
@@ -348,7 +352,6 @@ public class SignInDialog extends TitleAreaDialog {
                         subscriptionManager.getSubscriptionDetails();
                     } catch (Exception ex) {
                         System.out.println("run@ProgressDialog@doCreateServicePrincipal@SignInDialog: " + ex.getMessage());
-                        //LOGGER.log(LogService.LOG_ERROR,"run@ProgressDialog@doCreateServicePrincipal@SignInDialog", ex);
                         LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@doCreateServicePrincipal@SignInDialogg", ex));
                     }
                 }
