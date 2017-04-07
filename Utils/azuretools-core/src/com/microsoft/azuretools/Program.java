@@ -23,10 +23,10 @@
 package com.microsoft.azuretools;
 
 import com.microsoft.azure.management.Azure;
-import com.microsoft.azuretools.adauth.IWebUi;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.ResourceGroups;
 import com.microsoft.azure.management.resources.Subscription;
+import com.microsoft.azuretools.adauth.IWebUi;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.CommonSettings;

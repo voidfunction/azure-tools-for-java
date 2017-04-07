@@ -30,7 +30,6 @@ import com.microsoft.azuretools.sdkmanage.AzureManager;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**

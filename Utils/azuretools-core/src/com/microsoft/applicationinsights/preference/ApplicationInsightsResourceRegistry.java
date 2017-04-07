@@ -19,14 +19,10 @@
  */
 package com.microsoft.applicationinsights.preference;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+
+import java.util.*;
 
 public class ApplicationInsightsResourceRegistry {
 	/**

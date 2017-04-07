@@ -27,16 +27,13 @@ import com.intellij.openapi.ui.DialogWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class ErrorWindow extends DialogWrapper {
     private JPanel contentPane;
     private JTextPane textPane;
 
     public static void show(@Nullable Project project, String message, String title) {
-        ErrorWindow w = new ErrorWindow(project, message, null);
+        ErrorWindow w = new ErrorWindow(project, message, title);
         w.show();
     }
 

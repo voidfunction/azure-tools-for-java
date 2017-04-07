@@ -376,7 +376,10 @@ public class AppServiceCreateDialog extends DialogWrapper {
                     }, ModalityState.any());
 
 
-                } catch (IOException | AuthException | CanceledByUserException ex) {
+                } catch (CanceledByUserException e) {
+                    System.out.print("Canceled by user");
+                    e.printStackTrace();
+                } catch (IOException ex) {
                     ex.printStackTrace();
                     LOGGER.error("updateAndFillSubscriptions@AppServiceCreateDialog", ex);
                 }

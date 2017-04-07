@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 enum AuthorityType {
     AAD,
@@ -34,6 +36,8 @@ enum AuthorityType {
 }
 
 class Authenticator {
+    final static Logger log = Logger.getLogger(Authenticator.class.getName());
+
     private final static String tenantlessTenantName = "common";
     private final AuthenticatorTemplateList authenticatorTemplateList;
     private boolean updatedFromTemplate;
@@ -63,10 +67,16 @@ class Authenticator {
         return (tenant.compareToIgnoreCase(tenantlessTenantName) == 0);
     }
 
-    public Authenticator(String authority, boolean validateAuthority) throws IOException, URISyntaxException {
+    public Authenticator(String authority, boolean validateAuthority) throws IOException {
     	this.authenticatorTemplateList = new AuthenticatorTemplateList();
         setAuthority(canonicalizeUri(authority));
-        this.authorityType = detectAuthorityType(this.getAuthority());
+        try {
+            this.authorityType = detectAuthorityType(this.getAuthority());
+        } catch (URISyntaxException ex) {
+            ex.printStackTrace();
+            log.log(Level.SEVERE, "Authenticator@Authenticator", ex);
+            throw new IOException(ex);
+        }
 
         if (this.authorityType != AuthorityType.AAD && validateAuthority) {
             throw new IllegalArgumentException(AuthErrorMessage.UnsupportedAuthorityValidation);
@@ -75,9 +85,16 @@ class Authenticator {
         this.validateAuthority = validateAuthority;
     }
 
-    public void updateFromTemplate(CallState callState) throws URISyntaxException, IOException, AuthException {
+    public void updateFromTemplate(CallState callState) throws IOException {
         if (!updatedFromTemplate) {
-            URI authorityUri = new URI(this.getAuthority());
+            URI authorityUri = null;
+            try {
+                authorityUri = new URI(this.getAuthority());
+            } catch (URISyntaxException ex) {
+                ex.printStackTrace();
+                log.log(Level.SEVERE, "updateFromTemplate@Authenticator", ex);
+                throw new IOException(ex);
+            }
             String host = authorityUri.getAuthority();
             String path = authorityUri.getPath().substring(1);
             String tenant = path.substring(0, path.indexOf("/"));

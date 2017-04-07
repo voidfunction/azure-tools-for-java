@@ -22,8 +22,6 @@
 
 package com.microsoft.azuretools.adauth;
 
-import com.microsoft.azuretools.adauth.UserIdentifierType;
-
 public final class UserIdentifier
 {
     private final static String AnyUserId = "AnyUser";

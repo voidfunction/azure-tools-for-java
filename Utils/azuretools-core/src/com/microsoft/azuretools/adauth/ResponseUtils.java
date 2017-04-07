@@ -60,12 +60,11 @@ public class ResponseUtils {
                     log.log(Level.WARNING, "Returned correlation id '" + correlationIdHeader + "' is not in GUID format.");
                 }
             }
-
             if (map.containsKey(OAuthReservedClaim.Code)) {
                 result = new AuthorizationResult(map.get(OAuthReservedClaim.Code));
             }
             else if (map.containsKey(OAuthReservedClaim.Error)) {
-                result = new AuthorizationResult(map.get(OAuthReservedClaim.Error), map.get(OAuthReservedClaim.ErrorDescription));
+                result = new AuthorizationResult(map.get(OAuthReservedClaim.Error), map.get(OAuthReservedClaim.ErrorDescription), map.get(OAuthReservedClaim.ErrorSubcode));
             }
             else {
                 result = new AuthorizationResult(AuthError.AuthenticationFailed, AuthErrorMessage.AuthorizationServerInvalidResponse);
@@ -74,7 +73,7 @@ public class ResponseUtils {
         return result;
     }
 
-    public static AuthenticationResult parseTokenResponse(TokenResponse tokenResponse) throws AuthException, IOException, URISyntaxException {
+    public static AuthenticationResult parseTokenResponse(TokenResponse tokenResponse) throws IOException {
          AuthenticationResult result;
 
          if (tokenResponse.accessToken != null) {
@@ -109,7 +108,13 @@ public class ResponseUtils {
                  }
                  URI changePasswordUri = null;
                  if (!StringUtils.isNullOrEmpty(idToken.passwordChangeUrl)) {
-                     changePasswordUri = new URI(idToken.passwordChangeUrl);
+                     try {
+                         changePasswordUri = new URI(idToken.passwordChangeUrl);
+                     } catch (URISyntaxException ex) {
+                         ex.printStackTrace();
+                         log.log(Level.SEVERE, "parseTokenResponse@ResponseUtils", ex);
+                         throw new IOException(ex);
+                     }
                  }
                  result.updateTenantAndUserInfo(
                          tenantId, tokenResponse.idToken,

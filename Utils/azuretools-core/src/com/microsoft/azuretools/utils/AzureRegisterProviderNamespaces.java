@@ -23,7 +23,6 @@ package com.microsoft.azuretools.utils;
 
 import com.microsoft.azure.management.Azure;
 import rx.Observable;
-import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
 import java.util.concurrent.Callable;

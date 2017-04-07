@@ -25,36 +25,63 @@ package com.microsoft.azuretools.adauth;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-enum AuthorizationStatus
-{
+enum AuthorizationStatus {
     Failed,
     Success
 };
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AuthorizationResult
-{
-    AuthorizationResult(String code)
-    {
+public class AuthorizationResult {
+    AuthorizationResult(String code) {
         this.status = AuthorizationStatus.Success;
         this.code = code;
     }
-    
-    AuthorizationResult(String error, String errorDescription)
-    {
+
+    public AuthorizationStatus getStatus() {
+        return status;
+    }
+
+    AuthorizationResult(String error, String errorDescription) {
         this.status = AuthorizationStatus.Failed;
         this.error = error;
         this.errorDescription = errorDescription;
+        this.errorSubcode = null;
     }
-    
-    AuthorizationStatus status;
+
+    AuthorizationResult(String error, String errorDescription, String errorSubcode) {
+        this.status = AuthorizationStatus.Failed;
+        this.error = error;
+        this.errorDescription = errorDescription;
+        this.errorSubcode = errorSubcode;
+    }
+
+    private AuthorizationStatus status;
     
     @JsonProperty("Code")
-    String code;
-    
+    private String code;
+
     @JsonProperty("Error")
-    String error;
-    
+    private String error;
+
     @JsonProperty("ErrorDescription")
-    String errorDescription;
+    private String errorDescription;
+
+    private String errorSubcode;
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public String getErrorDescription() {
+        return errorDescription;
+    }
+
+    public String getErrorSubcode() {
+        return errorSubcode;
+    }
+
 }

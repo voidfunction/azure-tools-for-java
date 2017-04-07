@@ -22,14 +22,10 @@
 
 package com.microsoft.azuretools.authmanage.srvpri.rest;
 
-import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.adauth.PromptBehavior;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -61,16 +57,9 @@ abstract class RequestFactoryBase implements IRequestFactory {
         return urlPrefix;
     }
     public String getAccessToken() throws IOException {
-        if (tenantId == null) throw new IllegalArgumentException("this.tenantId is null");
-        if (resource == null) throw new IllegalArgumentException("this.resource is null");
+        if (tenantId == null) throw new IllegalArgumentException("tenantId is null");
+        if (resource == null) throw new IllegalArgumentException("resource is null");
 
-        try {
-            return AdAuthManager.getInstance().getAccessToken(tenantId, resource, promptBehavior);
-        } catch (URISyntaxException | InterruptedException | ExecutionException | AuthException e) {
-            e.printStackTrace();
-            LOGGER.log(Level.SEVERE, "getAccessToken@RequestFactoryBase", e);
-            throw new IOException(e);
-
-        }
+        return AdAuthManager.getInstance().getAccessToken(tenantId, resource, promptBehavior);
     }
 }

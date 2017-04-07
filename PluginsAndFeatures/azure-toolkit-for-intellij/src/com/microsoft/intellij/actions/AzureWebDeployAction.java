@@ -27,7 +27,6 @@ import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleTypeId;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ui.configuration.ProjectStructureConfigurable;
 import com.intellij.openapi.wm.WindowManager;
@@ -41,7 +40,7 @@ import com.microsoft.azuretools.ijidea.ui.ArtifactValidationWindow;
 import com.microsoft.azuretools.ijidea.ui.ErrorWindow;
 import com.microsoft.azuretools.ijidea.ui.WarSelectDialog;
 import com.microsoft.azuretools.ijidea.ui.WebAppDeployDialog;
-//import com.microsoft.intellij.forms.WebSiteDeployForm;
+
 import javax.swing.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -49,6 +48,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+
+//import com.microsoft.intellij.forms.WebSiteDeployForm;
 
 
 public class AzureWebDeployAction extends AnAction {

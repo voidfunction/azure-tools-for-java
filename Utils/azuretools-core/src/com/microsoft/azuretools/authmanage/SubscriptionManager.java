@@ -22,9 +22,9 @@
 
 package com.microsoft.azuretools.authmanage;
 
-import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
+import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.utils.Pair;

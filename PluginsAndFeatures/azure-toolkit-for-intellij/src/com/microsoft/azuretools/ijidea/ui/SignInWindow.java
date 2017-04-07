@@ -30,7 +30,7 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.microsoft.azuretools.adauth.AuthException;
+import com.microsoft.azuretools.adauth.AuthCanceledException;
 import com.microsoft.azuretools.adauth.StringUtils;
 import com.microsoft.azuretools.authmanage.AdAuthManager;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
@@ -44,7 +44,8 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -199,16 +200,17 @@ public class SignInWindow extends DialogWrapper {
                     indicator.setText("Signing In...");
                     try {
                         AdAuthManager.getInstance().signIn();
-                    } catch (AuthException ex) {
-                        LOGGER.error("signInAsync AuthException exception", ex.getMessage());
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        LOGGER.error("signInAsync", ex);
-                        try {
-                            ErrorWindow.show(project, ex.getMessage(), "Sign In Error");
-                        } catch (Exception e) {
-                            ex.printStackTrace();
-                        }
+                    } catch (AuthCanceledException ex) {
+                        System.out.println(ex.getMessage());
+                    } catch (IOException ex) {
+                        //ex.printStackTrace();
+                        //LOGGER.error("run@ProgressManager@signInAsync@SignInWindow", ex.getMessage());
+                        ApplicationManager.getApplication().invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                ErrorWindow.show(project, ex.getMessage(), "Sign In Error");
+                            }
+                        }, ModalityState.any());
                     }
                 }
             }

@@ -23,8 +23,6 @@
 package com.microsoft.azuretools.adauth;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -32,7 +30,7 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class AcquireTokenHandlerBase {
+public class AcquireTokenHandlerBase {
     final static Logger log = Logger.getLogger(AcquireTokenHandlerBase.class.getName());
     protected static ExecutorService service = Executors.newSingleThreadExecutor();
     protected CallState callState;
@@ -65,7 +63,7 @@ public abstract class AcquireTokenHandlerBase {
         this.supportADFS = false;
     }
 
-    AuthenticationResult run() throws AuthException, ExecutionException, InterruptedException, IOException, URISyntaxException {
+    AuthenticationResult run() throws IOException {
         boolean notifiedBeforeAccessCache = false;
         try {
             synchronized (cacheLock) {
@@ -83,7 +81,8 @@ public abstract class AcquireTokenHandlerBase {
                     result = validateResult(result);
                     if (result != null && result.accessToken == null
                             && result.refreshToken != null) {
-                        result = refreshAccessTokenAsync(result).get();
+                        //result = refreshAccessTokenAsync(result).get();
+                        result = refreshAccessToken(result);
                         if (result != null) {
                             tokenCache.storeToCache(result, authenticator.getAuthority(), resource, clientKey.clientId, tokenSubjectType);
                         }
@@ -91,7 +90,8 @@ public abstract class AcquireTokenHandlerBase {
                 }
                 if (result == null) {
                     preTokenRequest();
-                    result = acquireTokenAsync().get();
+                    //result = acquireTokenAsync().get();
+                    result = acquireToken();
                     postTokenRequest(result);
                     if (storeToCache) {
                         if (!notifiedBeforeAccessCache) {
@@ -116,33 +116,29 @@ public abstract class AcquireTokenHandlerBase {
     Future<AuthenticationResult> runAsync() {
         return service.submit(new Callable<AuthenticationResult>() {
             @Override
-            public AuthenticationResult call() throws InterruptedException, ExecutionException, AuthException, URISyntaxException, IOException {
+            public AuthenticationResult call() throws IOException {
                 return run();
             }
         });
     }
 
-    protected void preRun() throws AuthException, IOException, URISyntaxException {
+    protected void preRun() throws IOException {
         this.authenticator.updateFromTemplate(this.callState);
         this.validateAuthorityType();
     }
 
-    protected abstract void preTokenRequest() throws URISyntaxException, ExecutionException, AuthException, InterruptedException, UnsupportedEncodingException;
+    protected void preTokenRequest() throws IOException{};
     
-    protected Future<AuthenticationResult> acquireTokenAsync() {
-        return Executors.newSingleThreadExecutor().submit(new Callable<AuthenticationResult>() {
-            @Override
-            public AuthenticationResult call() throws URISyntaxException, IOException, AuthException, InstantiationException, IllegalAccessException {
-                Map<String, String> requestParameters = new HashMap<>();
-                requestParameters.put(OAuthParameter.Resource, resource);
-                requestParameters.put(OAuthParameter.ClientId, clientKey.clientId);
-                addAditionalRequestParameters(requestParameters);
-                return sendHttpMessage(requestParameters);  
-            }
-        });
+    protected AuthenticationResult acquireToken() throws IOException{
+        Map<String, String> requestParameters = new HashMap<>();
+        requestParameters.put(OAuthParameter.Resource, resource);
+        requestParameters.put(OAuthParameter.ClientId, clientKey.clientId);
+        addAdditionalRequestParameters(requestParameters);
+        return sendHttpMessage(requestParameters);
+
     }
 
-    protected void postTokenRequest(AuthenticationResult result) throws AuthException {
+    protected void postTokenRequest(AuthenticationResult result) throws IOException {
         authenticator.updateTenantId(result.tenantId);
     }
 
@@ -164,34 +160,29 @@ public abstract class AcquireTokenHandlerBase {
         return new CallState(correlationId);
     }
 
-    protected abstract void addAditionalRequestParameters(Map<String, String> requestParameters);
+    protected void addAdditionalRequestParameters(Map<String, String> requestParameters){};
 
-    private Future<AuthenticationResult> refreshAccessTokenAsync(final AuthenticationResult result) {
-        return Executors.newSingleThreadExecutor().submit(new Callable<AuthenticationResult>() {
-            @Override
-            public AuthenticationResult call() throws URISyntaxException, IOException, InstantiationException, IllegalAccessException {
-                AuthenticationResult newResult = null;
-                if (resource != null) {
-                    log.log(Level.FINEST, "Refreshing access token...");
-                    try {
-                        newResult = sendTokenRequestByRefreshToken(result.refreshToken);
-                       
-                    } catch (AuthException e) {
-                        log.log(Level.WARNING, "Error getting token - need to re-login.");
-                        return null;
-                    }
-                    authenticator.updateTenantId(result.tenantId);
-                    if (newResult != null && newResult.idToken == null) {
-                        // If Id token is not returned by token endpoint when refresh token is redeemed, we should copy tenant and user information from the cached token.
-                        newResult.updateTenantAndUserInfo(result.tenantId, result.idToken, result.userInfo);
-                    }
-                }
-                return newResult;
+    AuthenticationResult refreshAccessToken(AuthenticationResult result) throws IOException {
+        AuthenticationResult newResult = null;
+        if (resource != null) {
+            log.log(Level.FINEST, "Refreshing access token...");
+            try {
+                newResult = sendTokenRequestByRefreshToken(result.refreshToken);
+
+            } catch (AuthException e) {
+                log.log(Level.WARNING, "Error getting token - need to re-login.");
+                return null;
             }
-        });
+            authenticator.updateTenantId(result.tenantId);
+            if (newResult != null && newResult.idToken == null) {
+                // If Id token is not returned by token endpoint when refresh token is redeemed, we should copy tenant and user information from the cached token.
+                newResult.updateTenantAndUserInfo(result.tenantId, result.idToken, result.userInfo);
+            }
+        }
+        return newResult;
     }
-    
-    protected AuthenticationResult sendTokenRequestByRefreshToken(String refreshToken) throws AuthException, IllegalAccessException, IOException, InstantiationException, URISyntaxException {
+
+    protected AuthenticationResult sendTokenRequestByRefreshToken(String refreshToken) throws IOException {
         Map<String, String> requestParameters = new HashMap<>();
         requestParameters.put(OAuthParameter.Resource, this.resource);
         requestParameters.put(OAuthParameter.ClientId, this.clientKey.clientId);
@@ -200,7 +191,7 @@ public abstract class AcquireTokenHandlerBase {
         return sendHttpMessage(requestParameters);
     }
 
-    private AuthenticationResult sendHttpMessage(final Map<String, String> requestParameters) throws AuthException, IllegalAccessException, IOException, InstantiationException, URISyntaxException {
+    private AuthenticationResult sendHttpMessage(final Map<String, String> requestParameters) throws IOException {
         String uri = authenticator.tokenUri;
         TokenResponse tokenResponse = HttpHelper.sendPostRequestAndDeserializeJsonResponse(uri, requestParameters, callState, TokenResponse.class);
         AuthenticationResult result = ResponseUtils.parseTokenResponse(tokenResponse);

@@ -238,7 +238,7 @@ public class TokenCache {
         this.onAfterAccessCallback = onAfterAccessCallback;
     }
 
-    AuthenticationResult loadFromCache(String authority, String resource, String clientId, TokenSubjectType subjectType, String uniqueId, String displayableId) throws AuthException {
+    AuthenticationResult loadFromCache(String authority, String resource, String clientId, TokenSubjectType subjectType, String uniqueId, String displayableId) throws IOException {
        synchronized(lock) {
             log.log(Level.FINEST, "Looking up cache for a token...");
             AuthenticationResult result = null;
@@ -335,7 +335,7 @@ public class TokenCache {
     }
 
     private Map.Entry<TokenCacheKey, AuthenticationResult> loadSingleItemFromCache(String authority, String resource, String clientId,
-          TokenSubjectType subjectType, String uniqueId, String displayableId) throws AuthException {
+          TokenSubjectType subjectType, String uniqueId, String displayableId) throws IOException {
         synchronized(lock) {
             // First identify all potential tokens.
             List<Map.Entry<TokenCacheKey, AuthenticationResult>> items = queryCache(authority, clientId,
@@ -373,7 +373,7 @@ public class TokenCache {
             } else {
                 String message = AuthError.MultipleTokensMatched;
                 log.log(Level.SEVERE, message);
-                throw new AuthException(message);
+                throw new IOException(message);
             }
             return returnValue;
         }

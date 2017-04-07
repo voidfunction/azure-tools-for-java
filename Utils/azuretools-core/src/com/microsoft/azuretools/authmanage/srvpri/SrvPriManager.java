@@ -22,6 +22,12 @@
 
 package com.microsoft.azuretools.authmanage.srvpri;
 
+import com.microsoft.azuretools.authmanage.srvpri.entities.SrvPriData;
+import com.microsoft.azuretools.authmanage.srvpri.report.FileListener;
+import com.microsoft.azuretools.authmanage.srvpri.report.IListener;
+import com.microsoft.azuretools.authmanage.srvpri.report.Reporter;
+import com.microsoft.azuretools.authmanage.srvpri.step.*;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -34,17 +40,6 @@ import java.util.Properties;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.microsoft.azuretools.authmanage.srvpri.entities.SrvPriData;
-import com.microsoft.azuretools.authmanage.srvpri.report.FileListener;
-import com.microsoft.azuretools.authmanage.srvpri.report.IListener;
-import com.microsoft.azuretools.authmanage.srvpri.report.Reporter;
-import com.microsoft.azuretools.authmanage.srvpri.step.ApplicationStep;
-import com.microsoft.azuretools.authmanage.srvpri.step.CommonParams;
-import com.microsoft.azuretools.authmanage.srvpri.step.RoleAssignmentStep;
-import com.microsoft.azuretools.authmanage.srvpri.step.ServicePrincipalStep;
-import com.microsoft.azuretools.authmanage.srvpri.step.Status;
-import com.microsoft.azuretools.authmanage.srvpri.step.StepManager;
 
 /**
  * Created by vlashch on 8/16/16.

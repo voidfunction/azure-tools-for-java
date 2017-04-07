@@ -28,7 +28,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,12 +41,17 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     private final UserIdentifier userId;
 
     AcquireTokenInteractiveHandler(Authenticator authenticator, TokenCache tokenCache, String resource,
-                                   String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, IWebUi webUi) throws IOException, URISyntaxException {
+                                   String clientId, String redirectUri, PromptBehavior promptBehavior, UserIdentifier userId, IWebUi webUi) throws IOException {
         super(authenticator, tokenCache, resource, new ClientKey(clientId), TokenSubjectType.User);
         if (redirectUri == null) {
             throw new IllegalArgumentException("redirectUri");
         }
-        this.redirectUri = new URI(redirectUri);
+        try {
+            this.redirectUri = new URI(redirectUri);
+        } catch (URISyntaxException ex) {
+            ex.printStackTrace();
+            log.log(Level.SEVERE, "AcquireTokenInteractiveHandler@AcquireTokenInteractiveHandler", ex);
+        }
         if (this.redirectUri.getFragment() != null && !this.redirectUri.getFragment().isEmpty()) {
             throw new IllegalArgumentException("redirectUri: " + AuthErrorMessage.RedirectUriContainsFragment);
         }
@@ -78,24 +82,30 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
     }
 
     @Override
-    protected void preTokenRequest() throws URISyntaxException, ExecutionException, AuthException, InterruptedException, UnsupportedEncodingException {
+    protected void preTokenRequest() throws IOException {
         acquireAuthorization();
     }
 
-    private void acquireAuthorization() throws UnsupportedEncodingException, URISyntaxException, ExecutionException, InterruptedException, AuthException {
-        log.log(Level.FINEST, "acquireAuthorization...");
+    private void acquireAuthorization() throws IOException {
+        try {
+            log.log(Level.FINEST, "acquireAuthorization...");
 
-        URI authorizationUri = this.createAuthorizationUri(false);
-        log.log(Level.FINEST, "Starting web ui...");
-        String resultUri = this.webUi.authenticateAsync(authorizationUri, this.redirectUri).get();
-        if(resultUri == null) {
-            String message = "Authorization failed";
-            log.log(Level.SEVERE, message);
-            throw new AuthException(message);
+            URI authorizationUri = this.createAuthorizationUri(false);
+            log.log(Level.FINEST, "Starting web ui...");
+            String resultUri = webUi.authenticate(authorizationUri, redirectUri);
+            if(resultUri == null) {
+                String message = "Interactive sign in is unsuccessful or canceled.";
+                log.log(Level.SEVERE, message);
+                throw new AuthException(message);
+            }
+            authorizationResult = ResponseUtils.parseAuthorizeResponse(resultUri, this.callState);
+            log.log(Level.FINEST, "==> authorization code: " + authorizationResult.getCode());
+            verifyAuthorizationResult();
+
+        } catch (UnsupportedEncodingException | URISyntaxException ex) {
+            log.log(Level.SEVERE, "acquireAuthorization@AcquireTokenInteractiveHandler: " + ex);
+            throw new IOException(ex);
         }
-        authorizationResult = ResponseUtils.parseAuthorizeResponse(resultUri, this.callState);
-        log.log(Level.FINEST, "==> authorization code: " + authorizationResult.code);
-        verifyAuthorizationResult();
    }
 
     private URI createAuthorizationUri(boolean includeFormsAuthParam) throws UnsupportedEncodingException, URISyntaxException {
@@ -138,29 +148,35 @@ public class AcquireTokenInteractiveHandler extends AcquireTokenHandlerBase {
         return authorizationRequestParameters;
     }
 
-    private void verifyAuthorizationResult() throws AuthException {
+    private void verifyAuthorizationResult() throws IOException {
         if (this.promptBehavior == PromptBehavior.Never
-                && authorizationResult.error.equals(OAuthError.LoginRequired)) {
+                && authorizationResult.getError().equals(OAuthError.LoginRequired)) {
             String message = AuthError.UserInteractionRequired;
             log.log(Level.SEVERE, message);
             throw new AuthException(message);
         }
-        if (authorizationResult.status != AuthorizationStatus.Success) {
-            String message = authorizationResult.error + ": " + authorizationResult.errorDescription;
+        if (authorizationResult.getStatus() != AuthorizationStatus.Success) {
+            if (authorizationResult.getErrorSubcode().compareToIgnoreCase("cancel") == 0) {
+                throw new AuthCanceledException("Canceled by user");
+            }
+            String message = authorizationResult.getError() +
+                    authorizationResult.getErrorDescription() == null
+                ? ""
+                : ": " + authorizationResult.getErrorDescription();
             log.log(Level.SEVERE, message);
             throw new AuthException(message);
         }
     }
 
     @Override
-    protected void addAditionalRequestParameters(Map<String, String> requestParameters) {
+    protected void addAdditionalRequestParameters(Map<String, String> requestParameters) {
         requestParameters.put(OAuthParameter.GrantType, OAuthGrantType.AuthorizationCode);
-        requestParameters.put(OAuthParameter.Code, authorizationResult.code);
+        requestParameters.put(OAuthParameter.Code, authorizationResult.getCode());
         requestParameters.put(OAuthParameter.RedirectUri, this.redirectUriRequestParameter);
     }
 
     @Override
-    protected void postTokenRequest(AuthenticationResult result) throws AuthException {
+    protected void postTokenRequest(AuthenticationResult result) throws IOException {
         super.postTokenRequest(result);
         if ((this.displayableId == null && this.uniqueId == null)
                 || this.userIdentifierType == UserIdentifierType.OptionalDisplayableId) {

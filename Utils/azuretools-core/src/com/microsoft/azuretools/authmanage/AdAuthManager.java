@@ -23,21 +23,18 @@
 package com.microsoft.azuretools.authmanage;
 
 import com.microsoft.azure.AzureEnvironment;
-import com.microsoft.azuretools.adauth.*;
 import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.Tenant;
 import com.microsoft.azuretools.Constants;
+import com.microsoft.azuretools.adauth.*;
 import com.microsoft.azuretools.authmanage.models.AdAuthDetails;
 import com.microsoft.azuretools.sdkmanage.AccessTokenAzureManager;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AdAuthManager {
@@ -59,17 +56,17 @@ public class AdAuthManager {
         return instance;
     }
 
-    public String getAccessToken(String tid) throws IOException, URISyntaxException, InterruptedException, ExecutionException, AuthException {
+    public String getAccessToken(String tid) throws IOException {
         return getAccessToken(tid, Constants.resourceARM, PromptBehavior.Auto);
     }
 
-    public String getAccessToken(String tid, String resource, PromptBehavior promptBehavior) throws IOException, URISyntaxException, InterruptedException, ExecutionException, AuthException {
+    public String getAccessToken(String tid, String resource, PromptBehavior promptBehavior) throws IOException {
         AuthContext ac = new AuthContext(String.format("%s/%s", Constants.authority, tid), cache);
         AuthenticationResult result = ac.acquireToken(resource, Constants.clientId, Constants.redirectUri, promptBehavior, null);
         return result.getAccessToken();
     }
 
-    public AuthenticationResult signIn() throws IOException, URISyntaxException, InterruptedException, ExecutionException, AuthException {
+    public AuthenticationResult signIn() throws IOException {
 
         // build token cache for azure and graph api
         // using azure sdk directly
@@ -87,21 +84,16 @@ public class AdAuthManager {
         List<Tenant> tenants = AccessTokenAzureManager.getTenants(commonTid);
         for (Tenant t : tenants) {
             String tid = t.tenantId();
-            try {
-                AuthContext ac1 = new AuthContext(String.format("%s/%s", Constants.authority, tid), cache);
-                ac1.acquireToken(AzureEnvironment.AZURE.getResourceManagerEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
-                ac1.acquireToken(AzureEnvironment.AZURE.getGraphEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
-                ac1.acquireToken(Constants.resourceVault, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
-                List<String> sids = new LinkedList<>();
-                for (Subscription s : AccessTokenAzureManager.getSubscriptions(tid)) {
-                    sids.add(s.subscriptionId());
-                }
-                tidToSidsMap.put(t.tenantId(), sids);
-
-            } catch (IOException e) {
-                System.out.println("signIn@AdAuthManager exception for tid: " + tid + ":\n" + e.getMessage());
-                LOGGER.log(Level.WARNING, e.getMessage(), e);
+            AuthContext ac1 = new AuthContext(String.format("%s/%s", Constants.authority, tid), cache);
+            // put tokens into the cache
+            ac1.acquireToken(AzureEnvironment.AZURE.getResourceManagerEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
+            ac1.acquireToken(AzureEnvironment.AZURE.getGraphEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
+            ac1.acquireToken(Constants.resourceVault, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
+            List<String> sids = new LinkedList<>();
+            for (Subscription s : AccessTokenAzureManager.getSubscriptions(tid)) {
+                sids.add(s.subscriptionId());
             }
+            tidToSidsMap.put(t.tenantId(), sids);
         }
 
         // save account email

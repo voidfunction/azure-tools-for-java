@@ -22,9 +22,9 @@
 
 package com.microsoft.azuretools.authmanage.srvpri.step;
 
-import java.util.List;
-
 import com.microsoft.azuretools.authmanage.srvpri.report.Reporter;
+
+import java.util.List;
 
 /**
  * Created by vlashch on 10/18/16.

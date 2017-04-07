@@ -108,6 +108,12 @@ class LoginWindow extends DialogWrapper {
     }
 
     @Override
+    public void doCancelAction() {
+        super.doCancelAction();
+
+    }
+
+    @Override
     protected JComponent createSouthPanel() {
         return null;
     }

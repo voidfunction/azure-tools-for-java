@@ -23,9 +23,8 @@
 package com.microsoft.azuretools.adauth;
 
 import java.net.URI;
-import java.util.concurrent.Future;
 
 public interface IWebUi {
-    Future<String> authenticateAsync(URI requestUri, URI redirectUri);
-//    String authenticateAsync(URI requestUri, URI redirectUri) throws Exception;
+    String authenticate(URI requestUri, URI redirectUri);
+    //Future<String> authenticateAsync(URI requestUri, URI redirectUri)throws IOException;
 }

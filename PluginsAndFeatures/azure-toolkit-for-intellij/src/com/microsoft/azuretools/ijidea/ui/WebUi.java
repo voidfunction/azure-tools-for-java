@@ -37,7 +37,8 @@ import java.util.concurrent.Future;
 class WebUi implements IWebUi {
     LoginWindow loginWindow;
     @Override
-    public Future<String> authenticateAsync(URI requestUri, URI redirectUri) {
+    //public Future<String> authenticateAsync(URI requestUri, URI redirectUri) {
+    public String authenticate(URI requestUri, URI redirectUri) {
         System.out.println("==> requestUri: " + requestUri);
         final String requestUriStr = requestUri.toString();
         final String redirectUriStr = redirectUri.toString();
@@ -53,15 +54,16 @@ class WebUi implements IWebUi {
             }, ModalityState.any());
         }
 
-        final Callable<String> worker = new Callable<String>() {
-            @Override
-            public String call() {
-                return loginWindow.getResult();
-            }
-        };
-
-        // just to return future to comply interface
-        return Executors.newSingleThreadExecutor().submit(worker);
+//        final Callable<String> worker = new Callable<String>() {
+//            @Override
+//            public String call() {
+//                return loginWindow.getResult();
+//            }
+//        };
+//
+//        // just to return future to comply interface
+//        return Executors.newSingleThreadExecutor().submit(worker);
+        return loginWindow.getResult();
     }
 
     private void buildAndShow(String requestUri, String redirectUri) {
