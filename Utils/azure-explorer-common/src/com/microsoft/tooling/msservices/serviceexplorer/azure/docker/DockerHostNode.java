@@ -235,12 +235,18 @@ public class DockerHostNode extends AzureRefreshableNode {
       try {
         removeAllChildNodes();
         setIconPath(DOCKERHOST_STOP_ICON_PATH);
+        for (NodeAction nodeAction : getNodeActions()) {
+          nodeAction.setEnabled(false);
+        }
+        getNodeActionByName(ACTION_RESTART).setEnabled(true);
 
         Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
         VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
         if (vm != null) {
           vm.powerOff();
         }
+        getNodeActionByName(ACTION_START).setEnabled(true);
+        getNodeActionByName(ACTION_RESTART).setEnabled(false);
       } catch (Exception ee) {
         DefaultLoader.getUIHelper().logError(ee.getMessage(), ee);
       }

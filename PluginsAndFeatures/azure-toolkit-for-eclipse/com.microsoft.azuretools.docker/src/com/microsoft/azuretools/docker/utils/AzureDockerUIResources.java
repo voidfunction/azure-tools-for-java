@@ -66,6 +66,8 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 
@@ -212,8 +214,8 @@ public class AzureDockerUIResources {
 		            progressMonitor.done();
 					return Status.OK_STATUS;
 				} catch (Exception e) {
-					String msg = "An error occurred while attempting to create Docker host." + "\n" + e.getMessage();
-					log.log(Level.SEVERE, "createHost: " + msg, e);
+					String msg = "An error occurred while attempting to create a new Azure Key Vault." + "\n" + e.getMessage();
+					log.log(Level.SEVERE, "createDockerKeyVault: " + msg, e);
 					e.printStackTrace();
 					return Status.CANCEL_STATUS;
 				}
@@ -280,7 +282,7 @@ public class AzureDockerUIResources {
 		if (shell != null) {
 			MessageBox displayConfirmationDialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK| SWT.CANCEL);
 			displayConfirmationDialog.setText("Stop Create Azure Key Vault");
-			displayConfirmationDialog.setMessage("This action can leave the Docker virtual machine host in an partial setup state and which can cause publishing to a Docker container to fail!\n\n Are you sure you want this?");
+			displayConfirmationDialog.setMessage("This action can leave the Docker virtual machine host in a partial setup state and which can cause publishing to a Docker container to fail!\n\n Are you sure you want this?");
 			return displayConfirmationDialog.open();
 		}
 		
@@ -459,6 +461,18 @@ public class AzureDockerUIResources {
 		} catch (Exception e) {
 			log.log(Level.SEVERE, "publish2DockerHostContainer: " + e.getMessage(), e);
 			e.printStackTrace();					
+		}
+	}
+	
+	public static void printDebugMessage(Object source, String msg) {
+		if (AzureDockerUtils.DEBUG) {
+			System.out.println(msg);
+			try {
+				MessageConsole console = com.microsoft.azuretools.core.Activator.findConsole(com.microsoft.azuretools.core.Activator.CONSOLE_NAME);
+				console.activate();
+				final MessageConsoleStream azureConsoleOut = console.newMessageStream();
+		        azureConsoleOut.println(String.format("%s: %s", source.getClass().toString(), msg));
+			} catch (Exception ignored) {}
 		}
 	}
 }

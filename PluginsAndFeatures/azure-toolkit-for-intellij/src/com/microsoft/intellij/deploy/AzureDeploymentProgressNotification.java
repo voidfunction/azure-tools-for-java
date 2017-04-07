@@ -40,6 +40,7 @@ import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
 import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
@@ -130,7 +131,7 @@ public final class AzureDeploymentProgressNotification {
     public void deployToDockerContainer(AzureDockerImageInstance dockerImageInstance, String url) {
         Date startDate = new Date();
         try {
-            String msg = String.format("Deploying application to Docker host %s ...", dockerImageInstance.host.name);
+            String msg = String.format("Publishing %s to Docker host %s ...", new File(dockerImageInstance.artifactPath).getName(), dockerImageInstance.host.name);
             notifyProgress(dockerImageInstance.host.name, startDate, null, 5, msg);
 
             AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
@@ -223,7 +224,6 @@ public final class AzureDeploymentProgressNotification {
                 }
             }
             if (AzureDockerUtils.DEBUG) System.out.println("Done refreshing Docker hosts: " + new Date().toString());
-            if (AzureDockerUtils.DEBUG) System.out.println("Done refreshing key vaults: " + new Date().toString());
 
             notifyProgress(dockerImageInstance.host.name, startDate, url, 100, message("runStatus"), dockerImageInstance.host.name);
         } catch (InterruptedException e) {

@@ -28,7 +28,7 @@ class TableRowDescriptor{
 	private final TableItem item;
 	private final Link link;
 
-	public TableRowDescriptor(TableItem item,ProgressBar progressBar, Link link){
+	public TableRowDescriptor(TableItem item, ProgressBar progressBar, Link link){
 		this.item = item;
 		this.progressBar = progressBar;
 		this.link = link;

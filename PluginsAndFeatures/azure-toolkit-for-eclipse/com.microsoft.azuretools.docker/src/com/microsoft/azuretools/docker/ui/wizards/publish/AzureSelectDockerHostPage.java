@@ -316,12 +316,17 @@ public class AzureSelectDockerHostPage extends WizardPage {
 		dockerHostsList = new ArrayList<>();
 		dockerHostsTableViewer.setInput(dockerHostsList);
 		refreshDockerHostsTable(mainContainer);
-		if (!dockerHostsList.isEmpty() && dockerHostsTableSelection == null) {
-			dockerHostsTable.select(0);
-			dockerHostsTable.getItem(0).setChecked(true);
-			dockerHostsTableSelection = new DockerHostsTableSelection();
-			dockerHostsTableSelection.row = 0;
-			dockerHostsTableSelection.host = (DockerHost) dockerHostsTable.getItem(0).getData();
+		if (!dockerHostsList.isEmpty()) {
+			if (dockerHostsTableSelection == null) {
+				dockerHostsTable.select(0);
+				dockerHostsTable.getItem(0).setChecked(true);
+				dockerHostsTableSelection = new DockerHostsTableSelection();
+				dockerHostsTableSelection.row = 0;
+				dockerHostsTableSelection.host = (DockerHost) dockerHostsTable.getItem(0).getData();
+			} else {
+				dockerHostsTable.select(dockerHostsTableSelection.row);
+				dockerHostsTable.getItem(dockerHostsTableSelection.row).setChecked(true);				
+			}
 		} else {
 			dockerHostsTableSelection = null;
 		}
@@ -529,10 +534,6 @@ public class AzureSelectDockerHostPage extends WizardPage {
 
 	public void selectDefaultDockerHost(DockerHost dockerHost, boolean selectOtherHosts) {
 		if (dockerHost != null) {
-			if (dockerHostsTableSelection == null) {
-				dockerHostsTableSelection = new DockerHostsTableSelection();
-			}
-
 			int idx = 0;
 			DockerHost selected = null;
 			for (DockerHost host : dockerHostsList) {
@@ -548,6 +549,8 @@ public class AzureSelectDockerHostPage extends WizardPage {
 				}
 				dockerHostsTableSelection.row = idx;
 				dockerHostsTableSelection.host = selected;
+			} else {
+				dockerHostsTableSelection = null;
 			}
 		}
 	}
@@ -565,7 +568,7 @@ public class AzureSelectDockerHostPage extends WizardPage {
 		}
 
 		String artifactPath = dockerArtifactPathTextField.getText();
-		if (artifactPath == null || !Files.isRegularFile(Paths.get(artifactPath))) {
+		if (artifactPath == null || !AzureDockerValidationUtils.validateDockerArtifactPath(artifactPath)) {
 			errDispatcher.addMessage("dockerArtifactPathTextField", AzureDockerValidationUtils.getDockerArtifactPathTip(), null, IMessageProvider.ERROR, dockerArtifactPathTextField);
 			setErrorMessage("Invalid artifact path");
 			return false;

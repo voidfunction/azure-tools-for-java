@@ -19,28 +19,52 @@
  */
 package com.microsoft.azuretools.docker.ui.wizards.publish;
 
-import java.util.logging.Logger;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.Wizard;
-
 import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.model.EditableDockerHost;
+import com.microsoft.azure.docker.ops.AzureDockerContainerOps;
+import com.microsoft.azure.docker.ops.AzureDockerImageOps;
 import com.microsoft.azure.docker.ops.AzureDockerSSHOps;
 import com.microsoft.azure.docker.ops.AzureDockerVMOps;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
+import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
+import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
+import com.microsoft.azuretools.core.ui.views.AzureDeploymentProgressNotification;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.docker.ui.dialogs.AzureInputDockerLoginCredsDialog;
 import com.microsoft.azuretools.docker.utils.AzureDockerUIResources;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
+import java.io.File;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
+
 public class AzureSelectDockerWizard extends Wizard {
-	private static final Logger log =  Logger.getLogger(AzureDockerUIResources.class.getName());
+	private static final Logger log =  Logger.getLogger(AzureSelectDockerWizard.class.getName());
 	
 	private AzureSelectDockerHostPage azureSelectDockerHostPage;
 	private AzureConfigureDockerContainerStep azureConfigureDockerContainerStep;
@@ -150,9 +174,10 @@ public class AzureSelectDockerWizard extends Wizard {
 								} while (session == null);
 							}
 
-							Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerImageDescription.sid).azureClient;
+//							Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerImageDescription.sid).azureClient;
 //							DockerContainerDeployTask task = new DockerContainerDeployTask(project, azureClient, dockerImageDescription);
 //							task.queue();
+							createDockerContainerDeployTask(project, dockerImageDescription, dockerManager);
 						}
 					});
 				} catch (Exception e) {
@@ -162,9 +187,229 @@ public class AzureSelectDockerWizard extends Wizard {
 			}
 		});
 
-		return String.format("%s://%s:%s/%s", (dockerImageDescription.isHttpsWebApp ? "https" : "http"),
-				dockerImageDescription.host.hostVM.dnsName, dockerImageDescription.dockerPortSettings.split(":")[0], // "12345:80/tcp"
-				dockerImageDescription.artifactName);
+		return AzureDockerUtils.getUrl(dockerImageDescription);
 	}
+	
+	public void createDockerContainerDeployTask(IProject project, AzureDockerImageInstance dockerImageInstance, AzureDockerHostsManager dockerManager) {
+		String url = AzureDockerUtils.getUrl(dockerImageInstance);
+
+		String deploymentName = url;
+		String jobDescription = String.format("Publishing %s as Docker Container", new File(dockerImageInstance.artifactPath).getName());
+		AzureDeploymentProgressNotification.createAzureDeploymentProgressNotification(deploymentName, jobDescription);
+		
+		Job createDockerHostJob = new Job(jobDescription) {
+			@Override
+			protected IStatus run(IProgressMonitor progressMonitor) {
+		        try {
+		        	// Setup Azure Console and Azure Activity Log Window notifications
+					MessageConsole console = com.microsoft.azuretools.core.Activator.findConsole(com.microsoft.azuretools.core.Activator.CONSOLE_NAME);
+					console.activate();
+					final MessageConsoleStream azureConsoleOut = console.newMessageStream();
+		            progressMonitor.beginTask("start task", 100);
+		            com.microsoft.azuretools.core.Activator.removeUnNecessaryListener();
+		            DeploymentEventListener undeployListnr = new DeploymentEventListener() {
+		                @Override
+		                public void onDeploymentStep(DeploymentEventArgs args) {
+		                    progressMonitor.subTask(args.getDeployMessage());
+		                    progressMonitor.worked(args.getDeployCompleteness());
+		                    azureConsoleOut.println(String.format("%s: %s", deploymentName, args.getDeployMessage()));
+		                }
+		            };
+		            com.microsoft.azuretools.core.Activator.getDefault().addDeploymentEventListener(undeployListnr);
+		            com.microsoft.azuretools.core.Activator.depEveList.add(undeployListnr);
+
+		            // Start the real job here
+		            String msg = String.format("Publishing %s to Docker host %s ...", new File(dockerImageInstance.artifactPath).getName(), dockerImageInstance.host.name);
+					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 0, msg);
+
+					msg = "Connecting to Azure...";
+					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 5, msg);
+					Thread.sleep(5000);
+
+					AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
+		            // not signed in
+		            if (azureAuthManager == null) {
+		                throw new RuntimeException("User not signed in");
+		            }
+		            AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(azureAuthManager);
+		            Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerImageInstance.host.sid).azureClient;
+					KeyVaultClient keyVaultClient = dockerManager.getSubscriptionsMap().get(dockerImageInstance.host.sid).keyVaultClient;
+					if (progressMonitor.isCanceled()) {
+						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
+							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
+							progressMonitor.done();
+							return Status.CANCEL_STATUS;
+						}
+					}
+					
+		            if (dockerImageInstance.hasNewDockerHost) {
+		                msg = String.format("Creating new virtual machine %s ...", dockerImageInstance.host.name);
+						AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 20, msg);
+		                AzureDockerUIResources.printDebugMessage(this, "Creating new virtual machine: " + new Date().toString());
+		                AzureDockerVMOps.createDockerHostVM(azureClient, dockerImageInstance.host);
+		                AzureDockerUIResources.printDebugMessage(this, "Done creating new virtual machine: " + new Date().toString());
+						if (progressMonitor.isCanceled()) {
+							if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
+								AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
+								progressMonitor.done();
+								return Status.CANCEL_STATUS;
+							}
+						}
+						
+
+		                msg = String.format("Waiting for virtual machine to be up %s ...", dockerImageInstance.host.name);
+						AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 10, msg);
+		                AzureDockerUIResources.printDebugMessage(this, "Waiting for virtual machine to be up: " + new Date().toString());
+		                AzureDockerVMOps.waitForVirtualMachineStartup(azureClient, dockerImageInstance.host);
+		                AzureDockerUIResources.printDebugMessage(this, "Done Waiting for virtual machine to be up: " + new Date().toString());
+						if (progressMonitor.isCanceled()) {
+							if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
+								AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
+								progressMonitor.done();
+								return Status.CANCEL_STATUS;
+							}
+						}
+						
+
+		                msg = String.format("Configuring Docker service for %s ...", dockerImageInstance.host.name);
+						AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 10, msg);
+		                AzureDockerUIResources.printDebugMessage(this, "Configuring Docker host: " + new Date().toString());
+		                AzureDockerVMOps.installDocker(dockerImageInstance.host);
+		                AzureDockerUIResources.printDebugMessage(this, "Done configuring Docker host: " + new Date().toString());
+
+		                AzureDockerUIResources.printDebugMessage(this, "Finished setting up Docker host");
+		            } else {
+		                msg = String.format("Using virtual machine %s ...", dockerImageInstance.host.name);
+						AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 40, msg);
+		            }
+					if (progressMonitor.isCanceled()) {
+						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
+							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
+							progressMonitor.done();
+							return Status.CANCEL_STATUS;
+						}
+					}
+					
+
+		            if (dockerImageInstance.host.session == null) {
+		            	AzureDockerUIResources.printDebugMessage(this, "Opening a remote connection to the Docker host: " + new Date().toString());
+		                dockerImageInstance.host.session = AzureDockerSSHOps.createLoginInstance(dockerImageInstance.host);
+		                AzureDockerUIResources.printDebugMessage(this, "Done opening a remote connection to the Docker host: " + new Date().toString());
+		            }
+
+		            if (dockerImageInstance.hasNewDockerHost) {
+		                if (dockerImageInstance.host.certVault != null && dockerImageInstance.host.certVault.hostName != null) {
+		                    AzureDockerUIResources.createDockerKeyVault(dockerImageInstance.host, dockerManager);
+		                }
+		            }
+
+		            msg = String.format("Uploading Dockerfile and artifact %s on %s ...", dockerImageInstance.artifactName, dockerImageInstance.host.name);
+					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 15, msg);
+		            AzureDockerUIResources.printDebugMessage(this, "Uploading Dockerfile and artifact: " + new Date().toString());
+		            AzureDockerVMOps.uploadDockerfileAndArtifact(dockerImageInstance, dockerImageInstance.host.session);
+		            AzureDockerUIResources.printDebugMessage(this, "Uploading Dockerfile and artifact: " + new Date().toString());
+					if (progressMonitor.isCanceled()) {
+						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
+							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
+							progressMonitor.done();
+							return Status.CANCEL_STATUS;
+						}
+					}
+					
+
+		            msg = String.format("Creating Docker image %s on %s ...", dockerImageInstance.dockerImageName, dockerImageInstance.host.name);
+					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 20, msg);
+		            AzureDockerUIResources.printDebugMessage(this, "Creating a Docker image to the Docker host: " + new Date().toString());
+		            AzureDockerImageOps.create(dockerImageInstance, dockerImageInstance.host.session);
+		            AzureDockerUIResources.printDebugMessage(this, "Done creating a Docker image to the Docker host: " + new Date().toString());
+					if (progressMonitor.isCanceled()) {
+						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
+							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
+							progressMonitor.done();
+							return Status.CANCEL_STATUS;
+						}
+					}
+					
+
+		            msg = String.format("Creating Docker container %s for image %s on %s ...", dockerImageInstance.dockerContainerName, dockerImageInstance.dockerImageName, dockerImageInstance.host.name);
+					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 5, msg);
+		            AzureDockerUIResources.printDebugMessage(this, "Creating a Docker container to the Docker host: " + new Date().toString());
+		            AzureDockerContainerOps.create(dockerImageInstance, dockerImageInstance.host.session);
+		            AzureDockerUIResources.printDebugMessage(this, "Done creating a Docker container to the Docker host: " + new Date().toString());
+					if (progressMonitor.isCanceled()) {
+						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
+							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
+							progressMonitor.done();
+							return Status.CANCEL_STATUS;
+						}
+					}
+					
+
+		            msg = String.format("Starting Docker container %s for image %s on %s ...", dockerImageInstance.dockerContainerName, dockerImageInstance.dockerImageName, dockerImageInstance.host.name);
+					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 5, msg);
+		            AzureDockerUIResources.printDebugMessage(this, "Starting a Docker container to the Docker host: " + new Date().toString());
+		            AzureDockerContainerOps.start(dockerImageInstance, dockerImageInstance.host.session);
+		            AzureDockerUIResources.printDebugMessage(this, "Done starting a Docker container to the Docker host: " + new Date().toString());
+					if (progressMonitor.isCanceled()) {
+						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
+							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
+							progressMonitor.done();
+							return Status.CANCEL_STATUS;
+						}
+					}
+					
+
+		            msg = String.format("Updating Docker hosts ...");
+					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 5, msg);
+		            AzureDockerUIResources.printDebugMessage(this, "Refreshing docker hosts: " + new Date().toString());
+//		            dockerManager.refreshDockerHostDetails();
+		            VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerImageInstance.host.hostVM.resourceGroupName, dockerImageInstance.host.hostVM.name);
+		            if (vm != null) {
+		                DockerHost updatedHost = AzureDockerVMOps.getDockerHost(vm, dockerManager.getDockerVaultsMap());
+		                if (updatedHost != null) {
+		                    updatedHost.sid = dockerImageInstance.host.sid;
+		                    updatedHost.hostVM.sid = dockerImageInstance.host.hostVM.sid;
+		                    if (updatedHost.certVault == null) {
+		                        updatedHost.certVault = dockerImageInstance.host.certVault;
+		                        updatedHost.hasPwdLogIn = dockerImageInstance.host.hasPwdLogIn;
+		                        updatedHost.hasSSHLogIn = dockerImageInstance.host.hasSSHLogIn;
+		                        updatedHost.isTLSSecured = dockerImageInstance.host.isTLSSecured;
+		                    }
+		                    dockerManager.addDockerHostDetails(dockerImageInstance.host);
+		                }
+		            }
+		            AzureDockerUIResources.printDebugMessage(this, "Done refreshing Docker hosts: " + new Date().toString());
+
+					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 100, "SUCCESS: " + url);
+					
+		            progressMonitor.done();
+					return Status.OK_STATUS;
+				} catch (Exception e) {
+					String msg = "An error occurred while attempting to publish a Docker container!" + "\n" + e.getMessage();
+					log.log(Level.SEVERE, "createDockerContainerDeployTask: " + msg, e);
+					e.printStackTrace();
+					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Error: " + e.getMessage());
+					return Status.CANCEL_STATUS;
+				}
+			}
+		};
+		
+		createDockerHostJob.schedule();	
+	}
+	
+	private static int displayWarningOnCreateDockerContainerDeployTask(){
+		Display currentDisplay = Display.getCurrent();
+		Shell shell = currentDisplay.getActiveShell();
+		
+		if (shell != null) {
+			MessageBox displayConfirmationDialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK| SWT.CANCEL);
+			displayConfirmationDialog.setText("Stop Docker Container Deployment");
+			displayConfirmationDialog.setMessage("This action can leave the Docker virtual machine host in a partial setup state and which can cause publishing to a Docker container to fail!\n\n Are you sure you want this?");
+			return displayConfirmationDialog.open();
+		}
+		
+		return 1;
+	}
+	
 	
 }
