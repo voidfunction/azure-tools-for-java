@@ -124,6 +124,13 @@ public class AzureDockerUtils {
     return getDefaultName(projectName) + ".war";
   }
 
+  public static String getUrl(AzureDockerImageInstance dockerImageInstance) {
+    return String.format("%s://%s:%s/%s", (dockerImageInstance.isHttpsWebApp ? "https" : "http"),
+        dockerImageInstance.host.hostVM.dnsName,
+        dockerImageInstance.dockerPortSettings.split(":")[0], // "12345:80/tcp" -> "12345"
+        dockerImageInstance.hasRootDeployment ? "" : dockerImageInstance.artifactName);
+  }
+
   public static boolean checkKeyvaultNameAvailability(String name) {
     try {
       URL url = new URL("https://" + name + ".vault.azure.net");

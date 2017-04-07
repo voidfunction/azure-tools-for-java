@@ -29,9 +29,11 @@ import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -82,7 +84,7 @@ public class WindowsAzureActivityLogView extends ViewPart {
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 4; i++) {
 			new TableColumn(table, SWT.NONE);
 		}
 
@@ -90,12 +92,14 @@ public class WindowsAzureActivityLogView extends ViewPart {
 		parent.setLayout(layout);
 
 		table.getColumn(0).setText(Messages.desc);
-		table.getColumn(1).setText(Messages.status);
-		table.getColumn(2).setText(Messages.startTime);
+		table.getColumn(1).setText(Messages.progress);
+		table.getColumn(2).setText(Messages.status);
+		table.getColumn(3).setText(Messages.startTime);
 
-		layout.setColumnData(table.getColumn(0), new ColumnWeightData(65));
-		layout.setColumnData(table.getColumn(1), new ColumnWeightData(20));
-		layout.setColumnData(table.getColumn(2), new ColumnWeightData(15));
+		layout.setColumnData(table.getColumn(0), new ColumnWeightData(95));
+		layout.setColumnData(table.getColumn(1), new ColumnWeightData(25));
+		layout.setColumnData(table.getColumn(2), new ColumnWeightData(65));
+		layout.setColumnData(table.getColumn(3), new ColumnWeightData(15));
 
 		return table;
 	}
@@ -107,7 +111,7 @@ public class WindowsAzureActivityLogView extends ViewPart {
 		}
 
 		TableItem item = new TableItem(table, SWT.NONE);
-		item.setText(new String[] { description, null,
+		item.setText(new String[] { description, null, null,
 				dateFormat.format(startDate) });
 
 		ProgressBar bar = new ProgressBar(table, SWT.NONE);
@@ -118,7 +122,8 @@ public class WindowsAzureActivityLogView extends ViewPart {
 		editor.setEditor(bar, item, 1);
 
 		Link link = new Link(table, SWT.LEFT);
-		link.setText(String.format("%s%s%s%s", "  ", "<a>", Messages.runStatusVisible, "</a>"));
+		link.setText("");
+
 		rows.put(key, new TableRowDescriptor(item, bar, link));
 	}
 
@@ -142,13 +147,15 @@ public class WindowsAzureActivityLogView extends ViewPart {
 										if (row.getProgressBar().getMaximum() <= (row.getProgressBar().getSelection())) {
 											row.getProgressBar().setVisible(false);
 											/*
-											 * Need link only if service is running.
+											 * Need link only if args.getDeploymentURL() is not null.
 											 */
-											if (args.getDeployMessage().equalsIgnoreCase(Messages.runStatus)) {
-												TableEditor editor = new TableEditor(table);
-												editor.grabHorizontal = editor.grabVertical = true;
-												editor.setEditor(row.getLink(), row.getItem(), 1);
-												row.getLink().setVisible(true);
+											Link link = row.getLink();
+											TableEditor editor = new TableEditor(table);
+											editor.grabHorizontal = editor.grabVertical = true;
+											if (args.getDeploymentURL() != null) {
+												link.setVisible(true);
+												link.setText(String.format("  <a>Published</a>"));
+//												link.setText(String.format("%s%s%s%s", "  ", "<a>", Messages.runStatusVisible, "</a>"));
 												row.getLink().addSelectionListener(new SelectionAdapter() {
 													@Override
 													public void widgetSelected(SelectionEvent event) {
@@ -159,10 +166,28 @@ public class WindowsAzureActivityLogView extends ViewPart {
 														}
 													}
 												});
+												editor.setEditor(link, row.getItem(), 1);
 											} else {
-												row.getItem().setText(1, args.getDeployMessage());
+												link.setVisible(false);
 											}
 										}
+										row.getItem().setText(2, args.getDeployMessage());
+//											if (args.getDeployMessage().equalsIgnoreCase(Messages.runStatus)) {
+//												editor.setEditor(row.getLink(), row.getItem(), 2);
+//												row.getLink().setVisible(true);
+//												row.getLink().addSelectionListener(new SelectionAdapter() {
+//													@Override
+//													public void widgetSelected(SelectionEvent event) {
+//														try {
+//															PlatformUI.getWorkbench().getBrowserSupport().
+//															getExternalBrowser().openURL(new URL(args.getDeploymentURL()));
+//														} catch (Exception e) {
+//														}
+//													}
+//												});
+//											} else {
+//												row.getItem().setText(2, args.getDeployMessage());
+//											}
 									}
 								}
 							});
@@ -170,5 +195,4 @@ public class WindowsAzureActivityLogView extends ViewPart {
 					}
 				});
 	}
-
 }

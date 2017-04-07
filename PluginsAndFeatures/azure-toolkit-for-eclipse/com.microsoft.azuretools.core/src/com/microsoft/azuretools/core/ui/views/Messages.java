@@ -25,6 +25,7 @@ public final class Messages extends NLS {
 	private static final String BUNDLE_NAME = "com.microsoft.azuretools.core.ui.views.messages"; //$NON-NLS-1$
 	public static String desc;
 	public static String startTime;
+	public static String progress;
 	public static String status;
 	public static String runStatus;
 	public static String runStatusVisible;

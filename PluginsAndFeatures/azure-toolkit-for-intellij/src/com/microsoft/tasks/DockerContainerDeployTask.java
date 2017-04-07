@@ -28,6 +28,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azuretools.utils.WebAppUtils;
 import com.microsoft.intellij.AzurePlugin;
@@ -47,16 +48,12 @@ public class DockerContainerDeployTask extends Task.Backgroundable {
   static final Logger LOG = Logger.getInstance(DockerContainerDeployTask.class);
 
   public DockerContainerDeployTask(Project project, Azure azureClient, AzureDockerImageInstance dockerImageInstance) {
-    super(project, "Deploying Docker Container on Azure", true, Backgroundable.DEAF);
+    super(project, "Publishing Docker Container on Azure", true, Backgroundable.DEAF);
     this.project = project;
     this.dockerImageInstance = dockerImageInstance;
     this.azureClient = azureClient;
 
-    this.url = String.format("%s://%s:%s/%s",
-        (dockerImageInstance.isHttpsWebApp ? "https" : "http"),
-        dockerImageInstance.host.hostVM.dnsName,
-        dockerImageInstance.dockerPortSettings.split(":")[0],  // "12345:80/tcp" -> "12345"
-        dockerImageInstance.hasRootDeployment ? "" : dockerImageInstance.artifactName);
+    this.url = AzureDockerUtils.getUrl(dockerImageInstance);
   }
 
   @Override

@@ -583,8 +583,8 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     dockerImageDescription.dockerImageName = dockerImageNameTextField.getText();
     model.setDockerContainerName(AzureDockerUtils.getDefaultDockerContainerName(dockerImageDescription.dockerImageName));
 
-    if (dockerArtifactPath.getText() == null || !Files.isRegularFile(Paths.get(dockerArtifactPath.getText()))) {
-      ValidationInfo info = new ValidationInfo("Missing the artifact to be published", dockerArtifactPath);
+    if (dockerArtifactPath.getText() == null || !AzureDockerValidationUtils.validateDockerArtifactPath(dockerArtifactPath.getText())) {
+      ValidationInfo info = new ValidationInfo("Invalid artifact file name", dockerArtifactPath);
       dockerArtifactPathLabel.setVisible(true);
       setDialogButtonsState(false);
       if (shakeOnError)

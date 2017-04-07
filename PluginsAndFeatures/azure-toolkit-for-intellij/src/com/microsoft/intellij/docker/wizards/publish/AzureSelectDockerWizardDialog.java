@@ -30,6 +30,7 @@ import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.docker.model.EditableDockerHost;
 import com.microsoft.azure.docker.ops.AzureDockerSSHOps;
 import com.microsoft.azure.docker.ops.AzureDockerVMOps;
+import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.intellij.docker.dialogs.AzureInputDockerLoginCredsDialog;
 import com.microsoft.intellij.util.PluginUtil;
@@ -161,11 +162,7 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
       }
     });
 
-    return String.format("%s://%s:%s/%s",
-        (dockerImageInstance.isHttpsWebApp ? "https" : "http"),
-        dockerImageInstance.host.hostVM.dnsName,
-        dockerImageInstance.dockerPortSettings.split(":")[0],  // "12345:80/tcp" -> "12345"
-        dockerImageInstance.artifactName);
+    return AzureDockerUtils.getUrl(dockerImageInstance);
   }
 
   public AzureDockerImageInstance getDockerImageInstance() {
