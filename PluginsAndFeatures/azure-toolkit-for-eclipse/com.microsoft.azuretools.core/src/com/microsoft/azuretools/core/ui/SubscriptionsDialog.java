@@ -48,7 +48,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
-import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.authmanage.SubscriptionManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.core.Activator;
@@ -142,7 +141,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
                     monitor.beginTask("Reading subscriptions...", IProgressMonitor.UNKNOWN);
                     try {
                         subscriptionManager.getSubscriptionDetails();
-                    } catch (IOException | AuthException ex) {
+                    } catch (IOException ex) {
                     	ex.printStackTrace();
                     	 LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@efreshSubscriptionsAsync@SubscriptionDialog", ex));
                     }
@@ -164,7 +163,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
                 item.setText(new String[] {sd.getSubscriptionName(), sd.getSubscriptionId()});
                 item.setChecked(sd.isSelected());
             }
-        } catch (IOException | AuthException ex) {
+        } catch (IOException ex) {
         	ex.printStackTrace();
         	LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "setSubscriptionDetails@SubscriptionDialog", ex));
         }
@@ -178,7 +177,7 @@ public class SubscriptionsDialog extends TitleAreaDialog {
             refreshSubscriptionsAsync();
             setSubscriptionDetails();
             subscriptionManager.setSubscriptionDetails(sdl);
-        } catch (IOException | AuthException ex) {
+        } catch (IOException ex) {
         	ex.printStackTrace();
             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "refreshSubscriptions@SubscriptionDialog", ex));
         }
