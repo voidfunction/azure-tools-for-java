@@ -63,7 +63,7 @@ public class ArtifactValidationWindow extends DialogWrapper {
         sb.append("</ul>");
 
         sb.append("Please fix the issues first.<br/>");
-        sb.append("<a href=\"https://www.jetbrains.com/help/idea/2016.3/working-with-artifacts.html\">Working with Artifacts Help</a>");
+        sb.append("<a href=\"https://www.jetbrains.com/help/idea/2017.1/working-with-artifacts.html\">Working with Artifacts Help</a>");
 
 
         editorPane.setText(sb.toString());
