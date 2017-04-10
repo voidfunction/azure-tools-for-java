@@ -105,6 +105,11 @@ public class SubscriptionsDialog extends DialogWrapper {
         init();
     }
 
+    @Override
+    protected Action[] createActions() {
+        return new Action[]{this.getOKAction(), this.getCancelAction()};
+    }
+
     private void refreshSubscriptions() {
         try {
             AzureManager manager = AuthMethodManager.getInstance().getAzureManager();

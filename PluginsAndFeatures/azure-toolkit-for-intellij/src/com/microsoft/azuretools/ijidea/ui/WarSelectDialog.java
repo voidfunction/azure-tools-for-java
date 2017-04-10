@@ -22,18 +22,18 @@
 
 package com.microsoft.azuretools.ijidea.ui;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.packaging.artifacts.Artifact;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.List;
 
-public class WarSelectDialog extends JDialog {
+public class WarSelectDialog extends DialogWrapper {
     private JPanel contentPane;
-    private JButton buttonOK;
-    private JButton buttonCancel;
     private JTable table;
 
     private List<Artifact> artifactList;
@@ -43,51 +43,21 @@ public class WarSelectDialog extends JDialog {
         return selectedArtifact;
     }
 
-    private int result = JOptionPane.CANCEL_OPTION;
-
-    public static WarSelectDialog go(List<Artifact> artifactList, Component parent) {
-        WarSelectDialog d = new WarSelectDialog(artifactList);
+    public static WarSelectDialog go(@Nullable Project project, List<Artifact> artifactList) {
+        WarSelectDialog d = new WarSelectDialog(project, artifactList);
         d.artifactList = artifactList;
-        d.pack();
-        d.setLocationRelativeTo(parent);
-        d.setVisible(true);
-        if (d.result == JOptionPane.OK_OPTION)
+        d.show();
+        if (d.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
             return d;
+        }
+
         return null;
     }
 
-    protected WarSelectDialog(List<Artifact> artifactList) {
-        setContentPane(contentPane);
+    protected WarSelectDialog(@Nullable Project project, List<Artifact> artifactList) {
+        super(project, true, IdeModalityType.PROJECT);
         setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
         setTitle("Select WAR Artifact");
-
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
-
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         this.artifactList = artifactList;
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -98,26 +68,33 @@ public class WarSelectDialog extends JDialog {
             tableModel.addRow(new String[] {artifact.getName(), artifact.getOutputFilePath()});
         }
         table.setModel(tableModel);
+
+        init();
     }
 
-    private void onOK() {
+    @Nullable
+    @Override
+    protected JComponent createCenterPanel() {
+        return contentPane;
+    }
+
+    @Override
+    protected Action[] createActions() {
+        return new Action[]{this.getOKAction(), this.getCancelAction()};
+    }
+
+    @Override
+    protected void doOKAction() {
         DefaultTableModel tableModel = (DefaultTableModel)table.getModel();
         int i = table.getSelectedRow();
         if (i < 0) {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(contentPane,
                     "Please select an artifact",
                     "Select Artifact Status",
                     JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-
         selectedArtifact = artifactList.get(i);
-
-        result = JOptionPane.OK_OPTION;
-        dispose();
-    }
-
-    private void onCancel() {
-        dispose();
+        super.doOKAction();
     }
 }

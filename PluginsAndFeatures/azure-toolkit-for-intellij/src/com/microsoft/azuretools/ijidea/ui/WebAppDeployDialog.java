@@ -181,6 +181,11 @@ public class WebAppDeployDialog extends DialogWrapper {
         super.show();
     }
 
+    @Override
+    protected Action[] createActions() {
+        return new Action[]{this.getOKAction(), this.getCancelAction()};
+    }
+
     private void fillTableAsync() {
         ApplicationManager.getApplication().invokeLater(new Runnable() {
             @Override

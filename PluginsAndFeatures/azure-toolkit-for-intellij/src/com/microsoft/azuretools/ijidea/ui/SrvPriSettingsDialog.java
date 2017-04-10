@@ -111,6 +111,11 @@ public class SrvPriSettingsDialog extends DialogWrapper {
         init();
     }
 
+    @Override
+    protected Action[] createActions() {
+        return new Action[]{this.getOKAction(), this.getCancelAction()};
+    }
+
     private void setSubscriptions() {
         for (SubscriptionDetail sd : sdl) {
             model.addRow(new Object[] {sd.isSelected(), sd.getSubscriptionName(), sd.getSubscriptionId()});

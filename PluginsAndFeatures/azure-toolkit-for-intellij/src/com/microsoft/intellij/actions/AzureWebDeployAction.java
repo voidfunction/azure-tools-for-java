@@ -76,10 +76,10 @@ public class AzureWebDeployAction extends AnAction {
             List<String> issues = new LinkedList<>();
             if (artifacts.size() == 0 ) {
                 issues.add("A web archive (WAR) Artifact has not been configured yet. The artifact configurations are managed in the <b>Project Structure</b> dialog (<b>File | Project Structure | Artifacts</b>).");
-                ArtifactValidationWindow.go(issues, frame);
+                ArtifactValidationWindow.go(project, issues);
                 return;
             } else if (artifacts.size() > 1 ) {
-                WarSelectDialog d = WarSelectDialog.go(new ArrayList<>(artifacts), frame);
+                WarSelectDialog d = WarSelectDialog.go(project, new ArrayList<>(artifacts));
                 if (d == null) {
                     return;
                 }
@@ -102,7 +102,7 @@ public class AzureWebDeployAction extends AnAction {
             }
 
             if (issues.size() > 0) {
-                ArtifactValidationWindow.go(issues, frame);
+                ArtifactValidationWindow.go(project, issues);
                 return;
             }
 

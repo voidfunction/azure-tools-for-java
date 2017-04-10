@@ -38,6 +38,7 @@ import com.microsoft.azuretools.authmanage.interact.AuthMethod;
 import com.microsoft.azuretools.authmanage.models.AuthMethodDetails;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AccessTokenAzureManager;
+import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -48,6 +49,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -365,6 +367,13 @@ public class SignInWindow extends DialogWrapper {
     public void doCancelAction() {
         authMethodDetailsResult = authMethodDetails;
         super.doCancelAction();
+    }
+
+    @Override
+    public void doHelpAction() {
+        JXHyperlink helpLink = new JXHyperlink();
+        helpLink.setURI(URI.create("https://docs.microsoft.com/en-us/azure/azure-toolkit-for-intellij-sign-in-instructions"));
+        helpLink.doClick();
     }
 
     @Nullable
