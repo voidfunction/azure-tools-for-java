@@ -46,6 +46,7 @@ public class ErrorWindow extends DialogWrapper {
         } else {
             setTitle("Error Notification");
         }
+
         setCancelButtonText("Close");
         textPane.setText(message);
 

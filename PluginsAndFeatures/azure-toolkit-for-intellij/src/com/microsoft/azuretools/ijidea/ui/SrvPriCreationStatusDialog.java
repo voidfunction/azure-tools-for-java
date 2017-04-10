@@ -116,6 +116,11 @@ public class SrvPriCreationStatusDialog extends DialogWrapper {
         init();
     }
 
+    @Override
+    protected Action[] createActions() {
+        return new Action[]{this.getOKAction(), this.getCancelAction()};
+    }
+
     private void createUIComponents() {
         // TODO: place custom component creation code here
         statusTable = new JBTable();

@@ -333,6 +333,11 @@ public class AppServiceCreateDialog extends DialogWrapper {
         return "AppServiceCreateDialog";
     }
 
+    @Override
+    protected Action[] createActions() {
+        return new Action[]{this.getOKAction(), this.getCancelAction()};
+    }
+
     protected void fillWebContainers() {
         DefaultComboBoxModel<WebAppUtils.WebContainerMod> cbModel = new DefaultComboBoxModel<WebAppUtils.WebContainerMod>();
         for (WebAppUtils.WebContainerMod wc : WebAppUtils.WebContainerMod.values()) {

@@ -22,7 +22,10 @@
 
 package com.microsoft.azuretools.ijidea.ui;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import org.jdesktop.swingx.JXHyperlink;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
@@ -33,48 +36,23 @@ import java.awt.event.*;
 import java.net.URI;
 import java.util.List;
 
-public class ArtifactValidationWindow extends JDialog {
+public class ArtifactValidationWindow extends DialogWrapper {
     private JPanel contentPane;
-    private JButton buttonCancel;
-    //private JTextPane textPane;
     private JEditorPane editorPane;
 
     private List<String> issues;
 
-    public static void go(List<String> issues, Component parent) {
-        ArtifactValidationWindow w = new ArtifactValidationWindow(issues);
-        w.pack();
-        w.setLocationRelativeTo(parent);
-        w.setVisible(true);
+    public static void go(@Nullable Project project, List<String> issues) {
+        ArtifactValidationWindow w = new ArtifactValidationWindow(project, issues);
+        w.show();
     }
 
-    public ArtifactValidationWindow(List<String> issues) {
-        setContentPane(contentPane);
+    public ArtifactValidationWindow(@Nullable Project project, List<String> issues) {
+        super(project, true, IdeModalityType.PROJECT);
         setModal(true);
-        getRootPane().setDefaultButton(buttonCancel);
         setTitle("Artifact Validation");
+        setCancelButtonText("Close");
         this.issues = issues;
-
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
-
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         StringBuilder sb = new StringBuilder();
         sb.append("<H3>The following issues were found:</H3>");
@@ -108,11 +86,18 @@ public class ArtifactValidationWindow extends JDialog {
         String bodyRule = "body { font-family: " + font.getFamily() + "; " +
                 "font-size: " + font.getSize() + "pt; }";
         ((HTMLDocument)editorPane.getDocument()).getStyleSheet().addRule(bodyRule);
+
+        init();
     }
 
-    private void onCancel() {
-        // add your code here if necessary
-        dispose();
+    @Nullable
+    @Override
+    protected JComponent createCenterPanel() {
+        return contentPane;
     }
 
+    @Override
+    protected Action[] createActions() {
+        return new Action[]{this.getCancelAction()};
+    }
 }
