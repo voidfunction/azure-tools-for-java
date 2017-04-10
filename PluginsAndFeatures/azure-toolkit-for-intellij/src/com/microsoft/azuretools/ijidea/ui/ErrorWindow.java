@@ -27,6 +27,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class ErrorWindow extends DialogWrapper {
     private JPanel contentPane;
@@ -47,6 +48,9 @@ public class ErrorWindow extends DialogWrapper {
         }
         setCancelButtonText("Close");
         textPane.setText(message);
+
+        Font labelFont = UIManager.getFont("Label.font");
+        textPane.setFont(labelFont);
 
         init();
     }

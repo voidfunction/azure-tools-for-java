@@ -203,8 +203,6 @@ public class SignInWindow extends DialogWrapper {
                     } catch (AuthCanceledException ex) {
                         System.out.println(ex.getMessage());
                     } catch (IOException ex) {
-                        //ex.printStackTrace();
-                        //LOGGER.error("run@ProgressManager@signInAsync@SignInWindow", ex.getMessage());
                         ApplicationManager.getApplication().invokeLater(new Runnable() {
                             @Override
                             public void run() {
