@@ -19,17 +19,21 @@
  */
 package com.microsoft.azuretools.docker.utils;
 
+import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerCertVault;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.model.EditableDockerHost;
 import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
+import com.microsoft.azure.docker.ops.AzureDockerSSHOps;
 import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azuretools.docker.ui.dialogs.AzureInputDockerLoginCredsDialog;
 import com.microsoft.azuretools.docker.ui.wizards.publish.AzureSelectDockerWizard;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -475,4 +479,35 @@ public class AzureDockerUIResources {
 			} catch (Exception ignored) {}
 		}
 	}
+	
+	public static void updateDockerHost(Shell shell, IProject project, EditableDockerHost editableDockerHost, AzureDockerHostsManager dockerManager, boolean doReset) {
+		DockerHost updateHost = editableDockerHost.originalDockerHost;
+		AzureInputDockerLoginCredsDialog loginCredsDialog = new AzureInputDockerLoginCredsDialog(PluginUtil.getParentShell(), project, editableDockerHost, dockerManager, doReset);
+
+		if (loginCredsDialog.open() == Window.OK) {
+			// Update Docker host log in credentials
+			updateHost.isUpdating = true;
+			DefaultLoader.getIdeHelper().runInBackground(project, String.format("Updating %s Log In Credentials", updateHost.name), false, true, String.format("Updating log in credentials for %s...", updateHost.name), new Runnable() {
+				@Override
+				public void run() {
+					try {
+						AzureDockerVMOps.updateDockerHostVM(dockerManager.getSubscriptionsMap().get(updateHost.sid).azureClient, editableDockerHost.updatedDockerHost);
+						updateHost.certVault = editableDockerHost.updatedDockerHost.certVault;
+						updateHost.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
+						updateHost.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
+		                Session session = AzureDockerSSHOps.createLoginInstance(updateHost);
+		                AzureDockerVMOps.UpdateCurrentDockerUser(session);
+		                updateHost.session = session;
+					} catch (Exception ee) {
+						if (AzureDockerUtils.DEBUG)
+							ee.printStackTrace();
+						log.log(Level.SEVERE, "dockerHostsEditButton.addSelectionListener", ee);
+					}
+
+					updateHost.isUpdating = false;
+				}
+			});
+		}
+	}
+
 }

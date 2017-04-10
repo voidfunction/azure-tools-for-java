@@ -206,7 +206,7 @@ public class AzureSelectDockerWizard extends Wizard {
 					console.activate();
 					final MessageConsoleStream azureConsoleOut = console.newMessageStream();
 		            progressMonitor.beginTask("start task", 100);
-		            com.microsoft.azuretools.core.Activator.removeUnNecessaryListener();
+//		            com.microsoft.azuretools.core.Activator.removeUnNecessaryListener();
 		            DeploymentEventListener undeployListnr = new DeploymentEventListener() {
 		                @Override
 		                public void onDeploymentStep(DeploymentEventArgs args) {
@@ -233,7 +233,6 @@ public class AzureSelectDockerWizard extends Wizard {
 		            }
 		            AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(azureAuthManager);
 		            Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerImageInstance.host.sid).azureClient;
-					KeyVaultClient keyVaultClient = dockerManager.getSubscriptionsMap().get(dockerImageInstance.host.sid).keyVaultClient;
 					if (progressMonitor.isCanceled()) {
 						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
 							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
@@ -380,9 +379,13 @@ public class AzureSelectDockerWizard extends Wizard {
 		            }
 		            AzureDockerUIResources.printDebugMessage(this, "Done refreshing Docker hosts: " + new Date().toString());
 
-					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 100, "SUCCESS: " + url);
+					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 100, "");
 					
-		            progressMonitor.done();
+					try {
+			            com.microsoft.azuretools.core.Activator.depEveList.remove(undeployListnr);
+			            com.microsoft.azuretools.core.Activator.removeDeploymentEventListener(undeployListnr);
+					} catch (Exception ignored) { }
+					progressMonitor.done();
 					return Status.OK_STATUS;
 				} catch (Exception e) {
 					String msg = "An error occurred while attempting to publish a Docker container!" + "\n" + e.getMessage();

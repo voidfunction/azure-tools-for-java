@@ -49,10 +49,12 @@ import com.microsoft.intellij.ApplicationSettings;
 import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.helpers.tasks.CancellableTaskHandleImpl;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.Nullable;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
+import com.microsoft.tooling.msservices.helpers.UIHelper;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -460,5 +462,14 @@ public class IDEHelperImpl implements IDEHelper {
                 }
             }
         };
+    }
+
+    public void openLinkInBrowser(@NotNull String url) {
+        try {
+            Desktop.getDesktop().browse(URI.create(url));
+        } catch (Exception e) {
+            DefaultLoader.getUIHelper().showException("Unexpected exception: " + e.getMessage(), e, "Browse Web App", true, false);
+            DefaultLoader.getUIHelper().logError("Unexpected exception: " + e.getMessage(), e);
+        }
     }
 }

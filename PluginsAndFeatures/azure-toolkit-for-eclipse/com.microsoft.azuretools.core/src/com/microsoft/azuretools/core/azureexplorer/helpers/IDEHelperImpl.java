@@ -20,6 +20,7 @@
 package com.microsoft.azuretools.core.azureexplorer.helpers;
 
 import java.io.File;
+import java.net.URL;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,8 +28,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.IDEHelper;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.Nullable;
@@ -36,6 +39,7 @@ import com.microsoft.azuretools.azurecommons.tasks.CancellableTask;
 import com.microsoft.azuretools.azurecommons.tasks.CancellableTask.CancellableTaskHandle;
 import com.microsoft.azuretools.core.utils.Messages;
 import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 
 public class IDEHelperImpl implements IDEHelper {
@@ -227,5 +231,15 @@ public class IDEHelperImpl implements IDEHelper {
 	@Override
 	public String getProjectSettingsPath() {
 		return String.format("%s%s%s", PluginUtil.pluginFolder, File.separator, Messages.commonPluginID);
+	}
+	
+	@Override
+	public void openLinkInBrowser(@NotNull String url) {
+    	try {
+            PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
+        } catch (Exception ex) {
+        	DefaultLoader.getUIHelper().showException("Unexpected exception: " + ex.getMessage(), ex, "Browse Web App", true, false);
+            DefaultLoader.getUIHelper().logError(ex.getMessage(), ex);
+        }
 	}
 }
