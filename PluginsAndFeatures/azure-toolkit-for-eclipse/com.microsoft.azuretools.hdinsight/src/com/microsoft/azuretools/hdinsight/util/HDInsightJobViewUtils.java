@@ -39,7 +39,7 @@ public class HDInsightJobViewUtils {
     private static final int BUFFER_SIZE = 4096;
     private static final String HTML_ZIP_FILE_NAME = "hdinsight_jobview_html.zip";
     private static final String HDINSIGHT_JOB_VIEW_JAR_NAME = "hdinsight-job-view.jar";
-    private static final String HTML_FOLDER_NAME = "com.microsoft.azuretools.hdinsight";
+    private static final String HTML_FOLDER_NAME = "com.microsoft.azuretools.hdinsight/html";
     private static final String HDINSIGHT_JOBVIEW_EXTRACT_FLAG = "com.microsoft.azuretools.hdinsight.html.extract";
     
     public static void closeJobViewHttpServer() {
@@ -47,20 +47,21 @@ public class HDInsightJobViewUtils {
     }
     
     public static void checkInitlize() {
-		final String property = DefaultLoader.getIdeHelper().getProperty(HDINSIGHT_JOBVIEW_EXTRACT_FLAG);
-		if(StringHelper.isNullOrWhiteSpace(property)) {
-			extractJobViewResource();
-		}
+		extractJobViewResource();
 		JobViewDummyHttpServer.initlize();
     }
     
 	 private static void extractJobViewResource() {
 			URL url = HDInsightJobViewUtils.class.getResource("/resources/" + HTML_ZIP_FILE_NAME);
 			URL hdinsightJobViewJarUrl = HDInsightJobViewUtils.class.getResource("/resources/" + HDINSIGHT_JOB_VIEW_JAR_NAME);
+			if(url == null || hdinsightJobViewJarUrl == null) {
+				DefaultLoader.getUIHelper().showError("Cann't find Spark job view resources", "Job view");
+				return;
+			}
 			File indexRootFile = new File(PluginUtil.pluginFolder + File.separator + HTML_FOLDER_NAME);
 			FileUtils.deleteQuietly(indexRootFile);
 			if(!indexRootFile.exists()) {
-				indexRootFile.mkdir();
+				indexRootFile.mkdirs();
 			}
 			File toFile = new File(indexRootFile.getAbsolutePath(), HTML_ZIP_FILE_NAME);
 			File hdinsightJobViewToFile = new File(indexRootFile.getAbsolutePath(), HDINSIGHT_JOB_VIEW_JAR_NAME);
@@ -70,7 +71,7 @@ public class HDInsightJobViewUtils {
 				HDInsightJobViewUtils.unzip(toFile.getAbsolutePath(), toFile.getParent());
 				DefaultLoader.getIdeHelper().setProperty(HDINSIGHT_JOBVIEW_EXTRACT_FLAG, "true");
 			} catch (IOException e) {
-				Activator.getDefault().log("Extract Job View Folder", e);
+				DefaultLoader.getUIHelper().showError("Extract Job View Folder error:" + e.getMessage(), "Job view");
 			}
 	 }
 	 

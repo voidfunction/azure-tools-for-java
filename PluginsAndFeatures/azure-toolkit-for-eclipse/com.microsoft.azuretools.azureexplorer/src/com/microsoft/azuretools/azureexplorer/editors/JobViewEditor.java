@@ -15,6 +15,7 @@ import com.microsoft.azuretools.azureexplorer.Activator;
 import com.microsoft.azuretools.azureexplorer.hdinsight.*;
 import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
 import com.microsoft.azuretools.core.utils.PluginUtil;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 
 public class JobViewEditor extends EditorPart {
@@ -54,7 +55,8 @@ public class JobViewEditor extends EditorPart {
 	@Override
 	public void createPartControl(Composite composite) {
 		composite.setLayout(new FillLayout());
-		final String indexPath = PluginUtil.pluginFolder + "/com.microsoft.azure.hdinsight"
+	
+		final String indexPath = PluginUtil.pluginFolder + "/com.microsoft.azuretools.hdinsight/html"
 				+ "/hdinsight/job/html/index.html";
 		File indexFile = new File(indexPath);
 		if(indexFile.exists()) {
@@ -62,7 +64,7 @@ public class JobViewEditor extends EditorPart {
 			final String webUrl = "file:///" + indexPath.replace("\\", "/") + queryString;
 			FxClassLoader.loadJavaFxForJobView(composite, webUrl);
 		} else {
-			Activator.getDefault().log("HDInsight Job View index page not exist!", null);
+			DefaultLoader.getUIHelper().showError("HDInsight Job view index page not exist!", "job view");
 		}
 
 		final String queryString = "?projectid=" + uuid + "&engintype=javafx";

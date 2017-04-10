@@ -22,7 +22,7 @@
 package com.microsoft.azure.hdinsight.projects.samples;
 
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.roots.impl.ModuleRootManagerComponent;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.microsoft.azure.hdinsight.common.StreamUtil;
@@ -49,8 +49,6 @@ public class ProjectSampleUtil {
     };
     private static final String[] Scala_Local_Run_Sample_Data = new String[]{"/hdinsight/templates/scala/scala_local_run/data/sample_movielens_data.txt"};
 
-    private static final String MODULE_COMPONENT_NAME = "NewModuleRootManager";
-
     public static void copyFileToPath(Module module, HDInsightTemplatesType templatesType) {
         String sourcePath = getRootOrSourceFolder(module, true);
         String rootPath = getRootOrSourceFolder(module, false);
@@ -74,8 +72,11 @@ public class ProjectSampleUtil {
     }
 
     public static String getRootOrSourceFolder(Module module, boolean isSourceFolder) {
-        ModuleRootManagerComponent component = (ModuleRootManagerComponent)module.getComponent(MODULE_COMPONENT_NAME);
-        VirtualFile[] files = isSourceFolder ? component.getSourceRoots() : component.getContentRoots();
+        ModuleRootManager moduleRootManager = module.getComponent(ModuleRootManager.class);
+        if(module == null) {
+            return null;
+        }
+        VirtualFile[] files = isSourceFolder ? moduleRootManager.getSourceRoots() : moduleRootManager.getContentRoots();
 
         if(files.length == 0) {
             DefaultLoader.getUIHelper().showError("Source Root should be created if you want to create a new sample project", "Create Sample Project");
