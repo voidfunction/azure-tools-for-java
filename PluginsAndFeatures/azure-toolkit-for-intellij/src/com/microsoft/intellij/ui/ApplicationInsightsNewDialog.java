@@ -21,30 +21,20 @@
  */
 package com.microsoft.intellij.ui;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TitlePanel;
-import com.intellij.ui.ListCellRendererWrapper;
 import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
 import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.resources.Location;
-import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
-import com.microsoft.azuretools.utils.AzureModel;
-import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.*;
@@ -61,10 +51,10 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
     private JRadioButton createNewBtn;
     private JRadioButton useExistingBtn;
     private JTextField textGrp;
-    Map<String, SubscriptionDetail> subMap = new HashMap<String, SubscriptionDetail>();
     private SubscriptionDetail currentSub;
     static ApplicationInsightsResource resourceToAdd;
     private AzureManager azureManager;
+    private Runnable onCreate;
 
     public ApplicationInsightsNewDialog() {
         super(true);
@@ -127,12 +117,10 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
 
     private void populateValues() {
         try {
-            List<SubscriptionDetail> subList = azureManager.getSubscriptionManager().getSubscriptionDetails();
+            List<SubscriptionDetail> subList = azureManager.getSubscriptionManager().getSubscriptionDetails()
+                    .stream().filter(SubscriptionDetail::isSelected).collect(Collectors.toList());
             // check at least single subscription is associated with the account
             if (subList.size() > 0) {
-                for (SubscriptionDetail sub : subList) {
-                    subMap.put(sub.getSubscriptionId(), sub);
-                }
                 comboSub.setModel(new DefaultComboBoxModel(subList.toArray()));
                 comboSub.setSelectedIndex(0);
                 currentSub = subList.get(0);
@@ -175,16 +163,16 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
         return contentPane;
     }
 
+    @Override
     protected JComponent createTitlePane() {
         return new TitlePanel(message("newKeyTtl"), message("newKeyMsg"));
     }
 
     @Override
     protected void doOKAction() {
-        boolean isValid = false;
         if (txtName.getText().trim().isEmpty()
                 || comboSub.getSelectedItem() == null
-                || ((String) comboGrp.getSelectedItem()).isEmpty()
+                || ((((String) comboGrp.getSelectedItem()).isEmpty() && useExistingBtn.isSelected()) || (textGrp.getText().isEmpty() && createNewBtn.isSelected()))
                 || ((String) comboReg.getSelectedItem()).isEmpty()) {
             if (comboSub.getSelectedItem() == null || comboSub.getItemCount() <= 0) {
                 PluginUtil.displayErrorDialog(message("aiErrTtl"), message("noSubErrMsg"));
@@ -194,23 +182,35 @@ public class ApplicationInsightsNewDialog extends DialogWrapper {
                 PluginUtil.displayErrorDialog(message("aiErrTtl"), message("nameEmptyMsg"));
             }
         } else {
-            try {
-                Resource resource = AzureSDKManager.createApplicationInsightsResource(currentSub, (String) comboGrp.getSelectedItem(),
-                        txtName.getText(), (String) comboReg.getSelectedItem());
-                resourceToAdd = new ApplicationInsightsResource(resource.getName(), resource.getInstrumentationKey(),
-                        currentSub.getSubscriptionName(), currentSub.getSubscriptionId(), resource.getLocation(),
-                        resource.getResourceGroup(), true);
-                isValid = true;
-            } catch (Exception ex) {
-                PluginUtil.displayErrorDialogAndLog(message("aiErrTtl"), message("resCreateErrMsg"), ex);
-            }
-        }
-        if (isValid) {
+            boolean isNewGroup = createNewBtn.isSelected();
+            String resourceGroup = isNewGroup ? textGrp.getText() : (String) comboGrp.getSelectedItem();
+            DefaultLoader.getIdeHelper().runInBackground(null,"Creating Application Insights Resource " + txtName.getText(), false, true,
+                    "Creating Application Insights Resource " + txtName.getText(), new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Resource resource = AzureSDKManager.createApplicationInsightsResource(currentSub, resourceGroup, isNewGroup,
+                                        txtName.getText(), (String) comboReg.getSelectedItem());
+                                resourceToAdd = new ApplicationInsightsResource(resource.getName(), resource.getInstrumentationKey(),
+                                        currentSub.getSubscriptionName(), currentSub.getSubscriptionId(), resource.getLocation(),
+                                        resource.getResourceGroup(), true);
+                                if (onCreate != null) {
+                                    onCreate.run();
+                                }
+                            } catch (Exception ex) {
+                                PluginUtil.displayErrorDialogInAWTAndLog(message("aiErrTtl"), message("resCreateErrMsg"), ex);
+                            }
+                        }
+                    });
             super.doOKAction();
         }
     }
 
     public static ApplicationInsightsResource getResource() {
         return resourceToAdd;
+    }
+
+    public void setOnCreate(Runnable onCreate) {
+        this.onCreate = onCreate;
     }
 }

@@ -24,12 +24,15 @@ package com.microsoft.intellij.ui.components;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.TitlePanel;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.intellij.ui.AzureAbstractPanel;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+
+import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class DefaultDialogWrapper extends DialogWrapper {
     private AzureAbstractPanel contentPanel;
@@ -65,9 +68,7 @@ public class DefaultDialogWrapper extends DialogWrapper {
 
     @Override
     protected JComponent createTitlePane() {
-        JLabel header = new JLabel(contentPanel.getDisplayName());
-        header.setFont(header.getFont().deriveFont(Font.BOLD, 14));
-        return header;
+        return new TitlePanel(contentPanel.getDisplayName(), "");
     }
 
     @Nullable

@@ -108,17 +108,10 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
         newShell.setText("Create Storage Account");
-        Image image;
-		try {
-			URL imgUrl = Activator.getDefault().getBundle().getEntry(Messages.strAccDlgImg);
-			URL imgFileURL = FileLocator.toFileURL(imgUrl);
-			URL path = FileLocator.resolve(imgFileURL);
-			String imgpath = path.getFile();
-			image = new Image(null, new FileInputStream(imgpath));
-			setTitleImage(image);
-		} catch (Exception e) {
-			PluginUtil.displayErrorDialogAndLog(getShell(), Messages.err, "Error loading storage account image", e);
-		}
+        Image image = PluginUtil.getImage(Messages.strAccDlgImg);
+        if (image != null) {
+        	setTitleImage(image);
+        }
     }
 
     @Override

@@ -36,6 +36,7 @@ import com.microsoft.applicationinsights.preference.ApplicationInsightsResourceR
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.azuretools.core.Activator;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
 
 
@@ -50,50 +51,57 @@ public class ApplicationInsightsResourceRegistryEclipse {
 	 */
 	public static void updateApplicationInsightsResourceRegistry(List<SubscriptionDetail> subList) throws Exception {
 		for (SubscriptionDetail sub : subList) {
-			// fetch resources available for particular subscription
-			List<Resource> resourceList = AzureSDKManager.getApplicationInsightsResources(sub);
+			if (sub.isSelected()) {
+				try {
+					// fetch resources available for particular subscription
+					List<Resource> resourceList = AzureSDKManager.getApplicationInsightsResources(sub);
 
-			// Removal logic
-			List<ApplicationInsightsResource> registryList = ApplicationInsightsResourceRegistry.getResourceListAsPerSub(sub.getSubscriptionId());
-			List<ApplicationInsightsResource> importedList = ApplicationInsightsResourceRegistry.prepareAppResListFromRes(resourceList, sub);
-			List<String> inUsekeyList = getInUseInstrumentationKeys();
-			for (ApplicationInsightsResource registryRes : registryList) {
-				if (!importedList.contains(registryRes)) {
-					String key = registryRes.getInstrumentationKey();
-					int index = ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(key);
-					if (inUsekeyList.contains(key)) {
-//						 key is used by project but not present in cloud,
-//						 so make it as manually added resource and not imported.
-						ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
-								key, key, Messages.unknown, Messages.unknown,
-								Messages.unknown, Messages.unknown, false);
-						ApplicationInsightsResourceRegistry.getAppInsightsResrcList().set(index, resourceToAdd);
-					} else {
-						// key is not used by any project then delete it.
-						ApplicationInsightsResourceRegistry.getAppInsightsResrcList().remove(index);
+					// Removal logic
+					List<ApplicationInsightsResource> registryList = ApplicationInsightsResourceRegistry
+							.getResourceListAsPerSub(sub.getSubscriptionId());
+					List<ApplicationInsightsResource> importedList = ApplicationInsightsResourceRegistry
+							.prepareAppResListFromRes(resourceList, sub);
+					List<String> inUsekeyList = getInUseInstrumentationKeys();
+					for (ApplicationInsightsResource registryRes : registryList) {
+						if (!importedList.contains(registryRes)) {
+							String key = registryRes.getInstrumentationKey();
+							int index = ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(key);
+							if (inUsekeyList.contains(key)) {
+								// key is used by project but not present in
+								// cloud,
+								// so make it as manually added resource and not
+								// imported.
+								ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(key, key,
+										Messages.unknown, Messages.unknown, Messages.unknown, Messages.unknown, false);
+								ApplicationInsightsResourceRegistry.getAppInsightsResrcList().set(index, resourceToAdd);
+							} else {
+								// key is not used by any project then delete
+								// it.
+								ApplicationInsightsResourceRegistry.getAppInsightsResrcList().remove(index);
+							}
+						}
 					}
-				}
-			}
 
-			// Addition logic
-			List<ApplicationInsightsResource> list = ApplicationInsightsResourceRegistry.
-					getAppInsightsResrcList();
-			for (Resource resource : resourceList) {
-				ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
-						resource.getName(), resource.getInstrumentationKey(),
-						sub.getSubscriptionName(), sub.getSubscriptionId(),
-						resource.getLocation(), resource.getResourceGroup(), true);
-				if (list.contains(resourceToAdd)) {
-					int index = ApplicationInsightsResourceRegistry.
-							getResourceIndexAsPerKey(resource.getInstrumentationKey());
-					ApplicationInsightsResource objectFromRegistry = list.get(index);
-					if (!objectFromRegistry.isImported()) {
-						ApplicationInsightsResourceRegistry.
-						getAppInsightsResrcList().set(index, resourceToAdd);
+					// Addition logic
+					List<ApplicationInsightsResource> list = ApplicationInsightsResourceRegistry
+							.getAppInsightsResrcList();
+					for (Resource resource : resourceList) {
+						ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(resource.getName(),
+								resource.getInstrumentationKey(), sub.getSubscriptionName(), sub.getSubscriptionId(),
+								resource.getLocation(), resource.getResourceGroup(), true);
+						if (list.contains(resourceToAdd)) {
+							int index = ApplicationInsightsResourceRegistry
+									.getResourceIndexAsPerKey(resource.getInstrumentationKey());
+							ApplicationInsightsResource objectFromRegistry = list.get(index);
+							if (!objectFromRegistry.isImported()) {
+								ApplicationInsightsResourceRegistry.getAppInsightsResrcList().set(index, resourceToAdd);
+							}
+						} else {
+							ApplicationInsightsResourceRegistry.getAppInsightsResrcList().add(resourceToAdd);
+						}
 					}
-				} else {
-					ApplicationInsightsResourceRegistry.
-					getAppInsightsResrcList().add(resourceToAdd);
+				} catch (Exception e) {
+					Activator.getDefault().log(String.format(Messages.aiListErr, sub.getSubscriptionName()), e);
 				}
 			}
 		}

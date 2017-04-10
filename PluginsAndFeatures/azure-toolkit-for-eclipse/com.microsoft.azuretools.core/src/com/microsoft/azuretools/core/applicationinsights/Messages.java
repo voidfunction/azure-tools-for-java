@@ -44,6 +44,7 @@ public final class Messages extends NLS {
 	public static String exprFltMapping;
 	public static String aiRemoveErr;
 	public static String saveErrMsg;
+	public static String aiListErr;
 
 	static {
 		// initialize resource bundle

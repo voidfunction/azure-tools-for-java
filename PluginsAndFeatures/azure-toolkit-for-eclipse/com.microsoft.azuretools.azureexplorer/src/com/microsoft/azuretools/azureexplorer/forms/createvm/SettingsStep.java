@@ -53,8 +53,9 @@ import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
-import com.microsoft.azuretools.azureexplorer.Activator;
+
 import com.microsoft.azuretools.azureexplorer.forms.CreateArmStorageAccountForm;
+import com.microsoft.azuretools.core.Activator;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.utils.AzureModel;
 
