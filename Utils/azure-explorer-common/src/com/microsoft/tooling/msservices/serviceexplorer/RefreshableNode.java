@@ -148,13 +148,4 @@ public abstract class RefreshableNode extends Node {
 
         return future;
     }
-
-    public Runnable getRefreshHandler() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                load(false);
-            }
-        };
-    }
 }

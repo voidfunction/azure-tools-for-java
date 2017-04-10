@@ -67,6 +67,22 @@ public class AppInsightsCustomEvent {
 			}
 		}
 	}
+	
+	public static void createTelemetryDenyEvent(){
+		TelemetryClient telemetry = new TelemetryClient();
+		telemetry.getContext().setInstrumentationKey(key);
+		Map<String, String> properties = new HashMap<String, String>();
+		
+		if (new File(dataFile).exists()) {
+			String pluginVersion = DataOperations.getProperty(dataFile, Messages.version);
+			if (pluginVersion != null && !pluginVersion.isEmpty()) {
+				properties.put("Plugin Version", pluginVersion);
+			}
+		}
+		
+		telemetry.trackEvent(Messages.telemetryDenyAction, properties, null);
+		telemetry.flush();
+	}
 
 	public static void createFTPEvent(String eventName, String uri, String appName, String subId) {
 		TelemetryClient telemetry = new TelemetryClient();
