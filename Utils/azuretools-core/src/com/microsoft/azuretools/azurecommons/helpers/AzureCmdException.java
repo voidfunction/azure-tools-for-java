@@ -29,29 +29,30 @@ public class AzureCmdException extends Exception {
 
     public AzureCmdException(String message) {
         super(message);
-
         mErrorLog = "";
     }
 
     public AzureCmdException(String message, String errorLog) {
         super(message);
-
         mErrorLog = errorLog;
     }
 
     public AzureCmdException(String message, Throwable throwable) {
         super(message, throwable);
-
         if (throwable instanceof AzureCmdException) {
             mErrorLog = ((AzureCmdException) throwable).getErrorLog();
         } else {
-            StringWriter sw = new StringWriter();
-            PrintWriter writer = new PrintWriter(sw);
-
-            throwable.printStackTrace(writer);
-            writer.flush();
-
-            mErrorLog = sw.toString();
+            final StringWriter sw = new StringWriter();
+            final PrintWriter writer = new PrintWriter(sw);
+            try {
+                throwable.printStackTrace(writer);
+                writer.flush();
+                mErrorLog = sw.toString();
+            }
+            finally {
+                // closing the wrapping object
+                writer.close();
+            }
         }
     }
 
