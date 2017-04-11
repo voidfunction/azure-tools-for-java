@@ -41,6 +41,8 @@ import com.microsoft.intellij.AzureSettings;
 import com.microsoft.intellij.util.MethodUtils;
 import com.microsoft.intellij.util.PluginUtil;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
+
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
 
 import javax.swing.*;
@@ -48,7 +50,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
@@ -229,7 +230,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
         AzureSettings.getSafeInstance(project).saveAppInsights();
     }
 
-    public static void keeepManuallyAddedList(Project project) {
+    private static void keeepManuallyAddedList(Project project) {
         List<ApplicationInsightsResource> addedList = ApplicationInsightsResourceRegistry.getAddedResources();
         List<String> addedKeyList = new ArrayList<String>();
         for (ApplicationInsightsResource res : addedList) {
@@ -265,13 +266,11 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
     }
 
     private ActionListener newButtonListener() {
-        return new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    createNewDilaog();
-                } catch(Exception ex) {
-                    AzurePlugin.log(ex.getMessage(), ex);
-                }
+        return e -> {
+            try {
+                createNewDilaog();
+            } catch(Exception ex) {
+                AzurePlugin.log(ex.getMessage(), ex);
             }
         };
     }
@@ -282,8 +281,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
                 @Override
                 public void run() {
                     ApplicationInsightsNewDialog dialog = new ApplicationInsightsNewDialog();
-                    dialog.show();
-                    if (dialog.isOK()) {
+                    dialog.setOnCreate(() -> DefaultLoader.getIdeHelper().invokeLater(() -> {
                         ApplicationInsightsResource resource = ApplicationInsightsNewDialog.getResource();
                         if (resource != null && !ApplicationInsightsResourceRegistry.getAppInsightsResrcList().contains(resource)) {
                             ApplicationInsightsResourceRegistry.getAppInsightsResrcList().add(resource);
@@ -291,7 +289,8 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
                             ((InsightsTableModel) insightsTable.getModel()).setResources(getTableContent());
                             ((InsightsTableModel) insightsTable.getModel()).fireTableDataChanged();
                         }
-                    }
+                    }));
+                    dialog.show();
                 }
             }, ModalityState.defaultModalityState());
         } catch(Exception ex) {
@@ -300,46 +299,40 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
     }
 
     private ActionListener addButtonListener() {
-        return new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                ApplicationInsightsAddDialog dialog = new ApplicationInsightsAddDialog(myProject);
-                dialog.show();
-                if (dialog.isOK()) {
-                    ((InsightsTableModel) insightsTable.getModel()).setResources(getTableContent());
-                    ((InsightsTableModel) insightsTable.getModel()).fireTableDataChanged();
-                }
+        return e -> {
+            ApplicationInsightsAddDialog dialog = new ApplicationInsightsAddDialog(myProject);
+            dialog.show();
+            if (dialog.isOK()) {
+                ((InsightsTableModel) insightsTable.getModel()).setResources(getTableContent());
+                ((InsightsTableModel) insightsTable.getModel()).fireTableDataChanged();
             }
         };
     }
 
     private ActionListener detailsButtonListener() {
-        return new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int index = insightsTable.getSelectedRow();
-                ApplicationInsightsResource resource = ApplicationInsightsResourceRegistry.getAppInsightsResrcList().get(index);
-                ApplicationInsightsDetailsDialog dialog = new ApplicationInsightsDetailsDialog(resource);
-                dialog.show();
-            }
+        return e -> {
+            int index = insightsTable.getSelectedRow();
+            ApplicationInsightsResource resource = ApplicationInsightsResourceRegistry.getAppInsightsResrcList().get(index);
+            ApplicationInsightsDetailsDialog dialog = new ApplicationInsightsDetailsDialog(resource);
+            dialog.show();
         };
     }
 
     private ActionListener removeButtonListener() {
-        return new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int curSelIndex = insightsTable.getSelectedRow();
-                if (curSelIndex > -1) {
-                    String keyToRemove = ApplicationInsightsResourceRegistry.getKeyAsPerIndex(curSelIndex);
-                    String moduleName = MethodUtils.getModuleNameAsPerKey(myProject, keyToRemove);
-                    if (moduleName != null && !moduleName.isEmpty()) {
-                        PluginUtil.displayErrorDialog(message("aiErrTtl"), String.format(message("rsrcUseMsg"), moduleName));
-                    } else {
-                        int choice = Messages.showOkCancelDialog(message("rsrcRmvMsg"), message("aiErrTtl"), Messages.getQuestionIcon());
-                        if (choice == Messages.OK) {
-                            ApplicationInsightsResourceRegistry.getAppInsightsResrcList().remove(curSelIndex);
-                            AzureSettings.getSafeInstance(myProject).saveAppInsights();
-                            ((InsightsTableModel) insightsTable.getModel()).setResources(getTableContent());
-                            ((InsightsTableModel) insightsTable.getModel()).fireTableDataChanged();
-                        }
+        return e -> {
+            int curSelIndex = insightsTable.getSelectedRow();
+            if (curSelIndex > -1) {
+                String keyToRemove = ApplicationInsightsResourceRegistry.getKeyAsPerIndex(curSelIndex);
+                String moduleName = MethodUtils.getModuleNameAsPerKey(myProject, keyToRemove);
+                if (moduleName != null && !moduleName.isEmpty()) {
+                    PluginUtil.displayErrorDialog(message("aiErrTtl"), String.format(message("rsrcUseMsg"), moduleName));
+                } else {
+                    int choice = Messages.showOkCancelDialog(message("rsrcRmvMsg"), message("aiErrTtl"), Messages.getQuestionIcon());
+                    if (choice == Messages.OK) {
+                        ApplicationInsightsResourceRegistry.getAppInsightsResrcList().remove(curSelIndex);
+                        AzureSettings.getSafeInstance(myProject).saveAppInsights();
+                        ((InsightsTableModel) insightsTable.getModel()).setResources(getTableContent());
+                        ((InsightsTableModel) insightsTable.getModel()).fireTableDataChanged();
                     }
                 }
             }
@@ -347,21 +340,11 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
     }
 
     private ActionListener manageSubscriptionsListener() {
-        return new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                SelectSubscriptionsAction.onShowSubscriptions(myProject);
-            }
-        };
+        return e -> SelectSubscriptionsAction.onShowSubscriptions(myProject);
     }
 
     private ActionListener signInOutListener() {
-        return new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                AzureSignInAction.onAzureSignIn(myProject);
-            }
-        };
+        return e -> AzureSignInAction.onAzureSignIn(myProject);
     }
 
     private ListSelectionListener createAccountsTableListener() {

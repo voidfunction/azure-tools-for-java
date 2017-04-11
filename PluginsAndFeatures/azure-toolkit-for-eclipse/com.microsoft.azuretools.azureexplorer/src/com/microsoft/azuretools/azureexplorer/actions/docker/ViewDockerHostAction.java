@@ -64,15 +64,11 @@ public class ViewDockerHostAction extends NodeActionListener {
 		viewDockerDialog.open();
 
 		if (viewDockerDialog.getInternalExitCode() == AzureViewDockerDialog.UPDATE_EXIT_CODE) {
-			EditableDockerHost editableDockerHost = new EditableDockerHost(dockerHost);
-//
-//			AzureEditDockerLoginCredsDialog editDockerDialog = new AzureEditDockerLoginCredsDialog(project,
-//					editableDockerHost, dockerManager);
-//			editDockerDialog.show();
-//
-//			if (editDockerDialog.getExitCode() == 0) {
-//				// TODO: Apply the edit actions here
-//			}
+			if (dockerHost != null && !dockerHost.isUpdating) {
+				AzureDockerUIResources.updateDockerHost(PluginUtil.getParentShell(), project, new EditableDockerHost(dockerHost), dockerManager, true);
+			} else {
+				PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), "Error: Invalid Edit Selection", "The selected Docker host can not be edited at this time!");
+			}
 		}
 	}
 }

@@ -21,6 +21,7 @@
  */
 package com.microsoft.tooling.msservices.helpers;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -147,5 +148,7 @@ public interface IDEHelper {
     String[] getApplicationProperties(@NotNull String name);
 
     boolean isApplicationPropertySet(@NotNull String name);
+
+    void openLinkInBrowser(@NotNull String url);
     
 }

@@ -366,10 +366,22 @@ public class AzureSelectDockerHostPage extends WizardPage {
 		dockerHostsViewButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				DockerHost dockerHost = (DockerHost) dockerHostsTable.getItem(dockerHostsTable.getSelectionIndex()).getData();
-				if (dockerHost != null) {
-					AzureViewDockerDialog viewDockerDialog = new AzureViewDockerDialog(mainContainer.getShell(), project, dockerHost, dockerManager);
-					viewDockerDialog.open();
+				int idx = dockerHostsTable.getSelectionIndex();
+				if (idx >= 0 && dockerHostsTable.getItem(idx) != null) {
+					DockerHost dockerHost = (DockerHost) dockerHostsTable.getItem(dockerHostsTable.getSelectionIndex()).getData();
+					if (dockerHost != null) {
+						AzureViewDockerDialog viewDockerDialog = new AzureViewDockerDialog(mainContainer.getShell(), project, dockerHost, dockerManager);
+						viewDockerDialog.open();
+						
+						if (viewDockerDialog.getInternalExitCode() == AzureViewDockerDialog.UPDATE_EXIT_CODE) {
+							if (dockerHost != null && !dockerHost.isUpdating) {
+								AzureDockerUIResources.updateDockerHost(PluginUtil.getParentShell(), project, new EditableDockerHost(dockerHost), dockerManager, true);
+							} else {
+								PluginUtil.displayErrorDialog(mainContainer.getShell(), "Error: Invalid Edit Selection", "The selected Docker host can not be edited at this time!");
+							}
+						}
+						setPageComplete(doValidate());
+					}
 				}
 			}
 		});
@@ -457,33 +469,7 @@ public class AzureSelectDockerHostPage extends WizardPage {
 				if (idx >= 0 && dockerHostsTable.getItem(idx) != null) {
 					DockerHost updateHost = (DockerHost) dockerHostsTable.getItem(idx).getData();
 					if (updateHost != null && !updateHost.isUpdating) {
-						EditableDockerHost editableDockerHost = new EditableDockerHost(updateHost);
-						AzureInputDockerLoginCredsDialog loginCredsDialog = new AzureInputDockerLoginCredsDialog(PluginUtil.getParentShell(), project, editableDockerHost, dockerManager, true);
-		
-						if (loginCredsDialog.open() == Window.OK) {
-							// Update Docker host log in credentials
-							updateHost.isUpdating = true;
-							DefaultLoader.getIdeHelper().runInBackground(project, String.format("Updating %s Log In Credentials", updateHost.name), false, true, String.format("Updating log in credentials for %s...", updateHost.name), new Runnable() {
-								@Override
-								public void run() {
-									try {
-										AzureDockerVMOps.updateDockerHostVM(dockerManager.getSubscriptionsMap().get(updateHost.sid).azureClient, editableDockerHost.updatedDockerHost);
-										updateHost.certVault = editableDockerHost.updatedDockerHost.certVault;
-										updateHost.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
-										updateHost.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
-						                Session session = AzureDockerSSHOps.createLoginInstance(updateHost);
-						                AzureDockerVMOps.UpdateCurrentDockerUser(session);
-						                updateHost.session = session;
-									} catch (Exception ee) {
-										if (AzureDockerUtils.DEBUG)
-											ee.printStackTrace();
-										log.log(Level.SEVERE, "dockerHostsEditButton.addSelectionListener", ee);
-									}
-
-									updateHost.isUpdating = false;
-								}
-							});	
-						}
+						AzureDockerUIResources.updateDockerHost(PluginUtil.getParentShell(), project, new EditableDockerHost(updateHost), dockerManager, true);
 					} else {
 						PluginUtil.displayErrorDialog(mainContainer.getShell(), "Error: Invalid Edit Selection", "The selected Docker host can not be edited at this time!");
 					}

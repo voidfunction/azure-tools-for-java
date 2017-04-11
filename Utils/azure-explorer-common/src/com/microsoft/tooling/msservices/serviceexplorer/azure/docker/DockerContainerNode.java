@@ -136,11 +136,7 @@ public class DockerContainerNode extends AzureRefreshableNode {
           @Override
           public void run() {
             if(dockerContainer.url != null && dockerContainer.isRunning && dockerHost.dockerImages.get(dockerContainer.image).isPluginImage) {
-              try {
-                Desktop.getDesktop().browse(URI.create(dockerContainer.url));
-              } catch (Exception ee) {
-                DefaultLoader.getUIHelper().logError(ee.getMessage(), ee);
-              }
+              DefaultLoader.getIdeHelper().openLinkInBrowser(dockerContainer.url);
             }
           }
         });

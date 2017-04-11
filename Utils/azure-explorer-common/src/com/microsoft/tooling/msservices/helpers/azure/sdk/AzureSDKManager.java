@@ -199,17 +199,21 @@ public class AzureSDKManager {
     }
 
     public static Resource createApplicationInsightsResource(@NotNull SubscriptionDetail subscription,
-                                                      @NotNull String resourceGroupName,
-                                                      @NotNull String resourceName,
-                                                      @NotNull String location) throws Exception {
+                                                             @NotNull String resourceGroupName,
+                                                             boolean isNewGroup,
+                                                             @NotNull String resourceName,
+                                                             @NotNull String location) throws Exception {
 
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
         if (azureManager == null) { // not signed in
             return null;
         }
         String tenantId = subscription.getTenantId();
-        return getApplicationManagementClient(tenantId, azureManager.getAccessToken(tenantId))
-                .createResource(subscription.getSubscriptionId(), resourceGroupName, resourceName, location);
+        ApplicationInsightsManagementClient client = getApplicationManagementClient(tenantId, azureManager.getAccessToken(tenantId));
+        if (isNewGroup) {
+            client.createResourceGroup(subscription.getSubscriptionId(), resourceGroupName, location);
+        }
+        return client.createResource(subscription.getSubscriptionId(), resourceGroupName, resourceName, location);
     }
 
     public static List<String> getLocationsForApplicationInsights(SubscriptionDetail subscription) throws Exception {

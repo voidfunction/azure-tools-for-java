@@ -20,6 +20,7 @@
 package com.microsoft.azuretools.core.utils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 
@@ -46,6 +47,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
@@ -412,5 +414,18 @@ public class PluginUtil {
 			Activator.getDefault().log(e.getMessage(), e);
 		}
 		return file;
+	}
+	
+	public static Image getImage(String imagePath) {
+		try {
+			URL imgUrl = Activator.getDefault().getBundle().getEntry(imagePath);
+			URL imgFileURL = FileLocator.toFileURL(imgUrl);
+			URL path = FileLocator.resolve(imgFileURL);
+			String imgpath = path.getFile();
+			return new Image(null, new FileInputStream(imgpath));
+		} catch (Exception e) {
+			Activator.getDefault().log("Error loading image", e);
+			return null;
+		}
 	}
 }

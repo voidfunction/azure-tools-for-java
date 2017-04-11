@@ -58,6 +58,7 @@ import java.util.List;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public class ApplicationInsightsPanel implements AzureAbstractPanel {
+    private static final String DISPLAY_NAME = "Choose Application Insights Telemetry key";
     private JPanel rootPanel;
     private JCheckBox aiCheck;
     private JXHyperlink lnkInstrumentationKey;
@@ -178,7 +179,7 @@ public class ApplicationInsightsPanel implements AzureAbstractPanel {
 
     @Override
     public String getDisplayName() {
-        return null;
+        return DISPLAY_NAME;
     }
 
     @Override

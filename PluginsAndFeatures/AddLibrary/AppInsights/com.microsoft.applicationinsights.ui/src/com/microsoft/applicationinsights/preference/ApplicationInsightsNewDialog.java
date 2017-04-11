@@ -19,20 +19,15 @@
  */
 package com.microsoft.applicationinsights.preference;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -43,7 +38,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -51,17 +45,12 @@ import com.microsoft.applicationinsights.management.rest.model.Resource;
 import com.microsoft.applicationinsights.ui.activator.Activator;
 import com.microsoft.applicationinsights.util.AILibraryUtil;
 import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.resources.Location;
-import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
-import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
-import com.microsoft.azuretools.utils.AzureModel;
-import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.AzureSDKManager;
-import com.microsoftopentechnologies.wacommon.commoncontrols.NewResourceGroupDialog;
+
 /**
  * Class is intended for creating new application insights resources
  * remotely in the cloud.
@@ -70,12 +59,16 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
     private static final String LOADING = "<Loading...>";
 	Text txtName;
 	private Combo subscription;
-	Combo resourceGrp;
+    private Label resourceGroupLabel;
+    private Button createNewRadioButton;
+    private Button useExistingRadioButton;
+    private Text resourceGrpField;
+    private Combo resourceGrpCombo;
 	Combo region;
 	Button okButton;
-	Button newBtn;
 	private SubscriptionDetail currentSub;
 	static ApplicationInsightsResource resourceToAdd;
+	private Runnable onCreate;
 
 	public ApplicationInsightsNewDialog(Shell parentShell) {
 		super(parentShell);
@@ -109,7 +102,7 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 		Composite container = new Composite(parent, SWT.NONE);
 		GridLayout gridLayout = new GridLayout();
 		GridData gridData = new GridData();
-		gridLayout.numColumns = 3;
+		gridLayout.numColumns = 2;
 		gridLayout.marginBottom = 10;
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.grabExcessHorizontalSpace = true;
@@ -162,12 +155,12 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
             List<String> groupStringList = groups.stream().map(com.microsoft.azure.management.resources.ResourceGroup::name).collect(Collectors.toList());
             if (groupStringList.size() > 0) {
 				String[] groupArray = groupStringList.toArray(new String[groupStringList.size()]);
-				resourceGrp.removeAll();
-				resourceGrp.setItems(groupArray);
+				resourceGrpCombo.removeAll();
+				resourceGrpCombo.setItems(groupArray);
 				if (valtoSet.isEmpty() || !groupStringList.contains(valtoSet)) {
-					resourceGrp.setText(groupArray[0]);
+					resourceGrpCombo.setText(groupArray[0]);
 				} else {
-					resourceGrp.setText(valtoSet);
+					resourceGrpCombo.setText(valtoSet);
 				}
 			}
 			enableOkBtn();
@@ -192,8 +185,6 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 				enableOkBtn();
 			}
 		});
-
-		new Link(container, SWT.NO);
 	}
 
 	private void createSubCmpnt(Composite container) {
@@ -211,7 +202,7 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				SubscriptionDetail newSub = (SubscriptionDetail) subscription.getData(subscription.getText());
-				String prevResGrpVal = resourceGrp.getText();
+				String prevResGrpVal = resourceGrpCombo.getText();
 				if (currentSub.equals(newSub)) {
 					populateResourceGroupValues(currentSub.getSubscriptionId(), prevResGrpVal);
 				} else {
@@ -226,44 +217,54 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 
 			}
 		});
-
-		new Link(container, SWT.NO);
 	}
 
 	private void createResourceGroupCmpnt(Composite container) {
-		Label lblName = new Label(container, SWT.LEFT);
-		GridData gridData = gridDataForLbl();
-		lblName.setLayoutData(gridData);
-		lblName.setText(Messages.resGrp);
+		resourceGroupLabel = new Label(container, SWT.LEFT);
+		resourceGroupLabel.setText(Messages.resGrp);
+		GridData gridData = new GridData();
+		gridData.verticalAlignment = SWT.TOP;
+		resourceGroupLabel.setLayoutData(gridData);
 
-		resourceGrp = new Combo(container, SWT.READ_ONLY);
-		gridData = gridDataForText(180);
-		resourceGrp.setLayoutData(gridData);
+		final Composite composite = new Composite(container, SWT.NONE);
+		GridLayout gridLayout = new GridLayout();
+		gridLayout.numColumns = 2;
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.verticalAlignment = GridData.BEGINNING;
+		gridData.grabExcessHorizontalSpace = true;
+		// gridData.widthHint = 250;
+		composite.setLayout(gridLayout);
+		composite.setLayoutData(gridData);
 
-		newBtn =  new Button(container, SWT.PUSH);
-		newBtn.setText(Messages.btnNewLbl);
-		gridData = gridDataForText(40);
-		newBtn.setLayoutData(gridData);
+		createNewRadioButton = new Button(composite, SWT.RADIO);
+		createNewRadioButton.setText("Create new");
+		createNewRadioButton.setSelection(true);
+		resourceGrpField = new Text(composite, SWT.LEFT | SWT.BORDER);
+		gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+		resourceGrpField.setLayoutData(gridData);
 
-		newBtn.addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-			}
-
-			@Override
+		useExistingRadioButton = new Button(composite, SWT.RADIO);
+		useExistingRadioButton.setText("Use existing");
+		resourceGrpCombo = new Combo(composite, SWT.READ_ONLY);
+		gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+		resourceGrpCombo.setLayoutData(gridData);
+		SelectionListener updateListener = new SelectionAdapter() {
+        	@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				String subTxt = subscription.getText();
-				NewResourceGroupDialog dialog = new NewResourceGroupDialog(getShell(), subTxt);
-				int result = dialog.open();
-				if (result == Window.OK) {
-					ResourceGroup group = dialog.getResourceGroup();
-					if (group != null) {
-						populateResourceGroupValues(currentSub.getSubscriptionId(), group.name());
-					}
-				}
+        		 updateResourceGroup();
 			}
-		});
+		};
+        createNewRadioButton.addSelectionListener(updateListener);
+        useExistingRadioButton.addSelectionListener(updateListener);	
+   
+        updateResourceGroup();
+	}
+	
+	private void updateResourceGroup() {
+    	final boolean isNewGroup = createNewRadioButton.getSelection();
+        resourceGrpField.setEnabled(isNewGroup);
+        resourceGrpCombo.setEnabled(!isNewGroup);
 	}
 
 	private void createRegionCmpnt(Composite container) {
@@ -275,8 +276,6 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 		region = new Combo(container, SWT.READ_ONLY);
 		gridData = gridDataForText(180);
 		region.setLayoutData(gridData);
-
-		new Link(container, SWT.NO);
 	}
 
 	/**
@@ -313,52 +312,56 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 		if (okButton != null) {
 			if (txtName.getText().trim().isEmpty()
 					|| subscription.getText().isEmpty()
-					|| resourceGrp.getText().isEmpty()
+					|| (resourceGrpCombo.getText().isEmpty() && useExistingRadioButton.getSelection() || resourceGrpField.getText().isEmpty() && createNewRadioButton.getSelection())
 					|| region.getText().isEmpty()) {
 				okButton.setEnabled(false);
 				if (subscription.getText().isEmpty() || subscription.getItemCount() <= 0) {
 					setErrorMessage(Messages.noSubErrMsg);
-					newBtn.setEnabled(false);
-				} else if (resourceGrp.getText().isEmpty() || resourceGrp.getItemCount() <= 0) {
+				} else if (resourceGrpCombo.getText().isEmpty() && useExistingRadioButton.getSelection() || resourceGrpField.getText().isEmpty()) {
 					setErrorMessage(Messages.noResGrpErrMsg);
-					newBtn.setEnabled(true);
 				} else {
 					setErrorMessage(null);
-					newBtn.setEnabled(true);
 				}
 			} else {
 				okButton.setEnabled(true);
 				setErrorMessage(null);
-				newBtn.setEnabled(true);
 			}
 		}
 	}
 
 	@Override
 	protected void okPressed() {
-		boolean isValid = false;
-		try {
-			PluginUtil.showBusy(true, getShell());
-			String subId = currentSub.getSubscriptionId();
-			Resource resource = AzureSDKManager.createApplicationInsightsResource(currentSub, resourceGrp.getText(),
-					txtName.getText(), region.getText());
-			resourceToAdd = new ApplicationInsightsResource(
-					resource.getName(), resource.getInstrumentationKey(),
-					subscription.getText(), subId, resource.getLocation(),
-					resource.getResourceGroup(), true);
-			isValid = true;
-		} catch (Exception ex) {
-			PluginUtil.showBusy(false, getShell());
-			PluginUtil.displayErrorDialogAndLog(getShell(),
-					Messages.appTtl, Messages.resCreateErrMsg, ex);
-		}
-		if (isValid) {
-			PluginUtil.showBusy(false, getShell());
-			super.okPressed();
-		}
+		String subId = currentSub.getSubscriptionId();
+		boolean isNewGroup = createNewRadioButton.getSelection();
+		String resourceGroup = isNewGroup ? resourceGrpField.getText() : resourceGrpCombo.getText();
+		String name = txtName.getText();
+		String location = region.getText();
+		DefaultLoader.getIdeHelper().runInBackground(null, "Creating Application Insights Resource", false, true,
+				"Creating Application Insights Resource " + name + "...", new Runnable() {
+					@Override
+					public void run() {
+						try {
+							Resource resource = AzureSDKManager.createApplicationInsightsResource(currentSub,
+									resourceGroup, isNewGroup, name, location);
+							resourceToAdd = new ApplicationInsightsResource(resource.getName(),
+									resource.getInstrumentationKey(), currentSub.getSubscriptionName(), subId,
+									resource.getLocation(), resource.getResourceGroup(), true);
+							if (onCreate != null) {
+                                onCreate.run();
+                            }
+						} catch (Exception ex) {
+							DefaultLoader.getUIHelper().showException(ex.getMessage(), ex, Messages.resCreateErrMsg, true, false);
+						}
+					}
+				});
+		super.okPressed();
 	}
 
 	public static ApplicationInsightsResource getResource() {
 		return resourceToAdd;
+	}
+
+	public void setOnCreate(Runnable onCreate) {
+		this.onCreate = onCreate;
 	}
 }
