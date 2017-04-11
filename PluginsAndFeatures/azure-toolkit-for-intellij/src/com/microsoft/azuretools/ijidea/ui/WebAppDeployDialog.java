@@ -540,13 +540,13 @@ public class WebAppDeployDialog extends DialogWrapper {
 
                     azureDeploymentProgressNotification.notifyProgress(webApp.name(), startDate, sitePath, 75, "Checking Web App availability...");
 
+                    int stepLimit = 5;
+                    int sleepMs = 2000;
                     // to make warn up cancelable
                     Thread thread = new Thread(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                int stepLimit = 5;
-                                int sleepMs = 2000;
                                 for (int step = 0; step < stepLimit; ++step) {
 
                                     if (WebAppUtils.isUrlAccessible(sitePath))  { // warm up
@@ -560,10 +560,10 @@ public class WebAppDeployDialog extends DialogWrapper {
                             }
                         }
                     });
-                    thread.run();
+                    thread.start();
                     while (thread.isAlive()) {
                         if (progressIndicator.isCanceled()) return;
-                        else Thread.sleep(2000);
+                        else Thread.sleep(sleepMs);
                     }
                     azureDeploymentProgressNotification.notifyProgress(webApp.name(), startDate, sitePath, 100, message("runStatus"));
                     showLink(sitePath);

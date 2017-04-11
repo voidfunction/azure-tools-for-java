@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -14,6 +15,7 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -59,6 +61,7 @@ import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.core.ui.ErrorWindow;
+import com.microsoft.azuretools.core.ui.views.AzureDeploymentProgressNotification;
 import com.microsoft.azuretools.core.utils.ProgressDialog;
 import com.microsoft.azuretools.core.utils.UpdateProgressIndicator;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
@@ -449,10 +452,11 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             String projectName = project.getName();
             String destinationPath = project.getLocation() + "/" + projectName + ".war";
             export(projectName, destinationPath);
-            String sitePath = deploy(projectName, destinationPath);
-            if (sitePath != null) {
-                showLink(sitePath);
-            }
+            deploy(projectName, destinationPath);
+//            String sitePath = deploy(projectName, destinationPath);
+//            if (sitePath != null) {
+//                showLink(sitePath);
+//            }
         } catch (Exception ex) {
             ex.printStackTrace();
             LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "okPressed@AppServiceCreateDialog", ex));
@@ -503,65 +507,141 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         String sitePath = buildSiteLink(wad.webApp,  isDeployToRoot ? null : artifactName);
         Map<String, String> threadParams = new HashMap<>();
         threadParams.put("sitePath", sitePath);
-        try {
-            ProgressDialog.get(this.getShell(), "Deploy Web App Progress").run(true, true, new IRunnableWithProgress() {
-                @Override
-                public void run(IProgressMonitor monitor) {
-                       monitor.beginTask("Deploying Web App...", IProgressMonitor.UNKNOWN);
-                    try {
-                        PublishingProfile pp = webApp.getPublishingProfile();
-                        WebAppUtils.deployArtifact(artifactName, artifactPath,
-                                pp, isDeployToRoot, new UpdateProgressIndicator(monitor));
-                        monitor.setTaskName("Checking Web App availability...");
-                        monitor.subTask("Link: " + sitePath);
-                        // to make warn up cancelable
-                        int stepLimit = 5;
-                        int sleepMs = 2000;
-                        Thread thread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    for (int step = 0; step < stepLimit; ++step) {
-
-                                        if (WebAppUtils.isUrlAccessible(sitePath))  { // warm up
-                                            break;
-                                        }
-                                        Thread.sleep(sleepMs);
-                                    }
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
-                                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@Thread@run@ProgressDialog@deploy@AppServiceCreateDialog@SingInDialog", ex));
-                                }
-                            }
-                        });
-                        thread.run();
-                        while (thread.isAlive()) {
-                            if (monitor.isCanceled()) return;
-                            else Thread.sleep(sleepMs);
-                        }
-                        monitor.done();
-                    } catch (IOException ex) {
-                        threadParams.put("sitePath", null);
-                        ex.printStackTrace();
-                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@deploy@AppServiceCreateDialog", ex));
-                        Display.getDefault().asyncExec(new Runnable() {
-                            @Override
-                            public void run() {
-                                ErrorWindow.go(parentShell, ex.getMessage(), errTitle);;
-                            }
-                        });
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        } catch (InvocationTargetException | InterruptedException ex) {
-            threadParams.put("sitePath", null);
-            ex.printStackTrace();
-            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "deploy@AppServiceCreateDialog", ex));
-            ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
-        }
+        String jobDescription = String.format("Web App '%s' deployment", webApp.name());
+        String deploymentName = UUID.randomUUID().toString();
+        AzureDeploymentProgressNotification.createAzureDeploymentProgressNotification(deploymentName, jobDescription);
         
+        Job job = new Job(jobDescription) {
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                String message = "Deploying Web App...";
+                String cancelMessage = "Interrupted by user";
+                String successMessage = "Success";
+                String errorMessage = "Error";
+                
+                monitor.beginTask(message, IProgressMonitor.UNKNOWN);
+                try {
+                    AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 5, message);
+                    PublishingProfile pp = webApp.getPublishingProfile();
+                    WebAppUtils.deployArtifact(artifactName, artifactPath,
+                            pp, isDeployToRoot, new UpdateProgressIndicator(monitor));
+                    
+                    if (monitor.isCanceled()) {
+                        AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 0, cancelMessage);
+                        return Status.CANCEL_STATUS;
+                    }
+                    
+                    message = "Checking Web App availability...";
+                    monitor.setTaskName(message);
+                    //monitor.subTask("Link: " + sitePath);
+                    AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 75, message);
+                    
+                    // to make warn up cancelable
+                    int stepLimit = 5;
+                    int sleepMs = 1000;
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                for (int step = 0; step < stepLimit; ++step) {
+                                    if (WebAppUtils.isUrlAccessible(sitePath))  { // warm up
+                                        break;
+                                    }
+                                    Thread.sleep(sleepMs);
+                                }
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                                LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@Thread@run@ProgressDialog@deploy@AppServiceCreateDialog@SingInDialog", ex));
+                            } catch (InterruptedException ex) {
+                                System.out.println("The thread is interupted");
+                            }
+                        }
+                    });
+                    thread.start();
+                    while (thread.isAlive()) {
+                        if (monitor.isCanceled()) {
+                            AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 100, cancelMessage);
+                            return Status.CANCEL_STATUS;
+                        }
+                        else Thread.sleep(sleepMs);
+                    }
+                    
+                    monitor.done();
+                    AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 20, successMessage);
+                } catch (IOException | InterruptedException ex) {
+                    threadParams.put("sitePath", null);
+                    ex.printStackTrace();
+                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@deploy@AppServiceCreateDialog", ex));
+                    AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 0, errorMessage);
+                    Display.getDefault().asyncExec(new Runnable() {
+                        @Override
+                        public void run() {
+                            ErrorWindow.go(parentShell, ex.getMessage(), errTitle);;
+                        }
+                    });
+                }
+                return Status.OK_STATUS;
+            }
+        };
+        job.schedule();
+        
+//        try {
+//            ProgressDialog.get(this.getShell(), "Deploy Web App Progress").run(true, true, new IRunnableWithProgress() {
+//                @Override
+//                public void run(IProgressMonitor monitor) {
+//                    monitor.beginTask("Deploying Web App...", IProgressMonitor.UNKNOWN);
+//                    try {
+//                        PublishingProfile pp = webApp.getPublishingProfile();
+//                        WebAppUtils.deployArtifact(artifactName, artifactPath,
+//                                pp, isDeployToRoot, new UpdateProgressIndicator(monitor));
+//                        monitor.setTaskName("Checking Web App availability...");
+//                        monitor.subTask("Link: " + sitePath);
+//                        
+//                        // to make warn up cancelable
+//                        int stepLimit = 5;
+//                        int sleepMs = 2000;
+//                        Thread thread = new Thread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                try {
+//                                    for (int step = 0; step < stepLimit; ++step) {
+//                                        if (WebAppUtils.isUrlAccessible(sitePath))  { // warm up
+//                                            break;
+//                                        }
+//                                        Thread.sleep(sleepMs);
+//                                    }
+//                                } catch (IOException | InterruptedException ex) {
+//                                    ex.printStackTrace();
+//                                    LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@Thread@run@ProgressDialog@deploy@AppServiceCreateDialog@SingInDialog", ex));
+//                                }
+//                            }
+//                        });
+//                        thread.run();
+//                        while (thread.isAlive()) {
+//                            if (monitor.isCanceled()) return;
+//                            else Thread.sleep(sleepMs);
+//                        }
+//                        
+//                        monitor.done();
+//                    } catch (IOException | InterruptedException ex) {
+//                        threadParams.put("sitePath", null);
+//                        ex.printStackTrace();
+//                        LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@deploy@AppServiceCreateDialog", ex));
+//                        Display.getDefault().asyncExec(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                ErrorWindow.go(parentShell, ex.getMessage(), errTitle);;
+//                            }
+//                        });
+//                    }
+//                }
+//            });
+//        } catch (InvocationTargetException | InterruptedException ex) {
+//            threadParams.put("sitePath", null);
+//            ex.printStackTrace();
+//            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "deploy@AppServiceCreateDialog", ex));
+//            ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
+//        }
         return threadParams.get("sitePath");
     }
     
@@ -587,14 +667,12 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         if (selectedRow < 0) {
             return;
         }
-
         String appServiceName = table.getItems()[selectedRow].getText(0);
         WebAppDetails wad = webAppDetailsMap.get(appServiceName);
         
         boolean confirmed = MessageDialog.openConfirm(getShell(), 
                 "Delete App Service", 
                 "Do you really want to delete the App Service '" + appServiceName + "'?");
-        
         if (!confirmed) {
             return;
         }
