@@ -30,7 +30,6 @@ import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -128,12 +127,12 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         Composite container = new Composite(area, SWT.NONE);
         container.setLayout(new GridLayout(2, false));
         GridData gd_container = new GridData(GridData.FILL_BOTH);
-        gd_container.widthHint = 622;
+        gd_container.widthHint = 750;
         container.setLayoutData(gd_container);
         
         table = new Table(container, SWT.BORDER | SWT.FULL_SELECTION);
-        GridData gd_table = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-        gd_table.heightHint = 325;
+        GridData gd_table = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
+        gd_table.heightHint = 300;
         table.setLayoutData(gd_table);
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
@@ -143,11 +142,11 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         tblclmnName.setText("Name");
         
         TableColumn tblclmnJdk = new TableColumn(table, SWT.LEFT);
-        tblclmnJdk.setWidth(100);
+        tblclmnJdk.setWidth(60);
         tblclmnJdk.setText("JDK");
         
         TableColumn tblclmnWebContainer = new TableColumn(table, SWT.LEFT);
-        tblclmnWebContainer.setWidth(145);
+        tblclmnWebContainer.setWidth(110);
         tblclmnWebContainer.setText("Web container");
         
         TableColumn tblclmnResourceGroup = new TableColumn(table, SWT.LEFT);
@@ -198,9 +197,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         
         Group grpAppServiceDetails = new Group(container, SWT.NONE);
         grpAppServiceDetails.setLayout(new FillLayout(SWT.HORIZONTAL));
-        GridData gd_grpAppServiceDetails = new GridData(SWT.FILL, SWT.BOTTOM, false, false, 1, 1);
-        gd_grpAppServiceDetails.heightHint = 100;
-        gd_grpAppServiceDetails.widthHint = 396;
+        GridData gd_grpAppServiceDetails = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+        gd_grpAppServiceDetails.heightHint = 150;
         grpAppServiceDetails.setLayoutData(gd_grpAppServiceDetails);
         grpAppServiceDetails.setText("App service details");
         
@@ -315,14 +313,6 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             return appServiceLink;
     }
 
-    /**
-     * Return the initial size of the dialog.
-     */
-    @Override
-    protected Point getInitialSize() {
-        return new Point(800, 550);
-    }
-    
     private void updateAndFillTable() {
         try {
             ProgressDialog.get(getShell(), "Update Azure Local Cache Progress").run(true, true, new IRunnableWithProgress() {
@@ -497,7 +487,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         }
     }
     
-    private String deploy(String artifactName, String artifactPath) {
+    private void deploy(String artifactName, String artifactPath) {
         int selectedRow = table.getSelectionIndex();
         String appServiceName = table.getItems()[selectedRow].getText(0);
         WebAppDetails wad = webAppDetailsMap.get(appServiceName);
@@ -505,8 +495,8 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         boolean isDeployToRoot = btnDeployToRoot.getSelection();
         String errTitle = "Deploy Web App Error";
         String sitePath = buildSiteLink(wad.webApp,  isDeployToRoot ? null : artifactName);
-        Map<String, String> threadParams = new HashMap<>();
-        threadParams.put("sitePath", sitePath);
+        //Map<String, String> threadParams = new HashMap<>();
+        //threadParams.put("sitePath", sitePath);
         String jobDescription = String.format("Web App '%s' deployment", webApp.name());
         String deploymentName = UUID.randomUUID().toString();
         AzureDeploymentProgressNotification.createAzureDeploymentProgressNotification(deploymentName, jobDescription);
@@ -527,7 +517,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                             pp, isDeployToRoot, new UpdateProgressIndicator(monitor));
                     
                     if (monitor.isCanceled()) {
-                        AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 0, cancelMessage);
+                        AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, -1, cancelMessage);
                         return Status.CANCEL_STATUS;
                     }
                     
@@ -560,19 +550,20 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                     thread.start();
                     while (thread.isAlive()) {
                         if (monitor.isCanceled()) {
-                            AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 100, cancelMessage);
+                            // it's published but not warmed up yet - consider as success
+                            AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 100, successMessage);
                             return Status.CANCEL_STATUS;
                         }
                         else Thread.sleep(sleepMs);
                     }
                     
                     monitor.done();
-                    AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 20, successMessage);
+                    AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 100, successMessage);
                 } catch (IOException | InterruptedException ex) {
-                    threadParams.put("sitePath", null);
+                    //threadParams.put("sitePath", null);
                     ex.printStackTrace();
                     LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@deploy@AppServiceCreateDialog", ex));
-                    AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 0, errorMessage);
+                    AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, -1, errorMessage);
                     Display.getDefault().asyncExec(new Runnable() {
                         @Override
                         public void run() {
@@ -642,25 +633,25 @@ public class WebAppDeployDialog extends TitleAreaDialog {
 //            LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "deploy@AppServiceCreateDialog", ex));
 //            ErrorWindow.go(getShell(), ex.getMessage(), errTitle);;
 //        }
-        return threadParams.get("sitePath");
+        //return threadParams.get("sitePath");
     }
     
-    private void showLink(String link) {
-        MessageBox messageBox = new MessageBox(
-                parentShell, 
-                SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-        messageBox.setMessage( "Web App has been uploaded successfully.\nLink: " + link + "\nOpen in browser?");
-        messageBox.setText("Upload Web App Status");
-        int response = messageBox.open();
-        if (response == SWT.YES) {
-            try {
-                PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(link));
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@Display@showLink@AppServiceCreateDialog", ex));
-            }
-        }
-    }
+//    private void showLink(String link) {
+//        MessageBox messageBox = new MessageBox(
+//                parentShell, 
+//                SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+//        messageBox.setMessage( "Web App has been uploaded successfully.\nLink: " + link + "\nOpen in browser?");
+//        messageBox.setText("Upload Web App Status");
+//        int response = messageBox.open();
+//        if (response == SWT.YES) {
+//            try {
+//                PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(link));
+//            } catch (Exception ex) {
+//                ex.printStackTrace();
+//                LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@Display@showLink@AppServiceCreateDialog", ex));
+//            }
+//        }
+//    }
     
     private void deleteAppService() {
         int selectedRow = table.getSelectionIndex();

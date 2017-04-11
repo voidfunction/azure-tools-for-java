@@ -29,7 +29,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -109,7 +108,9 @@ public class SrvPriSettingsDialog extends TitleAreaDialog {
         
         table = new Table(container, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION);
         table.setEnabled(true);
-        table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+        GridData gd_table = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+        gd_table.heightHint = 300;
+        table.setLayoutData(gd_table);
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
         
@@ -182,14 +183,6 @@ public class SrvPriSettingsDialog extends TitleAreaDialog {
         });
     }
 
-    /**
-     * Return the initial size of the dialog.
-     */
-    @Override
-    protected Point getInitialSize() {
-        return new Point(602, 570);
-    }
-    
     private void onOk() {
         TableItem[] tia = table.getItems();
         int chekedCount = 0;

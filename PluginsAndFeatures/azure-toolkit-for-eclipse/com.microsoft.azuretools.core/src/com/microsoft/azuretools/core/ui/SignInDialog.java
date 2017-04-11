@@ -40,7 +40,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -230,14 +229,6 @@ public class SignInDialog extends TitleAreaDialog {
         btnCreateAuthenticationFile.setEnabled(enabled);
     }
 
-    /**
-     * Return the initial size of the dialog.
-     */
-    @Override
-    protected Point getInitialSize() {
-        return new Point(622, 451);
-    }
-    
     @Override
     public void okPressed() {
 //      dropCurrentAzureManager();
