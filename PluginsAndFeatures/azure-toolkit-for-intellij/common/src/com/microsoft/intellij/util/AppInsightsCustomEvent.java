@@ -1,17 +1,14 @@
 package com.microsoft.intellij.util;
 
+import com.microsoft.applicationinsights.TelemetryClient;
+import com.microsoft.azuretools.azurecommons.helpers.Nullable;
+import com.microsoft.azuretools.azurecommons.xmlhandling.DataOperations;
+import com.microsoft.intellij.common.CommonConst;
+import com.microsoft.intellij.ui.messages.AzureBundle;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.intellij.openapi.application.PathManager;
-import com.microsoft.applicationinsights.TelemetryClient;
-
-import com.microsoft.intellij.common.CommonConst;
-import com.microsoft.intellij.ui.messages.AzureBundle;
-import com.microsoft.azuretools.azurecommons.helpers.NotNull;
-import com.microsoft.azuretools.azurecommons.helpers.Nullable;
-import com.microsoft.azuretools.azurecommons.xmlhandling.DataOperations;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
@@ -26,17 +23,21 @@ public class AppInsightsCustomEvent {
     private static String getTemplateFile(String fileName) {
         return String.format("%s%s%s", PluginUtil.getPluginRootDirectory(), File.separator, fileName);
     }
-    
+
     public static void createTelemetryDenyEvent() {
         TelemetryClient telemetry = new TelemetryClient();
         telemetry.getContext().setInstrumentationKey(key);
         Map<String, String> properties = new HashMap<>();
         properties.put("Plugin Version", CommonConst.PLUGIN_VERISON);
+        String instID = DataOperations.getProperty(dataFile, AzureBundle.message("instID"));
+        if (instID != null && !instID.isEmpty()) {
+            properties.put("Installation ID", instID);
+        }
         telemetry.trackEvent(message("telemetryDenyAction"), properties, null);
         telemetry.flush();
     }
 
-    public static void create(String eventName, String version,@Nullable Map<String, String> myProperties) {
+    public static void create(String eventName, String version, @Nullable Map<String, String> myProperties) {
         if (new File(dataFile).exists()) {
             String prefValue = DataOperations.getProperty(dataFile, AzureBundle.message("prefVal"));
             if (prefValue == null || prefValue.isEmpty() || prefValue.equalsIgnoreCase("true")) {
@@ -51,13 +52,12 @@ public class AppInsightsCustomEvent {
                     properties.put("Plugin Version", pluginVersion);
                 }
 
-                Map<String, Double> metrics = new HashMap<String, Double>();
                 String instID = DataOperations.getProperty(dataFile, AzureBundle.message("instID"));
                 if (instID != null && !instID.isEmpty()) {
-                    metrics.put("Installation ID", Double.parseDouble(instID));
+                    properties.put("Installation ID", instID);
                 }
 
-                telemetry.trackEvent(eventName, properties, metrics);
+                telemetry.trackEvent(eventName, properties, null);
                 telemetry.flush();
             }
         }
@@ -72,7 +72,6 @@ public class AppInsightsCustomEvent {
         telemetry.getContext().setInstrumentationKey(key);
 
         Map<String, String> properties = new HashMap<String, String>();
-        Map<String, Double> metrics = new HashMap<String, Double>();
 
         if (uri != null && !uri.isEmpty()) {
             properties.put("WebApp URI", uri);
@@ -91,10 +90,10 @@ public class AppInsightsCustomEvent {
 
             String instID = DataOperations.getProperty(dataFile, AzureBundle.message("instID"));
             if (instID != null && !instID.isEmpty()) {
-                metrics.put("Installation ID", Double.parseDouble(instID));
+                properties.put("Installation ID", instID);
             }
         }
-        telemetry.trackEvent(eventName, properties, metrics);
+        telemetry.trackEvent(eventName, properties, null);
         telemetry.flush();
     }
 }

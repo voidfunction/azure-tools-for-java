@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 package com.microsoft.intellij;
+
 import com.intellij.ide.plugins.cl.PluginClassLoader;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
@@ -40,6 +41,7 @@ import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.azuretools.azurecommons.util.FileUtil;
+import com.microsoft.azuretools.azurecommons.util.GetHashMac;
 import com.microsoft.azuretools.azurecommons.util.ParserXMLUtility;
 import com.microsoft.azuretools.azurecommons.util.Utils;
 import com.microsoft.azuretools.azurecommons.util.WAEclipseHelperMethods;
@@ -57,10 +59,7 @@ import org.w3c.dom.Document;
 import javax.swing.event.EventListenerList;
 import java.io.*;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -91,11 +90,14 @@ public class AzurePlugin extends AbstractProjectComponent {
 
     private final AzureSettings azureSettings;
 
+    private String _hashmac = GetHashMac.GetHashMac();
+
     public AzurePlugin(Project project) {
         super(project);
         this.azureSettings = AzureSettings.getSafeInstance(project);
         CommonSettings.setUserAgent(String.format(USER_AGENT, PLUGIN_VERSION));
     }
+
 
     public void projectOpened() {
         initializeAIRegistry();
@@ -143,9 +145,14 @@ public class AzurePlugin extends AbstractProjectComponent {
                         setValues(dataFile);
                     } else if (instID == null || instID.isEmpty()) {
                         Document doc = ParserXMLUtility.parseXMLFile(dataFile);
-                        DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-                        DataOperations.updatePropertyValue(doc, message("instID"), dateFormat.format(new Date()));
+                        DataOperations.updatePropertyValue(doc, message("instID"), _hashmac);
                         ParserXMLUtility.saveXMLFile(dataFile, doc);
+                    } else if (instID != null && !instID.isEmpty()) {
+                        if (!GetHashMac.IsValidHashMacFormat(instID)) {
+                            Document doc = ParserXMLUtility.parseXMLFile(dataFile);
+                            DataOperations.updatePropertyValue(doc, message("instID"), _hashmac);
+                            ParserXMLUtility.saveXMLFile(dataFile, doc);
+                        }
                     }
                 } else {
                     // proceed with setValues method. Case of new plugin installation
@@ -196,8 +203,7 @@ public class AzurePlugin extends AbstractProjectComponent {
             public void run() {
                 DataOperations.updatePropertyValue(doc, message("prefVal"), String.valueOf("true"));
                 DataOperations.updatePropertyValue(doc, message("pluginVersion"), PLUGIN_VERSION);
-                DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-                DataOperations.updatePropertyValue(doc, message("instID"), dateFormat.format(new Date()));
+                DataOperations.updatePropertyValue(doc, message("instID"), _hashmac);
                 try {
                     ParserXMLUtility.saveXMLFile(dataFile, doc);
                 } catch (Exception ex) {
@@ -211,10 +217,11 @@ public class AzurePlugin extends AbstractProjectComponent {
     }
 
     /**
-     *  Delete %proj% directory from temporary folder during IntelliJ start
-     *  To fix #2943 : Hang invoking a new Azure project,
-     *  PML does not delete .cspack.jar everytime new azure project is created.
-     *  Hence its necessary to delete %proj% directory when plugin with newer version is installed.
+     * Delete %proj% directory from temporary folder during IntelliJ start
+     * To fix #2943 : Hang invoking a new Azure project,
+     * PML does not delete .cspack.jar everytime new azure project is created.
+     * Hence its necessary to delete %proj% directory when plugin with newer version is installed.
+     *
      * @throws Exception
      */
     private void clearTempDirectory() throws Exception {
@@ -344,7 +351,7 @@ public class AzurePlugin extends AbstractProjectComponent {
     private boolean isFirstInstallationByVersion() {
         if (new File(dataFile).exists()) {
             String version = DataOperations.getProperty(dataFile, message("pluginVersion"));
-            if(!StringHelper.isNullOrWhiteSpace(version) && version.equals(PLUGIN_VERSION)) {
+            if (!StringHelper.isNullOrWhiteSpace(version) && version.equals(PLUGIN_VERSION)) {
                 return false;
             }
         }
@@ -354,8 +361,8 @@ public class AzurePlugin extends AbstractProjectComponent {
     private void extractJobViewResource() {
         File indexRootFile = new File(PluginUtil.getPluginRootDirectory() + File.separator + "com.microsoft.hdinsight");
 
-        if(isFirstInstallationByVersion() || isDebugModel()) {
-            if(indexRootFile.exists()) {
+        if (isFirstInstallationByVersion() || isDebugModel()) {
+            if (indexRootFile.exists()) {
                 try {
                     FileUtils.deleteDirectory(indexRootFile);
                 } catch (IOException e) {
@@ -365,7 +372,7 @@ public class AzurePlugin extends AbstractProjectComponent {
         }
 
         URL url = AzurePlugin.class.getResource(HTML_ZIP_FILE_NAME);
-        if(url != null) {
+        if (url != null) {
             File toFile = new File(indexRootFile.getAbsolutePath(), HTML_ZIP_FILE_NAME);
             try {
                 FileUtils.copyURLToFile(url, toFile);
@@ -408,5 +415,4 @@ public class AzurePlugin extends AbstractProjectComponent {
         }
         bos.close();
     }
-
 }
