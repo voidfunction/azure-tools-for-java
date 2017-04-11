@@ -141,7 +141,7 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
 //                if (!AzureSettings.getSafeInstance(myProject).isAppInsightsLoaded()) {
                     updateApplicationInsightsResourceRegistry(subList, myProject);
                 } else {
-                    // imported publish settings file. just show manually added list from preferences
+                    // just show manually added list from preferences
                     // Neither clear subscription list nor show sign in dialog as user may just want to add key manually.
                     keeepManuallyAddedList(myProject);
                 }
@@ -175,53 +175,17 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
     }
 
     public static void updateApplicationInsightsResourceRegistry(List<SubscriptionDetail> subList, Project project) throws Exception {
+        // remove all resourecs that were not manually added
+        keeepManuallyAddedList(project);
         for (SubscriptionDetail sub : subList) {
             if (sub.isSelected()) {
                 try {
                     // fetch resources available for particular subscription
                     List<Resource> resourceList = AzureSDKManager.getApplicationInsightsResources(sub);
-
                     // Removal logic
-                    List<ApplicationInsightsResource> registryList = ApplicationInsightsResourceRegistry.getResourceListAsPerSub(sub.getSubscriptionId());
                     List<ApplicationInsightsResource> importedList = ApplicationInsightsResourceRegistry.prepareAppResListFromRes(resourceList, sub);
-                    List<String> inUsekeyList = MethodUtils.getInUseInstrumentationKeys(project);
-                    for (ApplicationInsightsResource registryRes : registryList) {
-                        if (!importedList.contains(registryRes)) {
-                            String key = registryRes.getInstrumentationKey();
-                            int index = ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(key);
-                            if (inUsekeyList.contains(key)) {
-                        /*
-						 * key is used by project but not present in cloud,
-						 * so make it as manually added resource and not imported.
-						 */
-                                ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
-                                        key, key, message("unknown"), message("unknown"),
-                                        message("unknown"), message("unknown"), false);
-                                ApplicationInsightsResourceRegistry.getAppInsightsResrcList().set(index, resourceToAdd);
-                            } else {
-                                // key is not used by any project then delete it.
-                                ApplicationInsightsResourceRegistry.getAppInsightsResrcList().remove(index);
-                            }
-                        }
-                    }
-
                     // Addition logic
-                    List<ApplicationInsightsResource> list = ApplicationInsightsResourceRegistry.getAppInsightsResrcList();
-                    for (Resource resource : resourceList) {
-                        ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
-                                resource.getName(), resource.getInstrumentationKey(),
-                                sub.getSubscriptionName(), sub.getSubscriptionId(),
-                                resource.getLocation(), resource.getResourceGroup(), true);
-                        if (list.contains(resourceToAdd)) {
-                            int index = ApplicationInsightsResourceRegistry.getResourceIndexAsPerKey(resource.getInstrumentationKey());
-                            ApplicationInsightsResource objectFromRegistry = list.get(index);
-                            if (!objectFromRegistry.isImported()) {
-                                ApplicationInsightsResourceRegistry.getAppInsightsResrcList().set(index, resourceToAdd);
-                            }
-                        } else {
-                            ApplicationInsightsResourceRegistry.getAppInsightsResrcList().add(resourceToAdd);
-                        }
-                    }
+                    ApplicationInsightsResourceRegistry.getAppInsightsResrcList().addAll(importedList);
                 } catch (Exception ex) {
                     AzurePlugin.log("Error loading AppInsights information for subscription '" + sub.getSubscriptionName() + "'");
                 }
@@ -232,19 +196,6 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
 
     private static void keeepManuallyAddedList(Project project) {
         List<ApplicationInsightsResource> addedList = ApplicationInsightsResourceRegistry.getAddedResources();
-        List<String> addedKeyList = new ArrayList<String>();
-        for (ApplicationInsightsResource res : addedList) {
-            addedKeyList.add(res.getInstrumentationKey());
-        }
-        List<String> inUsekeyList = MethodUtils.getInUseInstrumentationKeys(project);
-        for (String inUsekey : inUsekeyList) {
-            if (!addedKeyList.contains(inUsekey)) {
-                ApplicationInsightsResource resourceToAdd = new ApplicationInsightsResource(
-                        inUsekey, inUsekey, message("unknown"), message("unknown"),
-                        message("unknown"), message("unknown"), false);
-                addedList.add(resourceToAdd);
-            }
-        }
         ApplicationInsightsResourceRegistry.setAppInsightsResrcList(addedList);
         AzureSettings.getSafeInstance(project).saveAppInsights();
     }
@@ -340,11 +291,21 @@ public class AppInsightsMngmtPanel implements AzureAbstractConfigurablePanel {
     }
 
     private ActionListener manageSubscriptionsListener() {
-        return e -> SelectSubscriptionsAction.onShowSubscriptions(myProject);
+        return e -> {
+            SelectSubscriptionsAction.onShowSubscriptions(myProject);
+            loadInfoFirstTime();
+            ((InsightsTableModel) insightsTable.getModel()).setResources(getTableContent());
+            ((InsightsTableModel) insightsTable.getModel()).fireTableDataChanged();
+        };
     }
 
     private ActionListener signInOutListener() {
-        return e -> AzureSignInAction.onAzureSignIn(myProject);
+        return e -> {
+            AzureSignInAction.onAzureSignIn(myProject);
+            loadInfoFirstTime();
+            ((InsightsTableModel) insightsTable.getModel()).setResources(getTableContent());
+            ((InsightsTableModel) insightsTable.getModel()).fireTableDataChanged();
+        };
     }
 
     private ListSelectionListener createAccountsTableListener() {
