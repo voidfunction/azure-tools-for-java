@@ -395,35 +395,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
       DockerHost updateHost = dockerManager.getDockerHostForURL(apiURL);
 
       if (updateHost != null && !updateHost.isUpdating) {
-        EditableDockerHost editableDockerHost = new EditableDockerHost(updateHost);
-
-//      AzureEditDockerLoginCredsDialog editDockerDialog = new AzureEditDockerLoginCredsDialog(model.getProject(), editableDockerHost, dockerManager);
-//      editDockerDialog.show();
-        AzureInputDockerLoginCredsDialog loginCredsDialog = new AzureInputDockerLoginCredsDialog(model.getProject(), editableDockerHost, model.getDockerHostsManager(), true);
-        loginCredsDialog.show();
-
-        if (loginCredsDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
-          // Update Docker host log in credentials
-          updateHost.isUpdating = true;
-          DefaultLoader.getIdeHelper().runInBackground(model.getProject(), String.format("Updating %s Log In Credentials", updateHost.name), false, true, String.format("Updating log in credentials for %s...", updateHost.name), new Runnable() {
-            @Override
-            public void run() {
-              try {
-                AzureDockerVMOps.updateDockerHostVM(model.getDockerHostsManager().getSubscriptionsMap().get(updateHost.sid).azureClient, editableDockerHost.updatedDockerHost);
-                updateHost.certVault = editableDockerHost.updatedDockerHost.certVault;
-                updateHost.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
-                updateHost.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
-                Session session = AzureDockerSSHOps.createLoginInstance(updateHost);
-                AzureDockerVMOps.UpdateCurrentDockerUser(session);
-                updateHost.session = session;
-              } catch (Exception ee) {
-                if (AzureDockerUtils.DEBUG) ee.printStackTrace();
-                LOGGER.error("onEditDockerHostAction", ee);
-              }
-              updateHost.isUpdating = false;
-            }
-          });
-        }
+        AzureDockerUIResources.updateDockerHost(model.getProject(), new EditableDockerHost(updateHost), model.getDockerHostsManager(), true);
       } else {
         PluginUtil.displayErrorDialog("Error: Invalid Edit Selection", "The selected Docker host can not be edited at this time!");
       }
