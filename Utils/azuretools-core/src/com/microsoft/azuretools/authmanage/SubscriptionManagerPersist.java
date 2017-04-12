@@ -29,6 +29,7 @@ import com.microsoft.azuretools.sdkmanage.AzureManager;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,7 +88,7 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
         //subscriptionDetails.clear();
         FileStorage subscriptionsDetailsFileStorage = new FileStorage(subscriptionsDetailsFileName, CommonSettings.settingsBaseDir);
         byte[] data = subscriptionsDetailsFileStorage.read();
-        String json = new String(data);
+        String json = new String(data, StandardCharsets.UTF_8);
         if (json.isEmpty()) {
             System.out.println(subscriptionsDetailsFileName + " file is empty");
             return null;
@@ -105,7 +106,7 @@ public class SubscriptionManagerPersist extends SubscriptionManager {
         String sd = JsonHelper.serialize(sdl);
         //String subscriptionsDetailsFileName = azureManager.getSettings().getSubscriptionsDetailsFileName();
         FileStorage subscriptionsDetailsFileStorage = new FileStorage(subscriptionsDetailsFileName, CommonSettings.settingsBaseDir);
-        subscriptionsDetailsFileStorage.write(sd.getBytes(Charset.forName("utf-8")));
+        subscriptionsDetailsFileStorage.write(sd.getBytes(StandardCharsets.UTF_8));
     }
 
 }
