@@ -123,6 +123,7 @@ public class WindowsAzureActivityLogView extends ViewPart {
 
 		Link link = new Link(table, SWT.LEFT);
 		link.setText("");
+		link.setBackground(item.getBackground());
 
 		rows.put(key, new TableRowDescriptor(item, bar, link));
 	}
@@ -143,51 +144,40 @@ public class WindowsAzureActivityLogView extends ViewPart {
 									TableRowDescriptor row = rows.get(args.getId());
 
 									if (!row.getProgressBar().isDisposed()) {
-										row.getProgressBar().setSelection(row.getProgressBar().getSelection() + args.getDeployCompleteness());
-										if (row.getProgressBar().getMaximum() <= (row.getProgressBar().getSelection())) {
-											row.getProgressBar().setVisible(false);
-											/*
-											 * Need link only if args.getDeploymentURL() is not null.
-											 */
-											Link link = row.getLink();
-											TableEditor editor = new TableEditor(table);
-											editor.grabHorizontal = editor.grabVertical = true;
-											if (args.getDeploymentURL() != null) {
-												link.setVisible(true);
-												link.setText(String.format("  <a>Published</a>"));
-//												link.setText(String.format("%s%s%s%s", "  ", "<a>", Messages.runStatusVisible, "</a>"));
-												row.getLink().addSelectionListener(new SelectionAdapter() {
-													@Override
-													public void widgetSelected(SelectionEvent event) {
-														try {
-															PlatformUI.getWorkbench().getBrowserSupport().
-															getExternalBrowser().openURL(new URL(args.getDeploymentURL()));
-														} catch (Exception e) {
+										if (args.getDeployCompleteness() >= 0) {
+											row.getProgressBar().setSelection(row.getProgressBar().getSelection() + args.getDeployCompleteness());
+											if (row.getProgressBar().getMaximum() <= (row.getProgressBar().getSelection())) {
+												row.getProgressBar().setVisible(false);
+												/*
+												 * Need link only if args.getDeploymentURL() is not null.
+												 */
+												Link link = row.getLink();
+												TableEditor editor = new TableEditor(table);
+												editor.grabHorizontal = editor.grabVertical = true;
+												if (args.getDeploymentURL() != null) {
+													link.setVisible(true);
+													link.setText(String.format("  <a>%s</a>", Messages.runStatusVisible)); // Published
+//													link.setText(String.format("%s%s%s%s", "  ", "<a>", Messages.runStatusVisible, "</a>"));
+													row.getLink().addSelectionListener(new SelectionAdapter() {
+														@Override
+														public void widgetSelected(SelectionEvent event) {
+															try {
+																PlatformUI.getWorkbench().getBrowserSupport().
+																getExternalBrowser().openURL(new URL(args.getDeploymentURL()));
+															} catch (Exception e) {
+															}
 														}
-													}
-												});
-												editor.setEditor(link, row.getItem(), 1);
-											} else {
-												link.setVisible(false);
+													});
+													editor.setEditor(link, row.getItem(), 1);
+												} else {
+													link.setVisible(false);
+												}
 											}
+										} else {
+											row.getProgressBar().setVisible(false);
+											// row.getProgressBar().dispose();
 										}
 										row.getItem().setText(2, args.getDeployMessage());
-//											if (args.getDeployMessage().equalsIgnoreCase(Messages.runStatus)) {
-//												editor.setEditor(row.getLink(), row.getItem(), 2);
-//												row.getLink().setVisible(true);
-//												row.getLink().addSelectionListener(new SelectionAdapter() {
-//													@Override
-//													public void widgetSelected(SelectionEvent event) {
-//														try {
-//															PlatformUI.getWorkbench().getBrowserSupport().
-//															getExternalBrowser().openURL(new URL(args.getDeploymentURL()));
-//														} catch (Exception e) {
-//														}
-//													}
-//												});
-//											} else {
-//												row.getItem().setText(2, args.getDeployMessage());
-//											}
 									}
 								}
 							});

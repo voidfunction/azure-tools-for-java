@@ -188,25 +188,26 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
     public String getAccessToken(String tid) throws IOException {
         ExecutorService service = null;
         AuthenticationResult authenticationResult;
-        try {
+//        try {
             ApplicationTokenCredentials credentials = (atc == null)
                     ? ApplicationTokenCredentials.fromFile(credFile)
                     : atc;
 
-            service = Executors.newFixedThreadPool(1);
-            AuthenticationContext context = new AuthenticationContext(String.format("%s/%s", Constants.authority, tid), false, service);
-            ClientCredential clientCredential = new ClientCredential(credentials.getClientId(), credentials.getSecret());
-            Future<AuthenticationResult> future = context.acquireToken(Constants.resourceARM, clientCredential, null);
-            authenticationResult = future.get();
-            return authenticationResult.getAccessToken();
-        } catch (InterruptedException  | ExecutionException e) {
-            e.printStackTrace();
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            throw new IOException(e);
-        } finally {
-            if (service != null) {
-                service.shutdown();
-            }
-        }
+            return credentials.getToken(Constants.resourceARM);
+//            service = Executors.newFixedThreadPool(1);
+//            AuthenticationContext context = new AuthenticationContext(String.format("%s/%s", Constants.authority, tid), false, service);
+//            ClientCredential clientCredential = new ClientCredential(credentials.getClientId(), credentials.getSecret());
+//            Future<AuthenticationResult> future = context.acquireToken(Constants.resourceARM, clientCredential, null);
+//            authenticationResult = future.get();
+//            return authenticationResult.getAccessToken();
+//        } catch (InterruptedException  | ExecutionException e) {
+//            e.printStackTrace();
+//            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+//            throw new IOException(e);
+//        } finally {
+//            if (service != null) {
+//                service.shutdown();
+//            }
+//        }
     }
 }
