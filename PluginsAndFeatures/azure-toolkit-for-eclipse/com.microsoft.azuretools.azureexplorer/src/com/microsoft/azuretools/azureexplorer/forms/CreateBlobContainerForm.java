@@ -153,9 +153,8 @@ public class CreateBlobContainerForm extends Dialog {
                                     return;
                                 }
                             }
-//TODO
-//                            BlobContainer blobContainer = new BlobContainer(name, storageAccount.getBlobsUri() + name, "", Calendar.getInstance(), "");
-//                            StorageClientSDKManager.getManager().createBlobContainer(storageAccount.getConnectionString(), blobContainer);
+                            BlobContainer blobContainer = new BlobContainer(name, ""/*storageAccount.getBlobsUri() + name*/, "", Calendar.getInstance(), "");
+                            StorageClientSDKManager.getManager().createBlobContainer(connectionString, blobContainer);
 
                             if (onCreate != null) {
                                 DefaultLoader.getIdeHelper().invokeLater(onCreate);
