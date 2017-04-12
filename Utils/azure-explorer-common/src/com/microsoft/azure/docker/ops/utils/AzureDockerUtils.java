@@ -52,6 +52,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 
 public class AzureDockerUtils {
   public static boolean DEBUG = true;
@@ -338,10 +339,9 @@ public class AzureDockerUtils {
         AzureDockerSubscription dockerSubscription = subsMap.get(subscription.subscriptionId());
 
         if (dockerSubscription != null) {
-          dockerSubscription.locations = new ArrayList<>();
-          for (Location location : subscription.listLocations()) {
-            dockerSubscription.locations.add(location.name().toLowerCase());
-          }
+          List<String> locations = subscription.listLocations().stream().sorted(Comparator.comparing(Location::displayName))
+                  .map(o -> o.name().toLowerCase()).collect(Collectors.toList());
+          dockerSubscription.locations = locations;
         }
       }
     } catch (Exception e) {
