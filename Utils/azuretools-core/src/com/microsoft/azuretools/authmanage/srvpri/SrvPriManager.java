@@ -28,9 +28,7 @@ import com.microsoft.azuretools.authmanage.srvpri.report.IListener;
 import com.microsoft.azuretools.authmanage.srvpri.report.Reporter;
 import com.microsoft.azuretools.authmanage.srvpri.step.*;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -147,15 +145,30 @@ public class SrvPriManager {
         return null;
     }
 
-    private static void createArtifact(String filepath, UUID appId, String appPassword) {
+    private static void createArtifact(String filepath, UUID appId, String appPassword) throws IOException {
 
         Properties prop = new Properties();
-        OutputStream output = null;
+        Writer writer = null;
 
         try {
-
-            // TODO.shch: best file name?
-            output = new FileOutputStream(filepath);
+            // to ignore date comment
+            String lineSeparator = System.getProperty("line.separator");
+            writer = new BufferedWriter(new FileWriter(filepath)) {
+                private boolean skipLineSeparator = false;
+                @Override
+                public void write(String str) throws IOException {
+                    System.out.println(str);
+                    if (str.startsWith("#")) {
+                        skipLineSeparator = true;
+                        return;
+                    }
+                    if (str.startsWith(lineSeparator) && skipLineSeparator) {
+                        skipLineSeparator = false;
+                        return;
+                    }
+                    super.write(str);
+                }
+            };
 
             // set the properties value
             prop.setProperty("tenant", CommonParams.getTenantId());
@@ -174,20 +187,10 @@ public class SrvPriManager {
             prop.setProperty("baseURL", "https://management.azure.com/");
             prop.setProperty("authURL", "https://login.windows.net/");
 
-            // save properties to project root folder
-            prop.store(output, null);
-
-        } catch (IOException io) {
-            io.printStackTrace();
-            LOGGER.log(Level.SEVERE, "createArtifact()", io);
+            prop.store(writer, null);
         } finally {
-            if (output != null) {
-                try {
-                    output.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    LOGGER.log(Level.SEVERE, "output.close()", e);
-                }
+            if (writer != null) {
+                writer.close();
             }
         }
     }
