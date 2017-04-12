@@ -100,8 +100,16 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 	}
 
 	public void createBtnCmpnt(Composite parent) {
-		signInOutBtn = new Button(parent, SWT.PUSH | SWT.CENTER);
+		Composite container = new Composite(parent, SWT.NONE);
+		GridLayout gridLayout = new GridLayout();
+		gridLayout.numColumns = 2;
 		GridData gridData = new GridData();
+		gridData.horizontalAlignment = SWT.LEFT;
+		gridData.horizontalSpan = 2;
+		container.setLayout(gridLayout);
+		container.setLayoutData(gridData);
+		signInOutBtn = new Button(container, SWT.PUSH | SWT.LEFT);
+		gridData = new GridData();
 		gridData.horizontalIndent = 3;
 		boolean isSignedIn = false;
 		try {
@@ -118,7 +126,7 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 				signInOutBtnListener();
 			}
 		});
-		selectSubscriptionsBtn = new Button(parent, SWT.PUSH | SWT.CENTER);
+		selectSubscriptionsBtn = new Button(container, SWT.PUSH | SWT.LEFT);
 		gridData = new GridData();
 		gridData.horizontalIndent = 3;
 		selectSubscriptionsBtn.setImage(PluginUtil.getImage(ICON_SELECT_SUBSCRIPTIONS));
@@ -174,8 +182,7 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 		tableViewer.setLabelProvider(new ITableLabelProvider() {
 
 			@Override
-			public void removeListener(
-					ILabelProviderListener ilabelproviderlistener) {
+			public void removeListener(ILabelProviderListener ilabelproviderlistener) {
 			}
 
 			@Override
@@ -188,8 +195,7 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
 			}
 
 			@Override
-			public void addListener(
-					ILabelProviderListener ilabelproviderlistener) {
+			public void addListener(ILabelProviderListener ilabelproviderlistener) {
 			}
 
 			@Override
@@ -335,6 +341,7 @@ public class ApplicationInsightsPreferencePage extends PreferencePage implements
     		} else {
     			SignInCommandHandler.doSignIn(PluginUtil.getParentShell());
     		}
+    		signInOutBtn.setImage(PluginUtil.getImage(authMethodManager.isSignedIn() ? ICON_SIGNOUT : ICON_SIGNIN));
     		tableViewer.refresh();
     	} catch (Exception ex) {
     		Activator.getDefault().log(ex.getMessage(), ex);

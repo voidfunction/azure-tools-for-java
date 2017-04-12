@@ -46,8 +46,6 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
 
     private State myState = new State();
 
-    Map<String, Boolean> websiteDebugPrep = new HashMap<String, Boolean>();
-
     public static AzureSettings getSafeInstance(Project project) {
         AzureSettings settings = ServiceManager.getService(project, AzureSettings.class);
         return settings != null ? settings : new AzureSettings();
@@ -87,27 +85,6 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
         }
     }
 
-    /*public Map<WebSite, WebSiteConfiguration> loadWebApps() {
-        Map<WebSite, WebSiteConfiguration> map = null;
-        try {
-            if (myState.webApps != null) {
-                byte[] data = Base64.decode(myState.webApps.getBytes());
-                ByteArrayInputStream buffer = new ByteArrayInputStream(data);
-                ObjectInput input = new ObjectInputStream(buffer);
-                try {
-                    map = (Map<WebSite, WebSiteConfiguration>) input.readObject();
-                } finally {
-                    input.close();
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            // ignore - this happens because class package changed and settings were not updated
-        } catch (Exception e) {
-            log(message("err"), e);
-        }
-        return map;
-    }*/
-
     public void saveAppInsights() {
         try {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -115,14 +92,9 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
             List<ApplicationInsightsResource> data = ApplicationInsightsResourceRegistry.getAppInsightsResrcList();
             /*
 			 * Sort list according to application insights resource name.
+			 * Save only manually added resources
 			 */
-            Collections.sort(data);
-            ApplicationInsightsResource[] dataArray = new ApplicationInsightsResource[data.size()];
-            int i = 0;
-            for (ApplicationInsightsResource pd1 : data) {
-                dataArray[i] = pd1;
-                i++;
-            }
+            ApplicationInsightsResource[] dataArray = data.stream().filter(a -> !a.isImported()).sorted().toArray(ApplicationInsightsResource[]::new);
             try {
                 output.writeObject(dataArray);
             } finally {
@@ -152,14 +124,6 @@ public class AzureSettings implements PersistentStateComponent<AzureSettings.Sta
 
     public boolean isPropertySet(String name) {
         return myState.properties.containsKey(name);
-    }
-
-    public Map<String, Boolean> getWebsiteDebugPrep() {
-        return websiteDebugPrep;
-    }
-
-    public void setWebsiteDebugPrep(Map<String, Boolean> websiteDebugPrep) {
-        this.websiteDebugPrep = websiteDebugPrep;
     }
 
     public String[] getProperties(String name) {

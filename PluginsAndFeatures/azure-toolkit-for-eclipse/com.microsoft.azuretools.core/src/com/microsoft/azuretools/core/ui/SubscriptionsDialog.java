@@ -36,7 +36,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -94,16 +93,18 @@ public class SubscriptionsDialog extends TitleAreaDialog {
         container.setLayoutData(new GridData(GridData.FILL_BOTH));
         
         table = new Table(container, SWT.BORDER | SWT.CHECK);
-        table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+        GridData gd_table = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+        gd_table.heightHint = 300;
+        table.setLayoutData(gd_table);
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
         
         TableColumn tblclmnNewColumn = new TableColumn(table, SWT.NONE);
-        tblclmnNewColumn.setWidth(250);
+        tblclmnNewColumn.setWidth(300);
         tblclmnNewColumn.setText("Subsription Name");
         
         TableColumn tblclmnNewColumn_1 = new TableColumn(table, SWT.NONE);
-        tblclmnNewColumn_1.setWidth(300);
+        tblclmnNewColumn_1.setWidth(270);
         tblclmnNewColumn_1.setText("Subscription ID");
         
         Button btnRefresh = new Button(container, SWT.NONE);
@@ -192,14 +193,6 @@ public class SubscriptionsDialog extends TitleAreaDialog {
         super.createButtonsForButtonBar(parent);
         Button okButton = getButton(IDialogConstants.OK_ID);
         okButton.setText("Select");
-    }
-
-    /**
-     * Return the initial size of the dialog.
-     */
-    @Override
-    protected Point getInitialSize() {
-        return new Point(668, 410);
     }
 
     @Override

@@ -27,48 +27,9 @@ import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.ui.libraries.AILibraryHandler;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
-/**
- * Class has common methods which
- * handles publish settings file and extract data.
- * Methods get called whenever user clicks
- * "Import from publish settings file..." button
- * on publish wizard or preference page dialog.
- */
 public class MethodUtils {
-
-    /**
-     * Method scans all open Maven or Dynamic web projects form workspace
-     * and prepare a list of instrumentation keys which are in use.
-     * @return
-     */
-    public static List<String> getInUseInstrumentationKeys(Project project) {
-        List<String> keyList = new ArrayList<String>();
-        try {
-            Module[] modules = ModuleManager.getInstance(project).getModules();
-            for (Module module : modules) {
-                if (module!= null && module.isLoaded() && ModuleTypeId.JAVA_MODULE.equals(module.getOptionValue(Module.ELEMENT_TYPE))) {
-                    AILibraryHandler handler = new AILibraryHandler();
-                    String aiXMLFilePath = String.format("%s%s%s", PluginUtil.getModulePath(module), File.separator, message("aiXMLPath"));
-                    if (new File(aiXMLFilePath).exists()) {
-                        handler.parseAIConfXmlPath(aiXMLFilePath);
-                        String key = handler.getAIInstrumentationKey();
-                        if (key != null && !key.isEmpty()) {
-                            keyList.add(key);
-                        }
-                    }
-                }
-            }
-        } catch(Exception ex) {
-            AzurePlugin.log(ex.getMessage(), ex);
-        }
-        return keyList;
-    }
 
     /**
      * Method scans all open Maven or Dynamic web projects form workspace

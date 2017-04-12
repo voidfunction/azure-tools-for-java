@@ -163,7 +163,6 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
 					resourceGrpCombo.setText(valtoSet);
 				}
 			}
-			enableOkBtn();
 		} catch (Exception ex) {
 			Activator.getDefault().log(Messages.getValuesErrMsg, ex);
 		}
@@ -253,11 +252,17 @@ public class ApplicationInsightsNewDialog extends TitleAreaDialog  {
         	@Override
 			public void widgetSelected(SelectionEvent arg0) {
         		 updateResourceGroup();
+        		 enableOkBtn();
 			}
 		};
         createNewRadioButton.addSelectionListener(updateListener);
         useExistingRadioButton.addSelectionListener(updateListener);	
-   
+        resourceGrpField.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent arg0) {
+				enableOkBtn();
+			}
+		});
         updateResourceGroup();
 	}
 	

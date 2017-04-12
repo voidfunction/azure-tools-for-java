@@ -36,7 +36,6 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -107,13 +106,13 @@ public class SrvPriCreationStatusDialog extends TitleAreaDialog {
         
         table = new Table(container, SWT.BORDER | SWT.FULL_SELECTION);
         GridData gd_table = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-        gd_table.heightHint = 313;
+        gd_table.heightHint = 300;
         table.setLayoutData(gd_table);
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
         
         TableColumn tblclmnStep = new TableColumn(table, SWT.NONE);
-        tblclmnStep.setWidth(400);
+        tblclmnStep.setWidth(250);
         tblclmnStep.setText("Step");
         
         TableColumn tblclmnResult = new TableColumn(table, SWT.NONE);
@@ -121,7 +120,7 @@ public class SrvPriCreationStatusDialog extends TitleAreaDialog {
         tblclmnResult.setText("Result");
         
         TableColumn tblclmnDetails = new TableColumn(table, SWT.NONE);
-        tblclmnDetails.setWidth(500);
+        tblclmnDetails.setWidth(250);
         tblclmnDetails.setText("Details");
         
         Label lblCreatedAuthenticationFiles = new Label(container, SWT.NONE);
@@ -158,14 +157,6 @@ public class SrvPriCreationStatusDialog extends TitleAreaDialog {
             }
         });
         createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-    }
-    
-    /**
-     * Return the initial size of the dialog.
-     */
-    @Override
-    protected Point getInitialSize() {
-        return new Point(718, 605);
     }
     
     private void onOk() {

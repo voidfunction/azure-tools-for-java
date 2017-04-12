@@ -33,6 +33,7 @@ import com.intellij.openapi.wm.ex.ToolWindowEx;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
 import com.microsoft.azure.hdinsight.common.HDInsightUtil;
+import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.ijidea.actions.AzureSignInAction;
 import com.microsoft.azuretools.ijidea.actions.SelectSubscriptionsAction;
 import com.microsoft.intellij.AzurePlugin;
@@ -327,22 +328,31 @@ public class ServerExplorerToolWindowFactory implements ToolWindowFactory, Prope
         if (toolWindow instanceof ToolWindowEx) {
             ToolWindowEx toolWindowEx = (ToolWindowEx) toolWindow;
             try {
-                toolWindowEx.setTitleActions(
-                        new AnAction("Refresh", "Refresh Azure Nodes List", null) {
-                            @Override
-                            public void actionPerformed(AnActionEvent event) {
-                                azureModule.load(true);
-                            }
+                Runnable forceRefreshTitleActions = () -> {
+                    try {
+                        toolWindowEx.setTitleActions(
+                            new AnAction("Refresh", "Refresh Azure Nodes List", null) {
+                                @Override
+                                public void actionPerformed(AnActionEvent event) {
+                                    azureModule.load(true);
+                                }
 
-                            @Override
-                            public  void update(AnActionEvent e) {
-                                boolean isDarkTheme = DefaultLoader.getUIHelper().isDarkTheme();
-                                e.getPresentation().setIcon(UIHelperImpl.loadIcon(isDarkTheme ?
+                                @Override
+                                public void update(AnActionEvent e) {
+                                    boolean isDarkTheme = DefaultLoader.getUIHelper().isDarkTheme();
+                                    e.getPresentation().setIcon(UIHelperImpl.loadIcon(isDarkTheme ?
                                         RefreshableNode.REFRESH_ICON_DARK : RefreshableNode.REFRESH_ICON_LIGHT));
-                            }
-                        },
-                        new AzureSignInAction(),
-                        new SelectSubscriptionsAction());
+                                }
+                            },
+                            new AzureSignInAction(),
+                            new SelectSubscriptionsAction());
+                    } catch (Exception e) {
+                        AzurePlugin.log(e.getMessage(), e);
+                    }
+                };
+                AuthMethodManager.getInstance().addSignInEventListener(forceRefreshTitleActions);
+                AuthMethodManager.getInstance().addSignOutEventListener(forceRefreshTitleActions);
+                forceRefreshTitleActions.run();
             } catch (Exception e) {
                 AzurePlugin.log(e.getMessage(), e);
             }

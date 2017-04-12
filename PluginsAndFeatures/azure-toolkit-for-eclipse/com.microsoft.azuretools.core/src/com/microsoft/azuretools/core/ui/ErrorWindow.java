@@ -69,6 +69,6 @@ public class ErrorWindow extends TitleAreaDialog {
      */
     @Override
     protected Point getInitialSize() {
-        return new Point(450, 300);
+        return new Point(501, 300);
     }
 }
