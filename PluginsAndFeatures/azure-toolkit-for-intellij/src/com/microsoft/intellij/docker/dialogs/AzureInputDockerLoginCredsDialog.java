@@ -6,6 +6,7 @@ import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.EditableDockerHost;
 import com.microsoft.intellij.docker.forms.AzureDockerHostUpdateLoginPanel;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -60,7 +61,11 @@ public class AzureInputDockerLoginCredsDialog extends DialogWrapper {
   protected void doOKAction() {
     try {
       if (loginPanel.doValidate(true) == null) {
-        super.doOKAction();
+        if (editableHost.originalDockerHost.hasKeyVault &&
+            DefaultLoader.getUIHelper().showConfirmation(String.format("We've detected that the selected host's login credentials are currently loaded from an Azure Key Vault. Reseting them will remove this association and will require to enter the credentials manually.\n\n Do you want to proceed with this update?"),
+            "Removing Key Vault Association", new String[]{"Yes", "No"},null)) {
+          super.doOKAction();
+        }
       }
     }
     catch (Exception e){

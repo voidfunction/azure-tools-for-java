@@ -53,6 +53,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.SWT;
@@ -224,7 +225,7 @@ public class AzureSelectDockerWizard extends Wizard {
 
 					msg = "Connecting to Azure...";
 					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 5, msg);
-					Thread.sleep(5000);
+					Thread.sleep(15000);
 
 					AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
 		            // not signed in
@@ -234,11 +235,8 @@ public class AzureSelectDockerWizard extends Wizard {
 		            AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(azureAuthManager);
 		            Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerImageInstance.host.sid).azureClient;
 					if (progressMonitor.isCanceled()) {
-						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
-							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
-							progressMonitor.done();
-							return Status.CANCEL_STATUS;
-						}
+						displayWarningOnCreateDockerContainerDeployTask(this, progressMonitor, deploymentName);
+						return Status.CANCEL_STATUS;
 					}
 					
 		            if (dockerImageInstance.hasNewDockerHost) {
@@ -248,11 +246,8 @@ public class AzureSelectDockerWizard extends Wizard {
 		                AzureDockerVMOps.createDockerHostVM(azureClient, dockerImageInstance.host);
 		                AzureDockerUIResources.printDebugMessage(this, "Done creating new virtual machine: " + new Date().toString());
 						if (progressMonitor.isCanceled()) {
-							if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
-								AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
-								progressMonitor.done();
-								return Status.CANCEL_STATUS;
-							}
+							displayWarningOnCreateDockerContainerDeployTask(this, progressMonitor, deploymentName);
+							return Status.CANCEL_STATUS;
 						}
 						
 
@@ -262,11 +257,8 @@ public class AzureSelectDockerWizard extends Wizard {
 		                AzureDockerVMOps.waitForVirtualMachineStartup(azureClient, dockerImageInstance.host);
 		                AzureDockerUIResources.printDebugMessage(this, "Done Waiting for virtual machine to be up: " + new Date().toString());
 						if (progressMonitor.isCanceled()) {
-							if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
-								AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
-								progressMonitor.done();
-								return Status.CANCEL_STATUS;
-							}
+							displayWarningOnCreateDockerContainerDeployTask(this, progressMonitor, deploymentName);
+							return Status.CANCEL_STATUS;
 						}
 						
 
@@ -282,11 +274,8 @@ public class AzureSelectDockerWizard extends Wizard {
 						AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 40, msg);
 		            }
 					if (progressMonitor.isCanceled()) {
-						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
-							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
-							progressMonitor.done();
-							return Status.CANCEL_STATUS;
-						}
+						displayWarningOnCreateDockerContainerDeployTask(this, progressMonitor, deploymentName);
+						return Status.CANCEL_STATUS;
 					}
 					
 
@@ -308,11 +297,8 @@ public class AzureSelectDockerWizard extends Wizard {
 		            AzureDockerVMOps.uploadDockerfileAndArtifact(dockerImageInstance, dockerImageInstance.host.session);
 		            AzureDockerUIResources.printDebugMessage(this, "Uploading Dockerfile and artifact: " + new Date().toString());
 					if (progressMonitor.isCanceled()) {
-						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
-							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
-							progressMonitor.done();
-							return Status.CANCEL_STATUS;
-						}
+						displayWarningOnCreateDockerContainerDeployTask(this, progressMonitor, deploymentName);
+						return Status.CANCEL_STATUS;
 					}
 					
 
@@ -322,11 +308,8 @@ public class AzureSelectDockerWizard extends Wizard {
 		            AzureDockerImageOps.create(dockerImageInstance, dockerImageInstance.host.session);
 		            AzureDockerUIResources.printDebugMessage(this, "Done creating a Docker image to the Docker host: " + new Date().toString());
 					if (progressMonitor.isCanceled()) {
-						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
-							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
-							progressMonitor.done();
-							return Status.CANCEL_STATUS;
-						}
+						displayWarningOnCreateDockerContainerDeployTask(this, progressMonitor, deploymentName);
+						return Status.CANCEL_STATUS;
 					}
 					
 
@@ -336,11 +319,8 @@ public class AzureSelectDockerWizard extends Wizard {
 		            AzureDockerContainerOps.create(dockerImageInstance, dockerImageInstance.host.session);
 		            AzureDockerUIResources.printDebugMessage(this, "Done creating a Docker container to the Docker host: " + new Date().toString());
 					if (progressMonitor.isCanceled()) {
-						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
-							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
-							progressMonitor.done();
-							return Status.CANCEL_STATUS;
-						}
+						displayWarningOnCreateDockerContainerDeployTask(this, progressMonitor, deploymentName);
+						return Status.CANCEL_STATUS;
 					}
 					
 
@@ -350,11 +330,8 @@ public class AzureSelectDockerWizard extends Wizard {
 		            AzureDockerContainerOps.start(dockerImageInstance, dockerImageInstance.host.session);
 		            AzureDockerUIResources.printDebugMessage(this, "Done starting a Docker container to the Docker host: " + new Date().toString());
 					if (progressMonitor.isCanceled()) {
-						if (displayWarningOnCreateDockerContainerDeployTask() == 0) {
-							AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Stopped by the user");
-							progressMonitor.done();
-							return Status.CANCEL_STATUS;
-						}
+						displayWarningOnCreateDockerContainerDeployTask(this, progressMonitor, deploymentName);
+						return Status.CANCEL_STATUS;
 					}
 					
 
@@ -391,7 +368,7 @@ public class AzureSelectDockerWizard extends Wizard {
 					String msg = "An error occurred while attempting to publish a Docker container!" + "\n" + e.getMessage();
 					log.log(Level.SEVERE, "createDockerContainerDeployTask: " + msg, e);
 					e.printStackTrace();
-					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, 100, "Error: " + e.getMessage());
+					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, -1, "Error: " + e.getMessage());
 					return Status.CANCEL_STATUS;
 				}
 			}
@@ -400,18 +377,19 @@ public class AzureSelectDockerWizard extends Wizard {
 		createDockerHostJob.schedule();	
 	}
 	
-	private static int displayWarningOnCreateDockerContainerDeployTask(){
-		Display currentDisplay = Display.getCurrent();
-		Shell shell = currentDisplay.getActiveShell();
-		
-		if (shell != null) {
-			MessageBox displayConfirmationDialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK| SWT.CANCEL);
-			displayConfirmationDialog.setText("Stop Docker Container Deployment");
-			displayConfirmationDialog.setMessage("This action can leave the Docker virtual machine host in a partial setup state and which can cause publishing to a Docker container to fail!\n\n Are you sure you want this?");
-			return displayConfirmationDialog.open();
-		}
-		
-		return 1;
+	private static void displayWarningOnCreateDockerContainerDeployTask(Object parent, IProgressMonitor progressMonitor, String deploymentName) {
+		DefaultLoader.getIdeHelper().invokeAndWait(new Runnable() {
+			@Override
+			public void run() {
+				Shell shell = PluginUtil.getParentShell();
+				
+				if (shell != null) {
+					MessageDialog.openWarning(shell, "Stop Publishing to Docker Container", "Canceling the task at this time can leave the Docker virtual machine host in a broken state and it can resut in publishing to fail the next time!");
+					AzureDeploymentProgressNotification.notifyProgress(parent, deploymentName, "Error", -1, "Stopped by the user");
+					progressMonitor.done();
+				}
+			}
+		});
 	}
 	
 	

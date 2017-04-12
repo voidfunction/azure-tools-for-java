@@ -32,17 +32,21 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerCertVault;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
+import com.microsoft.azure.docker.model.EditableDockerHost;
 import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
+import com.microsoft.azure.docker.ops.AzureDockerSSHOps;
 import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.intellij.docker.dialogs.AzureInputDockerLoginCredsDialog;
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardDialog;
 import com.microsoft.intellij.docker.wizards.publish.AzureSelectDockerWizardModel;
 import com.microsoft.intellij.util.PluginUtil;
@@ -385,5 +389,38 @@ public class AzureDockerUIResources {
         PluginUtil.getIcon("/icons/logwarn.png"),
         new String[]{"Cancel", "OK"},
         null);
+  }
+
+  public static void updateDockerHost(Project project, EditableDockerHost editableDockerHost, AzureDockerHostsManager dockerManager, boolean doReset) {
+    AzureInputDockerLoginCredsDialog loginCredsDialog = new AzureInputDockerLoginCredsDialog(project, editableDockerHost, dockerManager, doReset);
+    loginCredsDialog.show();
+
+    if (loginCredsDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+      // Update Docker host log in credentials
+      DockerHost updateHost = editableDockerHost.originalDockerHost;
+      updateHost.isUpdating = true;
+      DefaultLoader.getIdeHelper().runInBackground(project, String.format("Updating %s Log In Credentials", updateHost.name), false, true, String.format("Updating log in credentials for %s...", updateHost.name), new Runnable() {
+        @Override
+        public void run() {
+          try {
+            AzureDockerVMOps.updateDockerHostVM(dockerManager.getSubscriptionsMap().get(updateHost.sid).azureClient, editableDockerHost.updatedDockerHost);
+            updateHost.certVault = editableDockerHost.updatedDockerHost.certVault;
+            updateHost.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
+            updateHost.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
+            updateHost.hasKeyVault = false;
+            updateHost.certVault.uri = "";
+            updateHost.certVault.name = "";
+            Session session = AzureDockerSSHOps.createLoginInstance(updateHost);
+            AzureDockerVMOps.UpdateCurrentDockerUser(session);
+            updateHost.session = session;
+          } catch (Exception ee) {
+            if (AzureDockerUtils.DEBUG) ee.printStackTrace();
+            LOGGER.error("onEditDockerHostAction", ee);
+          }
+          updateHost.isUpdating = false;
+        }
+      });
+    }
+
   }
 }

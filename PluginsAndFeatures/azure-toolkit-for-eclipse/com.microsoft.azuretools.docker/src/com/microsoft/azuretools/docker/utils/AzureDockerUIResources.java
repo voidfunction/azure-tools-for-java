@@ -495,6 +495,9 @@ public class AzureDockerUIResources {
 						updateHost.certVault = editableDockerHost.updatedDockerHost.certVault;
 						updateHost.hasPwdLogIn = editableDockerHost.updatedDockerHost.hasPwdLogIn;
 						updateHost.hasSSHLogIn = editableDockerHost.updatedDockerHost.hasSSHLogIn;
+						updateHost.hasKeyVault = false;
+			            updateHost.certVault.uri = "";
+			            updateHost.certVault.name = "";
 		                Session session = AzureDockerSSHOps.createLoginInstance(updateHost);
 		                AzureDockerVMOps.UpdateCurrentDockerUser(session);
 		                updateHost.session = session;
