@@ -2,9 +2,9 @@
 THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
 Do Not Translate or Localize
 
-This file provides information regarding the open source software components included in the Azure Toolkit for Eclipse. Individual modules may only include a subset of these components.  Some components may contain additional notices.  Components in Section A are relicensed to you by Microsoft under Microsoft's software licensing terms, and  components in Section B are made available to you by Microsoft under the original licensing terms. Microsoft reserves all rights not expressly granted herein, whether by implication, estoppel or otherwise.
+This file provides information regarding the open source software components included in the Azure Toolkit for IntelliJ IDEA. Individual modules may only include a subset of these components.  Some components may contain additional notices.  Components in Section A are relicensed to you by Microsoft under Microsoft's software licensing terms, and  components in Section B are made available to you by Microsoft under the original licensing terms. Microsoft reserves all rights not expressly granted herein, whether by implication, estoppel or otherwise.
 
-Section A: Microsoft is offering you a license to use the following components with the Azure Toolkit for Eclipse under Microsoft's software licensing terms. The original copyright notices and licenses under which Microsoft received these components, are set forth below. Such licenses and notices are provided for informational purposes only. 
+Section A: Microsoft is offering you a license to use the following components with the Azure Toolkit for IntelliJ IDEA under Microsoft's software licensing terms. The original copyright notices and licenses under which Microsoft received these components, are set forth below. Such licenses and notices are provided for informational purposes only. 
 
 1.	annotation-detector (infomas-asl)  (https://github.com/rmuller/infomas-asl)
 2.	Apache Commons Codec (https://commons.apache.org/proper/commons-codec/)
@@ -3018,7 +3018,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 =========================================
 END OF Simple Logging Facade for Java NOTICES AND INFORMATION
 
-Section B: Microsoft is offering you a license to use the following components with the Azure Toolkit for Eclipse under their original license terms as set forth below.
+Section B: Microsoft is offering you a license to use the following components with the Azure Toolkit for IntelliJ IDEA under their original license terms as set forth below.
 
 1.	“Java Concurrency In Practice” Book Annotations (http://jcip.net/)
 2.	javax.mail (JavaMail) (https://java.net/projects/javamail/pages/Home)
