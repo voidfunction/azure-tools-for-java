@@ -21,9 +21,6 @@ package com.microsoft.azuretools.core.ui;
 
 import java.io.File;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -40,6 +37,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.w3c.dom.Document;
 
+import com.microsoft.azuretools.azurecommons.util.GetHashMac;
 import com.microsoft.azuretools.azurecommons.util.ParserXMLUtility;
 import com.microsoft.azuretools.azurecommons.xmlhandling.DataOperations;
 import com.microsoft.azuretools.core.Activator;
@@ -49,15 +47,12 @@ import com.microsoft.azuretools.core.utils.Messages;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 
 /**
- * Class creates azure preference page. 
+ * Class creates azure preference page.
  */
-public class WindowsAzurePreferencePage
-extends PreferencePage implements IWorkbenchPreferencePage {
+public class WindowsAzurePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	Button btnPreference;
-	String pluginInstLoc = String.format("%s%s%s",
-			PluginUtil.pluginFolder, File.separator, Messages.commonPluginID);
-	String dataFile = String.format("%s%s%s", pluginInstLoc,
-			File.separator, Messages.dataFileName);
+	String pluginInstLoc = String.format("%s%s%s", PluginUtil.pluginFolder, File.separator, Messages.commonPluginID);
+	String dataFile = String.format("%s%s%s", pluginInstLoc, File.separator, Messages.dataFileName);
 
 	@Override
 	public String getTitle() {
@@ -106,8 +101,7 @@ extends PreferencePage implements IWorkbenchPreferencePage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				try {
-					PlatformUI.getWorkbench().getBrowserSupport().
-					getExternalBrowser().openURL(new URL(event.text));
+					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(event.text));
 				} catch (Exception ex) {
 					Activator.getDefault().log(Messages.lnkOpenErrMsg, ex);
 				}
@@ -145,27 +139,28 @@ extends PreferencePage implements IWorkbenchPreferencePage {
 					}
 					String instID = DataOperations.getProperty(dataFile, Messages.instID);
 					if (instID == null || instID.isEmpty()) {
-						DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-						DataOperations.updatePropertyValue(doc, Messages.instID, dateFormat.format(new Date()));
+						DataOperations.updatePropertyValue(doc, Messages.instID, GetHashMac.GetHashMac());
+					} else {
+						if (!GetHashMac.IsValidHashMacFormat(instID)) {
+							DataOperations.updatePropertyValue(doc, Messages.instID, GetHashMac.GetHashMac());
+						}
 					}
 					ParserXMLUtility.saveXMLFile(dataFile, doc);
 					// Its necessary to call application insights custom create event after saving data.xml
-					if (oldPrefVal != null && !oldPrefVal.isEmpty()){
-						if(oldPrefVal.equals("false") && btnPreference.getSelection()) {
+					if (oldPrefVal != null && !oldPrefVal.isEmpty()) {
+						if (oldPrefVal.equals("false") && btnPreference.getSelection()) {
 							// Previous preference value is false and latest is true
 							// that indicates user agrees to send telemetry
 							AppInsightsCustomEvent.create(Messages.telAgrEvtName, "");
-							}
-						else if(oldPrefVal.equals("true") && !btnPreference.getSelection()) {
+						} else if (oldPrefVal.equals("true") && !btnPreference.getSelection()) {
 							// Previous preference value is true and latest is false
 							// that indicates user disagrees to send telemetry
 							AppInsightsCustomEvent.createTelemetryDenyEvent();
-							}
-					} else{
-						if(btnPreference.getSelection()){
-							AppInsightsCustomEvent.create(Messages.telAgrEvtName, "");
 						}
-						else{
+					} else {
+						if (btnPreference.getSelection()) {
+							AppInsightsCustomEvent.create(Messages.telAgrEvtName, "");
+						} else {
 							AppInsightsCustomEvent.createTelemetryDenyEvent();
 						}
 					}
@@ -178,7 +173,7 @@ extends PreferencePage implements IWorkbenchPreferencePage {
 				FileUtil.copyResourceFile(Messages.dataFileEntry, dataFile);
 				setValues(dataFile);
 			}
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			isSet = false;
 			Activator.getDefault().log(ex.getMessage(), ex);
 		}
@@ -187,15 +182,14 @@ extends PreferencePage implements IWorkbenchPreferencePage {
 			Activator.setPrefState("");
 			return super.performOk();
 		} else {
-			PluginUtil.displayErrorDialog(getShell(),
-					Messages.err,
-					Messages.prefSaveErMsg);
+			PluginUtil.displayErrorDialog(getShell(), Messages.err, Messages.prefSaveErMsg);
 			return false;
 		}
 	}
 
 	/**
 	 * Method updates or creates property elements in data.xml
+	 * 
 	 * @param dataFile
 	 * @throws Exception
 	 */
@@ -203,10 +197,8 @@ extends PreferencePage implements IWorkbenchPreferencePage {
 		Document doc = ParserXMLUtility.parseXMLFile(dataFile);
 		DataOperations.updatePropertyValue(doc, Messages.version,
 				Activator.getDefault().getBundle().getVersion().toString());
-		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-		DataOperations.updatePropertyValue(doc, Messages.instID, dateFormat.format(new Date()));
-		DataOperations.updatePropertyValue(doc, Messages.prefVal,
-				String.valueOf(btnPreference.getSelection()));
+		DataOperations.updatePropertyValue(doc, Messages.instID, GetHashMac.GetHashMac());
+		DataOperations.updatePropertyValue(doc, Messages.prefVal, String.valueOf(btnPreference.getSelection()));
 		ParserXMLUtility.saveXMLFile(dataFile, doc);
 		if (btnPreference.getSelection()) {
 			AppInsightsCustomEvent.create(Messages.telAgrEvtName, "");
