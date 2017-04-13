@@ -77,7 +77,15 @@ public class AzureLibrary {
             new String[]{
                     "applicationinsights-core-1.0.3.jar",
                     "applicationinsights-management-1.0.3.jar",
-                    "applicationinsights-web-1.0.3.jar"
+                    "applicationinsights-web-1.0.3.jar",
+                    "guava-18.0.jar",
+                    "httpcore-4.3.3.jar",
+                    "httpclient-4.3.6.jar",
+                    "commons-io-2.5.jar",
+                    "commons-codec-1.10.jar",
+                    "commons-logging-1.1.3.jar",
+                    "commons-lang3-3.4.jar",
+                    "annotation-detector-3.0.4.jar"
             });
     public static AzureLibrary[] LIBRARIES = new AzureLibrary[]{SQL_JDBC, AZURE_LIBRARIES};
 
