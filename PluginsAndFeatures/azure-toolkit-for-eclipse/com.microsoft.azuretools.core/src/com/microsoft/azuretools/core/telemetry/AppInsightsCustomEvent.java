@@ -29,16 +29,15 @@ import com.microsoft.azuretools.core.utils.Messages;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 
 public class AppInsightsCustomEvent {
-	static String pluginInstLoc = String.format("%s%s%s",
-			PluginUtil.pluginFolder, File.separator, Messages.commonPluginID);
-	static String dataFile = String.format("%s%s%s", pluginInstLoc,
-			File.separator, Messages.dataFileName);
+	static String pluginInstLoc = String.format("%s%s%s", PluginUtil.pluginFolder, File.separator,
+			Messages.commonPluginID);
+	static String dataFile = String.format("%s%s%s", pluginInstLoc, File.separator, Messages.dataFileName);
 	static String key = "824aaa4c-052b-4c43-bdcb-48f915d71b3f";
-	
-    public static void create(String eventName, String version) {
-    	create(eventName, version, null);
-    }
-    
+
+	public static void create(String eventName, String version) {
+		create(eventName, version, null);
+	}
+
 	public static void create(String eventName, String version, Map<String, String> myProperties) {
 		if (new File(pluginInstLoc).exists() && new File(dataFile).exists()) {
 			String prefValue = DataOperations.getProperty(dataFile, Messages.prefVal);
@@ -46,7 +45,8 @@ public class AppInsightsCustomEvent {
 				TelemetryClient telemetry = new TelemetryClient();
 				telemetry.getContext().setInstrumentationKey(key);
 
-				Map<String, String> properties = myProperties == null ? new HashMap<String, String>() : new HashMap<String, String>(myProperties);
+				Map<String, String> properties = myProperties == null ? new HashMap<String, String>()
+						: new HashMap<String, String>(myProperties);
 				if (version != null && !version.isEmpty()) {
 					properties.put("Library Version", version);
 				}
@@ -56,30 +56,34 @@ public class AppInsightsCustomEvent {
 					properties.put("Plugin Version", pluginVersion);
 				}
 
-				Map<String, Double> metrics = new HashMap<String, Double>();
 				String instID = DataOperations.getProperty(dataFile, Messages.instID);
 				if (instID != null && !instID.isEmpty()) {
-					metrics.put("Installation ID", Double.parseDouble(instID));
+					properties.put("Installation ID", instID);
 				}
 
-				telemetry.trackEvent(eventName, properties, metrics);
+				telemetry.trackEvent(eventName, properties, null);
 				telemetry.flush();
 			}
 		}
 	}
-	
-	public static void createTelemetryDenyEvent(){
+
+	public static void createTelemetryDenyEvent() {
 		TelemetryClient telemetry = new TelemetryClient();
 		telemetry.getContext().setInstrumentationKey(key);
 		Map<String, String> properties = new HashMap<String, String>();
-		
+
 		if (new File(dataFile).exists()) {
 			String pluginVersion = DataOperations.getProperty(dataFile, Messages.version);
 			if (pluginVersion != null && !pluginVersion.isEmpty()) {
 				properties.put("Plugin Version", pluginVersion);
 			}
+
+			String instID = DataOperations.getProperty(dataFile, Messages.instID);
+			if (instID != null && !instID.isEmpty()) {
+				properties.put("Installation ID", instID);
+			}
 		}
-		
+
 		telemetry.trackEvent(Messages.telemetryDenyAction, properties, null);
 		telemetry.flush();
 	}
@@ -89,7 +93,6 @@ public class AppInsightsCustomEvent {
 		telemetry.getContext().setInstrumentationKey(key);
 
 		Map<String, String> properties = new HashMap<String, String>();
-		Map<String, Double> metrics = new HashMap<String, Double>();
 
 		if (uri != null && !uri.isEmpty()) {
 			properties.put("WebApp URI", uri);
@@ -108,10 +111,10 @@ public class AppInsightsCustomEvent {
 
 			String instID = DataOperations.getProperty(dataFile, Messages.instID);
 			if (instID != null && !instID.isEmpty()) {
-				metrics.put("Installation ID", Double.parseDouble(instID));
+				properties.put("Installation ID", instID);
 			}
 		}
-		telemetry.trackEvent(eventName, properties, metrics);
+		telemetry.trackEvent(eventName, properties, null);
 		telemetry.flush();
 	}
 }

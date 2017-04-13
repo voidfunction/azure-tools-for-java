@@ -28,6 +28,7 @@ import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginHelper;
 import com.microsoft.intellij.util.PluginUtil;
+import com.microsoft.azuretools.azurecommons.util.GetHashMac;
 import com.microsoft.azuretools.azurecommons.util.ParserXMLUtility;
 import com.microsoft.azuretools.azurecommons.xmlhandling.DataOperations;
 
@@ -36,6 +37,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+
 import org.w3c.dom.Document;
 
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
@@ -87,28 +89,28 @@ public class AzurePanel implements AzureAbstractConfigurablePanel {
                 }
                 String instID = DataOperations.getProperty(dataFile, message("instID"));
                 if (instID == null || instID.isEmpty()) {
-                    DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-                    DataOperations.updatePropertyValue(doc, message("instID"), dateFormat.format(new Date()));
+                    DataOperations.updatePropertyValue(doc, message("instID"), GetHashMac.GetHashMac());
+                } else {
+                    if (!GetHashMac.IsValidHashMacFormat(instID)) {
+                        DataOperations.updatePropertyValue(doc, message("instID"), GetHashMac.GetHashMac());
+                    }
                 }
                 ParserXMLUtility.saveXMLFile(dataFile, doc);
                 // Its necessary to call application insights custom create event after saving data.xml
-                if (oldPrefVal != null && !oldPrefVal.isEmpty()){
-                    if(oldPrefVal.equals("false") && checkBox1.isSelected()) {
+                if (oldPrefVal != null && !oldPrefVal.isEmpty()) {
+                    if (oldPrefVal.equals("false") && checkBox1.isSelected()) {
                         // Previous preference value is false and latest is true
                         // that indicates user agrees to send telemetry
                         AppInsightsCustomEvent.create(message("telAgrEvtName"), "");
-                    }
-                    else if(oldPrefVal.equals("true") && !checkBox1.isSelected()) {
+                    } else if (oldPrefVal.equals("true") && !checkBox1.isSelected()) {
                         // Previous preference value is true and latest is false
                         // that indicates user disagrees to send telemetry
                         AppInsightsCustomEvent.createTelemetryDenyEvent();
                     }
-                }
-                else{
-                    if(checkBox1.isSelected()){
+                } else {
+                    if (checkBox1.isSelected()) {
                         AppInsightsCustomEvent.create(message("telAgrEvtName"), "");
-                    }
-                    else{
+                    } else {
                         AppInsightsCustomEvent.createTelemetryDenyEvent();
                     }
                 }
@@ -127,14 +129,12 @@ public class AzurePanel implements AzureAbstractConfigurablePanel {
     private void setValues(String dataFile) throws Exception {
         Document doc = ParserXMLUtility.parseXMLFile(dataFile);
         DataOperations.updatePropertyValue(doc, message("pluginVersion"), AzurePlugin.PLUGIN_VERSION);
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        DataOperations.updatePropertyValue(doc, message("instID"), dateFormat.format(new Date()));
+        DataOperations.updatePropertyValue(doc, message("instID"), GetHashMac.GetHashMac());
         DataOperations.updatePropertyValue(doc, message("prefVal"), String.valueOf(checkBox1.isSelected()));
         ParserXMLUtility.saveXMLFile(dataFile, doc);
         if (checkBox1.isSelected()) {
             AppInsightsCustomEvent.create(message("telAgrEvtName"), "");
-        }
-        else{
+        } else {
             AppInsightsCustomEvent.createTelemetryDenyEvent();
         }
     }
