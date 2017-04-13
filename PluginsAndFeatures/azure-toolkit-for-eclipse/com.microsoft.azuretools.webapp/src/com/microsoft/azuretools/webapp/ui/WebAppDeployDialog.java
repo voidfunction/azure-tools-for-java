@@ -43,7 +43,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -506,7 +505,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
             protected IStatus run(IProgressMonitor monitor) {
                 String message = "Deploying Web App...";
                 String cancelMessage = "Interrupted by user";
-                String successMessage = "Success";
+                String successMessage = "";
                 String errorMessage = "Error";
                 
                 monitor.beginTask(message, IProgressMonitor.UNKNOWN);
