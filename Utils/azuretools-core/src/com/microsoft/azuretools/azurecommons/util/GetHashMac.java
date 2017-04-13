@@ -73,7 +73,7 @@ public class GetHashMac {
             if (os != null && !os.isEmpty() && os.startsWith("win")) {
                 command = new String[]{"getmac"};
             }
-            //Test: Send null as InstID
+            
             ProcessBuilder probuilder = new ProcessBuilder(command);
             Process process = probuilder.start();
             InputStream inputStream = process.getInputStream();

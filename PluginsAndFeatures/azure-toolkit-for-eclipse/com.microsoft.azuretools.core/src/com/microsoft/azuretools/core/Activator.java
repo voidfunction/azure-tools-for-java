@@ -62,9 +62,12 @@ import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
 import com.microsoft.azuretools.azurecommons.deploy.UploadProgressEventArgs;
 import com.microsoft.azuretools.azurecommons.deploy.UploadProgressEventListener;
+import com.microsoft.azuretools.azurecommons.util.GetHashMac;
+import com.microsoft.azuretools.azurecommons.xmlhandling.DataOperations;
 import com.microsoft.azuretools.core.azureexplorer.helpers.IDEHelperImpl;
 import com.microsoft.azuretools.core.ui.UIFactory;
 import com.microsoft.azuretools.core.ui.views.Messages;
+import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.components.PluginComponent;
 import com.microsoft.tooling.msservices.components.PluginSettings;
@@ -81,7 +84,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
     public static boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
 
     // User-agent header for Azure SDK calls
-    public static final String USER_AGENT = "Azure Toolkit for Eclipse, v%s";
+    public static final String USER_AGENT = "Azure Toolkit for Eclipse, v%s, machineid:%s";
 
     // The shared instance
     private static Activator plugin;
@@ -131,7 +134,7 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
 
     private void initAzureToolsCoreLibsSettings() {
         try {
-            CommonSettings.setUserAgent(String.format(USER_AGENT, FrameworkUtil.getBundle(getClass()).getVersion()));
+            CommonSettings.setUserAgent(String.format(USER_AGENT, FrameworkUtil.getBundle(getClass()).getVersion(), getMachineId()));
             if (CommonSettings.getUiFactory() == null)
                 CommonSettings.setUiFactory(new UIFactory());
             String wd = "AzureToolsForEclipse";
@@ -164,6 +167,23 @@ public class Activator extends AbstractUIPlugin implements PluginComponent {
         }
     }
 
+    private String getMachineId() {
+		String ret = null;
+		String pluginInstLoc = String.format("%s%s%s", PluginUtil.pluginFolder, File.separator,
+				com.microsoft.azuretools.core.utils.Messages.commonPluginID);
+		String dataFile = String.format("%s%s%s", pluginInstLoc, File.separator,
+				com.microsoft.azuretools.core.utils.Messages.dataFileName);
+		if (new File(dataFile).exists()) {
+			ret = DataOperations.getProperty(dataFile, com.microsoft.azuretools.core.utils.Messages.instID);
+			if (ret == null || ret.isEmpty() || !GetHashMac.IsValidHashMacFormat(ret)) {
+				ret = GetHashMac.GetHashMac();
+			}
+		} else {
+			ret = GetHashMac.GetHashMac();
+		}
+
+		return ret;
+	}
     
     public boolean isHDInsightEnabled() {
         return isHDInsightEnabled;

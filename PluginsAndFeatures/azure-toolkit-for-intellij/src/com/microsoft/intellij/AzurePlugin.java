@@ -31,7 +31,6 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.ModuleTypeId;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupManager;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.util.PlatformUtils;
 import com.intellij.util.containers.HashSet;
 import com.microsoft.applicationinsights.preference.ApplicationInsightsResource;
@@ -76,7 +75,7 @@ public class AzurePlugin extends AbstractProjectComponent {
     public final static int REST_SERVICE_MAX_RETRY_COUNT = 7;
 
     // User-agent header for Azure SDK calls
-    public static final String USER_AGENT = "Azure Toolkit for IntelliJ, v%s";
+    public static final String USER_AGENT = "Azure Toolkit for IntelliJ, v%s, machineid:%s";
 
     public static boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
     public static boolean IS_ANDROID_STUDIO = "AndroidStudio".equals(PlatformUtils.getPlatformPrefix());
@@ -95,7 +94,7 @@ public class AzurePlugin extends AbstractProjectComponent {
     public AzurePlugin(Project project) {
         super(project);
         this.azureSettings = AzureSettings.getSafeInstance(project);
-        CommonSettings.setUserAgent(String.format(USER_AGENT, PLUGIN_VERSION));
+        CommonSettings.setUserAgent(String.format(USER_AGENT, PLUGIN_VERSION, getMachineId()));
     }
 
 
@@ -198,22 +197,16 @@ public class AzurePlugin extends AbstractProjectComponent {
 
     private void setValues(final String dataFile) throws Exception {
         final Document doc = ParserXMLUtility.parseXMLFile(dataFile);
-        ApplicationManager.getApplication().invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                DataOperations.updatePropertyValue(doc, message("prefVal"), String.valueOf("true"));
-                DataOperations.updatePropertyValue(doc, message("pluginVersion"), PLUGIN_VERSION);
-                DataOperations.updatePropertyValue(doc, message("instID"), _hashmac);
-                try {
-                    ParserXMLUtility.saveXMLFile(dataFile, doc);
-                } catch (Exception ex) {
-                    LOG.error(message("error"), ex);
-                }
+        DataOperations.updatePropertyValue(doc, message("prefVal"), String.valueOf("true"));
+        DataOperations.updatePropertyValue(doc, message("pluginVersion"), PLUGIN_VERSION);
+        DataOperations.updatePropertyValue(doc, message("instID"), _hashmac);
+        try {
+            ParserXMLUtility.saveXMLFile(dataFile, doc);
+        } catch (Exception ex) {
+            LOG.error(message("error"), ex);
+        }
 
-                AppInsightsCustomEvent.create(message("telAgrEvtName"), "");
-
-            }
-        }, ModalityState.defaultModalityState());
+        AppInsightsCustomEvent.create(message("telAgrEvtName"), "");
     }
 
     /**
@@ -294,6 +287,21 @@ public class AzurePlugin extends AbstractProjectComponent {
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    private String getMachineId() {
+        String ret = null;
+        String dataFile = PluginHelper.getTemplateFile(message("dataFileName"));
+        if (new File(dataFile).exists()) {
+            ret = DataOperations.getProperty(dataFile, message("instID"));
+            if (ret == null || ret.isEmpty() || !GetHashMac.IsValidHashMacFormat(ret)) {
+                ret = _hashmac;
+            }
+        } else {
+            ret = GetHashMac.GetHashMac();
+        }
+
+        return ret;
     }
 
     /**
