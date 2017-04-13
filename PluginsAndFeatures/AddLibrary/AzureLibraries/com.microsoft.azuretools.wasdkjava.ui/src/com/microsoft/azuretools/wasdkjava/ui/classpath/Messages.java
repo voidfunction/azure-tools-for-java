@@ -22,7 +22,7 @@ package com.microsoft.azuretools.wasdkjava.ui.classpath;
 import org.eclipse.osgi.util.NLS;
 
 public final class Messages extends NLS {
-    private static final String BUNDLE_NAME = "com.microsoftopentechnologies.windowsazure.tools.wasdkjava.ui.classpath.messages"; //$NON-NLS-1$
+    private static final String BUNDLE_NAME = "com.microsoft.azuretools.wasdkjava.ui.classpath.messages"; //$NON-NLS-1$
     public static String containerID;
     public static String containerDesc;
     public static String desc;

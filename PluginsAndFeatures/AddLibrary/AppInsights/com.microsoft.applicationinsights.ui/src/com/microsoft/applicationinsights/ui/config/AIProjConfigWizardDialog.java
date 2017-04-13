@@ -493,7 +493,7 @@ public class AIProjConfigWizardDialog extends TitleAreaDialog {
 
 	public IClasspathEntry[] getClasspathEntriesOfAzureLibabries(
 			IPath containerPath) {
-		String sdkID = "com.microsoftopentechnologies.windowsazure.tools.sdk";
+		String sdkID = "com.microsoft.azuretools.sdk";
 		Bundle bundle = Platform.getBundle(sdkID);
 		// Search the available SDKs
 		Bundle[] bundles = Platform.getBundles(sdkID, null);
@@ -509,7 +509,7 @@ public class AIProjConfigWizardDialog extends TitleAreaDialog {
 
 			// Get the SDK jar.
 			URL sdkJar = FileLocator.find(bundle, new Path(
-					"azure-core-0.9.2.jar"), null);
+					"azure-1.0.0-beta4.1.jar"), null);
 			URL resSdkJar = null;
 			IClasspathAttribute[] attr = null;
 			try {
@@ -525,7 +525,7 @@ public class AIProjConfigWizardDialog extends TitleAreaDialog {
 					URL bundleLoc = new URL(bundle.getLocation());
 					StringBuffer strBfr = new StringBuffer(bundleLoc.getPath());
 					strBfr.append(File.separator)
-							.append("azure-core-0.9.2.jar");
+							.append("azure-1.0.0-beta4.1.jar");
 					URL jarLoc = new URL(strBfr.toString());
 					IPath jarPath = new Path(FileLocator.resolve(jarLoc)
 							.getPath());
