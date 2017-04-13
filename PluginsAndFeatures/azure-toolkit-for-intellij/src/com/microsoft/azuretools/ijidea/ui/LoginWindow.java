@@ -35,6 +35,7 @@ import javafx.scene.web.WebView;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowEvent;
 
 /**
  * Created by vlashch on 10/17/16.
@@ -95,16 +96,17 @@ class LoginWindow extends DialogWrapper {
 
     @Override
     protected JComponent createCenterPanel() {
-        return  fxPanel;
+        return fxPanel;
     }
 
     private void closeDlg() {
         ApplicationManager.getApplication().invokeLater(new Runnable() {
             @Override
             public void run() {
-                doOKAction();
+                Window w = getWindow();
+                w.dispatchEvent(new WindowEvent(w, WindowEvent.WINDOW_CLOSING));
             }
-        }, ModalityState.any());
+        }, ModalityState.stateForComponent(fxPanel));
     }
 
     @Override
