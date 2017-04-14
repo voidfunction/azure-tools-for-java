@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.model.*;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import java.util.*;
 
@@ -35,6 +36,7 @@ import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.checkDockerC
 import static com.microsoft.azure.docker.ops.utils.AzureDockerVMSetupScriptsForUbuntu.DEFAULT_DOCKER_IMAGES_DIRECTORY;
 
 public class AzureDockerContainerOps {
+  public static final String CMD_SUCCESS = "errorleve: 0";
 
   public static List<AzureDockerContainerInstance> list(AzureDockerContainerInstance dockerContainer) {
     try {
@@ -131,6 +133,9 @@ public class AzureDockerContainerOps {
       String cmd1 = String.format("docker start %s \n", dockerContainer.name);
       if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
       String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
+      if (!cmdOut1.contains(CMD_SUCCESS)) {
+        DefaultLoader.getUIHelper().showError(cmdOut1, String.format("Docker Container %s Failed to Start", dockerContainer.name));
+      }
       if (DEBUG) System.out.println(cmdOut1);
       if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
 
@@ -154,6 +159,9 @@ public class AzureDockerContainerOps {
       String cmd1 = String.format("docker start %s \n", dockerContainer.dockerContainerName);
       if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
       String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
+      if (!cmdOut1.contains(CMD_SUCCESS)) {
+        DefaultLoader.getUIHelper().showError(cmdOut1, String.format("Docker Container %s Failed to Start", dockerContainer.dockerContainerName));
+      }
       if (DEBUG) System.out.println(cmdOut1);
       if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
 
@@ -192,6 +200,9 @@ public class AzureDockerContainerOps {
       String cmd1 = String.format("docker stop %s \n", dockerContainer.name);
       if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
       String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
+      if (!cmdOut1.contains(CMD_SUCCESS)) {
+        DefaultLoader.getUIHelper().showError(cmdOut1, String.format("Docker Container %s Failed to Stop", dockerContainer.name));
+      }
       if (DEBUG) System.out.println(cmdOut1);
       if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
 
@@ -215,6 +226,9 @@ public class AzureDockerContainerOps {
       String cmd1 = String.format("docker stop %s \n", dockerContainer.dockerContainerName);
       if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
       String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
+      if (!cmdOut1.contains(CMD_SUCCESS)) {
+        DefaultLoader.getUIHelper().showError(cmdOut1, String.format("Docker Container %s Failed to Stop", dockerContainer.dockerContainerName));
+      }
       if (DEBUG) System.out.println(cmdOut1);
       if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
 
@@ -253,6 +267,9 @@ public class AzureDockerContainerOps {
       String cmd1 = String.format("docker rm %s \n", dockerContainer.name);
       if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
       String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
+      if (!cmdOut1.contains(CMD_SUCCESS)) {
+        DefaultLoader.getUIHelper().showError(cmdOut1, String.format("Docker Container %s Failed to Delete", dockerContainer.name));
+      }
       if (DEBUG) System.out.println(cmdOut1);
       if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
 
@@ -276,6 +293,9 @@ public class AzureDockerContainerOps {
       String cmd1 = String.format("docker rm %s \n", dockerContainer.dockerContainerName);
       if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
       String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
+      if (!cmdOut1.contains(CMD_SUCCESS)) {
+        DefaultLoader.getUIHelper().showError(cmdOut1, String.format("Docker Container %s Failed to Delete", dockerContainer.dockerContainerName));
+      }
       if (DEBUG) System.out.println(cmdOut1);
       if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
 
@@ -321,6 +341,9 @@ public class AzureDockerContainerOps {
       String cmd1 = String.format("docker create %s --name %s %s \n", portSettings, dockerContainer.dockerContainerName, dockerContainer.dockerImageName);
       if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
       String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
+      if (!cmdOut1.contains(CMD_SUCCESS)) {
+        DefaultLoader.getUIHelper().showError(cmdOut1, String.format("Docker Container %s Failed to Create", dockerContainer.dockerContainerName));
+      }
       if (DEBUG) System.out.println(cmdOut1);
       if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
 

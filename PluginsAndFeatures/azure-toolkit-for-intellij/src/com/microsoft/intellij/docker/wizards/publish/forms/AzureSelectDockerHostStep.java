@@ -534,6 +534,7 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
     // Dialog buttons might not be ready when we call to set them - see tableChanged listener
     try {
       model.getCurrentNavigationState().NEXT.setEnabled(nextButtonState);
+      model.getCurrentNavigationState().PREVIOUS.setEnabled(false);
     } catch (Exception ignored) {}
   }
 
@@ -601,9 +602,12 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
   
   @Override
   public WizardStep onNext(final AzureSelectDockerWizardModel model) {
-    if (doValidate() == null) {
+    if (dockerHostsTableSelection != null && doValidate() == null) {
       return super.onNext(model);
     } else {
+      setDialogButtonsState(false);
+      ValidationInfo info = new ValidationInfo("Please check a Docker host or create a new", dockerHostsTable);
+      model.getSelectDockerWizardDialog().DialogShaker(info);
       return this;
     }
   }

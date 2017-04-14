@@ -358,10 +358,11 @@ public class AzureInputDockerLoginCredsDialog extends TitleAreaDialog {
 	protected void okPressed() {
 		if (doValidate()) {
 			if (editableDockerHost.originalDockerHost.hasKeyVault && 
-					DefaultLoader.getUIHelper().showConfirmation( String.format("We've detected that the selected host's login credentials are currently loaded from an Azure Key Vault. Reseting them will remove this association and will require to enter the credentials manually.\n\n Do you want to proceed with this update?"),
+					!DefaultLoader.getUIHelper().showConfirmation( String.format("We've detected that the selected host's login credentials are currently loaded from an Azure Key Vault. Reseting them will remove this association and will require to enter the credentials manually.\n\n Do you want to proceed with this update?"),
 							"Removing Key Vault Association", new String[] { "Yes", "No" }, null)) {
-				super.okPressed();
+				return;
 			}
+			super.okPressed();
 		} else {
 			okButton.setEnabled(false);
 		}

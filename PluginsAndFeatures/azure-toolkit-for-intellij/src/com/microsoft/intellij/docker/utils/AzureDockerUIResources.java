@@ -370,7 +370,7 @@ public class AzureDockerUIResources {
             progressIndicator.setIndeterminate(true);
 
           } catch (Exception e) {
-            String msg = "An error occurred while attempting to create Azure Key Vault for Docker host." + "\n" + e.getMessage();
+            String msg = "An error occurred while attempting to create Azure Key Vault for Docker host." + "\n" + e.getMessage() + "\n Try logging in using the automated path (create and use a service principal).\n";
             LOGGER.error("Failed to Create Azure Key Vault", e);
             PluginUtil.displayErrorDialogInAWTAndLog("Failed to Create Azure Key Vault", msg, e);
           }

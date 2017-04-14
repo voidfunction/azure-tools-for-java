@@ -47,7 +47,6 @@ public class AzureDockerVMOps {
   public static VirtualMachine updateDockerHostVM(Azure azureClient, DockerHost dockerHost) throws AzureDockerException {
     try {
       VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
-//      VirtualMachineExtension.UpdateDefinitionStages.WithAttach<VirtualMachine.Update> defStage1;
       HashMap<String, Object> protectedSettings = new HashMap<>();
       protectedSettings.put("username", dockerHost.certVault.vmUsername);
       if (dockerHost.hasPwdLogIn) {
@@ -63,6 +62,7 @@ public class AzureDockerVMOps {
             .updateExtension("VMAccessForLinux")
                 .withProtectedSettings(protectedSettings)
             .parent()
+            .withoutTag("dockervault")
             .apply();
       } else {
         vm.update()
@@ -72,6 +72,7 @@ public class AzureDockerVMOps {
                 .withVersion("1.4")
                 .withProtectedSettings(protectedSettings)
             .attach()
+            .withoutTag("dockervault")
             .apply();
       }
 

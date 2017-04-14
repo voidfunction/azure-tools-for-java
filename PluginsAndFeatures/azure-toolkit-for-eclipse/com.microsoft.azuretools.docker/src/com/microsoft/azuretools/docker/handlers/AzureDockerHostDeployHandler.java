@@ -76,53 +76,45 @@ public class AzureDockerHostDeployHandler extends AbstractHandler {
 		}
 
 		try {
-			AzureDockerUIResources.createArtifact(shell, project);
-			
-			AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
-
-			// not signed in
-			if (azureAuthManager == null) {
-				System.out.println("ERROR! Not signed in!");
-				return null;
-			}
-
-			AzureDockerHostsManager dockerManager = AzureDockerHostsManager
-					.getAzureDockerHostsManager(azureAuthManager);
-
-			if (!dockerManager.isInitialized()) {
-				AzureDockerUIResources.updateAzureResourcesWithProgressDialog(shell, project);
-				if (AzureDockerUIResources.CANCELED) {
-					return null;
-				}
-				dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
-			}
-
-			if (dockerManager.getSubscriptionsMap().isEmpty()) {
-				PluginUtil.displayErrorDialog(shell, "Create Docker Host", "Must select an Azure subscription first");
-				return null;
-			}
-			
-			DockerHost dockerHost = (dockerManager.getDockerPreferredSettings() != null) ? dockerManager.getDockerHostForURL(dockerManager.getDockerPreferredSettings().dockerApiName) : null;
-			AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
-			AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager, dockerImageDescription);
-			WizardDialog selectDockerHostDialog = new WizardDialog(shell, selectDockerWizard);
-
-			if (dockerHost != null) {
-				selectDockerWizard.selectDefaultDockerHost(dockerHost, true);
-			}
-
-			if (selectDockerHostDialog.open() == Window.OK) {
-
-//					AzureNewDockerWizard newDockerWizard = new AzureNewDockerWizard(project, dockerManager);
-//					WizardDialog createNewDockerHostDialog = new WizardDialog(shell, newDockerWizard);
-//					if (createNewDockerHostDialog.open() == Window.OK) {
-//						newDockerWizard.createHost();
-//					} else {
-//						MessageDialog.openInformation(
-//								shell,
-//								"WebAppPlugin",
-//								"Canceled");
-			}
+			AzureDockerUIResources.publish2DockerHostContainer(PluginUtil.getParentShell(), project, null);
+//			AzureDockerUIResources.createArtifact(shell, project);
+//			
+//			AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
+//
+//			// not signed in
+//			if (azureAuthManager == null) {
+//				System.out.println("ERROR! Not signed in!");
+//				return null;
+//			}
+//
+//			AzureDockerHostsManager dockerManager = AzureDockerHostsManager
+//					.getAzureDockerHostsManager(azureAuthManager);
+//
+//			if (!dockerManager.isInitialized()) {
+//				AzureDockerUIResources.updateAzureResourcesWithProgressDialog(shell, project);
+//				if (AzureDockerUIResources.CANCELED) {
+//					return null;
+//				}
+//				dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
+//			}
+//
+//			if (dockerManager.getSubscriptionsMap().isEmpty()) {
+//				PluginUtil.displayErrorDialog(shell, "Create Docker Host", "Must select an Azure subscription first");
+//				return null;
+//			}
+//			
+//			DockerHost dockerHost = (dockerManager.getDockerPreferredSettings() != null) ? dockerManager.getDockerHostForURL(dockerManager.getDockerPreferredSettings().dockerApiName) : null;
+//			AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
+//			AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager, dockerImageDescription);
+//			WizardDialog selectDockerHostDialog = new WizardDialog(shell, selectDockerWizard);
+//
+//			if (dockerHost != null) {
+//				selectDockerWizard.selectDefaultDockerHost(dockerHost, true);
+//			}
+//
+//			if (selectDockerHostDialog.open() == Window.OK) {
+//
+//			}
 		} catch (Exception e) {
 			log.log(Level.SEVERE, "execute: " + e.getMessage(), e);
 			e.printStackTrace();					

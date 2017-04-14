@@ -58,7 +58,7 @@ public class PublishDockerContainerAction extends NodeActionListener {
 				project = (IProject) dockerHostModule.getProject();
 			}
 
-			AzureDockerUIResources.publish2DockerHostContainer(PluginUtil.getParentShell(), project);
+			AzureDockerUIResources.publish2DockerHostContainer(PluginUtil.getParentShell(), project, null);
 		} catch (Exception ex1) {
 			log.log(Level.SEVERE, "actionPerformed", ex1);
 			ex1.printStackTrace();

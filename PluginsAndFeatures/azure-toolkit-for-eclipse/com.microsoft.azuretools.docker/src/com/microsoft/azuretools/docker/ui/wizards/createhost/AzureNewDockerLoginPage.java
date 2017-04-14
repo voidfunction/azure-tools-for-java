@@ -423,6 +423,7 @@ public class AzureNewDockerLoginPage extends WizardPage {
 		        String pwd1 = dockerHostFirstPwdField.getText();
 		        String pwd2 = ((Text) event.getSource()).getText();
 				if ((pwd1 == null && pwd2 == null) || pwd2.equals(pwd1)) {
+					errDispatcher.removeMessage("dockerHostFirstPwdField", dockerHostFirstPwdField);
 					errDispatcher.removeMessage("dockerHostSecondPwdField", dockerHostSecondPwdField);
 					setErrorMessage(null);
 					setPageComplete(doValidate());
@@ -675,7 +676,7 @@ public class AzureNewDockerLoginPage extends WizardPage {
 			if (dockerHostImportSshRadioButton.getSelection()) {
 				String sshPath = dockerHostImportSSHTextField.getText();
 				if (sshPath == null || sshPath.isEmpty() || !AzureDockerValidationUtils.validateDockerHostSshDirectory(sshPath)) {
-					errDispatcher.addMessage("dockerHostImportSshRadioButton", AzureDockerValidationUtils.getDockerHostPasswordTip(), null, IMessageProvider.ERROR, dockerHostImportSshRadioButton);
+					errDispatcher.addMessage("dockerHostImportSSHTextField", AzureDockerValidationUtils.getDockerHostSshDirectoryTip(), null, IMessageProvider.ERROR, dockerHostImportSSHTextField);
 					setErrorMessage("SSH key files not found in the specified directory");
 					credsTabfolder.setSelection(0);
 					return false;
@@ -685,7 +686,7 @@ public class AzureNewDockerLoginPage extends WizardPage {
 						AzureDockerCertVaultOps.copyVaultSshKeys(newHost.certVault, certVault);
 						newHost.hasSSHLogIn = true;
 					} catch (Exception e) {
-						errDispatcher.addMessage("dockerHostImportSshRadioButton", AzureDockerValidationUtils.getDockerHostPasswordTip(), null, IMessageProvider.ERROR, dockerHostImportSshRadioButton);
+						errDispatcher.addMessage("dockerHostImportSSHTextField", AzureDockerValidationUtils.getDockerHostPasswordTip(), null, IMessageProvider.ERROR, dockerHostImportSSHTextField);
 						setErrorMessage("Unexpected error reading SSH key files from specified directory: " + e.getMessage());
 						return false;
 					}

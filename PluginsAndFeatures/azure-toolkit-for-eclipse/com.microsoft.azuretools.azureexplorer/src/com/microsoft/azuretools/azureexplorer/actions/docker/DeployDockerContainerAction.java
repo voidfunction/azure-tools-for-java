@@ -71,45 +71,47 @@ public class DeployDockerContainerAction extends NodeActionListener {
 				project = (IProject) dockerHostNode.getProject();
 			}
 
-			AzureDockerUIResources.createArtifact(PluginUtil.getParentShell(), project);
-			
-			AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
+			AzureDockerUIResources.publish2DockerHostContainer(PluginUtil.getParentShell(), project, dockerHost);
 
-			// not signed in
-			if (azureAuthManager == null) {
-				return;
-			}
-
-			AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManager(azureAuthManager);
-
-			if (!dockerManager.isInitialized()) {
-				AzureDockerUIResources.updateAzureResourcesWithProgressDialog(PluginUtil.getParentShell(), project);
-				if (AzureDockerUIResources.CANCELED) {
-					return;
-				}
-				dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
-			}
-
-			if (dockerManager.getSubscriptionsMap().isEmpty()) {
-				PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), "Create Docker Host", "Must select an Azure subscription first");
-				return;
-			}
-
-			AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
-			AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager, dockerImageDescription);
-			WizardDialog selectDockerHostDialog = new WizardDialog(PluginUtil.getParentShell(), selectDockerWizard);
-			selectDockerWizard.selectDefaultDockerHost(dockerHost, false);
-
-			if (selectDockerHostDialog.open() == Window.OK) {
-		        try {
-		            String url = selectDockerWizard.deploy();
-		            if (AzureDockerUtils.DEBUG) System.out.println("Web app published at: " + url);
-		          } catch (Exception ex) {
-		            PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(), "Unexpected error detected while publishing to a Docker container", ex.getMessage(), ex);
-		            log.log(Level.SEVERE, "publish2DockerHostContainer: " + ex.getMessage(), ex);
-		          }
-			}
-
+//			AzureDockerUIResources.createArtifact(PluginUtil.getParentShell(), project);
+//			
+//			AzureManager azureAuthManager = AuthMethodManager.getInstance().getAzureManager();
+//
+//			// not signed in
+//			if (azureAuthManager == null) {
+//				return;
+//			}
+//
+//			AzureDockerHostsManager dockerManager = AzureDockerHostsManager.getAzureDockerHostsManager(azureAuthManager);
+//
+//			if (!dockerManager.isInitialized()) {
+//				AzureDockerUIResources.updateAzureResourcesWithProgressDialog(PluginUtil.getParentShell(), project);
+//				if (AzureDockerUIResources.CANCELED) {
+//					return;
+//				}
+//				dockerManager = AzureDockerHostsManager.getAzureDockerHostsManagerEmpty(null);
+//			}
+//
+//			if (dockerManager.getSubscriptionsMap().isEmpty()) {
+//				PluginUtil.displayErrorDialog(PluginUtil.getParentShell(), "Create Docker Host", "Must select an Azure subscription first");
+//				return;
+//			}
+//
+//			AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
+//			AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager, dockerImageDescription);
+//			WizardDialog selectDockerHostDialog = new WizardDialog(PluginUtil.getParentShell(), selectDockerWizard);
+//			selectDockerWizard.selectDefaultDockerHost(dockerHost, false);
+//
+//			if (selectDockerHostDialog.open() == Window.OK) {
+//		        try {
+//		            String url = selectDockerWizard.deploy();
+//		            if (AzureDockerUtils.DEBUG) System.out.println("Web app published at: " + url);
+//		          } catch (Exception ex) {
+//		            PluginUtil.displayErrorDialogAndLog(PluginUtil.getParentShell(), "Unexpected error detected while publishing to a Docker container", ex.getMessage(), ex);
+//		            log.log(Level.SEVERE, "publish2DockerHostContainer: " + ex.getMessage(), ex);
+//		          }
+//			}
+//
 		} catch (Exception ex1) {
 			log.log(Level.SEVERE, "actionPerformed", ex1);
 			ex1.printStackTrace();

@@ -329,6 +329,7 @@ public class AzureSelectDockerHostPage extends WizardPage {
 			}
 		} else {
 			dockerHostsTableSelection = null;
+			setPageComplete(false);
 		}
 
 		dockerHostsTable.addSelectionListener(new SelectionAdapter() {

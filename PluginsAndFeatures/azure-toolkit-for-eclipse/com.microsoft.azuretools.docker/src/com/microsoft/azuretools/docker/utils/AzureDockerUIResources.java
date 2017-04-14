@@ -172,10 +172,8 @@ public class AzureDockerUIResources {
 					Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
 					KeyVaultClient keyVaultClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).keyVaultClient;
 					if (progressMonitor.isCanceled()) {
-						if (displayWarningOnCreateKeyVaultCancelAction() == 0) {
-							progressMonitor.done();
-							return Status.CANCEL_STATUS;
-						}
+						progressMonitor.done();
+						return Status.CANCEL_STATUS;
 					}
 					
 					String retryMsg = "Create";
@@ -188,10 +186,8 @@ public class AzureDockerUIResources {
 						AzureDockerCertVaultOps.createOrUpdateVault(azureClient, dockerHost.certVault, keyVaultClient);
 						if (AzureDockerUtils.DEBUG) System.out.println("Done creating new key vault: " + new Date().toString());
 						if (progressMonitor.isCanceled()) {
-							if (displayWarningOnCreateKeyVaultCancelAction() == 0) {
-								progressMonitor.done();
-								return Status.CANCEL_STATUS;
-							}
+							progressMonitor.done();
+							return Status.CANCEL_STATUS;
 						}
 						certVault = AzureDockerCertVaultOps.getVault(azureClient, dockerHost.certVault.name,
 								dockerHost.certVault.resourceGroupName, keyVaultClient);
@@ -221,6 +217,7 @@ public class AzureDockerUIResources {
 					String msg = "An error occurred while attempting to create a new Azure Key Vault." + "\n" + e.getMessage();
 					log.log(Level.SEVERE, "createDockerKeyVault: " + msg, e);
 					e.printStackTrace();
+					PluginUtil.displayErrorDialog(Display.getDefault().getActiveShell(), "Error Creating Azure Key Vault " + dockerHost.certVault.name, "An error occurred while attempting to create a new Azure Key Vault." + "\n" + e.getMessage());
 					return Status.CANCEL_STATUS;
 				}
 			}
@@ -252,7 +249,10 @@ public class AzureDockerUIResources {
 				        dataModel.setProperty(IJ2EEComponentExportDataModelProperties.PROJECT_NAME, projectName);
 				        dataModel.setProperty(IJ2EEComponentExportDataModelProperties.ARCHIVE_DESTINATION, destinationPath);
 
-				        dataModel.getDefaultOperation().execute(null, null);
+				        if (dataModel.getDefaultOperation() != null)
+				        	try {
+				        		dataModel.getDefaultOperation().execute(null, null);
+				        	} catch (Exception ignored) {}
 						
 //						progressMonitor.subTask("");
 //						progressMonitor.worked(1);
@@ -279,20 +279,6 @@ public class AzureDockerUIResources {
 		}
 	}
 
-	private static int displayWarningOnCreateKeyVaultCancelAction(){
-		Display currentDisplay = Display.getCurrent();
-		Shell shell = currentDisplay.getActiveShell();
-		
-		if (shell != null) {
-			MessageBox displayConfirmationDialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK| SWT.CANCEL);
-			displayConfirmationDialog.setText("Stop Create Azure Key Vault");
-			displayConfirmationDialog.setMessage("This action can leave the Docker virtual machine host in a partial setup state and which can cause publishing to a Docker container to fail!\n\n Are you sure you want this?");
-			return displayConfirmationDialog.open();
-		}
-		
-		return 1;
-	}
-	
 	public static Color getColor(int systemColorID) {
 		Display display = Display.getCurrent();
 		return display.getSystemColor(systemColorID);
@@ -417,7 +403,7 @@ public class AzureDockerUIResources {
 		});
 	}
 
-	public static void publish2DockerHostContainer(Shell shell, IProject project) {
+	public static void publish2DockerHostContainer(Shell shell, IProject project, DockerHost host) {
 		try {
 			AzureDockerUIResources.createArtifact(shell, project);
 			
@@ -444,7 +430,7 @@ public class AzureDockerUIResources {
 				return;
 			}
 
-			DockerHost dockerHost = (dockerManager.getDockerPreferredSettings() != null) ? dockerManager.getDockerHostForURL(dockerManager.getDockerPreferredSettings().dockerApiName) : null;
+			DockerHost dockerHost = (host != null) ? host : (dockerManager.getDockerPreferredSettings() != null) ? dockerManager.getDockerHostForURL(dockerManager.getDockerPreferredSettings().dockerApiName) : null;
 			AzureDockerImageInstance dockerImageDescription = dockerManager.getDefaultDockerImageDescription(project.getName(), dockerHost);
 			AzureSelectDockerWizard selectDockerWizard = new AzureSelectDockerWizard(project, dockerManager, dockerImageDescription);
 			WizardDialog selectDockerHostDialog = new WizardDialog(shell, selectDockerWizard);
