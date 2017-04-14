@@ -30,7 +30,7 @@
       </handler>
    </extension>
    
-   <extension point="org.eclipse.ui.menus">           
+   <extension point="org.eclipse.ui.menus">
       <menuContribution locationURI="popup:org.eclipse.ui.popup.any?after=additions">
           <menu
                label="Azure"
@@ -55,8 +55,7 @@
           </menu>
       </menuContribution>
       <menuContribution locationURI="menu:com.microsoft.ui.dropdown.toolbar.command">
-         <command commandId="com.microsoft.azuretools.webapp.commands.deployToAzure" label="Publish as Azure Web App..." style="push">
-            <parameter name="com.microsoft.ui.dropdown.msg" value="Web App"></parameter>
+         <command commandId="com.microsoft.azuretools.webapp.commands.deployToAzure" style="push">
          </command>
       </menuContribution>
    </extension>
