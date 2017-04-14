@@ -36,6 +36,7 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.docker.DockerHostModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.storage.StorageModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.vmarm.VMArmModule;
+import com.microsoft.tooling.msservices.serviceexplorer.azure.rediscache.RedisCacheModule;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.webapps.WebappsModule;
 
 import java.util.List;
@@ -48,6 +49,7 @@ public class AzureModule extends AzureRefreshableNode {
 
     private Object project;
     private VMArmModule vmArmServiceModule;
+    private RedisCacheModule redisCacheModule;
     private StorageModule storageModule;
     private WebappsModule webappsModule;
     private HDInsightRootModule hdInsightModule;
@@ -60,6 +62,7 @@ public class AzureModule extends AzureRefreshableNode {
         webappsModule = new WebappsModule(this);
         //hdInsightModule = new HDInsightRootModule(this);
         vmArmServiceModule = new VMArmModule(this);
+        redisCacheModule = new RedisCacheModule(this);
         dockerHostModule = new DockerHostModule(this);
         try {
             SignInOutListener signInOutListener = new SignInOutListener();
@@ -112,6 +115,10 @@ public class AzureModule extends AzureRefreshableNode {
         if (!isDirectChild(vmArmServiceModule)) {
             addChildNode(vmArmServiceModule);
         }
+        if (!isDirectChild(redisCacheModule)) {
+            addChildNode(redisCacheModule);
+        }
+
         if (!isDirectChild(storageModule)) {
             addChildNode(storageModule);
         }
@@ -135,6 +142,7 @@ public class AzureModule extends AzureRefreshableNode {
         try {
             if (AuthMethodManager.getInstance().isSignedIn()) {
                 vmArmServiceModule.load(true);
+                redisCacheModule.load(true);
                 storageModule.load(true);
                 webappsModule.load(true);
                 hdInsightModule.load(true);

@@ -74,13 +74,10 @@ public final class RedisCacheModule extends AzureRefreshableNode {
             for (String sid : sidList) {
                 try {
                     Azure azure = azureManager.getAzure(sid);
-                    ParallelExecutor.For(
-                            azure.redisCaches().list(),
-                            new ParallelExecutor.Operation<RedisCache>() {
-                                public void perform(RedisCache cache) {
-                                    addChildNode(new RedisCacheNode(this, sid, cache));
-                                };
-                            });
+                    for (RedisCache cache : azure.redisCaches().list())
+                    {
+                        addChildNode(new RedisCacheNode(this, sid, cache));
+                    }
                 } catch (Exception ex) {
                     failedSubscriptions.add(new ImmutablePair<>(sid, ex.getMessage()));
                     continue;
