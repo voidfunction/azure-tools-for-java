@@ -31,6 +31,18 @@
     <properties>
         <artifact.name>${artifactId}-${version}.jar</artifact.name>
     </properties>
+    <repositories>
+        <repository>
+            <id>ossrh</id>
+            <name>Sonatype Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -115,7 +127,7 @@
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure</artifactId>
-            <version>1.0.0-beta4.1</version>
+            <version>1.0.0-beta6-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -152,16 +164,16 @@
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-keyvault-webkey</artifactId>
-            <version>1.0.0-beta5-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/azure-keyvault-webkey-1.0.0-beta5-SNAPSHOT.jar</systemPath>
+            <version>1.0.0</version>
+            <!--<scope>system</scope>-->
+            <!--<systemPath>${project.basedir}/lib/azure-keyvault-webkey-1.0.0-beta5-SNAPSHOT.jar</systemPath>-->
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-keyvault</artifactId>
-            <version>1.0.0-beta5-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/azure-keyvault-1.0.0-beta5-SNAPSHOT.jar</systemPath>
+            <version>1.0.0</version>
+            <!--<scope>system</scope>-->
+            <!--<systemPath>${project.basedir}/lib/azure-keyvault-1.0.0-beta5-SNAPSHOT.jar</systemPath>-->
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure</groupId>

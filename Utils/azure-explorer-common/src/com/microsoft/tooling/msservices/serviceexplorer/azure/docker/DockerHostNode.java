@@ -87,7 +87,7 @@ public class DockerHostNode extends AzureRefreshableNode {
   protected void refreshItems() throws AzureCmdException {
     try {
       Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
-      VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
+      VirtualMachine vm = azureClient.virtualMachines().getByResourceGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
       if (vm != null) {
         DockerHost updatedDockerHost = AzureDockerVMOps.getDockerHost(vm, dockerManager.getDockerVaultsMap());
         if (updatedDockerHost != null) {
@@ -163,7 +163,7 @@ public class DockerHostNode extends AzureRefreshableNode {
             setIconPath(DOCKERHOST_WAIT_ICON_PATH);
             try {
               Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
-              VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
+              VirtualMachine vm = azureClient.virtualMachines().getByResourceGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
               if (vm != null) {
                 vm.start();
                 setIconPath(DOCKERHOST_RUN_ICON_PATH);
@@ -206,7 +206,7 @@ public class DockerHostNode extends AzureRefreshableNode {
         removeAllChildNodes();
         setIconPath(DOCKERHOST_WAIT_ICON_PATH);
         Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
-        VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
+        VirtualMachine vm = azureClient.virtualMachines().getByResourceGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
         if (vm != null) {
           vm.restart();
           setIconPath(DOCKERHOST_RUN_ICON_PATH);
@@ -241,7 +241,7 @@ public class DockerHostNode extends AzureRefreshableNode {
         getNodeActionByName(ACTION_RESTART).setEnabled(true);
 
         Azure azureClient = dockerManager.getSubscriptionsMap().get(dockerHost.sid).azureClient;
-        VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
+        VirtualMachine vm = azureClient.virtualMachines().getByResourceGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
         if (vm != null) {
           vm.powerOff();
         }

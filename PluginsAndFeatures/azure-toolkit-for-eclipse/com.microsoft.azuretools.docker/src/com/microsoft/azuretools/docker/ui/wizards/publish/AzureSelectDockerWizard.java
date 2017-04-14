@@ -339,7 +339,7 @@ public class AzureSelectDockerWizard extends Wizard {
 					AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, url, 5, msg);
 		            AzureDockerUIResources.printDebugMessage(this, "Refreshing docker hosts: " + new Date().toString());
 //		            dockerManager.refreshDockerHostDetails();
-		            VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerImageInstance.host.hostVM.resourceGroupName, dockerImageInstance.host.hostVM.name);
+		            VirtualMachine vm = azureClient.virtualMachines().getByResourceGroup(dockerImageInstance.host.hostVM.resourceGroupName, dockerImageInstance.host.hostVM.name);
 		            if (vm != null) {
 		                DockerHost updatedHost = AzureDockerVMOps.getDockerHost(vm, dockerManager.getDockerVaultsMap());
 		                if (updatedHost != null) {

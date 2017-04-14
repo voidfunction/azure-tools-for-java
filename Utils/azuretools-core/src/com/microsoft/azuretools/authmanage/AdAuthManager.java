@@ -75,7 +75,7 @@ public class AdAuthManager {
         String commonTid = "common";
         AuthContext ac = new AuthContext(String.format("%s/%s", Constants.authority, commonTid), cache);
 
-        AuthenticationResult result = ac.acquireToken(AzureEnvironment.AZURE.getResourceManagerEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Always, null);
+        AuthenticationResult result = ac.acquireToken(AzureEnvironment.AZURE.resourceManagerEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Always, null);
         String displayableId = result.getUserInfo().getDisplayableId();
         UserIdentifier uid = new UserIdentifier(displayableId, UserIdentifierType.RequiredDisplayableId);
 
@@ -86,8 +86,8 @@ public class AdAuthManager {
             String tid = t.tenantId();
             AuthContext ac1 = new AuthContext(String.format("%s/%s", Constants.authority, tid), cache);
             // put tokens into the cache
-            ac1.acquireToken(AzureEnvironment.AZURE.getResourceManagerEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
-            ac1.acquireToken(AzureEnvironment.AZURE.getGraphEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
+            ac1.acquireToken(AzureEnvironment.AZURE.resourceManagerEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
+            ac1.acquireToken(AzureEnvironment.AZURE.graphEndpoint(), Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
             ac1.acquireToken(Constants.resourceVault, Constants.clientId, Constants.redirectUri, PromptBehavior.Auto, uid);
             List<String> sids = new LinkedList<>();
             for (Subscription s : AccessTokenAzureManager.getSubscriptions(tid)) {

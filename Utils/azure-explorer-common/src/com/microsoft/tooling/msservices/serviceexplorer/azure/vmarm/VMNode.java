@@ -59,7 +59,7 @@ public class VMNode extends RefreshableNode {
                 if (azureManager == null) {
                     return;
                 }
-                azureManager.getAzure(subscriptionId).virtualMachines().deleteByGroup(virtualMachine.resourceGroupName(), virtualMachine.name());
+                azureManager.getAzure(subscriptionId).virtualMachines().deleteByResourceGroup(virtualMachine.resourceGroupName(), virtualMachine.name());
             } catch (Exception ex) {
 
             }

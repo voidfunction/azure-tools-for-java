@@ -71,7 +71,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import com.microsoft.azure.management.appservice.AppServicePlan;
-import com.microsoft.azure.management.appservice.AppServicePricingTier;
+import com.microsoft.azure.management.appservice.PricingTier;
 import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
@@ -124,7 +124,7 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
     private List<ResourceGroup> binderResourceGroup;
     private List<AppServicePlan> binderAppServicePlan;
     private List<Location> binderAppServicePlanLocation;
-    private List<AppServicePricingTier> binderAppServicePlanPricingTier;
+    private List<PricingTier> binderAppServicePlanPricingTier;
     private List<AzulZuluModel> binderJdk3Party;
     
     TabFolder tabFolder;
@@ -765,9 +765,9 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
     protected void fillAppServicePlanPricingTiers() {
         try {
             comboAppServicePlanPricingTier.removeAll();
-            binderAppServicePlanPricingTier = new ArrayList<AppServicePricingTier>();
-            List<AppServicePricingTier> l = createListFromClassFields(AppServicePricingTier.class);
-            for (AppServicePricingTier aspt : l) {
+            binderAppServicePlanPricingTier = new ArrayList<PricingTier>();
+            List<PricingTier> l = createListFromClassFields(PricingTier.class);
+            for (PricingTier aspt : l) {
                 comboAppServicePlanPricingTier.add(aspt.toString());
                 binderAppServicePlanPricingTier.add(aspt);
             }

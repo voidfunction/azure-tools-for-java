@@ -33,6 +33,7 @@ import com.microsoft.azure.keyvault.requests.SetSecretRequest;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.keyvault.SecretPermissions;
 import com.microsoft.azure.management.keyvault.Vault;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.utils.Pair;
 import com.microsoft.rest.ServiceCallback;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
@@ -114,14 +115,18 @@ public class AzureDockerCertVaultOps {
       Vault vault = null;
 
       try {
-        for (Vault vaultItem : azureClient.vaults().list()) {
-          if (vaultItem.name().equals(certVault.name)) {
-            vault = azureClient.vaults().getByGroup(vaultItem.resourceGroupName(), certVault.name);
-            break;
+        // TODO
+        outerloop:
+        for (ResourceGroup group : azureClient.resourceGroups().list()) {
+          for (Vault vaultItem : azureClient.vaults().listByResourceGroup(group.name())) {
+            if (vaultItem.name().equals(certVault.name)) {
+              vault = azureClient.vaults().getByResourceGroup(vaultItem.resourceGroupName(), certVault.name);
+              break outerloop;
+            }
           }
         }
       } catch (CloudException e) {
-        if (e.getBody().getCode().equals("ResourceNotFound") || e.getBody().getCode().equals("ResourceGroupNotFound")) {
+        if (e.body().code().equals("ResourceNotFound") || e.body().code().equals("ResourceGroupNotFound")) {
           vault = null; // Vault does no exist
         } else {
           throw e;
@@ -159,7 +164,7 @@ public class AzureDockerCertVaultOps {
         }
       }
 
-      vault = azureClient.vaults().getByGroup(certVault.resourceGroupName, certVault.name);
+      vault = azureClient.vaults().getByResourceGroup(certVault.resourceGroupName, certVault.name);
       String vaultUri = vault.vaultUri();
       // vault is not immediately available so the next operation could fail
       // add a retry policy to make sure it got created and it is readable
@@ -246,7 +251,7 @@ public class AzureDockerCertVaultOps {
     }
 
     try {
-      Vault vault = azureClient.vaults().getByGroup(certVault.resourceGroupName, certVault.name);
+      Vault vault = azureClient.vaults().getByResourceGroup(certVault.resourceGroupName, certVault.name);
 
       if (certVault.servicePrincipalId != null) {
         vault.update()
@@ -278,7 +283,7 @@ public class AzureDockerCertVaultOps {
     }
 
     try {
-      Vault vault = azureClient.vaults().getByGroup(certVault.resourceGroupName, certVault.name);
+      Vault vault = azureClient.vaults().getByResourceGroup(certVault.resourceGroupName, certVault.name);
 
       if (certVault.userId != null) {
         vault.update()
@@ -324,7 +329,7 @@ public class AzureDockerCertVaultOps {
     Vault vault;
 
     try {
-      vault = azureClient.vaults().getByGroup(certVault.resourceGroupName, certVault.name);
+      vault = azureClient.vaults().getByResourceGroup(certVault.resourceGroupName, certVault.name);
       certVault.uri = vault.vaultUri();
     } catch(Exception e) {
       throw new AzureDockerException(e.getMessage());
@@ -442,7 +447,7 @@ public class AzureDockerCertVaultOps {
     }
 
     try {
-      azureClient.vaults().deleteByGroup(certVault.resourceGroupName, certVault.name);
+      azureClient.vaults().deleteByResourceGroup(certVault.resourceGroupName, certVault.name);
 
     } catch(Exception e) {
       throw new AzureDockerException(e.getMessage());

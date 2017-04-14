@@ -22,6 +22,7 @@
 package com.microsoft.azure.docker.model;
 
 import com.microsoft.azure.management.compute.ImageReference;
+import com.microsoft.azure.management.compute.implementation.ImageReferenceInner;
 
 public class AzureOSHost {
   public String publisher;
@@ -31,7 +32,7 @@ public class AzureOSHost {
 
   public AzureOSHost() {}
 
-  public AzureOSHost(ImageReference imageReference) {
+  public AzureOSHost(ImageReferenceInner imageReference) {
     this.publisher = imageReference.publisher();
     this.offer = imageReference.offer();
     this.sku = imageReference.sku();

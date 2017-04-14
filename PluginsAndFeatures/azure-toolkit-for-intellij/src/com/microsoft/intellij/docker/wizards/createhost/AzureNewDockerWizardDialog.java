@@ -154,7 +154,7 @@ public class AzureNewDockerWizardDialog extends WizardDialog<AzureNewDockerWizar
           progressIndicator.setText2("Refreshing the Docker virtual machines details...");
           if (AzureDockerUtils.DEBUG) System.out.println("Refreshing Docker hosts details: " + new Date().toString());
           // dockerManager.refreshDockerHostDetails();
-          VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
+          VirtualMachine vm = azureClient.virtualMachines().getByResourceGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
           if (vm != null) {
             DockerHost updatedHost = AzureDockerVMOps.getDockerHost(vm, dockerManager.getDockerVaultsMap());
             if (updatedHost != null) {

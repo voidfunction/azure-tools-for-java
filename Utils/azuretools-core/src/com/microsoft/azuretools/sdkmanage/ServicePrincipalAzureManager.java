@@ -22,9 +22,6 @@
 
 package com.microsoft.azuretools.sdkmanage;
 
-import com.microsoft.aad.adal4j.AuthenticationContext;
-import com.microsoft.aad.adal4j.AuthenticationResult;
-import com.microsoft.aad.adal4j.ClientCredential;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
@@ -43,11 +40,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ServicePrincipalAzureManager extends AzureManagerBase {
@@ -147,25 +139,10 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
             @Override
             public String doAuthenticate(String authorization, String resource, String scope) {
                 try {
-                    ExecutorService service = null;
-                    AuthenticationResult authenticationResult;
-                    try {
                         ApplicationTokenCredentials credentials = (atc == null)
                             ? ApplicationTokenCredentials.fromFile(credFile)
                             : atc;
-
-                        service = Executors.newFixedThreadPool(1);
-                        AuthenticationContext context = new AuthenticationContext(authorization, false, service);
-                        ClientCredential clientCredential = new ClientCredential(credentials.getClientId(), credentials.getSecret());
-                        Future<AuthenticationResult> future = context.acquireToken(resource, clientCredential,null);
-                        authenticationResult = future.get();
-                    } finally {
-                        if (service != null) {
-                            service.shutdown();
-                        }
-                    }
-
-                    return authenticationResult.getAccessToken();
+                    return credentials.getToken(resource);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -181,33 +158,15 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
             ? ApplicationTokenCredentials.fromFile(credFile)
             : atc;
 
-        return credentials.getClientId();
+        return credentials.clientId();
     }
 
     @Override
     public String getAccessToken(String tid) throws IOException {
-        ExecutorService service = null;
-        AuthenticationResult authenticationResult;
-//        try {
             ApplicationTokenCredentials credentials = (atc == null)
                     ? ApplicationTokenCredentials.fromFile(credFile)
                     : atc;
 
             return credentials.getToken(Constants.resourceARM);
-//            service = Executors.newFixedThreadPool(1);
-//            AuthenticationContext context = new AuthenticationContext(String.format("%s/%s", Constants.authority, tid), false, service);
-//            ClientCredential clientCredential = new ClientCredential(credentials.getClientId(), credentials.getSecret());
-//            Future<AuthenticationResult> future = context.acquireToken(Constants.resourceARM, clientCredential, null);
-//            authenticationResult = future.get();
-//            return authenticationResult.getAccessToken();
-//        } catch (InterruptedException  | ExecutionException e) {
-//            e.printStackTrace();
-//            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-//            throw new IOException(e);
-//        } finally {
-//            if (service != null) {
-//                service.shutdown();
-//            }
-//        }
     }
 }

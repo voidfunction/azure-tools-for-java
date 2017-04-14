@@ -70,7 +70,7 @@ public class StorageNode extends RefreshableNode {
                     return;
                 }
                 Azure azure = azureManager.getAzure(subscriptionId);
-                azure.storageAccounts().deleteByGroup(storageAccount.resourceGroupName(), storageAccount.name());
+                azure.storageAccounts().deleteByResourceGroup(storageAccount.resourceGroupName(), storageAccount.name());
                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                     @Override
                     public void run() {

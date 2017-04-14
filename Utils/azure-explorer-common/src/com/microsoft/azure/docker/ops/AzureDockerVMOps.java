@@ -46,7 +46,7 @@ public class AzureDockerVMOps {
 
   public static VirtualMachine updateDockerHostVM(Azure azureClient, DockerHost dockerHost) throws AzureDockerException {
     try {
-      VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
+      VirtualMachine vm = azureClient.virtualMachines().getByResourceGroup(dockerHost.hostVM.resourceGroupName, dockerHost.hostVM.name);
       HashMap<String, Object> protectedSettings = new HashMap<>();
       protectedSettings.put("username", dockerHost.certVault.vmUsername);
       if (dockerHost.hasPwdLogIn) {
@@ -57,7 +57,7 @@ public class AzureDockerVMOps {
       }
       protectedSettings.put("reset_ssh", "true");
 
-      if (vm.extensions().get("VMAccessForLinux") != null) {
+      if (vm.listExtensions().get("VMAccessForLinux") != null) {
         vm.update()
             .updateExtension("VMAccessForLinux")
                 .withProtectedSettings(protectedSettings)
@@ -102,7 +102,7 @@ public class AzureDockerVMOps {
         // reuse existing virtual network
         String vnetName = newHost.hostVM.vnetName.split("@")[0];
         String vnetResourceGroupName = newHost.hostVM.vnetName.split("@")[1];
-        vnet = azureClient.networks().getByGroup(vnetResourceGroupName, vnetName);
+        vnet = azureClient.networks().getByResourceGroup(vnetResourceGroupName, vnetName);
       } else {
         // create a new virtual network (a subnet will be automatically created as part of this)
         vnet = azureClient.networks()
@@ -113,18 +113,18 @@ public class AzureDockerVMOps {
             .create();
       }
 
-      VirtualMachine.DefinitionStages.WithLinuxRootPasswordOrPublicKey defStage1 = azureClient.virtualMachines()
+      VirtualMachine.DefinitionStages.WithLinuxRootPasswordOrPublicKeyManagedOrUnmanaged defStage1 = azureClient.virtualMachines()
           .define(newHost.hostVM.name)
           .withRegion(newHost.hostVM.region)
           .withExistingResourceGroup(resourceGroupName)
           .withExistingPrimaryNetwork(vnet)
           .withSubnet(newHost.hostVM.subnetName)
-          .withPrimaryPrivateIpAddressDynamic()
-          .withNewPrimaryPublicIpAddress(newHost.hostVM.name)
+          .withPrimaryPrivateIPAddressDynamic()
+          .withNewPrimaryPublicIPAddress(newHost.hostVM.name)
           .withSpecificLinuxImageVersion(newHost.hostVM.osHost.imageReference())
           .withRootUsername(newHost.certVault.vmUsername);
 
-      VirtualMachine.DefinitionStages.WithLinuxCreate defStage2;
+      VirtualMachine.DefinitionStages.WithLinuxCreateManagedOrUnmanaged defStage2;
       if (newHost.hasPwdLogIn && newHost.hasSSHLogIn) {
         defStage2 = defStage1
             .withRootPassword(newHost.certVault.vmPwd)
@@ -134,8 +134,8 @@ public class AzureDockerVMOps {
             defStage1.withSsh(newHost.certVault.sshPubKey) :
             defStage1.withRootPassword(newHost.certVault.vmPwd);
       }
-
-      VirtualMachine.DefinitionStages.WithCreate defStage3 = defStage2.withNewStorageAccount(newHost.hostVM.storageAccountName);
+      // todo - temporary not using managed disks as we do not support them yet for docker hosts
+      VirtualMachine.DefinitionStages.WithCreate defStage3 = defStage2.withUnmanagedDisks().withNewStorageAccount(newHost.hostVM.storageAccountName);
       if (newHost.hostVM.storageAccountName.contains("@")) {
         // Existing storage account
         for (StorageAccount item : azureClient.storageAccounts().list()) {
@@ -161,16 +161,16 @@ public class AzureDockerVMOps {
 
   public static AzureDockerVM getDockerVM(VirtualMachine vm) {
     try {
-      NicIpConfiguration nicIpConfiguration = vm.getPrimaryNetworkInterface().primaryIpConfiguration();
-      PublicIpAddress publicIp = nicIpConfiguration.getPublicIpAddress();
-      Network vnet = nicIpConfiguration.getNetwork();
+      NicIPConfiguration nicIPConfiguration = vm.getPrimaryNetworkInterface().primaryIPConfiguration();
+      PublicIPAddress publicIp = nicIPConfiguration.getPublicIPAddress();
+      Network vnet = nicIPConfiguration.getNetwork();
       AzureDockerVM dockerVM = new AzureDockerVM();
       dockerVM.name = vm.name();
       // TODO: Azure cloud bug; the resource group name in the id's for the VM's when retrieving as a list is capitalized!
       dockerVM.resourceGroupName = vm.resourceGroupName().toLowerCase();
       dockerVM.region = vm.regionName();
       dockerVM.availabilitySet = (vm.availabilitySetId() != null) ? ResourceUtils.nameFromResourceId(vm.availabilitySetId()) : null;
-      dockerVM.privateIp = nicIpConfiguration.privateIpAddress();
+      dockerVM.privateIp = nicIPConfiguration.privateIPAddress();
       if (publicIp != null) {
         dockerVM.publicIpName = publicIp.name();
         dockerVM.publicIp = publicIp.ipAddress();
@@ -187,9 +187,9 @@ public class AzureDockerVMOps {
       dockerVM.nicName = vm.getPrimaryNetworkInterface().name();
       dockerVM.vnetName = vnet.name();
       dockerVM.vnetAddressSpace = vnet.addressSpaces().get(0);
-      dockerVM.subnetName = nicIpConfiguration.subnetName();
+      dockerVM.subnetName = nicIPConfiguration.subnetName();
       dockerVM.subnetAddressRange = vnet.subnets().get(dockerVM.subnetName).addressPrefix();
-      dockerVM.networkSecurityGroupName = (nicIpConfiguration.parent().networkSecurityGroupId() != null) ? ResourceUtils.nameFromResourceId(nicIpConfiguration.parent().networkSecurityGroupId()) : null;
+      dockerVM.networkSecurityGroupName = (nicIPConfiguration.parent().networkSecurityGroupId() != null) ? ResourceUtils.nameFromResourceId(nicIPConfiguration.parent().networkSecurityGroupId()) : null;
       dockerVM.vmSize = vm.size().toString();
       dockerVM.osDiskName = vm.storageProfile().osDisk().name();
       if (vm.storageProfile().imageReference() != null) {
@@ -210,7 +210,7 @@ public class AzureDockerVMOps {
 
   public static AzureDockerVM getDockerVM(Azure azureClient, String resourceGroup, String hostName) {
     try {
-      AzureDockerVM azureDockerVM = getDockerVM(azureClient.virtualMachines().getByGroup(resourceGroup, hostName));
+      AzureDockerVM azureDockerVM = getDockerVM(azureClient.virtualMachines().getByResourceGroup(resourceGroup, hostName));
       azureDockerVM.sid = azureClient.subscriptionId();
 
       return azureDockerVM;
@@ -221,7 +221,7 @@ public class AzureDockerVMOps {
 
   public static VirtualMachine getVM(Azure azureClient, String resourceGroup, String hostName) throws AzureDockerException {
     try {
-      return azureClient.virtualMachines().getByGroup(resourceGroup, hostName);
+      return azureClient.virtualMachines().getByResourceGroup(resourceGroup, hostName);
     } catch (Exception e) {
       throw new AzureDockerException(e.getMessage(), e);
     }
@@ -232,14 +232,14 @@ public class AzureDockerVMOps {
       return false;
     }
 
-    VirtualMachine vm = azureClient.virtualMachines().getByGroup(resourceGroup, vmName);
+    VirtualMachine vm = azureClient.virtualMachines().getByResourceGroup(resourceGroup, vmName);
     if (vm == null) {
       return false;
     }
 
-    PublicIpAddress publicIp = vm.getPrimaryPublicIpAddress();
-    NicIpConfiguration nicIpConfiguration = publicIp.getAssignedNetworkInterfaceIpConfiguration();
-    Network vnet = nicIpConfiguration.getNetwork();
+    PublicIPAddress publicIp = vm.getPrimaryPublicIPAddress();
+    NicIPConfiguration nicIPConfiguration = publicIp.getAssignedNetworkInterfaceIPConfiguration();
+    Network vnet = nicIPConfiguration.getNetwork();
     NetworkInterface nic = vm.getPrimaryNetworkInterface();
 
     return nic.ipConfigurations().size() == 1 &&
@@ -252,20 +252,20 @@ public class AzureDockerVMOps {
       throw new AzureDockerException("Unexpected param values; Azure instance, resource group and VM name cannot be null");
     }
 
-    VirtualMachine vm = azureClient.virtualMachines().getByGroup(resourceGroup, vmName);
+    VirtualMachine vm = azureClient.virtualMachines().getByResourceGroup(resourceGroup, vmName);
     if (vm == null) {
       throw new AzureDockerException(String.format("Unexpected error retrieving VM %s from Azure", vmName));
     }
 
     try {
-      PublicIpAddress publicIp = vm.getPrimaryPublicIpAddress();
-      NicIpConfiguration nicIpConfiguration = publicIp.getAssignedNetworkInterfaceIpConfiguration();
-      Network vnet = nicIpConfiguration.getNetwork();
+      PublicIPAddress publicIp = vm.getPrimaryPublicIPAddress();
+      NicIPConfiguration nicIPConfiguration = publicIp.getAssignedNetworkInterfaceIPConfiguration();
+      Network vnet = nicIPConfiguration.getNetwork();
       NetworkInterface nic = vm.getPrimaryNetworkInterface();
 
       azureClient.virtualMachines().deleteById(vm.id());
       azureClient.networkInterfaces().deleteById(nic.id());
-      azureClient.publicIpAddresses().deleteById(publicIp.id());
+      azureClient.publicIPAddresses().deleteById(publicIp.id());
       azureClient.networks().deleteById(vnet.id());
     } catch (Exception e) {
       throw new AzureDockerException(String.format("Unexpected error while deleting VM %s and its associated resources", vmName));
@@ -277,7 +277,7 @@ public class AzureDockerVMOps {
       throw new AzureDockerException("Unexpected param values; Azure instance, resource group and VM name cannot be null");
     }
 
-    VirtualMachine vm = azureClient.virtualMachines().getByGroup(resourceGroup, vmName);
+    VirtualMachine vm = azureClient.virtualMachines().getByResourceGroup(resourceGroup, vmName);
     if (vm == null) {
       throw new AzureDockerException(String.format("Unexpected error retrieving VM %s from Azure", vmName));
     }
@@ -383,29 +383,34 @@ public class AzureDockerVMOps {
 
   public static Map<String, DockerHost> getDockerHosts(Azure azureClient, KeyVaultClient keyVaultClient) {
     Map<String, AzureDockerCertVault> dockerVaultsMap = new HashMap<>();
-    for (Vault vault : azureClient.vaults().list()) {
-      // TODO: clean the work around for bug with getting vault props for a listed vault
-      vault = azureClient.vaults().getById(vault.id());
+    // TODO
+    outerloop:
+    for (ResourceGroup group : azureClient.resourceGroups().list()) {
+      for (Vault vault : azureClient.vaults().listByResourceGroup(group.name())) {
+        // TODO: clean the work around for bug with getting vault props for a listed vault
+        vault = azureClient.vaults().getById(vault.id());
 
-      AzureDockerCertVault certVault = new AzureDockerCertVault();
-      certVault.name = vault.name();
-      certVault.resourceGroupName = vault.resourceGroupName();
-      certVault.region = vault.regionName();
-      certVault.uri = vault.vaultUri();
-      certVault.sid = azureClient.subscriptionId();
-      AzureDockerCertVault certVaultTemp = AzureDockerCertVaultOps.getVault(certVault, keyVaultClient);
-      if (certVaultTemp == null) {
-        try {
-          // try to assign read permissions to the key vault in case it was created with a different service principal
-          AzureDockerCertVaultOps.setVaultPermissionsRead(azureClient, certVault);
-          certVault = AzureDockerCertVaultOps.getVault(certVault, keyVaultClient);
-        } catch (Exception ignored) {}
-      } else {
-        certVault = certVaultTemp;
-      }
-      if (certVault != null && certVault.hostName != null) {
-        // Key vault names are unique, DNS like across the cloud
-        dockerVaultsMap.put(vault.name(), certVault);
+        AzureDockerCertVault certVault = new AzureDockerCertVault();
+        certVault.name = vault.name();
+        certVault.resourceGroupName = vault.resourceGroupName();
+        certVault.region = vault.regionName();
+        certVault.uri = vault.vaultUri();
+        certVault.sid = azureClient.subscriptionId();
+        AzureDockerCertVault certVaultTemp = AzureDockerCertVaultOps.getVault(certVault, keyVaultClient);
+        if (certVaultTemp == null) {
+          try {
+            // try to assign read permissions to the key vault in case it was created with a different service principal
+            AzureDockerCertVaultOps.setVaultPermissionsRead(azureClient, certVault);
+            certVault = AzureDockerCertVaultOps.getVault(certVault, keyVaultClient);
+          } catch (Exception ignored) {
+          }
+        } else {
+          certVault = certVaultTemp;
+        }
+        if (certVault != null && certVault.hostName != null) {
+          // Key vault names are unique, DNS like across the cloud
+          dockerVaultsMap.put(vault.name(), certVault);
+        }
       }
     }
 
@@ -534,7 +539,7 @@ public class AzureDockerVMOps {
       if (!session.isConnected()) session.connect();
 
       // Generate a random password to be used when creating the TLS certificates
-      String certCAPwd = ResourceNamer.randomResourceName("", 15);
+      String certCAPwd = new ResourceNamer("").randomName("", 15);
       String createTLScerts = CREATE_OPENSSL_TLS_CERTS_FOR_UBUNTU;
       createTLScerts = createTLScerts.replaceAll(CERT_CA_PWD_PARAM, certCAPwd);
       createTLScerts = createTLScerts.replaceAll(HOSTNAME, dockerHost.hostVM.name);

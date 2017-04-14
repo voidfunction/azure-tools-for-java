@@ -34,7 +34,7 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
-import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.network.PublicIPAddress;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.model.Creatable;
 import com.microsoft.azure.management.storage.Kind;
@@ -90,7 +90,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
     private List<Network> virtualNetworks;
 
     private Map<String, StorageAccount> storageAccounts;
-    private List<PublicIpAddress> publicIpAddresses;
+    private List<PublicIPAddress> publicIpAddresses;
     private List<NetworkSecurityGroup> networkSecurityGroups;
     private List<AvailabilitySet> availabilitySets;
 
@@ -155,8 +155,8 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
         pipCombo.setRenderer(new ListCellRendererWrapper<Object>() {
             @Override
             public void customize(JList jList, Object o, int i, boolean b, boolean b1) {
-                if (o instanceof PublicIpAddress) {
-                    PublicIpAddress pip = (PublicIpAddress) o;
+                if (o instanceof PublicIPAddress) {
+                    PublicIPAddress pip = (PublicIPAddress) o;
                     setText(String.format("%s (%s)", pip.name(), pip.resourceGroupName()));
                 }
             }
@@ -459,7 +459,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
             public void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.setIndeterminate(true);
                 if (publicIpAddresses == null) {
-                    publicIpAddresses = azure.publicIpAddresses().list();
+                    publicIpAddresses = azure.publicIPAddresses().list();
                 }
                 ApplicationManager.getApplication().invokeLater(new Runnable() {
                     @Override
@@ -496,7 +496,7 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
         }
     }
 
-    private DefaultComboBoxModel getPipAddressModel(PublicIpAddress selectedPip) {
+    private DefaultComboBoxModel getPipAddressModel(PublicIPAddress selectedPip) {
         DefaultComboBoxModel refreshedPipModel = new DefaultComboBoxModel(filterPip().toArray()) {
             @Override
             public void setSelectedItem(final Object o) {
@@ -508,8 +508,8 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                     model.setWithNewPip(true);
                     model.setPublicIpAddress(null);
 //                    showNewPipForm();
-                } else if (o instanceof PublicIpAddress) {
-                    model.setPublicIpAddress((PublicIpAddress) o);
+                } else if (o instanceof PublicIPAddress) {
+                    model.setPublicIpAddress((PublicIPAddress) o);
                     model.setWithNewPip(false);
                 }
             }
@@ -527,10 +527,10 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
         return refreshedPipModel;
     }
 
-    private Vector<PublicIpAddress> filterPip() {
-        Vector<PublicIpAddress> filteredPips = new Vector<>();
+    private Vector<PublicIPAddress> filterPip() {
+        Vector<PublicIPAddress> filteredPips = new Vector<>();
 
-        for (PublicIpAddress publicIpAddress : publicIpAddresses) {
+        for (PublicIPAddress publicIpAddress : publicIpAddresses) {
 
             // VM and public ip address need to be in the same region
             if (publicIpAddress.regionName() != null && publicIpAddress.regionName().equals(model.getRegion().name())) {

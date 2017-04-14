@@ -26,7 +26,6 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.util.Collections;
 import java.util.List;
 
 import org.osgi.service.prefs.BackingStoreException;
@@ -62,16 +61,11 @@ public class ApplicationInsightsPreferences {
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 			ObjectOutput output = new ObjectOutputStream(buffer);
 			List<ApplicationInsightsResource> data = ApplicationInsightsResourceRegistry.getAppInsightsResrcList();
-			/*
+			ApplicationInsightsResource[] dataArray = data.stream().filter(a -> !a.isImported()).sorted().toArray(ApplicationInsightsResource[]::new);
+            /*
 			 * Sort list according to application insights resource name.
+			 * Save only manually added resources
 			 */
-			Collections.sort(data);
-			ApplicationInsightsResource[] dataArray = new ApplicationInsightsResource[data.size()];
-			int i = 0;
-			for (ApplicationInsightsResource pd1 : data) {
-				dataArray[i] = pd1;
-				i++;
-			}
 			try {
 				output.writeObject(dataArray);
 			} finally {

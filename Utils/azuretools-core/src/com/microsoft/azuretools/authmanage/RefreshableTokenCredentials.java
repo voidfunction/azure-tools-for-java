@@ -29,16 +29,12 @@ import com.microsoft.azuretools.adauth.PromptBehavior;
 import okhttp3.OkHttpClient;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.logging.Logger;
 
-/**
- * Created by vlashch on 11/9/16.
- */
-//public class RefreshableTokenCredentials extends TokenCredentials implements AzureTokenCredentials {
-public class RefreshableTokenCredentials implements AzureTokenCredentials {
+public class RefreshableTokenCredentials extends AzureTokenCredentials {
     private final static Logger LOGGER = Logger.getLogger(RefreshableTokenCredentials.class.getName());
     private AdAuthManager authManager;
-    private String tid;
 
     /**
      * Initializes a new instance of the TokenCredentials.
@@ -47,9 +43,8 @@ public class RefreshableTokenCredentials implements AzureTokenCredentials {
      * @param tid  tenant ID
      */
     public RefreshableTokenCredentials(AdAuthManager authManager, String tid) {
-//        super(null, null);
+        super(null, tid);
         this.authManager = authManager;
-        this.tid = tid;
     }
 
 //    @Override
@@ -66,21 +61,20 @@ public class RefreshableTokenCredentials implements AzureTokenCredentials {
 
     @Override
     public String getToken(String s) throws IOException {
-        return authManager.getAccessToken(tid, s, PromptBehavior.Auto);
+        return authManager.getAccessToken(domain(), s, PromptBehavior.Auto);
     }
 
     @Override
-    public String getDomain() {
-        return tid;
-    }
-
-    @Override
-    public AzureEnvironment getEnvironment() {
+    public AzureEnvironment environment() {
         return AzureEnvironment.AZURE;
     }
 
     @Override
     public void applyCredentialsFilter(OkHttpClient.Builder clientBuilder) {
-        clientBuilder.addInterceptor(new AzureTokenCredentialsInterceptor(this));
+        try {
+            super.applyCredentialsFilter(clientBuilder);
+        } catch (Exception ex) {
+            LOGGER.warning(ex.getMessage());
+        }
     }
 }

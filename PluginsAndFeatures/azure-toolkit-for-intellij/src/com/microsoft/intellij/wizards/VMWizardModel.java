@@ -29,7 +29,7 @@ import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
-import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.network.PublicIPAddress;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
@@ -58,7 +58,7 @@ public class VMWizardModel extends WizardModel {
     private com.microsoft.tooling.msservices.model.storage.StorageAccount newStorageAccount;
     private boolean withNewStorageAccount;
     //    private String availabilitySet;
-    private PublicIpAddress publicIpAddress;
+    private PublicIPAddress publicIpAddress;
     private boolean withNewPip;
     private NetworkSecurityGroup networkSecurityGroup;
     private AvailabilitySet availabilitySet;
@@ -249,11 +249,11 @@ public class VMWizardModel extends WizardModel {
         this.withNewStorageAccount = withNewStorageAccount;
     }
 
-    public PublicIpAddress getPublicIpAddress() {
+    public PublicIPAddress getPublicIpAddress() {
         return publicIpAddress;
     }
 
-    public void setPublicIpAddress(PublicIpAddress publicIpAddress) {
+    public void setPublicIpAddress(PublicIPAddress publicIpAddress) {
         this.publicIpAddress = publicIpAddress;
     }
 

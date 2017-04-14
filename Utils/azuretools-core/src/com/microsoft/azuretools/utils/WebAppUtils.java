@@ -575,7 +575,7 @@ public class WebAppUtils {
         public AppServicePlan appServicePlan;
         public String appServicePlanNameCreateNew;
         public Location appServicePlanLocationCreateNew;
-        public AppServicePricingTier appServicePricingTierCreateNew;
+        public PricingTier appServicePricingTierCreateNew;
 
         public String jdk3PartyUrl;
         public String jdkOwnUrl;
@@ -595,28 +595,48 @@ public class WebAppUtils {
 
         Azure azure = azureManager.getAzure(model.subscriptionDetail.getSubscriptionId());
         WebApp.DefinitionStages.Blank definitionStages = azure.webApps().define(model.webAppName);
-        WebApp.DefinitionStages.WithAppServicePlan ds1;
-
-        if (model.isResourceGroupCreateNew) {
-            ds1 = definitionStages.withNewResourceGroup(model.resourceGroupNameCreateNew);
-        } else {
-            ds1 = definitionStages.withExistingResourceGroup(model.resourceGroup);
-        }
-
-        WebAppBase.DefinitionStages.WithCreate<WebApp> ds2;
+//        WebApp.DefinitionStages.WithAppServicePlan ds1;
+        WebAppBase.DefinitionStages.WithCreate<WebApp> withCreate;
         if (model.isAppServicePlanCreateNew) {
-            ds2 = ds1.withNewAppServicePlan(model.appServicePlanNameCreateNew)
-                    .withRegion(model.appServicePlanLocationCreateNew.name())
-                    .withPricingTier(model.appServicePricingTierCreateNew);
+            WebApp.DefinitionStages.NewAppServicePlanWithGroup ds1 = definitionStages.withRegion(model.appServicePlanLocationCreateNew.name());
+            WebApp.DefinitionStages.WithNewAppServicePlan ds2;
+            if (model.isResourceGroupCreateNew) {
+                ds2 = ds1.withNewResourceGroup(model.resourceGroupNameCreateNew);
+            } else {
+                ds2 = ds1.withExistingResourceGroup(model.resourceGroup);
+            }
+            withCreate = ds2.withNewWindowsPlan(model.appServicePricingTierCreateNew);
         } else {
-            ds2 = ds1.withExistingAppServicePlan(model.appServicePlan);
+            WebApp.DefinitionStages.ExistingWindowsPlanWithGroup ds1 = definitionStages.withExistingWindowsPlan(model.appServicePlan);
+            if (model.isResourceGroupCreateNew) {
+                withCreate = ds1.withNewResourceGroup(model.resourceGroupNameCreateNew);
+            } else {
+                withCreate = ds1.withExistingResourceGroup(model.resourceGroup);
+            }
         }
-
         if (model.jdkDownloadUrl == null) { // no custom jdk
-            ds2 = ds2.withJavaVersion(JavaVersion.JAVA_8_NEWEST).withWebContainer(model.webContainer);
+            withCreate = withCreate.withJavaVersion(JavaVersion.JAVA_8_NEWEST).withWebContainer(model.webContainer);
         }
 
-        WebApp myWebApp = ds2.create();
+//        if (model.isResourceGroupCreateNew) {
+//            ds1 = definitionStages.withNewResourceGroup(model.resourceGroupNameCreateNew);
+//        } else {
+//            ds1 = definitionStages.withExistingResourceGroup(model.resourceGroup);
+//        }
+
+//        if (model.isAppServicePlanCreateNew) {
+//            ds2 = ds1.withNewAppServicePlan(model.appServicePlanNameCreateNew)
+//                    .withRegion(model.appServicePlanLocationCreateNew.name())
+//                    .withPricingTier(model.appServicePricingTierCreateNew);
+//        } else {
+//            ds2 = ds1.withExistingAppServicePlan(model.appServicePlan);
+//        }
+
+//        if (model.jdkDownloadUrl == null) { // no custom jdk
+//            ds2 = ds2.withJavaVersion(JavaVersion.JAVA_8_NEWEST).withWebContainer(model.webContainer);
+//        }
+
+        WebApp myWebApp = withCreate.create();
 
         if (model.jdkDownloadUrl != null ) {
             progressIndicator.setText("Deploying custom jdk...");

@@ -184,8 +184,8 @@ public class AzureModelController {
                 return Observable.create(new Observable.OnSubscribe<RgDepParams>() {
                     @Override
                     public void call(Subscriber<? super RgDepParams> subscriber) {
-                        List<WebApp> wal = azure.webApps().listByGroup(rg.name());
-                        List<AppServicePlan> aspl = azure.appServices().appServicePlans().listByGroup(rg.name());
+                        List<WebApp> wal = azure.webApps().listByResourceGroup(rg.name());
+                        List<AppServicePlan> aspl = azure.appServices().appServicePlans().listByResourceGroup(rg.name());
                         subscriber.onNext(new RgDepParams(rg, wal, aspl));
                         subscriber.onCompleted();
                     }

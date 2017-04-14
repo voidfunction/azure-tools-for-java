@@ -31,7 +31,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.azure.management.appservice.AppServicePlan;
-import com.microsoft.azure.management.appservice.AppServicePricingTier;
+import com.microsoft.azure.management.appservice.PricingTier;
 import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
@@ -502,7 +502,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
 
     protected void fillAppServicePlanPricingTiers() {
         try {
-            DefaultComboBoxModel<AppServicePricingTier> cbModel = createComboboxModelFromClassFields(AppServicePricingTier.class);
+            DefaultComboBoxModel<PricingTier> cbModel = createComboboxModelFromClassFields(PricingTier.class);
             comboBoxAppServicePlanPricingTier.setModel(cbModel);
 
         } catch (Exception ex) {
@@ -563,7 +563,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
 
             appServicePlanNameCreateNew = textFieldAppServicePlanName.getText().trim();
 
-            AppServicePricingTier appServicePricingTier = (AppServicePricingTier) comboBoxAppServicePlanPricingTier.getModel().getSelectedItem();
+            PricingTier appServicePricingTier = (PricingTier) comboBoxAppServicePlanPricingTier.getModel().getSelectedItem();
             appServicePricingTierCreateNew = appServicePricingTier == null ? null : appServicePricingTier;
 
             LocationAdapter loca = (LocationAdapter) comboBoxAppServicePlanLocation.getModel().getSelectedItem();

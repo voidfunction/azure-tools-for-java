@@ -48,7 +48,7 @@ import com.microsoft.azure.management.network.Network;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.model.vm.VirtualNetwork;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
-import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.network.PublicIPAddress;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.SkuName;
@@ -91,7 +91,7 @@ public class SettingsStep extends WizardPage {
     private List<Network> virtualNetworks;
 
     private Map<String, StorageAccount> storageAccounts;
-    private List<PublicIpAddress> publicIpAddresses;
+    private List<PublicIPAddress> publicIpAddresses;
     private List<NetworkSecurityGroup> networkSecurityGroups;
     private List<AvailabilitySet> availabilitySets;
 
@@ -419,7 +419,7 @@ public class SettingsStep extends WizardPage {
 			@Override
 			public void run() {
                 if (publicIpAddresses == null) {
-                    publicIpAddresses = wizard.getAzure().publicIpAddresses().list();
+                    publicIpAddresses = wizard.getAzure().publicIPAddresses().list();
                 }
                 DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
 					@Override
@@ -427,7 +427,7 @@ public class SettingsStep extends WizardPage {
 						pipCombo.removeAll();
 						pipCombo.add(NONE);
 						pipCombo.add(CREATE_NEW);
-						for (PublicIpAddress pip : filterPip()) {
+						for (PublicIPAddress pip : filterPip()) {
 							pipCombo.add(pip.name());
 							pipCombo.setData(pip.name(), pip);
 						}
@@ -446,8 +446,8 @@ public class SettingsStep extends WizardPage {
                     wizard.setWithNewPip(true);
                     wizard.setPublicIpAddress(null);
 //                    showNewPipForm();
-                } else if (pipCombo.getData(pipCombo.getText()) instanceof PublicIpAddress) {
-                    wizard.setPublicIpAddress((PublicIpAddress) pipCombo.getData(pipCombo.getText()));
+                } else if (pipCombo.getData(pipCombo.getText()) instanceof PublicIPAddress) {
+                    wizard.setPublicIpAddress((PublicIPAddress) pipCombo.getData(pipCombo.getText()));
                     wizard.setWithNewPip(false);
                 }
 			}
@@ -465,10 +465,10 @@ public class SettingsStep extends WizardPage {
         }
     }
 
-    private Vector<PublicIpAddress> filterPip() {
-        Vector<PublicIpAddress> filteredPips = new Vector<>();
+    private Vector<PublicIPAddress> filterPip() {
+        Vector<PublicIPAddress> filteredPips = new Vector<>();
 
-        for (PublicIpAddress publicIpAddress : publicIpAddresses) {
+        for (PublicIPAddress publicIpAddress : publicIpAddresses) {
             // VM and public ip address need to be in the same region
             if (publicIpAddress.regionName().equals(wizard.getRegion().name())) {
                 filteredPips.add(publicIpAddress);

@@ -32,7 +32,7 @@ import com.microsoft.azure.management.compute.OperatingSystemTypes;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.network.Network;
-import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.network.PublicIPAddress;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.model.Creatable;
 import com.microsoft.azure.management.storage.AccessTier;
@@ -80,7 +80,7 @@ public class AzureSDKManager {
                                                       @NotNull String size, @NotNull String region, final VirtualMachineImage vmImage, Object knownImage, boolean isKnownImage,
                                                       final StorageAccount storageAccount, com.microsoft.tooling.msservices.model.storage.StorageAccount newStorageAccount, boolean withNewStorageAccount,
                                                       final Network network, VirtualNetwork newNetwork, boolean withNewNetwork,
-                                                      @NotNull String subnet, @Nullable PublicIpAddress pip, boolean withNewPip,
+                                                      @NotNull String subnet, @Nullable PublicIPAddress pip, boolean withNewPip,
                                                       @Nullable AvailabilitySet availabilitySet, boolean withNewAvailabilitySet,
                                                       @NotNull final String username, @Nullable final String password, @Nullable String publicKey) throws Exception {
         AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
@@ -103,7 +103,7 @@ public class AzureSDKManager {
             withNetwork = withGroup.withExistingResourceGroup(resourceGroup);
         }
         // ------ Virtual Network -----
-        VirtualMachine.DefinitionStages.WithPublicIpAddress withPublicIpAddress;
+        VirtualMachine.DefinitionStages.WithPublicIPAddress withPublicIpAddress;
         if (withNewNetwork) {
             Network.DefinitionStages.WithGroup networkWithGroup = azure.networks().define(newNetwork.name).withRegion(region);
             Creatable<Network> newVirtualNetwork;
@@ -116,29 +116,29 @@ public class AzureSDKManager {
                         .withAddressSpace(newNetwork.addressSpace)
                         .withSubnet(newNetwork.subnet.name, newNetwork.subnet.addressSpace);
             }
-            withPublicIpAddress = withNetwork.withNewPrimaryNetwork(newVirtualNetwork).withPrimaryPrivateIpAddressDynamic();
+            withPublicIpAddress = withNetwork.withNewPrimaryNetwork(newVirtualNetwork).withPrimaryPrivateIPAddressDynamic();
 //            withPublicIpAddress = withNetwork.withNewPrimaryNetwork("10.0.0.0/28").
 //                    .withPrimaryPrivateIpAddressDynamic();
         } else {
             withPublicIpAddress = withNetwork.withExistingPrimaryNetwork(network)
                     .withSubnet(subnet)
-                    .withPrimaryPrivateIpAddressDynamic();
+                    .withPrimaryPrivateIPAddressDynamic();
         }
         // ------ Public IP Address------
         VirtualMachine.DefinitionStages.WithOS withOS;
         if (pip == null) {
             if (withNewPip) {
-                withOS = withPublicIpAddress.withNewPrimaryPublicIpAddress(name + "pip");
+                withOS = withPublicIpAddress.withNewPrimaryPublicIPAddress(name + "pip");
             } else {
-                withOS = withPublicIpAddress.withoutPrimaryPublicIpAddress();
+                withOS = withPublicIpAddress.withoutPrimaryPublicIPAddress();
             }
         } else {
-            withOS = withPublicIpAddress.withExistingPrimaryPublicIpAddress(pip);
+            withOS = withPublicIpAddress.withExistingPrimaryPublicIPAddress(pip);
         }
         // ------ OS and credentials -----
         VirtualMachine.DefinitionStages.WithCreate withCreate;
         if (isWindows) {
-            VirtualMachine.DefinitionStages.WithWindowsAdminUsername withWindowsAdminUsername;
+            VirtualMachine.DefinitionStages.WithWindowsAdminUsernameManagedOrUnmanaged withWindowsAdminUsername;
             if (isKnownImage) {
                 withWindowsAdminUsername = withOS.withPopularWindowsImage((KnownWindowsVirtualMachineImage) knownImage);
             } else {
@@ -146,13 +146,13 @@ public class AzureSDKManager {
             }
             withCreate = withWindowsAdminUsername.withAdminUsername(username).withAdminPassword(password);
         } else {
-            VirtualMachine.DefinitionStages.WithLinuxRootPasswordOrPublicKey withLinuxRootPasswordOrPublicKey;
+            VirtualMachine.DefinitionStages.WithLinuxRootPasswordOrPublicKeyManagedOrUnmanaged withLinuxRootPasswordOrPublicKey;
             if (isKnownImage) {
                 withLinuxRootPasswordOrPublicKey = withOS.withPopularLinuxImage((KnownLinuxVirtualMachineImage) knownImage).withRootUsername(username);
             } else {
                 withLinuxRootPasswordOrPublicKey = withOS.withSpecificLinuxImageVersion(vmImage.imageReference()).withRootUsername(username);
             }
-            VirtualMachine.DefinitionStages.WithLinuxCreate withLinuxCreate;
+            VirtualMachine.DefinitionStages.WithLinuxCreateManagedOrUnmanaged withLinuxCreate;
             // we assume either password or public key is not empty
             if (password != null && !password.isEmpty()) {
                 withLinuxCreate = withLinuxRootPasswordOrPublicKey.withRootPassword(password);

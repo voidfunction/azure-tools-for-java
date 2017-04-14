@@ -26,7 +26,7 @@ import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
-import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.network.PublicIPAddress;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
@@ -77,7 +77,7 @@ public class CreateVMWizard extends Wizard {
 	private StorageAccount storageAccount;
     private com.microsoft.tooling.msservices.model.storage.StorageAccount newStorageAccount;
     private boolean withNewStorageAccount;
-    private PublicIpAddress publicIpAddress;
+    private PublicIPAddress publicIpAddress;
     private boolean withNewPip;
     private AvailabilitySet availabilitySet;
     private boolean withNewAvailabilitySet;
@@ -341,11 +341,11 @@ public class CreateVMWizard extends Wizard {
 		this.withNewStorageAccount = withNewStorageAccount;
 	}
 
-	public PublicIpAddress getPublicIpAddress() {
+	public PublicIPAddress getPublicIpAddress() {
 		return publicIpAddress;
 	}
 
-	public void setPublicIpAddress(PublicIpAddress publicIpAddress) {
+	public void setPublicIpAddress(PublicIPAddress publicIpAddress) {
 		this.publicIpAddress = publicIpAddress;
 	}
 
