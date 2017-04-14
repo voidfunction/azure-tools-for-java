@@ -19,6 +19,8 @@
     </orderEntry>
     <orderEntry type="module" module-name="common" />
     <orderEntry type="module" module-name="hdinsight-node-common" exported="" />
+    <orderEntry type="module" module-name="azuretools-core" exported="" />
+    <orderEntry type="module" module-name="azure-explorer-common" />
   </component>
   <component name="POM File Configuration" pomFile="" />
 </module>
