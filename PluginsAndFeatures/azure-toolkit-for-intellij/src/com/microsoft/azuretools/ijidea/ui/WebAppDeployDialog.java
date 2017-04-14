@@ -192,7 +192,7 @@ public class WebAppDeployDialog extends DialogWrapper {
             public void run() {
                 fillTable();
             }
-        }, ModalityState.any());
+        }, ModalityState.stateForComponent(contentPane));
     }
 
     protected WebAppDeployDialog(Project project, Artifact artifact) {
@@ -436,7 +436,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                                     AzureModelController.removeWebAppFromResourceGroup(wad.resourceGroup, wad.webApp);
                                     editorPaneAppServiceDetails.setText("");
                                 }
-                            }, ModalityState.any());
+                            });
 
 
                         } catch (Exception ex) {
@@ -447,7 +447,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                                 public void run() {
                                     ErrorWindow.show(project, ex.getMessage(), "Delete App Service Error");
                                 }
-                            }, ModalityState.any());
+                            });
 
                         }
                     }
@@ -575,7 +575,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                         public void run() {
                             ErrorWindow.show(project, ex.getMessage(), "Deploy Web App Error");
                         }
-                    }, ModalityState.any());
+                    });
                 }
             }
         });

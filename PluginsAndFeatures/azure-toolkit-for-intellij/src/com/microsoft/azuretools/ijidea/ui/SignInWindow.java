@@ -23,7 +23,6 @@
 package com.microsoft.azuretools.ijidea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -210,7 +209,7 @@ public class SignInWindow extends DialogWrapper {
                             public void run() {
                                 ErrorWindow.show(project, ex.getMessage(), "Sign In Error");
                             }
-                        }, ModalityState.any());
+                        });
                     }
                 }
             }
@@ -262,7 +261,7 @@ public class SignInWindow extends DialogWrapper {
                             public void run() {
                                 ErrorWindow.show(project, ex.getMessage(), "Load Subscription Error");
                             }
-                        }, ModalityState.any());
+                        });
 
                     }
                 }

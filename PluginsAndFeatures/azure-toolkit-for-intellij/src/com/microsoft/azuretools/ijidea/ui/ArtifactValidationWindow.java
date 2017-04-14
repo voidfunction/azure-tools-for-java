@@ -32,7 +32,6 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
 import java.awt.*;
-import java.awt.event.*;
 import java.net.URI;
 import java.util.List;
 

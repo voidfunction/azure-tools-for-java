@@ -23,9 +23,7 @@
 package com.microsoft.azuretools.ijidea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -124,7 +122,7 @@ public class AppServiceChangeSettingsDialog extends AppServiceCreateDialog {
                         public void run() {
                             superDoOKAction();
                         }
-                    }, ModalityState.any());
+                    });
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     // TODO: show error message
@@ -134,7 +132,7 @@ public class AppServiceChangeSettingsDialog extends AppServiceCreateDialog {
                         public void run() {
                             ErrorWindow.show(project, ex.getMessage(), "Create App Service Error");
                         }
-                    }, ModalityState.any());
+                    });
                 }
             }
         });

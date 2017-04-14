@@ -23,9 +23,7 @@
 package com.microsoft.azuretools.ijidea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -35,10 +33,8 @@ import com.intellij.openapi.ui.ValidationInfo;
 import com.microsoft.azure.management.appservice.AppServicePlan;
 import com.microsoft.azure.management.appservice.AppServicePricingTier;
 import com.microsoft.azure.management.appservice.WebApp;
-import com.microsoft.azure.management.appservice.WebContainer;
 import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azuretools.adauth.AuthException;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.azuretools.ijidea.utility.UpdateProgressIndicator;
@@ -368,7 +364,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
                             public void run() {
                                 doCancelAction();
                             }
-                        }, ModalityState.any());
+                        });
                     }
 
                     AzureModelController.updateSubscriptionMaps(new UpdateProgressIndicator(progressIndicator));
@@ -378,7 +374,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
                         public void run() {
                             doFillSubscriptions();
                         }
-                    }, ModalityState.any());
+                    });
 
 
                 } catch (CanceledByUserException e) {
@@ -752,7 +748,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
                         public void run() {
                             superDoOKAction();
                         }
-                    }, ModalityState.any());
+                    });
                 } catch (IOException ex) {
                     ex.printStackTrace();
                     // TODO: show error message
@@ -762,7 +758,7 @@ public class AppServiceCreateDialog extends DialogWrapper {
                         public void run() {
                             ErrorWindow.show(project, ex.getMessage(), "Create App Service Error");
                         }
-                    }, ModalityState.any());
+                    });
                 } catch (InterruptedException | AzureCmdException | WebAppUtils.WebAppException ex) {
                     ex.printStackTrace();
                     LOGGER.error("run@Progress@doOKAction@@AppServiceCreateDialog", ex);

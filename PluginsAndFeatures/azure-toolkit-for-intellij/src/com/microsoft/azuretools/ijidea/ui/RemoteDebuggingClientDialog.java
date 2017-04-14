@@ -1,7 +1,6 @@
 package com.microsoft.azuretools.ijidea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -335,7 +334,7 @@ public class RemoteDebuggingClientDialog  extends DialogWrapper {
                         public void run() {
                             ErrorWindow.show(project, ex.getMessage(), title + "Error");
                         }
-                    }, ModalityState.any());
+                    });
                     try {
                         worker.rollBack(progressIndicator);
                     } catch (Exception ex1) {

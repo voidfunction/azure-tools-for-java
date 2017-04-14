@@ -39,7 +39,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -135,7 +134,7 @@ public class SrvPriCreationStatusDialog extends DialogWrapper {
                 ActionRunner task = new ActionRunner(project);
                 task.queue();
             }
-        }, ModalityState.any());
+        }, ModalityState.stateForComponent(contentPane));
     }
 
     private class ActionRunner extends Task.Modal implements IListener<Status> {
@@ -157,7 +156,7 @@ public class SrvPriCreationStatusDialog extends DialogWrapper {
                             statusTableModel.addRow(new Object[] {"=== Canceled by user", null, null});
                             statusTableModel.fireTableDataChanged();
                         }
-                    }, ModalityState.any());
+                    });
                     return;
                 }
                 List <String> sidList = tidSidsMap.get(tid);
@@ -170,7 +169,7 @@ public class SrvPriCreationStatusDialog extends DialogWrapper {
                                 statusTableModel.addRow(new Object[] {"tenant ID: " + tid + " ===", null, null});
                                 statusTableModel.fireTableDataChanged();
                             }
-                        }, ModalityState.any());
+                        });
                         Date now = new Date();
                         String suffix = new SimpleDateFormat("yyyyMMddHHmmss").format(now);;
                         final String authFilepath = SrvPriManager.createSp(tid, sidList, suffix, this, destinationFolder);
@@ -188,7 +187,7 @@ public class SrvPriCreationStatusDialog extends DialogWrapper {
                                     filesListModel.addElement(authFilepath);
                                     filesList.setSelectedIndex(0);
                                 }
-                            }, ModalityState.any());
+                            });
                         }
                     } catch (Exception ex) {
                         LOGGER.error("ActionRunner", ex);
@@ -208,7 +207,7 @@ public class SrvPriCreationStatusDialog extends DialogWrapper {
                     statusTableModel.addRow(new Object[] {status.getAction(), status.getResult(), status.getDetails()});
                     statusTableModel.fireTableDataChanged();
                 }
-            }, ModalityState.any());
+            });
         }
     }
 
