@@ -109,6 +109,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                 final boolean isNewGroup = createNewRadioButton.isSelected();
                 resourceGrpField.setEnabled(isNewGroup);
                 resourceGrpCombo.setEnabled(!isNewGroup);
+                validateEmptyFields();
             }
         };
         createNewRadioButton.addItemListener(updateListener);
