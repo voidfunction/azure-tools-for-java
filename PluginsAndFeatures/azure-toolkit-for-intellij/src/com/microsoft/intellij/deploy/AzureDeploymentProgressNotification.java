@@ -209,7 +209,7 @@ public final class AzureDeploymentProgressNotification {
             notifyProgress(descriptionTask, startDate, null, 95, msg);
             if (AzureDockerUtils.DEBUG) System.out.println("Refreshing docker hosts: " + new Date().toString());
 //            dockerManager.refreshDockerHostDetails();
-            VirtualMachine vm = azureClient.virtualMachines().getByGroup(dockerImageInstance.host.hostVM.resourceGroupName, dockerImageInstance.host.hostVM.name);
+            VirtualMachine vm = azureClient.virtualMachines().getByResourceGroup(dockerImageInstance.host.hostVM.resourceGroupName, dockerImageInstance.host.hostVM.name);
             if (vm != null) {
                 DockerHost updatedHost = AzureDockerVMOps.getDockerHost(vm, dockerManager.getDockerVaultsMap());
                 if (updatedHost != null) {
