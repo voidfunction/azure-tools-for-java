@@ -26,6 +26,7 @@ import java.util.Objects;
 public class AzureDockerCertVault {
   public String name;                   // Azure Key Vault's name
   public String uri;                    // Azure Key Vault's uri
+  public String id;                     // Azure Key Vault's id
   public String hostName;               // name of the dockerHost (Docker dockerHost) to store the credentials for
   public String resourceGroupName;      // Azure resource group where to create the vault
   public String region;                 // Azure location where to create the vault
@@ -50,6 +51,7 @@ public class AzureDockerCertVault {
   public AzureDockerCertVault(AzureDockerCertVault otherVault) {
     this.name = otherVault.name;
     this.uri = otherVault.uri;
+    this.id = otherVault.id;
     this.hostName = otherVault.hostName;
     this.resourceGroupName = otherVault.resourceGroupName;
     this.region = otherVault.region;
@@ -70,6 +72,7 @@ public class AzureDockerCertVault {
 
   public boolean equalsTo(AzureDockerCertVault otherVault) {
     return Objects.equals(this.name, otherVault.name) &&
+        Objects.equals(this.id, otherVault.id) &&
         Objects.equals(this.hostName, otherVault.hostName) &&
         Objects.equals(this.resourceGroupName, otherVault.resourceGroupName) &&
         Objects.equals(this.region, otherVault.region) &&

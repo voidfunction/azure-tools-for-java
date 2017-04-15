@@ -303,9 +303,6 @@ public class AzureDockerUtils {
                   dockerSubscription.tid = subscriptionDetail.getTenantId();
                   dockerSubscription.name = subscriptionDetail.getSubscriptionName();
                   dockerSubscription.azureClient = azureAuthManager.getAzure(dockerSubscription.id);
-//                  // TODO: temporary work around for registering the namespaces
-//                  AzureRegisterProviderNamespaces.registerAzureNamespaces(dockerSubscription.azureClient);
-
                   dockerSubscription.keyVaultClient = azureAuthManager.getKeyVaultClient(subscriptionDetail.getTenantId());
                   dockerSubscription.isSelected = true;
                   if (AzureDockerUtils.hasServicePrincipalAzureManager(azureAuthManager)) {
@@ -364,9 +361,6 @@ public class AzureDockerUtils {
           for (Vault vault : dockerSubscription.azureClient.vaults().listByResourceGroup(group.name())) {
             if (DEBUG) System.out.format("\tGet AzureDockerHostsManage Docker vault: %s at %s\n", vault.name(), new Date().toString());
 
-            // TODO: clean the work around for bug with getting vault props for a listed vault
-            vault = dockerSubscription.azureClient.vaults().getById(vault.id());
-
             if (vault.tags().get("dockerhost") != null) {
               if (DEBUG) System.out.format("\t\t...adding Docker vault: %s at %s\n", vault.name(), new Date().toString());
               vaults.put(vault.name(), new Pair<>(vault, dockerSubscription.keyVaultClient));
@@ -406,6 +400,7 @@ public class AzureDockerUtils {
                 try {
                   AzureDockerCertVault certVault = new AzureDockerCertVault();
                   certVault.name = vaultWithInner.name();
+                  certVault.id = vaultWithInner.id();
                   certVault.resourceGroupName = vaultWithInner.resourceGroupName();
                   certVault.userId = dockerSubscription.userId;
                   certVault.servicePrincipalId = dockerSubscription.servicePrincipalId;
