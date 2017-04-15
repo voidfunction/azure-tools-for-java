@@ -30,9 +30,11 @@ public class AzureInputDockerLoginCredsDialog extends DialogWrapper {
 
     loginPanel = new AzureDockerHostUpdateLoginPanel(project, editableHost, dockerManager, this);
     loginPanel.dockerHostAutoSshRadioButton.setVisible(resetCredentials);
+    loginPanel.dockerHostSecondPwdLabel.setVisible(resetCredentials);
+    loginPanel.dockerHostSecondPwdField.setVisible(resetCredentials);
 
     init();
-    setTitle(resetCredentials ? "Update Log In Credentials" : "Enter Log In Credentials");
+    setTitle("Docker Host Log In Credentials");
   }
 
   @Nullable
@@ -62,7 +64,7 @@ public class AzureInputDockerLoginCredsDialog extends DialogWrapper {
     try {
       if (loginPanel.doValidate(true) == null) {
         if (editableHost.originalDockerHost.hasKeyVault &&
-            !DefaultLoader.getUIHelper().showConfirmation(String.format("We've detected that the selected host's login credentials are currently loaded from an Azure Key Vault. Reseting them will remove this association and will require to enter the credentials manually.\n\n Do you want to proceed with this update?"),
+            !DefaultLoader.getUIHelper().showConfirmation("We've detected that the selected host's login credentials are currently loaded from an Azure Key Vault. Reseting them will remove this association and will require to enter the credentials manually.\n\n Do you want to proceed with this update?",
             "Removing Key Vault Association", new String[]{"Yes", "No"},null)) {
           return;
         } else {

@@ -24,6 +24,7 @@ package com.microsoft.azure.docker.ops;
 import com.fasterxml.jackson.databind.*;
 import com.jcraft.jsch.Session;
 import com.microsoft.azure.docker.model.*;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import java.util.*;
 
@@ -31,6 +32,7 @@ import static com.microsoft.azure.docker.ops.utils.AzureDockerUtils.DEBUG;
 import static com.microsoft.azure.docker.ops.utils.AzureDockerVMSetupScriptsForUbuntu.DEFAULT_DOCKER_IMAGES_DIRECTORY;
 
 public class AzureDockerImageOps {
+  public static final String CMD_SUCCESS = "exit-status: 0";
 
   public static void delete(DockerImage dockerImage, Session session) {
     if (dockerImage == null || session == null) {
@@ -52,6 +54,11 @@ public class AzureDockerImageOps {
       if (DEBUG) System.out.format("Start executing docker rmi %s\n", dockerImage.name);
       String cmdOut1 = AzureDockerSSHOps.executeCommand("docker rmi " + dockerImage.name, session, true);
       if (DEBUG) System.out.println(cmdOut1);
+      if (!cmdOut1.contains(CMD_SUCCESS)) {
+        String title = "Docker Image Error";
+        String msg = String.format("Docker image %s failed to delete: %s", dockerImage.name, cmdOut1);
+        DefaultLoader.getUIHelper().showError(msg, title);
+      }
       if (DEBUG) System.out.format("Done executing docker rmi %s\n", dockerImage.name);
 
       if (DEBUG) System.out.format("Start executing rm -f -r %s/%s\n", DEFAULT_DOCKER_IMAGES_DIRECTORY, dockerImage.name);
@@ -77,6 +84,12 @@ public class AzureDockerImageOps {
       String cmd1 = String.format("docker build -t %s -f %s/Dockerfile %s/ \n", dockerImage.name, dockerImageDir, dockerImageDir);
       if (DEBUG) System.out.format("Start executing: %s\n", cmd1);
       String cmdOut1 = AzureDockerSSHOps.executeCommand(cmd1, session, true);
+      if (!cmdOut1.contains(CMD_SUCCESS)) {
+        String title = "Docker Image Error";
+        String msg = String.format("Docker image %s failed to create: %s", dockerImage.name, cmdOut1);
+        DefaultLoader.getUIHelper().showError(msg, title);
+        return null;
+      }
       if (DEBUG) System.out.println(cmdOut1);
       if (DEBUG) System.out.format("Done executing: %s\n", cmd1);
 
@@ -108,10 +121,12 @@ public class AzureDockerImageOps {
     if (dockerImageInstance.host.dockerImages == null) {
       dockerImageInstance.host.dockerImages = new HashMap<>();
     }
-    dockerImageInstance.host.dockerImages.put(dockerImage.name, dockerImage);
+    if (dockerImage != null && dockerImage.name != null) {
+      dockerImageInstance.host.dockerImages.put(dockerImage.name, dockerImage);
 
-    dockerImageInstance.id = dockerImage.id;
-    dockerImageInstance.remotePath = dockerImage.remotePath;
+      dockerImageInstance.id = dockerImage.id;
+      dockerImageInstance.remotePath = dockerImage.remotePath;
+    }
 
     return dockerImageInstance;
   }

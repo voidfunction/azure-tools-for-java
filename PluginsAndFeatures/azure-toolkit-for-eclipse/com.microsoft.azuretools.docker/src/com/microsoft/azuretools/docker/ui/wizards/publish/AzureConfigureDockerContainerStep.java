@@ -71,6 +71,8 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 	private AzureDockerHostsManager dockerManager;
 	private AzureDockerImageInstance dockerImageDescription;
 	private AzureSelectDockerWizard wizard;
+	private String hostAppPortSettings;
+	private String hostDebugPortSettings;
 
 	/**
 	 * Create the wizard.
@@ -82,6 +84,10 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 		this.dockerManager = wizard.getDockerManager();
 		this.dockerImageDescription = wizard.getDockerImageInstance();
 		this.project = wizard.getProject();
+		
+		int randomPort = new Random().nextInt(10000); // default to host port 2xxxx and 5xxxx (debug)
+		hostAppPortSettings = String.format("%d", 20000 + randomPort);
+		hostDebugPortSettings = String.format("%d", 50000 + randomPort);
 
 		setTitle("Configure the Docker container to be created");
 		setDescription("");
@@ -358,16 +364,15 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 	}
 	
 	private String getDefaultPortMapping(KnownDockerImages knownImage) {
-		int randomPort = new Random().nextInt(10000); // default to host port 2xxxx and 5xxxx (debug)
 		if (knownImage == null) {
-			return String.format("2%04d:80", randomPort);
+			return String.format("%s:80", hostAppPortSettings);
 		}
 		if (knownImage.getDebugPortSettings() != null && !knownImage.getDebugPortSettings().isEmpty()) {
 			// TODO: add JVM port mapping
-			return String.format("2%04d:%s 5%04d:%s", randomPort, knownImage.getPortSettings(), randomPort,
+			return String.format("%s:%s %s:%s", hostAppPortSettings, knownImage.getPortSettings(), hostDebugPortSettings,
 					knownImage.getDebugPortSettings());
 		} else {
-			return String.format("2%04d:%s", randomPort, knownImage.getPortSettings());
+			return String.format("%s:%s", hostAppPortSettings, knownImage.getPortSettings());
 		}
 	}
 

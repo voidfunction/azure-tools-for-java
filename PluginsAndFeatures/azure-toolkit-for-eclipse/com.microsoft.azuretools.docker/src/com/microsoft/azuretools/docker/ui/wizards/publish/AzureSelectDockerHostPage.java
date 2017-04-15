@@ -257,6 +257,8 @@ public class AzureSelectDockerHostPage extends WizardPage {
 			public void modifyText(ModifyEvent event) {
 				if (AzureDockerValidationUtils.validateDockerArtifactPath(((Text) event.getSource()).getText())) {
 					errDispatcher.removeMessage("dockerArtifactPathTextField", dockerArtifactPathTextField);
+					String artifactFileName = new File(((Text) event.getSource()).getText()).getName();
+					wizard.setPredefinedDockerfileOptions(artifactFileName);
 					setErrorMessage(null);
 					setPageComplete(doValidate());
 				} else {
@@ -279,6 +281,8 @@ public class AzureSelectDockerHostPage extends WizardPage {
 					return;
 				}
 				dockerArtifactPathTextField.setText(path);
+				String artifactFileName = new File(path).getName();
+				wizard.setPredefinedDockerfileOptions(artifactFileName);
 				setPageComplete(doValidate());
 			}
 		});
@@ -493,7 +497,7 @@ public class AzureSelectDockerHostPage extends WizardPage {
 	
 	private void refreshDockerHostsTable(Composite mainContainer) {
 		dockerHostsList.clear();
-		// TODO: real Docker Hosts list goes here
+
 		for (DockerHost host : dockerManager.getDockerHostsList()) {
 			dockerHostsList.add(host);
 		}
@@ -569,7 +573,6 @@ public class AzureSelectDockerHostPage extends WizardPage {
 		    }
 			dockerImageDescription.artifactPath = artifactPath;		    
 			dockerImageDescription.hasRootDeployment = artifactFileName.toLowerCase().matches(".*.jar");
-			wizard.setPredefinedDockerfileOptions(artifactFileName);
 			errDispatcher.removeMessage("dockerArtifactPathTextField", dockerArtifactPathTextField);
 			setErrorMessage(null);
 		}

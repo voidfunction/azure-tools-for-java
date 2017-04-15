@@ -575,9 +575,11 @@ public class AzureSelectDockerHostStep extends AzureSelectDockerWizardStep {
         model.getSelectDockerWizardDialog().DialogShaker(info);
       return info;
     }
-    dockerImageDescription.artifactPath = artifactFilePath;
-    dockerImageDescription.hasRootDeployment = artifactFileName.toLowerCase().matches(".*.jar");
-    model.setPredefinedDockerfileOptions(artifactFileName);
+    if (dockerImageDescription.artifactPath == null || artifactFilePath == null || !dockerImageDescription.artifactPath.equals(artifactFilePath)) {
+      dockerImageDescription.artifactPath = artifactFilePath;
+      dockerImageDescription.hasRootDeployment = artifactFileName.toLowerCase().matches(".*.jar");
+      model.setPredefinedDockerfileOptions(artifactFileName);
+    }
 
     if (dockerHostsTableSelection == null && !dockerImageDescription.hasNewDockerHost){
       ValidationInfo info = new ValidationInfo("Please check a Docker host or create a new", dockerHostsTable);
