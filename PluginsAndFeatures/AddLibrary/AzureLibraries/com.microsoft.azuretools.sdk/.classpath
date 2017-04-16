@@ -12,20 +12,20 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/azure-client-runtime-1.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/azure-keyvault-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/azure-keyvault-webkey-1.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-appservice-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-batch-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-cdn-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-compute-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-dns-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-graph-rbac-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-keyvault-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-network-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-redis-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-resources-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-servicebus-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-sql-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-storage-1.0.0-beta6-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-trafficmanager-1.0.0-beta6-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-appservice-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-batch-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-cdn-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-compute-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-dns-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-graph-rbac-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-keyvault-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-network-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-redis-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-resources-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-servicebus-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-sql-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-storage-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/azure-mgmt-trafficmanager-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/azure-storage-4.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/client-runtime-1.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-codec-1.10.jar"/>
@@ -60,7 +60,7 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/retrofit-2.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/rxjava-1.2.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.12.jar"/>
-	<classpathentry exported="true" kind="lib" path="azure-1.0.0-beta6-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="azure-1.0.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="target/classes"/>

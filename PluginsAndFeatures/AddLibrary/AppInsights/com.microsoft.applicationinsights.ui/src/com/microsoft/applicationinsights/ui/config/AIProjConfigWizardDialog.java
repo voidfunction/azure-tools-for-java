@@ -509,7 +509,7 @@ public class AIProjConfigWizardDialog extends TitleAreaDialog {
 
 			// Get the SDK jar.
 			URL sdkJar = FileLocator.find(bundle, new Path(
-					"azure-1.0.0-beta4.1.jar"), null);
+					"azure-1.0.0.jar"), null);
 			URL resSdkJar = null;
 			IClasspathAttribute[] attr = null;
 			try {
@@ -525,7 +525,7 @@ public class AIProjConfigWizardDialog extends TitleAreaDialog {
 					URL bundleLoc = new URL(bundle.getLocation());
 					StringBuffer strBfr = new StringBuffer(bundleLoc.getPath());
 					strBfr.append(File.separator)
-							.append("azure-1.0.0-beta4.1.jar");
+							.append("azure-1.0.0.jar");
 					URL jarLoc = new URL(strBfr.toString());
 					IPath jarPath = new Path(FileLocator.resolve(jarLoc)
 							.getPath());
