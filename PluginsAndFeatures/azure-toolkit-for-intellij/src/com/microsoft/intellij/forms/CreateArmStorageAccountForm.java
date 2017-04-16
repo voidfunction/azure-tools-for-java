@@ -228,18 +228,10 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
                     indicator.setIndeterminate(true);
-                    boolean success = createStorageAccount();
-                    if (success) {
-                        ApplicationManager.getApplication().invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                close(DialogWrapper.OK_EXIT_CODE, true);
-                            }
-                        }, ModalityState.any());
-
-                    }
+                    createStorageAccount();
                 }
             });
+            close(DialogWrapper.OK_EXIT_CODE, true);
         } else { //creating from 'create vm'
             newStorageAccount =
                     new com.microsoft.tooling.msservices.model.storage.StorageAccount(nameTextField.getText(), subscription.getSubscriptionId());
