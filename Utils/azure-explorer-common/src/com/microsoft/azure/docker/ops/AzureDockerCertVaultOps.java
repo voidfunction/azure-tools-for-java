@@ -115,14 +115,17 @@ public class AzureDockerCertVaultOps {
       Vault vault = null;
 
       try {
-        // TODO
-        outerloop:
-        for (ResourceGroup group : azureClient.resourceGroups().list()) {
-          for (Vault vaultItem : azureClient.vaults().listByResourceGroup(group.name())) {
-            if (vaultItem.name().equals(certVault.name)) {
-              vault = azureClient.vaults().getByResourceGroup(vaultItem.resourceGroupName(), certVault.name);
-              break outerloop;
+        if (certVault.id != null) {
+          vault = azureClient.vaults().getById(certVault.id);
+        } else {
+          for (ResourceGroup group : azureClient.resourceGroups().list()) {
+            for (Vault vaultItem : azureClient.vaults().listByResourceGroup(group.name())) {
+              if (vaultItem.name().equals(certVault.name)) {
+                vault = vaultItem;
+                break;
+              }
             }
+            if (vault != null) break;
           }
         }
       } catch (CloudException e) {
@@ -135,10 +138,12 @@ public class AzureDockerCertVaultOps {
 
       if (vault == null) {
         // Vault does not exist so this is the create op
-        Vault.DefinitionStages.WithAccessPolicy withAccessPolicy = azureClient.vaults()
+        Vault.DefinitionStages.WithGroup withGroup = azureClient.vaults()
             .define(certVault.name)
-            .withRegion(certVault.region)
-            .withNewResourceGroup(certVault.resourceGroupName);
+            .withRegion(certVault.region);
+        Vault.DefinitionStages.WithAccessPolicy withAccessPolicy = certVault.resourceGroupName.contains("@") ?
+            withGroup.withExistingResourceGroup(certVault.resourceGroupName.split("@")[0]) :
+            withGroup.withNewResourceGroup(certVault.resourceGroupName);
 
         Vault.DefinitionStages.WithCreate withCreate = certVault.servicePrincipalId != null ?
             withAccessPolicy.defineAccessPolicy()
@@ -464,6 +469,7 @@ public class AzureDockerCertVaultOps {
     try {
       AzureDockerCertVault certVaultResult = getVault(azureClientSource, certVaultSource, keyVaultClient);
       certVaultResult.name = certVaultDest.name;
+      certVaultResult.id = certVaultDest.id;
       certVaultResult.resourceGroupName = certVaultDest.resourceGroupName;
       certVaultResult.region = certVaultDest.region;
       certVaultResult.userId = certVaultDest.userId;

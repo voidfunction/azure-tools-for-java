@@ -202,11 +202,10 @@ public class AzureInputDockerLoginCredsDialog extends TitleAreaDialog {
 	}
 	
 	private void initUIComponents(Composite mainContainer) {
+		setTitle("Docker Host Log In Credentials");
 		if (resetCredentials) {
-			setTitle("Reset Log In Credentials");
 			setMessage(String.format("Update %s with new log in credentials", editableDockerHost.originalDockerHost.name), IMessageProvider.INFORMATION);
 		} else {
-			setTitle("Enter Log In Credentials");
 			setMessage(String.format("Docker host %s log in credentials not found; enter your log in credentials", editableDockerHost.originalDockerHost.name), IMessageProvider.INFORMATION);
 		}
 
@@ -227,7 +226,7 @@ public class AzureInputDockerLoginCredsDialog extends TitleAreaDialog {
 		dockerHostUsernameTextField.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent event) {
-				if (AzureDockerValidationUtils.validateDockerHostUserName(((Text) event.getSource()).getText())) {
+				if (!resetCredentials || AzureDockerValidationUtils.validateDockerHostUserName(((Text) event.getSource()).getText())) {
 					errDispatcher.removeMessage("dockerHostUsernameTextField", dockerHostUsernameTextField);
 					setErrorMessage(null);
 					okButton.setEnabled(doValidate());
@@ -244,9 +243,12 @@ public class AzureInputDockerLoginCredsDialog extends TitleAreaDialog {
 			@Override
 			public void modifyText(ModifyEvent event) {
 				String text = ((Text) event.getSource()).getText();
-				if (text == null || text.isEmpty() || AzureDockerValidationUtils.validateDockerHostPassword(text)) {
+				if (text == null || text.isEmpty() || (!resetCredentials || AzureDockerValidationUtils.validateDockerHostPassword(text))) {
 					errDispatcher.removeMessage("dockerHostFirstPwdField", dockerHostFirstPwdField);
 					setErrorMessage(null);
+					if (!resetCredentials) {
+						dockerHostSecondPwdField.setText(text);
+					}
 					okButton.setEnabled(doValidate());
 				} else {
 					errDispatcher.addMessage("dockerHostFirstPwdField", AzureDockerValidationUtils.getDockerHostPasswordTip(), null, IMessageProvider.ERROR, dockerHostFirstPwdField);
@@ -256,6 +258,7 @@ public class AzureInputDockerLoginCredsDialog extends TitleAreaDialog {
 			}
 		});
 
+		dockerHostSecondPwdField.setVisible(resetCredentials);
 		dockerHostSecondPwdField.setToolTipText(AzureDockerValidationUtils.getDockerHostPasswordTip());
 		dockerHostSecondPwdField.addModifyListener(new ModifyListener() {
 			@Override
@@ -280,7 +283,11 @@ public class AzureInputDockerLoginCredsDialog extends TitleAreaDialog {
 			public void widgetSelected(SelectionEvent event) {
 				dockerHostImportSSHTextField.setEnabled(false);
 				dockerHostImportSSHBrowseButton.setEnabled(false);
-				AzureDockerCertVaultOps.copyVaultSshKeys(editableDockerHost.updatedDockerHost.certVault, editableDockerHost.originalDockerHost.certVault);
+				errDispatcher.removeMessage("dockerHostImportSSHTextField", dockerHostImportSSHTextField);
+				setErrorMessage(null);
+				if (editableDockerHost.originalDockerHost.hasSSHLogIn) {
+					AzureDockerCertVaultOps.copyVaultSshKeys(editableDockerHost.updatedDockerHost.certVault, editableDockerHost.originalDockerHost.certVault);
+				}
 				editableDockerHost.updatedDockerHost.hasSSHLogIn = editableDockerHost.originalDockerHost.hasSSHLogIn;
 				okButton.setEnabled(doValidate());
 			}
@@ -334,6 +341,8 @@ public class AzureInputDockerLoginCredsDialog extends TitleAreaDialog {
 			public void widgetSelected(SelectionEvent event) {
 				dockerHostImportSSHTextField.setEnabled(false);
 				dockerHostImportSSHBrowseButton.setEnabled(false);
+				errDispatcher.removeMessage("dockerHostImportSSHTextField", dockerHostImportSSHTextField);
+				setErrorMessage(null);			
 				AzureDockerCertVault certVault = AzureDockerCertVaultOps.generateSSHKeys(null, "SSH keys for " + editableDockerHost.updatedDockerHost.name);
 				AzureDockerCertVaultOps.copyVaultSshKeys(editableDockerHost.updatedDockerHost.certVault, certVault);
 				editableDockerHost.updatedDockerHost.hasSSHLogIn = true;
@@ -378,7 +387,7 @@ public class AzureInputDockerLoginCredsDialog extends TitleAreaDialog {
 
 	public boolean doValidate() {
 		String vmUsername = dockerHostUsernameTextField.getText();
-		if (vmUsername == null || vmUsername.isEmpty() || !AzureDockerValidationUtils.validateDockerHostUserName(vmUsername)) {
+		if (vmUsername == null || vmUsername.isEmpty() || (resetCredentials && !AzureDockerValidationUtils.validateDockerHostUserName(vmUsername))) {
 			errDispatcher.addMessage("dockerHostUsernameTextField", AzureDockerValidationUtils.getDockerHostUserNameTip(), null, IMessageProvider.ERROR, dockerHostUsernameTextField);
 			setErrorMessage("Invalid user name");
 			return false;
@@ -393,7 +402,7 @@ public class AzureInputDockerLoginCredsDialog extends TitleAreaDialog {
 		String vmPwd2 = dockerHostSecondPwdField.getText();
 		if (((dockerHostKeepSshRadioButton.getSelection() && !editableDockerHost.originalDockerHost.hasSSHLogIn) || 
 				(vmPwd1 != null && !vmPwd1.isEmpty()) || (vmPwd2 != null && !vmPwd2.isEmpty())) &&
-				(vmPwd1.isEmpty() || vmPwd2.isEmpty() || !vmPwd1.equals(vmPwd2) || !AzureDockerValidationUtils.validateDockerHostPassword(vmPwd1))) {
+				(vmPwd1.isEmpty() || vmPwd2.isEmpty() || !vmPwd1.equals(vmPwd2) || (resetCredentials && !AzureDockerValidationUtils.validateDockerHostPassword(vmPwd1)))) {
 			errDispatcher.addMessage("dockerHostFirstPwdField", AzureDockerValidationUtils.getDockerHostPasswordTip(), null, IMessageProvider.ERROR, dockerHostFirstPwdField);
 			setErrorMessage("Invalid password");
 			return false;
@@ -414,7 +423,7 @@ public class AzureInputDockerLoginCredsDialog extends TitleAreaDialog {
 		if (dockerHostImportSshRadioButton.getSelection()) {
 			String sshPath = dockerHostImportSSHTextField.getText();
 			if (sshPath == null || sshPath.isEmpty() || !AzureDockerValidationUtils.validateDockerHostSshDirectory(sshPath)) {
-				errDispatcher.addMessage("dockerHostImportSshRadioButton", AzureDockerValidationUtils.getDockerHostPasswordTip(), null, IMessageProvider.ERROR, dockerHostImportSshRadioButton);
+				errDispatcher.addMessage("dockerHostImportSSHTextField", AzureDockerValidationUtils.getDockerHostPasswordTip(), null, IMessageProvider.ERROR, dockerHostImportSSHTextField);
 				setErrorMessage("SSH key files not found in the specified directory");
 				return false;
 			} else {
@@ -423,13 +432,16 @@ public class AzureInputDockerLoginCredsDialog extends TitleAreaDialog {
 					AzureDockerCertVaultOps.copyVaultSshKeys(editableDockerHost.updatedDockerHost.certVault, certVault);
 					editableDockerHost.updatedDockerHost.hasSSHLogIn = true;
 				} catch (Exception e) {
-					errDispatcher.addMessage("dockerHostImportSshRadioButton", AzureDockerValidationUtils.getDockerHostPasswordTip(), null, IMessageProvider.ERROR, dockerHostImportSshRadioButton);
+					errDispatcher.addMessage("dockerHostImportSSHTextField", AzureDockerValidationUtils.getDockerHostPasswordTip(), null, IMessageProvider.ERROR, dockerHostImportSSHTextField);
 					setErrorMessage("Unexpected error reading SSH key files from specified directory: " + e.getMessage());
 					return false;
 				}
 				errDispatcher.removeMessage("dockerHostImportSSHTextField", dockerHostImportSSHTextField);
 				setErrorMessage(null);
 			}
+		} else {
+			errDispatcher.removeMessage("dockerHostImportSSHTextField", dockerHostImportSSHTextField);
+			setErrorMessage(null);			
 		}
 
 		return true;

@@ -7,6 +7,7 @@
         <artifict.name>${artifactId}-${version}.jar</artifict.name>
     </properties>
     <repositories>
+        <!--
         <repository>
             <id>ossrh</id>
             <name>Sonatype Snapshots</name>
@@ -16,6 +17,12 @@
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
             </snapshots>
+        </repository>
+        -->
+        <repository>
+            <id>commicrosoftazure-1688</id>
+            <name>commicrosoftazure-1688</name>
+            <url>http://oss.sonatype.org/service/local/repositories/commicrosoftazure-1688/content/</url>
         </repository>
     </repositories>
     <dependencyManagement>
@@ -154,7 +161,10 @@
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-mgmt-storage</artifactId>
+            <version>1.0.0</version>
+            <!--
             <version>1.0.0-beta6-SNAPSHOT</version>
+            -->
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

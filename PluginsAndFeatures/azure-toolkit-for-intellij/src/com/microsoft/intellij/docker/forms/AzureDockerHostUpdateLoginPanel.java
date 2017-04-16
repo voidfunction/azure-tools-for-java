@@ -56,6 +56,7 @@ public class AzureDockerHostUpdateLoginPanel {
   public JRadioButton dockerHostImportSshRadioButton;
   public TextFieldWithBrowseButton dockerHostImportSSHBrowseTextField;
   public JLabel dockerHostImportSSHBrowseLabel;
+  public JLabel dockerHostSecondPwdLabel;
   private ButtonGroup authSelectionGroup;
 
 
@@ -97,34 +98,32 @@ public class AzureDockerHostUpdateLoginPanel {
       @Override
       public boolean verify(JComponent input) {
         String text = dockerHostUsernameTextField.getText();
-        if (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostUserName(text)) {
+        if (text == null || text.isEmpty() || (dockerHostSecondPwdField.isVisible() && !AzureDockerValidationUtils.validateDockerHostUserName(text))) {
           dockerHostUsernameLabel.setVisible(true);
-          setDialogButtonsState(false);
           return false;
         } else {
           dockerHostUsernameLabel.setVisible(false);
-          setDialogButtonsState(doValidate(false) == null);
           return true;
         }
       }
     });
-    dockerHostUsernameTextField.getDocument().addDocumentListener(resetDialogButtonsState(null));
+//    dockerHostUsernameTextField.getDocument().addDocumentListener(resetDialogButtonsState(null));
     dockerHostFirstPwdField.setInputVerifier(new InputVerifier() {
       @Override
       public boolean verify(JComponent input) {
         String text = new String(dockerHostFirstPwdField.getPassword());
-        if (dockerHostFirstPwdField.getPassword().length > 0 && !text.isEmpty() && !AzureDockerValidationUtils.validateDockerHostPassword(text)) {
+        if (dockerHostFirstPwdField.getPassword().length > 0 && !text.isEmpty() && dockerHostSecondPwdField.isVisible() && !AzureDockerValidationUtils.validateDockerHostPassword(text)) {
           dockerHostFirstPwdLabel.setVisible(true);
-          setDialogButtonsState(false);
           return false;
         } else {
           dockerHostFirstPwdLabel.setVisible(false);
-          setDialogButtonsState(doValidate(false) == null);
+          if (!dockerHostSecondPwdField.isVisible()) {
+            dockerHostSecondPwdField.setText(text);
+          }
           return true;
         }
       }
     });
-    dockerHostFirstPwdField.getDocument().addDocumentListener(resetDialogButtonsState(null));
     dockerHostFirstPwdLabel.setVisible(false);
     dockerHostFirstPwdField.setToolTipText(AzureDockerValidationUtils.getDockerHostPasswordTip());
     dockerHostSecondPwdField.setInputVerifier(new InputVerifier() {
@@ -134,16 +133,13 @@ public class AzureDockerHostUpdateLoginPanel {
         String pwd2 = new String(dockerHostSecondPwdField.getPassword());
         if (dockerHostSecondPwdField.getPassword().length > 0 && !pwd2.isEmpty() && !pwd2.equals(pwd1)) {
           dockerHostFirstPwdLabel.setVisible(true);
-          setDialogButtonsState(false);
           return false;
         } else {
           dockerHostFirstPwdLabel.setVisible(false);
-          setDialogButtonsState(doValidate(false) == null);
           return true;
         }
       }
     });
-    dockerHostSecondPwdField.getDocument().addDocumentListener(resetDialogButtonsState(null));
     dockerHostSecondPwdField.setToolTipText(AzureDockerValidationUtils.getDockerHostPasswordTip());
 
     dockerHostKeepSshRadioButton.setText(editableHost.originalDockerHost.hasSSHLogIn ? "Use current keys" : "None");
@@ -177,11 +173,9 @@ public class AzureDockerHostUpdateLoginPanel {
         String text = dockerHostImportSSHBrowseTextField.getText();
         if (text == null || text.isEmpty() || !AzureDockerValidationUtils.validateDockerHostSshDirectory(text)) {
           dockerHostImportSSHBrowseLabel.setVisible(true);
-          setDialogButtonsState(false);
           return false;
         } else {
           dockerHostImportSSHBrowseLabel.setVisible(false);
-          setDialogButtonsState(doValidate(false) == null);
           return true;
         }
       }
@@ -207,9 +201,6 @@ public class AzureDockerHostUpdateLoginPanel {
     return mainPanel;
   }
 
-  private void setDialogButtonsState(boolean buttonsState) {
-  }
-
   public void DialogShaker(ValidationInfo info) {
     PluginUtil.dialogShaker(info, dialogWrapperParent);
   }
@@ -219,10 +210,9 @@ public class AzureDockerHostUpdateLoginPanel {
     // User name
     String vmUsername = dockerHostUsernameTextField.getText();
     if (vmUsername == null || vmUsername.isEmpty() ||
-        !AzureDockerValidationUtils.validateDockerHostUserName(vmUsername))
+        (dockerHostSecondPwdField.isVisible() && !AzureDockerValidationUtils.validateDockerHostUserName(vmUsername)))
     {
       ValidationInfo info = AzureDockerUIResources.validateComponent("Missing username", mainPanel, dockerHostUsernameTextField, dockerHostUsernameLabel);
-      setDialogButtonsState(false);
       if (shakeOnError) {
         DialogShaker(info);
       }
@@ -237,10 +227,9 @@ public class AzureDockerHostUpdateLoginPanel {
         dockerHostFirstPwdField.getPassword().length > 0 ||
         dockerHostSecondPwdField.getPassword().length > 0) &&
         (vmPwd1.isEmpty() || vmPwd2.isEmpty() || ! vmPwd1.equals(vmPwd2) ||
-            !AzureDockerValidationUtils.validateDockerHostPassword(vmPwd1)))
+            (dockerHostSecondPwdField.isVisible() && !AzureDockerValidationUtils.validateDockerHostPassword(vmPwd1))))
     {
       ValidationInfo info = AzureDockerUIResources.validateComponent("Incorrect password", mainPanel, dockerHostFirstPwdField, dockerHostFirstPwdLabel);
-      setDialogButtonsState(false);
       if (shakeOnError) {
         DialogShaker(info);
       }
@@ -255,7 +244,7 @@ public class AzureDockerHostUpdateLoginPanel {
     }
 
     // Keep current SSH keys
-    if (dockerHostKeepSshRadioButton.isSelected()) {
+    if (dockerHostKeepSshRadioButton.isSelected() && editableHost.originalDockerHost.hasSSHLogIn) {
       AzureDockerCertVaultOps.copyVaultSshKeys(editableHost.updatedDockerHost.certVault, editableHost.originalDockerHost.certVault);
       editableHost.updatedDockerHost.hasSSHLogIn = editableHost.originalDockerHost.hasSSHLogIn;
     }
@@ -272,7 +261,6 @@ public class AzureDockerHostUpdateLoginPanel {
       if (dockerHostImportSSHBrowseTextField.getText() == null || dockerHostImportSSHBrowseTextField.getText().isEmpty() ||
           !AzureDockerValidationUtils.validateDockerHostSshDirectory(dockerHostImportSSHBrowseTextField.getText())) {
         ValidationInfo info = AzureDockerUIResources.validateComponent("SSH key files were not found in the selected directory", mainPanel, dockerHostImportSSHBrowseTextField, dockerHostImportSSHBrowseLabel);
-        setDialogButtonsState(false);
         if (shakeOnError) {
           DialogShaker(info);
         }
@@ -284,30 +272,6 @@ public class AzureDockerHostUpdateLoginPanel {
       }
     }
     return null;
-  }
-
-  public DocumentListener resetDialogButtonsState(JComponent componentLabel) {
-    return new DocumentListener() {
-      @Override
-      public void insertUpdate(DocumentEvent e) {
-        setDialogButtonsState(true);
-        if (componentLabel != null) {
-          componentLabel.setVisible(false);
-        }
-      }
-
-      @Override
-      public void removeUpdate(DocumentEvent e) {
-      }
-
-      @Override
-      public void changedUpdate(DocumentEvent e) {
-        setDialogButtonsState(true);
-        if (componentLabel != null) {
-          componentLabel.setVisible(false);
-        }
-      }
-    };
   }
 
 }
