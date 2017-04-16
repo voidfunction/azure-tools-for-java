@@ -317,14 +317,23 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
 		if (subscription == null) {
 			String name = nameTextField.getText();
 			AccessTier accessTier = (AccessTier) accessTierComboBox.getData(accessTierComboBox.getText());
-			String subscriptionId = ((SubscriptionDetail) subscriptionComboBox.getData(subscriptionComboBox.getText())).getSubscriptionId();
+			SubscriptionDetail subscriptionDetail = (SubscriptionDetail) subscriptionComboBox.getData(subscriptionComboBox.getText());
 			DefaultLoader.getIdeHelper().runInBackground(null, "Creating storage account", false, true,
 					"Creating storage account " + name + "...", new Runnable() {
 						@Override
 						public void run() {
 							try {
-								AzureSDKManager.createStorageAccount(subscriptionId, name, region,
+								AzureSDKManager.createStorageAccount(subscriptionDetail.getSubscriptionId(), name, region,
 										isNewResourceGroup, resourceGroupName, kind, accessTier, false, replication);
+								// update resource groups cache if new resource group was created when creating storage account
+					            if (isNewResourceGroup) {
+					                AzureManager azureManager = AuthMethodManager.getInstance().getAzureManager();
+					                if (azureManager != null) {
+										ResourceGroup rg = azureManager.getAzure(subscriptionDetail.getSubscriptionId()).resourceGroups().getByName(resourceGroupName);
+										AzureModelController.addNewResourceGroup(subscriptionDetail, rg);
+									}
+					            }
+					
 								if (onCreate != null) {
 									onCreate.run();
 								}
