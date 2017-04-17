@@ -42,10 +42,10 @@ public class SparkBatchSubmission {
 
     private static String userAgentName;
 
-    static {
+    private SparkBatchSubmission() {
         String installID = HDInsightLoader.getHDInsightHelper().getInstallationId();
         String userAgentSource = SparkBatchSubmission.class.getClassLoader().getClass().getName().toLowerCase().contains("intellij")
-                                        ? "Azure Toolkit for IntelliJ " : "Azure Toolkit for Eclipse ";
+                ? "Azure Toolkit for IntelliJ " : "Azure Toolkit for Eclipse ";
         userAgentName = userAgentSource + installID;
     }
 

@@ -4,7 +4,9 @@
     <artifactId>hdinsight-node-common</artifactId>
     <version>3.0.0-SNAPSHOT</version>
     <properties>
-        <artifict.name>${artifactId}-${version}.jar</artifict.name>
+        <artifact.name>${project.artifactId}-${project.version}.jar</artifact.name>
+        <hdinsight.htmlcopy.enabled>false</hdinsight.htmlcopy.enabled>
+        <project.build.encoding>UTF-8</project.build.encoding>
     </properties>
     <repositories>
         <!--
@@ -65,6 +67,58 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <!-- trigger when ${html.build.enabled} set to true-->
+            <id>html.ant.build</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>html.build.enabled</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.3</version>
+                        <configuration>
+                            <source>1.8</source>
+                            <target>1.8</target>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <phase>install</phase>
+                                <configuration>
+                                    <target>
+                                        <copy todir="${basedir}/build">
+                                            <fileset dir="${basedir}/resources">
+                                                <exclude name="/htmlResources/**"/>
+                                                <type type="file"/>
+                                            </fileset>
+                                        </copy>
+                                        <zip destfile="${project.basedir}/build/hdinsight_jobview_html.zip" basedir="${basedir}/resources/htmlResources" />
+                                        <copy file="${project.basedir}/build/hdinsight_jobview_html.zip" tofile="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-eclipse/com.microsoft.azuretools.hdinsight/resources/hdinsight_jobview_html.zip" overwrite="true" />
+                                        <copy file="${project.basedir}/build/hdinsight_jobview_html.zip" tofile="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-intellij/hdinsight/resources/hdinsight_jobview_html.zip" overwrite="true" />
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <sourceDirectory>src</sourceDirectory>
         <resources>
@@ -73,42 +127,40 @@
             </resource>
         </resources>
         <defaultGoal>install</defaultGoal>
-        <!--<outputDirectory>target</outputDirectory>-->
         <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <configuration>
-                            <target>
-                                <copy todir="${basedir}/build">
-                                    <fileset dir="${basedir}/resources">
-                                        <exclude name="/htmlResources/**"/>
-                                        <type type="file"/>
-                                    </fileset>
-                                </copy>
-                                <zip destfile="${project.basedir}/build/hdinsight_jobview_html.zip" basedir="${basedir}/resources/htmlResources" />
-                                <copy file="${project.basedir}/build/hdinsight_jobview_html.zip" tofile="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-eclipse/com.microsoft.azuretools.hdinsight/resources/hdinsight_jobview_html.zip" overwrite="true" />
-                                <copy file="${project.basedir}/build/hdinsight_jobview_html.zip" tofile="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-intellij/hdinsight/resources/hdinsight_jobview_html.zip" overwrite="true" />
-                                <copy file="${project.basedir}/target/${artifict.name}" tofile="${basedir}/../../PluginsAndFeatures/azure-toolkit-for-eclipse/com.microsoft.azuretools.core/resources/${artifict.name}" overwrite="true" />
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+        <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.3</version>
+            <configuration>
+                <source>1.8</source>
+                <target>1.8</target>
+            </configuration>
+        </plugin>
+        <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>2.6</version>
+            <executions>
+                <execution>
+                    <id>copy-jar-to-eclipse</id>
+                    <phase>install</phase>
+                    <goals>
+                        <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                        <outputDirectory>${project.basedir}/../../PluginsAndFeatures/azure-toolkit-for-eclipse/com.microsoft.azuretools.core/resources/</outputDirectory>
+                        <resources>
+                            <resource>
+                                <directory>${project.basedir}/target/</directory>
+                                <includes>
+                                    <include>${artifact.name}</include>
+                                </includes>
+                            </resource>
+                        </resources>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
         </plugins>
     </build>
 
