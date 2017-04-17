@@ -108,22 +108,24 @@ public abstract class RefreshableNode extends Node {
                 new Runnable() {
                     @Override
                     public void run() {
-                        final String nodeName = node.getName();
-                        updateName(nodeName + " (Refreshing...)", null);
+                        if (!loading) {
+                            final String nodeName = node.getName();
+                            updateName(nodeName + " (Refreshing...)", null);
 //                        node.setName(nodeName + " (Refreshing...)");
 
-                        Futures.addCallback(future, new FutureCallback<List<Node>>() {
-                            @Override
-                            public void onSuccess(List<Node> nodes) {
-                                updateName(nodeName, null);
-                            }
+                            Futures.addCallback(future, new FutureCallback<List<Node>>() {
+                                @Override
+                                public void onSuccess(List<Node> nodes) {
+                                    updateName(nodeName, null);
+                                }
 
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                                updateName(nodeName, throwable);
-                            }
-                        });
-                        node.refreshItems(future, forceRefresh);
+                                @Override
+                                public void onFailure(Throwable throwable) {
+                                    updateName(nodeName, throwable);
+                                }
+                            });
+                            node.refreshItems(future, forceRefresh);
+                        }
                     }
 
                     private void updateName(String name, final Throwable throwable) {
