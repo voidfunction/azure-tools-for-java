@@ -2,7 +2,7 @@
 <feature
       id="com.microsoft.sqljdbc4.feature"
       label="Microsoft JDBC Driver 6.0 for SQL Server"
-      version="6.0.7507.100"
+      version="6.0.8112.100"
       provider-name="Microsoft Corp.">
 
    <description>
