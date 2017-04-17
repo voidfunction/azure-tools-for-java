@@ -6,7 +6,7 @@
             name="Publish as Azure Web App..."
             categoryId="com.microsoft.ui.dropdown.category"
             id="com.microsoft.azuretools.webapp.commands.deployToAzure"
-            icon="icons/publishWebsite.png">
+            icon="icons/publishWebApp_16.png">
             <commandParameter id="com.microsoft.ui.dropdown.msg" name="DropDown Options" optional="true"></commandParameter>
        </command>   
    </extension>
@@ -61,7 +61,7 @@
    </extension>
    
    <extension point="org.eclipse.ui.commandImages">
-     <image commandId="com.microsoft.azuretools.webapp.commands.deployToAzure" icon="icons/publishWebsite.png"></image>
+     <image commandId="com.microsoft.azuretools.webapp.commands.deployToAzure" icon="icons/publishWebApp_16.png"></image>
    </extension>
 
 </plugin>

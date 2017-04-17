@@ -52,7 +52,7 @@
     <extension point="org.eclipse.ui.commandImages">
         <image
             commandId="com.microsoft.ui.dropdown.command"
-            icon="icons/publish.png"/>
+            icon="icons/Publish_16.png"/>
     </extension>
 
     <!-- Handlers for dropdown -->
