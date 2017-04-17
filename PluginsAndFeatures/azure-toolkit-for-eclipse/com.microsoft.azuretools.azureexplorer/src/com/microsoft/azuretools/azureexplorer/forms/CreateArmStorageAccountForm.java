@@ -460,11 +460,13 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
 	                    replicationComboBox.add(replicationType.getDescription());
 	                    replicationComboBox.setData(replicationType.getDescription(), replicationType);
 	    			}
+                    replicationComboBox.select(3);
     			} else {
     				for (ReplicationTypes replicationType : new ReplicationTypes[] {ReplicationTypes.Standard_LRS, ReplicationTypes.Standard_GRS, ReplicationTypes.Standard_RAGRS}) {
 	                    replicationComboBox.add(replicationType.getDescription());
 	                    replicationComboBox.setData(replicationType.getDescription(), replicationType);
-	    			}	
+	    			}
+                    replicationComboBox.select(2);
     			}
     		} else {
         		// Create storage account from VM creation
@@ -472,12 +474,13 @@ public class CreateArmStorageAccountForm extends TitleAreaDialog {
                     replicationComboBox.add(replicationType.getDescription());
                     replicationComboBox.setData(replicationType.getDescription(), replicationType);
                 }
+                replicationComboBox.select(2);
     		}
     	} else {    		
     		replicationComboBox.add(ReplicationTypes.Premium_LRS.getDescription());
             replicationComboBox.setData(ReplicationTypes.Premium_LRS.getDescription(), ReplicationTypes.Premium_LRS);
+            replicationComboBox.select(0);
     	}
-        replicationComboBox.select(0);
     }
 
     public void setOnCreate(Runnable onCreate) {
