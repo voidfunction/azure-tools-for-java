@@ -2,9 +2,9 @@
 THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
 Do Not Translate or Localize
 
-This file provides information regarding the open source software components included in the Azure Toolkit for Eclipse. Individual modules may only include a subset of these components.  Some components may contain additional notices.  Components in Section A are relicensed to you by Microsoft under Microsoft's software licensing terms, and  components in Section B are made available to you by Microsoft under the original licensing terms. Microsoft reserves all rights not expressly granted herein, whether by implication, estoppel or otherwise.
+This file provides information regarding the open source software components included in the Azure Toolkits for Eclipse and IntelliJ. Individual modules may only include a subset of these components.  Some components may contain additional notices.  Components in Section A are relicensed to you by Microsoft under Microsoft's software licensing terms, and components in Section B are made available to you by Microsoft under the original licensing terms. Microsoft reserves all rights not expressly granted herein, whether by implication, estoppel or otherwise.
 
-Section A: Microsoft is offering you a license to use the following components with the Azure Toolkit for Eclipse under Microsoft's software licensing terms. The original copyright notices and licenses under which Microsoft received these components, are set forth below. Such licenses and notices are provided for informational purposes only. 
+Section A: Microsoft is offering you a license to use the following components with the Azure Toolkits for Eclipse and IntelliJ under Microsoft's software licensing terms. The original copyright notices and licenses under which Microsoft received these components, are set forth below. Such licenses and notices are provided for informational purposes only. 
 
 1.	annotation-detector (infomas-asl)  (https://github.com/rmuller/infomas-asl)
 2.	Apache Commons Codec (https://commons.apache.org/proper/commons-codec/)
@@ -32,15 +32,17 @@ Section A: Microsoft is offering you a license to use the following components w
 24.	Javax.Inject  (https://code.google.com/p/atinject/)
 25.	Joda Time (https://github.com/JodaOrg/joda-time)
 26.	JSch (https://github.com/is/jsch)
-27.	JSON Small And Fast Parser (https://github.com/netplex/json-smart-v1)
-28.	Microsoft Azure Libraries for Java (https://github.com/Azure/azure-sdk-for-java)
-29.	Nimbus JOSE + JWT (https://bitbucket.org/connect2id/nimbus-jose-jwt/src)
-30.	OAuth 2.0 SDK With OpenID Connect Extensions (https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions)
-31.	OkHttp (https://github.com/square/okhttp)
-32.	Okio (https://github.com/square/okio)
-33.	Retrofit (https://github.com/square/retrofit)
-34.	RxJava (https://github.com/ReactiveX/RxJava)
-35.	Simple Logging Facade for Java (https://www.slf4j.org/)
+27.	JSON (http://www.JSON.org/)
+28.	JSON Small And Fast Parser (https://github.com/netplex/json-smart-v1)
+29.	jsoup (https://jsoup.org/)
+30.	Microsoft Azure Libraries for Java (https://github.com/Azure/azure-sdk-for-java)
+31.	Nimbus JOSE + JWT (https://bitbucket.org/connect2id/nimbus-jose-jwt/src)
+32.	OAuth 2.0 SDK With OpenID Connect Extensions (https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions)
+33.	OkHttp (https://github.com/square/okhttp)
+34.	Okio (https://github.com/square/okio)
+35.	Retrofit (https://github.com/square/retrofit)
+36.	RxJava (https://github.com/ReactiveX/RxJava)
+37.	Simple Logging Facade for Java (https://www.slf4j.org/)
 
 
 %% annotation-detector (infomas-asl)  NOTICES AND INFORMATION BEGIN HERE
@@ -547,7 +549,6 @@ END OF Apache Log4j NOTICES AND INFORMATION
 %% Application Insights SDK for Java  NOTICES AND INFORMATION BEGIN HERE
 =========================================
 ApplicationInsights-Java
-
 Copyright (c) Microsoft Corporation
 All rights reserved.
 
@@ -557,10 +558,8 @@ software and associated documentation files (the ""Software""), to deal in the S
 without restriction, including without limitation the rights to use, copy, modify, merge,
 publish, distribute, sublicense, and/or sell copies of the Software, and to permit
 persons to whom the Software is furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in all copies or
 substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
 PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
@@ -2290,6 +2289,20 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 =========================================
 END OF JSch NOTICES AND INFORMATION
 
+%% JSON NOTICES AND INFORMATION BEGIN HERE
+=========================================
+Copyright (c) 2002 JSON.org
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+The Software shall be used for Good, not Evil.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+=========================================
+END OF JSON NOTICES AND INFORMATION
+
 %% JSON Small And Fast Parser NOTICES AND INFORMATION BEGIN HERE
 =========================================
                                 Apache License
@@ -2496,6 +2509,22 @@ END OF JSch NOTICES AND INFORMATION
 
 =========================================
 END OF JSON Small And Fast Parser NOTICES AND INFORMATION
+
+%% jsoup NOTICES AND INFORMATION BEGIN HERE
+=========================================
+jsoup License
+The jsoup code-base (include source and compiled packages) are distributed under the open source MIT license as described below.
+
+The MIT License
+Copyright © 2009 - 2016 Jonathan Hedley (jonathan@hedley.net)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+=========================================
+END OF jsoup NOTICES AND INFORMATION
 
 %% Microsoft Azure Libraries for Java NOTICES AND INFORMATION BEGIN HERE
 =========================================
@@ -3000,6 +3029,7 @@ Copyright (c) 2016-present, RxJava Contributors.
       of your accepting any such warranty or additional liability.
 
    END OF TERMS AND CONDITIONS
+
    
 =========================================
 END OF RxJava NOTICES AND INFORMATION
@@ -3018,7 +3048,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 =========================================
 END OF Simple Logging Facade for Java NOTICES AND INFORMATION
 
-Section B: Microsoft is offering you a license to use the following components with the Azure Toolkit for Eclipse under their original license terms as set forth below.
+Section B: Microsoft is offering you a license to use the following components with the Azure Toolkits for Eclipse and IntelliJ under their original license terms as set forth below.
 
 1.	“Java Concurrency In Practice” Book Annotations (http://jcip.net/)
 2.	javax.mail (JavaMail) (https://java.net/projects/javamail/pages/Home)
@@ -3032,6 +3062,7 @@ Copyright (c) 2005 Brian Goetz and Tim Peierls.
 See http://www.jcip.net and the Creative Commons Attribution License
 (http://creativecommons.org/licenses/by/2.5)
 Full text: http://creativecommons.org/licenses/by/2.5/legalcode
+
 
 License 
 
