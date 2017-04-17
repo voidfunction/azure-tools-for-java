@@ -31,6 +31,7 @@ import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azuretools.core.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import java.util.Collections;
@@ -121,9 +122,9 @@ public class AzureNewDockerConfigPage extends WizardPage {
 	 * Create the wizard.
 	 */
 	public AzureNewDockerConfigPage(AzureNewDockerWizard wizard) {
-		super("Create Docker Host");
-		setTitle("Configure the new virtual machine");
-		setDescription("");
+		super("Create Docker Host", "Configure the new virtual machine", Activator.getImageDescriptor("icons/large/Azure.png"));
+//		setTitle("Configure the new virtual machine");
+//		setDescription("");
 
 		this.wizard = wizard;		
 		this.dockerManager = wizard.getDockerManager();

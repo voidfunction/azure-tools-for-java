@@ -30,6 +30,7 @@ import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azuretools.core.Activator;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.docker.ui.dialogs.AzureInputDockerLoginCredsDialog;
 import com.microsoft.azuretools.docker.ui.dialogs.AzureViewDockerDialog;
@@ -106,7 +107,7 @@ public class AzureSelectDockerHostPage extends WizardPage {
 	 * Create the wizard.
 	 */
 	public AzureSelectDockerHostPage(AzureSelectDockerWizard wizard) {
-		super("Deploying Docker Container on Azure");
+		super("Deploying Docker Container on Azure", "", Activator.getImageDescriptor("icons/large/Azure.png"));
 		
 		this.wizard = wizard;		
 		this.dockerManager = wizard.getDockerManager();
