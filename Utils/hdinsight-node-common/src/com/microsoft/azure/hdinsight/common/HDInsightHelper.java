@@ -28,4 +28,5 @@ public interface HDInsightHelper {
     void closeJobViewEditor(@NotNull Object projectObject, @NotNull String uuid);
     String getPluginRootPath();
     String getInstallationId();
+    boolean isIntelliJPlugin();
 }

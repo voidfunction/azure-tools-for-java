@@ -40,7 +40,7 @@ public class HDInsightUtil {
 					try {
 						sparkSubmissionToolWindowView = (SparkSubmissionToolWindowView) PlatformUI.getWorkbench()
 								.getActiveWorkbenchWindow().getActivePage()
-								.showView("com.microsoft.azuretools.hdinsight.sparksubmissiontoolwindowview");
+								.showView(SparkSubmissionToolWindowView.class.getName());
 					} catch (PartInitException e) {
 						Activator.getDefault().log(e.getMessage(), e);
 					}
@@ -76,33 +76,6 @@ public class HDInsightUtil {
     }
 
     private static void showInfoOnSubmissionMessageWindow(@NotNull final MessageInfoType type, @NotNull final String message, @NotNull final boolean isNeedClear) {
-//        final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(CommonConst.SPARK_SUBMISSION_WINDOW_ID);
-
-//        if (!toolWindow.isVisible()) {
-//             synchronized (LOCK) {
-//                if (!toolWindow.isVisible()) {
-//                    if (ApplicationManager.getApplication().isDispatchThread()) {
-//                        toolWindow.show(null);
-//                    } else {
-//                        try {
-                            
-//                        	SparkSubmissionToolWindowView sparkSubmissionview = null;
-//							try {
-//								sparkSubmissionview = (SparkSubmissionToolWindowView) PlatformUI
-//												.getWorkbench().getActiveWorkbenchWindow()
-//												.getActivePage().showView("com.microsoft.azuretools.hdinsight.sparksubmissiontoolwindowview");
-//							} catch (PartInitException e) {
-//								// TODO Auto-generated catch block
-//								e.printStackTrace();
-//							}
-                            
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }
-//            }
-//        }
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -111,7 +84,7 @@ public class HDInsightUtil {
 		});
 	}
 
-    private static void showSubmissionMessage(SparkSubmissionToolWindowView sparkSubmissionView, @NotNull String message, @NotNull MessageInfoType type, @NotNull final boolean isNeedClear) {
+    private static void showSubmissionMessage(@NotNull SparkSubmissionToolWindowView sparkSubmissionView, @NotNull String message, @NotNull MessageInfoType type, @NotNull final boolean isNeedClear) {
         if (isNeedClear) {
             sparkSubmissionView.clearAll();
         }

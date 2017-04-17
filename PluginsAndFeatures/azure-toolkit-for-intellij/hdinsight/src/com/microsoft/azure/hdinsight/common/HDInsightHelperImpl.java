@@ -103,7 +103,7 @@ public class HDInsightHelperImpl implements HDInsightHelper {
         }, ModalityState.any());
     }
 
-    private void openItem(@NotNull final Project project, @NotNull IClusterDetail myClusterDetail,@NotNull String uuid, @Nullable VirtualFile closeableFile) {
+    private void openItem(@NotNull final Project project, @NotNull IClusterDetail myClusterDetail, @NotNull String uuid, @Nullable VirtualFile closeableFile) {
         final LightVirtualFile virtualFile = new LightVirtualFile(myClusterDetail.getName() + ": Job View");
         virtualFile.putUserData(JobViewEditorProvider.JOB_VIEW_KEY, myClusterDetail);
         virtualFile.setFileType(new FileType() {
@@ -149,5 +149,10 @@ public class HDInsightHelperImpl implements HDInsightHelper {
         });
         virtualFile.putUserData(JobViewEditorProvider.JOB_VIEW_UUID, uuid);
         openItem(project, virtualFile, closeableFile);
+    }
+
+    @Override
+    public boolean isIntelliJPlugin() {
+        return true;
     }
 }

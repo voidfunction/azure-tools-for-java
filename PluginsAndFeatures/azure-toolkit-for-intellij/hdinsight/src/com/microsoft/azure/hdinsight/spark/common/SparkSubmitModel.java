@@ -374,7 +374,7 @@ public class SparkSubmitModel {
     private void initializeTableModel(final InteractiveTableModel tableModel) {
         if (submissionParameter == null) {
             for (int i = 0; i < SparkSubmissionParameter.defaultParameters.length; ++i) {
-                tableModel.addRow(SparkSubmissionParameter.defaultParameters[i].getLeft(), "");
+                tableModel.addRow(SparkSubmissionParameter.defaultParameters[i].first(), "");
             }
         } else {
             Map<String, Object> configs = submissionParameter.getJobConfig();

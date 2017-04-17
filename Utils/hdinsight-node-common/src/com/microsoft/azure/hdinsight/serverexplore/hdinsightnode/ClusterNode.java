@@ -21,9 +21,7 @@
  */
 package com.microsoft.azure.hdinsight.serverexplore.hdinsightnode;
 
-import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
-import com.microsoft.azure.hdinsight.common.CommonConst;
-import com.microsoft.azure.hdinsight.common.JobViewManager;
+import com.microsoft.azure.hdinsight.common.*;
 import com.microsoft.azure.hdinsight.sdk.cluster.ClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.EmulatorClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.HDInsightAdditionalClusterDetail;
@@ -135,7 +133,11 @@ public class ClusterNode extends RefreshableNode {
             final String uuid = UUID.randomUUID().toString();
             JobViewManager.registerJovViewNode(uuid, clusterDetail);
             JobViewNode jobViewNode = new JobViewNode(this, uuid);
-            addChildNode(jobViewNode);
+            boolean isIntelliJ = HDInsightLoader.getHDInsightHelper().isIntelliJPlugin();
+            boolean isLinux = System.getProperty("os.name").toLowerCase().contains("linux");
+            if(isIntelliJ || !isLinux) {
+                addChildNode(jobViewNode);
+            }
 
             RefreshableNode storageAccountNode = new StorageAccountFolderNode(this, clusterDetail);
             addChildNode(storageAccountNode);

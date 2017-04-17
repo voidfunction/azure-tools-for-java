@@ -66,10 +66,6 @@ public class JobViewEditor extends EditorPart {
 		} else {
 			DefaultLoader.getUIHelper().showError("HDInsight Job view index page not exist!", "job view");
 		}
-
-		final String queryString = "?projectid=" + uuid + "&engintype=javafx";
-		final String webUrl = "file:///" + indexPath.replace("\\", "/") + queryString;
-		FxClassLoader.loadJavaFxForJobView(composite, webUrl);
 	}
 
 	@Override
