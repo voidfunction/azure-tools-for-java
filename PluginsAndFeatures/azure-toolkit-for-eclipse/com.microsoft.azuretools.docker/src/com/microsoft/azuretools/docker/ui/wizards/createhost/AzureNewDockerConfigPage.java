@@ -237,7 +237,7 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		        }
 			}
 		});
-		dockerPricingHyperlink.setText("<a>Pricing...</a>");
+		dockerPricingHyperlink.setText("<a>Pricing</a>");
 		GridData gd_dockerPricingHyperlink = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 2);
 		dockerPricingHyperlink.setLayoutData(gd_dockerPricingHyperlink);
 
