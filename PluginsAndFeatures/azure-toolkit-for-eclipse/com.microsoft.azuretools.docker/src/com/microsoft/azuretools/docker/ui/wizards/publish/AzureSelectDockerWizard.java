@@ -36,6 +36,7 @@ import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
+import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
 import com.microsoft.azuretools.core.ui.views.AzureDeploymentProgressNotification;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.docker.ui.dialogs.AzureInputDockerLoginCredsDialog;
@@ -45,6 +46,8 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -202,6 +205,10 @@ public class AzureSelectDockerWizard extends Wizard {
 		String deploymentName = url;
 		String jobDescription = String.format("Publishing %s as Docker Container", new File(dockerImageInstance.artifactPath).getName());
 		AzureDeploymentProgressNotification.createAzureDeploymentProgressNotification(deploymentName, jobDescription);
+		
+		Map<String, String> postEventProperties = new HashMap<String, String>();
+		postEventProperties.put("DockerApiName", dockerImageInstance.host.apiUrl);
+		postEventProperties.put("DockerFileOption", dockerImageInstance.predefinedDockerfile);
 		
 		Job createDockerHostJob = new Job(jobDescription) {
 			@Override
@@ -367,6 +374,7 @@ public class AzureSelectDockerWizard extends Wizard {
 			            com.microsoft.azuretools.core.Activator.removeDeploymentEventListener(undeployListnr);
 					} catch (Exception ignored) { }
 					progressMonitor.done();
+					AppInsightsCustomEvent.create("Deploy as DockerContainer", "", postEventProperties);
 					return Status.OK_STATUS;
 				} catch (Exception e) {
 					String msg = "An error occurred while attempting to publish a Docker container!" + "\n" + e.getMessage();
@@ -377,7 +385,7 @@ public class AzureSelectDockerWizard extends Wizard {
 				}
 			}
 		};
-		
+
 		createDockerHostJob.schedule();	
 	}
 	

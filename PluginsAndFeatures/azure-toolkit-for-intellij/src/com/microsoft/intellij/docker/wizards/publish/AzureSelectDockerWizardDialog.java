@@ -30,7 +30,6 @@ import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.model.EditableDockerHost;
 import com.microsoft.azure.docker.ops.AzureDockerSSHOps;
-import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.intellij.docker.dialogs.AzureInputDockerLoginCredsDialog;
