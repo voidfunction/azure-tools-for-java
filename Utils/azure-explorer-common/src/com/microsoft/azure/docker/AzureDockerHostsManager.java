@@ -428,6 +428,13 @@ public class AzureDockerHostsManager {
     return dockerHostsMap.get(apiURL);
   }
 
+  public void updateDockerHost(DockerHost host) {
+    if (host != null) {
+      dockerHostsMap.put(host.apiUrl, host);
+      dockerHostsList = new ArrayList<>(dockerHostsMap.values());
+    }
+  }
+
   public List<String> getDockerVMStates() {
     List<String> result = new ArrayList<>();
     for (DockerHost.DockerHostVMState state : DockerHost.DockerHostVMState.values()) {
