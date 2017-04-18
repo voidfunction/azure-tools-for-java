@@ -77,6 +77,7 @@ import com.microsoft.azure.management.resources.Location;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.core.ui.ErrorWindow;
+import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.core.utils.ProgressDialog;
 import com.microsoft.azuretools.core.utils.UpdateProgressIndicator;
 import com.microsoft.azuretools.utils.AzulZuluModel;
@@ -174,6 +175,15 @@ public class AppServiceCreateDialog extends TitleAreaDialog {
         setHelpAvailable(false);
         setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
     } 
+    
+    @Override
+    protected void configureShell(Shell newShell) {
+        super.configureShell(newShell);
+        Image image = PluginUtil.getImage("icons/large/Azure.png");
+        if (image != null) {
+        	setTitleImage(image);
+        }
+    }
     
     @Override
     protected Control createDialogArea(Composite parent) {
