@@ -185,7 +185,7 @@ public class DockerHostNode extends AzureRefreshableNode {
         });
       }
     });
-    addAction(ACTION_RESTART,new RestartDockerHostAction());
+    addAction(ACTION_RESTART, ACTION_START_ICON, new RestartDockerHostAction());
     addAction(ACTION_SHUTDOWN, ACTION_SHUTDOWN_ICON, new ShutdownDockerHostAction());
     super.loadActions();
   }
