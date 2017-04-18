@@ -59,6 +59,7 @@ import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
 import com.microsoft.azuretools.core.ui.ErrorWindow;
 import com.microsoft.azuretools.core.ui.views.AzureDeploymentProgressNotification;
 import com.microsoft.azuretools.core.utils.Messages;
@@ -519,6 +520,9 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                 String cancelMessage = "Interrupted by user";
                 String successMessage = "";
                 String errorMessage = "Error";
+                Map<String, String> postEventProperties = new HashMap<String, String>();
+                postEventProperties.put("Java App Name", project.getName());
+                postEventProperties.put("WebApp URI", sitePath);
                 
                 monitor.beginTask(message, IProgressMonitor.UNKNOWN);
                 try {
@@ -572,6 +576,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                     AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 100, successMessage);
                 } catch (IOException | InterruptedException ex) {
                     //threadParams.put("sitePath", null);
+                	postEventProperties.put("PublishError", ex.getMessage());
                     ex.printStackTrace();
                     LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@deploy@AppServiceCreateDialog", ex));
                     AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, -1, errorMessage);
@@ -582,6 +587,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         }
                     });
                 }
+                AppInsightsCustomEvent.create("Deploy as WebApp", "", postEventProperties);
                 return Status.OK_STATUS;
             }
         };

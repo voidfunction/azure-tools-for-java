@@ -27,7 +27,10 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.DockerHost;
-import com.microsoft.azure.docker.ops.*;
+import com.microsoft.azure.docker.ops.AzureDockerContainerOps;
+import com.microsoft.azure.docker.ops.AzureDockerImageOps;
+import com.microsoft.azure.docker.ops.AzureDockerSSHOps;
+import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.management.Azure;
@@ -39,13 +42,15 @@ import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.intellij.AzurePlugin;
 import com.microsoft.intellij.activitylog.ActivityLogToolWindowFactory;
 import com.microsoft.intellij.docker.utils.AzureDockerUIResources;
+import com.microsoft.intellij.util.AppInsightsCustomEvent;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import static com.intellij.projectImport.ProjectImportBuilder.getCurrentProject;
 import static com.microsoft.intellij.ui.messages.AzureBundle.message;
 
 public final class AzureDeploymentProgressNotification {
@@ -130,6 +135,9 @@ public final class AzureDeploymentProgressNotification {
 
     public void deployToDockerContainer(AzureDockerImageInstance dockerImageInstance, String url) {
         Date startDate = new Date();
+        Map<String, String> postEventProperties = new HashMap<String, String>();
+        postEventProperties.put("DockerApiName", dockerImageInstance.host.apiUrl);
+        postEventProperties.put("DockerFileOption", dockerImageInstance.predefinedDockerfile);
         String descriptionTask =  String.format("Publishing %s into Docker host %s at port(s) %s", new File(dockerImageInstance.artifactPath).getName(), dockerImageInstance.host.name, dockerImageInstance.dockerPortSettings);
         try {
             String msg = String.format("Publishing %s to Docker host %s ...", new File(dockerImageInstance.artifactPath).getName(), dockerImageInstance.host.name);
@@ -228,9 +236,12 @@ public final class AzureDeploymentProgressNotification {
 
             notifyProgress(descriptionTask, startDate, url, 100, message("runStatus"), dockerImageInstance.host.name);
         } catch (InterruptedException e) {
+            postEventProperties.put("PublishInterruptedError", e.getMessage());
             notifyProgress(descriptionTask, startDate, url, 100, message("runStatus"), dockerImageInstance.host.name);
         } catch (Exception ee) {
+            postEventProperties.put("PublishError", ee.getMessage());
             notifyProgress(descriptionTask, startDate, url, 100, "Error: %s", ee.getMessage());
         }
+        AppInsightsCustomEvent.create("Deploy as DockerContainer", "", postEventProperties);
     }
 }
