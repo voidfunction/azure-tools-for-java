@@ -36,6 +36,7 @@ import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventArgs;
 import com.microsoft.azuretools.azurecommons.deploy.DeploymentEventListener;
+import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
 import com.microsoft.azuretools.core.ui.views.AzureDeploymentProgressNotification;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.docker.ui.dialogs.AzureInputDockerLoginCredsDialog;
@@ -45,6 +46,8 @@ import com.microsoft.tooling.msservices.components.DefaultLoader;
 
 import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -139,6 +142,9 @@ public class AzureSelectDockerWizard extends Wizard {
 		dockerPreferredSettings.dockerApiName = dockerImageDescription.host.apiUrl;
 		dockerPreferredSettings.dockerfileOption = dockerImageDescription.predefinedDockerfile;
 		dockerManager.setDockerPreferredSettings(dockerPreferredSettings);
+		Map<String, String> postEventProperties = new HashMap<String, String>();
+		postEventProperties.put("DockerApiName", dockerImageDescription.host.apiUrl);
+		postEventProperties.put("DockerFileOption", dockerImageDescription.predefinedDockerfile);
 
 		DefaultLoader.getIdeHelper().runInBackground(project, "Deploying Docker Container on Azure", false, true, "Deploying Web app to a Docker host on Azure...", new Runnable() {
 			@Override
@@ -182,12 +188,14 @@ public class AzureSelectDockerWizard extends Wizard {
 						}
 					});
 				} catch (Exception e) {
+					postEventProperties.put("PublishError", e.getMessage());
 					String msg = "An error occurred while attempting to deploy to the selected Docker host." + "\n" + e.getMessage();
 					PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), "Failed to Deploy Web App as Docker Container", msg, e);
 				}
 			}
 		});
 
+		AppInsightsCustomEvent.create("Deploy as DockerContainer", "", postEventProperties);
 		return AzureDockerUtils.getUrl(dockerImageDescription);
 	}
 	

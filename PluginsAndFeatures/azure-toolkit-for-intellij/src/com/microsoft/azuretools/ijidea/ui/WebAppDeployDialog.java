@@ -53,6 +53,7 @@ import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.azuretools.utils.CanceledByUserException;
 import com.microsoft.azuretools.utils.WebAppUtils;
 import com.microsoft.intellij.deploy.AzureDeploymentProgressNotification;
+import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -567,6 +568,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                     }
                     azureDeploymentProgressNotification.notifyProgress(webApp.name(), startDate, sitePath, 100, message("runStatus"));
                     showLink(sitePath);
+                    AppInsightsCustomEvent.createFTPEvent("WebFTP", sitePath, project.getName(), wad.subscriptionDetail.getSubscriptionId());
                 } catch (IOException | InterruptedException ex) {
                     ex.printStackTrace();
                     LOGGER.error("deploy", ex);

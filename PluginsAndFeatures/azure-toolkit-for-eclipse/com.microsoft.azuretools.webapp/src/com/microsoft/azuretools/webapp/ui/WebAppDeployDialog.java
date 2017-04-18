@@ -58,6 +58,7 @@ import com.microsoft.azure.management.appservice.WebApp;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
 import com.microsoft.azuretools.core.ui.ErrorWindow;
 import com.microsoft.azuretools.core.ui.views.AzureDeploymentProgressNotification;
 import com.microsoft.azuretools.core.utils.ProgressDialog;
@@ -558,6 +559,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                     
                     monitor.done();
                     AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 100, successMessage);
+                    AppInsightsCustomEvent.createFTPEvent("WebAppFTP", sitePath, project.getName(), wad.subscriptionDetail.getSubscriptionId());
                 } catch (IOException | InterruptedException ex) {
                     //threadParams.put("sitePath", null);
                     ex.printStackTrace();
