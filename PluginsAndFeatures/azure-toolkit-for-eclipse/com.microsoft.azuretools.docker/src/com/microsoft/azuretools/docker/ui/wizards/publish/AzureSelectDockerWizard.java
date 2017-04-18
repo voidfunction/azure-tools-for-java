@@ -142,9 +142,6 @@ public class AzureSelectDockerWizard extends Wizard {
 		dockerPreferredSettings.dockerApiName = dockerImageDescription.host.apiUrl;
 		dockerPreferredSettings.dockerfileOption = dockerImageDescription.predefinedDockerfile;
 		dockerManager.setDockerPreferredSettings(dockerPreferredSettings);
-		Map<String, String> postEventProperties = new HashMap<String, String>();
-		postEventProperties.put("DockerApiName", dockerImageDescription.host.apiUrl);
-		postEventProperties.put("DockerFileOption", dockerImageDescription.predefinedDockerfile);
 
 		DefaultLoader.getIdeHelper().runInBackground(project, "Deploying Docker Container on Azure", false, true, "Deploying Web app to a Docker host on Azure...", new Runnable() {
 			@Override
@@ -188,14 +185,12 @@ public class AzureSelectDockerWizard extends Wizard {
 						}
 					});
 				} catch (Exception e) {
-					postEventProperties.put("PublishError", e.getMessage());
 					String msg = "An error occurred while attempting to deploy to the selected Docker host." + "\n" + e.getMessage();
 					PluginUtil.displayErrorDialogWithAzureMsg(PluginUtil.getParentShell(), "Failed to Deploy Web App as Docker Container", msg, e);
 				}
 			}
 		});
 
-		AppInsightsCustomEvent.create("Deploy as DockerContainer", "", postEventProperties);
 		return AzureDockerUtils.getUrl(dockerImageDescription);
 	}
 	
@@ -205,6 +200,10 @@ public class AzureSelectDockerWizard extends Wizard {
 		String deploymentName = url;
 		String jobDescription = String.format("Publishing %s as Docker Container", new File(dockerImageInstance.artifactPath).getName());
 		AzureDeploymentProgressNotification.createAzureDeploymentProgressNotification(deploymentName, jobDescription);
+		
+		Map<String, String> postEventProperties = new HashMap<String, String>();
+		postEventProperties.put("DockerApiName", dockerImageInstance.host.apiUrl);
+		postEventProperties.put("DockerFileOption", dockerImageInstance.predefinedDockerfile);
 		
 		Job createDockerHostJob = new Job(jobDescription) {
 			@Override
@@ -371,6 +370,7 @@ public class AzureSelectDockerWizard extends Wizard {
 			            com.microsoft.azuretools.core.Activator.removeDeploymentEventListener(undeployListnr);
 					} catch (Exception ignored) { }
 					progressMonitor.done();
+					AppInsightsCustomEvent.create("Deploy as DockerContainer", "", postEventProperties);
 					return Status.OK_STATUS;
 				} catch (Exception e) {
 					String msg = "An error occurred while attempting to publish a Docker container!" + "\n" + e.getMessage();
@@ -381,7 +381,7 @@ public class AzureSelectDockerWizard extends Wizard {
 				}
 			}
 		};
-		
+
 		createDockerHostJob.schedule();	
 	}
 	

@@ -522,6 +522,8 @@ public class WebAppDeployDialog extends DialogWrapper {
         WebAppDetails wad = webAppWebAppDetailsMap.get(tableModel.getValueAt(selectedRow, 0));
         WebApp webApp = wad.webApp;
         boolean isDeployToRoot = deployToRootCheckBox.isSelected();
+        Map<String, String> postEventProperties = new HashMap<String, String>();
+        postEventProperties.put("Java App Name", project.getName());
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Deploy Web App Progress", true) {
             @Override
             public void run(@NotNull ProgressIndicator progressIndicator) {
@@ -536,6 +538,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                     WebAppUtils.deployArtifact(artifact.getName(), artifact.getOutputFilePath(),
                             pp, isDeployToRoot, new UpdateProgressIndicator(progressIndicator));
                     String sitePath = buildSiteLink(wad.webApp, isDeployToRoot ? null : artifact.getName());
+                    postEventProperties.put("WebApp URI", sitePath);
                     progressIndicator.setText("Checking Web App availability...");
                     progressIndicator.setText2("Link: " + sitePath);
 
@@ -568,8 +571,8 @@ public class WebAppDeployDialog extends DialogWrapper {
                     }
                     azureDeploymentProgressNotification.notifyProgress(webApp.name(), startDate, sitePath, 100, message("runStatus"));
                     showLink(sitePath);
-                    AppInsightsCustomEvent.createFTPEvent("WebFTP", sitePath, project.getName(), wad.subscriptionDetail.getSubscriptionId());
                 } catch (IOException | InterruptedException ex) {
+                    postEventProperties.put("PublishError", ex.getMessage());
                     ex.printStackTrace();
                     LOGGER.error("deploy", ex);
                     ApplicationManager.getApplication().invokeLater(new Runnable() {
@@ -579,6 +582,7 @@ public class WebAppDeployDialog extends DialogWrapper {
                         }
                     });
                 }
+                AppInsightsCustomEvent.create("Deploy as WebApp", "", postEventProperties);
             }
         });
     }

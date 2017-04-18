@@ -520,6 +520,9 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                 String cancelMessage = "Interrupted by user";
                 String successMessage = "";
                 String errorMessage = "Error";
+                Map<String, String> postEventProperties = new HashMap<String, String>();
+                postEventProperties.put("Java App Name", project.getName());
+                postEventProperties.put("WebApp URI", sitePath);
                 
                 monitor.beginTask(message, IProgressMonitor.UNKNOWN);
                 try {
@@ -571,9 +574,9 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                     
                     monitor.done();
                     AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, sitePath, 100, successMessage);
-                    AppInsightsCustomEvent.createFTPEvent("WebAppFTP", sitePath, project.getName(), wad.subscriptionDetail.getSubscriptionId());
                 } catch (IOException | InterruptedException ex) {
                     //threadParams.put("sitePath", null);
+                	postEventProperties.put("PublishError", ex.getMessage());
                     ex.printStackTrace();
                     LOG.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "run@ProgressDialog@deploy@AppServiceCreateDialog", ex));
                     AzureDeploymentProgressNotification.notifyProgress(this, deploymentName, null, -1, errorMessage);
@@ -584,6 +587,7 @@ public class WebAppDeployDialog extends TitleAreaDialog {
                         }
                     });
                 }
+                AppInsightsCustomEvent.create("Deploy as WebApp", "", postEventProperties);
                 return Status.OK_STATUS;
             }
         };

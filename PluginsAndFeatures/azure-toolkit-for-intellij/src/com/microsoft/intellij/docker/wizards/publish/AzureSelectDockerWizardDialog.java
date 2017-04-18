@@ -29,19 +29,15 @@ import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.AzureDockerPreferredSettings;
 import com.microsoft.azure.docker.model.EditableDockerHost;
 import com.microsoft.azure.docker.ops.AzureDockerSSHOps;
-import com.microsoft.azure.docker.ops.AzureDockerVMOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerUtils;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.intellij.docker.dialogs.AzureInputDockerLoginCredsDialog;
-import com.microsoft.intellij.util.AppInsightsCustomEvent;
 import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.tasks.DockerContainerDeployTask;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
 
 public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDockerWizardModel> {
   private AzureSelectDockerWizardModel model;
@@ -102,7 +98,6 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
   public String deploy() {
     AzureDockerImageInstance dockerImageInstance = model.getDockerImageDescription();
     AzureDockerPreferredSettings dockerPreferredSettings = model.getDockerHostsManager().getDockerPreferredSettings();
-    Map<String, String> postEventProperties = new HashMap<String, String>();
 
     if (dockerPreferredSettings == null) {
       dockerPreferredSettings = new AzureDockerPreferredSettings();
@@ -110,8 +105,6 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
     dockerPreferredSettings.dockerApiName = dockerImageInstance.host.apiUrl;
     dockerPreferredSettings.dockerfileOption = dockerImageInstance.predefinedDockerfile;
     model.getDockerHostsManager().setDockerPreferredSettings(dockerPreferredSettings);
-    postEventProperties.put("DockerApiName", dockerImageInstance.host.apiUrl);
-    postEventProperties.put("DockerFileOption", dockerImageInstance.predefinedDockerfile);
 
     DefaultLoader.getIdeHelper().runInBackground(model.getProject(), "Deploying Docker Container on Azure", false, true, "Deploying Web app to a Docker host on Azure...", new Runnable() {
       @Override
@@ -162,14 +155,12 @@ public class AzureSelectDockerWizardDialog extends WizardDialog<AzureSelectDocke
             }
           });
         } catch (Exception e) {
-          postEventProperties.put("PublishError", e.getMessage());
           String msg = "An error occurred while attempting to deploy to the selected Docker host." + "\n" + e.getMessage();
           PluginUtil.displayErrorDialogInAWTAndLog("Failed to Deploy Web App as Docker Container", msg, e);
         }
       }
     });
 
-    AppInsightsCustomEvent.create("Deploy as DockerContainer", "", postEventProperties);
     return AzureDockerUtils.getUrl(dockerImageInstance);
   }
 
