@@ -767,8 +767,10 @@ public class AzureNewDockerConfigPage extends WizardPage {
 		dockerSelectStorageComboBox.removeAll();
 		String vmImageSize = (String) dockerHostVMSizeComboBox.getText();
 		if (vmImageSize != null) {
-			String vmImageType = vmImageSize.contains("_D") ? "Premium_LRS" : "Standard_LRS";
-			for (String storageAccName : dockerManager.getAvailableStorageAccounts(currentSubscription.id, vmImageType)) {
+			List<String> storageAccountsList = dockerManager.getAvailableStorageAccounts(currentSubscription.id, "Standard");
+			if (vmImageSize.contains("_D"))
+				storageAccountsList.addAll(dockerManager.getAvailableStorageAccounts(currentSubscription.id, "Premium"));
+			for (String storageAccName : storageAccountsList) {
 				dockerSelectStorageComboBox.add(storageAccName);
 			}
 		}

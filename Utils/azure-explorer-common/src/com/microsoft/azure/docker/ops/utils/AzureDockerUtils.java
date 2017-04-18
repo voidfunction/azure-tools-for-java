@@ -215,7 +215,7 @@ public class AzureDockerUtils {
     if (storageAccounts != null) {
       for (AzureDockerStorageAccount storageAccount : storageAccounts) {
         if (vmImageSizeType != null) {
-          if (storageAccount.skuType.toLowerCase().equals(vmImageSizeType.toLowerCase())) {
+          if (storageAccount.skuType.toLowerCase().startsWith(vmImageSizeType.toLowerCase())) {
             result.add(storageAccount.name);
           }
         } else {

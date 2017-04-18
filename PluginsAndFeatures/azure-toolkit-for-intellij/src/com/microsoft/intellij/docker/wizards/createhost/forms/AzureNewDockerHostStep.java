@@ -531,8 +531,10 @@ public class AzureNewDockerHostStep extends AzureNewDockerWizardStep {
     String vmImageSize = (String) dockerHostVMSizeComboBox.getSelectedItem();
     DefaultComboBoxModel<String> dockerHostStorageComboModel;
     if (vmImageSize != null) {
-      String vmImageType = vmImageSize.contains("_D") ? "Premium_LRS" : "Standard_LRS";
-      dockerHostStorageComboModel = new DefaultComboBoxModel<>(new Vector<>(dockerManager.getAvailableStorageAccounts(subscription.id, vmImageType)));
+      List<String> storageAccountsList = dockerManager.getAvailableStorageAccounts(subscription.id, "Standard");
+      if (vmImageSize.contains("_D"))
+        storageAccountsList.addAll(dockerManager.getAvailableStorageAccounts(subscription.id, "Premium"));
+      dockerHostStorageComboModel = new DefaultComboBoxModel<>(new Vector<>(storageAccountsList));
     } else {
       dockerHostStorageComboModel = new DefaultComboBoxModel<>();
     }
