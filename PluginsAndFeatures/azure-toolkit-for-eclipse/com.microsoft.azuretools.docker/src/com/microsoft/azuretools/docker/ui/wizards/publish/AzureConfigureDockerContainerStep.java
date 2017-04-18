@@ -23,6 +23,7 @@ import com.microsoft.azure.docker.AzureDockerHostsManager;
 import com.microsoft.azure.docker.model.AzureDockerImageInstance;
 import com.microsoft.azure.docker.model.KnownDockerImages;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
+import com.microsoft.azuretools.core.Activator;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -78,7 +79,7 @@ public class AzureConfigureDockerContainerStep extends WizardPage {
 	 * Create the wizard.
 	 */
 	public AzureConfigureDockerContainerStep(AzureSelectDockerWizard wizard) {
-		super("Deploying Docker Container on Azure");
+		super("Deploying Docker Container on Azure", "", Activator.getImageDescriptor("icons/large/Azure.png"));
 
 		this.wizard = wizard;		
 		this.dockerManager = wizard.getDockerManager();

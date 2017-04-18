@@ -56,7 +56,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 public class AzureDockerUtils {
-  public static boolean DEBUG = true;
+  public static boolean DEBUG = false;
 
   public static Boolean isValid(String str) {
     return str != null && !str.isEmpty();

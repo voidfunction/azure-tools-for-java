@@ -15,9 +15,6 @@
     <orderEntry type="module" module-name="azure-explorer-common" />
     <orderEntry type="module" module-name="azuretools-core" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.5" level="project" />
-    <orderEntry type="library" name="com.microsoft.azure:azure:1.0.0-beta6-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="com.microsoft.azure:azure-keyvault:1.0.0" level="project" />
-    <orderEntry type="library" name="applicationinsights-1.0.3" level="project" />
   </component>
   <component name="POM File Configuration" pomFile="" />
 </module>

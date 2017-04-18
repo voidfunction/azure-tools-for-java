@@ -381,42 +381,6 @@ public class AzureDockerVMOps {
     return dockerHostMap;
   }
 
-  public static Map<String, DockerHost> getDockerHosts(Azure azureClient, KeyVaultClient keyVaultClient) {
-    Map<String, AzureDockerCertVault> dockerVaultsMap = new HashMap<>();
-    // TODO
-    outerloop:
-    for (ResourceGroup group : azureClient.resourceGroups().list()) {
-      for (Vault vault : azureClient.vaults().listByResourceGroup(group.name())) {
-        // TODO: clean the work around for bug with getting vault props for a listed vault
-        vault = azureClient.vaults().getById(vault.id());
-
-        AzureDockerCertVault certVault = new AzureDockerCertVault();
-        certVault.name = vault.name();
-        certVault.resourceGroupName = vault.resourceGroupName();
-        certVault.region = vault.regionName();
-        certVault.uri = vault.vaultUri();
-        certVault.sid = azureClient.subscriptionId();
-        AzureDockerCertVault certVaultTemp = AzureDockerCertVaultOps.getVault(certVault, keyVaultClient);
-        if (certVaultTemp == null) {
-          try {
-            // try to assign read permissions to the key vault in case it was created with a different service principal
-            AzureDockerCertVaultOps.setVaultPermissionsRead(azureClient, certVault);
-            certVault = AzureDockerCertVaultOps.getVault(certVault, keyVaultClient);
-          } catch (Exception ignored) {
-          }
-        } else {
-          certVault = certVaultTemp;
-        }
-        if (certVault != null && certVault.hostName != null) {
-          // Key vault names are unique, DNS like across the cloud
-          dockerVaultsMap.put(vault.name(), certVault);
-        }
-      }
-    }
-
-    return getDockerHosts(azureClient, dockerVaultsMap);
-  }
-
   public static void installDocker(DockerHost dockerHost) {
     if (dockerHost == null) {
       throw new AzureDockerException("Unexpected param values; dockerHost cannot be null");

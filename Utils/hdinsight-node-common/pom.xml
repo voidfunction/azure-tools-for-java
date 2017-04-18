@@ -8,25 +8,6 @@
         <hdinsight.htmlcopy.enabled>false</hdinsight.htmlcopy.enabled>
         <project.build.encoding>UTF-8</project.build.encoding>
     </properties>
-    <repositories>
-        <!--
-        <repository>
-            <id>ossrh</id>
-            <name>Sonatype Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-        -->
-        <repository>
-            <id>commicrosoftazure-1688</id>
-            <name>commicrosoftazure-1688</name>
-            <url>http://oss.sonatype.org/service/local/repositories/commicrosoftazure-1688/content/</url>
-        </repository>
-    </repositories>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -199,11 +180,6 @@
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>

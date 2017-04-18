@@ -108,7 +108,7 @@
       <view
             category="com.microsoft.azuretools"
             class="com.microsoft.azuretools.hdinsight.SparkSubmissionToolWindowView"
-            id="com.microsoft.azure.hdinsight.sparksubmissiontoolwindowview"
+            id="com.microsoft.azuretools.hdinsight.SparkSubmissionToolWindowView"
             name="Spark Submision"
             icon="icons/Spark.png">
       </view>

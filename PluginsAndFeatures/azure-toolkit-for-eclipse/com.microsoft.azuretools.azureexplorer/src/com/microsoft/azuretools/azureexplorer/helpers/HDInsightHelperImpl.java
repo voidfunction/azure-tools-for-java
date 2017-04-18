@@ -92,5 +92,10 @@ public class HDInsightHelperImpl implements HDInsightHelper {
 		// TODO Auto-generated method stub
 		return instID;
 	}
+	
+    @Override
+    public boolean isIntelliJPlugin() {
+        return false;
+    }
 
 }

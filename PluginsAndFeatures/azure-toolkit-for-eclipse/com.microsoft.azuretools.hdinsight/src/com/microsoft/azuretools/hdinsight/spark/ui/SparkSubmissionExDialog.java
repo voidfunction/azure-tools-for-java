@@ -438,7 +438,7 @@ public class SparkSubmissionExDialog extends Dialog {
     
     private void initializeTable() {
 		for (int i = 0; i < SparkSubmissionParameter.defaultParameters.length; ++i) {
-			jobConfigMap.put(SparkSubmissionParameter.defaultParameters[i].getLeft(), "");
+			jobConfigMap.put(SparkSubmissionParameter.defaultParameters[i].first(), "");
 		}
 		tableViewer.setInput(jobConfigMap.entrySet());
 	}

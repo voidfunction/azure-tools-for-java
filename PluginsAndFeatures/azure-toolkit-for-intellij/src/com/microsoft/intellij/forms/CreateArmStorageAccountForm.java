@@ -409,6 +409,7 @@ public class CreateArmStorageAccountForm extends DialogWrapper {
                                     ReplicationTypes.Standard_LRS,
                                     ReplicationTypes.Standard_GRS,
                                     ReplicationTypes.Standard_RAGRS}));
+                    replicationComboBox.setSelectedItem(ReplicationTypes.Standard_RAGRS);
                 }
 
             } else {

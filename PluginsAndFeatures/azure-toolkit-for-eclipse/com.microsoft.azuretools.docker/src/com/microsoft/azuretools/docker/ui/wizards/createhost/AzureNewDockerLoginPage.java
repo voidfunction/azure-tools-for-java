@@ -24,6 +24,7 @@ import com.microsoft.azure.docker.model.AzureDockerCertVault;
 import com.microsoft.azure.docker.model.DockerHost;
 import com.microsoft.azure.docker.ops.AzureDockerCertVaultOps;
 import com.microsoft.azure.docker.ops.utils.AzureDockerValidationUtils;
+import com.microsoft.azuretools.core.Activator;
 
 import java.util.logging.Logger;
 
@@ -96,9 +97,7 @@ public class AzureNewDockerLoginPage extends WizardPage {
 	 * Create the wizard.
 	 */
 	public AzureNewDockerLoginPage(AzureNewDockerWizard wizard) {
-		super("Create Docker Host");
-		setTitle("Configure log in credentials and port settings");
-		setDescription("");
+		super("Create Docker Host", "Configure log in credentials and port settings", Activator.getImageDescriptor("icons/large/Azure.png"));
 
 		this.wizard = wizard;
 		this.dockerManager = wizard.getDockerManager();

@@ -404,8 +404,7 @@ public class SettingsStep extends WizardPage {
 
         for (StorageAccount storageAccount : storageAccounts.values()) {
             // VM and storage account need to be in the same region; only general purpose accounts support page blobs, so only they can be used to create vm
-            if (storageAccount.regionName().equals(wizard.getRegion().name()) 
-            		&& storageAccount.kind() == Kind.STORAGE
+            if (storageAccount.kind() == Kind.STORAGE
                     && storageAccount.sku().name() != SkuName.STANDARD_ZRS) {
                 filteredStorageAccounts.add(storageAccount);
             }

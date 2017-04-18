@@ -30,6 +30,7 @@ import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -61,6 +62,8 @@ import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.core.telemetry.AppInsightsCustomEvent;
 import com.microsoft.azuretools.core.ui.ErrorWindow;
 import com.microsoft.azuretools.core.ui.views.AzureDeploymentProgressNotification;
+import com.microsoft.azuretools.core.utils.Messages;
+import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.core.utils.ProgressDialog;
 import com.microsoft.azuretools.core.utils.UpdateProgressIndicator;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
@@ -115,6 +118,15 @@ public class WebAppDeployDialog extends TitleAreaDialog {
         return null;
     }
 
+    @Override
+    protected void configureShell(Shell newShell) {
+        super.configureShell(newShell);
+        Image image = PluginUtil.getImage("icons/large/Azure.png");
+        if (image != null) {
+        	setTitleImage(image);
+        }
+    }
+    
     /**
      * Create contents of the dialog.
      * @param parent

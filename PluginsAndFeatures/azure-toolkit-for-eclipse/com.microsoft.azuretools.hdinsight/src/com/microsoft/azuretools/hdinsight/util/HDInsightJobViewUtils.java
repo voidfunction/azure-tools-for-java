@@ -30,16 +30,14 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
 
 import com.microsoft.azure.hdinsight.spark.jobs.JobViewDummyHttpServer;
-import com.microsoft.azuretools.azureexplorer.Activator;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 
 public class HDInsightJobViewUtils {
     private static final int BUFFER_SIZE = 4096;
     private static final String HTML_ZIP_FILE_NAME = "hdinsight_jobview_html.zip";
     private static final String HDINSIGHT_JOB_VIEW_JAR_NAME = "hdinsight-job-view.jar";
-    private static final String HTML_FOLDER_NAME = "com.microsoft.azuretools.hdinsight/html";
+    private static final String HDINSIGIHT_FOLDER_NAME = "com.microsoft.azuretools.hdinsight";
     private static final String HDINSIGHT_JOBVIEW_EXTRACT_FLAG = "com.microsoft.azuretools.hdinsight.html.extract";
     
     public static void closeJobViewHttpServer() {
@@ -58,17 +56,18 @@ public class HDInsightJobViewUtils {
 				DefaultLoader.getUIHelper().showError("Cann't find Spark job view resources", "Job view");
 				return;
 			}
-			File indexRootFile = new File(PluginUtil.pluginFolder + File.separator + HTML_FOLDER_NAME);
-			FileUtils.deleteQuietly(indexRootFile);
-			if(!indexRootFile.exists()) {
-				indexRootFile.mkdirs();
+			File indexRootFile = new File(PluginUtil.pluginFolder, HDINSIGIHT_FOLDER_NAME);
+			if(indexRootFile.exists()) {
+				FileUtils.deleteQuietly(indexRootFile);
 			}
-			File toFile = new File(indexRootFile.getAbsolutePath(), HTML_ZIP_FILE_NAME);
-			File hdinsightJobViewToFile = new File(indexRootFile.getAbsolutePath(), HDINSIGHT_JOB_VIEW_JAR_NAME);
+			File htmlRootFile = new File(indexRootFile.getPath(), "html");
+			htmlRootFile.mkdirs();
+			File htmlToFile = new File(htmlRootFile.getAbsolutePath(), HTML_ZIP_FILE_NAME);
+			File hdinsightJobViewToFile = new File(indexRootFile, HDINSIGHT_JOB_VIEW_JAR_NAME);
 			try {
-				FileUtils.copyURLToFile(url, toFile);
+				FileUtils.copyURLToFile(url, htmlToFile);
 				FileUtils.copyURLToFile(hdinsightJobViewJarUrl, hdinsightJobViewToFile);
-				HDInsightJobViewUtils.unzip(toFile.getAbsolutePath(), toFile.getParent());
+				HDInsightJobViewUtils.unzip(htmlToFile.getAbsolutePath(), htmlToFile.getParent());
 				DefaultLoader.getIdeHelper().setProperty(HDINSIGHT_JOBVIEW_EXTRACT_FLAG, "true");
 			} catch (IOException e) {
 				DefaultLoader.getUIHelper().showError("Extract Job View Folder error:" + e.getMessage(), "Job view");

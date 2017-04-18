@@ -22,8 +22,7 @@
 package com.microsoft.azure.hdinsight.spark.common;
 
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import com.microsoft.azuretools.utils.Pair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -260,11 +259,11 @@ public class SparkSubmissionParameter {
             SparkSubmissionParameter.ExecutorMemory, SparkSubmissionParameter.ExecutorCores, SparkSubmissionParameter.NumExecutors};
 
     //the first value in pair should be in same order with parameterList
-    public static final Pair<String, String>[] defaultParameters = new ImmutablePair[]{
-            new ImmutablePair<String, String>(SparkSubmissionParameter.DriverMemory, SparkSubmissionParameter.DriverMemoryDefaultValue),
-            new ImmutablePair<String, String>(SparkSubmissionParameter.DriverCores, SparkSubmissionParameter.DriverCoresDefaultValue),
-            new ImmutablePair<String, String>(SparkSubmissionParameter.ExecutorMemory, SparkSubmissionParameter.ExecutorMemoryDefaultValue),
-            new ImmutablePair<String, String>(SparkSubmissionParameter.ExecutorCores, SparkSubmissionParameter.ExecutorCoresDefaultValue),
-            new ImmutablePair<String, String>(SparkSubmissionParameter.NumExecutors, SparkSubmissionParameter.NumExecutorsDefaultValue)
+    public static final Pair<String, String>[] defaultParameters = new Pair[]{
+            new Pair<String, String>(SparkSubmissionParameter.DriverMemory, SparkSubmissionParameter.DriverMemoryDefaultValue),
+            new Pair<String, String>(SparkSubmissionParameter.DriverCores, SparkSubmissionParameter.DriverCoresDefaultValue),
+            new Pair<String, String>(SparkSubmissionParameter.ExecutorMemory, SparkSubmissionParameter.ExecutorMemoryDefaultValue),
+            new Pair<String, String>(SparkSubmissionParameter.ExecutorCores, SparkSubmissionParameter.ExecutorCoresDefaultValue),
+            new Pair<String, String>(SparkSubmissionParameter.NumExecutors, SparkSubmissionParameter.NumExecutorsDefaultValue)
     };
 }

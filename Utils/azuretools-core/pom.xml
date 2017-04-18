@@ -31,25 +31,6 @@
     <properties>
         <artifact.name>${artifactId}-${version}.jar</artifact.name>
     </properties>
-    <repositories>
-        <!--
-        <repository>
-            <id>ossrh</id>
-            <name>Sonatype Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-        -->
-        <repository>
-            <id>commicrosoftazure-1688</id>
-            <name>commicrosoftazure-1688</name>
-            <url>http://oss.sonatype.org/service/local/repositories/commicrosoftazure-1688/content/</url>
-        </repository>
-    </repositories>
     <dependencyManagement>
         <dependencies>
             <dependency>

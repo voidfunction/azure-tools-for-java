@@ -21,7 +21,6 @@
  */
 package com.microsoft.tooling.msservices.serviceexplorer.azure.storage.asm;
 
-import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.BlobContainer;

@@ -441,11 +441,9 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
         Vector<StorageAccount> filteredStorageAccounts = new Vector<>();
 
         for (StorageAccount storageAccount : storageAccounts.values()) {
-            // VM and storage account need to be in the same region;
             // only general purpose accounts support page blobs, so only they can be used to create vm;
             // zone-redundant acounts not supported for vm
-            if (storageAccount.regionName().equals(model.getRegion().name())
-                    && storageAccount.kind() == Kind.STORAGE
+            if (storageAccount.kind() == Kind.STORAGE
                     && storageAccount.sku().name() != SkuName.STANDARD_ZRS) {
                 filteredStorageAccounts.add(storageAccount);
             }
@@ -814,8 +812,14 @@ public class SettingsStep extends WizardStep<VMWizardModel> {
                                     model.getPassword(),
                                     certData.length > 0 ? new String(certData) : null);
                     // update resource groups cache if new resource group was created when creating vm
+                    ResourceGroup rg = null;
                     if (createNewRadioButton.isSelected()) {
-                        ResourceGroup rg = azure.resourceGroups().getByName(resourceGroupName);
+                        rg = azure.resourceGroups().getByName(resourceGroupName);
+                        AzureModelController.addNewResourceGroup(model.getSubscription(), rg);
+                    }
+                    if (model.isWithNewStorageAccount() && model.getNewStorageAccount().isNewResourceGroup() &&
+                            (rg == null || !rg.name().equals(model.getNewStorageAccount().getResourceGroupName()))) {
+                        rg = azure.resourceGroups().getByName(model.getNewStorageAccount().getResourceGroupName());
                         AzureModelController.addNewResourceGroup(model.getSubscription(), rg);
                     }
 

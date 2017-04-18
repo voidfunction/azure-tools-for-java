@@ -28,10 +28,12 @@ import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.PublicIPAddress;
 import com.microsoft.azure.management.resources.Location;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
+import com.microsoft.azuretools.utils.AzureModelController;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
 import com.microsoft.azuretools.azureexplorer.Activator;
@@ -153,7 +155,17 @@ public class CreateVMWizard extends Wizard {
                             userName,
                             password,
                             certData.length > 0 ? new String(certData) : null);
-
+                    // update resource groups cache if new resource group was created when creating storage account
+                    ResourceGroup rg = null;
+                    if (isNewResourceGroup) {
+                        rg = azure.resourceGroups().getByName(resourceGroupName);
+                        AzureModelController.addNewResourceGroup(subscription, rg);
+                    }
+                    if (withNewStorageAccount && newStorageAccount.isNewResourceGroup() &&
+                            (rg == null ||!rg.name().equals(newStorageAccount.getResourceGroupName()))) {
+                        rg = azure.resourceGroups().getByName(newStorageAccount.getResourceGroupName());
+                        AzureModelController.addNewResourceGroup(subscription, rg);
+                    }
 //                    virtualMachine = AzureManagerImpl.getManager().refreshVirtualMachineInformation(virtualMachine);
                     DefaultLoader.getIdeHelper().invokeLater(new Runnable() {
                         @Override

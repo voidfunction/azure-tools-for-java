@@ -86,15 +86,15 @@ public class CreateProjectUtil {
 		final String rootPath = sourceRootFolder.getLocation().toFile().getAbsolutePath();
 
 		switch (id) {
-		case "com.microsoft.azuretools.hdinsight.local-scala.projwizard":
+		case "com.microsoft.azure.hdinsight.local-scala.projwizard":
 			createResourceStructForLocalRunScalaProject(sourceRootFolder, rootPath, project);
 			AppInsightsCustomEvent.create(Messages.SparkProjectSystemScalaCreation, null);
 			break;
-		case "com.microsoft.azuretools.hdinsight.local-java.projwizard":
+		case "com.microsoft.azure.hdinsight.local-java.projwizard":
 			AppInsightsCustomEvent.create(Messages.SparkProjectSystemJavaSampleCreation, null);
 			copyFileTo(Java_Local_RunSample, rootPath);
 			break;
-		case "com.microsoft.azuretools.hdinsight.cluster-scala.projwizard":
+		case "com.microsoft.azure.hdinsight.cluster-scala.projwizard":
 			AppInsightsCustomEvent.create(Messages.SparkProjectSystemScalaSampleCreation, null);
 			copyFileTo(Scala_Cluster_Run_Sample, rootPath);
 			break;
