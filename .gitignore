@@ -5,3 +5,11 @@
 bin/
 
 *.publishsettings
+
+PluginsAndFeatures/azure-toolkit-for-intellij/.idea/*
+PluginsAndFeatures/AddLibrary/AzureLibraries/com.microsoft.azuretools.sdk/*
+PluginsAndFeatures/azure-toolkit-for-eclipse/com.microsoft.azuretools.core/resources/*
+PluginsAndFeatures/AddLibrary/AzureLibraries/com.microsoft.azuretools.sdk/dependencies/*
+PluginsAndFeatures/AddLibrary/AzureLibraries/com.microsoft.azuretools.sdk/dependencies/**
+target/
+.idea/
