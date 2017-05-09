@@ -118,14 +118,13 @@ public class StreamUtil {
     private static ClassLoader classLoader = streamUtil.getClass().getClassLoader();
     private static final String SPARK_SUBMISSION_FOLDER = "SparkSubmission";
 
-    public static String uploadArtifactToADLS(@NotNull File localFile, IHDIStorageAccount storageAccount) throws Exception {
+    public static String uploadArtifactToADLS(@NotNull File localFile, IHDIStorageAccount storageAccount, @NotNull String uploadFolderPath) throws Exception {
         String rootPath = storageAccount.getDefaultContainerOrRootPath();
         if(rootPath.startsWith("/")) {
             rootPath = rootPath.substring(1);
         }
-        final String uuid = UUID.randomUUID().toString();
-        // rootPath should be in format: /path_name/
-        final String remoteFilePath = String.format("%s%s/%s/%s", rootPath, SPARK_SUBMISSION_FOLDER, uuid, localFile.getName());
+
+        final String remoteFilePath = String.format("%s%s/%s/%s", rootPath, SPARK_SUBMISSION_FOLDER, uploadFolderPath, localFile.getName());
         WebHDFSUtils.uploadFileToADLS(storageAccount, localFile, remoteFilePath, true);
         return String.format("adl://%s.azuredatalakestore.net/%s", storageAccount.getName(), remoteFilePath);
     }

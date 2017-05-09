@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.microsoft.azure.hdinsight.sdk.cluster.ClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
-import com.microsoft.azure.hdinsight.spark.jobs.structure.Application;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.Nullable;
 import org.apache.http.HttpEntity;
@@ -56,17 +55,17 @@ public class SparkRestUtil {
     private static JsonFactory jsonFactory = new JsonFactory();
     private static ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
 
-    @Nullable
-    public static List<Application> getApplications(@NotNull ClusterDetail clusterDetail) throws HDIException, IOException {
-        HttpEntity entity = getEntity(clusterDetail, "applications");
-        String entityType = entity.getContentType().getValue();
-        if( entityType.equals("application/json")){
-            String json = EntityUtils.toString(entity);
-            List<Application> apps = objectMapper.readValue(json, TypeFactory.defaultInstance().constructType(List.class, Application.class));
-            return apps;
-        }
-        return null;
-    }
+//    @Nullable
+//    public static List<Application> getApplications(@NotNull ClusterDetail clusterDetail) throws HDIException, IOException {
+//        HttpEntity entity = getEntity(clusterDetail, "applications");
+//        String entityType = entity.getContentType().getValue();
+//        if( entityType.equals("application/json")){
+//            String json = EntityUtils.toString(entity);
+//            List<Application> apps = objectMapper.readValue(json, TypeFactory.defaultInstance().constructType(List.class, Application.class));
+//            return apps;
+//        }
+//        return null;
+//    }
 
     public static HttpEntity getEntity(@NotNull IClusterDetail clusterDetail, @NotNull String restUrl) throws HDIException, IOException {
         provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(clusterDetail.getHttpUserName(),clusterDetail.getHttpPassword()));

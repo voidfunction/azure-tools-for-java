@@ -48,9 +48,7 @@ import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
 
 import java.io.*;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -224,7 +222,7 @@ public class SparkSubmitHelper {
         }
     }
 
-    public String uploadFileToHDFS(Project project, String localFile, IHDIStorageAccount storageAccount, String defaultContainerName, String uniqueFolderId)
+    public String uploadFileToHDFS(Project project, String localFile, IHDIStorageAccount storageAccount, String defaultContainerName, String uploadFolderPath)
             throws Exception {
         final File file = new File(localFile);
         if(storageAccount.getAccountType() == StorageAccountTypeEnum.BLOB) {
@@ -240,7 +238,7 @@ public class SparkSubmitHelper {
 
                     HDStorageAccount blobStorageAccount = (HDStorageAccount) storageAccount;
                     BlobContainer defaultContainer = getSparkClusterDefaultContainer(blobStorageAccount, defaultContainerName);
-                    String path = String.format("SparkSubmission/%s/%s", uniqueFolderId, file.getName());
+                    String path = String.format("SparkSubmission/%s/%s", uploadFolderPath, file.getName());
                     String uploadedPath = String.format("wasb://%s@%s/%s", defaultContainerName, blobStorageAccount.getFullStorageBlobName(), path);
 
                     HDInsightUtil.showInfoOnSubmissionMessageWindow(project,
@@ -263,7 +261,7 @@ public class SparkSubmitHelper {
             String uploadPath = String.format("adl://%s.azuredatalakestore.net%s%s", storageAccount.getName(), storageAccount.getDefaultContainerOrRootPath(), "SparkSubmission");
             HDInsightUtil.showInfoOnSubmissionMessageWindow(project,
                     String.format("Info : Begin uploading file %s to Azure Datalake store %s ...", localFile, uploadPath));
-            String uploadedPath = StreamUtil.uploadArtifactToADLS(file, storageAccount);
+            String uploadedPath = StreamUtil.uploadArtifactToADLS(file, storageAccount, uploadFolderPath);
             HDInsightUtil.showInfoOnSubmissionMessageWindow(project,
                     String.format("Info : Submit file to Azure Datalake store '%s' successfully.", uploadedPath));
             return uploadedPath;
@@ -337,10 +335,19 @@ public class SparkSubmitHelper {
     public static String uploadFileToHDFS(@NotNull Project project, @NotNull IClusterDetail selectedClusterDetail, @NotNull String buildJarPath) throws Exception {
 
         HDInsightUtil.showInfoOnSubmissionMessageWindow(project, String.format("Info : Get target jar from %s.", buildJarPath));
+        final String uploadShortPath = getFormatPathByDate();
+        return SparkSubmitHelper.getInstance().uploadFileToHDFS(project, buildJarPath,
+                selectedClusterDetail.getStorageAccount(), selectedClusterDetail.getStorageAccount().getDefaultContainerOrRootPath(), uploadShortPath);
+    }
+
+    private static String getFormatPathByDate() {
+        int year = Calendar.getInstance(TimeZone.getTimeZone("UTC")).get(Calendar.YEAR);
+        int month = Calendar.getInstance(TimeZone.getTimeZone("UTC")).get(Calendar.MONTH);
+        int day = Calendar.getInstance(TimeZone.getTimeZone("UTC")).get(Calendar.DAY_OF_MONTH);
+
         String uniqueFolderId = UUID.randomUUID().toString();
 
-        return SparkSubmitHelper.getInstance().uploadFileToHDFS(project, buildJarPath,
-                selectedClusterDetail.getStorageAccount(), selectedClusterDetail.getStorageAccount().getDefaultContainerOrRootPath(), uniqueFolderId);
+        return String.format("%04d/%02d/%02d/%s", year, month, day, uniqueFolderId);
     }
 
     public static boolean isLocalArtifactPath(String path) {

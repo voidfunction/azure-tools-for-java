@@ -25,9 +25,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,15 +36,8 @@ import java.util.regex.Pattern;
 import com.google.common.base.Joiner;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpException;
 import com.microsoft.azure.hdinsight.common.StreamUtil;
-import com.microsoft.azure.hdinsight.sdk.cluster.EmulatorClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
-import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
 import com.microsoft.azure.hdinsight.sdk.storage.IHDIStorageAccount;
@@ -63,7 +57,6 @@ import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.hdinsight.Activator;
 import com.microsoft.azuretools.hdinsight.common2.HDInsightUtil;
 import com.microsoft.azuretools.hdinsight.util.Messages;
-import com.sun.org.apache.regexp.internal.recompile;
 
 public class SparkSubmitHelper {
 	private static SparkSubmitHelper ourInstance = new SparkSubmitHelper();
@@ -195,7 +188,7 @@ public class SparkSubmitHelper {
         }
     }
 
-    public String uploadFileToHDFS(/*Project project,*/ String localFile,IHDIStorageAccount storageAccount, String defaultContainerName, String uniqueFolderId)
+    public String uploadFileToHDFS(/*Project project,*/ String localFile,IHDIStorageAccount storageAccount, String defaultContainerName, String uploadFolderPath)
             throws Exception {
         final File file = new File(localFile);
         if(storageAccount.getAccountType() == StorageAccountTypeEnum.BLOB) {
@@ -211,7 +204,7 @@ public class SparkSubmitHelper {
                     
                     HDStorageAccount blobStorageAccount = (HDStorageAccount) storageAccount;
                     BlobContainer defaultContainer = getSparkClusterDefaultContainer(blobStorageAccount, defaultContainerName);
-                    String path = String.format("SparkSubmission/%s/%s", uniqueFolderId, file.getName());
+                    String path = String.format("SparkSubmission/%s/%s", uploadFolderPath, file.getName());
                     String uploadedPath = String.format("wasb://%s@%s/%s", defaultContainerName, blobStorageAccount.getFullStorageBlobName(), path);
 
                     HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Begin uploading file %s to Azure Blob Storage Account %s ...", localFile, uploadedPath));
@@ -232,7 +225,7 @@ public class SparkSubmitHelper {
         } else if(storageAccount.getAccountType() == StorageAccountTypeEnum.ADLS) {
             String uploadPath = String.format("adl://%s.azuredatalakestore.net/%s/%s", storageAccount.getName(), storageAccount.getDefaultContainerOrRootPath(), "SparkSubmission");
             HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Begin uploading file %s to Azure Data Lake Store %s ...", localFile, uploadPath));
-            String uploadedPath = StreamUtil.uploadArtifactToADLS(file, storageAccount);
+            String uploadedPath = StreamUtil.uploadArtifactToADLS(file, storageAccount, uploadFolderPath);
             HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Submit file to azure blob '%s' successfully.", uploadedPath));
             return uploadedPath;
         } else {
@@ -347,10 +340,10 @@ public class SparkSubmitHelper {
     public static String uploadFileToHDFS(/*@NotNull Project project,*/ @NotNull IClusterDetail selectedClusterDetail, @NotNull String buildJarPath) throws Exception {
 
         HDInsightUtil.showInfoOnSubmissionMessageWindow(String.format("Info : Get target jar from %s.", buildJarPath));
-        String uniqueFolderId = UUID.randomUUID().toString();
+        final String uploadShortPath = getFormatPathByDate();
 
         return SparkSubmitHelper.getInstance().uploadFileToHDFS(/*project,*/ buildJarPath,
-                selectedClusterDetail.getStorageAccount(), selectedClusterDetail.getStorageAccount().getDefaultContainerOrRootPath(), uniqueFolderId);
+                selectedClusterDetail.getStorageAccount(), selectedClusterDetail.getStorageAccount().getDefaultContainerOrRootPath(), uploadShortPath);
     }
     
     public static String getLivyConnectionURL(IClusterDetail clusterDetail) {
@@ -372,5 +365,15 @@ public class SparkSubmitHelper {
 
         return path.endsWith(".jar");
 
+    }
+    
+    private static String getFormatPathByDate() {
+        int year = Calendar.getInstance(TimeZone.getTimeZone("UTC")).get(Calendar.YEAR);
+        int month = Calendar.getInstance(TimeZone.getTimeZone("UTC")).get(Calendar.MONTH);
+        int day = Calendar.getInstance(TimeZone.getTimeZone("UTC")).get(Calendar.DAY_OF_MONTH);
+
+        String uniqueFolderId = UUID.randomUUID().toString();
+
+        return String.format("%04d/%02d/%02d/%s", year, month, day, uniqueFolderId);
     }
 }

@@ -24,14 +24,13 @@ package com.microsoft.azure.hdinsight.spark.jobs;
 import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.common.task.TaskExecutor;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
-import com.microsoft.azure.hdinsight.spark.jobs.structure.Application;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 
 import java.util.List;
 
 public class SparkJobInfo {
     private IClusterDetail clusterDetail;
-    private List<Application> applications;
+//    private List<Application> applications;
     private String currentSelectedApp;
 
     public SparkJobInfo(@NotNull IClusterDetail clusterDetail) {

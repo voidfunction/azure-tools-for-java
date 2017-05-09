@@ -37,6 +37,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 
+import java.nio.charset.Charset;
+
 public class LivyTask extends Task<String> {
     private static Logger LOG = Logger.getLogger(LivyTask.class);
 
@@ -66,6 +68,6 @@ public class LivyTask extends Task<String> {
 
         HttpEntity httpEntity = response.getEntity();
 
-        return IOUtils.toString(httpEntity.getContent());
+        return IOUtils.toString(httpEntity.getContent(), Charset.forName("utf-8"));
     }
 }
