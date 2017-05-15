@@ -6,17 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="auth-manage" />
-        <module name="azure-explorer-common" />
-        <module name="azuretools-core" />
-        <module name="hdinsight-node-common" />
+        <module name="azure-toolkit-for-intellij" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="auth-manage" target="1.8" />
-      <module name="azure-explorer-common" target="1.8" />
-      <module name="azuretools-core" target="1.8" />
-      <module name="hdinsight-node-common" target="1.8" />
+      <module name="azure-toolkit-for-intellij" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>
