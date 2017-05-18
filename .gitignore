@@ -98,3 +98,8 @@ fabric.properties
 # Build tmp folder
 .repository
 artifacts
+
+# generated gradle files
+gradle/
+gradlew
+gradlew.bat

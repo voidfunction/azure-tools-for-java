@@ -27,6 +27,7 @@ import com.microsoft.azure.hdinsight.common.MultiHttpFutureCallback;
 import com.microsoft.azure.hdinsight.common.task.*;
 import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
+import com.microsoft.azure.hdinsight.spark.jobs.framework.HttpRequestType;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -91,7 +92,7 @@ public class JobViewDummyHttpServer {
 
                     IClusterDetail clusterDetail = requestDetail.getClusterDetail();
                     final String queryUrl = requestDetail.getQueryUrl();
-                    if (requestDetail.getApiType() == RequestDetail.APIType.YarnHistory) {
+                    if (requestDetail.getApiType() == HttpRequestType.YarnHistory) {
                         TaskExecutor.submit(new YarnHistoryTask(clusterDetail, queryUrl, new HttpFutureCallback(httpExchange) {
                             @Override
                             public void onSuccess(String str) {
@@ -119,7 +120,7 @@ public class JobViewDummyHttpServer {
                             }
 
                         }));
-                    } else if (requestDetail.getApiType() == RequestDetail.APIType.LivyBatchesRest) {
+                    } else if (requestDetail.getApiType() == HttpRequestType.LivyBatchesRest) {
                         TaskExecutor.submit(new LivyTask(clusterDetail, queryUrl, new HttpFutureCallback(httpExchange) {
                             @Override
                             public void onSuccess(String str) {
@@ -139,7 +140,7 @@ public class JobViewDummyHttpServer {
                                 }
                             }
                         }));
-                    } else if(requestDetail.getApiType() == RequestDetail.APIType.MultiTask){
+                    } else if(requestDetail.getApiType() == HttpRequestType.MultiTask){
                         TaskExecutor.submit(new MultiRestTask(clusterDetail, requestDetail.getQueryUrls(), new MultiHttpFutureCallback(httpExchange){
                             public void onSuccess(List<String> strs) {
                                 httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");

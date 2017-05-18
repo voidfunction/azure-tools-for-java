@@ -19,27 +19,39 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.jobs;
+package com.microsoft.azure.hdinsight.spark.jobs.framework;
 
-import com.intellij.openapi.components.ApplicationComponent;
-import com.microsoft.azure.hdinsight.spark.jobs.JobViewHttpServer;
-import org.jetbrains.annotations.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 
-public class JobViewApplicationComponent implements ApplicationComponent {
+public enum HttpRequestType {
+    SparkRest("spark"),
+    YarnRest("yarn"),
+    YarnHistory("yarn-history"),
+    LivyBatchesRest("livy"),
+    MultiTask("multi-task"),
+    None("NONE");
 
-    @NotNull
-    @Override
-    public String getComponentName() {
-        return JobViewApplicationComponent.class.getName();
+    private final String type;
+
+    private HttpRequestType(@NotNull String type) {
+        this.type = type;
     }
 
-    @Override
-    public void initComponent() {
-        JobViewHttpServer.initialize();
+    public String getText() {
+        return type;
     }
 
-    @Override
-    public void disposeComponent() {
-        JobViewHttpServer.close();
+    public static HttpRequestType fromString(String text) {
+        if (StringHelper.isNullOrWhiteSpace(text)) {
+            return None;
+        }
+
+        for (HttpRequestType element : HttpRequestType.values()) {
+            if (element.type.equalsIgnoreCase(text)) {
+                return element;
+            }
+        }
+        return None;
     }
 }

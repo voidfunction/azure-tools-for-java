@@ -25,6 +25,8 @@ import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.Nullable;
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -37,7 +39,7 @@ import java.util.regex.Pattern;
 public class RequestDetail {
     private final String clusterFormatId;
     private final String restUrl;
-    private final APIType apiType;
+    private final HttpRequestType apiType;
 
     private static Pattern clusterPattern = Pattern.compile("^/clusters/([^/]*)(/.*)");
     private static final String sparkPreRestUrl = "https://%s.azurehdinsight.net/sparkhistory/api/v1";
@@ -48,14 +50,15 @@ public class RequestDetail {
     @NotNull
     private IClusterDetail clusterDetail;
 
-    private Map<String, String> queriesMap = new HashMap<String, String>();
+    private Map<String, String> queriesMap = new HashMap<>();
 
-    public enum APIType {
-        SparkRest,
-        YarnRest,
-        YarnHistory,
-        LivyBatchesRest,
-        MultiTask
+    public static RequestDetail getRequestDetail(@NotNull HttpExchange httpExchange) {
+        final Headers headers = httpExchange.getRequestHeaders();
+        final String clusterName = headers.getFirst("Cluster-name");
+        final String ResetType = headers.getFirst("Rest-type");
+
+        // TODO :
+        return null;
     }
 
     @Nullable
@@ -86,18 +89,18 @@ public class RequestDetail {
         if (queriesMap.containsKey("restType")) {
             String type = queriesMap.get("restType");
             if (type.equalsIgnoreCase("yarn")) {
-                apiType = APIType.YarnRest;
+                apiType = HttpRequestType.YarnRest;
             } else if (type.equalsIgnoreCase("yarnhistory")) {
-                apiType = APIType.YarnHistory;
+                apiType = HttpRequestType.YarnHistory;
             } else if (type.equalsIgnoreCase("livy")) {
-                apiType = APIType.LivyBatchesRest;
+                apiType = HttpRequestType.LivyBatchesRest;
             } else {
-                apiType = APIType.SparkRest;
+                apiType = HttpRequestType.SparkRest;
             }
         } else if(isMultiQuery()) {
-            apiType = APIType.MultiTask;
+            apiType = HttpRequestType.MultiTask;
         } else {
-            apiType = APIType.SparkRest;
+            apiType = HttpRequestType.SparkRest;
         }
     }
 
@@ -127,7 +130,7 @@ public class RequestDetail {
     public String getQueryUrl() {
         String queryUrl = String.format(getPreURl(), clusterDetail.getName()) + getRestUrl();
         // get error message for Yarn website
-        if (getApiType() == RequestDetail.APIType.YarnHistory) {
+        if (getApiType() == HttpRequestType.YarnHistory) {
             if(queryUrl.endsWith("stderr")) {
                 queryUrl = queryUrl + "?start=0";
             }
@@ -163,6 +166,7 @@ public class RequestDetail {
         }
 
     }
+
     public String getClusterFormatId() {
         return clusterFormatId;
     }
@@ -171,7 +175,7 @@ public class RequestDetail {
         return restUrl;
     }
 
-    public APIType getApiType() {
+    public HttpRequestType getApiType() {
         return apiType;
     }
 

@@ -24,8 +24,12 @@ package com.microsoft.azure.hdinsight.sdk.rest.spark;
 
 import com.microsoft.azure.hdinsight.sdk.rest.AttemptWithAppId;
 import com.microsoft.azure.hdinsight.sdk.rest.IConvertible;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class Application implements IConvertible
 {
@@ -65,11 +69,16 @@ public class Application implements IConvertible
         this.name = name;
     }
 
-    public AttemptWithAppId getLastAttemptWithAppId() {
+    public int getLastAttemptId() {
+        return attempts.size();
+    }
+
+    public AttemptWithAppId getLastAttemptWithAppId(@NotNull String clusterName) {
         final int attemptTimes = attempts.size();
-        Attempt lastAttempt = attempts.stream().filter(attempt -> {
-            return Integer.valueOf(attempt.getAttemptId()) == attemptTimes;
-        }).findFirst().get();
-        return new AttemptWithAppId("spark2withblob",getId(), lastAttempt);
+        Optional<Attempt> lastAttempt = attempts.stream()
+                .filter(attempt -> Integer.valueOf(attempt.getAttemptId()) == attemptTimes)
+                .findFirst();
+
+        return lastAttempt.isPresent() ? new AttemptWithAppId(clusterName, getId(), lastAttempt.get()) : null;
     }
 }

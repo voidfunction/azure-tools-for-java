@@ -19,27 +19,32 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.jobs;
+package com.microsoft.azure.hdinsight.spark.jobs;
 
-import com.intellij.openapi.components.ApplicationComponent;
-import com.microsoft.azure.hdinsight.spark.jobs.JobViewHttpServer;
-import org.jetbrains.annotations.NotNull;
+import com.microsoft.azure.hdinsight.common.HttpFutureCallback;
+import com.microsoft.azure.hdinsight.common.MultiHttpFutureCallback;
+import com.microsoft.azure.hdinsight.common.task.*;
+import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
+import com.microsoft.azure.hdinsight.spark.jobs.framework.IRequest;
+import com.microsoft.azure.hdinsight.spark.jobs.framework.JobRequestDetails;
+import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
+import com.microsoft.azure.hdinsight.spark.jobs.framework.HttpRequestType;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
-public class JobViewApplicationComponent implements ApplicationComponent {
+import java.io.IOException;
+import java.util.List;
 
-    @NotNull
+public class JobHttpHandler implements HttpHandler {
+
     @Override
-    public String getComponentName() {
-        return JobViewApplicationComponent.class.getName();
-    }
+    public void handle(HttpExchange httpExchange) throws IOException {
+        JobRequestDetails requestDetail = JobRequestDetails.getJobRequestDetail(httpExchange);
+        // TODO : get message from spark history server
 
-    @Override
-    public void initComponent() {
-        JobViewHttpServer.initialize();
-    }
-
-    @Override
-    public void disposeComponent() {
-        JobViewHttpServer.close();
+        JobUtils.setResponse(httpExchange, "");
     }
 }
+

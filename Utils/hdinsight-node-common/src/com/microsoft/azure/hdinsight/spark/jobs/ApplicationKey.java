@@ -19,41 +19,50 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.common;
+package com.microsoft.azure.hdinsight.spark.jobs;
 
-
-import com.google.common.util.concurrent.FutureCallback;
+import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
-import com.sun.net.httpserver.HttpExchange;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.OutputStream;
+public class ApplicationKey {
+    private final IClusterDetail clusterDetail;
+    private final String appId;
 
-public abstract class  HttpFutureCallback implements FutureCallback<String> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpFutureCallback.class);
+    public ApplicationKey(@NotNull IClusterDetail clusterDetail, @NotNull String appId) {
+        this.clusterDetail = clusterDetail;
+        this.appId = appId;
+    }
 
-    private final HttpExchange httpExchange;
+    public IClusterDetail getClusterDetails() {
+        return clusterDetail;
+    }
 
-    public HttpFutureCallback(@NotNull HttpExchange httpExchange) {
-        this.httpExchange = httpExchange;
+    public String getClusterConnString() {
+        return getClusterDetails().getConnectionUrl();
+    }
+
+    public String getAppId() {
+        return appId;
     }
 
     @Override
-    public void onFailure(Throwable t) {
-        dealWithFailure(t,httpExchange);
+    public int hashCode() {
+        return getClusterConnString().toLowerCase().hashCode() + getAppId().toLowerCase().hashCode();
     }
 
-    protected static void dealWithFailure(@NotNull Throwable throwable,@NotNull final HttpExchange httpExchange) {
-        httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-        try {
-            String str = throwable.getMessage();
-            httpExchange.sendResponseHeaders(200, str.length());
-            OutputStream stream = httpExchange.getResponseBody();
-            stream.write(str.getBytes());
-            stream.close();
-        }catch (Exception e) {
-            LOGGER.error("get Job History",e);
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
         }
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof ApplicationKey) {
+            ApplicationKey that = (ApplicationKey)obj;
+            return getClusterConnString().equalsIgnoreCase(that.getClusterConnString()) &&
+                    getAppId().equalsIgnoreCase(that.getClusterConnString());
+        }
+        return false;
     }
 }

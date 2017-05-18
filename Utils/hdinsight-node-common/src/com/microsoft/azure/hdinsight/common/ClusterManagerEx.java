@@ -95,7 +95,7 @@ public class ClusterManagerEx {
             cachedClusterDetails = getClusterDetails(projectObject);
         }
 
-        if (isIgnoreErrorCluster == true) {
+        if (isIgnoreErrorCluster) {
             List<IClusterDetail> result = new ArrayList<>();
             for (IClusterDetail clusterDetail : cachedClusterDetails) {
                 if (clusterDetail instanceof ClusterDetail && !clusterDetail.getState().equalsIgnoreCase("Running")) {

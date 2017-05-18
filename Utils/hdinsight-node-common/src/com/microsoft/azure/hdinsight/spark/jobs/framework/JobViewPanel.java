@@ -22,6 +22,7 @@
 
 package com.microsoft.azure.hdinsight.spark.jobs.framework;
 
+import com.microsoft.azure.hdinsight.spark.jobs.JobViewHttpServer;
 import com.microsoft.azure.hdinsight.spark.jobs.JobUtils;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
@@ -37,44 +38,63 @@ import netscape.javascript.JSObject;
 
 public final class JobViewPanel extends JFXPanel {
 
-    private final JobUtils jobUtil;
+    private final Object jobUtil;
     private final String rootPath;
-    private final String id;
+    private final String clusterName;
     private WebView webView;
     private WebEngine webEngine;
     private boolean alreadyLoad = false;
 
-    public JobViewPanel(@NotNull String rootPath, @NotNull String uuid) {
+    private static final String QUERY_TEMPLATE = "?clusterName=%s&port=%s&engineType=javafx";
+
+    public JobViewPanel(@NotNull String rootPath, @NotNull String clusterName) {
         this.rootPath = rootPath;
-        this.id = uuid;
+        this.clusterName = clusterName;
         this.jobUtil = new JobUtils();
         init(this);
     }
 
     private void init(final JFXPanel panel) {
         String url = rootPath + "/com.microsoft.hdinsight/hdinsight/job/html/index.html";
-        url = url.replace("\\", "/");
-        final String queryString = "?projectid=" + id + "&engintype=javafx";
-        final String weburl = "file:///" + url + queryString;
+         // for debug only
+        final String debugFlag = System.getProperty("hdinsight.debug");
+        if(!StringHelper.isNullOrWhiteSpace(debugFlag)) {
+            final String workFolder = System.getProperty("user.dir");
+            final String path = "resource/hdinsight-node-common/resources/htmlResources/hdinsight/job/html/index.html";
+            url = String.format("file:///%s/%s", workFolder, path);
+        }
+        // end of for debug only part
+
+       final String queryString = String.format(QUERY_TEMPLATE, clusterName, JobViewHttpServer.getPort());
+        final String webUrl = "file:///" + url + queryString;
 
         Platform.setImplicitExit(false);
-        Platform.runLater(()-> {
-            webView = new WebView();
-            webEngine = webView.getEngine();
-            webEngine.setJavaScriptEnabled(true);
-            webEngine.getLoadWorker().stateProperty().addListener(
-                    (ObservableValue<? extends Worker.State> ov, Worker.State oldState,
-                     Worker.State newState) -> {
-                        if (newState == Worker.State.SUCCEEDED) {
-                            JSObject win = (JSObject) webEngine.executeScript("window");
-                            win.setMember("JobUtils", jobUtil);
-                        }
-                    });
-            panel.setScene(new Scene(webView));
-
-            if (!alreadyLoad) {
-                webEngine.load(weburl);
-                alreadyLoad = true;
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                webView = new WebView();
+                panel.setScene(new Scene(webView));
+                webEngine = webView.getEngine();
+                webEngine.setJavaScriptEnabled(true);
+                final JSObject win = (JSObject) webEngine.executeScript("window");
+                if (!alreadyLoad) {
+                    webEngine.load(webUrl);
+                    alreadyLoad = true;
+                    webEngine.getLoadWorker().stateProperty().addListener(
+                            new ChangeListener<Worker.State>() {
+                                @Override
+                                public void changed(ObservableValue<? extends Worker.State> ov,
+                                                    Worker.State oldState, Worker.State newState) {
+                                    if (newState == Worker.State.SUCCEEDED) {
+                                        // ignore it if 'JobUtils' has been set
+                                        if (win.getMember("JobUtils").toString().equalsIgnoreCase("undefined")) {
+                                            win.setMember("JobUtils", jobUtil);
+                                        }
+                                    }
+                                }
+                            }
+                    );
+                }
             }
         });
     }

@@ -19,27 +19,14 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.jobs;
+package com.microsoft.azure.hdinsight.sdk.rest;
 
-import com.intellij.openapi.components.ApplicationComponent;
-import com.microsoft.azure.hdinsight.spark.jobs.JobViewHttpServer;
-import org.jetbrains.annotations.NotNull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-public class JobViewApplicationComponent implements ApplicationComponent {
-
-    @NotNull
-    @Override
-    public String getComponentName() {
-        return JobViewApplicationComponent.class.getName();
-    }
-
-    @Override
-    public void initComponent() {
-        JobViewHttpServer.initialize();
-    }
-
-    @Override
-    public void disposeComponent() {
-        JobViewHttpServer.close();
+public class RestUtil {
+    public static  <T> List<T> getEmptyList(Class<T> tClass) {
+        return Collections.unmodifiableList(new ArrayList<T>(0));
     }
 }

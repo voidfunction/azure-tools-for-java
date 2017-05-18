@@ -1,61 +1,85 @@
-var localhost = "http://localhost:39128/clusters/";
+"use strict";
+
+// to cache all job related object
+var spark;
 
 $(function () {
+    initiate();
+    commandBinding();
+    getBasicInfoFromUrl();
+    getJobHistory();
+});
+
+function initiate() {
     $('#jobGraphDiv').hide();
     // hide the error messagae tab first
     // $('#myTab li:eq(0)').hide();
     // show the job output tab
-    $('#myTable').colResizable({liveDrag:true});
-    $('#myTable').dragtable();
-    $('#leftDiv').resizable();
-    $('#myTab li:eq(4) a').tab('show');
-    $('#jobGraphLink').on('shown.bs.tab', function() {
-        $('#jobGraphDiv').show();
+    var myTable = $('#myTable');
+    myTable.colResizable({liveDrag:true});
+    myTable.dragtable();
+
+    var leftDiv = $('#leftDiv');
+    var rightDiv = $('#rightDiv');
+    leftDiv.resizable();
+
+    myTable.find('li:eq(4) a').tab('show');
+
+    var tableDiv =  $('#tableDIv');
+    tableDiv.resizable();
+    tableDiv.resize(function(){
+        rightDiv.width($('#parent').width()-$('#tableDIv').width());
     });
 
-    $('#jobGraphLink').on('hidden.bs.tab', function() {
-        $('#jobGraphDiv').hide();
-    });
+    if (!String.prototype.format) {
+        String.prototype.format = function() {
+            var args = arguments;
+            return this.replace(/{(\d+)}/g, function(match, number) {
+                return typeof args[number] !== 'undefined'
+                    ? args[number]
+                    : match
+                    ;
+            });
+        };
+    }
+}
 
-    $("#tableDIv").resizable();
-    $('#tableDIv').resize(function(){
-        $('#rightDiv').width($("#parent").width()-$("#tableDIv").width());
-    });
+function commandBinding() {
+    $('#JobHistoryTbody').on('click', 'tr', function () {
+        // clean all generated values
+        spark.isJobGraphGenerated = false;
+        spark.currentSelectedJobs = null;
+        spark.currentSelectedStages = null;
+        spark.appId = null;
+        spark.attemptId = null;
+        spark.applicationName = null;
 
-
-    getProjectId();
-    $("#JobHistoryTbody").on('click', 'tr', function () {
-        isJobGraphGenerated = false;
-        currentSelectedJobs = null;
-        currentSelectedStages = null;
-        appId = null;
-        attemptId = null;
-        applicationName = null;
-
-        $("#summaryTitle").html("Application details");
-        $("#basicInformationTitle").html("Basic Application Information");
+        $('#summaryTitle').html("Application details");
+        $('#basicInformationTitle').html("Basic Application Information");
         d3.selectAll("#stageSummaryTbody tr").remove();
         d3.selectAll("#taskSummaryTbody tr").remove();
-        $("#errorMessage").text("");
-        $("#jobOutputTextarea").text("");
-        $("#livyJobLog").text("");
-        $("#sparkDriverLog").text("");
-        var rows = $("#JobHistoryTbody tr");
+        $('#errorMessage').text("");
+        $('#jobOutputTextarea').text("");
+        $('#livyJobLog').text("");
+        $('#sparkDriverLog').text("");
+        var rows = $('#JobHistoryTbody').find('tr');
         rows.removeClass('selected-hight');
         $(this).addClass('selected-hight');
 
-        //get Application Id
-        appId = $(this).find('td:eq(1)').text();
-        // get last attempt
-        attemptId = $(this).find('td:eq(4)').text();
-        applicationName = $(this).find('td:eq(2)').text();
-        $("#jobName").text("Application: " + applicationName);
 
-        if (appId == null) {
+        //get Application Id
+        spark.appId = $(this).find('td:eq(1)').text();
+
+        // get last attempt
+        spark.attemptId = $(this).find('td:eq(4)').text();
+        spark.applicationName = $(this).find('td:eq(2)').text();
+        $('#jobName').text("Application: " + spark.applicationName);
+
+        if (spark.appId === 'undefined') {
             return;
         }
         // save current Application ID to LocalStorage
-        localStorage.setItem("selectedAppID", appId);
+        localStorage.setItem('selectedAppID', spark.appId);
         setBasicInformation();
         setAMcontainer();
         setDiagnosticsLog();
@@ -67,19 +91,19 @@ $(function () {
         setExecutorsDetails();
     });
 
-    $("#sparkEventButton").click(function () {
-        JobUtils.openSparkEventLog(projectId, typeof appId == 'undefined' ? "" : appId.toString());
+    $('#sparkEventButton').click(function () {
+        JobUtils.openSparkEventLog(projectId, typeof appId === 'undefined' ? "" : appId.toString());
     });
 
-    $("#livyLogButton").click(function() {
-        JobUtils.openLivyLog(typeof appId == 'undefined' ? "" : appId.toString());
+    $('#livyLogButton').click(function() {
+        JobUtils.openLivyLog(typeof appId === 'undefined' ? "" : appId.toString());
     });
 
     $("#openSparkUIButton").click(function () {
-        var id = typeof appId == 'undefined' ? "" : appId.toString();
+        var id = typeof appId === 'undefined' ? "" : appId.toString();
         if (id != "") {
             var application = $.grep(applicationList, function (e) {
-                return e.id == id;
+                return e.id === id;
             });
             if (application != null && application.length == 1) {
                 var currentAttemptId = application[0].attempts[0].attemptId;
@@ -108,21 +132,11 @@ $(function () {
         location.reload();
         refreshGetSelectedApplication();
     });
-
-    getJobHistory();
-});
-
-function getJobHistory() {
-    getMessageAsync(localhost + projectId + "/applications/", function (s) {
-        writeToTable(s);
-        refreshGetSelectedApplication();
-        $("#JobHistoryTbody tr:eq(0)").click();
-    });
 }
 
+function getBasicInfoFromUrl() {
 
-function getProjectId() {
-    queriresMap = {};
+    spark.queriresMap = {};
     var urlinfo = window.location.href;
     var len = urlinfo.length;
     var offset = urlinfo.indexOf("?");
@@ -130,44 +144,57 @@ function getProjectId() {
     var additionalInfo = urlinfo.substr(offset + 1, len);
     var infos = additionalInfo.split("&");
     for (var i = 0; i < infos.length; ++i) {
-        strs = infos[i].split("=");
-        queriresMap[strs[0]] = strs[1];
+        var strs = infos[i].split("=");
+        spark.queriresMap[strs[0]] = strs[1];
     }
-    projectId = queriresMap["projectid"];
-    sourceType = queriresMap["sourcetype"] == null ? "intellij" : "eclipse";
-    clusterName = queriresMap["clustername"];
-    var webType = queriresMap["engintype"];
+
+    spark.sourceType = spark.queriresMap['sourcetype'] === 'undefined' ? "intellij" : "eclipse";
+    spark.clusterName = spark.queriresMap['clusterName'];
+    spark.engineType = spark.queriresMap['engineType'];
+    spark.queryPort = spark.queriresMap['port'];
+    spark.localhost = 'http://localhost:{0}/'.format(spark.queryPort);
+}
+
+function getJobHistory() {
+    getMessageAsync("/applications/", 'spark', function (s) {
+        writeToTable(s);
+        refreshGetSelectedApplication();
+
+        // try to click the first application
+        $('#JobHistoryTbody').find('tr:eq(0)').click();
+    });
 }
 
 function refreshGetSelectedApplication() {
     var selectedAppid = localStorage.getItem("selectedAppID");
-    if (selectedAppid == null) {
+    if (selectedAppid === 'undefined') {
         return;
     }
 
-    var tableRow = $("#myTable tbody tr").filter(function () {
-        return $(this).children('td:eq(1)').text() == selectedAppid;
+    var tableRow = $('#myTable tbody tr').filter(function () {
+        return $(this).children('td:eq(1)').text() === selectedAppid;
     }).closest("tr");
+    tableRow.click();
 }
 
 
 function getFirstAttempt(attempts) {
     return findElement(attempts, function (a) {
-        return typeof a.attemptId == 'undefined' || a.attemptId == 1;
+        return typeof a.attemptId === 'undefined' || a.attemptId === 1;
     });
 }
 
 function getLastAttempt(attempts) {
     return findElement(attempts, function (a) {
-        return typeof a.attemptId == 'undefined' || a.attemptId == attemptId;
+        return typeof a.attemptId === 'undefined' || a.attemptId === attemptId;
     });
 }
 
 function setBasicInformation() {
-    getMessageAsync(localhost + projectId + "/applications/" + appId, function (s) {
+    getMessageAsync("/applications?appId=" + spark.appId, 'spark', function (s) {
         var application = JSON.parse(s);
-        $("#startTime").text(formatServerTime(getFirstAttempt(application.attempts).startTime));
-        $("#endTime").text(formatServerTime(getLastAttempt(application.attempts).endTime));
+        $('#startTime').text(formatServerTime(getFirstAttempt(application.attempts).startTime));
+        $('#endTime').text(formatServerTime(getLastAttempt(application.attempts).endTime));
     });
 }
 
@@ -177,7 +204,7 @@ function setMessageForLable(str) {
 }
 
 function writeToTable(message) {
-    applicationList = JSON.parse(message);
+    spark.applicationList = JSON.parse(message);
     $('#myTable tbody').html("");
     d3.select("#myTable tbody")
         .selectAll('tr')
@@ -226,15 +253,16 @@ function getTheJobStatusImgLabel(str) {
 }
 
 function setAMcontainer() {
-    if (appId.substr(0, 5) == "local") {
+    // filter out local application
+    if (appId.substr(0, 5) === "local") {
         $("#containerNumber").text("Local Task");
     } else {
-        getMessageAsync(localhost + projectId + "/cluster/apps/" + appId + "/appattempts?restType=yarn", function (str) {
-            var object = JSON.parse(str);
-            containerId = object.appAttempts.appAttempt[0].containerId;
-            nodeId = object.appAttempts.appAttempt[0].nodeId;
-            $("#containerNumber").text(containerId);
-            if (appId.substr(0, 5) != "local" && attemptId != 0) {
+        getMessageAsync('/applications?appId=' + spark.appId, 'spark', function (str) {
+            var myAttempts = JSON.parse(str);
+            spark.containerId = myAttempts.appAttempts.appAttempt[0].containerId;
+            spark.nodeId = myAttempts.appAttempts.appAttempt[0].nodeId;
+            $("#containerNumber").text(spark.containerId);
+            if (spark.appId.substr(0, 5) !== "local" && spark.attemptId !== 0) {
                 getJobResult();
                 getSparkDriverLog();
             }
@@ -243,122 +271,82 @@ function setAMcontainer() {
 }
 
 function setDiagnosticsLog() {
-    if (appId.substr(0, 5) == "local") {
+    if (appId.substr(0, 5) === "local") {
         $("#errorMessage").text("No Yarn Error Message");
     } else {
-        getMessageAsync(localhost + projectId + "/cluster/apps/" + appId + "?restType=yarn", function (s) {
-            var object = JSON.parse(s);
-            var message = object.app.diagnostics;
-            if (message == 'undefined' || message == "") {
+        getMessageAsync("/apps?appId=" + spark.appId + 'yarn', function (s) {
+            var responseObject = JSON.parse(s);
+            var message = responseObject.app.diagnostics;
+            if (message === 'undefined' || message === "") {
                 message = "No Error Message";
             }
-            $("#errorMessage").text(message);
+            $('#errorMessage').text(message);
         });
     }
 }
 
 function getSparkDriverLog() {
-    if (attemptId == 0 || typeof containerId == 'undefined') {
+    if (spark.attemptId === 0 || typeof spark.containerId === 'undefined') {
         return;
     }
-    getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/executors", function (s) {
-        executorsObject = JSON.parse(s);
-        var hostPort = getDriverPortFromExecutor(executorsObject);
-        ipAddress = hostPort.split(":")[0];
-        var url = localhost + projectId + "/jobhistory/logs/" + ipAddress + "/port/30050/" + containerId + "/" + containerId + "/livy/stderr?restType=yarnhistory";
-        getResultFromSparkHistory(url, function (result) {
-            $("#sparkDriverLog").text(result);
-        });
+    getMessageAsync("/applications/driverLog?appId" + spark.appId, 'yarn', function (s) {
+        var executorsObject = JSON.parse(s);
+        // var hostPort = getDriverPortFromExecutor(executorsObject);
+        // var ipAddress = hostPort.split(":")[0];
+        // var url = localhost + projectId + "/jobhistory/logs/" + ipAddress + "/port/30050/" + containerId + "/" + containerId + "/livy/stderr?restType=yarnhistory";
+        // getResultFromSparkHistory(url, function (result) {
+        //     $("#sparkDriverLog").text(result);
+        // });
     });
 }
 
 function getJobResult() {
-    if (attemptId == 0 || typeof containerId == 'undefined') {
+    // there's no attemptId for non-spark job
+    if (spark.attemptId === 0 || typeof spark.containerId === 'undefined') {
         return;
     }
 
-    getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/executors", function (s) {
-        executorsObject = JSON.parse(s);
-        var hostPort = getDriverPortFromExecutor(executorsObject);
-        ipAddress = hostPort.split(":")[0];
-        var url = localhost + projectId + "/jobhistory/logs/" + ipAddress + "/port/30050/" + containerId + "/" + containerId + "/livy/stdout?restType=yarnhistory";
-        getResultFromSparkHistory(url, function (result) {
-            if (result == "") {
-                result = "No out put";
-            }
-            $("#jobOutputTextarea").text(result);
-        });
+    getMessageAsync("/yarnui/jobresult?appId" + spark.appId, 'yarnhistory', function (s) {
+        // var executorsObject = JSON.parse(s);
+        // var hostPort = getDriverPortFromExecutor(executorsObject);
+        // var ipAddress = hostPort.split(":")[0];
+        // var url = localhost + projectId + "/jobhistory/logs/" + ipAddress + "/port/30050/" + containerId + "/" + containerId + "/livy/stdout?restType=yarnhistory";
+        // getResultFromSparkHistory(url, function (result) {
+        //     if (result == "") {
+        //         result = "No out put";
+        //     }
+        //     $("#jobOutputTextarea").text(result);
+        // });
     });
 }
 
-function getResultFromSparkHistory(url, callback) {
-    getMessageAsync(url, function (s) {
-        callback(s);
-    });
-}
 
-function getDriverPortFromExecutor(executorsObject) {
-    for (i = 0; i < executorsObject.length; ++i) {
-        if (executorsObject[i].id == "driver") {
-            return executorsObject[i].hostPort;
-        }
-    }
-}
-
-function setLivyLog() {
-    getMessageAsync(localhost + projectId + "/?restType=livy&applicationId=" + appId, function (s) {
-        $("#livyJobLog").text(s);
-    });
-}
+// function setLivyLog() {
+//     getMessageAsync(localhost + projectId + "/?restType=livy&applicationId=" + appId, function (s) {
+//         $("#livyJobLog").text(s);
+//     });
+// }
 
 function setJobDetail() {
-    var selectedApp = findElement(applicationList, function (d) {
-       return d.id == appId;
+    var selectedApp = findElement(spark.applicationList, function (d) {
+       return d.id === appId;
     });
-    if(typeof selectedApp == 'undefined') {
+    if(typeof selectedApp === 'undefined') {
         return;
     }
     setDebugInfo("selectApp " + appId);
-    if(selectedApp.attempts[0].sparkUser == 'hive') {
+    if(selectedApp.attempts[0].sparkUser === 'hive') {
         return;
     }
-    var url = localhost + projectId + "/applications/" + appId + "/" +　attemptId ;
-    getMessageAsync(url + "/jobs", function (s) {
-        currentSelectedJobs = JSON.parse(s);
-        renderJobDetails(currentSelectedJobs);
-        // setJobGraphOnApplicationLevel(currentSelectedJobs);
-        renderJobGraphOnApplicationLevel(currentSelectedJobs);
-        // if(currentSelectedStages != null && !isJobGraphGenerated) {
-        //     setJobGraph(currentSelectedJobs);
-        // }
+    getMessageAsync("/applications/jobs?appId=" + spark.appId, 'spark', function (s) {
+        spark.currentSelectedJobs = JSON.parse(s);
+        renderJobDetails(spark.currentSelectedJobs);
+        renderJobGraphOnApplicationLevel(spark.currentSelectedJobs);
     });
 }
-// d3.select("#stored_rdd_details").selectAll("li")
-//     .data(myData)
-//     .enter()
-//     .append("li")
-//     .attr("role","presentation")
-//     .append("a")
-//     .attr("role","menuitem")
-//     .attr("tabindex", -1)
-//     .text(function(d) {
-//         ++counter;
-//         return "RDD " + d.id;
-//     }).on("click", function(d,i) {
-//     d3.select("#stored_rdd_info")
-//         .selectAll("tr")
-//         .remove();
-//     d3.select("#stored_rdd_info")
-//         .selectAll("tr")
-//         .data(storedRDDDetailsColumn)
-//         .enter()
-//         .append("tr")
-//         .html(function(inner) {
-//             return "<td>"+ inner + "</td><td>" + d[inner] + "</td>";
-//         });
-// });
+
 function setJobGraph(jobs) {
-    isJobGraphGenerated = true;
+    spark.isJobGraphGenerated = true;
     d3.select("#job-graph-menu")
         .selectAll('li')
         .data(jobs)
@@ -374,50 +362,47 @@ function setJobGraph(jobs) {
         setJobGraphForOneJob(job);
     });
 }
-function setJobGraphOnApplicationLevel(jobs) {
-
-}
 
 function setJobGraphForOneJob(job) {
     var stageIds = job['stageIds'];
     var selectedStages = [];
     stageIds.forEach(function(stageId) {
-       selectedStages.push(currentSelectedStages.find(function(d) {
-           return d['stageId'] == stageId;
+       selectedStages.push(spark.currentSelectedStages.find(function(d) {
+           return d['stageId'] === stageId;
        }));
     });
     renderJobGraph(selectedStages);
 }
 
 function stagesInfo(jobs, url) {
-        getMessageAsync(url + "/stages", function (s) {
+        getMessageAsync("/applications/stages?appId=" + spark.appId, 'spark', function (s) {
             var data = new Object();
             var stages = JSON.parse(s);
             data.jobs = jobs;
             data.stages = stages;
             data.stageDetails = [];
-            jobs.stageIds.forEach(function(stageNumber) {
-                getMessageAsync(url + "/stages" + "/" + stageNumber, function(s) {
+            data.jobs.stageIds.forEach(function(stageNumber) {
+                getMessageAsync("/applications/stages?appId=", function(s) {
                     var detail = JSON.parse(s);
                 });
             });
         });
 }
 
-function setJobTimeLine() {
-    var url = localhost + projectId + "/cluster/apps/" + appId + "?restType=yarn";
-    getMessageAsync(url, function(s) {
-        var t = s;
-    });
-}
+// function setJobTimeLine() {
+//     var url = localhost + projectId + "/cluster/apps/" + appId + "?restType=yarn";
+//     getMessageAsync(url, function(s) {
+//         var t = s;
+//     });
+// }
 
 ///applications/[app-id]/storage/rdd
 function setStoredRDD() {
-    if(attemptId == 0) {
+    if(spark.attemptId === 0) {
         renderStoredRDD('');
         return;
     }
-    getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/storage/rdd",function(s) {
+    getMessageAsync("/applications/storage?appId=" + spark.appId, 'spark', function(s) {
         var rdds = JSON.parse(s);
         renderStoredRDD(rdds);
     });
@@ -430,7 +415,7 @@ function setStageDetailsWithTaskDetails() {
     }
     $("#stage_detail_info_message").text('');
     getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/stages", function (s) {
-        currentSelectedStages = JSON.parse(s);
+        spark.currentSelectedStages = JSON.parse(s);
         renderStageSummary(currentSelectedStages);
         setTaskDetails();
         if(!isJobGraphGenerated && currentSelectedJobs != null) {
@@ -467,7 +452,7 @@ function filterTaskSummaryTable() {
     filter = $("#filterTableInput").val().toLowerCase();
     tr = $("#taskSummaryTable tbody tr");
     tr.each(function () {
-        text = $(this).html().toLowerCase();
+        var text = $(this).html().toLowerCase();
         if(text.indexOf(filter) > -1) {
             $(this).css("display","");
         } else {
@@ -512,7 +497,7 @@ function filterTaskTableWithTaskIds(taskIds) {
 }
 function getJsonLength(jsonObject) {
     var length = 0;
-    for(item in jsonObject) {
+    for(var item in jsonObject) {
         length++;
     }
     return length;

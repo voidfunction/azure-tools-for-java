@@ -26,12 +26,16 @@ function findElement(arrs, func) {
 
 var asyncMessageCounter = 0;
 
-function getMessageAsync(url, callback) {
+function getRestHeaders(type) {
+    return {'http-type' : type, 'cluster-name' : spark.clusterName }
+}
 
+function getMessageAsync(url, type, callback) {
+    var headers = getRestHeaders(type);
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.timeout = 60 * 1000;
     xmlHttp.ontimeout = function () {
-        if (--asyncMessageCounter == 0) {
+        if (--asyncMessageCounter === 0) {
             $('body').css("cursor", "default");
         }
     };
@@ -39,20 +43,25 @@ function getMessageAsync(url, callback) {
     $('body').css("cursor", "progress");
 
     xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState == 4) {
-            if (--asyncMessageCounter == 0) {
+        if (xmlHttp.readyState === 4) {
+            if (--asyncMessageCounter === 0) {
                 $('body').css("cursor", "default");
             }
-            if (xmlHttp.status == 200 || xmlHttp.status == 201) {
+            if (xmlHttp.status === 200 || xmlHttp.status === 201) {
                 var s = xmlHttp.responseText;
-                if (s == "") {
+                if (s === '') {
                     return;
                 }
                 callback(s);
             }
         }
     };
-    xmlHttp.open("GET", url, true);
+
+    xmlHttp.open('GET', spark.localhost + url, true);
+    Object.keys(headers).forEach(function(k) {
+        xmlHttp.setRequestHeader(k, headers[k]);
+    });
+
     xmlHttp.send(null);
 }
 

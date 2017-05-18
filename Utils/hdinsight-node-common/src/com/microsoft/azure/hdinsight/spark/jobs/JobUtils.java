@@ -24,45 +24,63 @@ package com.microsoft.azure.hdinsight.spark.jobs;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.microsoft.azure.hdinsight.common.HDInsightHelper;
 import com.microsoft.azure.hdinsight.common.HDInsightLoader;
 import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
+import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
 import com.microsoft.azure.hdinsight.spark.jobs.livy.LivyBatchesInformation;
 import com.microsoft.azure.hdinsight.spark.jobs.livy.LivySession;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
-import com.microsoft.azuretools.azurecommons.helpers.Nullable;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
-import javafx.application.Application;
-import javafx.stage.Stage;
+import com.sun.net.httpserver.HttpExchange;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
-/*
-    this class is pass to Web Page when load html from WebEngin
-    non-related web page action should not be here.
- */
 public class JobUtils {
+    private static Logger LOGGER = LoggerFactory.getLogger(JobUtils.class);
+
     private static String defaultYarnUIHistoryFormat = "https://%s.azurehdinsight.net/yarnui/hn/cluster";
     private static String yarnUIHisotryFormat = "https://%s.azurehdinsight.net/yarnui/hn/cluster/app/%s";
 
     private static String sparkUIHistoryFormat = "https://%s.azurehdinsight.net/sparkhistory/history/%s/jobs";
     private static String defaultSparkUIHistoryFormat = "https://%s.azurehdinsight.net/sparkhistory";
-    private Map<String, String> webPageMaps = new HashMap<>();
 
     private static final String JobLogFolderName = "SparkJobLog";
     private static final String SPARK_EVENT_LOG_FOLDER_NAME = "SparkEventLog";
+    private static CredentialsProvider provider = new BasicCredentialsProvider();
+
+
+    public static void setResponse(@NotNull HttpExchange httpExchange, @NotNull String message) {
+        try {
+            httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            httpExchange.sendResponseHeaders(200, message.length());
+            OutputStream stream = httpExchange.getResponseBody();
+            stream.write(message.getBytes());
+            stream.close();
+        } catch (IOException e) {
+        LOGGER.error("JobUtils set Response error", e);
+        }
+    }
 
     public static URI getLivyLogPath(@NotNull String rootPath, @NotNull String applicationId) {
         String path = StringHelper.concat(rootPath, File.separator, JobLogFolderName, File.separator, applicationId);
@@ -71,13 +89,6 @@ public class JobUtils {
             file.mkdirs();
         }
         return file.toURI();
-    }
-
-    public String getItem(@Nullable String key) {
-        return webPageMaps.get(key);
-    }
-    public void setItem(@NotNull String key, @Nullable String value) {
-        webPageMaps.put(key, value);
     }
 
     public static String getJobInformation(@NotNull String allBatchesInformation, @NotNull String applicationId) {
@@ -104,7 +115,11 @@ public class JobUtils {
         } else {
             yarnHistoryUrl = String.format(yarnUIHisotryFormat, requestDetail.getClusterDetail().getName(), applicationId);
         }
-        openDefaultBrowser(yarnHistoryUrl);
+        try {
+            openDefaultBrowser(yarnHistoryUrl);
+        } catch (Exception e) {
+            DefaultLoader.getUIHelper().showError(e.getMessage(), "open Yarn UI");
+        }
     }
 
     public void openSparkUIHistory(String applicationId) {
@@ -115,31 +130,40 @@ public class JobUtils {
         } else {
             sparkHistoryUrl = String.format(sparkUIHistoryFormat, requestDetail.getClusterDetail().getName(), applicationId);
         }
-
-        openDefaultBrowser(sparkHistoryUrl);
-    }
-
-    public void openDefaultBrowser(@NotNull final String url) {
-        Application application = new Application() {
-            @Override
-            public void start(Stage primaryStage) throws Exception {
-                getHostServices().showDocument(url);
-            }
-        };
-
         try {
-            application.start(null);
-        }catch (Exception e) {
-            DefaultLoader.getUIHelper().showError("Failed to open browser", "Open browser Error");
+            openDefaultBrowser(sparkHistoryUrl);
+        } catch (IOException e) {
+            DefaultLoader.getUIHelper().showError(e.getMessage(), "open Spark UI");
         }
     }
 
-    public void openFileExplorer(URI uri) {
-        openDefaultBrowser(uri.toString());
+    public void openDefaultBrowser(@NotNull final String url) throws IOException {
+        final URI uri = URI.create(url);
+        openDefaultBrowser(uri);
+    }
+
+    public void openDefaultBrowser(@NotNull final URI uri) throws IOException {
+        if (Desktop.isDesktopSupported()) {
+            final String scheme = uri.getScheme();
+            if (scheme.equalsIgnoreCase("https") || scheme.equalsIgnoreCase("http")) {
+                Desktop.getDesktop().browse(uri);
+            } else if (scheme.equalsIgnoreCase("file")) {
+                Desktop.getDesktop().open(new File(uri.getPath()));
+            }
+        }
+    }
+
+    public void openFileExplorer(@NotNull final File file) throws IOException {
+        openDefaultBrowser(file.toURI());
     }
 
     public void openLivyLog(String applicationId) {
-        openFileExplorer(getLivyLogPath(HDInsightLoader.getHDInsightHelper().getPluginRootPath(), applicationId));
+        final URI livyUri = getLivyLogPath(HDInsightLoader.getHDInsightHelper().getPluginRootPath(), applicationId);
+        try {
+            openDefaultBrowser(livyUri);
+        } catch (IOException e) {
+            DefaultLoader.getUIHelper().showError(e.getMessage(), "Open Livy Logs");
+        }
     }
 
     private static final String EVENT_LOG_REST_API = "applications/%s/logs";
@@ -157,12 +181,30 @@ public class JobUtils {
             String restApi = String.format(EVENT_LOG_REST_API, applicationId);
 
             try {
-                HttpEntity entity = SparkRestUtil.getEntity(clusterDetail,restApi);
+                HttpEntity entity = getEntity(clusterDetail,restApi);
                 FileUtils.copyInputStreamToFile(entity.getContent(), downloadFile);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        openFileExplorer(file.toURI());
+        try {
+            openDefaultBrowser(file.toURI());
+        } catch (IOException e) {
+            DefaultLoader.getUIHelper().showError(e.getMessage(), "Open Spark Event Log");
+        }
+    }
+
+    public static HttpEntity getEntity(@NotNull final IClusterDetail clusterDetail, @NotNull final String url) throws IOException, HDIException {
+        provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(clusterDetail.getHttpUserName(), clusterDetail.getHttpPassword()));
+        final HttpClient client = HttpClients.custom().setDefaultCredentialsProvider(provider).build();
+
+        final HttpGet get = new HttpGet(url);
+        final HttpResponse response = client.execute(get);
+        int code = response.getStatusLine().getStatusCode();
+        if (code == HttpStatus.SC_OK || code == HttpStatus.SC_CREATED) {
+            return response.getEntity();
+        } else {
+            throw new HDIException(response.getStatusLine().getReasonPhrase(), response.getStatusLine().getStatusCode());
+        }
     }
 }
