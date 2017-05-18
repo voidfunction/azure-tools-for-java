@@ -5,8 +5,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
-import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
-import com.microsoft.tooling.msservices.model.storage.StorageServiceTreeItem;
 
 public class JobViewInput implements IEditorInput {
     private IClusterDetail clusterDetail;

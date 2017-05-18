@@ -46,88 +46,45 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.internal.ui.jarpackager.JarFileExportOperation;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 
 public class SparkSubmitModel {
-    private static final String[] columns = {"Key", "Value", ""};
+    // private static final String[] columns = {"Key", "Value", ""};
     private  static final String SparkYarnLogUrlFormat = "%s/yarnui/hn/cluster/app/%s";
 
-//    private static Map<Project, SparkSubmissionParameter> submissionParameterMap = new HashMap<>();
-
-//    private Project project;
     private List<IClusterDetail> cachedClusterDetails;
 
     private Map<String, IClusterDetail> mapClusterNameToClusterDetail = new HashMap<>();
-//    private Map<String, Artifact> artifactHashMap = new HashMap<>();
+
 
     private SparkSubmissionParameter submissionParameter;
 
-//    private DefaultComboBoxModel<String> clusterComboBoxModel;
-//    private DefaultComboBoxModel<String> artifactComboBoxModel;
-//    private SubmissionTableModel tableModel = new SubmissionTableModel(columns);
     private Map<String, String> postEventProperty = new HashMap<>();
 
-    public SparkSubmitModel(/*@NotNull IProject project,*/ @NotNull List<IClusterDetail> cachedClusterDetails) {
+    public SparkSubmitModel(@NotNull List<IClusterDetail> cachedClusterDetails) {
         this.cachedClusterDetails = cachedClusterDetails;
-        
-        
-//
-//        this.clusterComboBoxModel = new DefaultComboBoxModel<>();
-//        this.artifactComboBoxModel = new DefaultComboBoxModel<>();
-//        this.submissionParameter = submissionParameterMap.get(project);
-//
         setClusterDetailsMap(cachedClusterDetails);
-//        int index = submissionParameter != null ? clusterComboBoxModel.getIndexOf(submissionParameter.getClusterName()) : -1;
-//        if (index != -1) {
-//            clusterComboBoxModel.setSelectedItem(submissionParameter.getClusterName());
-//        }
-//
-//        final List<Artifact> artifacts = ArtifactUtil.getArtifactWithOutputPaths(project);
-//
-//        for (Artifact artifact : artifacts) {
-//            artifactHashMap.put(artifact.getName(), artifact);
-//            artifactComboBoxModel.addElement(artifact.getName());
-//            if (artifactComboBoxModel.getSize() == 0) {
-//                artifactComboBoxModel.setSelectedItem(artifact.getName());
-//            }
-//        }
-//
-//        index = submissionParameter != null ? artifactComboBoxModel.getIndexOf(submissionParameter.getArtifactName()) : -1;
-//        if (index != -1) {
-//            artifactComboBoxModel.setSelectedItem(submissionParameter.getArtifactName());
-//        }
-//
-//        initializeTableModel(tableModel);
     }
 
     public SparkSubmissionParameter getSubmissionParameter() {
         return submissionParameter;
     }
-//
-//    @NotNull
-//    public IClusterDetail getSelectedClusterDetail() {
-//        return mapClusterNameToClusterDetail.get((String) clusterComboBoxModel.getSelectedItem());
-//    }
+
 
     public boolean isLocalArtifact() {
         return submissionParameter.isLocalArtifact();
@@ -141,13 +98,7 @@ public class SparkSubmitModel {
         }
     }
     public void action(@NotNull SparkSubmissionParameter submissionParameter) {
-//        PluginUtil.getJobStatusManager(project).setJobRunningState(true);
         this.submissionParameter = submissionParameter;
-//        submissionParameterMap.put(project, submissionParameter);
-//        postEventAction();
-
-        
-        
         
         if (isLocalArtifact()) {
             submit();
@@ -164,40 +115,6 @@ public class SparkSubmitModel {
 					}
 				};
 			});
-        	
-
-//           
-//        	
-//        	
-////            List<Artifact> artifacts = new ArrayList<>();
-//            final Artifact artifact = artifactHashMap.get(submissionParameter.getArtifactName());
-////            artifacts.add(artifact);
-////            ArtifactsWorkspaceSettings.getInstance(project).setArtifactsToBuild(artifacts);
-//
-////            final CompileScope scope = ArtifactCompileScope.createArtifactsScope(project, artifacts, true);
-//
-//            
-//            
-////            CompilerManager.getInstance(project).make(scope, new CompileStatusNotification() {
-////                @Override
-////                public void finished(boolean aborted, int errors, int warnings, CompileContext compileContext) {
-////                    if (aborted || errors != 0) {
-////                        postEventProperty.put("IsSubmitSucceed", "false");
-////                        postEventProperty.put("SubmitFailedReason", "CompileFailed");
-////                        TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
-////                        PluginUtil.getJobStatusManager(project).setJobRunningState(false);
-////                        return;
-////                    } else {
-////                        CompilerManager.getInstance(project).make(new CompileStatusNotification() {
-////                            @Override
-////                            public void finished(boolean aborted1, int errors1, int warnings1, CompileContext compileContext1) {
-////                                PluginUtil.showInfoOnSubmissionMessageWindow(project, String.format("Info : Build %s successfully.", artifact.getOutputFile()));
-////                                submit();
-////                            }
-////                        });
-////                    }
-////                }
-////            });
         }
     }
 
@@ -205,7 +122,7 @@ public class SparkSubmitModel {
     	private IProject project;
     	private String errorMessage;
     	
-		public JarExportJob(String name, IProject project) {
+    	public JarExportJob(String name, IProject project) {
 			super(name);
 			this.project = project;
 		}
@@ -214,8 +131,9 @@ public class SparkSubmitModel {
 		protected IStatus run(final IProgressMonitor monitor) {
 			monitor.beginTask("Begin building task", IProgressMonitor.UNKNOWN);
 			try {
+				// TODO： IncrementalProjectBuilder
 				// build will new thread to run and we have no better way to get status of the thread
-				// project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
+				//project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
 				
 				super.setName("");
 				final JarPackageData jarPackageData = new JarPackageData();
@@ -239,11 +157,12 @@ public class SparkSubmitModel {
 				monitor.setTaskName("Creating Jar file...");
 				Display.getDefault().syncExec(new Runnable() {
 					
+					@SuppressWarnings("restriction")
 					@Override
 					public void run() {
 						try {
-							new JarFileExportOperation(jarPackageData, Display.getDefault().getActiveShell())
-							.run(new SubProgressMonitor(monitor, 100, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+							JarFileExportOperation jarFileExportOperation = new JarFileExportOperation(jarPackageData, Display.getDefault().getActiveShell());
+							jarFileExportOperation.run(SubMonitor.convert(monitor,"Compiler Spark project", 100));
 						} catch (InvocationTargetException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -298,7 +217,8 @@ public class SparkSubmitModel {
             String jobLink = String.format("%s/sparkhistory", selectedClusterDetail.getConnectionUrl());
             
             HDInsightUtil.setHyperLinkWithText("See spark job view from ", jobLink, jobLink);
-            final SparkSubmitResponse sparkSubmitResponse = new Gson().fromJson(response.getMessage(), new TypeToken<SparkSubmitResponse>() {
+            @SuppressWarnings("serial")
+			final SparkSubmitResponse sparkSubmitResponse = new Gson().fromJson(response.getMessage(), new TypeToken<SparkSubmitResponse>() {
             }.getType());
 
             // Set submitted spark application id and http request info for stopping running application
@@ -326,7 +246,6 @@ public class SparkSubmitModel {
         postEventProperty.put("IsSubmitSucceed", "false");
         postEventProperty.put("SubmitFailedReason", exception.toString());
         AppInsightsClient.create(Messages.SparkSubmissionButtonClickEvent, null, postEventProperty);
-//        TelemetryManager.postEvent(TelemetryCommon.SparkSubmissionButtonClickEvent, postEventProperty, null);
     }
 
     private void writeJobLogToLocal() {
@@ -342,7 +261,7 @@ public class SparkSubmitModel {
             HDInsightUtil.setHyperLinkWithText("See detailed job log from local:", urlPath, path);
         }
     }
-//
+
     private IClusterDetail getClusterConfiguration(@NotNull final IClusterDetail selectedClusterDetail, @NotNull final boolean isFirstSubmit) {
         try {
             if (!selectedClusterDetail.isConfigInfoAvailable()) {
@@ -351,7 +270,6 @@ public class SparkSubmitModel {
         } catch (AuthenticationException authenticationException) {
             if (isFirstSubmit) {
                 HDInsightUtil.showErrorMessageOnSubmissionMessageWindow("Error: Cluster Credentials Expired, Please sign in again...");
-                //get new credentials by call getClusterDetails
                 cachedClusterDetails = ClusterManagerEx.getInstance().getClusterDetails(null);
 
                 for (IClusterDetail iClusterDetail : cachedClusterDetails) {
@@ -372,6 +290,7 @@ public class SparkSubmitModel {
     }
 
     private void submit() {
+    	postEventAction();
         DefaultLoader.getIdeHelper().executeOnPooledThread(new Runnable() {
             @Override
             public void run() {
@@ -432,26 +351,4 @@ public class SparkSubmitModel {
             postEventProperty.put("HasReferencedJar", "false");
         }
     }
-//
-//    public Map<String, Object> getJobConfigMap() {
-//        return tableModel.getJobConfigMap();
-//    }
-//
-//    private void initializeTableModel(final InteractiveTableModel tableModel) {
-//        if (submissionParameter == null) {
-//            for (int i = 0; i < SparkSubmissionParameter.defaultParameters.length; ++i) {
-//                tableModel.addRow(SparkSubmissionParameter.defaultParameters[i].getFirst(), "");
-//            }
-//        } else {
-//            Map<String, Object> configs = submissionParameter.getJobConfig();
-//            for (int i = 0; i < SparkSubmissionParameter.parameterList.length; ++i) {
-//                tableModel.addRow(SparkSubmissionParameter.parameterList[i], configs.containsKey(SparkSubmissionParameter.parameterList[i]) ?
-//                        configs.get(SparkSubmissionParameter.parameterList[i]) : "");
-//            }
-//        }
-//
-//        if (!tableModel.hasEmptyRow()) {
-//            tableModel.addEmptyRow();
-//        }
-//    }
 }
