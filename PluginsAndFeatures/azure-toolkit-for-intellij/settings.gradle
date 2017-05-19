@@ -1,4 +1,3 @@
 rootProject.name = 'azure-toolkit-for-intellij'
 //intellij_version = 'IU-2016.3'
-//dep_plugins='org.intellij.scala:2016.3.5'
 
