@@ -28,7 +28,6 @@ import com.intellij.ide.util.projectWizard.SettingsStep;
 import com.intellij.openapi.module.StdModuleTypes;
 import com.intellij.openapi.roots.ui.configuration.projectRoot.LibrariesContainer;
 import com.microsoft.azure.hdinsight.projects.HDInsightModuleBuilder;
-import org.jetbrains.plugins.scala.project.template.ScalaLibraryDescription$;
 
 import javax.swing.*;
 
@@ -48,8 +47,8 @@ public class CustomModuleWizardSetup extends ModuleWizardStep {
         this.isNeedScalaSDK = this.info.isNeedScalaSDK();
 
         if (isNeedScalaSDK) {
-            this.scalaLibraryPanel = new LibraryOptionsPanel(ScalaLibraryDescription$.MODULE$, "",
-                    FrameworkLibraryVersionFilter.ALL, librariesContainer, false);
+//            this.scalaLibraryPanel = new LibraryOptionsPanel(ScalaLibraryDescription$.MODULE$, "",
+//                    FrameworkLibraryVersionFilter.ALL, librariesContainer, false);
             ((JButton) scalaLibraryPanel.getSimplePanel().getComponent(1)).setText("Select...");
             settingsStep.addSettingsField("Scala S\u001BDK:", scalaLibraryPanel.getSimplePanel());
         }

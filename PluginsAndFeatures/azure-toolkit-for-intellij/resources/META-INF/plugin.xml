@@ -53,7 +53,7 @@
           icon="/icons/AzureExplorer_16.png"/>
 
     <projectTemplatesFactory implementation="com.microsoft.azure.hdinsight.projects.HDInsightProjectTemplatesFactory"/>
-    <projectStructureDetector implementation="com.microsoft.azure.hdinsight.projects.HDInsightProjectStructureDetector"/>
+    <!--<projectStructureDetector implementation="com.microsoft.azure.hdinsight.projects.HDInsightProjectStructureDetector"/>-->
     <toolWindow
         anchor="bottom"
         factoryClass="com.microsoft.azure.hdinsight.spark.ui.SparkSubmissionToolWindowFactory"

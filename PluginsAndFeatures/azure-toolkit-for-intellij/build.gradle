@@ -32,7 +32,7 @@ apply plugin: 'org.jetbrains.intellij'
 intellij {
     pluginName 'azure-toolkit-for-intellij'
     version intellij_version
-    plugins = ['maven', dep_plugins]
+    plugins = ['maven']
 	downloadSources Boolean.valueOf(sources)
 }
 
