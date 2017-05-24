@@ -34,6 +34,7 @@ import com.microsoft.intellij.util.PluginUtil;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.Nullable;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionEvent;
 import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
@@ -56,6 +57,20 @@ public class HDInsightUtil {
         });
 
         azureModule.setHdInsightModule(hdInsightRootModule);
+    }
+
+    public static void setJobRunningStatus(boolean isRun) {
+        Project project = (Project)DefaultLoader.getIdeHelper().getCurrentProject();
+        setJobRunningStatus(project, isRun);
+    }
+
+    public static void setJobRunningStatus(@Nullable Project project, boolean isRun) {
+        if(project != null) {
+            JobStatusManager jobStatusManager = getJobStatusManager(project);
+            if(jobStatusManager != null) {
+                jobStatusManager.setJobRunningState(isRun);
+            }
+        }
     }
 
     @Nullable

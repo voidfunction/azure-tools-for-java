@@ -93,6 +93,7 @@ public class SparkBatchJobDebuggerRunner extends GenericDebuggerRunner {
                     try {
                         return submitModel.tryToCreateBatchSparkDebugJob(selectedClusterDetail);
                     } catch (Exception e) {
+                        HDInsightUtil.setJobRunningStatus(submitModel.getProject(), false);
                         throw Exceptions.propagate(e);
                     }
                 })
@@ -111,6 +112,7 @@ public class SparkBatchJobDebuggerRunner extends GenericDebuggerRunner {
                                             "Error : Spark batch debugging job is killed, got exception " + err);
 
                                     remoteDebugJob.killBatchJob();
+                                    HDInsightUtil.setJobRunningStatus(submitModel.getProject(), false);
                                 } catch (IOException ignore) { }
                             }))
                 .subscribe(
@@ -122,12 +124,17 @@ public class SparkBatchJobDebuggerRunner extends GenericDebuggerRunner {
 
                             sparkBatchDebugSession.close();
 
+                            HDInsightUtil.setJobRunningStatus(submitModel.getProject(), false);
+
                             postEventProperty.put("IsSubmitSucceed", "true");
                             AppInsightsClient.create(
                                     HDInsightBundle.message("SparkRunConfigDebugButtonClick"), null,
                                     postEventProperty);
                         },
                         (throwable) -> {
+                            // set the running flag to false
+                            HDInsightUtil.setJobRunningStatus(submitModel.getProject(), false);
+
                             String errorMessage;
 
                             if (throwable instanceof CompositeException) {
