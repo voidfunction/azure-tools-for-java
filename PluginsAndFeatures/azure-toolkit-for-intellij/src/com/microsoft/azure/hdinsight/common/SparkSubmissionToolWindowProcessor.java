@@ -77,6 +77,8 @@ public class SparkSubmissionToolWindowProcessor implements IToolWindowProcessor 
     }
 
     public void initialize() {
+        ApplicationManager.getApplication().assertIsDispatchThread();
+        
         UISettings.getInstance().addUISettingsListener(new UISettingsListener() {
             @Override
             public void uiSettingsChanged(UISettings uiSettings) {
@@ -175,21 +177,9 @@ public class SparkSubmissionToolWindowProcessor implements IToolWindowProcessor 
         jPanel.add(scrollPane, c10);
 
         toolWindow.getComponent().add(jPanel);
-        try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                                             @Override
-                                             public void run() {
-                                                 jEditorPanel.setEditable(false);
-                                                 jEditorPanel.setOpaque(false);
-                                                 jEditorPanel.setEditorKit(JEditorPane.createEditorKitForContentType("text/html"));
-                                             }
-                                         }
-            );
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
+        jEditorPanel.setEditable(false);
+        jEditorPanel.setOpaque(false);
+        jEditorPanel.setEditorKit(JEditorPane.createEditorKitForContentType("text/html"));
 
         jEditorPanel.addHyperlinkListener(new HyperlinkListener() {
             @Override

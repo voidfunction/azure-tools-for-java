@@ -39,9 +39,6 @@ import com.microsoft.tooling.msservices.serviceexplorer.NodeActionListener;
 import com.microsoft.tooling.msservices.serviceexplorer.azure.AzureModule;
 import com.microsoft.intellij.common.CommonConst;
 
-import javax.swing.*;
-import java.lang.reflect.InvocationTargetException;
-
 import static com.microsoft.azure.hdinsight.common.MessageInfoType.*;
 
 public class HDInsightUtil {
@@ -78,7 +75,15 @@ public class HDInsightUtil {
         if(!PluginUtil.isContainsToolWindowKey(key)) {
             SparkSubmissionToolWindowProcessor sparkSubmissionToolWindowProcessor = new SparkSubmissionToolWindowProcessor(toolWindow);
             PluginUtil.registerToolWindowManager(key, sparkSubmissionToolWindowProcessor);
-            sparkSubmissionToolWindowProcessor.initialize();
+
+            // make sure tool window process initialize on swing dispatch
+            if(ApplicationManager.getApplication().isDispatchThread()) {
+                sparkSubmissionToolWindowProcessor.initialize();
+            } else {
+                ApplicationManager.getApplication().invokeAndWait(()-> {
+                    sparkSubmissionToolWindowProcessor.initialize();
+                });
+            }
         }
 
         return (SparkSubmissionToolWindowProcessor)PluginUtil.getToolWindowManager(key);
@@ -101,35 +106,25 @@ public class HDInsightUtil {
     }
 
     private static void showInfoOnSubmissionMessageWindow(@NotNull final Project project, @NotNull final MessageInfoType type, @NotNull final String message, @NotNull final boolean isNeedClear) {
-        final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(CommonConst.SPARK_SUBMISSION_WINDOW_ID);
 
-        if (!toolWindow.isVisible()) {
-            synchronized (LOCK) {
-                if (!toolWindow.isVisible()) {
-                    if (ApplicationManager.getApplication().isDispatchThread()) {
-                        toolWindow.show(null);
-                    } else {
-                        try {
-                            SwingUtilities.invokeAndWait(new Runnable() {
-                                @Override
-                                public void run() {
-                                    toolWindow.show(null);
-                                }
-                            });
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
+        synchronized (LOCK) {
+            final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(CommonConst.SPARK_SUBMISSION_WINDOW_ID);
+            showSubmissionMessage(toolWindow, project, message, type, isNeedClear);
+        }
+    }
+
+    private static void showSubmissionMessage(@NotNull final ToolWindow toolWindow, @NotNull Project project, @NotNull String message, @NotNull MessageInfoType type, @NotNull final boolean isNeedClear) {
+        if(!toolWindow.isVisible()) {
+            if (ApplicationManager.getApplication().isDispatchThread()) {
+                toolWindow.show(null);
+            } else {
+                ApplicationManager.getApplication().invokeAndWait(() -> {
+                    toolWindow.show(null);
+                });
             }
         }
 
-        showSubmissionMessage(getSparkSubmissionToolWindowManager(project), message, type, isNeedClear);
-    }
-
-    private static void showSubmissionMessage(SparkSubmissionToolWindowProcessor processor, @NotNull String message, @NotNull MessageInfoType type, @NotNull final boolean isNeedClear) {
+        final SparkSubmissionToolWindowProcessor processor = getSparkSubmissionToolWindowManager(project);
         if (isNeedClear) {
             processor.clearAll();
         }
