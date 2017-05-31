@@ -38,14 +38,15 @@ public class YarnHistoryTask extends Task<String> {
 
     protected final IClusterDetail clusterDetail;
     protected final String path;
-    private static final CredentialsProvider CREDENTIALS_PROVIDER =  new BasicCredentialsProvider();
+    private final CredentialsProvider credentialsProvider  =  new BasicCredentialsProvider();
     private static final WebClient WEB_CLIENT = new WebClient();
+
     public YarnHistoryTask(@NotNull IClusterDetail clusterDetail, @NotNull String path, @NotNull FutureCallback<String> callback) {
         super(callback);
         this.clusterDetail = clusterDetail;
         this.path = path;
         try {
-            CREDENTIALS_PROVIDER.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(clusterDetail.getHttpUserName(), clusterDetail.getHttpPassword()));
+            credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(clusterDetail.getHttpUserName(), clusterDetail.getHttpPassword()));
         } catch (HDIException e) {
             e.printStackTrace();
         }
@@ -53,7 +54,7 @@ public class YarnHistoryTask extends Task<String> {
 
     @Override
     public String call() throws Exception {
-        WEB_CLIENT.setCredentialsProvider(CREDENTIALS_PROVIDER);
+        WEB_CLIENT.setCredentialsProvider(credentialsProvider);
         HtmlPage htmlPage = WEB_CLIENT.getPage(path);
 
         // parse pre tag from html response
@@ -61,7 +62,7 @@ public class YarnHistoryTask extends Task<String> {
         DomNodeList<DomElement> preTagElements = htmlPage.getElementsByTagName("pre");
 
         if (preTagElements.size() == 0) {
-            return "No logs here or logs not available";
+            throw new HDIException("No logs here or logs not available");
         } else {
             return preTagElements.get(0).asText();
         }
