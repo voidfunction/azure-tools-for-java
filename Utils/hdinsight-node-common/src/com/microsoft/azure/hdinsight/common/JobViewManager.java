@@ -64,7 +64,7 @@ public class JobViewManager {
         return jobViewPanelMap.get(clusterName);
     }
 
-    public static void unRegisterJobView(@NotNull String uuid) {
-        jobViewPanelMap.remove(uuid);
+    public static void unRegisterJobView(@NotNull String clusterName) {
+        jobViewPanelMap.remove(clusterName);
     }
 }
