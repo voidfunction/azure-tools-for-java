@@ -32,16 +32,17 @@ import javafx.util.Pair;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class JobViewManager {
-    private static Map<String, IClusterDetail> jobViewPanelMap = new HashMap<>();
-    private static Map<String, List<Application>> sparkApplicationMap = new HashMap<>();
+    private static Map<String, IClusterDetail> jobViewPanelMap = new ConcurrentHashMap<>();
+    private static Map<String, List<Application>> sparkApplicationMap = new ConcurrentHashMap<>();
 
-    public synchronized static void registerApplications(@NotNull String clusterName, @NotNull List<Application> apps) {
+    public static void registerApplications(@NotNull String clusterName, @NotNull List<Application> apps) {
         sparkApplicationMap.put(clusterName, apps);
     }
 
-    public synchronized static Application getCachedApp(@NotNull ApplicationKey key) {
+    public static Application getCachedApp(@NotNull ApplicationKey key) {
         final String clusterName = key.getClusterDetails().getName();
         final String appId = key.getAppId();
         if(sparkApplicationMap.containsKey(clusterName)) {
@@ -54,16 +55,16 @@ public class JobViewManager {
         return null;
     }
 
-    public synchronized static void registerJovViewNode(@NotNull String uuid, @NotNull IClusterDetail clusterDetail) {
+    public static void registerJovViewNode(@NotNull String uuid, @NotNull IClusterDetail clusterDetail) {
         jobViewPanelMap.put(uuid, clusterDetail);
     }
 
     @Nullable
-    public synchronized static IClusterDetail getCluster(@NotNull String clusterName) {
+    public static IClusterDetail getCluster(@NotNull String clusterName) {
         return jobViewPanelMap.get(clusterName);
     }
 
-    public synchronized static void unRegisterJobView(@NotNull String uuid) {
+    public static void unRegisterJobView(@NotNull String uuid) {
         jobViewPanelMap.remove(uuid);
     }
 }
