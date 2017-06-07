@@ -1,18 +1,13 @@
-
 function renderJobGraphOnApplicationLevel(jobs) {
-    renderJobGraphOnApplicationLevelTest(jobs);
-}
-
-function renderJobGraphOnApplicationLevelTest(jobs) {
     g = new dagreD3.graphlib.Graph()
         .setGraph({})
         .setDefaultEdgeLabel(function() { return {}; });
 
     var counters = jobs.length, i = 0;
     g.setNode(0, {label :"Driver",   class : "type-TOP"});
-    for(i =1; i <= counters; ++i) {
+    for(i = 1; i <= counters; ++i) {
         var s = "Job " + i;
-        var currentClass = jobs[i - 1]["status"] == "SUCCEEDED" ? "type-Success" : "type-Error";
+        var currentClass = jobs[i - 1]["status"] === "SUCCEEDED" ? "sparkJob-success" : "sparkJob-error";
         g.setNode(i, {label: s,  class : currentClass});
     }
 
@@ -52,26 +47,62 @@ function renderJobGraphOnApplicationLevelTest(jobs) {
     svg.call(zoom);
 
     // Simple function to style the tooltip for the given node.
-
-
     inner.selectAll("g.node")
         .attr("title", function(v) {
             return setToolTips(jobs, v)
         })
-        .each(function(v) { $(this).tipsy({ gravity: "w", opacity: 1, html: true }); });
+        .each(function(v) { $(this).tipsy({ gravity: "w", opacity: 1, html: true }); })
+        .on('click',function(d) {
+            if ( d === '0') {
+                return;
+            }
+            alert("warring");
+        });
 
 }
 
+function renderJobGraphForSelectedJob(d) {
+    var job = spark.currentSelectedJobs[d - 1];
+}
+
 function setToolTips(jobs, v) {
-    if(v != "0") {
+    if(v !== "0") {
         var counter = parseInt(v) - 1;
         var job = jobs[counter];
-        return "<p class='name'>" + getJobStatusImage(job["status"])
-                + "</p><p class='description'>" + job["name"] +
-                "</p>" + "<p class='description'>" + getRunningTime(job) + "</p>";
+        return getFormattedTipsForJob(job);
+        // return "<p class='name'>" + getJobStatusImage(job["status"])
+        //         + "</p><p class='description'>" + job["name"] +
+        //         "</p>" + "<p class='description'>" + getRunningTime(job) + "</p>";
     } else {
-
+        // driver
+        return getFormattedTipsForDriver();
     }
+}
+function getFormattedTipsForDriver() {
+
+
+    var containerLogs = spark.selectedYarnApp.amContainerLogs;
+    var paths = containerLogs.split('/');
+    var amContainer = paths[paths.length - 2];
+
+    return "<p class='name'>Application Details:</p>"
+            + "<p class='description jobtips' align='left'>AM Container: {0}<br>".format(amContainer)
+            + "<hr class='jobview-hr'/>"
+            + "Start time: {0}<br>End Time: {1} <br>Duration(mins): {2}<br> Memory Seconds: {3}<br>Core Seconds: {4}".format( formatServerTime(spark.selectedApp.startTime),
+                formatServerTime(spark.selectedApp.endTime),
+                ((spark.selectedYarnApp.finishedTime - spark.selectedYarnApp.startedTime)/(1000 * 60)).toFixed(2),
+                spark.selectedYarnApp.memorySeconds,
+                spark.selectedYarnApp.vcoreSeconds)
+            + "<hr class='jobview-hr'/>"
+            + "</p>";
+}
+
+function getFormattedTipsForJob(job) {
+    var timeDuration = getTimeIntervalByMins(job.completionTime, job.submissionTime);
+    return "<p class='name jobtips' align='left'>Job ID: {0}<br> {1}</p>".format(job.jobId , job.name) +
+        "<p class='description jobtips' align='left'>Time Duration(Mins): {0}<br>".format(timeDuration) +
+        "Completed Tasks: {0} &nbsp;&nbsp;&nbsp;Failed Tasks: {1}<br>".format(job.numTasks, job.numFailedTasks) +
+        "Completed Stages: {0} &nbsp;&nbsp;&nbsp;Failed Stages:{1}</p>".format(job.numCompletedStages, job.numFailedStages);
 }
 
 function getRunningTime(job) {

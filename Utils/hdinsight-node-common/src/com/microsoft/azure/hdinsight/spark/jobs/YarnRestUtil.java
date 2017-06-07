@@ -26,6 +26,7 @@ import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import com.microsoft.azure.hdinsight.sdk.rest.ObjectConvertUtils;
+import com.microsoft.azure.hdinsight.sdk.rest.RestUtil;
 import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.App;
 import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.AppResponse;
 import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.YarnApplicationResponse;
@@ -46,7 +47,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class YarnRestUtil {
-    private static final String YARN_UI_HISTORY_URL = "%s/yarnui/ws/v1/%s";
+    private static final String YARN_UI_HISTORY_URL = "%s/yarnui/ws/v1/cluster/%s";
 
     private static List<App> getSparkAppFromYarn(@NotNull final IClusterDetail clusterDetail) throws IOException, HDIException {
         final HttpEntity entity = getYarnRestEntity(clusterDetail, "cluster/apps");
@@ -57,6 +58,11 @@ public class YarnRestUtil {
                 .stream()
                 .filter(app -> app.isLivyJob())
                 .collect(Collectors.toList());
+    }
+
+    public static App getApp(@NotNull ApplicationKey key) throws HDIException, IOException {
+        HttpEntity entity = getYarnRestEntity(key.getClusterDetails(), String.format("/apps/%s", key.getAppId()));
+        return ObjectConvertUtils.convertEntityToObject(entity, AppResponse.class).orElseThrow(()-> new HDIException("get Yarn app error")).getApp();
     }
 
     private static HttpEntity getYarnRestEntity(@NotNull IClusterDetail clusterDetail, @NotNull String restUrl) throws HDIException, IOException {

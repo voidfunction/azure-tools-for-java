@@ -38,7 +38,6 @@ import netscape.javascript.JSObject;
 
 public final class JobViewPanel extends JFXPanel {
 
-    private final Object jobUtil;
     private final String rootPath;
     private final String clusterName;
     private WebView webView;
@@ -50,51 +49,33 @@ public final class JobViewPanel extends JFXPanel {
     public JobViewPanel(@NotNull String rootPath, @NotNull String clusterName) {
         this.rootPath = rootPath;
         this.clusterName = clusterName;
-        this.jobUtil = new JobUtils();
         init(this);
     }
 
     private void init(final JFXPanel panel) {
         String url = rootPath + "/com.microsoft.hdinsight/hdinsight/job/html/index.html";
+
          // for debug only
-        final String debugFlag = System.getProperty("hdinsight.debug");
-        if(!StringHelper.isNullOrWhiteSpace(debugFlag)) {
+        final String ideaSystemPath = System.getProperty("idea.system.path");
+        if(!StringHelper.isNullOrWhiteSpace(ideaSystemPath) && ideaSystemPath.contains("idea-sandbox")) {
             final String workFolder = System.getProperty("user.dir");
-            final String path = "resource/hdinsight-node-common/resources/htmlResources/hdinsight/job/html/index.html";
+            final String path = "Utils/hdinsight-node-common/resources/htmlResources/hdinsight/job/html/index.html";
             url = String.format("file:///%s/%s", workFolder, path);
         }
         // end of for debug only part
 
        final String queryString = String.format(QUERY_TEMPLATE, clusterName, JobViewHttpServer.getPort());
-        final String webUrl = "file:///" + url + queryString;
+        final String webUrl = url + queryString;
 
         Platform.setImplicitExit(false);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                webView = new WebView();
-                panel.setScene(new Scene(webView));
-                webEngine = webView.getEngine();
-                webEngine.setJavaScriptEnabled(true);
-                final JSObject win = (JSObject) webEngine.executeScript("window");
-                if (!alreadyLoad) {
-                    webEngine.load(webUrl);
-                    alreadyLoad = true;
-                    webEngine.getLoadWorker().stateProperty().addListener(
-                            new ChangeListener<Worker.State>() {
-                                @Override
-                                public void changed(ObservableValue<? extends Worker.State> ov,
-                                                    Worker.State oldState, Worker.State newState) {
-                                    if (newState == Worker.State.SUCCEEDED) {
-                                        // ignore it if 'JobUtils' has been set
-                                        if (win.getMember("JobUtils").toString().equalsIgnoreCase("undefined")) {
-                                            win.setMember("JobUtils", jobUtil);
-                                        }
-                                    }
-                                }
-                            }
-                    );
-                }
+        Platform.runLater(()-> {
+            webView = new WebView();
+            panel.setScene(new Scene(webView));
+            webEngine = webView.getEngine();
+            webEngine.setJavaScriptEnabled(true);
+            if (!alreadyLoad) {
+                webEngine.load(webUrl);
+                alreadyLoad = true;
             }
         });
     }

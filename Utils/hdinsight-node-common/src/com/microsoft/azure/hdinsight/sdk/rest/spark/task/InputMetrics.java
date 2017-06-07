@@ -19,32 +19,30 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.microsoft.azure.hdinsight.spark.jobs;
+package com.microsoft.azure.hdinsight.sdk.rest.spark.task;
 
-import com.microsoft.azure.hdinsight.common.HttpFutureCallback;
-import com.microsoft.azure.hdinsight.common.MultiHttpFutureCallback;
-import com.microsoft.azure.hdinsight.common.task.*;
-import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
-import com.microsoft.azure.hdinsight.spark.jobs.framework.IRequest;
-import com.microsoft.azure.hdinsight.spark.jobs.framework.JobRequestDetails;
-import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
-import com.microsoft.azure.hdinsight.spark.jobs.framework.HttpRequestType;
-import com.microsoft.azuretools.azurecommons.helpers.NotNull;
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
+public class InputMetrics {
+    private long recordsRead;
 
-import java.io.IOException;
-import java.util.List;
+    private long bytesRead;
 
-public class JobHttpHandler implements HttpHandler {
+    public long getRecordsRead ()
+    {
+        return recordsRead;
+    }
 
-    @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
-        JobRequestDetails requestDetail = JobRequestDetails.getJobRequestDetail(httpExchange);
-        // TODO : get message from spark history server
+    public void setRecordsRead (long recordsRead)
+    {
+        this.recordsRead = recordsRead;
+    }
 
-        JobUtils.setResponse(httpExchange, "");
+    public long getBytesRead ()
+    {
+        return bytesRead;
+    }
+
+    public void setBytesRead (long bytesRead)
+    {
+        this.bytesRead = bytesRead;
     }
 }
-

@@ -32,6 +32,7 @@ import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
 import com.microsoft.azure.hdinsight.spark.jobs.livy.LivyBatchesInformation;
 import com.microsoft.azure.hdinsight.spark.jobs.livy.LivySession;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.microsoft.azuretools.azurecommons.helpers.Nullable;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.sun.net.httpserver.HttpExchange;
@@ -59,26 +60,27 @@ import java.net.URI;
 public class JobUtils {
     private static Logger LOGGER = LoggerFactory.getLogger(JobUtils.class);
 
-    private static String defaultYarnUIHistoryFormat = "https://%s.azurehdinsight.net/yarnui/hn/cluster";
-    private static String yarnUIHisotryFormat = "https://%s.azurehdinsight.net/yarnui/hn/cluster/app/%s";
+    private static String defaultYarnUIHistoryFormat = "%s.azurehdinsight.net/yarnui/hn/cluster";
+    private static String yarnUIHisotryFormat = "%s/yarnui/hn/cluster/app/%s";
 
-    private static String sparkUIHistoryFormat = "https://%s.azurehdinsight.net/sparkhistory/history/%s/jobs";
-    private static String defaultSparkUIHistoryFormat = "https://%s.azurehdinsight.net/sparkhistory";
+    private static String sparkUIHistoryFormat = "%s/sparkhistory/history/%s/%s/jobs";
+    private static String defaultSparkUIHistoryFormat = "%s.azurehdinsight.net/sparkhistory";
 
     private static final String JobLogFolderName = "SparkJobLog";
     private static final String SPARK_EVENT_LOG_FOLDER_NAME = "SparkEventLog";
     private static CredentialsProvider provider = new BasicCredentialsProvider();
 
-
     public static void setResponse(@NotNull HttpExchange httpExchange, @NotNull String message) {
+        setResponse(httpExchange, message, 200);
+    }
+
+    public static void setResponse(@NotNull HttpExchange httpExchange, @NotNull String message, @NotNull int code) {
         try {
-            httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-            httpExchange.sendResponseHeaders(200, message.length());
+            httpExchange.sendResponseHeaders(code, message.length());
             OutputStream stream = httpExchange.getResponseBody();
             stream.write(message.getBytes());
-            stream.close();
         } catch (IOException e) {
-        LOGGER.error("JobUtils set Response error", e);
+            LOGGER.error("JobUtils set Response error", e);
         }
     }
 
@@ -107,14 +109,8 @@ public class JobUtils {
         return result;
     }
 
-    public void openYarnUIHistory(String applicationId) {
-        RequestDetail requestDetail = JobViewDummyHttpServer.getCurrentRequestDetail();
-        String yarnHistoryUrl = null;
-        if(StringHelper.isNullOrWhiteSpace(applicationId)) {
-            yarnHistoryUrl = String.format(defaultYarnUIHistoryFormat, requestDetail.getClusterDetail().getName());
-        } else {
-            yarnHistoryUrl = String.format(yarnUIHisotryFormat, requestDetail.getClusterDetail().getName(), applicationId);
-        }
+    public static void openYarnUIHistory(@NotNull String clusterConnectString, @NotNull String applicationId) {
+        String yarnHistoryUrl = String.format(yarnUIHisotryFormat, clusterConnectString, applicationId);;
         try {
             openDefaultBrowser(yarnHistoryUrl);
         } catch (Exception e) {
@@ -122,14 +118,8 @@ public class JobUtils {
         }
     }
 
-    public void openSparkUIHistory(String applicationId) {
-        RequestDetail requestDetail = JobViewDummyHttpServer.getCurrentRequestDetail();
-        String sparkHistoryUrl = null;
-        if(StringHelper.isNullOrWhiteSpace(applicationId)) {
-            sparkHistoryUrl = String.format(defaultSparkUIHistoryFormat, requestDetail.getClusterDetail().getName());
-        } else {
-            sparkHistoryUrl = String.format(sparkUIHistoryFormat, requestDetail.getClusterDetail().getName(), applicationId);
-        }
+    public static void openSparkUIHistory(@NotNull String clusterConnectString, @NotNull String applicationId, @NotNull int attemptId) {
+        String sparkHistoryUrl = String.format(sparkUIHistoryFormat, clusterConnectString, applicationId, attemptId);
         try {
             openDefaultBrowser(sparkHistoryUrl);
         } catch (IOException e) {
@@ -137,12 +127,12 @@ public class JobUtils {
         }
     }
 
-    public void openDefaultBrowser(@NotNull final String url) throws IOException {
+    public static void openDefaultBrowser(@NotNull final String url) throws IOException {
         final URI uri = URI.create(url);
         openDefaultBrowser(uri);
     }
 
-    public void openDefaultBrowser(@NotNull final URI uri) throws IOException {
+    public static void openDefaultBrowser(@NotNull final URI uri) throws IOException {
         if (Desktop.isDesktopSupported()) {
             final String scheme = uri.getScheme();
             if (scheme.equalsIgnoreCase("https") || scheme.equalsIgnoreCase("http")) {
@@ -153,11 +143,11 @@ public class JobUtils {
         }
     }
 
-    public void openFileExplorer(@NotNull final File file) throws IOException {
+    public static void openFileExplorer(@NotNull final File file) throws IOException {
         openDefaultBrowser(file.toURI());
     }
 
-    public void openLivyLog(String applicationId) {
+    public static void openLivyLog(String applicationId) {
         final URI livyUri = getLivyLogPath(HDInsightLoader.getHDInsightHelper().getPluginRootPath(), applicationId);
         try {
             openDefaultBrowser(livyUri);
@@ -169,7 +159,7 @@ public class JobUtils {
     private static final String EVENT_LOG_REST_API = "applications/%s/logs";
     private static final String Event_LOG_FILE_NAME = "eventLogs.zip";
 
-    public void openSparkEventLog(String uuid, String applicationId) {
+    public static void openSparkEventLog(String uuid, String applicationId) {
         IClusterDetail clusterDetail = JobViewManager.getCluster(uuid);
         String path = StringHelper.concat(HDInsightLoader.getHDInsightHelper().getPluginRootPath(), File.separator, SPARK_EVENT_LOG_FOLDER_NAME, File.separator, applicationId);
         File downloadFile = new File(path, Event_LOG_FILE_NAME);

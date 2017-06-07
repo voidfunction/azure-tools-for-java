@@ -95,7 +95,6 @@
     position: relative;
     -webkit-flex: 1 1 auto;
     flex: 1 1 auto;
-    position: relative;
     overflow-x: hidden;
     overflow-y: hidden;
     transition: margin .2s ease;
@@ -114,4 +113,14 @@
 }
 .fxs-theme-dark {
     background-color: #202428;
+}
+
+.jobview-hr {
+    border: 1px dotted ;
+    border-style: none none dotted;
+    background-color: #fff;
+    margin: 3px;
+}
+.jobtips {
+    margin: 0;
 }

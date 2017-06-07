@@ -21,6 +21,7 @@
  */
 package com.microsoft.azure.hdinsight.spark.jobs;
 
+import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
@@ -66,14 +67,17 @@ public class JobViewHttpServer {
 
         try {
             // try to get a random socket port
-            ServerSocket s = new ServerSocket(0);
+            ServerSocket s = new ServerSocket(29104);
             s.close();
 
             InetSocketAddress socketAddress = new InetSocketAddress(s.getLocalPort());
             port = socketAddress.getPort();
 
             server = HttpServer.create(socketAddress, 10);
-            server.createContext("/", new JobHttpHandler());
+            server.createContext("/applications", new SparkJobHttpHandler());
+            server.createContext("/apps", new YarnJobHttpHandler());
+            server.createContext("/actions", new ActionHttpHandler());
+
             executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
             server.setExecutor(executorService);
             server.start();

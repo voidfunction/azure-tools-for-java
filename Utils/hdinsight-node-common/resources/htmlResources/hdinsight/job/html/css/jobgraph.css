@@ -1,8 +1,8 @@
-g.type-Success > rect {
+g.sparkJob-success > rect {
     fill: #00ffd0;
 }
 
-g.type-Error > rect {
+g.sparkJob-error > rect {
     fill:red;
 }
 

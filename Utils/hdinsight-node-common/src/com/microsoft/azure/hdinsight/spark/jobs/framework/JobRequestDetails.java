@@ -24,9 +24,7 @@ package com.microsoft.azure.hdinsight.spark.jobs.framework;
 import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
-import com.microsoft.azuretools.azurecommons.helpers.Nullable;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
-import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.net.URI;
@@ -34,78 +32,65 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JobRequestDetails implements IRequest {
+public class JobRequestDetails {
 
     private final Map<String, String> myQueriesMap;
     private final IClusterDetail myClusterDetail;
-    private final String myRequestUrl;
+    private final String myRequestPath;
     private final HttpRequestType myHttpRequestType;
     private final String myAppId;
-    private final String myQueryString;
 
-    private static final String HTTP_HEADER = "http-type";
-    private static final String CLUSTER_NAME_HEADER = "cluster-name";
+    private static final String HTTP_TYPE_TAG = "http-type";
+    private static final String CLUSTER_NAME_TAG = "cluster-name";
     private static final String APP_ID_QUERY_KEY = "appId";
 
-    private JobRequestDetails (@NotNull String requestUrl, @Nullable String queryString,
-                               @NotNull String clusterName, @NotNull HttpRequestType requestType) {
+    private JobRequestDetails (@NotNull String requestPath, @NotNull Map<String, String> queriesMap) {
+        this.myRequestPath = requestPath;
+        this.myQueriesMap = queriesMap;
+        final String clusterName = myQueriesMap.get(CLUSTER_NAME_TAG);
         this.myClusterDetail = JobViewManager.getCluster(clusterName);
-        this.myRequestUrl = requestUrl;
-        this.myQueryString = queryString;
-        this.myQueriesMap = new HashMap<>();
-        this.myHttpRequestType = requestType;
 
+        final String requestType = myQueriesMap.get(HTTP_TYPE_TAG);
+        this.myHttpRequestType = HttpRequestType.fromString(requestType);
+
+        this.myAppId = myQueriesMap.getOrDefault(APP_ID_QUERY_KEY, "0");
+    }
+
+    public String getAppId() {
+        return myAppId;
+    }
+
+    public String getRequestPath() {
+            return myRequestPath;
+    }
+
+    public static JobRequestDetails getJobRequestDetail(@NotNull HttpExchange httpExchange) {
+        final URI myUri = httpExchange.getRequestURI();
+        final String path = myUri.getPath();
+        final String queryString = myUri.getQuery();
+        Map<String, String> queriesqMap = new HashMap<>();
         String[] queries = StringHelper.isNullOrWhiteSpace(queryString) ? new String[0] : queryString.split("&");
         Arrays.stream(queries).forEach(str -> {
             String[] query = str.split("=");
             if (query.length == 2) {
-                myQueriesMap.put(query[0], query[1]);
+                queriesqMap.put(query[0], query[1]);
             }
         });
-        this.myAppId = myQueriesMap.getOrDefault(APP_ID_QUERY_KEY, "0");
+
+        assert queriesqMap.containsKey("cluster-name");
+        assert queriesqMap.containsKey("http-type");
+
+        return new JobRequestDetails(path, queriesqMap);
     }
 
-    public static JobRequestDetails getJobRequestDetail(@NotNull HttpExchange httpExchange) {
-        final Headers headers = httpExchange.getRequestHeaders();
-        final String httpType = headers.getFirst(HTTP_HEADER);
-        final String clusterName = headers.getFirst(CLUSTER_NAME_HEADER);
-        HttpRequestType requestType = HttpRequestType.fromString(httpType);
-
-        final URI myUri = httpExchange.getRequestURI();
-
-        final String path = myUri.getPath();
-
-        return new JobRequestDetails(path, myUri.getQuery(), clusterName, requestType);
+    public boolean isSpecificApp() {
+        return !myAppId.equals("0");
     }
 
-    @Override
-    public String getRequestUrl() {
-        String url = myClusterDetail.getConnectionUrl();
-
-        switch (myHttpRequestType) {
-            case SparkRest:
-                url += "/sparkhistory/api/v1";
-                break;
-            case YarnRest:
-                url += "/yarnui/ws/v1";
-                break;
-            case YarnHistory:
-                url += "/yarnui";
-                break;
-            case LivyBatchesRest:
-                url += "/livy";
-                break;
-        }
-        url += myRequestUrl;
-        return StringHelper.isNullOrWhiteSpace(myQueryString) ? url : url + "?" + myQueryString;
-    }
-
-    @Override
     public IClusterDetail getCluster() {
         return myClusterDetail;
     }
 
-    @Override
     public HttpRequestType getRestType() {
         return myHttpRequestType;
     }

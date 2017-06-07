@@ -30,8 +30,25 @@ function getRestHeaders(type) {
     return {'http-type' : type, 'cluster-name' : spark.clusterName }
 }
 
-function getMessageAsync(url, type, callback) {
-    var headers = getRestHeaders(type);
+function serializeQuery(queriesMap) {
+    var keys = Object.keys(queriesMap);
+    if (keys.length === 0) return '';
+    var result = '';
+    keys.forEach(function (key) {
+        result = result + "&{0}={1}".format(key, queriesMap[key]);
+    });
+    return result.substring(1)
+}
+
+function getMessageAsync(url, type, callback, appId) {
+    var queriesMap = {};
+    queriesMap['http-type'] = (type === undefined ? 'spark' : type);
+    queriesMap['cluster-name'] = spark.clusterName;
+    if (appId !== undefined) {
+        queriesMap['appId'] = appId;
+    }
+    var queryString = serializeQuery(queriesMap);
+
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.timeout = 60 * 1000;
     xmlHttp.ontimeout = function () {
@@ -52,17 +69,19 @@ function getMessageAsync(url, type, callback) {
                 if (s === '') {
                     return;
                 }
-                callback(s);
+                if (callback !== undefined) {
+                    callback(s);
+                }
             }
         }
     };
 
-    xmlHttp.open('GET', spark.localhost + url, true);
-    Object.keys(headers).forEach(function(k) {
-        xmlHttp.setRequestHeader(k, headers[k]);
-    });
-
+    xmlHttp.open('GET', spark.localhost + url + '?' + queryString, true);
     xmlHttp.send(null);
+}
+
+function sendActionSingle(url) {
+    getMessageAsync(url, undefined, undefined, appId = spark.appId)
 }
 
 function reloadTableStyle() {
@@ -78,4 +97,10 @@ function formatServerTime(gmtTime) {
     var formatTime = d3.timeFormat("%b %d, %Y %H:%M:%S");
     var ptime = strictIsoParse(gmtTime);
     return formatTime(ptime);
+}
+
+
+function getTimeIntervalByMins(time1, time2) {
+    var strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LGMT");
+    return ((strictIsoParse(time1) - strictIsoParse(time2))/(1000 * 60.0)).toFixed(2);
 }

@@ -125,7 +125,7 @@ function getJobSummaryValue(jobs) {
     return details;
 }
 
- var storedRDDSummaryColumn = ["RDD Number", "diskUsed", "memoryUsed"];
+var storedRDDSummaryColumn = ["RDD Number", "diskUsed", "memoryUsed"];
 var storedRDDDetailsColumn = ["name", "numPartitions", "numCachedPartitions","memoryUsed","diskUsed"];
 function renderStoredRDD(myData) {
     var counter = 0;
@@ -343,8 +343,7 @@ function renderJobGraph(myData) {
     });
 }
 
-var taskSummaryColumn= ["Index", "ID", "Attempt", "Status", "Locality Level", "Executor ID/Host", "Launch Time"];
-var taskSummaryColumn2 = ['taskId','index','attempt','launchTime','executorId','host','taskLocality','speculative'];
+
 function renderTaskSummary(myData) {
     d3.select('#taskSummaryTbody')
         .selectAll('tr')
@@ -354,8 +353,7 @@ function renderTaskSummary(myData) {
         .attr('align', 'center')
         .attr('class','ui-widget-content')
         .html(function(d) {
-            var key = Object.keys(d)[0];
-            return generateTaskSummaryLine(d[key]);
+            return generateTaskSummaryLine(d);
     });
 
 }
@@ -372,15 +370,16 @@ function taskSummaryObjToList(myTaskSummary) {
     return lists;
 }
 
+var taskSummaryColumn = ['taskId','index','attempt','launchTime','executorId','host','taskLocality','speculative'];
 function generateTaskSummaryLine(task) {
     var html = '';
-    taskSummaryColumn2.forEach(function(d) {
+    taskSummaryColumn.forEach(function(d) {
         html += '<td>'+ task[d] + '</td>';
     });
     return html;
 }
 var executorSummaryColumn = ["id","hostPort", "rddBlocks", "memoryUsed","diskUsed","totalDuration", "totalInputBytes", "totalShuffleRead", "totalShuffleWrite","maxMemory"]
-function renderExecutors(myData) {
+function renderExecutorsOnPage(myData) {
     d3.select("#executorDetailsBody")
         .selectAll('tr')
         .data(myData)

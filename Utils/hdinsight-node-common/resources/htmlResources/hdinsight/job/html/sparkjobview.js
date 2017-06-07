@@ -1,7 +1,7 @@
 "use strict";
 
 // to cache all job related object
-var spark;
+var spark = new Object();
 
 $(function () {
     initiate();
@@ -69,7 +69,9 @@ function commandBinding() {
 
         //get Application Id
         spark.appId = $(this).find('td:eq(1)').text();
-
+        spark.selectedApp = spark.applicationList.filter(function(item) {
+            return item.id == spark.appId;
+        })[0];
         // get last attempt
         spark.attemptId = $(this).find('td:eq(4)').text();
         spark.applicationName = $(this).find('td:eq(2)').text();
@@ -80,52 +82,37 @@ function commandBinding() {
         }
         // save current Application ID to LocalStorage
         localStorage.setItem('selectedAppID', spark.appId);
-        setBasicInformation();
-        setAMcontainer();
-        setDiagnosticsLog();
-        setLivyLog();
-        setDebugInfo("end livy log");
-        setJobDetail();
-        setStoredRDD();
-        setStageDetailsWithTaskDetails();
-        setExecutorsDetails();
+        renderApplicationGraph();
+        // getYarnApplicationDetails();
+
+        renderStageDetails();
+        renderExecutors();
+        renderTaskDetails();
+        // setBasicInformation();
+        // setAMcontainer();
+        // setDiagnosticsLog();
+        // setLivyLog();
+        // setDebugInfo("end livy log");
+        // setJobDetail();
+        // setStoredRDD();
+
     });
 
     $('#sparkEventButton').click(function () {
-        JobUtils.openSparkEventLog(projectId, typeof appId === 'undefined' ? "" : appId.toString());
+        sendActionSingle("/actions/sparkEvent");
+        // JobUtils.openSparkEventLog(projectId, typeof appId === 'undefined' ? "" : appId.toString());
     });
 
     $('#livyLogButton').click(function() {
-        JobUtils.openLivyLog(typeof appId === 'undefined' ? "" : appId.toString());
+        sendActionSingle("/actions/livyLog");
     });
 
     $("#openSparkUIButton").click(function () {
-        var id = typeof appId === 'undefined' ? "" : appId.toString();
-        if (id != "") {
-            var application = $.grep(applicationList, function (e) {
-                return e.id === id;
-            });
-            if (application != null && application.length == 1) {
-                var currentAttemptId = application[0].attempts[0].attemptId;
-                if (currentAttemptId != null) {
-                    id = id + "/" + currentAttemptId;
-                }
-            }
-        }
-        if(sourceType == "intellij") {
-            JobUtils.openSparkUIHistory(id);
-        } else {
-            JobUtils.openSparkUIHistory(clusterName, id);
-        }
-
+        sendActionSingle("/actions/sparkui");
     });
 
     $("#openYarnUIButton").click(function () {
-        if(sourceType == "intellij"){
-            JobUtils.openYarnUIHistory(typeof appId == 'undefined' ? "" : appId.toString());
-        } else {
-            JobUtils.openYarnUIHistory(clusterName, typeof appId == 'undefined' ? "" : appId.toString());
-        }
+        sendActionSingle("/actions/yarnui");
     });
 
     $("#refreshButton").click(function () {
@@ -152,7 +139,7 @@ function getBasicInfoFromUrl() {
     spark.clusterName = spark.queriresMap['clusterName'];
     spark.engineType = spark.queriresMap['engineType'];
     spark.queryPort = spark.queriresMap['port'];
-    spark.localhost = 'http://localhost:{0}/'.format(spark.queryPort);
+    spark.localhost = 'http://localhost:{0}'.format(spark.queryPort);
 }
 
 function getJobHistory() {
@@ -166,37 +153,37 @@ function getJobHistory() {
 }
 
 function refreshGetSelectedApplication() {
-    var selectedAppid = localStorage.getItem("selectedAppID");
-    if (selectedAppid === 'undefined') {
+    var selectedAppId = localStorage.getItem("selectedAppID");
+    if (selectedAppId === 'undefined') {
         return;
     }
 
     var tableRow = $('#myTable tbody tr').filter(function () {
-        return $(this).children('td:eq(1)').text() === selectedAppid;
+        return $(this).children('td:eq(1)').text() === selectedAppId;
     }).closest("tr");
     tableRow.click();
 }
 
 
-function getFirstAttempt(attempts) {
-    return findElement(attempts, function (a) {
-        return typeof a.attemptId === 'undefined' || a.attemptId === 1;
-    });
-}
+// function getFirstAttempt(attempts) {
+//     return findElement(attempts, function (a) {
+//         return typeof a.attemptId === 'undefined' || a.attemptId === 1;
+//     });
+// }
+//
+// function getLastAttempt(attempts) {
+//     return findElement(attempts, function (a) {
+//         return typeof a.attemptId === 'undefined' || a.attemptId === attemptId;
+//     });
+// }
 
-function getLastAttempt(attempts) {
-    return findElement(attempts, function (a) {
-        return typeof a.attemptId === 'undefined' || a.attemptId === attemptId;
-    });
-}
-
-function setBasicInformation() {
-    getMessageAsync("/applications?appId=" + spark.appId, 'spark', function (s) {
-        var application = JSON.parse(s);
-        $('#startTime').text(formatServerTime(getFirstAttempt(application.attempts).startTime));
-        $('#endTime').text(formatServerTime(getLastAttempt(application.attempts).endTime));
-    });
-}
+// function setBasicInformation() {
+//     getMessageAsync('/applications', 'spark', function (s) {
+//         var application = JSON.parse(s);
+//         $('#startTime').text(formatServerTime(getFirstAttempt(application.attempts).startTime));
+//         $('#endTime').text(formatServerTime(getLastAttempt(application.attempts).endTime));
+//     }, spark.appId);
+// }
 
 function setMessageForLable(str) {
     var ss = document.getElementById("demo");
@@ -208,7 +195,7 @@ function writeToTable(message) {
     $('#myTable tbody').html("");
     d3.select("#myTable tbody")
         .selectAll('tr')
-        .data(applicationList)
+        .data(spark.applicationList)
         .enter()
         .append('tr')
         .attr("align","center")
@@ -235,7 +222,7 @@ function appInformationList(app) {
     lists.push(app.id);
     lists.push(app.name);
     lists.push(formatServerTime(app.attempts[0].startTime));
-    if(app.attempts.length == 1 && typeof app.attempts[0].attemptId == 'undefined') {
+    if(app.attempts.length === 1 && typeof app.attempts[0].attemptId === 'undefined') {
         lists.push(0);
     } else {
         lists.push(app.attempts.length);
@@ -245,7 +232,7 @@ function appInformationList(app) {
 }
 
 function getTheJobStatusImgLabel(str) {
-    if (str == true) {
+    if (str === 'true') {
         return "<img src=\"resources/icons/Success.png\">";
     } else {
         return "<img src=\"resources/icons/Error.png\">";
@@ -254,10 +241,10 @@ function getTheJobStatusImgLabel(str) {
 
 function setAMcontainer() {
     // filter out local application
-    if (appId.substr(0, 5) === "local") {
+    if (spark.appId.substr(0, 5) === "local") {
         $("#containerNumber").text("Local Task");
     } else {
-        getMessageAsync('/applications?appId=' + spark.appId, 'spark', function (str) {
+        getMessageAsync('/applications', 'spark', function (str) {
             var myAttempts = JSON.parse(str);
             spark.containerId = myAttempts.appAttempts.appAttempt[0].containerId;
             spark.nodeId = myAttempts.appAttempts.appAttempt[0].nodeId;
@@ -266,22 +253,22 @@ function setAMcontainer() {
                 getJobResult();
                 getSparkDriverLog();
             }
-        });
+        }, spark.appId);
     }
 }
 
 function setDiagnosticsLog() {
-    if (appId.substr(0, 5) === "local") {
+    if (spark.appId.substr(0, 5) === "local") {
         $("#errorMessage").text("No Yarn Error Message");
     } else {
-        getMessageAsync("/apps?appId=" + spark.appId + 'yarn', function (s) {
+        getMessageAsync('/apps', 'yarn', function (s) {
             var responseObject = JSON.parse(s);
             var message = responseObject.app.diagnostics;
             if (message === 'undefined' || message === "") {
                 message = "No Error Message";
             }
             $('#errorMessage').text(message);
-        });
+        }, spark.appId);
     }
 }
 
@@ -289,7 +276,7 @@ function getSparkDriverLog() {
     if (spark.attemptId === 0 || typeof spark.containerId === 'undefined') {
         return;
     }
-    getMessageAsync("/applications/driverLog?appId" + spark.appId, 'yarn', function (s) {
+    getMessageAsync('/applications/driverLog', 'yarn', function (s) {
         var executorsObject = JSON.parse(s);
         // var hostPort = getDriverPortFromExecutor(executorsObject);
         // var ipAddress = hostPort.split(":")[0];
@@ -297,7 +284,7 @@ function getSparkDriverLog() {
         // getResultFromSparkHistory(url, function (result) {
         //     $("#sparkDriverLog").text(result);
         // });
-    });
+    }, spark.appId);
 }
 
 function getJobResult() {
@@ -327,23 +314,41 @@ function getJobResult() {
 //     });
 // }
 
-function setJobDetail() {
-    var selectedApp = findElement(spark.applicationList, function (d) {
-       return d.id === appId;
-    });
-    if(typeof selectedApp === 'undefined') {
-        return;
-    }
-    setDebugInfo("selectApp " + appId);
-    if(selectedApp.attempts[0].sparkUser === 'hive') {
-        return;
-    }
-    getMessageAsync("/applications/jobs?appId=" + spark.appId, 'spark', function (s) {
-        spark.currentSelectedJobs = JSON.parse(s);
-        renderJobDetails(spark.currentSelectedJobs);
+function renderApplicationGraph() {
+    getMessageAsync('/applications/application_graph', 'spark', function (s) {
+        var yarnAppWithJobs= JSON.parse(s);
+        spark.selectedYarnApp = yarnAppWithJobs.app;
+        spark.currentSelectedJobs = yarnAppWithJobs.jobs;
         renderJobGraphOnApplicationLevel(spark.currentSelectedJobs);
-    });
+    }, spark.appId);
 }
+
+function renderStageDetails() {
+    if(spark.attemptId === 0) {
+        $("#stage_detail_info_message").text("No Stage Info");
+        return;
+    }
+    $('#stage_detail_info_message').text('');
+    getMessageAsync("/applications/stages_summary", 'spark', function (s) {
+        spark.currentSelectedStages = JSON.parse(s);
+        renderStageSummary(spark.currentSelectedStages);
+    }, spark.appId);
+}
+
+function renderTaskDetails() {
+    getMessageAsync("/applications/tasks_summary",'spark', function(s){
+        var tasks = JSON.parse(s);
+        renderTaskSummary(tasks);
+    }, spark.appId);
+}
+
+function renderExecutors() {
+    getMessageAsync("/applications/executors_summary", 'spark', function (s) {
+        var executors = JSON.parse(s);
+        renderExecutorsOnPage(executors);
+    }, spark.appId);
+}
+
 
 function setJobGraph(jobs) {
     spark.isJobGraphGenerated = true;
@@ -408,41 +413,24 @@ function setStoredRDD() {
     });
 }
 
-function setStageDetailsWithTaskDetails() {
-    if(attemptId == 0) {
-        $("#stage_detail_info_message").text("No Stage Info");
-        return;
-    }
-    $("#stage_detail_info_message").text('');
-    getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/stages", function (s) {
-        spark.currentSelectedStages = JSON.parse(s);
-        renderStageSummary(currentSelectedStages);
-        setTaskDetails();
-        if(!isJobGraphGenerated && currentSelectedJobs != null) {
-            setJobGraph(currentSelectedJobs);
-        }
-    });
-}
 
-function setTaskDetails() {
-    var httpQuery = localhost + projectId + "/applications" + "?applicationId="+appId + "&attemptId=" + attemptId + "&multi-stages=" + currentSelectedStages.length;
-    getMessageAsync(httpQuery, function(s){
-        var tasks = JSON.parse(s);
-        renderTaskSummary(tasks);
-    });
-}
+// function setStageDetailsWithTaskDetails() {
+//     if(attemptId == 0) {
+//         $("#stage_detail_info_message").text("No Stage Info");
+//         return;
+//     }
+//     $("#stage_detail_info_message").text('');
+//     getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/stages", function (s) {
+//         spark.currentSelectedStages = JSON.parse(s);
+//         renderStageSummary(currentSelectedStages);
+//         setTaskDetails();
+//         if(!isJobGraphGenerated && currentSelectedJobs != null) {
+//             setJobGraph(currentSelectedJobs);
+//         }
+//     });
+// }
 
-function setExecutorsDetails() {
-    var httpQuery = localhost + projectId + "/applications/" + appId + "/" + attemptId + "/executors";
-    getMessageAsync(httpQuery, function (s) {
-        try {
-            var executors = JSON.parse(s);
-            renderExecutors(executors);
-        } catch (e) {
 
-        }
-    })
-}
 function setDebugInfo(s) {
     $("#debuginfo").text(s);
 }

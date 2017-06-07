@@ -31,6 +31,7 @@ import com.microsoft.azure.hdinsight.sdk.rest.spark.Application;
 import com.microsoft.azure.hdinsight.sdk.rest.spark.executor.Executor;
 import com.microsoft.azure.hdinsight.sdk.rest.spark.job.Job;
 import com.microsoft.azure.hdinsight.sdk.rest.spark.stage.Stage;
+import com.microsoft.azure.hdinsight.sdk.rest.spark.task.Task;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import org.apache.http.HttpEntity;
 
@@ -38,14 +39,15 @@ import org.apache.http.HttpEntity;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class SparkRestUtil {
-    public static final String SPARK_REST_API_ENDPOINT = "%s/sparkhistory/api/v1/%s";
+    public static final String SPARK_REST_API_ENDPOINT = "%s/sparkhistory/api/v1/applications/%s";
 
     @NotNull
     public static List<Application> getSparkApplications(@NotNull IClusterDetail clusterDetail) throws HDIException, IOException {
-        HttpEntity entity = getSparkRestEntity(clusterDetail, "applications");
+        HttpEntity entity = getSparkRestEntity(clusterDetail, "");
         Optional<List<Application>> apps = ObjectConvertUtils.convertEntityToList(entity, Application.class);
 
         // spark job has at least one attempt
@@ -55,30 +57,45 @@ public class SparkRestUtil {
                 .collect(Collectors.toList());
     }
 
-    public static List<Executor> getAllExecutorFromApp(@NotNull ApplicationKey key) throws IOException, HDIException {
-        final Application app = JobViewManager.getCachedApp(key);
-        final HttpEntity entity = getSparkRestEntity(key.getClusterDetails(), String.format("/%s/%s/executors", app.getId(), app.getLastAttemptId()));
+    public static List<Executor> getAllExecutorFromApp(@NotNull ApplicationKey key) throws IOException, HDIException, ExecutionException {
+        final AttemptWithAppId attemptWithAppId = getLastAttemptFromLocalCache(key);
+        final HttpEntity entity = getSparkRestEntity(key.getClusterDetails(), String.format("/%s/%s/executors", attemptWithAppId.getAppId(), attemptWithAppId.getAttemptId()));
         Optional<List<Executor>> executors = ObjectConvertUtils.convertEntityToList(entity, Executor.class);
         return executors.orElse(RestUtil.getEmptyList(Executor.class));
     }
 
-    public static List<Stage> getAllStageFromApp(@NotNull ApplicationKey key) throws IOException, HDIException {
-        final Application app = JobViewManager.getCachedApp(key);
-        final HttpEntity entity = getSparkRestEntity(key.getClusterDetails(), String.format("/%s/%s/jobs", app.getId(), app.getLastAttemptId()));
+    public static List<Stage> getAllStageFromApp(@NotNull ApplicationKey key) throws IOException, HDIException, ExecutionException {
+        final AttemptWithAppId attemptWithAppId = getLastAttemptFromLocalCache(key);
+        final HttpEntity entity = getSparkRestEntity(key.getClusterDetails(), String.format("/%s/%s/stages", attemptWithAppId.getAppId(), attemptWithAppId.getAttemptId()));
         final Optional<List<Stage>> stages = ObjectConvertUtils.convertEntityToList(entity, Stage.class);
-        return stages.orElse(Stage.EMPTY_LIST);
+        return stages.orElse(RestUtil.getEmptyList(Stage.class));
     }
 
-    public static List<Job> getLastAttemptJobsFromApp(@NotNull ApplicationKey key) throws IOException, HDIException {
-        final Application app = JobViewManager.getCachedApp(key);
-        AttemptWithAppId attemptWithAppId = app.getLastAttemptWithAppId(key.getClusterDetails().getName());
+    public static List<Job> getLastAttemptJobsFromApp(@NotNull ApplicationKey key) throws IOException, HDIException, ExecutionException {
+        AttemptWithAppId attemptWithAppId = getLastAttemptFromLocalCache(key);
         return getSparkJobsFromApp(key.getClusterDetails(), key.getAppId(), attemptWithAppId.getAttemptId());
     }
 
     public static List<Job> getSparkJobsFromApp(@NotNull IClusterDetail clusterDetail, @NotNull String appId, @NotNull String attemptId) throws IOException, HDIException {
         HttpEntity entity = getSparkRestEntity(clusterDetail, String.format("/%s/%s/jobs", appId, attemptId));
         Optional<List<Job>> apps = ObjectConvertUtils.convertEntityToList(entity, Job.class);
-        return apps.orElse(Job.EMPTY_LIST);
+        return apps.orElse(RestUtil.getEmptyList(Job.class));
+    }
+
+    public static List<Task> getSparkTasks(@NotNull ApplicationKey key, @NotNull int stage, int attemptId) throws IOException, ExecutionException, HDIException {
+        AttemptWithAppId attemptWithAppId = getLastAttemptFromLocalCache(key);
+        String url = String.format("/%s/%s/stages/%s/%s/taskList", attemptWithAppId.getAppId(), attemptWithAppId.getAttemptId(),stage, attemptId);
+        HttpEntity entity = getSparkRestEntity(key.getClusterDetails(), url);
+
+        Optional<List<Task>> tasks = ObjectConvertUtils.convertEntityToList(entity, Task.class);
+        return tasks.orElse(RestUtil.getEmptyList(Task.class));
+    }
+
+    private static AttemptWithAppId getLastAttemptFromLocalCache(@NotNull ApplicationKey key) throws ExecutionException, HDIException {
+        List<Application> sparkApplications = JobViewCacheManager.getSparkApplications(key.getClusterDetails());
+        Optional<Application> selectedApplication = sparkApplications.stream().filter(application -> application.getId().equalsIgnoreCase(key.getAppId())
+        ).findFirst();
+        return selectedApplication.orElseThrow(()-> new HDIException("application can't find")).getLastAttemptWithAppId(key.getClusterDetails().getName());
     }
 
     private static HttpEntity getSparkRestEntity(@NotNull IClusterDetail clusterDetail, @NotNull String restUrl) throws HDIException, IOException {
