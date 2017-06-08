@@ -21,25 +21,14 @@
  */
 package com.microsoft.azure.hdinsight.spark.jobs;
 
-import com.jcraft.jsch.JSch;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
-import com.microsoft.azure.hdinsight.sdk.common.HttpResponse;
 import com.microsoft.azure.hdinsight.sdk.rest.ObjectConvertUtils;
-import com.microsoft.azure.hdinsight.sdk.rest.RestUtil;
 import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.App;
 import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.AppResponse;
 import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.YarnApplicationResponse;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import org.apache.http.HttpEntity;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClients;
 
 import java.io.IOException;
 import java.util.List;

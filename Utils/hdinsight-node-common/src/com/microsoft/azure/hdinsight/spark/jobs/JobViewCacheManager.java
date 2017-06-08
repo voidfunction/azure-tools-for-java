@@ -32,6 +32,7 @@ import com.microsoft.azure.hdinsight.sdk.rest.spark.job.Job;
 import com.microsoft.azure.hdinsight.sdk.rest.spark.stage.Stage;
 import com.microsoft.azure.hdinsight.sdk.rest.spark.task.Task;
 import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.App;
+import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.ApplicationMasterLogs;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import org.json.JSONObject;
 
@@ -98,6 +99,16 @@ public class JobViewCacheManager {
                 }
             });
 
+    private static final LoadingCache<ApplicationKey, ApplicationMasterLogs> yarnAppLogLocalCache = CacheBuilder.newBuilder()
+            .maximumSize(100)
+            .initialCapacity(20)
+            .build(new CacheLoader<ApplicationKey, ApplicationMasterLogs>() {
+                @Override
+                public ApplicationMasterLogs load(ApplicationKey key) throws Exception {
+                    return JobUtils.getYarnLogs(key);
+                }
+            });
+
     private static final LoadingCache<ApplicationKey, App> yarnApplicationLocalCache = CacheBuilder.newBuilder()
             .maximumSize(100)
             .initialCapacity(20)
@@ -107,6 +118,10 @@ public class JobViewCacheManager {
                     return YarnRestUtil.getApp(key);
                 }
             });
+
+    public static ApplicationMasterLogs getYarnLogs(@NotNull ApplicationKey key) throws ExecutionException {
+            return yarnAppLogLocalCache.get(key);
+    }
 
     public static App getYarnApp(@NotNull ApplicationKey key) throws ExecutionException {
         return yarnApplicationLocalCache.get(key);

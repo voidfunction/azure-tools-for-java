@@ -82,12 +82,12 @@ function commandBinding() {
         }
         // save current Application ID to LocalStorage
         localStorage.setItem('selectedAppID', spark.appId);
-        renderApplicationGraph();
-        // getYarnApplicationDetails();
 
+        renderApplicationGraph();
         renderStageDetails();
         renderExecutors();
         renderTaskDetails();
+        renderYarnLogs();
         // setBasicInformation();
         // setAMcontainer();
         // setDiagnosticsLog();
@@ -100,7 +100,6 @@ function commandBinding() {
 
     $('#sparkEventButton').click(function () {
         sendActionSingle("/actions/sparkEvent");
-        // JobUtils.openSparkEventLog(projectId, typeof appId === 'undefined' ? "" : appId.toString());
     });
 
     $('#livyLogButton').click(function() {
@@ -307,13 +306,6 @@ function getJobResult() {
     });
 }
 
-
-// function setLivyLog() {
-//     getMessageAsync(localhost + projectId + "/?restType=livy&applicationId=" + appId, function (s) {
-//         $("#livyJobLog").text(s);
-//     });
-// }
-
 function renderApplicationGraph() {
     getMessageAsync('/applications/application_graph', 'spark', function (s) {
         var yarnAppWithJobs= JSON.parse(s);
@@ -329,26 +321,34 @@ function renderStageDetails() {
         return;
     }
     $('#stage_detail_info_message').text('');
-    getMessageAsync("/applications/stages_summary", 'spark', function (s) {
+    getMessageAsync('/applications/stages_summary', 'spark', function (s) {
         spark.currentSelectedStages = JSON.parse(s);
         renderStageSummary(spark.currentSelectedStages);
     }, spark.appId);
 }
 
 function renderTaskDetails() {
-    getMessageAsync("/applications/tasks_summary",'spark', function(s){
+    getMessageAsync('/applications/tasks_summary','spark', function(s){
         var tasks = JSON.parse(s);
         renderTaskSummary(tasks);
     }, spark.appId);
 }
 
 function renderExecutors() {
-    getMessageAsync("/applications/executors_summary", 'spark', function (s) {
+    getMessageAsync('/applications/executors_summary', 'spark', function (s) {
         var executors = JSON.parse(s);
         renderExecutorsOnPage(executors);
     }, spark.appId);
 }
 
+function renderYarnLogs() {
+    getMessageAsync('/apps/logs', 'yarn', function (s) {
+        spark.logs = JSON.parse(s);
+        $('#driverErrorTextArea').text(spark.logs.stderr);
+        $('#jobOutputTextArea').text(spark.logs.stdout);
+        $('#directoryInfoTextArea').text(spark.logs.directoryInfo);
+    }, spark.appId);
+}
 
 function setJobGraph(jobs) {
     spark.isJobGraphGenerated = true;
@@ -489,7 +489,4 @@ function getJsonLength(jsonObject) {
         length++;
     }
     return length;
-}
-function openLivyLog() {
-
 }

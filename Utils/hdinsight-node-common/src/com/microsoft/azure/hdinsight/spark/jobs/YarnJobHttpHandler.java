@@ -24,6 +24,7 @@ package com.microsoft.azure.hdinsight.spark.jobs;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.rest.ObjectConvertUtils;
 import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.App;
+import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.ApplicationMasterLogs;
 import com.microsoft.azure.hdinsight.spark.jobs.framework.JobRequestDetails;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -39,15 +40,18 @@ public class YarnJobHttpHandler implements HttpHandler {
 
         JobRequestDetails requestDetail = JobRequestDetails.getJobRequestDetail(httpExchange);
         String path = requestDetail.getRequestPath();
-
-        if (path.contains("/app") && requestDetail.isSpecificApp()) {
-            try {
+        try {
+            if (path.contains("/apps/app") && requestDetail.isSpecificApp()) {
                 App app = JobViewCacheManager.getYarnApp(new ApplicationKey(requestDetail.getCluster(), requestDetail.getAppId()));
                 Optional<String> responseString = ObjectConvertUtils.convertObjectToJsonString(app);
                 JobUtils.setResponse(httpExchange, responseString.orElseThrow(IOException::new));
-            } catch (ExecutionException e) {
-                JobUtils.setResponse(httpExchange, e.getMessage(), 500);
+            } else if (path.contains("/apps/logs") && requestDetail.isSpecificApp()) {
+                ApplicationMasterLogs logs = JobViewCacheManager.getYarnLogs(new ApplicationKey(requestDetail.getCluster(), requestDetail.getAppId()));
+                Optional<String> responseString = ObjectConvertUtils.convertObjectToJsonString(logs);
+                JobUtils.setResponse(httpExchange, responseString.orElseThrow(IOException::new));
             }
+        } catch (ExecutionException e) {
+            JobUtils.setResponse(httpExchange, e.getMessage(), 500);
         }
     }
 }

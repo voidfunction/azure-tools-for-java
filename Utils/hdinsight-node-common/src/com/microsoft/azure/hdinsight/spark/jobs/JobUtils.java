@@ -21,6 +21,10 @@
  */
 package com.microsoft.azure.hdinsight.spark.jobs;
 
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.DomNodeList;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -28,6 +32,8 @@ import com.microsoft.azure.hdinsight.common.HDInsightLoader;
 import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
+import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.App;
+import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.ApplicationMasterLogs;
 import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
 import com.microsoft.azure.hdinsight.spark.jobs.livy.LivyBatchesInformation;
 import com.microsoft.azure.hdinsight.spark.jobs.livy.LivySession;
@@ -56,6 +62,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.net.URI;
+import java.util.concurrent.ExecutionException;
 
 public class JobUtils {
     private static Logger LOGGER = LoggerFactory.getLogger(JobUtils.class);
@@ -182,6 +189,63 @@ public class JobUtils {
         } catch (IOException e) {
             DefaultLoader.getUIHelper().showError(e.getMessage(), "Open Spark Event Log");
         }
+    }
+    private static final WebClient HTTP_WEB_CLIENT = new WebClient();
+
+    private static final String DRIVER_LOG_INFO_URL = "%s/yarnui/jobhistory/logs/%s/port/%s/%s/%s/livy";
+
+    public static ApplicationMasterLogs getYarnLogs(@NotNull ApplicationKey key) throws IOException, ExecutionException, HDIException {
+        App app = JobViewCacheManager.getYarnApp(key);
+
+        // amHostHttpAddress example: 10.0.0.4:30060
+        final String amHostHttpAddress = app.getAmHostHttpAddress();
+        String [] addressAndPort = amHostHttpAddress.split(":");
+        if(addressAndPort.length != 2) {
+            throw new HDIException("Yarn Application Master Host parse error");
+        }
+        String address = addressAndPort[0];
+        // TODO: Set Node Manager port to default value(30050) temporarily, we need a better way to detect it
+        String nodeManagerPort = "30050";
+        final String amContainerLogPath = app.getAmContainerLogs();
+        String amContainerId = getContainerIdFromAmContainerLogPath(amContainerLogPath);
+        String url = String.format(DRIVER_LOG_INFO_URL, key.getClusterConnString(), address, nodeManagerPort, amContainerId, amContainerId);
+        IClusterDetail clusterDetail = key.getClusterDetails();
+        return getYarnLogsFromWebClient(clusterDetail, url);
+    }
+
+    private static String getContainerIdFromAmContainerLogPath(@NotNull String amContainerLogPath) {
+        // AM container Logs path example: http://10.0.0.4:30060/node/containerlogs/container_1488459864280_0006_01_000001/livy
+        String [] res = amContainerLogPath.split("/");
+        assert res.length == 7;
+        String amContainerId = res[res.length - 2];
+        assert amContainerId.startsWith("container_");
+        return amContainerId;
+    }
+
+    private static ApplicationMasterLogs getYarnLogsFromWebClient(@NotNull final IClusterDetail clusterDetail, @NotNull final String url) throws HDIException, IOException {
+        final CredentialsProvider credentialsProvider  =  new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(clusterDetail.getHttpUserName(), clusterDetail.getHttpPassword()));
+        HTTP_WEB_CLIENT.setCredentialsProvider(credentialsProvider);
+
+        String standerr = getInformationFromYarnLogDom(url + "/stderr/?start=0");
+        String standout = getInformationFromYarnLogDom(url + "/stout/?start=0");
+        String directoryInfo = getInformationFromYarnLogDom(url + "/directory.info/?start=0");
+        return new ApplicationMasterLogs(standout, standerr, directoryInfo);
+    }
+
+    private static String getInformationFromYarnLogDom(@NotNull String url) {
+        try {
+            HtmlPage htmlPage = HTTP_WEB_CLIENT.getPage(url);
+            // parse pre tag from html response
+            // there's only one 'pre' in response
+            DomNodeList<DomElement> preTagElements = htmlPage.getElementsByTagName("pre");
+            if (preTagElements.size() != 0) {
+                return preTagElements.get(0).asText();
+            }
+        } catch (IOException e) {
+            LOGGER.error("get Driver Log Error", e);
+        }
+        return "";
     }
 
     public static HttpEntity getEntity(@NotNull final IClusterDetail clusterDetail, @NotNull final String url) throws IOException, HDIException {

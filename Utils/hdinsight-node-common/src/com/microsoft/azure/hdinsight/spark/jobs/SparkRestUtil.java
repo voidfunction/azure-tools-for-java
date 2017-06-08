@@ -21,7 +21,6 @@
  */
 package com.microsoft.azure.hdinsight.spark.jobs;
 
-import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.rest.AttemptWithAppId;

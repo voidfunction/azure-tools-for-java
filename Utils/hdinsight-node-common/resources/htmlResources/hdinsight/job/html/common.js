@@ -81,7 +81,7 @@ function getMessageAsync(url, type, callback, appId) {
 }
 
 function sendActionSingle(url) {
-    getMessageAsync(url, undefined, undefined, appId = spark.appId)
+    getMessageAsync(url, undefined, undefined, spark.appId)
 }
 
 function reloadTableStyle() {
