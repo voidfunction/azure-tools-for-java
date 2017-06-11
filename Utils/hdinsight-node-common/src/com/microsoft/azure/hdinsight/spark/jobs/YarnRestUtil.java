@@ -51,7 +51,7 @@ public class YarnRestUtil {
 
     public static App getApp(@NotNull ApplicationKey key) throws HDIException, IOException {
         HttpEntity entity = getYarnRestEntity(key.getClusterDetails(), String.format("/apps/%s", key.getAppId()));
-        return ObjectConvertUtils.convertEntityToObject(entity, AppResponse.class).orElseThrow(()-> new HDIException("get Yarn app error")).getApp();
+        return ObjectConvertUtils.convertEntityToObject(entity, AppResponse.class).orElseThrow(()-> new HDIException(String.format("get Yarn app %s on cluster %s error", key.getAppId(), key.getClusterDetails().getName()))).getApp();
     }
 
     private static HttpEntity getYarnRestEntity(@NotNull IClusterDetail clusterDetail, @NotNull String restUrl) throws HDIException, IOException {

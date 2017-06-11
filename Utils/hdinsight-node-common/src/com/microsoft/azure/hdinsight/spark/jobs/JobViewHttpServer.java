@@ -67,7 +67,7 @@ public class JobViewHttpServer {
 
         try {
             // try to get a random socket port
-            ServerSocket s = new ServerSocket(29104);
+            ServerSocket s = new ServerSocket(0);
             s.close();
 
             InetSocketAddress socketAddress = new InetSocketAddress(s.getLocalPort());

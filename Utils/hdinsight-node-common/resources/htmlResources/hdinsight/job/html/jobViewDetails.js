@@ -372,9 +372,8 @@ function taskSummaryObjToList(myTaskSummary) {
 
 var taskSummaryColumn = ['taskId','index','attempt','launchTime','executorId','host','taskLocality','speculative'];
 function generateTaskSummaryLine(task) {
-    var html = '';
-    taskSummaryColumn.forEach(function(d) {
-        html += '<td>'+ task[d] + '</td>';
+    var html = taskSummaryColumn.reduce(function(sumSoFar, d) {
+        return sumSoFar + '<td>'+ task[d] + '</td>'
     });
     return html;
 }

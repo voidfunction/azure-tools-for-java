@@ -56,12 +56,6 @@ public class ActionHttpHandler implements HttpHandler {
 
 
         }
-//        IClusterDetail clusterDetail = HttpHandlerUtils.getClusterDetail(httpExchange);
-//        final URI uri = httpExchange.getRequestURI();
-//        final Map<String,String> queryMap = HttpHandlerUtils.splitQuery(uri);
-//        String appId = queryMap.get("appId");
-//        String url = String.format(SPARK_UI_ENDPOINT, clusterDetail.getConnectionUrl(), appId);
-//        JobUtils.openDefaultBrowser(url);
     }
 
 

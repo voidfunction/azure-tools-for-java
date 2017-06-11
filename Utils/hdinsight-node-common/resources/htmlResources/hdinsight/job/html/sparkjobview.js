@@ -1,7 +1,7 @@
 "use strict";
 
 // to cache all job related object
-var spark = new Object();
+var spark = {};
 
 $(function () {
     initiate();
@@ -153,7 +153,7 @@ function getJobHistory() {
 
 function refreshGetSelectedApplication() {
     var selectedAppId = localStorage.getItem("selectedAppID");
-    if (selectedAppId === 'undefined') {
+    if (!selectedAppId) {
         return;
     }
 
@@ -272,7 +272,7 @@ function setDiagnosticsLog() {
 }
 
 function getSparkDriverLog() {
-    if (spark.attemptId === 0 || typeof spark.containerId === 'undefined') {
+    if (spark.attemptId === 0 || !spark.containerId) {
         return;
     }
     getMessageAsync('/applications/driverLog', 'yarn', function (s) {

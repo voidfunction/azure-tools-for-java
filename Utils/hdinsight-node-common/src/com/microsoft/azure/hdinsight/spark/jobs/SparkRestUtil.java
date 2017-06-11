@@ -94,7 +94,7 @@ public class SparkRestUtil {
         List<Application> sparkApplications = JobViewCacheManager.getSparkApplications(key.getClusterDetails());
         Optional<Application> selectedApplication = sparkApplications.stream().filter(application -> application.getId().equalsIgnoreCase(key.getAppId())
         ).findFirst();
-        return selectedApplication.orElseThrow(()-> new HDIException("application can't find")).getLastAttemptWithAppId(key.getClusterDetails().getName());
+        return selectedApplication.orElseThrow(()-> new HDIException(String.format("application %s on cluster %s can't find", key.getAppId(), key.getClusterDetails().getName()))).getLastAttemptWithAppId(key.getClusterDetails().getName());
     }
 
     private static HttpEntity getSparkRestEntity(@NotNull IClusterDetail clusterDetail, @NotNull String restUrl) throws HDIException, IOException {

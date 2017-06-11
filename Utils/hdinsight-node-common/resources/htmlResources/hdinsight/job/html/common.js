@@ -32,19 +32,19 @@ function getRestHeaders(type) {
 
 function serializeQuery(queriesMap) {
     var keys = Object.keys(queriesMap);
-    if (keys.length === 0) return '';
-    var result = '';
-    keys.forEach(function (key) {
-        result = result + "&{0}={1}".format(key, queriesMap[key]);
-    });
-    return result.substring(1)
+    if (!keys || keys.length === 0) return '';
+
+    var result = keys.reduce(function(sumSoFar, key) {
+        return sumSoFar + "&{0}={1}".format(key, queriesMap[key]);
+    }, '');
+    return result.substring(1);
 }
 
 function getMessageAsync(url, type, callback, appId) {
     var queriesMap = {};
-    queriesMap['http-type'] = (type === undefined ? 'spark' : type);
+    queriesMap['http-type'] = type | 'spark';
     queriesMap['cluster-name'] = spark.clusterName;
-    if (appId !== undefined) {
+    if (!appId) {
         queriesMap['appId'] = appId;
     }
     var queryString = serializeQuery(queriesMap);
@@ -81,7 +81,7 @@ function getMessageAsync(url, type, callback, appId) {
 }
 
 function sendActionSingle(url) {
-    getMessageAsync(url, undefined, undefined, spark.appId)
+    getMessageAsync(url, null, null, spark.appId)
 }
 
 function reloadTableStyle() {

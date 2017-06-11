@@ -71,9 +71,9 @@ public class JobRequestDetails {
         Map<String, String> queriesqMap = new HashMap<>();
         String[] queries = StringHelper.isNullOrWhiteSpace(queryString) ? new String[0] : queryString.split("&");
         Arrays.stream(queries).forEach(str -> {
-            String[] query = str.split("=");
-            if (query.length == 2) {
-                queriesqMap.put(query[0], query[1]);
+            String[] kvPairs = str.split("=");
+            if (kvPairs.length == 2) {
+                queriesqMap.put(kvPairs[0], kvPairs[1]);
             }
         });
 
