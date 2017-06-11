@@ -69,7 +69,7 @@ function getMessageAsync(url, type, callback, appId) {
                 if (s === '') {
                     return;
                 }
-                if (callback !== undefined) {
+                if (callback) {
                     callback(s);
                 }
             }

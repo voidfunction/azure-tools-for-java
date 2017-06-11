@@ -163,27 +163,6 @@ function refreshGetSelectedApplication() {
     tableRow.click();
 }
 
-
-// function getFirstAttempt(attempts) {
-//     return findElement(attempts, function (a) {
-//         return typeof a.attemptId === 'undefined' || a.attemptId === 1;
-//     });
-// }
-//
-// function getLastAttempt(attempts) {
-//     return findElement(attempts, function (a) {
-//         return typeof a.attemptId === 'undefined' || a.attemptId === attemptId;
-//     });
-// }
-
-// function setBasicInformation() {
-//     getMessageAsync('/applications', 'spark', function (s) {
-//         var application = JSON.parse(s);
-//         $('#startTime').text(formatServerTime(getFirstAttempt(application.attempts).startTime));
-//         $('#endTime').text(formatServerTime(getLastAttempt(application.attempts).endTime));
-//     }, spark.appId);
-// }
-
 function setMessageForLable(str) {
     var ss = document.getElementById("demo");
     ss.innerHTML = str;
@@ -411,28 +390,6 @@ function setStoredRDD() {
         var rdds = JSON.parse(s);
         renderStoredRDD(rdds);
     });
-}
-
-
-// function setStageDetailsWithTaskDetails() {
-//     if(attemptId == 0) {
-//         $("#stage_detail_info_message").text("No Stage Info");
-//         return;
-//     }
-//     $("#stage_detail_info_message").text('');
-//     getMessageAsync(localhost + projectId + "/applications/" + appId + "/" + attemptId + "/stages", function (s) {
-//         spark.currentSelectedStages = JSON.parse(s);
-//         renderStageSummary(currentSelectedStages);
-//         setTaskDetails();
-//         if(!isJobGraphGenerated && currentSelectedJobs != null) {
-//             setJobGraph(currentSelectedJobs);
-//         }
-//     });
-// }
-
-
-function setDebugInfo(s) {
-    $("#debuginfo").text(s);
 }
 
 function filterTaskSummaryTable() {
