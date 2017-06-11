@@ -373,13 +373,6 @@ function stagesInfo(jobs, url) {
         });
 }
 
-// function setJobTimeLine() {
-//     var url = localhost + projectId + "/cluster/apps/" + appId + "?restType=yarn";
-//     getMessageAsync(url, function(s) {
-//         var t = s;
-//     });
-// }
-
 ///applications/[app-id]/storage/rdd
 function setStoredRDD() {
     if(spark.attemptId === 0) {

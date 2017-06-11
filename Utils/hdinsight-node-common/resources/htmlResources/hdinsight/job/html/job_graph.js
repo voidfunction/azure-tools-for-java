@@ -70,17 +70,13 @@ function setToolTips(jobs, v) {
         var counter = parseInt(v) - 1;
         var job = jobs[counter];
         return getFormattedTipsForJob(job);
-        // return "<p class='name'>" + getJobStatusImage(job["status"])
-        //         + "</p><p class='description'>" + job["name"] +
-        //         "</p>" + "<p class='description'>" + getRunningTime(job) + "</p>";
     } else {
         // driver
         return getFormattedTipsForDriver();
     }
 }
+
 function getFormattedTipsForDriver() {
-
-
     var containerLogs = spark.selectedYarnApp.amContainerLogs;
     var paths = containerLogs.split('/');
     var amContainer = paths[paths.length - 2];
