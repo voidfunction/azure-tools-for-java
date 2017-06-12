@@ -70,7 +70,7 @@ function commandBinding() {
         //get Application Id
         spark.appId = $(this).find('td:eq(1)').text();
         spark.selectedApp = spark.applicationList.filter(function(item) {
-            return item.id == spark.appId;
+            return item.id === spark.appId;
         })[0];
         // get last attempt
         spark.attemptId = $(this).find('td:eq(4)').text();

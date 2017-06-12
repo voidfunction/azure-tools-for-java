@@ -56,7 +56,8 @@ function renderJobGraphOnApplicationLevel(jobs) {
             if ( d === '0') {
                 return;
             }
-            alert("warring");
+            // TODO: show some details of job after clicking job stages
+            alert("warning");
         });
 
 }
