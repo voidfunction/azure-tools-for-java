@@ -25,11 +25,14 @@ import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class JobRequestDetails {
@@ -67,20 +70,12 @@ public class JobRequestDetails {
     public static JobRequestDetails getJobRequestDetail(@NotNull HttpExchange httpExchange) {
         final URI myUri = httpExchange.getRequestURI();
         final String path = myUri.getPath();
-        final String queryString = myUri.getQuery();
-        Map<String, String> queriesqMap = new HashMap<>();
-        String[] queries = StringHelper.isNullOrWhiteSpace(queryString) ? new String[0] : queryString.split("&");
-        Arrays.stream(queries).forEach(str -> {
-            String[] kvPairs = str.split("=");
-            if (kvPairs.length == 2) {
-                queriesqMap.put(kvPairs[0], kvPairs[1]);
-            }
-        });
+        Map<String, String> queriesMap = splitQueryString(myUri);
 
-        assert queriesqMap.containsKey("cluster-name");
-        assert queriesqMap.containsKey("http-type");
+        assert queriesMap.containsKey("cluster-name");
+        assert queriesMap.containsKey("http-type");
 
-        return new JobRequestDetails(path, queriesqMap);
+        return new JobRequestDetails(path, queriesMap);
     }
 
     public boolean isSpecificApp() {
@@ -93,5 +88,23 @@ public class JobRequestDetails {
 
     public HttpRequestType getRestType() {
         return myHttpRequestType;
+    }
+
+    private static Map<String, String> splitQueryString(URI uri) {
+        Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+        String query = uri.getRawQuery();
+
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            try {
+                String key = URLDecoder.decode(pair.substring(0, idx), "utf-8");
+                String value = URLDecoder.decode(pair.substring(idx + 1), "utf-8");
+                query_pairs.put(key, value);
+            } catch (Exception e) {
+                DefaultLoader.getUIHelper().showError(e.getMessage(), "Spark job view http request decode error");
+            }
+        }
+        return query_pairs;
     }
 }
