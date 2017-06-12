@@ -26,6 +26,7 @@ import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.rest.ObjectConvertUtils;
 import com.microsoft.azure.hdinsight.sdk.rest.spark.Application;
 import com.microsoft.azure.hdinsight.sdk.rest.spark.YarnAppWithJobs;
+import com.microsoft.azure.hdinsight.sdk.rest.spark.event.JobStartEventLog;
 import com.microsoft.azure.hdinsight.sdk.rest.spark.executor.Executor;
 import com.microsoft.azure.hdinsight.sdk.rest.spark.job.Job;
 import com.microsoft.azure.hdinsight.sdk.rest.spark.stage.Stage;
@@ -58,7 +59,8 @@ public class SparkJobHttpHandler implements HttpHandler {
                 ApplicationKey key = new ApplicationKey(requestDetail.getCluster(), requestDetail.getAppId());
                 List<Job> jobs = JobViewCacheManager.getJob(key);
                 App app = JobViewCacheManager.getYarnApp(key);
-                YarnAppWithJobs yarnAppWithJobs = new YarnAppWithJobs(app, jobs);
+                List<JobStartEventLog> jobStartEventLogs = JobViewCacheManager.getJobStartEventLogs(key);
+                YarnAppWithJobs yarnAppWithJobs = new YarnAppWithJobs(app, jobs, jobStartEventLogs);
                 Optional<String> responseString = ObjectConvertUtils.convertObjectToJsonString(yarnAppWithJobs);
                 JobUtils.setResponse(httpExchange, responseString.orElseThrow(IOException::new));
             } else if (path.contains("stages_summary")) {
