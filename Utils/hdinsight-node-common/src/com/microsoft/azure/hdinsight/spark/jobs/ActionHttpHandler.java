@@ -24,6 +24,7 @@ package com.microsoft.azure.hdinsight.spark.jobs;
 import com.microsoft.azure.hdinsight.sdk.rest.spark.Application;
 import com.microsoft.azure.hdinsight.spark.jobs.framework.JobRequestDetails;
 
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -48,6 +49,7 @@ public class ActionHttpHandler implements HttpHandler {
                 JobUtils.setResponse(httpExchange, "open browser successfully");
             } catch (ExecutionException e) {
                 JobUtils.setResponse(httpExchange, "open browser error", 500);
+                DefaultLoader.getUIHelper().showError(e.getMessage(), "open browser error");
             }
         }
     }
