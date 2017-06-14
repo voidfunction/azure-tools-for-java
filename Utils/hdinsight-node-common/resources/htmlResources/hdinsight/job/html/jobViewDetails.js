@@ -372,11 +372,11 @@ function taskSummaryObjToList(myTaskSummary) {
 
 var taskSummaryColumn = ['taskId','index','attempt','launchTime','executorId','host','taskLocality','speculative'];
 function generateTaskSummaryLine(task) {
-    var html = taskSummaryColumn.reduce(function(sumSoFar, d) {
-        return sumSoFar + '<td>'+ task[d] + '</td>'
-    });
-    return html;
+    return taskSummaryColumn.reduce(function(sumSoFar, d) {
+                return sumSoFar + '<td>'+ task[d] + '</td>'
+            }, '');
 }
+
 var executorSummaryColumn = ["id","hostPort", "rddBlocks", "memoryUsed","diskUsed","totalDuration", "totalInputBytes", "totalShuffleRead", "totalShuffleWrite","maxMemory"]
 function renderExecutorsOnPage(myData) {
     d3.select("#executorDetailsBody")
