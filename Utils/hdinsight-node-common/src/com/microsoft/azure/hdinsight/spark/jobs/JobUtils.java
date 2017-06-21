@@ -21,10 +21,10 @@
  */
 package com.microsoft.azure.hdinsight.spark.jobs;
 
-//import com.gargoylesoftware.htmlunit.WebClient;
-//import com.gargoylesoftware.htmlunit.html.DomElement;
-//import com.gargoylesoftware.htmlunit.html.DomNodeList;
-//import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.DomNodeList;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -66,15 +66,13 @@ import java.util.concurrent.ExecutionException;
 
 public class JobUtils {
     private static Logger LOGGER = LoggerFactory.getLogger(JobUtils.class);
-
+    private static final String JobLogFolderName = "SparkJobLog";
     private static String defaultYarnUIHistoryFormat = "%s.azurehdinsight.net/yarnui/hn/cluster";
     private static String yarnUIHisotryFormat = "%s/yarnui/hn/cluster/app/%s";
 
     private static String sparkUIHistoryFormat = "%s/sparkhistory/history/%s/%s/jobs";
     private static String defaultSparkUIHistoryFormat = "%s.azurehdinsight.net/sparkhistory";
 
-    private static final String JobLogFolderName = "SparkJobLog";
-    private static final String SPARK_EVENT_LOG_FOLDER_NAME = "SparkEventLog";
     private static CredentialsProvider provider = new BasicCredentialsProvider();
 
     public static void setResponse(@NotNull HttpExchange httpExchange, @NotNull String message) {
@@ -169,31 +167,32 @@ public class JobUtils {
     private static final String EVENT_LOG_REST_API = "applications/%s/logs";
     private static final String Event_LOG_FILE_NAME = "eventLogs.zip";
 
-    public static void openSparkEventLog(String uuid, String applicationId) {
-        IClusterDetail clusterDetail = JobViewManager.getCluster(uuid);
-        String path = StringHelper.concat(HDInsightLoader.getHDInsightHelper().getPluginRootPath(), File.separator, SPARK_EVENT_LOG_FOLDER_NAME, File.separator, applicationId);
-        File downloadFile = new File(path, Event_LOG_FILE_NAME);
-        File file = new File(path);
-        if(!file.exists() || !downloadFile.exists()) {
-            if(!file.exists()) {
-                file.mkdirs();
-            }
-            String restApi = String.format(EVENT_LOG_REST_API, applicationId);
+//    public static void openSparkEventLog(String uuid, String applicationId) {
+//        IClusterDetail clusterDetail = JobViewManager.getCluster(uuid);
+//
+//        File downloadFile = new File(path, Event_LOG_FILE_NAME);
+//        File file = new File(path);
+//        if(!file.exists() || !downloadFile.exists()) {
+//            if(!file.exists()) {
+//                file.mkdirs();
+//            }
+//            String restApi = String.format(EVENT_LOG_REST_API, applicationId);
+//
+//            try {
+//                HttpEntity entity = getEntity(clusterDetail,restApi);
+//                FileUtils.copyInputStreamToFile(entity.getContent(), downloadFile);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        try {
+//            openDefaultBrowser(file.toURI());
+//        } catch (IOException e) {
+//            DefaultLoader.getUIHelper().showError(e.getMessage(), "Open Spark Event Log");
+//        }
+//    }
 
-            try {
-                HttpEntity entity = getEntity(clusterDetail,restApi);
-                FileUtils.copyInputStreamToFile(entity.getContent(), downloadFile);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        try {
-            openDefaultBrowser(file.toURI());
-        } catch (IOException e) {
-            DefaultLoader.getUIHelper().showError(e.getMessage(), "Open Spark Event Log");
-        }
-    }
-//    private static final WebClient HTTP_WEB_CLIENT = new WebClient();
+    private static final WebClient HTTP_WEB_CLIENT = new WebClient();
 
     private static final String DRIVER_LOG_INFO_URL = "%s/yarnui/jobhistory/logs/%s/port/%s/%s/%s/livy";
 
@@ -228,7 +227,7 @@ public class JobUtils {
     private static ApplicationMasterLogs getYarnLogsFromWebClient(@NotNull final IClusterDetail clusterDetail, @NotNull final String url) throws HDIException, IOException {
         final CredentialsProvider credentialsProvider  =  new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(clusterDetail.getHttpUserName(), clusterDetail.getHttpPassword()));
-//        HTTP_WEB_CLIENT.setCredentialsProvider(credentialsProvider);
+        HTTP_WEB_CLIENT.setCredentialsProvider(credentialsProvider);
 
         String standerr = getInformationFromYarnLogDom(url + "/stderr/?start=0");
         String standout = getInformationFromYarnLogDom(url + "/stout/?start=0");
@@ -237,18 +236,18 @@ public class JobUtils {
     }
 
     private static String getInformationFromYarnLogDom(@NotNull String url) {
-//        try {
-//            HtmlPage htmlPage = HTTP_WEB_CLIENT.getPage(url);
-//            // parse pre tag from html response
-//            // there's only one 'pre' in response
-//            DomNodeList<DomElement> preTagElements = htmlPage.getElementsByTagName("pre");
-//            if (preTagElements.size() != 0) {
-//                return preTagElements.get(0).asText();
-//            }
-//        } catch (IOException e) {
-//            LOGGER.error("get Driver Log Error", e);
-//        }
-        return "Yarn Log unavailable";
+        try {
+            HtmlPage htmlPage = HTTP_WEB_CLIENT.getPage(url);
+            // parse pre tag from html response
+            // there's only one 'pre' in response
+            DomNodeList<DomElement> preTagElements = htmlPage.getElementsByTagName("pre");
+            if (preTagElements.size() != 0) {
+                return preTagElements.get(0).asText();
+            }
+        } catch (IOException e) {
+            LOGGER.error("get Driver Log Error", e);
+        }
+        return "";
     }
 
     public static HttpEntity getEntity(@NotNull final IClusterDetail clusterDetail, @NotNull final String url) throws IOException, HDIException {
