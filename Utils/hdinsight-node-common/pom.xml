@@ -21,7 +21,7 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
                 <property>
-                    <name>html.build.enabled</name>
+                    <name>hdinsight.htmlcopy.enabled</name>
                     <value>true</value>
                 </property>
             </activation>

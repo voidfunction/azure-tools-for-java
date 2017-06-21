@@ -289,9 +289,10 @@ function getJobResult() {
 
 function renderApplicationGraph() {
     getMessageAsync('/applications/application_graph', 'spark', function (s) {
-        var yarnAppWithJobs= JSON.parse(s);
+        var yarnAppWithJobs = JSON.parse(s);
         spark.selectedYarnApp = yarnAppWithJobs.app;
         spark.currentSelectedJobs = yarnAppWithJobs.jobs;
+        spark.jobStartEvents = yarnAppWithJobs.startEventLogs;
         renderJobGraphOnApplicationLevel(spark.currentSelectedJobs);
     }, spark.appId);
 }
