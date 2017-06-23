@@ -29,20 +29,16 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.microsoft.azure.hdinsight.common.HDInsightLoader;
-import com.microsoft.azure.hdinsight.common.JobViewManager;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.App;
 import com.microsoft.azure.hdinsight.sdk.rest.yarn.rm.ApplicationMasterLogs;
-import com.microsoft.azure.hdinsight.spark.jobs.framework.RequestDetail;
 import com.microsoft.azure.hdinsight.spark.jobs.livy.LivyBatchesInformation;
 import com.microsoft.azure.hdinsight.spark.jobs.livy.LivySession;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
-import com.microsoft.azuretools.azurecommons.helpers.Nullable;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.sun.net.httpserver.HttpExchange;
-import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -67,11 +63,9 @@ import java.util.concurrent.ExecutionException;
 public class JobUtils {
     private static Logger LOGGER = LoggerFactory.getLogger(JobUtils.class);
     private static final String JobLogFolderName = "SparkJobLog";
-    private static String defaultYarnUIHistoryFormat = "%s.azurehdinsight.net/yarnui/hn/cluster";
     private static String yarnUIHisotryFormat = "%s/yarnui/hn/cluster/app/%s";
 
     private static String sparkUIHistoryFormat = "%s/sparkhistory/history/%s/%s/jobs";
-    private static String defaultSparkUIHistoryFormat = "%s.azurehdinsight.net/sparkhistory";
 
     private static CredentialsProvider provider = new BasicCredentialsProvider();
 
@@ -85,7 +79,6 @@ public class JobUtils {
             OutputStream stream = httpExchange.getResponseBody();
             stream.write(message.getBytes());
             stream.flush();
-            stream.close();
             httpExchange.close();
         } catch (IOException e) {
             LOGGER.error("JobUtils set Response error", e);
@@ -163,34 +156,6 @@ public class JobUtils {
             DefaultLoader.getUIHelper().showError(e.getMessage(), "Open Livy Logs");
         }
     }
-
-    private static final String EVENT_LOG_REST_API = "applications/%s/logs";
-    private static final String Event_LOG_FILE_NAME = "eventLogs.zip";
-
-//    public static void openSparkEventLog(String uuid, String applicationId) {
-//        IClusterDetail clusterDetail = JobViewManager.getCluster(uuid);
-//
-//        File downloadFile = new File(path, Event_LOG_FILE_NAME);
-//        File file = new File(path);
-//        if(!file.exists() || !downloadFile.exists()) {
-//            if(!file.exists()) {
-//                file.mkdirs();
-//            }
-//            String restApi = String.format(EVENT_LOG_REST_API, applicationId);
-//
-//            try {
-//                HttpEntity entity = getEntity(clusterDetail,restApi);
-//                FileUtils.copyInputStreamToFile(entity.getContent(), downloadFile);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        try {
-//            openDefaultBrowser(file.toURI());
-//        } catch (IOException e) {
-//            DefaultLoader.getUIHelper().showError(e.getMessage(), "Open Spark Event Log");
-//        }
-//    }
 
     private static final WebClient HTTP_WEB_CLIENT = new WebClient();
 
