@@ -22,6 +22,7 @@
 package com.microsoft.azure.hdinsight.jobs;
 
 import com.intellij.openapi.components.ApplicationComponent;
+import com.intellij.openapi.components.ServiceManager;
 import com.microsoft.azure.hdinsight.spark.jobs.JobViewHttpServer;
 import org.jetbrains.annotations.NotNull;
 

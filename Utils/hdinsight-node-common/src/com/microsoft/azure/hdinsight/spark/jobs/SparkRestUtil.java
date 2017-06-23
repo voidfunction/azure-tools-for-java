@@ -44,10 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -143,7 +140,7 @@ public class SparkRestUtil {
                     return eventName.equalsIgnoreCase("SparkListenerJobStart");
                     })
                 .map(oneLine -> ObjectConvertUtils.convertToObjectQuietly(oneLine, JobStartEventLog.class))
-                .filter(item -> item != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
         return jobStartEvents;
