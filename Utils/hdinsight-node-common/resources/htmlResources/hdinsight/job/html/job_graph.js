@@ -19,15 +19,15 @@ function renderJobGraphOnApplicationLevel(jobs) {
     var render = new dagreD3.render();
 
 // Set up an SVG group so that we can translate the final graph.
-    var svg = d3.select("#jobGraphSvg");
+    var svg = d3.select("#applicationGraphSvg");
 
     // remove all graph first
-    d3.selectAll("#jobGraphSvg g").remove();
+    d3.selectAll("#applicationGraphSvg g").remove();
 
     var inner = svg.append("g");
 
 // Run the renderer. This is what draws the final graph.
-    render(d3.select("#jobGraphSvg g"), g);
+    render(d3.select("#applicationGraphSvg g"), g);
 
     var g_width = g.graph().width ;
     var g_height = g.graph().height ;
@@ -102,6 +102,9 @@ function getFormattedTipsForJob(job) {
 }
 
 function renderJobGraph(job) {
+    $('#applicationGraphDiv').toggleClass('application-graph-enabled');
+    $('#jobGraphDiv').toggleClass('job-graph-disabled');
+
     g = new dagreD3.graphlib.Graph()
         .setGraph({})
         .setDefaultEdgeLabel(function() { return {}; });
@@ -131,7 +134,7 @@ function renderJobGraph(job) {
     // Create the renderer
     var render = new dagreD3.render();
 
-// Set up an SVG group so that we can translate the final graph.
+    // Set up an SVG group so that we can translate the final graph.
     var svg = d3.select("#jobGraphSvg");
 
     // remove all graph first

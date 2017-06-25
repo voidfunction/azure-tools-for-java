@@ -124,3 +124,12 @@
 .jobtips {
     margin: 0;
 }
+
+.application-graph-enabled {
+    visibility : visible;
+}
+
+.job-graph-disabled {
+    visibility : hidden;
+}
+

@@ -118,6 +118,11 @@ function commandBinding() {
         location.reload();
         refreshGetSelectedApplication();
     });
+
+    $('#jobGraphBackButton').click(function() {
+        $('#applicationGraphDiv').toggleClass('application-graph-enabled');
+        $('#jobGraphDiv').toggleClass('job-graph-disabled');
+    });
 }
 
 function getBasicInfoFromUrl() {
