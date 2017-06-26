@@ -1,5 +1,7 @@
 function renderJobGraphOnApplicationLevel(jobs) {
-    g = new dagreD3.graphlib.Graph()
+    $('#applicationGraphDiv').removeClass('graph-disabled');
+    $('#jobGraphDiv').addClass('graph-disabled');
+    var g = new dagreD3.graphlib.Graph()
         .setGraph({})
         .setDefaultEdgeLabel(function() { return {}; });
 
@@ -29,16 +31,24 @@ function renderJobGraphOnApplicationLevel(jobs) {
 // Run the renderer. This is what draws the final graph.
     render(d3.select("#applicationGraphSvg g"), g);
 
-    var g_width = g.graph().width ;
-    var g_height = g.graph().height ;
-    var viewBoxValue = "0 0 " + g_width + " " + g_height;
+    var g_width = g.graph().width;
+    var g_height = g.graph().height;
+    var viewBoxValue = "0 0 " + 1.3 * g_width + " " +  g_height;
     svg.attr("viewBox", viewBoxValue);
     svg.attr("preserveAspectRatio", "xMidYMid meet");
 
-    render(d3.select("#jobGraphSvg g"), g);
-// Center the graph
-    var width = $("#jobGraphSvg").width();
-    var height = $("#jobGraphSvg").height();
+    render(d3.select("#applicationGraphSvg g"), g);
+    // Center the graph
+    var applicationSvg = $('#applicationGraphSvg');
+    if (!spark.graphsize) {
+        spark.graphsize = {
+            'width': applicationSvg.width(),
+            'height': applicationSvg.height()
+        };
+    } else {
+        applicationSvg.width(spark.graphsize.width);
+        applicationSvg.height(spark.graphsize.height);
+    }
 
     var zoom = d3.behavior.zoom().on("zoom", function() {
         inner.attr("transform", "translate(" + d3.event.translate + ")" +
@@ -51,17 +61,25 @@ function renderJobGraphOnApplicationLevel(jobs) {
         .attr("title", function(v) {
             return setToolTips(jobs, v)
         })
-        .each(function(v) { $(this).tipsy({ gravity: "w", opacity: 1, html: true }); })
+        .each(function(v) {
+            $(this).tipsy({
+                gravity: "w",
+                opacity: 1,
+                html: true });
+        })
         .on('click',function(d) {
             if ( d === '0') {
                 return;
             }
             renderJobGraphForSelectedJob(d);
+        })
+        .on('mouseover', function (d) {
+            d3.select(this).style()
         });
 }
 
 function renderJobGraphForSelectedJob(d) {
-    var job = spark.currentSelectedJobs[d - 1];
+    var job = spark.jobStartEvents[d - 1];
     renderJobGraph(job);
 }
 
@@ -102,10 +120,9 @@ function getFormattedTipsForJob(job) {
 }
 
 function renderJobGraph(job) {
-    $('#applicationGraphDiv').toggleClass('application-graph-enabled');
-    $('#jobGraphDiv').toggleClass('job-graph-disabled');
-
-    g = new dagreD3.graphlib.Graph()
+    $('#applicationGraphDiv').addClass('graph-disabled');
+    $('#jobGraphDiv').removeClass('graph-disabled');
+    var g = new dagreD3.graphlib.Graph()
         .setGraph({})
         .setDefaultEdgeLabel(function() { return {}; });
 
@@ -135,7 +152,7 @@ function renderJobGraph(job) {
     var render = new dagreD3.render();
 
     // Set up an SVG group so that we can translate the final graph.
-    var svg = d3.select("#jobGraphSvg");
+    var svg = d3.select('#jobGraphSvg');
 
     // remove all graph first
     d3.selectAll("#jobGraphSvg g").remove();
@@ -145,16 +162,17 @@ function renderJobGraph(job) {
 // Run the renderer. This is what draws the final graph.
     render(d3.select("#jobGraphSvg g"), g);
 
-    var g_width = g.graph().width ;
-    var g_height = g.graph().height ;
-    var viewBoxValue = "0 0 " + g_width + " " + g_height;
+    var g_width = g.graph().width;
+    var g_height = g.graph().height;
+    var viewBoxValue = "0 0 " + 1.2 * g_width + " " + g_height;
     svg.attr("viewBox", viewBoxValue);
     svg.attr("preserveAspectRatio", "xMidYMid meet");
 
     render(d3.select("#jobGraphSvg g"), g);
-// Center the graph
-    var width = $("#jobGraphSvg").width();
-    var height = $("#jobGraphSvg").height();
+    // Center the graph
+    var jobGraphSvg = $('#jobGraphSvg');
+    var width = jobGraphSvg.width();
+    var height = jobGraphSvg.height();
 
     var zoom = d3.behavior.zoom().on("zoom", function() {
         inner.attr("transform", "translate(" + d3.event.translate + ")" +

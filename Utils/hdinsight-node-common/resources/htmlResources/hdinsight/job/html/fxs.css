@@ -125,11 +125,11 @@
     margin: 0;
 }
 
-.application-graph-enabled {
-    visibility : visible;
+.graph-disabled {
+    display: none;
 }
 
-.job-graph-disabled {
-    visibility : hidden;
+#applicationGraphSvg g.node:hover {
+    background: yellow;
 }
 
