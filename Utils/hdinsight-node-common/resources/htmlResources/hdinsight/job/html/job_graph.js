@@ -72,9 +72,6 @@ function renderJobGraphOnApplicationLevel(jobs) {
                 return;
             }
             renderJobGraphForSelectedJob(d);
-        })
-        .on('mouseover', function (d) {
-            d3.select(this).style()
         });
 }
 
@@ -132,16 +129,15 @@ function renderJobGraph(job) {
     stageInfos.sort(function(left, right) {
         return left['Stage ID'] > right['Stage ID'];
     });
-    // for virtual job node
-    g.setNode(-1, {label :'Job ' + id,   class : 'type-TOP'});
-
+    spark.stageMap = {};
     stageInfos.forEach(function(stage) {
         var id = stage['Stage ID'];
-        g.setNode(id, {'label' : 'stage'});
         var parentNodes = stage['Parent IDs'];
+        spark.stageMap[id] = stage;
         if (parentNodes.length === 0) {
-            g.setEdge(-1, id);
+            g.setNode(id, {'label' : stage['Stage Name'], class: 'type-TOP'});
         } else {
+            g.setNode(id, {'label' : stage['Stage Name']});
             parentNodes.forEach(function(parentId) {
                 g.setEdge(parentId, id);
             });
@@ -155,28 +151,59 @@ function renderJobGraph(job) {
     var svg = d3.select('#jobGraphSvg');
 
     // remove all graph first
-    d3.selectAll("#jobGraphSvg g").remove();
+    svg.selectAll('g').remove();
 
     var inner = svg.append("g");
 
-// Run the renderer. This is what draws the final graph.
-    render(d3.select("#jobGraphSvg g"), g);
+    // Run the renderer. This is what draws the final graph.
+    render(inner, g);
 
     var g_width = g.graph().width;
     var g_height = g.graph().height;
-    var viewBoxValue = "0 0 " + 1.2 * g_width + " " + g_height;
-    svg.attr("viewBox", viewBoxValue);
-    svg.attr("preserveAspectRatio", "xMidYMid meet");
+    var viewBoxValue = '0 0 ' + 1.2 * g_width + ' ' + g_height;
+    svg.attr('viewBox', viewBoxValue);
+    svg.attr('preserveAspectRatio', 'xMidYMid meet');
 
-    render(d3.select("#jobGraphSvg g"), g);
+    render(inner, g);
+
     // Center the graph
-    var jobGraphSvg = $('#jobGraphSvg');
-    var width = jobGraphSvg.width();
-    var height = jobGraphSvg.height();
-
-    var zoom = d3.behavior.zoom().on("zoom", function() {
-        inner.attr("transform", "translate(" + d3.event.translate + ")" +
-            "scale(" + d3.event.scale + ")");
+    var zoom = d3.behavior.zoom().on('zoom', function() {
+        inner.attr('transform', 'translate(' + d3.event.translate + ')' +
+            'scale(' + d3.event.scale + ')');
     });
     svg.call(zoom);
+
+    inner.selectAll('g.node')
+        .attr('title', function(d, v) {
+            return setToolTipForStage(d);
+        })
+        .each(function(v) {
+            $(this).tipsy({
+                gravity: "w",
+                opacity: 1,
+                html: true });
+        })
+}
+
+function setToolTipForStage(stageId) {
+    var stageInfo = spark.stageMap[stageId];
+    if (stageInfo) {
+        var filterStages = spark.currentSelectedStages.filter(function(s) {
+           return s['stageId'] === parseInt(stageId);
+        });
+        if (filterStages.length === 1) {
+            var selectedStage = filterStages[0];
+            return "<p class='name'>Stage Details:</p>"
+                + "<p class='description jobtips' align='left'>Input Bytes: {0}<br>".format(selectedStage['inputBytes'])
+                +  "Output Bytes: {0}<br>".format(selectedStage['outputBytes'])
+                + "Shuffle Read Bytes: {0}<br>".format(selectedStage['shuffleReadBytes'])
+                + "Shuffle Write Bytes: {0}<br>".format(selectedStage['shuffleWriteBytes'])
+                + "executorRunTime: {0}<br>".format(selectedStage['executorRunTime'])
+                + "<hr class='jobview-hr'/>"
+                + "Complete Tasks: {0}<br>".format(selectedStage['numCompleteTasks'])
+                + "Failed Tasks: {0}<br>".format(selectedStage['numFailedTasks'])
+                + "</p>";
+        }
+
+    }
 }
