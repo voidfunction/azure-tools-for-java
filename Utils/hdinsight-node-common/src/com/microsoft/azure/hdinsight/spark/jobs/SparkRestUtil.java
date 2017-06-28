@@ -98,19 +98,7 @@ public class SparkRestUtil {
         Optional<List<Task>> tasks = ObjectConvertUtils.convertEntityToList(entity, Task.class);
         return tasks.orElse(RestUtil.getEmptyList(Task.class));
     }
-
-    public static void main(String[] args) throws IOException {
-        ZipFile zipFile = new ZipFile(new File("C:\\Users\\ltian\\spark-test\\SparkEventLog\\application_1495159635595_0080\\eventLogs.zip"));
-        List<? extends ZipEntry> entities =  Collections.list(zipFile.entries());
-        // every application has an attempt in event log
-        // and the entity name should be in formation "{appId}_{attemptId}"
-        String entityName = String.format("%s_%s", "application_1495159635595_0080", entities.size());
-
-        ZipEntry lastEntity = zipFile.getEntry(entityName);
-
-        int a = 1;
-    }
-
+    
     public static List<JobStartEventLog> getSparkEventLogs(@NotNull ApplicationKey key) throws HDIException, IOException {
         String url = String.format("%s/logs", key.getAppId());
         String eventLogsPath = String.format("%s/SparkEventLogs/%s/eventLogs.zip", HDInsightLoader.getHDInsightHelper().getPluginRootPath(), key.getAppId());
