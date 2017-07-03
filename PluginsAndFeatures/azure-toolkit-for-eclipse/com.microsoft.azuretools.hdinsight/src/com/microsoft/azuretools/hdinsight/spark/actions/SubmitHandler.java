@@ -22,16 +22,21 @@ package com.microsoft.azuretools.hdinsight.spark.actions;
 import java.util.HashSet;
 import java.util.List;
 
-import com.microsoft.azure.hdinsight.common.CallBack;
-
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.internal.resources.Project;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
-import com.microsoft.tooling.msservices.components.DefaultLoader;
+import com.microsoft.azure.management.network.EffectiveNetworkSecurityGroup;
 import com.microsoft.azuretools.telemetry.AppInsightsClient;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azuretools.core.utils.AzureAbstractHandler;
 import com.microsoft.azuretools.core.utils.PluginUtil;
 import com.microsoft.azuretools.hdinsight.Activator;
@@ -41,14 +46,21 @@ import com.microsoft.azuretools.core.utils.Messages;
 
 public class SubmitHandler extends AzureAbstractHandler {
     private List<IClusterDetail> cachedClusterDetails = null;
-    private static final HashSet<IProject> isActionPerformedSet = new HashSet<>();
-    
+   
 	@Override
 	public Object onExecute(ExecutionEvent event) throws ExecutionException {
 		synchronized (SubmitHandler.class) {
-					AppInsightsClient.create(Messages.SparkSubmissionRightClickProject,Activator.getDefault().getBundle().getVersion().toString());
+					TreeSelection selection = (TreeSelection)HandlerUtil.getCurrentSelection(event);
+					
+					IProject project = (IProject)selection.getFirstElement();
+					if (project == null) {
+						HDInsightUtil.showErrorMessageOnSubmissionMessageWindow("Please select a project to submit Spark application");
+						return null;
+					}
+					
+					AppInsightsClient.create(Messages.SparkSubmissionRightClickProject, Activator.getDefault().getBundle().getVersion().toString());
                     HDInsightUtil.showInfoOnSubmissionMessageWindow("List spark clusters ...", true);
-                   
+                    
                     cachedClusterDetails = ClusterManagerEx.getInstance().getClusterDetailsWithoutAsync(true, null);
                     if(!ClusterManagerEx.getInstance().isSelectedSubscriptionExist()) {
                         HDInsightUtil.showWarningMessageOnSubmissionMessageWindow("No selected subscription(s), Please go to HDInsight Explorer to sign in....");
@@ -64,7 +76,7 @@ public class SubmitHandler extends AzureAbstractHandler {
                     } else {
                         HDInsightUtil.showErrorMessageOnSubmissionMessageWindow("Error: Failed to list additional cluster");
                     }
-                    SparkSubmissionExDialog dialog = new SparkSubmissionExDialog(PluginUtil.getParentShell(), cachedClusterDetails, null);
+                    SparkSubmissionExDialog dialog = new SparkSubmissionExDialog(PluginUtil.getParentShell(), cachedClusterDetails, project, null);
                     dialog.open();
             return null;
         }
