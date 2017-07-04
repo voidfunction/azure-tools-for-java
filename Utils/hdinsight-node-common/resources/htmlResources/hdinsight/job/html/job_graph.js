@@ -193,7 +193,7 @@ function setToolTipForStage(stageId) {
         });
         if (filterStages.length === 1) {
             var selectedStage = filterStages[0];
-            return "<p class='name'>Stage Details:</p>"
+            return "<p class='name'>Stage ID:{0}</p>".format(selectedStage['stageId'])
                 + "<p class='description jobtips' align='left'>Input Bytes: {0}<br>".format(selectedStage['inputBytes'])
                 +  "Output Bytes: {0}<br>".format(selectedStage['outputBytes'])
                 + "Shuffle Read Bytes: {0}<br>".format(selectedStage['shuffleReadBytes'])
