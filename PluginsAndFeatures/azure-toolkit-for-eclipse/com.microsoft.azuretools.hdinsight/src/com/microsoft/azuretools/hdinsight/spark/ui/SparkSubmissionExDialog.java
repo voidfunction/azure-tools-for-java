@@ -84,9 +84,10 @@ import java.util.Map;
 public class SparkSubmissionExDialog extends Dialog {
 
 	private final int margin = 10;
-	private final String DIALOG_TITLE = "Spark Submission";
-	private static String[] COLUMN_NAMES = { "Key", "Value" };
-
+	private static final String DIALOG_TITLE = "Spark Submission";
+	private static final String[] COLUMN_NAMES = { "Key", "Value" };
+	private static final String JAVA_NATURE_ID = "org.eclipse.jdt.core.javanature";
+	
 	private int row = 0;
 	private Combo clustersListComboBox;
 	private Combo selectedArtifactComboBox;
@@ -531,11 +532,9 @@ public class SparkSubmissionExDialog extends Dialog {
 		return projects;
 	}
 
-	private static String javaNatureId = "org.eclipse.jdt.core.javanature";
-
 	private java.util.Set<String> getClassesWithMainMethod() throws CoreException {
 		java.util.Set<String> filterClassSet = new HashSet<String>();
-		if (myProject.isNatureEnabled(javaNatureId)) {
+		if (myProject.isNatureEnabled(JAVA_NATURE_ID)) {
 			IJavaProject javaProject = JavaCore.create(myProject);
 			if (javaProject == null) {
 				return filterClassSet;

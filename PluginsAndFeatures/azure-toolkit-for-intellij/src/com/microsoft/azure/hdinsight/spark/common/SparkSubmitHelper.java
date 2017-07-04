@@ -171,7 +171,7 @@ public class SparkSubmitHelper {
                 if (submitStatus != null && submitStatus.getLog() != null && submitStatus.getLog().size() > 0) {
                     List<String> logs = submitStatus.getLog();
                     String log = logs.get(logs.size() - 1);
-                    postEventProperty.put("SubmitFailedReason", log.substring(0, log.length() > 50 ? 50 : log.length()));
+                    postEventProperty.put("SubmitFailedReason", HDInsightUtil.normalizeTelemetryMessage(log));
                 }
 
                 HDInsightUtil.getSparkSubmissionToolWindowManager(project).setError("Error : Your submitted job run failed");
@@ -184,8 +184,7 @@ public class SparkSubmitHelper {
         } catch (Exception e) {
             if (HDInsightUtil.getSparkSubmissionToolWindowManager(project).getJobStatusManager().isJobKilled() == false) {
                 HDInsightUtil.getSparkSubmissionToolWindowManager(project).setError("Error : Failed to getting running log. Exception : " + e.toString());
-                String message = e.toString();
-                postEventProperty.put("SubmitFailedReason", message.substring(0, message.length() > 50 ? 50 : message.length()));
+                postEventProperty.put("SubmitFailedReason", HDInsightUtil.normalizeTelemetryMessage(e.toString()));
             } else {
                 postEventProperty.put("IsKilled", "true");
                 AppInsightsClient.create(HDInsightBundle.message("SparkSubmissionButtonClickEvent"), null, postEventProperty);
