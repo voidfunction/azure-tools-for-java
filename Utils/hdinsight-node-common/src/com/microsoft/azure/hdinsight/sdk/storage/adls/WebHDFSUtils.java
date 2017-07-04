@@ -70,11 +70,19 @@ public class WebHDFSUtils {
             stream.flush();
             stream.close();
         } catch (ADLException e) {
-            // ADLS operation may get a 403 when 'user' didn't have access to ADLS under Service Principle model
-            // currently we didn't have a good way to solve this problem
-            // we just popup the exception message for customers to guide customers login under interactive model
+            // 403 error can be expected in:
+            //      1. In interactive login model
+            //          login user have no write permission to attached adls storage
+            //      2. In Service Principle login model
+            //          the adls was attached to HDInsight by Service Principle (hdi sp).
+            //          Currently we don't have a better way to use hdi sp to grant write access to ADLS, so we just
+            //          try to write adls directly use the login sp account(may have no access to target ADLS)
             if (e.httpResponseCode == 403 || HttpStatusCode.valueOf(e.httpResponseMessage) == HttpStatusCode.FORBIDDEN) {
-                throw new HDIException("Forbidden. Attached Azure DataLake Store is not supported in Automated login model. Please logout first and try Interactive login model", 403);
+                throw new HDIException("Forbidden. " +
+                        "This problem could be: " +
+                        "1. Attached Azure DataLake Store is not supported in Automated login model. Please logout first and try Interactive login model" +
+                        "2. Login account have no write permission on attached ADLS storage. " +
+                            "Please grant write access from storage account admin(or other roles who have permission to do it)", 403);
             }
         } finally {
             IOUtils.closeQuietly(stream);
