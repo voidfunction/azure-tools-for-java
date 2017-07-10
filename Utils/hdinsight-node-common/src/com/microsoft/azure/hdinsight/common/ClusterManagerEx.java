@@ -134,7 +134,7 @@ public class ClusterManagerEx {
         List<SubscriptionDetail> subscriptionList = null;
         try {
             subscriptionList = manager.getSubscriptionManager().getSubscriptionDetails();
-            cachedClusterDetails = ClusterManager.getInstance().getHDInsightClustersWithSpecificType(subscriptionList, ClusterType.spark, OSTYPE, project);
+            cachedClusterDetails = ClusterManager.getInstance().getHDInsightClustersWithSpecificType(subscriptionList, OSTYPE, project);
             // TODO: so far we have not a good way to judge whether it is token expired as we have changed the way to list hdinsight clusters
             if (cachedClusterDetails.size() == 0) {
                 //DefaultLoader.getUIHelper().showError("Falied to get HDInsight Cluster, Please make sure there's no login problem first","List HDInsight Cluster Error");

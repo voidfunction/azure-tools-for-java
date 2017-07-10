@@ -74,30 +74,29 @@ public class ClusterManager {
     }
 
     /**
-     * get hdinsight detailed cluster info list with specific cluster type
+     * get hdinsight detailed cluster info list with specific cluster type: Spark and RServer
      *
      * @param subscriptions
-     * @param type
      * @return detailed cluster info list with specific cluster type
      * @throws AggregatedException
      */
     public synchronized List<IClusterDetail> getHDInsightClustersWithSpecificType(
             List<SubscriptionDetail> subscriptions,
-            ClusterType type,
             String osType,
             Object projectObject) throws AggregatedException {
         List<IClusterDetail> clusterDetailList = getClusterDetails(subscriptions, projectObject);
 
         Map<String, IClusterDetail> filterClusterDetailMap = new HashMap<>();
         for (IClusterDetail clusterDetail : clusterDetailList) {
-            if (clusterDetail.getOSType() != null && osType != null) {
-                if (clusterDetail.getType().equals(type) && clusterDetail.getOSType().toLowerCase().equals(osType.toLowerCase())) {
-                    filterClusterDetailMap.put(clusterDetail.getName(), clusterDetail);
-                }
-            } else {
-                if (clusterDetail.getType().equals(type)) {
-                    filterClusterDetailMap.put(clusterDetail.getName(), clusterDetail);
-                }
+            ClusterType clusterType = clusterDetail.getType();
+            String myOsType = clusterDetail.getOSType();
+            if (clusterType.equals(ClusterType.rserver) || clusterType.equals(ClusterType.spark)) {
+
+                // remove Windows cluster
+               if (myOsType != null && osType != null && !myOsType.equalsIgnoreCase(osType)) {
+                   continue;
+               }
+               filterClusterDetailMap.put(clusterDetail.getName(), clusterDetail);
             }
         }
 

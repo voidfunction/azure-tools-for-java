@@ -28,5 +28,6 @@ public enum ClusterType {
     storm,
     kafka,
     interactivehive,
-    spark
+    spark,
+    rserver
 };
