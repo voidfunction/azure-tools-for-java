@@ -21,14 +21,36 @@
  */
 package com.microsoft.azure.hdinsight.sdk.storage;
 
+import com.microsoft.azure.hdinsight.sdk.cluster.ClusterIdentity;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
+import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.model.ServiceTreeItem;
 
 public class ADLSStorageAccount implements IHDIStorageAccount, ServiceTreeItem {
-    private String name;
+    private final String name;
     private boolean isDefaultStorageAccount;
-    private String defaultRootFolderPath;
-    private IClusterDetail clusterDetail;
+    private final String defaultRootFolderPath;
+    private final IClusterDetail clusterDetail;
+    private final ClusterIdentity clusterIdentity;
+    @NotNull
+    private final ADLSCertificateInfo certificateInfo;
+
+    public ADLSStorageAccount(IClusterDetail clusterDetail, String name, boolean isDefault, String defaultRootPath, ClusterIdentity clusterIdentity) {
+        this.name = name;
+        this.isDefaultStorageAccount = isDefault;
+        this.defaultRootFolderPath = defaultRootPath;
+        this.clusterDetail = clusterDetail;
+        this.clusterIdentity = clusterIdentity;
+
+        ADLSCertificateInfo adlsCertificateInfo = null;
+        try {
+            adlsCertificateInfo = new ADLSCertificateInfo(clusterIdentity);
+        } catch (Exception e) {
+            DefaultLoader.getUIHelper().showError(e.getMessage(), "get ADLS certificate error");
+        }
+        this.certificateInfo = adlsCertificateInfo;
+    }
 
     @Override
     public boolean isLoading() {
@@ -60,11 +82,13 @@ public class ADLSStorageAccount implements IHDIStorageAccount, ServiceTreeItem {
         return defaultRootFolderPath;
     }
 
-    public ADLSStorageAccount(IClusterDetail clusterDetail, String name, boolean isDefault, String defaultRootPath) {
-//        super(name.replace(".blob.core.windows.net", ""));
-        this.name = name;
-        this.isDefaultStorageAccount = isDefault;
-        this.defaultRootFolderPath = defaultRootPath;
-        this.clusterDetail = clusterDetail;
+    @NotNull
+    public ClusterIdentity getClusterIdentity() {
+        return this.clusterIdentity;
+    }
+
+    @NotNull
+    public ADLSCertificateInfo getCertificateInfo() {
+        return certificateInfo;
     }
 }
