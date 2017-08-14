@@ -42,7 +42,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class WebHDFSUtils {
-    private static final ExecutorService service = Executors.newFixedThreadPool(5);
+    private static ExecutorService service = null;
 
     private static String getUserAgent() {
         final String installID = HDInsightLoader.getHDInsightHelper().getInstallationId();
@@ -52,6 +52,10 @@ public class WebHDFSUtils {
     }
 
     public static String getAccessTokenFromCertificate(@NotNull ADLSStorageAccount storageAccount) throws ExecutionException, InterruptedException, MalformedURLException {
+
+        if (service == null) {
+            service = Executors.newFixedThreadPool(5);
+        }
 
         final ADLSCertificateInfo certificateInfo = storageAccount.getCertificateInfo();
         AuthenticationContext ctx = new AuthenticationContext(certificateInfo.getAadTenantId(), true, service);
