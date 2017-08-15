@@ -23,6 +23,7 @@ package com.microsoft.azure.hdinsight.sdk.storage;
 
 import com.microsoft.azure.hdinsight.sdk.cluster.ClusterIdentity;
 import com.microsoft.azure.hdinsight.sdk.cluster.IClusterDetail;
+import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.tooling.msservices.model.ServiceTreeItem;
@@ -79,14 +80,16 @@ public class ADLSStorageAccount implements IHDIStorageAccount, ServiceTreeItem {
     }
 
     @NotNull
-    public ADLSCertificateInfo getCertificateInfo() {
+    public ADLSCertificateInfo getCertificateInfo() throws HDIException {
         if (this.certificateInfo == null) {
             try {
                 this.certificateInfo = new ADLSCertificateInfo(this.clusterIdentity);
+                return certificateInfo;
             } catch (Exception e) {
-                DefaultLoader.getUIHelper().showError(e.getMessage(), "get ADLS certificate error");
+                throw  new HDIException("get ADLS certificate error", e.getMessage());
             }
+        } else {
+            return this.certificateInfo;
         }
-        return certificateInfo;
     }
 }

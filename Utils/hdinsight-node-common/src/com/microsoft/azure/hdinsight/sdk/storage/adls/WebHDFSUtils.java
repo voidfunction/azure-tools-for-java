@@ -51,7 +51,7 @@ public class WebHDFSUtils {
         return userAgentSource + installID;
     }
 
-    private static String getAccessTokenFromCertificate(@NotNull ADLSStorageAccount storageAccount) throws ExecutionException, InterruptedException, MalformedURLException {
+    private static String getAccessTokenFromCertificate(@NotNull ADLSStorageAccount storageAccount) throws ExecutionException, InterruptedException, MalformedURLException, HDIException {
         if (service == null) {
             synchronized (WebHDFSUtils.class) {
                 if (service == null) {
