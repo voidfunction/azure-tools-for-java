@@ -51,10 +51,13 @@ public class WebHDFSUtils {
         return userAgentSource + installID;
     }
 
-    public static String getAccessTokenFromCertificate(@NotNull ADLSStorageAccount storageAccount) throws ExecutionException, InterruptedException, MalformedURLException {
-
+    private static String getAccessTokenFromCertificate(@NotNull ADLSStorageAccount storageAccount) throws ExecutionException, InterruptedException, MalformedURLException {
         if (service == null) {
-            service = Executors.newFixedThreadPool(5);
+            synchronized (WebHDFSUtils.class) {
+                if (service == null) {
+                    service = Executors.newFixedThreadPool(5);
+                }
+            }
         }
 
         final ADLSCertificateInfo certificateInfo = storageAccount.getCertificateInfo();

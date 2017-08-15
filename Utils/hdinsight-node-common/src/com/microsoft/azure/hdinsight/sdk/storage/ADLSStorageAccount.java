@@ -33,8 +33,7 @@ public class ADLSStorageAccount implements IHDIStorageAccount, ServiceTreeItem {
     private final String defaultRootFolderPath;
     private final IClusterDetail clusterDetail;
     private final ClusterIdentity clusterIdentity;
-    @NotNull
-    private final ADLSCertificateInfo certificateInfo;
+    private ADLSCertificateInfo certificateInfo;
 
     public ADLSStorageAccount(IClusterDetail clusterDetail, String name, boolean isDefault, String defaultRootPath, ClusterIdentity clusterIdentity) {
         this.name = name;
@@ -42,14 +41,6 @@ public class ADLSStorageAccount implements IHDIStorageAccount, ServiceTreeItem {
         this.defaultRootFolderPath = defaultRootPath;
         this.clusterDetail = clusterDetail;
         this.clusterIdentity = clusterIdentity;
-
-        ADLSCertificateInfo adlsCertificateInfo = null;
-        try {
-            adlsCertificateInfo = new ADLSCertificateInfo(clusterIdentity);
-        } catch (Exception e) {
-            DefaultLoader.getUIHelper().showError(e.getMessage(), "get ADLS certificate error");
-        }
-        this.certificateInfo = adlsCertificateInfo;
     }
 
     @Override
@@ -89,6 +80,13 @@ public class ADLSStorageAccount implements IHDIStorageAccount, ServiceTreeItem {
 
     @NotNull
     public ADLSCertificateInfo getCertificateInfo() {
+        if (this.certificateInfo == null) {
+            try {
+                this.certificateInfo = new ADLSCertificateInfo(this.clusterIdentity);
+            } catch (Exception e) {
+                DefaultLoader.getUIHelper().showError(e.getMessage(), "get ADLS certificate error");
+            }
+        }
         return certificateInfo;
     }
 }
