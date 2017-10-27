@@ -25,6 +25,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.microsoft.azure.hdinsight.sdk.common.*;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.Environment;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
 import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.azuretools.azurecommons.helpers.NotNull;
@@ -51,12 +52,14 @@ public class ClusterOperationImpl implements IClusterOperation {
      public List<ClusterRawInfo> listCluster(final SubscriptionDetail subscription) throws IOException, HDIException, AzureCmdException {
           try {
               String response = requestWithToken(subscription.getTenantId(), (accessToken) -> {
-                      String managementUrl = AuthMethodManager.getInstance().getAzureManager().getManagementURI();
+                      Environment environment = AuthMethodManager.getInstance().getAzureManager().getEnvironment();
+                      String managementUrl = Environment.valueOf(environment.getName()).getAzureEnvironment().resourceManagerEndpoint();
                       return AzureAADHelper.executeRequest(managementUrl,
                               String.format("/subscriptions/%s/providers/Microsoft.HDInsight/clusters?api-version=%s", subscription.getSubscriptionId(), VERSION),
                               RestServiceManager.ContentType.Json,
                               "GET",
-                              null,accessToken,
+                              null,
+                              accessToken,
                               new RestServiceManagerBaseImpl());
                       });
 

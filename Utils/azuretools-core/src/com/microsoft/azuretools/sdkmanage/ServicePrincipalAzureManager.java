@@ -170,21 +170,7 @@ public class ServicePrincipalAzureManager extends AzureManagerBase {
     public String getManagementURI() throws IOException {
         initATCIfNeeded();
         // default to global cloud
-        String managementUri = atc.environment() == null ? AzureEnvironment.AZURE.resourceManagerEndpoint() : atc.environment().resourceManagerEndpoint();
-
-        /*
-        this is a walking around for MoonCake resource manager endpoint
-        It should be 'https://management.chinacloudapi.cn/', but Mooncake environment return 'https://management.chinacloudapi.cn'
-        The following error message can be expected without the walking around
-
-        {
-        "error": {
-            "code": "InvalidAuthenticationTokenAudience",
-            "message": "The access token has been obtained from wrong audience or resource 'https://management.chinacloudapi.cn'. It should exactly match (including forward slash) with one of the allowed audiences 'https://management.core.chinacloudapi.cn/','https://management.chinacloudapi.cn/'."
-            }
-        }
-         */
-        return managementUri.endsWith("/") ? managementUri : managementUri + "/";
+        return atc.environment() == null ? AzureEnvironment.AZURE.resourceManagerEndpoint() : atc.environment().resourceManagerEndpoint();
     }
 
     @Override
