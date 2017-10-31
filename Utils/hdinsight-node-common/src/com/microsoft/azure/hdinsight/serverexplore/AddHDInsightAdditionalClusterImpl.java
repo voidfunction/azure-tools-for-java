@@ -21,11 +21,13 @@
  */
 package com.microsoft.azure.hdinsight.serverexplore;
 
+import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
 import com.microsoft.azure.hdinsight.common.StreamUtil;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
 import com.microsoft.azure.management.storage.implementation.StorageManagementClientImpl;
 import com.microsoft.azuretools.azurecommons.helpers.AzureCmdException;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
@@ -48,12 +50,16 @@ import java.util.regex.Pattern;
 
 public class AddHDInsightAdditionalClusterImpl {
 
-    private static final String clusterConfigureFileUrl = "https://%s.azurehdinsight.net/api/v1/clusters/%s/configurations/service_config_versions?service_name=HDFS&service_config_version=1";
+    // private static final String clusterConfigureFileUrl = "https://%s.azurehdinsight.net/api/v1/clusters/%s/configurations/service_config_versions?service_name=HDFS&service_config_version=1";
 
     private static final Pattern PATTERN_DEFAULT_STORAGE = Pattern.compile("\"fs\\.defaultFS\":\"wasb://([^@\"]*)@([^@\"]*)\"", Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
     private static final Pattern PATTER_STORAGE_KEY = Pattern.compile("\"fs\\.azure\\.account\\.key\\.[^\"]*\":\"[^\"]*=\"", Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
     private static final String STORAGE_ACCOUNT_NAME_PATTERN = "^wasb://(.*)@(.*)$";
-    private static final String BLOB_URL_SUFFIX = ".blob.core.windows.net";
+
+    private static final String getClusterConfigureFileUrl(@NotNull final String clusterName) {
+        final String url = ClusterManagerEx.getInstance().getClusterConnectionString(clusterName) + "api/v1/clusters/%s/configurations/service_config_versions?service_name=HDFS&service_config_version=1";
+        return String.format(url, clusterName);
+    }
 
     public static HDStorageAccount getStorageAccount(String clusterName, String storageName, String storageKey, String userName, String password) throws HDIException, AzureCmdException {
 
@@ -74,7 +80,7 @@ public class AddHDInsightAdditionalClusterImpl {
             throw new HDIException("Failed to get default container for storage account");
         }
 
-        HDStorageAccount account = new HDStorageAccount(null, storageName + BLOB_URL_SUFFIX, storageKey, true, defaultContainer);
+        HDStorageAccount account = new HDStorageAccount(null, ClusterManagerEx.getInstance().getBlobFullName(storageName), storageKey, true, defaultContainer);
 
         //getting container to check the storage key is correct or not
         try {
@@ -88,7 +94,7 @@ public class AddHDInsightAdditionalClusterImpl {
 
     private static String getMessageByAmbari(String clusterName, String userName, String passwd) throws HDIException {
 
-        String linuxClusterConfigureFileUrl = String.format(clusterConfigureFileUrl, clusterName, clusterName);
+        String linuxClusterConfigureFileUrl = getClusterConfigureFileUrl(clusterName);
 
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 

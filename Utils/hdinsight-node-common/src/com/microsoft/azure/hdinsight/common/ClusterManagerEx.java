@@ -25,17 +25,22 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.hdinsight.metadata.ClusterMetaDataService;
 import com.microsoft.azure.hdinsight.sdk.cluster.*;
 import com.microsoft.azuretools.authmanage.AuthMethodManager;
+import com.microsoft.azuretools.authmanage.Environment;
 import com.microsoft.azuretools.authmanage.models.SubscriptionDetail;
+import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
+import com.microsoft.azuretools.sdkmanage.AzureManager;
 import com.microsoft.tooling.msservices.components.DefaultLoader;
 import com.microsoft.azure.hdinsight.sdk.common.AggregatedException;
 import com.microsoft.azure.hdinsight.sdk.common.AuthenticationErrorHandler;
 import com.microsoft.azure.hdinsight.sdk.common.HDIException;
 import com.microsoft.azure.hdinsight.sdk.storage.HDStorageAccount;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -67,6 +72,54 @@ public class ClusterManagerEx {
         }
 
         return instance;
+    }
+
+    public String getClusterConnectionString(final @NotNull String clusterName) {
+        if (isAzureChinaEnvironment()) {
+            return String.format("https://%s.azurehdinsight.cn", clusterName);
+        } else {
+            return String.format("https://%s.azurehdinsight.net", clusterName);
+        }
+    }
+
+    public String getBlobFullName(@NotNull final String storageName) {
+        return storageName + getBlobSuffix();
+    }
+
+    public String getBlobSuffix() {
+        if (isAzureChinaEnvironment()){
+            return ".blob.core.chinacloudapi.cn";
+        } else {
+            return "blob.core.windows.net";
+        }
+    }
+
+    public String getPortalUrl() {
+        if (isAzureChinaEnvironment()) {
+            return "https://portal.azure.cn/";
+        } else {
+            return "https://portal.azure.com/";
+        }
+    }
+
+    public Environment getAzureEnvironment() {
+        AzureManager azureManager = null;
+        Environment env = Environment.GLOBAL;
+
+        try {
+            azureManager = AuthMethodManager.getInstance().getAzureManager();
+        } catch (IOException e) {
+            // ignore the exception
+        }
+
+        if (azureManager != null) {
+            env = azureManager.getEnvironment();
+        }
+        return Environment.valueOf(env.getName());
+    }
+
+    public boolean isAzureChinaEnvironment() {
+        return getAzureEnvironment() == Environment.CHINA;
     }
 
     //make sure calling it after getClusterDetails(project)
