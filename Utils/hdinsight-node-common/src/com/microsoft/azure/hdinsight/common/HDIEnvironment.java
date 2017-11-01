@@ -91,7 +91,7 @@ public final class HDIEnvironment implements IEnvironment {
 
         try {
             azureManager = AuthMethodManager.getInstance().getAzureManager();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             // ignore the exception
         }
 

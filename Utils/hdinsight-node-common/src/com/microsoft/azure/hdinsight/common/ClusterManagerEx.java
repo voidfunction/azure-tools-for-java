@@ -70,7 +70,7 @@ public class ClusterManagerEx {
         return instance;
     }
 
-    public String getClusterConnectionString(final @NotNull String clusterName) {
+    public String getClusterConnectionString(@NotNull final String clusterName) {
         String formatString = HDIEnvironment.getHDIEnvironment().getClusterConnectionFormat();
         return String.format(formatString, clusterName);
     }

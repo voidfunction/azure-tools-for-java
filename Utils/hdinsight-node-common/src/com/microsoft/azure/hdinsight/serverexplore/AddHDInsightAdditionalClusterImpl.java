@@ -49,9 +49,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AddHDInsightAdditionalClusterImpl {
-
-    // private static final String clusterConfigureFileUrl = "https://%s.azurehdinsight.net/api/v1/clusters/%s/configurations/service_config_versions?service_name=HDFS&service_config_version=1";
-
     private static final Pattern PATTERN_DEFAULT_STORAGE = Pattern.compile("\"fs\\.defaultFS\":\"wasb://([^@\"]*)@([^@\"]*)\"", Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
     private static final Pattern PATTER_STORAGE_KEY = Pattern.compile("\"fs\\.azure\\.account\\.key\\.[^\"]*\":\"[^\"]*=\"", Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
     private static final String STORAGE_ACCOUNT_NAME_PATTERN = "^wasb://(.*)@(.*)$";
