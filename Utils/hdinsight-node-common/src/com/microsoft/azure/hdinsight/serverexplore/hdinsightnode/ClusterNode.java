@@ -21,10 +21,7 @@
  */
 package com.microsoft.azure.hdinsight.serverexplore.hdinsightnode;
 
-import com.microsoft.azure.hdinsight.common.ClusterManagerEx;
-import com.microsoft.azure.hdinsight.common.CommonConst;
-import com.microsoft.azure.hdinsight.common.HDInsightLoader;
-import com.microsoft.azure.hdinsight.common.JobViewManager;
+import com.microsoft.azure.hdinsight.common.*;
 import com.microsoft.azure.hdinsight.sdk.cluster.*;
 import com.microsoft.azure.hdinsight.sdk.common.CommonConstant;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
@@ -94,7 +91,7 @@ public class ClusterNode extends RefreshableNode implements TelemetryProperties 
                     String resourceGroupName = clusterDetail.getResourceGroup();
                     if (resourceGroupName != null) {
 
-                        String webPortHttpLink = String.format(ClusterManagerEx.getInstance().getPortalUrl() + "#resource/subscriptions/%s/resourcegroups/%s/providers/Microsoft.HDInsight/clusters/%s",
+                        String webPortHttpLink = String.format(HDIEnvironment.getHDIEnvironment().getPortal() + "#resource/subscriptions/%s/resourcegroups/%s/providers/Microsoft.HDInsight/clusters/%s",
                                 clusterDetail.getSubscription().getSubscriptionId(),
                                 resourceGroupName,
                                 clusterDetail.getName());
