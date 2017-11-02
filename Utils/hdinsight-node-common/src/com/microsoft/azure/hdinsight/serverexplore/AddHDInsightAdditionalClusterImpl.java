@@ -31,6 +31,7 @@ import com.microsoft.azuretools.azurecommons.helpers.NotNull;
 import com.microsoft.azuretools.azurecommons.helpers.StringHelper;
 import com.microsoft.tooling.msservices.helpers.azure.sdk.StorageClientSDKManager;
 import com.microsoft.tooling.msservices.model.storage.ClientStorageAccount;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -51,15 +52,16 @@ import java.util.regex.Pattern;
 public class AddHDInsightAdditionalClusterImpl {
     private static final Pattern PATTERN_DEFAULT_STORAGE = Pattern.compile("\"fs\\.defaultFS\":\"wasb://([^@\"]*)@([^@\"]*)\"", Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
     private static final Pattern PATTER_STORAGE_KEY = Pattern.compile("\"fs\\.azure\\.account\\.key\\.[^\"]*\":\"[^\"]*=\"", Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
-    private static final String STORAGE_ACCOUNT_NAME_PATTERN = "^wasb://(.*)@(.*)$";
 
-    private static final String getClusterConfigureFileUrl(@NotNull final String clusterName) {
-        final String url = ClusterManagerEx.getInstance().getClusterConnectionString(clusterName) + "api/v1/clusters/%s/configurations/service_config_versions?service_name=HDFS&service_config_version=1";
-        return String.format(url, clusterName);
+    private static final String SERVICE_NAME = "HDFS";
+    private static final String HDFS_SERVICE_CONFIG_VERSION = "1";
+
+    private static String getClusterConfigureFileUrl(@NotNull final String clusterName) {
+        final String connectionString = ClusterManagerEx.getInstance().getClusterConnectionString(clusterName);
+        return String.format("%s/api/v1/clusters/%s/configurations/service_config_versions?service_name=%s&service_config_version=%s", connectionString, SERVICE_NAME, HDFS_SERVICE_CONFIG_VERSION);
     }
 
     public static HDStorageAccount getStorageAccount(String clusterName, String storageName, String storageKey, String userName, String password) throws HDIException, AzureCmdException {
-
         String responseMessage = getMessageByAmbari(clusterName, userName, password);
         responseMessage = responseMessage.replace(" ", "");
         if (StringHelper.isNullOrWhiteSpace(responseMessage)) {
@@ -67,7 +69,6 @@ public class AddHDInsightAdditionalClusterImpl {
         }
 
         Matcher matcher = PATTERN_DEFAULT_STORAGE.matcher(responseMessage);
-
         String defaultContainer = "";
         if (matcher.find()) {
             defaultContainer = matcher.group(1);
